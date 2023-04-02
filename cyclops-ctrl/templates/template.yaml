@@ -1,0 +1,54 @@
+apiVersion: apps/v1
+kind: {{ .Kind}}
+metadata:
+  name: {{ .AppName}}
+  namespace: {{ .Namespace}}
+  annotations:
+    cyclops.fleet.version: {{ .ChangeTitle }}
+  labels:
+    {{- range $i, $label := .Labels }}
+    {{ $label.Key}}: {{$label.Value}}
+    {{- end}}
+spec:
+  replicas: {{ .Replicas}}
+  selector:
+    matchLabels:
+      {{- range $i, $label := .Labels }}
+      {{ $label.Key }}: {{$label.Value}}
+      {{- end}}
+  template:
+    metadata:
+      annotations:
+        cyclops.fleet.version: {{ .ChangeTitle }}
+      labels:
+        {{- range $i, $label := .Labels }}
+        {{ $label.Key}}: {{$label.Value}}
+        {{- end}}
+    spec:
+      containers:
+        - name: {{ .AppName}}
+          image: {{ .ImageName}}
+          ports:
+            - containerPort: 80
+          env:
+            {{- range $i, $envVar := .EnvironmentVariables }}
+            - name: {{ $envVar.Name }}
+              value: {{ $envVar.Value }}
+            {{- end }}
+{{ if .NeedsService }}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .ServiceName}}
+  labels:
+    app: {{ .ServiceLabel}}
+spec:
+  type: ClusterIP
+  ports:
+    - port: {{ .Port}}
+      protocol: {{ .Protocol}}
+      targetPort: {{ .TargetPort}}
+  selector:
+    app: {{ .ServiceSelector}}
+{{ end }}

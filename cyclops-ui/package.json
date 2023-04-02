@@ -1,0 +1,56 @@
+{
+  "name": "cyclops-ui",
+  "version": "0.1.0",
+  "private": true,
+  "dependencies": {
+    "@ant-design/charts": "^1.3.5",
+    "@ant-design/compatible": "^1.1.0",
+    "@ant-design/icons": "^4.7.0",
+    "@rmlio/matey": "^1.0.4",
+    "@testing-library/jest-dom": "^5.16.2",
+    "@testing-library/react": "^12.1.3",
+    "@testing-library/user-event": "^13.5.0",
+    "@types/jest": "^27.4.0",
+    "@types/node": "^17.0.23",
+    "@types/react": "^17.0.39",
+    "@types/react-dom": "^17.0.11",
+    "@types/react-router": "^5.1.18",
+    "ace-builds": "^1.4.14",
+    "antd": "^4.18.7",
+    "axios": "^0.26.0",
+    "fetch-jsonp": "^1.2.1",
+    "react": "^17.0.2",
+    "react-ace": "^9.5.0",
+    "react-diff-viewer": "^3.1.1",
+    "react-dom": "^17.0.2",
+    "react-highlight-words": "^0.17.0",
+    "react-router-dom": "^6.2.1",
+    "react-scripts": "^2.1.3",
+    "typescript": "^4.5.5",
+    "web-vitals": "^2.1.4"
+  },
+  "scripts": {
+    "start": "NODE_OPTIONS=--openssl-legacy-provider REACT_APP_CYCLOPS_CTRL_HOST=http://localhost:8888 node_modules/.bin/react-scripts start",
+    "build": "node_modules/.bin/react-scripts build",
+    "test": "node_modules/.bin/react-scripts test",
+    "eject": "node_modules/.bin/react-scripts eject"
+  },
+  "eslintConfig": {
+    "extends": [
+      "react-app",
+      "react-app/jest"
+    ]
+  },
+  "browserslist": {
+    "production": [
+      ">0.2%",
+      "not dead",
+      "not op_mini all"
+    ],
+    "development": [
+      "last 1 chrome version",
+      "last 1 firefox version",
+      "last 1 safari version"
+    ]
+  }
+}

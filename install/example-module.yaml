@@ -1,0 +1,25 @@
+apiVersion: cyclops.com/v1alpha1
+kind: Application
+metadata:
+  name: test-module
+spec:
+  template: basic
+  values:
+    - name: name
+      value: my-cyclops-app
+    - name: replicas
+      value: 3
+
+
+  version: initial release
+  namespaces:
+    - name: kube-system
+      components:
+        - name: cyclops-ctrl
+          kind: deployment
+        - name: cyclops-ctrl
+          kind: ingress
+    - name: cyclops-namespace
+      components:
+        - name: cyclops-ui
+          kind: deployment

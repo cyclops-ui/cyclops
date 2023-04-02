@@ -1,0 +1,13 @@
+apiVersion: cyclops.com/v1alpha1
+kind: Module
+metadata:
+  name: test-module-2
+spec:
+  template:
+    name: aeigj
+    version: aejfg
+  values:
+    - name: appname
+      value: juraj
+    - name: replicas
+      value: "3"

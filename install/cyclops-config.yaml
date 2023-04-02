@@ -1,0 +1,50 @@
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  name: configs.cyclops.com
+spec:
+  group: cyclops.com
+  names:
+    plural: configs
+    singular: config
+    kind: Config
+    shortNames:
+      - cc
+  scope: Namespaced
+  versions:
+    - name: v1alpha1
+      served: true
+      storage: true
+      schema:
+        openAPIV3Schema:
+          type: object
+          properties:
+            spec:
+              type: object
+              properties:
+                name:
+                  type: string
+                template:
+                  type: string
+                fields:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      name:
+                        type: string
+                      display_name:
+                        type: string
+                      manifest_key:
+                        type: string
+                      initial_value:
+                        type: string
+                      type:
+                        type: string
+                    required: [ "name", "display_name", "manifest_key", "initial_value", "type" ]
+                created:
+                  type: string
+                edited:
+                  type: string
+              required: [ "name", "template", "fields" ]
+          required: ["spec"]

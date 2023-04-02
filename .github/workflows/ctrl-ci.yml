@@ -1,0 +1,73 @@
+name: cyclops-ctrl-CI
+
+on:
+  push:
+    branches:
+      - main
+    paths: 
+      - cyclops-ctrl/**
+  workflow_dispatch:
+
+jobs:
+  cyclops-ctrl-CI:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Bump ctrl version in latest file
+        run: |
+          git config pull.rebase false
+          git config pull.rebase true
+          
+          git pull origin main
+          
+          LATEST_VERSION_FILE=$GITHUB_WORKSPACE/install/ctrl-latest.txt
+
+          # get current version
+          VERSION=$(cat $LATEST_VERSION_FILE)
+          MAJOR=$(($(cut -d\. -f2 <<< $VERSION) + 1))
+
+          # bump
+          VERSION=v0.$MAJOR.0
+          echo $VERSION > $LATEST_VERSION_FILE
+
+          # update file
+          git config --global user.email "petar.cvitanovic@gmail.com"
+          git config --global user.name "petar-cvit"
+
+          git add -A
+          git commit -m 'ci update cyclops ctrl to '$VERSION
+          git push origin HEAD:main
+        
+      - name: Login to DockerHub
+        uses: docker/login-action@v1
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+        
+      - name: Build and push
+        run: |
+          LATEST_VERSION_FILE=$GITHUB_WORKSPACE/install/ctrl-latest.txt
+
+          # get current version
+          VERSION=$(cat $LATEST_VERSION_FILE)
+          
+          docker build cyclops-ctrl -t petarcvit223/cyclops-ctrl:$VERSION
+          docker push petarcvit223/cyclops-ctrl:$VERSION
+
+      - name: Update install manifest
+        run: |
+          LATEST_VERSION_FILE=$GITHUB_WORKSPACE/install/ctrl-latest.txt
+          INSTALL_YAML=$GITHUB_WORKSPACE/install/cyclops.yaml
+
+          # get current version
+          VERSION=$(cat $LATEST_VERSION_FILE)
+
+          sed -i 's/petarcvit223\/cyclops-ctrl\:.*/petarcvit223\/cyclops-ctrl\:'$VERSION'/' $INSTALL_YAML
+
+          # update file
+          git config --global user.email "petar.cvitanovic@gmail.com"
+          git config --global user.name "petar-cvit"
+          git status
+          git add .
+          git commit -m 'ci update cyclops ctrl to '$VERSION
+          git push
