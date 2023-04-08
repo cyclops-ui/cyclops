@@ -38,3 +38,46 @@ spec:
                         type: string
                       value:
                         type: string
+            status:
+              properties:
+                resources:
+                  items:
+                    properties:
+                      group:
+                        type: string
+                      version:
+                        type: string
+                      kind:
+                        type: string
+                      namespace:
+                        type: string
+                      name:
+                        type: string
+                      status:
+                        type: string
+                      health:
+                        type: string
+                    type: object
+                  type: array
+                conditions:
+                  items:
+                    properties:
+                      lastTransitionTime:
+                        format: date-time
+                        type: string
+                      message:
+                        type: string
+                      reason:
+                        type: string
+                      status:
+                        type: string
+                      type:
+                        type: string
+                    required:
+                      - message
+                      - reason
+                      - status
+                      - type
+                    type: object
+                  type: array
+              type: object

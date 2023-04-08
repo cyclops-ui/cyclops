@@ -85,6 +85,7 @@ func (c *Controller) UpdateModule(ctx *gin.Context) {
 	err = c.workflowRunner.UpdateModuleResources(request.Name)
 	if err != nil {
 		fmt.Println(err)
+		ctx.Status(http.StatusInternalServerError)
 	}
 
 	ctx.Header("Access-Control-Allow-Origin", "*")

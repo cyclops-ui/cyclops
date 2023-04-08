@@ -16,6 +16,8 @@ import (
 	"k8s.io/api/autoscaling/v1"
 	apiv1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/client-go/discovery"
+	"k8s.io/client-go/dynamic"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/rest"
 	"k8s.io/client-go/tools/clientcmd"
@@ -23,6 +25,7 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"time"
 )
 
 const (
@@ -31,6 +34,9 @@ const (
 
 type KubernetesClient struct {
 	clientset *kubernetes.Clientset
+
+	discovery *discovery.DiscoveryClient
+	dynamic   dynamic.Interface
 
 	moduleset *v1alpha1.ExampleV1Alpha1Client
 }
@@ -87,9 +93,18 @@ func createLocalClient() (*KubernetesClient, error) {
 		panic(err)
 	}
 
+	discovery := discovery.NewDiscoveryClientForConfigOrDie(config)
+
+	dynamic, err := dynamic.NewForConfig(config)
+	if err != nil {
+		panic(err.Error())
+	}
+
 	go Watch(moduleSet)
 
 	return &KubernetesClient{
+		discovery: discovery,
+		dynamic:   dynamic,
 		clientset: clientset,
 		moduleset: moduleSet,
 	}, nil
@@ -249,6 +264,20 @@ func (k *KubernetesClient) UpdateModule(module v1alpha12.Module) error {
 	if err := k.moduleset.Modules("default").Delete(module.Name); err != nil {
 		return err
 	}
+
+	if module.Status.Conditions == nil {
+		module.Status.Conditions = make([]metav1.Condition, 0)
+	}
+
+	module.Status.Conditions = append(module.Status.Conditions, metav1.Condition{
+		Type:   "Availability",
+		Status: "Available",
+		LastTransitionTime: metav1.Time{
+			time.Now(),
+		},
+		Reason:  "All good",
+		Message: "good job",
+	})
 
 	_, err := k.moduleset.Modules("default").Create(&module)
 	return err

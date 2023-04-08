@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"gitops/internal/workflow/cyclops/services/k8s_client"
 	v1 "k8s.io/api/core/v1"
-	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
+	v12 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"strings"
 
 	appsv1 "k8s.io/api/apps/v1"
@@ -36,8 +36,6 @@ func GenerateResources(kClient *k8s_client.KubernetesClient, module v1alpha1.Mod
 		objects = append(objects, obj)
 	}
 
-	_ = unstructured.Unstructured{}
-
 	for _, object := range objects {
 		switch rs := object.(type) {
 		case *appsv1.Deployment:
@@ -48,6 +46,14 @@ func GenerateResources(kClient *k8s_client.KubernetesClient, module v1alpha1.Mod
 
 			labels["cyclops.module"] = module.Name
 			rs.SetLabels(labels)
+
+			rs.SetOwnerReferences([]v12.OwnerReference{
+				{
+					APIVersion: "cyclops.com/v1alpha1",
+					Kind:       "Module",
+					Name:       module.Name,
+				},
+			})
 
 			if err := kClient.Deploy(rs); err != nil {
 				return err
@@ -60,6 +66,14 @@ func GenerateResources(kClient *k8s_client.KubernetesClient, module v1alpha1.Mod
 
 			labels["cyclops.module"] = module.Name
 			rs.SetLabels(labels)
+
+			rs.SetOwnerReferences([]v12.OwnerReference{
+				{
+					APIVersion: "cyclops.com/v1alpha1",
+					Kind:       "Module",
+					Name:       module.Name,
+				},
+			})
 
 			if err := kClient.DeployService(rs); err != nil {
 				return err
@@ -88,8 +102,6 @@ func UpdateResources(kClient *k8s_client.KubernetesClient, module v1alpha1.Modul
 		objects = append(objects, obj)
 	}
 
-	_ = unstructured.Unstructured{}
-
 	for _, object := range objects {
 		switch rs := object.(type) {
 		case *appsv1.Deployment:
@@ -100,6 +112,15 @@ func UpdateResources(kClient *k8s_client.KubernetesClient, module v1alpha1.Modul
 
 			labels["cyclops.module"] = module.Name
 			rs.SetLabels(labels)
+
+			rs.SetOwnerReferences([]v12.OwnerReference{
+				{
+					APIVersion: "cyclops.com/v1alpha1",
+					Kind:       "Module",
+					Name:       module.Name,
+					UID:        module.UID,
+				},
+			})
 
 			if err := kClient.UpdateDeployment(rs); err != nil {
 				return err
