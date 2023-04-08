@@ -47,14 +47,6 @@ func GenerateResources(kClient *k8s_client.KubernetesClient, module v1alpha1.Mod
 			labels["cyclops.module"] = module.Name
 			rs.SetLabels(labels)
 
-			rs.SetOwnerReferences([]v12.OwnerReference{
-				{
-					APIVersion: "cyclops.com/v1alpha1",
-					Kind:       "Module",
-					Name:       module.Name,
-				},
-			})
-
 			if err := kClient.Deploy(rs); err != nil {
 				return err
 			}
@@ -66,15 +58,7 @@ func GenerateResources(kClient *k8s_client.KubernetesClient, module v1alpha1.Mod
 
 			labels["cyclops.module"] = module.Name
 			rs.SetLabels(labels)
-
-			rs.SetOwnerReferences([]v12.OwnerReference{
-				{
-					APIVersion: "cyclops.com/v1alpha1",
-					Kind:       "Module",
-					Name:       module.Name,
-				},
-			})
-
+			
 			if err := kClient.DeployService(rs); err != nil {
 				return err
 			}
