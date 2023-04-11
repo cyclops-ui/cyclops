@@ -96,7 +96,8 @@ const EditModule = () => {
             {
                 "values": values,
                 "name": values["cyclops_module_name"],
-                "template": config.name,
+                "template": module.template,
+                "version": module.version,
             })
             .then(res => {
                 console.log(res);

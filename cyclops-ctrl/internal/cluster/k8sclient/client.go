@@ -9,6 +9,7 @@ import (
 	v12 "k8s.io/api/apps/v1"
 	"k8s.io/api/autoscaling/v1"
 	apiv1 "k8s.io/api/core/v1"
+	"k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/discovery"
 	"k8s.io/client-go/dynamic"
@@ -109,8 +110,19 @@ func (k *KubernetesClient) UpdateScale(namespace, name string, sc v1.Scale) erro
 
 func (k *KubernetesClient) Deploy(deploymentSpec *v12.Deployment) error {
 	deploymentClient := k.clientset.AppsV1().Deployments(apiv1.NamespaceDefault)
-	_, err := deploymentClient.Create(context.TODO(), deploymentSpec, metav1.CreateOptions{})
-	return err
+
+	_, err := deploymentClient.Get(context.TODO(), deploymentSpec.Name, metav1.GetOptions{})
+	if err != nil {
+		if errors.IsNotFound(err) {
+			_, err := deploymentClient.Create(context.TODO(), deploymentSpec, metav1.CreateOptions{})
+			return err
+		} else {
+			return err
+		}
+	} else {
+		_, err := deploymentClient.Update(context.TODO(), deploymentSpec, metav1.UpdateOptions{})
+		return err
+	}
 }
 
 func (k *KubernetesClient) UpdateDeployment(deploymentSpec *v12.Deployment) error {
