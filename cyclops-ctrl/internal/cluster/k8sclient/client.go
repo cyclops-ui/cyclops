@@ -125,22 +125,21 @@ func (k *KubernetesClient) Deploy(deploymentSpec *v12.Deployment) error {
 	}
 }
 
-func (k *KubernetesClient) UpdateDeployment(deploymentSpec *v12.Deployment) error {
-	deploymentClient := k.clientset.AppsV1().Deployments(apiv1.NamespaceDefault)
-	_, err := deploymentClient.Update(context.TODO(), deploymentSpec, metav1.UpdateOptions{})
-	return err
-}
-
 func (k *KubernetesClient) DeployService(service *apiv1.Service) error {
-	deploymentClient := k.clientset.CoreV1().Services(apiv1.NamespaceDefault)
-	_, err := deploymentClient.Create(context.TODO(), service, metav1.CreateOptions{})
-	return err
-}
+	serviceClient := k.clientset.CoreV1().Services(apiv1.NamespaceDefault)
 
-func (k *KubernetesClient) UpdateService(service *apiv1.Service) error {
-	deploymentClient := k.clientset.CoreV1().Services(apiv1.NamespaceDefault)
-	_, err := deploymentClient.Update(context.TODO(), service, metav1.UpdateOptions{})
-	return err
+	_, err := serviceClient.Get(context.TODO(), service.Name, metav1.GetOptions{})
+	if err != nil {
+		if errors.IsNotFound(err) {
+			_, err := serviceClient.Create(context.TODO(), service, metav1.CreateOptions{})
+			return err
+		} else {
+			return err
+		}
+	} else {
+		_, err := serviceClient.Update(context.TODO(), service, metav1.UpdateOptions{})
+		return err
+	}
 }
 
 func (k *KubernetesClient) GetPods(namespace, name string) ([]apiv1.Pod, error) {
