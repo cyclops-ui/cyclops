@@ -1,7 +1,9 @@
 package dto
 
-type CreateModuleRequest struct {
-	Name     string                 `json:"name"`
-	Template string                 `json:"template"`
-	Values   map[string]interface{} `json:"values"`
+type Module struct {
+	Name      string                 `json:"name"`
+	Namespace string                 `json:"namespace"`
+	Template  string                 `json:"template"`
+	Version   string                 `json:"version"`
+	Values    map[string]interface{} `json:"values"`
 }

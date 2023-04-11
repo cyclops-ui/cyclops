@@ -39,6 +39,7 @@ const EditModule = () => {
         namespace: "",
         template: "",
         values: {},
+        version: "",
     });
 
     const [form] = Form.useForm();
@@ -64,11 +65,12 @@ const EditModule = () => {
                 values: res.data.values,
                 template: res.data.template,
                 namespace: res.data.namespace,
+                version: res.data.version,
             });
 
             form.setFieldsValue(res.data.values);
 
-            axios.get(process.env.REACT_APP_CYCLOPS_CTRL_HOST + `/create-config/` + res.data.template).then(res => {
+            axios.get(process.env.REACT_APP_CYCLOPS_CTRL_HOST + `/create-config/` + res.data.template + `?version=` + res.data.version).then(res => {
                 setConfig(res.data);
             });
         });

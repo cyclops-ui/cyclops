@@ -1,23 +1,12 @@
 package main
 
-import (
-	"fmt"
-	"gitops/internal/api/server"
-	"gitops/internal/workflow/cyclops"
-)
+import "github.com/cyclops-ui/cycops-ctrl/internal/handler"
 
 func main() {
-	workflowRunner, err := cyclops.NewWorkflowRunner()
+	handler, err := handler.New()
 	if err != nil {
-		fmt.Println(err)
+		panic(err)
 	}
-
-	apiServer, err := server.New(workflowRunner)
-	if err != nil {
-		fmt.Println(err)
-	}
-
-	if err = apiServer.Start(); err != nil {
-		fmt.Println(err)
-	}
+	
+	handler.Start()
 }

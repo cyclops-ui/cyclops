@@ -19,7 +19,7 @@ var (
 func addKnownTypes(scheme *runtime.Scheme) error {
 	scheme.AddKnownTypes(SchemeGroupVersion,
 		&Module{},
-		//&ModuleList{},
+		&ModuleList{},
 	)
 
 	metav1.AddToGroupVersion(scheme, SchemeGroupVersion)

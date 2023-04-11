@@ -1,0 +1,179 @@
+package k8sclient
+
+import (
+	"bytes"
+	"context"
+	"flag"
+	"fmt"
+	"github.com/cyclops-ui/cycops-ctrl/internal/cluster/v1alpha1"
+	v12 "k8s.io/api/apps/v1"
+	"k8s.io/api/autoscaling/v1"
+	apiv1 "k8s.io/api/core/v1"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/client-go/discovery"
+	"k8s.io/client-go/dynamic"
+	"k8s.io/client-go/kubernetes"
+	"k8s.io/client-go/tools/clientcmd"
+	"k8s.io/client-go/util/homedir"
+	"os"
+	"os/exec"
+	"path/filepath"
+)
+
+const (
+	kubectl = "kubectl"
+)
+
+type KubernetesClient struct {
+	Dynamic dynamic.Interface
+
+	clientset *kubernetes.Clientset
+
+	discovery *discovery.DiscoveryClient
+
+	moduleset *v1alpha1.ExampleV1Alpha1Client
+}
+
+func New() (*KubernetesClient, error) {
+	return createLocalClient()
+}
+
+func createLocalClient() (*KubernetesClient, error) {
+	var kubeconfig *string
+	if home := homedir.HomeDir(); home != "" {
+		kubeconfig = flag.String("kubeconfig", filepath.Join(home, ".kube", "config"), "(optional) absolute path to the kubeconfig file")
+	} else {
+		kubeconfig = flag.String("kubeconfig", "", "absolute path to the kubeconfig file")
+	}
+	flag.Parse()
+
+	fmt.Println("loading local config", *kubeconfig)
+
+	config, err := clientcmd.BuildConfigFromFlags("", *kubeconfig)
+	if err != nil {
+		return nil, err
+	}
+
+	clientset, err := kubernetes.NewForConfig(config)
+	if err != nil {
+		return nil, err
+	}
+
+	moduleSet, err := v1alpha1.NewForConfig(config)
+	if err != nil {
+		panic(err)
+	}
+
+	discovery := discovery.NewDiscoveryClientForConfigOrDie(config)
+
+	dynamic, err := dynamic.NewForConfig(config)
+	if err != nil {
+		panic(err.Error())
+	}
+
+	//clientset.CoreV1().Services("").Watch()
+
+	return &KubernetesClient{
+		Dynamic:   dynamic,
+		discovery: discovery,
+		clientset: clientset,
+		moduleset: moduleSet,
+	}, nil
+}
+
+func (k *KubernetesClient) GetDeployment(namespace, name string) (*v12.Deployment, error) {
+	deploymentClient := k.clientset.AppsV1().Deployments(namespace)
+	return deploymentClient.Get(context.TODO(), name, metav1.GetOptions{})
+}
+
+func (k *KubernetesClient) GetDeployments(namespace string) ([]v12.Deployment, error) {
+	deploymentClient := k.clientset.AppsV1().Deployments(namespace)
+	deploymentList, err := deploymentClient.List(context.TODO(), metav1.ListOptions{})
+	if err != nil {
+		return nil, err
+	}
+
+	return deploymentList.Items, err
+}
+
+func (k *KubernetesClient) GetScale(namespace, name string) (*v1.Scale, error) {
+	deploymentClient := k.clientset.AppsV1().Deployments(namespace)
+	return deploymentClient.GetScale(context.TODO(), name, metav1.GetOptions{})
+}
+
+func (k *KubernetesClient) UpdateScale(namespace, name string, sc v1.Scale) error {
+	deploymentClient := k.clientset.AppsV1().Deployments(namespace)
+	_, err := deploymentClient.UpdateScale(context.TODO(), name, &sc, metav1.UpdateOptions{})
+	return err
+}
+
+func (k *KubernetesClient) Deploy(deploymentSpec *v12.Deployment) error {
+	deploymentClient := k.clientset.AppsV1().Deployments(apiv1.NamespaceDefault)
+	_, err := deploymentClient.Create(context.TODO(), deploymentSpec, metav1.CreateOptions{})
+	return err
+}
+
+func (k *KubernetesClient) UpdateDeployment(deploymentSpec *v12.Deployment) error {
+	deploymentClient := k.clientset.AppsV1().Deployments(apiv1.NamespaceDefault)
+	_, err := deploymentClient.Update(context.TODO(), deploymentSpec, metav1.UpdateOptions{})
+	return err
+}
+
+func (k *KubernetesClient) DeployService(service *apiv1.Service) error {
+	deploymentClient := k.clientset.CoreV1().Services(apiv1.NamespaceDefault)
+	_, err := deploymentClient.Create(context.TODO(), service, metav1.CreateOptions{})
+	return err
+}
+
+func (k *KubernetesClient) UpdateService(service *apiv1.Service) error {
+	deploymentClient := k.clientset.CoreV1().Services(apiv1.NamespaceDefault)
+	_, err := deploymentClient.Update(context.TODO(), service, metav1.UpdateOptions{})
+	return err
+}
+
+func (k *KubernetesClient) GetPods(namespace, name string) ([]apiv1.Pod, error) {
+	podClient := k.clientset.CoreV1().Pods(namespace)
+	podList, err := podClient.List(context.TODO(), metav1.ListOptions{
+		LabelSelector: fmt.Sprintf("app=%v", name),
+	})
+
+	if err != nil {
+		return nil, err
+	}
+
+	return podList.Items, err
+}
+
+func (k *KubernetesClient) GetAllNamespacePods() ([]apiv1.Pod, error) {
+	podClient := k.clientset.CoreV1().Pods(apiv1.NamespaceDefault)
+	podList, err := podClient.List(context.TODO(), metav1.ListOptions{})
+	if err != nil {
+		return nil, err
+	}
+
+	return podList.Items, nil
+}
+
+func (k *KubernetesClient) GetNamespaces() ([]apiv1.Namespace, error) {
+	namespaceClient := k.clientset.CoreV1().Namespaces()
+	namespaces, err := namespaceClient.List(context.TODO(), metav1.ListOptions{})
+	if err != nil {
+		return nil, err
+	}
+
+	return namespaces.Items, err
+}
+
+func (k *KubernetesClient) Delete(kind, name string) error {
+	cmd := exec.Command(kubectl, "delete", kind, name)
+	cmd.Stdout = os.Stdout
+	return cmd.Run()
+}
+
+func (k *KubernetesClient) GetDeploymentsYaml(name string, namespace string) (*bytes.Buffer, error) {
+	buff := new(bytes.Buffer)
+	command := exec.Command(kubectl, "get", "deployments", name, "-n", namespace, "-o", "yaml")
+	command.Stdout = buff
+	command.Stderr = os.Stderr
+	return buff, command.Run()
+}

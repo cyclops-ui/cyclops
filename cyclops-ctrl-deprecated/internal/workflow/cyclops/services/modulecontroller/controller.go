@@ -58,7 +58,7 @@ func GenerateResources(kClient *k8s_client.KubernetesClient, module v1alpha1.Mod
 
 			labels["cyclops.module"] = module.Name
 			rs.SetLabels(labels)
-			
+
 			if err := kClient.DeployService(rs); err != nil {
 				return err
 			}
