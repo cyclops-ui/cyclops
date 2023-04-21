@@ -34,7 +34,7 @@ func (h *Handler) Start() error {
 	}
 
 	templatesController := controller.NewTemplatesController(templatesStorage, k8sClient)
-	modulesController := controller.NewModulesController(k8sClient)
+	modulesController := controller.NewModulesController(templatesStorage, k8sClient)
 
 	h.router = gin.New()
 
@@ -53,6 +53,8 @@ func (h *Handler) Start() error {
 	h.router.POST("/modules/new", modulesController.CreateModule)
 	h.router.POST("/modules/update", modulesController.UpdateModule)
 	h.router.GET("/modules/:name/resources", modulesController.ResourcesForModule)
+	h.router.GET("/modules/:name/template", modulesController.Template)
+	h.router.GET("/modules/:name/helm-template", modulesController.HelmTemplate)
 	//h.router.POST("/modules/resources", modulesController.ModuleToResources)
 
 	h.router.Use(h.options)

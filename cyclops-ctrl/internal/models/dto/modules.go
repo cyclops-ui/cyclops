@@ -7,3 +7,8 @@ type Module struct {
 	Version   string                 `json:"version"`
 	Values    map[string]interface{} `json:"values"`
 }
+
+type TemplatesResponse struct {
+	Current string `json:"current"`
+	New     string `json:"new"`
+}

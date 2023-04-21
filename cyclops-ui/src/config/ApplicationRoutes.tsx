@@ -50,7 +50,7 @@ const ApplicationRoutes = () => {
                     </Header>
                     <Content style={{margin: '24px 16px', padding: 24, minHeight: "calc(100vh - 114px)", background: "#fff"}}>
                         <Routes>
-                            <Route path="/" element={<List/>}/>
+                            <Route path="/" element={<Modules/>}/>
                             <Route path="/modules" element={<Modules/>}/>
                             <Route path="/modules/new" element={<NewModule/>}/>
                             <Route path="/modules/:moduleName" element={<ModuleDetails/>}/>

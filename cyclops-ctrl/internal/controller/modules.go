@@ -2,6 +2,8 @@ package controller
 
 import (
 	"fmt"
+	"github.com/cyclops-ui/cycops-ctrl/internal/storage/templates"
+	"github.com/cyclops-ui/cycops-ctrl/internal/template"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -13,11 +15,13 @@ import (
 
 type Modules struct {
 	kubernetesClient *k8sclient.KubernetesClient
+	templates        *templates.Storage
 }
 
-func NewModulesController(kubernetes *k8sclient.KubernetesClient) *Modules {
+func NewModulesController(templates *templates.Storage, kubernetes *k8sclient.KubernetesClient) *Modules {
 	return &Modules{
 		kubernetesClient: kubernetes,
+		templates:        templates,
 	}
 }
 
@@ -112,9 +116,80 @@ func (m *Modules) ResourcesForModule(ctx *gin.Context) {
 		ctx.Status(http.StatusInternalServerError)
 		return
 	}
-	
+
 	ctx.Header("Access-Control-Allow-Origin", "*")
 	ctx.JSON(http.StatusOK, resources)
+}
+
+func (m *Modules) Template(ctx *gin.Context) {
+	module, err := m.kubernetesClient.GetModule(ctx.Param("name"))
+	if err != nil {
+		fmt.Println(err)
+		ctx.Status(http.StatusInternalServerError)
+		return
+	}
+
+	currentTemplate, err := m.templates.GetConfig(module.Spec.TemplateRef.Name, module.Spec.TemplateRef.Version)
+	if err != nil {
+		fmt.Println(err)
+		ctx.Status(http.StatusInternalServerError)
+		return
+	}
+
+	currentManifest, err := template.HelmTemplate(*module, currentTemplate)
+	if err != nil {
+		fmt.Println("error templating current", err)
+		ctx.Status(http.StatusInternalServerError)
+		return
+	}
+
+	proposedTemplate, err := m.templates.GetConfig(module.Spec.TemplateRef.Name, ctx.Query("version"))
+	if err != nil {
+		fmt.Println(err)
+		ctx.Status(http.StatusInternalServerError)
+		return
+	}
+
+	proposedManifest, err := template.HelmTemplate(*module, proposedTemplate)
+	if err != nil {
+		fmt.Println("error templating current", err)
+		ctx.Status(http.StatusInternalServerError)
+		return
+	}
+
+	res := dto.TemplatesResponse{
+		Current: currentManifest,
+		New:     proposedManifest,
+	}
+
+	ctx.Header("Access-Control-Allow-Origin", "*")
+	ctx.JSON(http.StatusOK, res)
+}
+
+func (m *Modules) HelmTemplate(ctx *gin.Context) {
+	module, err := m.kubernetesClient.GetModule(ctx.Param("name"))
+	if err != nil {
+		fmt.Println(err)
+		ctx.Status(http.StatusInternalServerError)
+		return
+	}
+
+	currentTemplate, err := m.templates.GetConfig(module.Spec.TemplateRef.Name, module.Spec.TemplateRef.Version)
+	if err != nil {
+		fmt.Println(err)
+		ctx.Status(http.StatusInternalServerError)
+		return
+	}
+
+	_, err = template.HelmTemplate(*module, currentTemplate)
+	if err != nil {
+		fmt.Println("error templating current", err)
+		ctx.Status(http.StatusInternalServerError)
+		return
+	}
+
+	ctx.Header("Access-Control-Allow-Origin", "*")
+	ctx.JSON(http.StatusOK, "{}")
 }
 
 //func (m *Modules) ModuleToResources(ctx *gin.Context) {

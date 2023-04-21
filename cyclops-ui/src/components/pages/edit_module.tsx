@@ -16,7 +16,7 @@ import {
 } from 'antd';
 import axios from 'axios';
 import {useNavigate} from 'react-router';
-import {MinusCircleOutlined, PlusOutlined} from "@ant-design/icons";
+import {LinkOutlined, MinusCircleOutlined, PlusOutlined} from "@ant-design/icons";
 
 import AceEditor from "react-ace";
 
@@ -24,6 +24,8 @@ import "ace-builds/src-noconflict/mode-java";
 import "ace-builds/src-noconflict/theme-github";
 import "ace-builds/src-noconflict/ext-language_tools";
 import {useParams} from "react-router-dom";
+import Link from "antd/lib/typography/Link";
+import ReactDiffViewer from "react-diff-viewer";
 
 const {TextArea} = Input;
 
@@ -44,6 +46,9 @@ const EditModule = () => {
 
     const [form] = Form.useForm();
 
+    const [versions, setVersions] = useState([]);
+    const [targetVersion, setTargetVersion] = useState([]);
+
     const [loading, setLoading] = useState(false);
     const [dplName, setName] = useState("");
     const [allConfigs, setAllConfigs] = useState([]);
@@ -54,6 +59,13 @@ const EditModule = () => {
         manifest: "",
         fields: []
     })
+
+    const [migrating, setMigrating] = useState(false);
+    const [migrateDiff, setMigrateDiff] = useState({
+        current: "",
+        new: ""
+    })
+
     const history = useNavigate();
 
     let {moduleName} = useParams();
@@ -74,14 +86,38 @@ const EditModule = () => {
                 setConfig(res.data);
             });
         });
-        
-        console.log(module)
     }, []);
 
     const configNames: {} | any = [];
     allConfigs.map((c: any) => {
         configNames.push(<Select.Option key={c.name}>{c.name}</Select.Option>)
     })
+
+    const handleVersionChange = (value: any) => {
+        axios.get(process.env.REACT_APP_CYCLOPS_CTRL_HOST + `/modules/` + module.name + `/template?version=` + value).then(res => {
+            setMigrateDiff(res.data);
+        });
+        setTargetVersion(value)
+    }
+
+    const getVersions = () => {
+        axios.get(process.env.REACT_APP_CYCLOPS_CTRL_HOST + `/configuration/` + module.template + `/versions`).then(res => {
+            let configVersions = res.data.sort(function(a: string, b: string){
+                if (a === "latest") {return -1}
+                if (b === "latest") {return 1}
+                if(a < b) { return 1; }
+                if(a > b) { return -1; }
+                return 0;
+            })
+
+            const versionOptions: {} | any = [];
+            configVersions.map((v: any) => {
+                versionOptions.push(<Select.Option key={v}>{v}</Select.Option>)
+            })
+
+            setVersions(versionOptions);
+        });
+    }
 
     const handleSubmit = (values: any) => {
         console.log({
@@ -112,8 +148,32 @@ const EditModule = () => {
         setLoading(true);
     }
 
+    const handleMigrate = () => {
+        console.log(targetVersion)
+
+        axios.post(process.env.REACT_APP_CYCLOPS_CTRL_HOST + `/modules/update`,
+            {
+                "values": module.values,
+                "name": module.name,
+                "template": module.template,
+                "version": targetVersion,
+            })
+            .then(res => {
+                console.log(res);
+                window.location.href = "/modules/" + moduleName
+            })
+            .catch(error => {
+                setLoading(false);
+                message.error(error);
+            })
+    }
+
     const handleCancel = () => {
         setLoading(false)
+    };
+
+    const handleCancelMigrating = () => {
+        setMigrating(false);
     };
 
     const handleChange = (value: any) => {
@@ -202,6 +262,41 @@ const EditModule = () => {
             <Row gutter={[40, 0]}>
                 <Col span={18}>
                     <Form {...layout} form={form} autoComplete={"off"} onFinish={handleSubmit}>
+                        <Col span={18}>
+                            <Link aria-level={3} href={`/configurations/` + module.template}>
+                                <LinkOutlined/>
+                                {module.template}@{module.version}
+                            </Link>
+                            <Button onClick={function () {
+                                setMigrating(true)
+                                getVersions()
+                            }} block>Migrate</Button>
+                        </Col>
+                        <Modal
+                            title="Migrate module to different template version"
+                            visible={migrating}
+                            onCancel={handleCancelMigrating}
+                            width={'40%'}
+                            footer={
+                                <Button block onClick={handleMigrate}>Migrate</Button>
+                            }
+                        >
+                            <Select
+                                placeholder={"Template version"}
+                                style={{width: '30%'}}
+                                onChange={handleVersionChange}
+                            >
+                                {versions}
+                            </Select>
+                            <ReactDiffViewer
+                                oldValue={migrateDiff.current}
+                                newValue={migrateDiff.new}
+                                splitView={true}
+                                leftTitle={"current manifest"}
+                                rightTitle={"updated manifest"}
+                                useDarkTheme={false}
+                            />
+                        </Modal>
                         <Divider orientation="left" orientationMargin="0">
                             Edit Module
                         </Divider>
