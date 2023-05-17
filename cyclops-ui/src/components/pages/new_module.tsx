@@ -56,6 +56,10 @@ const NewModule = () => {
             setAllConfigs(res.data);
         });
 
+        axios.get(process.env.REACT_APP_CYCLOPS_CTRL_HOST + `/create-config/git`).then(res => {
+            setConfig(res.data);
+        });
+
         setLoading(false);
     }, []);
 

@@ -3,6 +3,7 @@ package controller
 import (
 	"fmt"
 	"github.com/cyclops-ui/cycops-ctrl/internal/cluster/k8sclient"
+	git "github.com/cyclops-ui/cycops-ctrl/internal/git/templates"
 	"github.com/cyclops-ui/cycops-ctrl/internal/mapper"
 	"github.com/cyclops-ui/cycops-ctrl/internal/models"
 	"github.com/cyclops-ui/cycops-ctrl/internal/models/crd/v1alpha1"
@@ -67,6 +68,18 @@ func semantic(current string) string {
 func (c *Templates) GetConfiguration(ctx *gin.Context) {
 	name := ctx.Param("name")
 	version := ctx.Query("version")
+
+	// TODO delete this is for testing
+	if name == "git" {
+		template, err := git.LoadTemplate("https://github.com/cyclops-ui/templates", "application")
+		if err != nil {
+			panic(err)
+		}
+
+		ctx.Header("Access-Control-Allow-Origin", "*")
+		ctx.JSON(http.StatusOK, template)
+		return
+	}
 
 	configuration, err := c.templates.GetConfig(name, version)
 	if err != nil {

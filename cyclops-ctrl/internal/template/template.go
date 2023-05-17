@@ -59,8 +59,6 @@ func TemplateModule(module v1alpha1.Module, moduleTemplate models.Template) (str
 //}
 
 func HelmTemplate(module v1alpha1.Module, moduleTemplate models.Template) (string, error) {
-	//getHelmChart()
-
 	chart := &chart.Chart{
 		Raw:      []*chart.File{},
 		Metadata: &chart.Metadata{},
