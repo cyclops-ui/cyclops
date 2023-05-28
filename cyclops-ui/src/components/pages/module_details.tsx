@@ -29,6 +29,7 @@ import {
 } from "@ant-design/icons";
 import Link from "antd/lib/typography/Link";
 import AceEditor from "react-ace";
+import { formatDistanceToNow } from 'date-fns';
 
 const {Title, Text} = Typography;
 
@@ -53,6 +54,11 @@ interface module {
 
 const colors = ["pink", "yellow", "orange", "cyan", "green", "blue", "purple", "magenta", "lime"];
 const pieColors = ["#ffb6c1", "#ffffe0", "#ffd580", "#e0ffff", "#90ee90", "#add8e6", "#cbc3e3", "#ff80ff", "#bfff00"];
+
+function formatPodAge(podAge: string): string {
+    const parsedDate = new Date(podAge);
+    return formatDistanceToNow(parsedDate, { addSuffix: true });
+}
 
 const ModuleDetails = () => {
     const history = useNavigate();
@@ -195,6 +201,13 @@ const ModuleDetails = () => {
                                     <Table.Column
                                         title='Phase'
                                         dataIndex='podPhase'
+                                    />
+                                    <Table.Column
+                                        title='Lifetime'
+                                        dataIndex='podAge'
+                                        render={(value) => (
+                                            <span>{formatPodAge(value)}</span>
+                                        )}
                                     />
                                     <Table.Column
                                         title='Images'

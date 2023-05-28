@@ -148,6 +148,7 @@ func (k *KubernetesClient) getPods(namespace, deployment string) ([]dto.Pod, err
 			Containers: containers,
 			Node:       item.Spec.NodeName,
 			PodPhase:   string(item.Status.Phase),
+			Lifetime:   item.Status.StartTime,
 		})
 	}
 
