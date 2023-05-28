@@ -126,6 +126,7 @@ insight into what components make cyclops and give you an idea on how to deploy 
 - cd to cyclops-ui in terminal
 - run `npm start`
 - in another terminal tab run `minikube start`
+- apply the Cyclops CRDs to the Kubernetes cluster `kubectl apply -f <path to cyclops root>/install/CRDs/cyclops-module.yaml`
 - in another terminal tab from that one cd into cyclops-ctrl and run `make local-redis` to spin up a local redis instance through docker compose
 - in the same tab as the previous step run `export PORT=8888` to expose backend to that port (its hardcoded in FE)
 - in the same tab run `make start`
