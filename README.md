@@ -130,4 +130,4 @@ insight into what components make cyclops and give you an idea on how to deploy 
 - in another terminal tab from that one cd into cyclops-ctrl and run `make local-redis` to spin up a local redis instance through docker compose
 - in the same tab as the previous step run `export PORT=8888` to expose backend to that port (its hardcoded in FE)
 - in the same tab run `make start`
-- go to `http://localhost:3000` in your browser 
+- go to `http://localhost:3000` in your browser
