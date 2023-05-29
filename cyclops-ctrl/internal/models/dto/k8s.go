@@ -22,7 +22,7 @@ type Pod struct {
 	Containers []Container  `json:"containers"`
 	Node       string       `json:"node"`
 	PodPhase   string       `json:"podPhase"`
-	Start      *metav1.Time `json:"podAge"`
+	Started    *metav1.Time `json:"podAge"`
 }
 
 type Deployment struct {
