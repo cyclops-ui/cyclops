@@ -204,7 +204,7 @@ const ModuleDetails = () => {
                                     />
                                     <Table.Column
                                         title='Started'
-                                        dataIndex='podAge'
+                                        dataIndex='Started'
                                         render={(value) => (
                                             <span>{formatPodAge(value)}</span>
                                         )}
