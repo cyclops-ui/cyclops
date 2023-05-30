@@ -1,5 +1,9 @@
 package dto
 
+import (
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+)
+
 type Container struct {
 	Name   string            `json:"name"`
 	Image  string            `json:"image"`
@@ -14,10 +18,11 @@ type ContainerStatus struct {
 }
 
 type Pod struct {
-	Name       string      `json:"name"`
-	Containers []Container `json:"containers"`
-	Node       string      `json:"node"`
-	PodPhase   string      `json:"podPhase"`
+	Name       string       `json:"name"`
+	Containers []Container  `json:"containers"`
+	Node       string       `json:"node"`
+	PodPhase   string       `json:"podPhase"`
+	Started    *metav1.Time `json:"started"`
 }
 
 type Deployment struct {
