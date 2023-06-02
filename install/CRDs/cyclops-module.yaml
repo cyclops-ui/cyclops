@@ -29,6 +29,13 @@ spec:
                       type: string
                     version:
                       type: string
+                    git:
+                      type: object
+                      properties:
+                        repo:
+                          type: string
+                        path:
+                          type: string
                 values:
                   type: array
                   items:
