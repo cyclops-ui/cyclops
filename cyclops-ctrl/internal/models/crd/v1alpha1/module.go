@@ -8,8 +8,14 @@ type ModuleValue struct {
 }
 
 type TemplateRef struct {
-	Name    string `json:"name"`
-	Version string `json:"version"`
+	Name           string         `json:"name"`
+	Version        string         `json:"version"`
+	TemplateGitRef TemplateGitRef `json:"git"`
+}
+
+type TemplateGitRef struct {
+	Repo string `json:"repo"`
+	Path string `json:"path"`
 }
 
 type ModuleSpec struct {

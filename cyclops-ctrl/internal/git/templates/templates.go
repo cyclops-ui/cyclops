@@ -85,11 +85,11 @@ func LoadTemplate(repoURL, path string) (models.Template, error) {
 	}
 
 	return models.Template{
-		Name:     path,
+		Name:     "",
 		Manifest: strings.Join(manifests, "---\n"),
 		Fields:   mapper.HelmSchemaToFields(schema),
 		Created:  "",
 		Edited:   "",
-		Version:  "HEAD",
+		Version:  "",
 	}, nil
 }

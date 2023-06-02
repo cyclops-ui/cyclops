@@ -25,11 +25,8 @@ func RequestToModule(req dto.Module) v1alpha1.Module {
 			Name: req.Name,
 		},
 		Spec: v1alpha1.ModuleSpec{
-			TemplateRef: v1alpha1.TemplateRef{
-				Name:    req.Template,
-				Version: req.Version,
-			},
-			Values: values,
+			TemplateRef: dtoTemplateRefToK8s(req.Template),
+			Values:      values,
 		},
 	}
 }
@@ -45,7 +42,7 @@ func ModuleToDTO(module v1alpha1.Module) dto.Module {
 		Name:      module.Name,
 		Namespace: module.Namespace,
 		Version:   module.Spec.TemplateRef.Version,
-		Template:  module.Spec.TemplateRef.Name,
+		Template:  k8sTemplateRefToDTO(module.Spec.TemplateRef),
 		Values:    values,
 	}
 }
@@ -58,4 +55,26 @@ func ModuleListToDTO(modules []v1alpha1.Module) []dto.Module {
 	}
 
 	return out
+}
+
+func dtoTemplateRefToK8s(dto dto.Template) v1alpha1.TemplateRef {
+	return v1alpha1.TemplateRef{
+		Name:    dto.Name,
+		Version: dto.Version,
+		TemplateGitRef: v1alpha1.TemplateGitRef{
+			Repo: dto.GitRef.Repo,
+			Path: dto.GitRef.Path,
+		},
+	}
+}
+
+func k8sTemplateRefToDTO(templateRef v1alpha1.TemplateRef) dto.Template {
+	return dto.Template{
+		Name:    templateRef.Name,
+		Version: templateRef.Version,
+		GitRef: dto.TemplateGitRef{
+			Repo: templateRef.TemplateGitRef.Repo,
+			Path: templateRef.TemplateGitRef.Path,
+		},
+	}
 }

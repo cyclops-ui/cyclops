@@ -84,10 +84,16 @@ const NewModule = () => {
 
         axios.post(process.env.REACT_APP_CYCLOPS_CTRL_HOST + `/modules/new`,
             {
-                "name": values["cyclops_module_name"],
-                "values": values,
-                "template": config.name,
-                "version": config.version,
+                name: values["cyclops_module_name"],
+                values: values,
+                template: {
+                    name: config.name,
+                    version: config.version,
+                    git: {
+                        repo: gitTemplate.repo,
+                        path: gitTemplate.path,
+                    }
+                },
             })
             .then(res => {
                 console.log(res);
