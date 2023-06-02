@@ -7,6 +7,7 @@ import (
 	"github.com/cyclops-ui/cycops-ctrl/internal/mapper"
 	"github.com/cyclops-ui/cycops-ctrl/internal/models"
 	"github.com/cyclops-ui/cycops-ctrl/internal/models/crd/v1alpha1"
+	"github.com/cyclops-ui/cycops-ctrl/internal/models/dto"
 	"github.com/cyclops-ui/cycops-ctrl/internal/storage/templates"
 	"net/http"
 	"strconv"
@@ -134,4 +135,25 @@ func (c *Templates) GetConfigurationsVersions(ctx *gin.Context) {
 
 	ctx.Header("Access-Control-Allow-Origin", "*")
 	ctx.JSON(http.StatusOK, versions)
+}
+
+func (c *Templates) GetTemplateFromGit(ctx *gin.Context) {
+	ctx.Header("Access-Control-Allow-Origin", "*")
+
+	repo := ctx.Query("repo")
+	path := ctx.Query("path")
+
+	if repo == "" {
+		ctx.String(http.StatusBadRequest, "set repo field")
+		return
+	}
+
+	template, err := git.LoadTemplate(repo, path)
+	if err != nil {
+		fmt.Println(err)
+		ctx.JSON(http.StatusBadRequest, dto.NewError("Error loading template", err.Error()))
+		return
+	}
+
+	ctx.JSON(http.StatusOK, template)
 }
