@@ -38,10 +38,15 @@ const layout = {
 const EditModule = () => {
     const [module, setModule] = useState({
         name: "",
-        namespace: "",
-        template: "",
         values: {},
-        version: "",
+        template: {
+            name: "",
+            version: "",
+            git: {
+                repo: "",
+                path: "",
+            }
+        }
     });
 
     const [form] = Form.useForm();
@@ -76,15 +81,30 @@ const EditModule = () => {
                 name: res.data.name,
                 values: res.data.values,
                 template: res.data.template,
-                namespace: res.data.namespace,
-                version: res.data.version,
             });
 
             form.setFieldsValue(res.data.values);
 
-            axios.get(process.env.REACT_APP_CYCLOPS_CTRL_HOST + `/create-config/` + res.data.template + `?version=` + res.data.version).then(res => {
-                setConfig(res.data);
-            });
+            if (module.name.length !== 0 ) {
+                axios.get(process.env.REACT_APP_CYCLOPS_CTRL_HOST + `/create-config/` + res.data.template + `?version=` + res.data.version).then(res => {
+                    setConfig(res.data);
+                });
+            } else {
+                axios.get(process.env.REACT_APP_CYCLOPS_CTRL_HOST + `/templates/git?repo=` + res.data.template.git.repo + `&path=` + res.data.template.git.path).then(res => {
+                    setConfig(res.data);
+
+                    // setError({
+                    //     message: "",
+                    //     description: "",
+                    // });
+                    // setSuccessLoad(true);
+                }).catch(function (error) {
+                    // setError(error.response.data);
+                    // setSuccessLoad(false);
+
+                    return
+                });
+            }
         });
     }, []);
 
@@ -133,7 +153,6 @@ const EditModule = () => {
                 "values": values,
                 "name": values["cyclops_module_name"],
                 "template": module.template,
-                "version": module.version,
             })
             .then(res => {
                 console.log(res);
@@ -265,7 +284,9 @@ const EditModule = () => {
                         <Col span={18}>
                             <Link aria-level={3} href={`/configurations/` + module.template}>
                                 <LinkOutlined/>
-                                {module.template}@{module.version}
+                                { module.template.name.length === 0 && module.template.git.repo + '/' + module.template.git.path }
+
+                                { module.template.name.length !== 0 && module.template.name + '@' + module.template.version }
                             </Link>
                             <Button onClick={function () {
                                 setMigrating(true)
