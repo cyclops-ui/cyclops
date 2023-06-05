@@ -1,0 +1,133 @@
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  labels:
+    app.kubernetes.io/component: ctrl
+    app.kubernetes.io/name: cyclops-ctrl
+    app.kubernetes.io/part-of: cyclops
+  name: cyclops-ctrl
+  namespace: cyclops
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  labels:
+    app.kubernetes.io/component: ctrl
+    app.kubernetes.io/name: cyclops-ctrl
+    app.kubernetes.io/part-of: cyclops
+  name: cyclops-ctrl
+  namespace: cyclops
+rules:
+  - apiGroups:
+      - '*'
+    resources:
+      - '*'
+    verbs:
+      - '*'
+  - nonResourceURLs:
+      - '*'
+    verbs:
+      - '*'
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  labels:
+    app.kubernetes.io/component: ctrl
+    app.kubernetes.io/name: cyclops-ctrl
+    app.kubernetes.io/part-of: cyclops
+  name: cyclops-ctrl
+  namespace: cyclops
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: cyclops-ctrl
+subjects:
+  - kind: ServiceAccount
+    name: cyclops-ctrl
+    namespace: cyclops
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: cyclops-ui
+  namespace: cyclops
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: cyclops-ui
+  template:
+    metadata:
+      labels:
+        app: cyclops-ui
+    spec:
+      containers:
+        - name: cyclops-ui
+          image: petarcvit223/cyclops-ui:v0.0.1
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 3000
+          env:
+            - name: REACT_APP_CYCLOPS_CTRL_HOST
+              value: http://localhost:8080 # http://cyclops-ctrl.cyclops:8080
+            - name: NODE_OPTIONS
+              value: --openssl-legacy-provider
+      restartPolicy: Always
+---
+kind: Service
+apiVersion: v1
+metadata:
+  name: cyclops-ui
+  namespace: cyclops
+spec:
+  type: LoadBalancer
+  ports:
+    - port: 3000
+      targetPort: 3000
+      protocol: TCP
+  selector:
+    app: cyclops-ui
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: cyclops-ctrl
+  namespace: cyclops
+  labels:
+    app: cyclops-ctrl
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: cyclops-ctrl
+  template:
+    metadata:
+      labels:
+        app: cyclops-ctrl
+    spec:
+      serviceAccountName: cyclops-ctrl
+      containers:
+        - name: cyclops-ctrl
+          image: petarcvit223/cyclops-ctrl:v0.0.2
+          ports:
+            - containerPort: 8080
+          env:
+            - name: PORT
+              value: "8080"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: cyclops-ctrl
+  namespace: cyclops
+  labels:
+    app: cyclops-ctrl
+spec:
+  type: LoadBalancer
+  ports:
+    - port: 8080
+      protocol: TCP
+      targetPort: 8080
+  selector:
+    app: cyclops-ctrl
