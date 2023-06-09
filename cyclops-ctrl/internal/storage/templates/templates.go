@@ -4,10 +4,12 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+
+	"github.com/go-redis/redis/v8"
+
 	git "github.com/cyclops-ui/cycops-ctrl/internal/git/templates"
 	"github.com/cyclops-ui/cycops-ctrl/internal/models"
 	"github.com/cyclops-ui/cycops-ctrl/internal/models/crd/v1alpha1"
-	"github.com/go-redis/redis/v8"
 )
 
 const (

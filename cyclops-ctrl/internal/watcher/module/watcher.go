@@ -3,14 +3,15 @@ package module
 import (
 	"context"
 	"fmt"
-	"github.com/cyclops-ui/cycops-ctrl/internal/models/dto"
-	"github.com/cyclops-ui/cycops-ctrl/internal/storage/templates"
+
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/runtime/schema"
 	"k8s.io/apimachinery/pkg/watch"
 
 	"github.com/cyclops-ui/cycops-ctrl/internal/cluster/k8sclient"
+	"github.com/cyclops-ui/cycops-ctrl/internal/models/dto"
+	"github.com/cyclops-ui/cycops-ctrl/internal/storage/templates"
 )
 
 type Watcher struct {

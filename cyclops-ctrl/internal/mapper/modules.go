@@ -2,9 +2,11 @@ package mapper
 
 import (
 	"fmt"
+
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+
 	"github.com/cyclops-ui/cycops-ctrl/internal/models/crd/v1alpha1"
 	"github.com/cyclops-ui/cycops-ctrl/internal/models/dto"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
 func RequestToModule(req dto.Module) v1alpha1.Module {

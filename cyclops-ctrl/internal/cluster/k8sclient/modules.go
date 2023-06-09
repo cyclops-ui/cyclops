@@ -3,11 +3,13 @@ package k8sclient
 import (
 	"context"
 	"encoding/json"
-	"github.com/cyclops-ui/cycops-ctrl/internal/models/crd/v1alpha1"
-	"github.com/cyclops-ui/cycops-ctrl/internal/models/dto"
+
 	"gopkg.in/yaml.v2"
 	apiv1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+
+	"github.com/cyclops-ui/cycops-ctrl/internal/models/crd/v1alpha1"
+	"github.com/cyclops-ui/cycops-ctrl/internal/models/dto"
 )
 
 func (k *KubernetesClient) ListModules() ([]v1alpha1.Module, error) {

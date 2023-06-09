@@ -5,7 +5,10 @@ import (
 	"context"
 	"flag"
 	"fmt"
-	"github.com/cyclops-ui/cycops-ctrl/internal/cluster/v1alpha1"
+	"os"
+	"os/exec"
+	"path/filepath"
+
 	v12 "k8s.io/api/apps/v1"
 	"k8s.io/api/autoscaling/v1"
 	apiv1 "k8s.io/api/core/v1"
@@ -17,9 +20,8 @@ import (
 	"k8s.io/client-go/rest"
 	"k8s.io/client-go/tools/clientcmd"
 	"k8s.io/client-go/util/homedir"
-	"os"
-	"os/exec"
-	"path/filepath"
+
+	"github.com/cyclops-ui/cycops-ctrl/internal/cluster/v1alpha1"
 )
 
 const (

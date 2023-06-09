@@ -2,11 +2,13 @@ package v1alpha1
 
 import (
 	"context"
-	"github.com/cyclops-ui/cycops-ctrl/internal/models/crd/v1alpha1"
+	"time"
+
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/watch"
 	"k8s.io/client-go/rest"
-	"time"
+
+	"github.com/cyclops-ui/cycops-ctrl/internal/models/crd/v1alpha1"
 )
 
 type ModuleInterface interface {

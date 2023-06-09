@@ -2,6 +2,12 @@ package controller
 
 import (
 	"fmt"
+	"net/http"
+	"strconv"
+	"time"
+
+	"github.com/gin-gonic/gin"
+
 	"github.com/cyclops-ui/cycops-ctrl/internal/cluster/k8sclient"
 	git "github.com/cyclops-ui/cycops-ctrl/internal/git/templates"
 	"github.com/cyclops-ui/cycops-ctrl/internal/mapper"
@@ -9,11 +15,6 @@ import (
 	"github.com/cyclops-ui/cycops-ctrl/internal/models/crd/v1alpha1"
 	"github.com/cyclops-ui/cycops-ctrl/internal/models/dto"
 	"github.com/cyclops-ui/cycops-ctrl/internal/storage/templates"
-	"net/http"
-	"strconv"
-	"time"
-
-	"github.com/gin-gonic/gin"
 )
 
 type Templates struct {
