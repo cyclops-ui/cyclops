@@ -1,7 +1,6 @@
 package module
 
 import (
-	"fmt"
 	"github.com/cyclops-ui/cycops-ctrl/internal/cluster/k8sclient"
 	"github.com/cyclops-ui/cycops-ctrl/internal/models"
 	"github.com/cyclops-ui/cycops-ctrl/internal/models/crd/v1alpha1"
@@ -19,11 +18,14 @@ func generateResources(kClient *k8sclient.KubernetesClient, module v1alpha1.Modu
 		return err
 	}
 
-	fmt.Println(out)
-
 	objects := make([]runtime.Object, 0, 0)
 
 	for _, s := range strings.Split(out, "---") {
+		s := strings.TrimSpace(s)
+		if len(s) == 0 {
+			continue
+		}
+
 		obj, _, err := scheme.Codecs.UniversalDeserializer().Decode([]byte(s), nil, nil)
 		if err != nil {
 			return err

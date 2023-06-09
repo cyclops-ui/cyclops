@@ -35,7 +35,8 @@
   },
   "scripts": {
     "start": "NODE_OPTIONS=--openssl-legacy-provider REACT_APP_CYCLOPS_CTRL_HOST=http://localhost:8888 node_modules/.bin/react-scripts start",
-    "build": "node_modules/.bin/react-scripts build",
+    "prod": "node_modules/.bin/react-scripts start",
+    "build": "NODE_OPTIONS=--openssl-legacy-provider node_modules/.bin/react-scripts build",
     "test": "node_modules/.bin/react-scripts test",
     "eject": "node_modules/.bin/react-scripts eject"
   },

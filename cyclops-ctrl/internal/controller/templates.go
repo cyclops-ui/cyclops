@@ -82,7 +82,7 @@ func (c *Templates) GetConfiguration(ctx *gin.Context) {
 		return
 	}
 
-	configuration, err := c.templates.GetConfig(name, version)
+	configuration, err := c.templates.GetConfigByVersion(name, version)
 	if err != nil {
 		fmt.Println(err)
 		ctx.Status(http.StatusInternalServerError)

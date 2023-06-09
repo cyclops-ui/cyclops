@@ -43,6 +43,8 @@ func (w Watcher) Start() {
 		case m := <-w.watch:
 			module := m.Object.(*unstructured.Unstructured)
 
+			fmt.Println(fmt.Sprintf("got event %s for module %s", m.Type, module.GetName()))
+
 			switch m.Type {
 			case watch.Added:
 				if err := w.moduleToResources(module.GetName()); err != nil {
@@ -86,7 +88,7 @@ func (w Watcher) moduleToResources(name string) error {
 		return err
 	}
 
-	template, err := w.templates.GetConfig(module.Spec.TemplateRef.Name, module.Spec.TemplateRef.Version)
+	template, err := w.templates.GetConfig(module.Spec.TemplateRef)
 	if err != nil {
 		return err
 	}

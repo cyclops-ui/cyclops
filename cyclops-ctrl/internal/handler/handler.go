@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"fmt"
 	"github.com/cyclops-ui/cycops-ctrl/internal/cluster/k8sclient"
 	"github.com/cyclops-ui/cycops-ctrl/internal/controller"
 	"github.com/cyclops-ui/cycops-ctrl/internal/storage/templates"
@@ -25,12 +26,14 @@ func (h *Handler) Start() error {
 
 	templatesStorage, err := templates.NewStorage()
 	if err != nil {
-		panic(err)
+		fmt.Println("error bootstrapping redis", err)
+		//panic(err)
 	}
 
 	k8sClient, err := k8sclient.New()
 	if err != nil {
-		return err
+		fmt.Println("error bootstrapping Kubernetes client", err)
+		panic(err)
 	}
 
 	templatesController := controller.NewTemplatesController(templatesStorage, k8sClient)
