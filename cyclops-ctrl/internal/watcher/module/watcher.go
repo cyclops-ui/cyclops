@@ -3,14 +3,15 @@ package module
 import (
 	"context"
 	"fmt"
-	"github.com/cyclops-ui/cycops-ctrl/internal/models/dto"
-	"github.com/cyclops-ui/cycops-ctrl/internal/storage/templates"
+
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/runtime/schema"
 	"k8s.io/apimachinery/pkg/watch"
 
 	"github.com/cyclops-ui/cycops-ctrl/internal/cluster/k8sclient"
+	"github.com/cyclops-ui/cycops-ctrl/internal/models/dto"
+	"github.com/cyclops-ui/cycops-ctrl/internal/storage/templates"
 )
 
 type Watcher struct {
@@ -42,6 +43,8 @@ func (w Watcher) Start() {
 		select {
 		case m := <-w.watch:
 			module := m.Object.(*unstructured.Unstructured)
+
+			fmt.Println(fmt.Sprintf("got event %s for module %s", m.Type, module.GetName()))
 
 			switch m.Type {
 			case watch.Added:
@@ -86,7 +89,7 @@ func (w Watcher) moduleToResources(name string) error {
 		return err
 	}
 
-	template, err := w.templates.GetConfig(module.Spec.TemplateRef.Name, module.Spec.TemplateRef.Version)
+	template, err := w.templates.GetConfig(module.Spec.TemplateRef)
 	if err != nil {
 		return err
 	}

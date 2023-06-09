@@ -33,23 +33,17 @@ import { formatDistanceToNow } from 'date-fns';
 
 const {Title, Text} = Typography;
 
-interface pod {
-    name: string,
-    node_name: string,
-    containers: string,
-    memory: number,
-    cpu: number,
-    healthy: boolean,
-    status: string,
-    age: string,
-    cyclops_fleet: string,
-}
-
 interface module {
     name: String,
     namespace: String,
-    template: String,
-    version: String,
+    template: {
+        name: String,
+        version: String,
+        git: {
+            repo: String,
+            path: String,
+        }
+    }
 }
 
 const colors = ["pink", "yellow", "orange", "cyan", "green", "blue", "purple", "magenta", "lime"];
@@ -74,8 +68,14 @@ const ModuleDetails = () => {
     const [module, setModule] = useState<module>({
         name: "",
         namespace: "",
-        template: "",
-        version: "",
+        template: {
+            name: "",
+            version: "",
+            git: {
+                repo: "",
+                path: "",
+            }
+        }
     });
     let {moduleName} = useParams();
     useEffect(() => {
@@ -93,12 +93,6 @@ const ModuleDetails = () => {
             });
         }, 2000);
     }, []);
-
-    const data = {
-        name: module.name,
-        namespace: module.namespace,
-        template: module.template,
-    }
 
     const hashCode = (s: string) => Math.abs(s.split('').reduce((a,b) => (((a << 5) - a) + b.charCodeAt(0))|0, 0))
 
@@ -286,10 +280,19 @@ const ModuleDetails = () => {
             </Row>
             <Row gutter={[40, 0]}>
                 <Col span={9}>
-                    <Link aria-level={3} href={`/configurations/` + module.template}>
-                        <LinkOutlined/>
-                            {module.template}@{module.version}
-                    </Link>
+                    { module.template.name.length !== 0 &&
+                        <Link aria-level={3} href={`/configurations/` + module.template}>
+                            <LinkOutlined/>
+                            { module.template.name.length !== 0 && module.template.name + '@' + module.template.version }
+                        </Link>
+                    }
+
+                    { module.template.name.length === 0 &&
+                        <Link aria-level={3} href={ module.template.git.repo + `/tree/master/` + module.template.git.path }>
+                            <LinkOutlined/>
+                            { module.template.name.length === 0 && 'Template ref' }
+                        </Link>
+                    }
                 </Col>
             </Row>
             <Row><Title></Title></Row>

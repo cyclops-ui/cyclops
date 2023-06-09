@@ -1,7 +1,8 @@
 package module
 
 import (
-	"fmt"
+	"strings"
+
 	"github.com/cyclops-ui/cycops-ctrl/internal/cluster/k8sclient"
 	"github.com/cyclops-ui/cycops-ctrl/internal/models"
 	"github.com/cyclops-ui/cycops-ctrl/internal/models/crd/v1alpha1"
@@ -10,7 +11,6 @@ import (
 	v1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/client-go/kubernetes/scheme"
-	"strings"
 )
 
 func generateResources(kClient *k8sclient.KubernetesClient, module v1alpha1.Module, template models.Template) error {
@@ -19,11 +19,14 @@ func generateResources(kClient *k8sclient.KubernetesClient, module v1alpha1.Modu
 		return err
 	}
 
-	fmt.Println(out)
-
 	objects := make([]runtime.Object, 0, 0)
 
 	for _, s := range strings.Split(out, "---") {
+		s := strings.TrimSpace(s)
+		if len(s) == 0 {
+			continue
+		}
+
 		obj, _, err := scheme.Codecs.UniversalDeserializer().Decode([]byte(s), nil, nil)
 		if err != nil {
 			return err

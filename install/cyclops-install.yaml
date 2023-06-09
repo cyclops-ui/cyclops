@@ -1,0 +1,230 @@
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  name: modules.cyclops.com
+spec:
+  group: cyclops.com
+  names:
+    plural: modules
+    singular: module
+    kind: Module
+    shortNames:
+      - cm
+  scope: Namespaced
+  versions:
+    - name: v1alpha1
+      served: true
+      storage: true
+      schema:
+        openAPIV3Schema:
+          type: object
+          properties:
+            spec:
+              type: object
+              properties:
+                template:
+                  type: object
+                  properties:
+                    name:
+                      type: string
+                    version:
+                      type: string
+                    git:
+                      type: object
+                      properties:
+                        repo:
+                          type: string
+                        path:
+                          type: string
+                values:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      name:
+                        type: string
+                      value:
+                        type: string
+            status:
+              properties:
+                resources:
+                  items:
+                    properties:
+                      group:
+                        type: string
+                      version:
+                        type: string
+                      kind:
+                        type: string
+                      namespace:
+                        type: string
+                      name:
+                        type: string
+                      status:
+                        type: string
+                      health:
+                        type: string
+                    type: object
+                  type: array
+                conditions:
+                  items:
+                    properties:
+                      lastTransitionTime:
+                        format: date-time
+                        type: string
+                      message:
+                        type: string
+                      reason:
+                        type: string
+                      status:
+                        type: string
+                      type:
+                        type: string
+                    required:
+                      - message
+                      - reason
+                      - status
+                      - type
+                    type: object
+                  type: array
+              type: object
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: cyclops
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  labels:
+    app.kubernetes.io/component: ctrl
+    app.kubernetes.io/name: cyclops-ctrl
+    app.kubernetes.io/part-of: cyclops
+  name: cyclops-ctrl
+  namespace: cyclops
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  labels:
+    app.kubernetes.io/component: ctrl
+    app.kubernetes.io/name: cyclops-ctrl
+    app.kubernetes.io/part-of: cyclops
+  name: cyclops-ctrl
+  namespace: cyclops
+rules:
+  - apiGroups:
+      - '*'
+    resources:
+      - '*'
+    verbs:
+      - '*'
+  - nonResourceURLs:
+      - '*'
+    verbs:
+      - '*'
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  labels:
+    app.kubernetes.io/component: ctrl
+    app.kubernetes.io/name: cyclops-ctrl
+    app.kubernetes.io/part-of: cyclops
+  name: cyclops-ctrl
+  namespace: cyclops
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: cyclops-ctrl
+subjects:
+  - kind: ServiceAccount
+    name: cyclops-ctrl
+    namespace: cyclops
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: cyclops-ui
+  namespace: cyclops
+  labels:
+    app: cyclops-ui
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: cyclops-ui
+  template:
+    metadata:
+      labels:
+        app: cyclops-ui
+    spec:
+      containers:
+        - name: cyclops-ui
+          image: petarcvit223/cyclops-ui:v0.0.1
+          ports:
+            - containerPort: 3000
+          env:
+            - name: REACT_APP_CYCLOPS_CTRL_HOST
+              value: http://localhost:8080 # http://cyclops-ctrl.cyclops:8080
+            - name: NODE_OPTIONS
+              value: --openssl-legacy-provider
+      restartPolicy: Always
+---
+kind: Service
+apiVersion: v1
+metadata:
+  name: cyclops-ui
+  namespace: cyclops
+spec:
+  type: LoadBalancer
+  ports:
+    - port: 3000
+      targetPort: 3000
+      protocol: TCP
+  selector:
+    app: cyclops-ui
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: cyclops-ctrl
+  namespace: cyclops
+  labels:
+    app: cyclops-ctrl
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: cyclops-ctrl
+  template:
+    metadata:
+      labels:
+        app: cyclops-ctrl
+    spec:
+      serviceAccountName: cyclops-ctrl
+      containers:
+        - name: cyclops-ctrl
+          image: petarcvit223/cyclops-ctrl:v0.0.5
+          ports:
+            - containerPort: 8080
+          env:
+            - name: PORT
+              value: "8080"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: cyclops-ctrl
+  namespace: cyclops
+  labels:
+    app: cyclops-ctrl
+spec:
+  type: LoadBalancer
+  ports:
+    - port: 8080
+      protocol: TCP
+      targetPort: 8080
+  selector:
+    app: cyclops-ctrl

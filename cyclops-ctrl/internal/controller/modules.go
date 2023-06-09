@@ -2,8 +2,6 @@ package controller
 
 import (
 	"fmt"
-	"github.com/cyclops-ui/cycops-ctrl/internal/storage/templates"
-	"github.com/cyclops-ui/cycops-ctrl/internal/template"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -11,6 +9,8 @@ import (
 	"github.com/cyclops-ui/cycops-ctrl/internal/cluster/k8sclient"
 	"github.com/cyclops-ui/cycops-ctrl/internal/mapper"
 	"github.com/cyclops-ui/cycops-ctrl/internal/models/dto"
+	"github.com/cyclops-ui/cycops-ctrl/internal/storage/templates"
+	"github.com/cyclops-ui/cycops-ctrl/internal/template"
 )
 
 type Modules struct {
@@ -129,7 +129,7 @@ func (m *Modules) Template(ctx *gin.Context) {
 		return
 	}
 
-	currentTemplate, err := m.templates.GetConfig(module.Spec.TemplateRef.Name, module.Spec.TemplateRef.Version)
+	currentTemplate, err := m.templates.GetConfig(module.Spec.TemplateRef)
 	if err != nil {
 		fmt.Println(err)
 		ctx.Status(http.StatusInternalServerError)
@@ -143,7 +143,7 @@ func (m *Modules) Template(ctx *gin.Context) {
 		return
 	}
 
-	proposedTemplate, err := m.templates.GetConfig(module.Spec.TemplateRef.Name, ctx.Query("version"))
+	proposedTemplate, err := m.templates.GetConfig(module.Spec.TemplateRef)
 	if err != nil {
 		fmt.Println(err)
 		ctx.Status(http.StatusInternalServerError)
@@ -174,7 +174,7 @@ func (m *Modules) HelmTemplate(ctx *gin.Context) {
 		return
 	}
 
-	currentTemplate, err := m.templates.GetConfig(module.Spec.TemplateRef.Name, module.Spec.TemplateRef.Version)
+	currentTemplate, err := m.templates.GetConfig(module.Spec.TemplateRef)
 	if err != nil {
 		fmt.Println(err)
 		ctx.Status(http.StatusInternalServerError)

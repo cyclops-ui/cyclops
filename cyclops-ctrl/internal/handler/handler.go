@@ -1,13 +1,15 @@
 package handler
 
 import (
+	"fmt"
+	"net/http"
+
+	"github.com/gin-gonic/gin"
+
 	"github.com/cyclops-ui/cycops-ctrl/internal/cluster/k8sclient"
 	"github.com/cyclops-ui/cycops-ctrl/internal/controller"
 	"github.com/cyclops-ui/cycops-ctrl/internal/storage/templates"
 	"github.com/cyclops-ui/cycops-ctrl/internal/watcher/module"
-	"net/http"
-
-	"github.com/gin-gonic/gin"
 )
 
 type Handler struct {
@@ -25,12 +27,14 @@ func (h *Handler) Start() error {
 
 	templatesStorage, err := templates.NewStorage()
 	if err != nil {
-		panic(err)
+		fmt.Println("error bootstrapping redis", err)
+		//panic(err)
 	}
 
 	k8sClient, err := k8sclient.New()
 	if err != nil {
-		return err
+		fmt.Println("error bootstrapping Kubernetes client", err)
+		panic(err)
 	}
 
 	templatesController := controller.NewTemplatesController(templatesStorage, k8sClient)
@@ -45,6 +49,7 @@ func (h *Handler) Start() error {
 	h.router.GET("/create-config/:name", templatesController.GetConfiguration)
 	h.router.GET("/configuration-details", templatesController.GetConfigurationsDetails)
 	h.router.GET("/configuration/:name/versions", templatesController.GetConfigurationsVersions)
+	h.router.GET("/templates/git", templatesController.GetTemplateFromGit)
 
 	// modules
 	h.router.GET("/modules/:name", modulesController.GetModule)

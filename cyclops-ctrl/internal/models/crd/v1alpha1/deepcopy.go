@@ -24,6 +24,10 @@ func (in *Module) DeepCopyInto(out *Module) {
 		TemplateRef: TemplateRef{
 			Name:    in.Spec.TemplateRef.Name,
 			Version: in.Spec.TemplateRef.Version,
+			TemplateGitRef: TemplateGitRef{
+				Repo: in.Spec.TemplateRef.TemplateGitRef.Repo,
+				Path: in.Spec.TemplateRef.TemplateGitRef.Path,
+			},
 		},
 		Values: DeepCopyValues(in.Spec.Values),
 	}

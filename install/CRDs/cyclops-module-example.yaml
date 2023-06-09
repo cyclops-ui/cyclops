@@ -4,8 +4,9 @@ metadata:
   name: test-module-2
 spec:
   template:
-    name: aeigj
-    version: aejfg
+    git:
+      repo: https://github.com/cyclops-ui/templates
+      path: application
   values:
     - name: appname
       value: juraj

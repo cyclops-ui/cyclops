@@ -7,6 +7,7 @@ import (
 )
 
 const GroupName = "cyclops.com"
+
 const GroupVersion = "v1alpha1"
 
 var SchemeGroupVersion = schema.GroupVersion{Group: GroupName, Version: GroupVersion}

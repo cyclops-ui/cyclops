@@ -1,5 +1,6 @@
 import React, {useEffect, useState} from 'react';
 import {
+    Alert,
     Button,
     Col,
     Divider,
@@ -7,7 +8,6 @@ import {
     Input,
     InputNumber,
     message,
-    Modal,
     Row,
     Select,
     Space,
@@ -17,8 +17,6 @@ import {
 import axios from 'axios';
 import {useNavigate} from 'react-router';
 import {MinusCircleOutlined, PlusOutlined} from "@ant-design/icons";
-
-import AceEditor from "react-ace";
 
 import "ace-builds/src-noconflict/mode-java";
 import "ace-builds/src-noconflict/theme-github";
@@ -46,19 +44,28 @@ const NewModule = () => {
         manifest: "",
         fields: []
     })
+
+    const [gitTemplate, setGitTemplate] = useState({
+        repo: "",
+        path: ""
+    })
+
+    const [error, setError] = useState({
+        message: "",
+        description: "",
+    });
+
+    const [successLoad, setSuccessLoad] = useState(false);
+
     const history = useNavigate();
 
     let {name} = useParams();
 
     useEffect(() => {
         setLoading(true);
-        axios.get(process.env.REACT_APP_CYCLOPS_CTRL_HOST + `/configuration-details`).then(res => {
-            setAllConfigs(res.data);
-        });
-
-        axios.get(process.env.REACT_APP_CYCLOPS_CTRL_HOST + `/create-config/git`).then(res => {
-            setConfig(res.data);
-        });
+        // axios.get(process.env.REACT_APP_CYCLOPS_CTRL_HOST + `/configuration-details`).then(res => {
+        //     setAllConfigs(res.data);
+        // });
 
         setLoading(false);
     }, []);
@@ -77,10 +84,16 @@ const NewModule = () => {
 
         axios.post(process.env.REACT_APP_CYCLOPS_CTRL_HOST + `/modules/new`,
             {
-                "name": values["cyclops_module_name"],
-                "values": values,
-                "template": config.name,
-                "version": config.version,
+                name: values["cyclops_module_name"],
+                values: values,
+                template: {
+                    name: config.name,
+                    version: config.version,
+                    git: {
+                        repo: gitTemplate.repo,
+                        path: gitTemplate.path,
+                    }
+                },
             })
             .then(res => {
                 console.log(res);
@@ -108,11 +121,19 @@ const NewModule = () => {
         })
 
         axios.get(process.env.REACT_APP_CYCLOPS_CTRL_HOST + `/configuration/` + value + `/versions`).then(res => {
-            let configVersions = res.data.sort(function(a: string, b: string){
-                if (a === "latest") {return -1}
-                if (b === "latest") {return 1}
-                if(a < b) { return 1; }
-                if(a > b) { return -1; }
+            let configVersions = res.data.sort(function (a: string, b: string) {
+                if (a === "latest") {
+                    return -1
+                }
+                if (b === "latest") {
+                    return 1
+                }
+                if (a < b) {
+                    return 1;
+                }
+                if (a > b) {
+                    return -1;
+                }
                 return 0;
             })
 
@@ -132,6 +153,24 @@ const NewModule = () => {
             setConfig(res.data);
         });
     }
+
+    const loadTemplate = () => {
+        axios.get(process.env.REACT_APP_CYCLOPS_CTRL_HOST + `/templates/git?repo=` + gitTemplate.repo + `&path=` + gitTemplate.path).then(res => {
+            setConfig(res.data);
+
+            setError({
+                message: "",
+                description: "",
+            });
+            setSuccessLoad(true);
+        }).catch(function (error) {
+            setError(error.response.data);
+            setSuccessLoad(false);
+
+            return
+        });
+    }
+
 
     const formFields: {} | any = [];
     config.fields.forEach((field: any) => {
@@ -201,6 +240,31 @@ const NewModule = () => {
 
     return (
         <div>
+            {
+                error.message.length !== 0 && <Alert
+                    message={error.message}
+                    description={error.description}
+                    type="error"
+                    closable
+                    afterClose={() => {setError({
+                        message: "",
+                        description: "",
+                    })}}
+                    style={{marginBottom: '20px'}}
+                />
+            }
+            {
+                successLoad && <Alert
+                    message={"Loaded template successfully"}
+                    description={error.description}
+                    type="success"
+                    closable
+                    afterClose={() => {
+                        setSuccessLoad(false);
+                    }}
+                    style={{marginBottom: '20px'}}
+                />
+            }
             <Row gutter={[40, 0]}>
                 <Col span={23}>
                     <Title style={{textAlign: 'center'}} level={2}>
@@ -212,23 +276,51 @@ const NewModule = () => {
                 <Col span={18}>
                     <Form {...layout} autoComplete={"off"} onFinish={handleSubmit}>
                         <Divider orientation="left" orientationMargin="0">
-                            Select configuration
+                            Module template
                         </Divider>
-                        <Select
-                            placeholder={"Template"}
+                        <Input
+                            placeholder={"Repository"}
+                            style={{width: '40%'}}
+                            onChange={(value: any) => {
+                                setGitTemplate({
+                                    repo: value.target.value,
+                                    path: gitTemplate.path,
+                                })
+                            }}
+                        />
+                        {' / '}
+                        <Input
+                            placeholder={"Path"}
                             style={{width: '30%'}}
-                            onChange={handleChange}
-                        >
-                            {configNames}
-                        </Select>
+                            onChange={(value: any) => {
+                                setGitTemplate({
+                                    repo: gitTemplate.repo,
+                                    path: value.target.value,
+                                })
+                            }}
+                        />
                         {'  '}
-                        <Select
-                            placeholder={"Template version"}
-                            style={{width: '30%'}}
-                            onChange={handleVersionChange}
-                        >
-                            {versions}
-                        </Select>
+                        <Button type="primary" htmlType="button" onClick={loadTemplate}>
+                            Load
+                        </Button>
+                        {/*<Divider orientation="left" orientationMargin="0">*/}
+                        {/*    Select configuration*/}
+                        {/*</Divider>*/}
+                        {/*<Select*/}
+                        {/*    placeholder={"Template"}*/}
+                        {/*    style={{width: '30%'}}*/}
+                        {/*    onChange={handleChange}*/}
+                        {/*>*/}
+                        {/*    {configNames}*/}
+                        {/*</Select>*/}
+                        {/*{'  '}*/}
+                        {/*<Select*/}
+                        {/*    placeholder={"Template version"}*/}
+                        {/*    style={{width: '30%'}}*/}
+                        {/*    onChange={handleVersionChange}*/}
+                        {/*>*/}
+                        {/*    {versions}*/}
+                        {/*</Select>*/}
                         <Divider orientation="left" orientationMargin="0">
                             Module name
                         </Divider>

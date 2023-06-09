@@ -4,8 +4,12 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"github.com/cyclops-ui/cycops-ctrl/internal/models"
+
 	"github.com/go-redis/redis/v8"
+
+	git "github.com/cyclops-ui/cycops-ctrl/internal/git/templates"
+	"github.com/cyclops-ui/cycops-ctrl/internal/models"
+	"github.com/cyclops-ui/cycops-ctrl/internal/models/crd/v1alpha1"
 )
 
 const (
@@ -64,8 +68,12 @@ func (s *Storage) GetConfigByVersion(name, version string) (models.Template, err
 	return config, nil
 }
 
-func (s *Storage) GetConfig(name, version string) (models.Template, error) {
-	return s.GetConfigByVersion(name, version)
+func (s *Storage) GetConfig(ref v1alpha1.TemplateRef) (models.Template, error) {
+	if ref.TemplateGitRef.Repo != "" {
+		return git.LoadTemplate(ref.TemplateGitRef.Repo, ref.TemplateGitRef.Path)
+	}
+
+	return s.GetConfigByVersion(ref.Name, ref.Version)
 }
 
 func (s *Storage) ListConfigLatest() (out []models.Template, err error) {

@@ -2,17 +2,19 @@ package controller
 
 import (
 	"fmt"
-	"github.com/cyclops-ui/cycops-ctrl/internal/cluster/k8sclient"
-	git "github.com/cyclops-ui/cycops-ctrl/internal/git/templates"
-	"github.com/cyclops-ui/cycops-ctrl/internal/mapper"
-	"github.com/cyclops-ui/cycops-ctrl/internal/models"
-	"github.com/cyclops-ui/cycops-ctrl/internal/models/crd/v1alpha1"
-	"github.com/cyclops-ui/cycops-ctrl/internal/storage/templates"
 	"net/http"
 	"strconv"
 	"time"
 
 	"github.com/gin-gonic/gin"
+
+	"github.com/cyclops-ui/cycops-ctrl/internal/cluster/k8sclient"
+	git "github.com/cyclops-ui/cycops-ctrl/internal/git/templates"
+	"github.com/cyclops-ui/cycops-ctrl/internal/mapper"
+	"github.com/cyclops-ui/cycops-ctrl/internal/models"
+	"github.com/cyclops-ui/cycops-ctrl/internal/models/crd/v1alpha1"
+	"github.com/cyclops-ui/cycops-ctrl/internal/models/dto"
+	"github.com/cyclops-ui/cycops-ctrl/internal/storage/templates"
 )
 
 type Templates struct {
@@ -81,7 +83,7 @@ func (c *Templates) GetConfiguration(ctx *gin.Context) {
 		return
 	}
 
-	configuration, err := c.templates.GetConfig(name, version)
+	configuration, err := c.templates.GetConfigByVersion(name, version)
 	if err != nil {
 		fmt.Println(err)
 		ctx.Status(http.StatusInternalServerError)
@@ -134,4 +136,25 @@ func (c *Templates) GetConfigurationsVersions(ctx *gin.Context) {
 
 	ctx.Header("Access-Control-Allow-Origin", "*")
 	ctx.JSON(http.StatusOK, versions)
+}
+
+func (c *Templates) GetTemplateFromGit(ctx *gin.Context) {
+	ctx.Header("Access-Control-Allow-Origin", "*")
+
+	repo := ctx.Query("repo")
+	path := ctx.Query("path")
+
+	if repo == "" {
+		ctx.String(http.StatusBadRequest, "set repo field")
+		return
+	}
+
+	template, err := git.LoadTemplate(repo, path)
+	if err != nil {
+		fmt.Println(err)
+		ctx.JSON(http.StatusBadRequest, dto.NewError("Error loading template", err.Error()))
+		return
+	}
+
+	ctx.JSON(http.StatusOK, template)
 }

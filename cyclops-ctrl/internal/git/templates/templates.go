@@ -4,16 +4,19 @@ import (
 	"bufio"
 	"bytes"
 	"encoding/json"
-	"github.com/cyclops-ui/cycops-ctrl/internal/mapper"
-	"github.com/cyclops-ui/cycops-ctrl/internal/models/helm"
-	"gopkg.in/src-d/go-billy.v4/memfs"
-	git "gopkg.in/src-d/go-git.v4"
-	"gopkg.in/src-d/go-git.v4/storage/memory"
+	"fmt"
 	"io"
 	path2 "path"
 	"strings"
 
+	"github.com/pkg/errors"
+	"gopkg.in/src-d/go-billy.v4/memfs"
+	git "gopkg.in/src-d/go-git.v4"
+	"gopkg.in/src-d/go-git.v4/storage/memory"
+
+	"github.com/cyclops-ui/cycops-ctrl/internal/mapper"
 	"github.com/cyclops-ui/cycops-ctrl/internal/models"
+	"github.com/cyclops-ui/cycops-ctrl/internal/models/helm"
 )
 
 func LoadTemplate(repoURL, path string) (models.Template, error) {
@@ -21,7 +24,7 @@ func LoadTemplate(repoURL, path string) (models.Template, error) {
 		URL: repoURL,
 	})
 	if err != nil {
-		return models.Template{}, err
+		return models.Template{}, errors.Wrap(err, fmt.Sprintf("repo %s was not cloned sucessfully; authentication might be required; check if repository exists and you referenced it correctly", repoURL))
 	}
 
 	wt, err := repo.Worktree()
@@ -31,14 +34,20 @@ func LoadTemplate(repoURL, path string) (models.Template, error) {
 
 	fs := wt.Filesystem
 
+	// check if helm chart
+	_, err = fs.Open(path2.Join(path, "Chart.yaml"))
+	if err != nil {
+		return models.Template{}, errors.Wrap(err, "could not read 'Chart.yaml' file; it should be placed in the repo/path you provided; make sure you provided the correct path")
+	}
+
 	templatesPath := path2.Join(path, "templates")
 
 	files, err := fs.ReadDir(templatesPath)
 	if err != nil {
-		return models.Template{}, err
+		return models.Template{}, errors.Wrap(err, "could not find 'templates' dir; it should be placed in the repo/path you provided; make sure 'templates' directory exists")
 	}
 
-	manifests := make([]string, len(files))
+	manifests := make([]string, 0, len(files))
 
 	for _, fileInfo := range files {
 		if fileInfo.IsDir() {
@@ -62,7 +71,7 @@ func LoadTemplate(repoURL, path string) (models.Template, error) {
 	// read schema
 	schemaFile, err := fs.Open(path2.Join(path, "values.schema.json"))
 	if err != nil {
-		return models.Template{}, err
+		return models.Template{}, errors.Wrap(err, "could not read 'values.schema.json' file; it should be placed in the repo/path you provided; make sure 'templates' directory exists")
 	}
 
 	var b bytes.Buffer
@@ -77,11 +86,11 @@ func LoadTemplate(repoURL, path string) (models.Template, error) {
 	}
 
 	return models.Template{
-		Name:     path,
+		Name:     "",
 		Manifest: strings.Join(manifests, "---\n"),
 		Fields:   mapper.HelmSchemaToFields(schema),
 		Created:  "",
 		Edited:   "",
-		Version:  "HEAD",
+		Version:  "",
 	}, nil
 }
