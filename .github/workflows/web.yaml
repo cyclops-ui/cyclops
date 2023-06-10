@@ -21,7 +21,7 @@ jobs:
 #          cache: npm
 
       - name: Install dependencies and build
-        run:
+        run: |
           cd web
           npm ci
           npm run build
