@@ -3,6 +3,7 @@ package k8sclient
 import (
 	"context"
 	"encoding/json"
+
 	"gopkg.in/yaml.v2"
 	apiv1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -54,6 +55,7 @@ func (k *KubernetesClient) GetModule(name string) (*v1alpha1.Module, error) {
 
 func (k *KubernetesClient) GetResourcesForModule(name string) ([]interface{}, error) {
 	out := make([]interface{}, 0, 0)
+
 	deployments, err := k.clientset.AppsV1().Deployments("").List(context.Background(), metav1.ListOptions{
 		LabelSelector: "cyclops.module=" + name,
 	})
