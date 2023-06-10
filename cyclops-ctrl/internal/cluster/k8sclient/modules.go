@@ -3,7 +3,6 @@ package k8sclient
 import (
 	"context"
 	"encoding/json"
-
 	"gopkg.in/yaml.v2"
 	apiv1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -68,7 +67,7 @@ func (k *KubernetesClient) GetResourcesForModule(name string) ([]interface{}, er
 			return nil, err
 		}
 
-		pods, err := k.getPods(apiv1.NamespaceDefault, item.Name)
+		pods, err := k.getPods(item.Namespace, item.Name)
 		if err != nil {
 			return nil, err
 		}
