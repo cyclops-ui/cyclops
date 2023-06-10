@@ -290,7 +290,7 @@ const ModuleDetails = () => {
                     { module.template.name.length === 0 &&
                         <Link aria-level={3} href={ module.template.git.repo + `/tree/master/` + module.template.git.path }>
                             <LinkOutlined/>
-                            { module.template.name.length === 0 && 'Template ref' }
+                            { module.template.name.length === 0 && ' Template ref' }
                         </Link>
                     }
                 </Col>

@@ -1,10 +1,11 @@
 import React, {useEffect, useState} from 'react';
-import {Button, Col, Divider, Row, Select, Table, Tag, Typography, Input, Space} from 'antd';
+import {Button, Col, Divider, Row, Select, Table, Tag, Typography, Input, Space, Card} from 'antd';
 import {Icon} from '@ant-design/compatible';
 import {useNavigate} from 'react-router';
 import axios from 'axios';
 import SearchInput from "../searchbar";
-import { SearchOutlined } from '@ant-design/icons';
+import {LinkOutlined, SearchOutlined} from '@ant-design/icons';
+import Link from "antd/lib/typography/Link";
 
 const {Title} = Typography;
 
@@ -88,38 +89,35 @@ const Modules = () => {
                 </Col>
             </Row>
             <Divider orientationMargin="0"/>
-            <Col span={24} style={{overflowX: "auto"}}>
-                <Table dataSource={data.slice(1, data.length)}>
-                    <Table.Column
-                        title='Module name'
-                        dataIndex='name'
-                        filterSearch={true}
-                        key='name'
-                    />
-                    <Table.Column
-                        title='Namespace'
-                        dataIndex='namespace'
-                    />
-                    <Table.Column
-                        title='Details'
-                        width='15%'
-                        render={module =>
-                            <Button onClick={function () {
-                                window.location.href = "/modules/" + module.name
-                            }} block>Details</Button>
-                        }
-                    />
-                    <Table.Column
-                        title='Edit'
-                        width='15%'
-                        render={module =>
-                            <Button onClick={function () {
-                                window.location.href = "/modules/" + module.name + "/edit"
-                            }} block>Edit</Button>
-                        }
-                    />
-                </Table>
-            </Col>
+            <Row gutter={[16, 16]}>
+                {allData.map((module:any, index) => (
+                    <Col key={index} span={6}>
+                        <Card title={module.name}>
+                            <Row gutter={[16, 16]}>
+                                <Col span={24}>
+                                    Repo:
+                                    <Link aria-level={3} href={module.template.git.repo}>
+                                        {module.template.name.length === 0 && " " + module.template.git.repo}
+                                    </Link>
+                                </Col>
+                            </Row>
+                            <Row gutter={[16, 16]}>
+                                <Col span={24}>
+                                    Path:
+                                    <Link aria-level={3} href={ module.template.git.repo + `/tree/master/` + module.template.git.path }>
+                                        { module.template.name.length === 0 && " " + module.template.git.path }
+                                    </Link>
+                                </Col>
+                            </Row>
+                            <Row style={{paddingTop: "15px"}}>
+                                <Col>
+                                    <Button type={"primary"} onClick={ function() {window.location.href = "/modules/" + module.name} } block>Details</Button>
+                                </Col>
+                            </Row>
+                        </Card>
+                    </Col>
+                ))}
+            </Row>
         </div>
     );
 }

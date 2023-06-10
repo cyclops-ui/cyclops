@@ -342,7 +342,7 @@ const NewModule = () => {
                             <Button type="primary" loading={loading} htmlType="submit" name="Save">
                                 Save
                             </Button>{' '}
-                            <Button type="ghost" htmlType="button" onClick={() => history('/list')}>
+                            <Button type="ghost" htmlType="button" onClick={() => history('/')}>
                                 Back
                             </Button>
                         </div>
