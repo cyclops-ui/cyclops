@@ -68,7 +68,7 @@ func (k *KubernetesClient) GetResourcesForModule(name string) ([]interface{}, er
 			return nil, err
 		}
 
-		pods, err := k.getPods(item.Name)
+		pods, err := k.getPods(apiv1.NamespaceDefault, item.Name)
 		if err != nil {
 			return nil, err
 		}
@@ -110,8 +110,8 @@ func (k *KubernetesClient) GetResourcesForModule(name string) ([]interface{}, er
 	return out, nil
 }
 
-func (k *KubernetesClient) getPods(deployment string) ([]dto.Pod, error) {
-	pods, err := k.clientset.CoreV1().Pods(apiv1.NamespaceDefault).List(context.Background(), metav1.ListOptions{
+func (k *KubernetesClient) getPods(namespace, deployment string) ([]dto.Pod, error) {
+	pods, err := k.clientset.CoreV1().Pods(namespace).List(context.Background(), metav1.ListOptions{
 		LabelSelector: "app=" + deployment,
 	})
 	if err != nil {
