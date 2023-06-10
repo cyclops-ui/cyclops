@@ -25,7 +25,8 @@ import (
 )
 
 const (
-	kubectl = "kubectl"
+	kubectl          = "kubectl"
+	cyclopsNamespace = "cyclops"
 )
 
 type KubernetesClient struct {
@@ -97,13 +98,13 @@ func createLocalClient() (*KubernetesClient, error) {
 	}, nil
 }
 
-func (k *KubernetesClient) GetDeployment(namespace, name string) (*v12.Deployment, error) {
-	deploymentClient := k.clientset.AppsV1().Deployments(namespace)
+func (k *KubernetesClient) GetDeployment(name string) (*v12.Deployment, error) {
+	deploymentClient := k.clientset.AppsV1().Deployments(apiv1.NamespaceDefault)
 	return deploymentClient.Get(context.TODO(), name, metav1.GetOptions{})
 }
 
-func (k *KubernetesClient) GetDeployments(namespace string) ([]v12.Deployment, error) {
-	deploymentClient := k.clientset.AppsV1().Deployments(namespace)
+func (k *KubernetesClient) GetDeployments() ([]v12.Deployment, error) {
+	deploymentClient := k.clientset.AppsV1().Deployments(apiv1.NamespaceDefault)
 	deploymentList, err := deploymentClient.List(context.TODO(), metav1.ListOptions{})
 	if err != nil {
 		return nil, err
@@ -112,13 +113,13 @@ func (k *KubernetesClient) GetDeployments(namespace string) ([]v12.Deployment, e
 	return deploymentList.Items, err
 }
 
-func (k *KubernetesClient) GetScale(namespace, name string) (*v1.Scale, error) {
-	deploymentClient := k.clientset.AppsV1().Deployments(namespace)
+func (k *KubernetesClient) GetScale(name string) (*v1.Scale, error) {
+	deploymentClient := k.clientset.AppsV1().Deployments(apiv1.NamespaceDefault)
 	return deploymentClient.GetScale(context.TODO(), name, metav1.GetOptions{})
 }
 
-func (k *KubernetesClient) UpdateScale(namespace, name string, sc v1.Scale) error {
-	deploymentClient := k.clientset.AppsV1().Deployments(namespace)
+func (k *KubernetesClient) UpdateScale(name string, sc v1.Scale) error {
+	deploymentClient := k.clientset.AppsV1().Deployments(apiv1.NamespaceDefault)
 	_, err := deploymentClient.UpdateScale(context.TODO(), name, &sc, metav1.UpdateOptions{})
 	return err
 }
@@ -157,8 +158,8 @@ func (k *KubernetesClient) DeployService(service *apiv1.Service) error {
 	}
 }
 
-func (k *KubernetesClient) GetPods(namespace, name string) ([]apiv1.Pod, error) {
-	podClient := k.clientset.CoreV1().Pods(namespace)
+func (k *KubernetesClient) GetPods(name string) ([]apiv1.Pod, error) {
+	podClient := k.clientset.CoreV1().Pods(apiv1.NamespaceDefault)
 	podList, err := podClient.List(context.TODO(), metav1.ListOptions{
 		LabelSelector: fmt.Sprintf("app=%v", name),
 	})
