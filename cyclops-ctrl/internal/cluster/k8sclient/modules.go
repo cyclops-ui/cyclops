@@ -13,12 +13,12 @@ import (
 )
 
 func (k *KubernetesClient) ListModules() ([]v1alpha1.Module, error) {
-	moduleList, err := k.moduleset.Modules("default").List(metav1.ListOptions{})
+	moduleList, err := k.moduleset.Modules(cyclopsNamespace).List(metav1.ListOptions{})
 	return moduleList, err
 }
 
 func (k *KubernetesClient) CreateModule(module v1alpha1.Module) error {
-	_, err := k.moduleset.Modules("default").Create(&module)
+	_, err := k.moduleset.Modules(cyclopsNamespace).Create(&module)
 	return err
 }
 
@@ -41,16 +41,16 @@ func (k *KubernetesClient) UpdateModule(module v1alpha1.Module) error {
 	//	Message: "good job",
 	//})
 
-	_, err := k.moduleset.Modules("default").Update(&module)
+	_, err := k.moduleset.Modules(cyclopsNamespace).Update(&module)
 	return err
 }
 
 func (k *KubernetesClient) DeleteModule(name string) error {
-	return k.moduleset.Modules("default").Delete(name)
+	return k.moduleset.Modules(cyclopsNamespace).Delete(name)
 }
 
 func (k *KubernetesClient) GetModule(name string) (*v1alpha1.Module, error) {
-	return k.moduleset.Modules("default").Get(name)
+	return k.moduleset.Modules(cyclopsNamespace).Get(name)
 }
 
 func (k *KubernetesClient) GetResourcesForModule(name string) ([]interface{}, error) {

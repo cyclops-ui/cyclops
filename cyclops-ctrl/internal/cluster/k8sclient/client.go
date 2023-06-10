@@ -25,7 +25,8 @@ import (
 )
 
 const (
-	kubectl = "kubectl"
+	kubectl          = "kubectl"
+	cyclopsNamespace = "cyclops"
 )
 
 type KubernetesClient struct {
