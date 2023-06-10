@@ -326,7 +326,7 @@ const EditModule = () => {
                             <Button type="primary" htmlType="submit" name="Save">
                                 Save
                             </Button>{' '}
-                            <Button type="ghost" htmlType="button" onClick={() => history('/list')}>
+                            <Button type="ghost" htmlType="button" onClick={() => history('/modules/' + moduleName)}>
                                 Back
                             </Button>
                         </div>
