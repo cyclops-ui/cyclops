@@ -1,3 +1,4 @@
+
 import React from 'react';
 import clsx from 'clsx';
 import Link from '@docusaurus/Link';
@@ -39,7 +40,7 @@ function HomepageHeader() {
                     </Link>
                 </div>
                 <div className={styles.support}>
-                    <p style={{padding: 0, margin: 0, paddingBottom: '5px'}}>Supported by</p>
+                    <p style={{padding: 0, margin: 0, paddingBottom: '5px'}}>Supported by test</p>
                     <ul>
                         <li>
                             <Link to="https://nuqleus.io/">
