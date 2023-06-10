@@ -1,0 +1,101 @@
+/**
+ * CSS files with the .module.css suffix will be treated as CSS modules
+ * and scoped locally.
+ */
+
+@media screen and (max-width: 950px) {
+  .heroBanner {
+    flex-direction: column;
+    width: 100%;
+  }
+}
+
+ul {
+  padding-left: 0;
+}
+
+li {
+  list-style-type: none;
+}
+
+.heroBanner {
+  left: 50%;
+  align-content: center;
+  align-items: center;
+  alignment: center;
+  background: white;
+  display: flex;
+  justify-content: center;
+}
+
+.image {
+  float: right;
+  width: 35%;
+}
+
+.letters {
+  text-align: left;
+  position: relative;
+  overflow: hidden;
+  background: white;
+  color: #00152A;
+  float: right;
+  width: 30%;
+  margin: 5px;
+  padding: 15px;
+}
+
+.buttons {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  justify-content: left;
+  padding-right: 0;
+  margin-right: 0;
+}
+
+.support {
+  padding: 10px;
+}
+
+.supporters {
+  padding: 10px;
+  justify-content: center;
+  align-items: center;
+}
+
+@media screen and (max-width: 996px) {
+  .heroBanner {
+    /*padding: 2rem;*/
+    width: 100%;
+  }
+}
+
+@media screen and (max-width: 600px) {
+  .image {
+    float: right;
+    width: 100%;
+  }
+
+  .letters {
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+    background: white;
+    color: #00152A;
+    width: 100%;
+    margin: 0;
+  }
+
+  .buttons {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+  }
+}
+
+.right {
+  float: right;
+  width: 60%;
+}

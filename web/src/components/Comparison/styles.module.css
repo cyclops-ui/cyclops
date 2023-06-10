@@ -1,0 +1,44 @@
+@media screen and (max-width: 950px) {
+  .all {
+    flex-direction: column;
+    width: 100%;
+  }
+}
+
+.all {
+  display: flex;
+  justify-content: center;
+  background-color: white;
+}
+
+.yaml {
+  float: left;
+  width: 50%;
+  padding-left: 10%;
+  padding-top: 30px;
+  padding-bottom: 30px;
+}
+
+.ui {
+  padding-top: 30px;
+  padding-bottom: 30px;
+  float: left;
+  width: 30%;
+}
+
+@media screen and (max-width: 600px) {
+  .yaml {
+    width: 100%;
+    padding-right: 5px;
+    padding-left: 5px;
+  }
+
+  .ui {
+    text-align: center;
+    width: 100%;
+    padding-right: 5px;
+    padding-left: 5px;
+    padding-bottom: 0;
+  }
+}
+
