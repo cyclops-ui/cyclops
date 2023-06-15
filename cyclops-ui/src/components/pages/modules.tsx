@@ -53,15 +53,11 @@ const Modules = () => {
     }
 
     const handleSearch = (event: any) => {
-        // Access input value
         const query = event.target.value;
-        // Create copy of item list
         var updatedList = [...allData];
-        // Include all elements which includes the search query
         updatedList = updatedList.filter((module: any) => {
             return module.name.toLowerCase().indexOf(query.toLowerCase()) !== -1;
         });
-        // Trigger render with updated values
         setFilteredData(updatedList);
     }
 
