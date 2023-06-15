@@ -12,6 +12,7 @@ const {Title} = Typography;
 const Modules = () => {
     const history = useNavigate();
     const [allData, setAllData] = useState([]);
+    const [filteredData, setFilteredData] = useState([]);
     const [namespacesState, setNamespacesState] = useState([]);
     useEffect(() => {
         console.log(process.env)
@@ -21,6 +22,7 @@ const Modules = () => {
         axios.get(process.env.REACT_APP_CYCLOPS_CTRL_HOST + `/modules/list`).then(res => {
             console.log(res.data)
             setAllData(res.data);
+            setFilteredData(res.data);
         });
 
         axios.get(process.env.REACT_APP_CYCLOPS_CTRL_HOST + `/namespaces`).then(res => {
@@ -28,6 +30,8 @@ const Modules = () => {
             setNamespacesState(res.data.namespaces)
         });
     }, []);
+
+    const [moduleNames, setModuleNames] = useState([]);
 
     async function handleChange(value: any) {
         await axios.get(process.env.REACT_APP_CYCLOPS_CTRL_HOST + `/modules/list`).then(res => {
@@ -40,20 +44,6 @@ const Modules = () => {
         namespaces.push(<Select.Option key={namespace.name}>{namespace.name}</Select.Option>)
     })
 
-    const data = [{}];
-    allData.map((module: any) => {
-        data.push({
-            name: module.name,
-            imageName: module.image_name,
-            template: module.template,
-            namespace: module.namespace,
-            replicas: module.replicas,
-            healthy: module.healthy,
-        })
-        return data;
-    });
-
-    const [dataSource, setDataSource] = useState(data);
     const [value, setValue] = useState('');
 
     const handleClick = () => {
@@ -62,6 +52,19 @@ const Modules = () => {
 
     const handleClickNew = () => {
         history('/new-app')
+    }
+
+    const handleSearch = (event: any) => {
+        // Access input value
+        const query = event.target.value;
+        // Create copy of item list
+        var updatedList = [...allData];
+        // Include all elements which includes the search query
+        updatedList = updatedList.filter((module: any) => {
+            return module.name.toLowerCase().indexOf(query.toLowerCase()) !== -1;
+        });
+        // Trigger render with updated values
+        setFilteredData(updatedList);
     }
 
     return (
@@ -78,19 +81,17 @@ const Modules = () => {
             </Row>
             <Row gutter={[40, 0]}>
                 <Col span={18}>
-                    <Select
-                        mode="tags"
-                        placeholder={"Select namespaces"}
+                    <Input
+                        placeholder={"Search modules"}
                         style={{width: '30%'}}
-                        onChange={handleChange}
+                        onChange={handleSearch}
                     >
-                        {namespaces}
-                    </Select>
+                    </Input>
                 </Col>
             </Row>
             <Divider orientationMargin="0"/>
             <Row gutter={[16, 16]}>
-                {allData.map((module:any, index) => (
+                {filteredData.map((module:any, index) => (
                     <Col key={index} span={6}>
                         <Card title={module.name}>
                             <Row gutter={[16, 16]}>
