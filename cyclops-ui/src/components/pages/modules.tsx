@@ -31,8 +31,6 @@ const Modules = () => {
         });
     }, []);
 
-    const [moduleNames, setModuleNames] = useState([]);
-
     async function handleChange(value: any) {
         await axios.get(process.env.REACT_APP_CYCLOPS_CTRL_HOST + `/modules/list`).then(res => {
             setAllData(res.data);
