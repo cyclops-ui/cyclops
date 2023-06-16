@@ -117,6 +117,27 @@ func (m *Modules) ResourcesForModule(ctx *gin.Context) {
 		return
 	}
 
+	module, err := m.kubernetesClient.GetModule(ctx.Param("name"))
+	if err != nil {
+		fmt.Println(err)
+		ctx.Status(http.StatusInternalServerError)
+		return
+	}
+
+	template, err := m.templates.GetConfig(module.Spec.TemplateRef)
+	if err != nil {
+		fmt.Println(err)
+		ctx.Status(http.StatusInternalServerError)
+		return
+	}
+
+	resources, err = m.kubernetesClient.GetDeletedResources(resources, *module, template)
+	if err != nil {
+		fmt.Println(err)
+		ctx.Status(http.StatusInternalServerError)
+		return
+	}
+
 	ctx.Header("Access-Control-Allow-Origin", "*")
 	ctx.JSON(http.StatusOK, resources)
 }

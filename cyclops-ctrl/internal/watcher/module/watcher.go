@@ -67,9 +67,9 @@ func (w Watcher) Start() {
 
 				for _, resource := range resources {
 					switch v := resource.(type) {
-					case dto.Deployment:
+					case *dto.Deployment:
 						w.kubernetesClient.Delete("deployments", v.Name)
-					case dto.Service:
+					case *dto.Service:
 						w.kubernetesClient.Delete("services", v.Name)
 					}
 				}

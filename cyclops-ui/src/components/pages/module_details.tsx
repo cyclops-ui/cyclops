@@ -11,7 +11,7 @@ import {
     Row, Space,
     Switch,
     Table,
-    Tag,
+    Tag, Tooltip,
     Typography
 } from 'antd';
 import {Icon} from '@ant-design/compatible';
@@ -22,10 +22,10 @@ import {Pie} from "@ant-design/charts";
 import {release} from "os";
 import {
     CheckCircleTwoTone,
-    CloseSquareTwoTone,
+    CloseSquareTwoTone, InfoCircleOutlined,
     LinkOutlined,
     MinusCircleOutlined,
-    PlusOutlined
+    PlusOutlined, WarningFilled
 } from "@ant-design/icons";
 import Link from "antd/lib/typography/Link";
 import AceEditor from "react-ace";
@@ -147,9 +147,28 @@ const ModuleDetails = () => {
 
     const resourceCollapses: {} | any = [];
 
+    const genExtra = (resource: any) => {
+        if (resource.deleted) {
+            return (
+                <Row gutter={[0, 8]}>
+                    <Col span={15} style={{display: 'flex', justifyContent: 'flex-start'}}>
+                        Service
+                    </Col>
+                    <Col span={9} style={{display: 'flex', justifyContent: 'flex-end'}}>
+                        <WarningFilled style={{color: 'red', right: "0px", fontSize: '20px'}}/>
+                    </Col>
+                </Row>
+            );
+        } else {
+            return (
+                <Row>Service</Row>
+            );
+        }
+    }
+
     resources.forEach((resource: any) => {
         switch (resource.kind) {
-            case "deployment":
+            case "Deployment":
                 let statusIcon = resource.status ? <CheckCircleTwoTone style={{fontSize: '200%', verticalAlign: 'middle'}} twoToneColor={'blue'} /> :
                     <CloseSquareTwoTone style={{fontSize: '200%', verticalAlign: 'middle'}} twoToneColor={'red'} />
                 resourceCollapses.push(
@@ -230,13 +249,28 @@ const ModuleDetails = () => {
                     </Collapse.Panel>
                 )
                 return;
-            case "service":
+            case "Service":
+                var deletedWarning = (
+                    <Col/>
+                )
+
+                if (resource.deleted) {
+                    deletedWarning = (
+                        <Col style={{paddingLeft: "5px"}}>
+                            <Tooltip title={"The resource is not a part of the Module and can be deleted"} trigger="click">
+                                <WarningFilled style={{color: 'red', right: "0px", fontSize: '20px'}}/>
+                            </Tooltip>
+                        </Col>
+                    )
+                }
+
                 resourceCollapses.push(
-                    <Collapse.Panel header={'Service'} key='service'>
+                    <Collapse.Panel header={genExtra(resource)} key='service' style={{color: "red"}}>
                         <Row>
                             <Col>
                                 <Title level={3}>{resource.name}</Title>
                             </Col>
+                            {deletedWarning}
                         </Row>
                         <Row>
                             <Title level={4}>{resource.namespace}</Title>

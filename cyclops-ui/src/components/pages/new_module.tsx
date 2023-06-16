@@ -208,9 +208,6 @@ const NewModule = () => {
                     <Form.Item initialValue={field.initialValue} name={field.name} id={field.name}
                                label={field.display_name}>
                         <Switch />
-                        <Tooltip title={field.description} trigger="click">
-                            <InfoCircleOutlined style={{paddingLeft: '10px'}}/>
-                        </Tooltip>
                     </Form.Item>
                 )
                 return;
