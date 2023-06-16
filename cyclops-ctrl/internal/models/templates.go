@@ -14,6 +14,7 @@ type Template struct {
 
 type Field struct {
 	Name         string `json:"name"`
+	Description  string `json:"description"`
 	Type         string `json:"type"`
 	DisplayName  string `json:"display_name"`
 	ManifestKey  string `json:"manifest_key"`

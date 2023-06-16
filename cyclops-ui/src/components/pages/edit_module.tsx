@@ -11,12 +11,12 @@ import {
     Row,
     Select,
     Space,
-    Switch,
+    Switch, Tooltip,
     Typography
 } from 'antd';
 import axios from 'axios';
 import {useNavigate} from 'react-router';
-import {LinkOutlined, MinusCircleOutlined, PlusOutlined} from "@ant-design/icons";
+import {InfoCircleOutlined, LinkOutlined, MinusCircleOutlined, PlusOutlined} from "@ant-design/icons";
 
 import AceEditor from "react-ace";
 
@@ -205,20 +205,29 @@ const EditModule = () => {
     config.fields.forEach((field: any) => {
         switch (field.type) {
             case "string":
-                console.log(module.values);
-                console.log(field.name)
                 formFields.push(
                     <Form.Item initialValue={field.initialValue} name={field.name} id={field.name}
                                label={field.display_name}>
-                        <Input/>
+                        <Input addonAfter={
+                            <Tooltip title={field.description} trigger="click">
+                                <InfoCircleOutlined/>
+                            </Tooltip>
+                        }/>
                     </Form.Item>
                 )
                 return;
             case "number":
                 formFields.push(
-                    <Form.Item initialValue={field.initialValue} name={field.name} id={field.name}
-                               label={field.display_name}>
-                        <InputNumber/>
+                    <Form.Item initialValue={field.initialValue} name={field.name} id={field.name} label={
+                        <Tooltip title={field.description} trigger="click">
+                            {field.display_name}
+                        </Tooltip>
+                    }>
+                        <InputNumber style={{width: '100%'}} addonAfter={
+                            <Tooltip title={field.description} trigger="click">
+                                <InfoCircleOutlined/>
+                            </Tooltip>
+                        }/>
                     </Form.Item>
                 )
                 return;
@@ -226,7 +235,10 @@ const EditModule = () => {
                 formFields.push(
                     <Form.Item initialValue={field.initialValue} name={field.name} id={field.name}
                                label={field.display_name}>
-                        <Switch/>
+                        <Switch />
+                        <Tooltip title={field.description} trigger="click">
+                            <InfoCircleOutlined style={{paddingLeft: '10px'}}/>
+                        </Tooltip>
                     </Form.Item>
                 )
                 return;

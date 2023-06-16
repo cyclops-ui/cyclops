@@ -12,11 +12,12 @@ import {
     Select,
     Space,
     Switch,
-    Typography
+    Typography,
+    Tooltip
 } from 'antd';
 import axios from 'axios';
 import {useNavigate} from 'react-router';
-import {MinusCircleOutlined, PlusOutlined} from "@ant-design/icons";
+import {MinusCircleOutlined, PlusOutlined, InfoCircleOutlined} from "@ant-design/icons";
 
 import "ace-builds/src-noconflict/mode-java";
 import "ace-builds/src-noconflict/theme-github";
@@ -179,15 +180,26 @@ const NewModule = () => {
                 formFields.push(
                     <Form.Item initialValue={field.initialValue} name={field.name} id={field.name}
                                label={field.display_name}>
-                        <Input/>
+                        <Input addonAfter={
+                            <Tooltip title={field.description} trigger="click">
+                                <InfoCircleOutlined/>
+                            </Tooltip>
+                        }/>
                     </Form.Item>
                 )
                 return;
             case "number":
                 formFields.push(
-                    <Form.Item initialValue={field.initialValue} name={field.name} id={field.name}
-                               label={field.display_name}>
-                        <InputNumber/>
+                    <Form.Item initialValue={field.initialValue} name={field.name} id={field.name} label={
+                        <Tooltip title={field.description} trigger="click">
+                            {field.display_name}
+                        </Tooltip>
+                    }>
+                        <InputNumber style={{width: '100%'}} addonAfter={
+                            <Tooltip title={field.description} trigger="click">
+                                <InfoCircleOutlined/>
+                            </Tooltip>
+                        }/>
                     </Form.Item>
                 )
                 return;
@@ -195,7 +207,10 @@ const NewModule = () => {
                 formFields.push(
                     <Form.Item initialValue={field.initialValue} name={field.name} id={field.name}
                                label={field.display_name}>
-                        <Switch/>
+                        <Switch />
+                        <Tooltip title={field.description} trigger="click">
+                            <InfoCircleOutlined style={{paddingLeft: '10px'}}/>
+                        </Tooltip>
                     </Form.Item>
                 )
                 return;
