@@ -13,6 +13,7 @@ func HelmSchemaToFields(schema helm.Schema) []models.Field {
 	for name, property := range schema.Properties {
 		fields = append(fields, models.Field{
 			Name:        name,
+			Description: property.Description,
 			Type:        mapHelmPropertyTypeToFieldType(property.Type),
 			DisplayName: name,
 			ManifestKey: name,
