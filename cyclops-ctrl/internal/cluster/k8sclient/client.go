@@ -5,10 +5,7 @@ import (
 	"context"
 	"flag"
 	"fmt"
-	"os"
-	"os/exec"
-	"path/filepath"
-
+	"io"
 	v12 "k8s.io/api/apps/v1"
 	"k8s.io/api/autoscaling/v1"
 	apiv1 "k8s.io/api/core/v1"
@@ -20,6 +17,9 @@ import (
 	"k8s.io/client-go/rest"
 	"k8s.io/client-go/tools/clientcmd"
 	"k8s.io/client-go/util/homedir"
+	"os"
+	"os/exec"
+	"path/filepath"
 
 	"github.com/cyclops-ui/cycops-ctrl/internal/cluster/v1alpha1"
 )
@@ -169,6 +169,45 @@ func (k *KubernetesClient) GetPods(namespace, name string) ([]apiv1.Pod, error) 
 	}
 
 	return podList.Items, err
+}
+
+func (k *KubernetesClient) GetPodLogs(namespace, container, name string) ([]string, error) {
+	count := int64(100)
+	podLogOptions := apiv1.PodLogOptions{
+		Container: container,
+		TailLines: &count,
+	}
+	podClient := k.clientset.CoreV1().Pods(namespace).GetLogs(name, &podLogOptions)
+	stream, err := podClient.Stream(context.Background())
+
+	if err != nil {
+		return nil, err
+	}
+
+	defer func(stream io.ReadCloser) {
+		err := stream.Close()
+		if err != nil {
+
+		}
+	}(stream)
+
+	var logs []string
+	for {
+		buf := make([]byte, 2000)
+		numBytes, err := stream.Read(buf)
+		if err == io.EOF {
+			break
+		}
+		if err != nil {
+			return nil, err
+		}
+		if numBytes == 0 {
+			continue
+		}
+		logs = append(logs, string(buf[:numBytes]))
+	}
+
+	return logs, nil
 }
 
 func (k *KubernetesClient) GetAllNamespacePods() ([]apiv1.Pod, error) {

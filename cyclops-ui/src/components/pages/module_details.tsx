@@ -10,7 +10,7 @@ import {
     Modal,
     Row, Space,
     Switch,
-    Table,
+    Table, Tabs, TabsProps,
     Tag,
     Typography
 } from 'antd';
@@ -30,6 +30,7 @@ import {
 import Link from "antd/lib/typography/Link";
 import AceEditor from "react-ace";
 import { formatDistanceToNow } from 'date-fns';
+import {CodeBlock} from "react-code-blocks";
 
 const {Title, Text} = Typography;
 
@@ -62,6 +63,10 @@ const ModuleDetails = () => {
         name: "",
         namespace: "",
     })
+    const [logsModal, setLogsModal] = useState({
+        on: false
+    })
+    const [logs, setLogs] = useState('');
     const [loading, setLoading] = useState(false);
     const [deleteName, setDeleteName] = useState("");
     const [resources, setResources] = useState([]);
@@ -77,6 +82,26 @@ const ModuleDetails = () => {
             }
         }
     });
+    const [logTabs, setLogTabs] = useState([]);
+
+    const items: TabsProps['items'] = [
+        {
+            key: '1',
+            label: `Tab 1`,
+            children: `Content of Tab Pane 1`,
+        },
+        {
+            key: '2',
+            label: `Tab 2`,
+            children: `Content of Tab Pane 2`,
+        },
+        {
+            key: '3',
+            label: `Tab 3`,
+            children: `Content of Tab Pane 3`,
+        },
+    ];
+
     let {moduleName} = useParams();
     useEffect(() => {
         axios.get(process.env.REACT_APP_CYCLOPS_CTRL_HOST + `/modules/` + moduleName).then(res => {
@@ -109,6 +134,12 @@ const ModuleDetails = () => {
         })
     };
 
+    const handleCancelLogs = () => {
+        setLogsModal({
+            on: false
+        })
+    };
+
     const handleCancel = () => {
         setLoading(false);
     };
@@ -126,6 +157,10 @@ const ModuleDetails = () => {
 
         return "{}"
     }
+
+    const getLogs = () => {
+        return logs; // Return the stored logs
+    };
 
     const deleteDeployment = () => {
         axios.delete(process.env.REACT_APP_CYCLOPS_CTRL_HOST + `/modules/` + moduleName).then(res => {
@@ -221,6 +256,26 @@ const ModuleDetails = () => {
                                                         );
                                                     })
                                                 }
+                                            </>
+                                        )}
+                                    />
+                                    <Table.Column
+                                        title='Logs'
+                                        width='15%'
+                                        render={ pod => (
+                                            <>
+                                                <Button onClick={function () {
+                                                    axios.get(process.env.REACT_APP_CYCLOPS_CTRL_HOST + '/resources/pods/' + resource.namespace + '/' + pod.name + '/' + pod.containers[0].name + '/logs').then(res => {
+                                                        var log = ""
+                                                        res.data.forEach((s :string) => { log += s })
+                                                        setLogs(log);
+                                                    });
+                                                    setLogTabs([
+                                                    ]);
+                                                    setLogsModal({
+                                                        on: true
+                                                    })
+                                                }} block>View Logs</Button>
                                             </>
                                         )}
                                     />
@@ -342,6 +397,15 @@ const ModuleDetails = () => {
                 width={'40%'}
             >
                 <AceEditor style={{width: "100%"}} mode={"sass"} value={getManifest()} readOnly={true} />
+            </Modal>
+            <Modal
+                title="Logs"
+                visible={logsModal.on}
+                onCancel={handleCancelLogs}
+                width={'40%'}
+            >
+                {/*<Tabs defaultActiveKey="1" items={items} onChange={onChange} />;*/}
+                <AceEditor style={{width: "100%"}} mode={"sass"} value={logs} readOnly={true} />
             </Modal>
         </div>
     );
