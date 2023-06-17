@@ -86,6 +86,8 @@ func HelmTemplate(module v1alpha1.Module, moduleTemplate models.Template) (strin
 			values[value.Name] = asBool
 		case "string":
 			values[value.Name] = value.Value
+		case "number":
+			values[value.Name] = value.Value
 		}
 	}
 
