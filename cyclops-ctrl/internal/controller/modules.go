@@ -61,6 +61,25 @@ func (m *Modules) DeleteModule(ctx *gin.Context) {
 	ctx.Status(http.StatusOK)
 }
 
+func (m *Modules) DeleteModuleResource(ctx *gin.Context) {
+	var request dto.DeleteResource
+	if err := ctx.BindJSON(&request); err != nil {
+		fmt.Println("error binding request", request)
+		ctx.Status(http.StatusBadRequest)
+		return
+	}
+
+	err := m.kubernetesClient.DeleteV2(&request)
+	if err != nil {
+		fmt.Println(err)
+		ctx.Status(http.StatusInternalServerError)
+		return
+	}
+
+	ctx.Header("Access-Control-Allow-Origin", "*")
+	ctx.Status(http.StatusOK)
+}
+
 func (m *Modules) CreateModule(ctx *gin.Context) {
 	var request dto.Module
 	if err := ctx.BindJSON(&request); err != nil {
@@ -110,13 +129,6 @@ func (m *Modules) UpdateModule(ctx *gin.Context) {
 }
 
 func (m *Modules) ResourcesForModule(ctx *gin.Context) {
-	resources, err := m.kubernetesClient.GetResourcesForModule(ctx.Param("name"))
-	if err != nil {
-		fmt.Println(err)
-		ctx.Status(http.StatusInternalServerError)
-		return
-	}
-
 	module, err := m.kubernetesClient.GetModule(ctx.Param("name"))
 	if err != nil {
 		fmt.Println(err)
@@ -125,6 +137,13 @@ func (m *Modules) ResourcesForModule(ctx *gin.Context) {
 	}
 
 	template, err := m.templates.GetConfig(module.Spec.TemplateRef)
+	if err != nil {
+		fmt.Println(err)
+		ctx.Status(http.StatusInternalServerError)
+		return
+	}
+
+	resources, err := m.kubernetesClient.GetResourcesForModule(ctx.Param("name"))
 	if err != nil {
 		fmt.Println(err)
 		ctx.Status(http.StatusInternalServerError)

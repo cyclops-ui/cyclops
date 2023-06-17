@@ -94,8 +94,6 @@ const ModuleDetails = () => {
         }, 2000);
     }, []);
 
-    const hashCode = (s: string) => Math.abs(s.split('').reduce((a,b) => (((a << 5) - a) + b.charCodeAt(0))|0, 0))
-
     const changeDeleteName = (e: any) => {
         setDeleteName(e.target.value)
     }
@@ -152,7 +150,7 @@ const ModuleDetails = () => {
             return (
                 <Row gutter={[0, 8]}>
                     <Col span={15} style={{display: 'flex', justifyContent: 'flex-start'}}>
-                        Service
+                        {resource.kind}
                     </Col>
                     <Col span={9} style={{display: 'flex', justifyContent: 'flex-end'}}>
                         <WarningFilled style={{color: 'red', right: "0px", fontSize: '20px'}}/>
@@ -161,7 +159,7 @@ const ModuleDetails = () => {
             );
         } else {
             return (
-                <Row>Service</Row>
+                <Row>{resource.kind}</Row>
             );
         }
     }
@@ -169,17 +167,50 @@ const ModuleDetails = () => {
     resources.forEach((resource: any) => {
         switch (resource.kind) {
             case "Deployment":
+                var deletedWarning = (<p/>)
+
+                if (resource.deleted) {
+                    deletedWarning = (
+                        <Tooltip title={"The resource is not a part of the Module and can be deleted"} trigger="click">
+                            <WarningFilled style={{color: 'red', right: "0px", fontSize: '30px', paddingRight: "5px"}}/>
+                        </Tooltip>
+                    )
+                }
+
+                var deleteButton = (<p/>)
+
+                if (resource.deleted) {
+                    deleteButton = (
+                        <Button onClick={function () {
+                            axios.delete(process.env.REACT_APP_CYCLOPS_CTRL_HOST + `/modules/` + moduleName + `/resources`, {
+                                    data: {
+                                        group: resource.group,
+                                        version: resource.version,
+                                        kind: resource.kind,
+                                        name: resource.name,
+                                        namespace: resource.namespace,
+                                    }
+                                }
+                            ).then(res => {
+
+                            });
+                        }} danger block>Delete</Button>
+                    )
+                }
+
                 let statusIcon = resource.status ? <CheckCircleTwoTone style={{fontSize: '200%', verticalAlign: 'middle'}} twoToneColor={'blue'} /> :
                     <CloseSquareTwoTone style={{fontSize: '200%', verticalAlign: 'middle'}} twoToneColor={'red'} />
                 resourceCollapses.push(
-                    <Collapse.Panel header={'Deployment'} key='deployment'>
+                    <Collapse.Panel header={genExtra(resource)} key='deployment'>
                         <Row>
                             <Col>
+                                {deletedWarning}
+                            </Col>
+                            <Col span={19}>
                                 <Title level={3}>{resource.name}</Title>
                             </Col>
-                            <Divider type="vertical" style={{ height: "100%" }} />
-                            <Col>
-                                {statusIcon}
+                            <Col span={4} style={{display: 'flex', justifyContent: 'flex-end'}}>
+                                {deleteButton}
                             </Col>
                         </Row>
                         <Row>
@@ -250,17 +281,34 @@ const ModuleDetails = () => {
                 )
                 return;
             case "Service":
-                var deletedWarning = (
-                    <Col/>
-                )
+                var deletedWarning = (<p/>)
 
                 if (resource.deleted) {
                     deletedWarning = (
-                        <Col style={{paddingLeft: "5px"}}>
                             <Tooltip title={"The resource is not a part of the Module and can be deleted"} trigger="click">
-                                <WarningFilled style={{color: 'red', right: "0px", fontSize: '20px'}}/>
+                                <WarningFilled style={{color: 'red', right: "0px", fontSize: '30px', paddingRight: "5px"}}/>
                             </Tooltip>
-                        </Col>
+                    )
+                }
+
+                var deleteButton = (<p/>)
+
+                if (resource.deleted) {
+                    deleteButton = (
+                        <Button onClick={function () {
+                            axios.delete(process.env.REACT_APP_CYCLOPS_CTRL_HOST + `/modules/` + moduleName + `/resources`, {
+                                    data: {
+                                        group: resource.group,
+                                        version: resource.version,
+                                        kind: resource.kind,
+                                        name: resource.name,
+                                        namespace: resource.namespace,
+                                    }
+                                }
+                            ).then(res => {
+
+                            });
+                        }} danger block>Delete</Button>
                     )
                 }
 
@@ -268,9 +316,14 @@ const ModuleDetails = () => {
                     <Collapse.Panel header={genExtra(resource)} key='service' style={{color: "red"}}>
                         <Row>
                             <Col>
+                                {deletedWarning}
+                            </Col>
+                            <Col span={19}>
                                 <Title level={3}>{resource.name}</Title>
                             </Col>
-                            {deletedWarning}
+                            <Col span={4} style={{display: 'flex', justifyContent: 'flex-end'}}>
+                                {deleteButton}
+                            </Col>
                         </Row>
                         <Row>
                             <Title level={4}>{resource.namespace}</Title>

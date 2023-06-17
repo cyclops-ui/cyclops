@@ -6,6 +6,9 @@ import (
 
 type Resource interface {
 	GetGroupVersionKind() string
+	GetGroup() string
+	GetVersion() string
+	GetKind() string
 	GetName() string
 	GetNamespace() string
 	GetDeleted() bool
@@ -27,6 +30,18 @@ type Deployment struct {
 
 func (d *Deployment) GetGroupVersionKind() string {
 	return d.Group + "/" + d.Version + ", Kind=" + d.Kind
+}
+
+func (d *Deployment) GetGroup() string {
+	return d.Group
+}
+
+func (d *Deployment) GetVersion() string {
+	return d.Version
+}
+
+func (d *Deployment) GetKind() string {
+	return d.Kind
 }
 
 func (d *Deployment) GetName() string {
@@ -59,6 +74,18 @@ type Service struct {
 
 func (s *Service) GetGroupVersionKind() string {
 	return s.Group + "/" + s.Version + ", Kind=" + s.Kind
+}
+
+func (s *Service) GetGroup() string {
+	return s.Group
+}
+
+func (s *Service) GetVersion() string {
+	return s.Version
+}
+
+func (s *Service) GetKind() string {
+	return s.Kind
 }
 
 func (s *Service) GetName() string {

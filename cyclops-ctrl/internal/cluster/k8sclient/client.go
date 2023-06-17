@@ -8,12 +8,15 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"strings"
 
+	"github.com/cyclops-ui/cycops-ctrl/internal/models/dto"
 	v12 "k8s.io/api/apps/v1"
 	"k8s.io/api/autoscaling/v1"
 	apiv1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/runtime/schema"
 	"k8s.io/client-go/discovery"
 	"k8s.io/client-go/dynamic"
 	"k8s.io/client-go/kubernetes"
@@ -203,4 +206,20 @@ func (k *KubernetesClient) GetDeploymentsYaml(name string, namespace string) (*b
 	command.Stdout = buff
 	command.Stderr = os.Stderr
 	return buff, command.Run()
+}
+
+func (k *KubernetesClient) DeleteV2(resource dto.Resource) error {
+	gvr := schema.GroupVersionResource{
+		Group:    resource.GetGroup(),
+		Version:  resource.GetVersion(),
+		Resource: strings.ToLower(resource.GetKind()) + "s",
+	}
+
+	fmt.Println()
+
+	return k.Dynamic.Resource(gvr).Namespace("default").Delete(
+		context.Background(),
+		resource.GetName(),
+		metav1.DeleteOptions{},
+	)
 }

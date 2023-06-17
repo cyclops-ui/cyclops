@@ -58,6 +58,7 @@ func (h *Handler) Start() error {
 	h.router.POST("/modules/new", modulesController.CreateModule)
 	h.router.POST("/modules/update", modulesController.UpdateModule)
 	h.router.GET("/modules/:name/resources", modulesController.ResourcesForModule)
+	h.router.DELETE("/modules/:name/resources", modulesController.DeleteModuleResource)
 	h.router.GET("/modules/:name/template", modulesController.Template)
 	h.router.GET("/modules/:name/helm-template", modulesController.HelmTemplate)
 	//h.router.POST("/modules/resources", modulesController.ModuleToResources)
