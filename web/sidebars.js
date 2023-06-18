@@ -40,7 +40,16 @@ const sidebars = {
       items: [
         'installation/prerequisites',
         'installation/install',
-        'installation/demo',
+        {
+          type: 'category',
+          label: 'Demo',
+          items: [
+            'installation/demo/new_module',
+            'installation/demo/module',
+            'installation/demo/edit_module',
+            'installation/demo/logs',
+          ],
+        }
       ],
     },
     {
