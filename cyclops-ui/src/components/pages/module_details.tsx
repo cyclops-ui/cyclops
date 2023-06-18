@@ -190,9 +190,15 @@ const ModuleDetails = () => {
 
     const onLogsTabsChange = (container: string) => {
         axios.get(window.__RUNTIME_CONFIG__.REACT_APP_CYCLOPS_CTRL_HOST + '/resources/pods/' + logsModal.namespace + '/' + logsModal.pod + '/' + container + '/logs').then(res => {
-            var log = ""
-            res.data.forEach((s :string) => { log += s })
-            setLogs(log);
+            if (res.data) {
+                var log = "";
+                res.data.forEach((s :string) => {
+                    log += s;
+                });
+                setLogs(log);
+            } else {
+                setLogs("No logs available");
+            }
         });
     }
 
@@ -332,14 +338,20 @@ const ModuleDetails = () => {
                                             <>
                                                 <Button onClick={function () {
                                                     axios.get(window.__RUNTIME_CONFIG__.REACT_APP_CYCLOPS_CTRL_HOST + '/resources/pods/' + resource.namespace + '/' + pod.name + '/' + pod.containers[0].name + '/logs').then(res => {
-                                                        var log = ""
-                                                        res.data.forEach((s :string) => { log += s })
-                                                        setLogs(log);
+                                                      if (res.data) {
+                                                            var log = "";
+                                                            res.data.forEach((s :string) => {
+                                                                log += s;
+                                                            });
+                                                            setLogs(log);
+                                                        } else {
+                                                            setLogs("No logs available");
+                                                        }
                                                     });
                                                     setLogsModal({
                                                         on: true,
                                                         namespace: resource.namespace,
-                                                        pod: pod .name,
+                                                        pod: pod.name,
                                                         containers: pod.containers
                                                     })
                                                 }} block>View Logs</Button>
@@ -447,7 +459,7 @@ const ModuleDetails = () => {
                     }
 
                     { module.template.name.length === 0 &&
-                        <Link aria-level={3} href={ module.template.git.repo + `/tree/master/` + module.template.git.path }>
+                        <Link aria-level={3} href={ module.template.git.repo + `/tree/main/` + module.template.git.path }>
                             <LinkOutlined/>
                             { module.template.name.length === 0 && ' Template ref' }
                         </Link>
