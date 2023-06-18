@@ -150,7 +150,7 @@ const ModuleDetails = () => {
     };
 
     const deleteDeployment = () => {
-        axios.delete(process.env.REACT_APP_CYCLOPS_CTRL_HOST + `/modules/` + moduleName).then(res => {
+        axios.delete(window.__RUNTIME_CONFIG__.REACT_APP_CYCLOPS_CTRL_HOST + `/modules/` + moduleName).then(res => {
             window.location.href = "/modules"
         });
     }
