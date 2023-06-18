@@ -162,12 +162,14 @@ spec:
     spec:
       containers:
         - name: cyclops-ui
-          image: petarcvit223/cyclops-ui:v0.0.1
+          image: petarcvit223/cyclops-ui:v0.0.4
           ports:
-            - containerPort: 3000
+            - containerPort: 80
           env:
             - name: REACT_APP_CYCLOPS_CTRL_HOST
               value: http://localhost:8080 # http://cyclops-ctrl.cyclops:8080
+            - name: NODE_ENV
+              value: production
             - name: NODE_OPTIONS
               value: --openssl-legacy-provider
       restartPolicy: Always
@@ -181,7 +183,7 @@ spec:
   type: LoadBalancer
   ports:
     - port: 3000
-      targetPort: 3000
+      targetPort: 80
       protocol: TCP
   selector:
     app: cyclops-ui
@@ -206,7 +208,7 @@ spec:
       serviceAccountName: cyclops-ctrl
       containers:
         - name: cyclops-ctrl
-          image: petarcvit223/cyclops-ctrl:v0.0.6
+          image: petarcvit223/cyclops-ctrl:v0.0.7
           ports:
             - containerPort: 8080
           env:

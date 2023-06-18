@@ -25,11 +25,13 @@ const SideNav = () => {
     }
     return (
         <div>
-            <div style={{top: "0", height: "32px", width: "100%", margin: "1rem", display: "inline-flex", alignContent: "center"}}>
-                <h2 style={{verticalAlign: "center", color: "white", textAlign: "center", textSizeAdjust: "120%"}}><b>Cyclops</b></h2>{'       '}
-                <img  style={{height: "120%", objectFit: "contain", marginLeft: "6px"}}
-                     src={require("./KIKLOPcic.png")} alt="Cyclops" />;
-            </div>
+            <a href={'/'}>
+                <div style={{top: "0", height: "32px", width: "100%", margin: "1rem", display: "inline-flex", alignContent: "center"}}>
+                    <h2 style={{verticalAlign: "center", color: "white", textAlign: "center", textSizeAdjust: "120%"}}><b>Cyclops</b></h2>{'       '}
+                    <img  style={{height: "120%", objectFit: "contain", marginLeft: "6px"}}
+                         src={require("./KIKLOPcic.png")} alt="Cyclops" />
+                </div>
+            </a>
             <Menu theme="dark" mode="inline" defaultSelectedKeys={['1']}>
                 <Menu.Item key="2" onClick={handleModulesClick}>
                     <AppstoreAddOutlined />

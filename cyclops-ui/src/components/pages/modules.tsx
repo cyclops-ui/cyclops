@@ -15,11 +15,7 @@ const Modules = () => {
     const [filteredData, setFilteredData] = useState([]);
     const [namespacesState, setNamespacesState] = useState([]);
     useEffect(() => {
-        console.log(process.env)
-
-        console.log(process.env.REACT_APP_CYCLOPS_CTRL_HOST);
-
-        axios.get(process.env.REACT_APP_CYCLOPS_CTRL_HOST + `/modules/list`).then(res => {
+        axios.get(window.__RUNTIME_CONFIG__.REACT_APP_CYCLOPS_CTRL_HOST + `/modules/list`).then(res => {
             console.log(res.data)
             setAllData(res.data);
             setFilteredData(res.data);
@@ -27,7 +23,7 @@ const Modules = () => {
     }, []);
 
     async function handleChange(value: any) {
-        await axios.get(process.env.REACT_APP_CYCLOPS_CTRL_HOST + `/modules/list`).then(res => {
+        await axios.get(window.__RUNTIME_CONFIG__.REACT_APP_CYCLOPS_CTRL_HOST + `/modules/list`).then(res => {
             setAllData(res.data);
         });
     }

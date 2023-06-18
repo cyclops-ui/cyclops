@@ -21,6 +21,7 @@
     "jsx": "preserve"
   },
   "include": [
-    "src"
+    "src",
+    "src/types"
   ]
 }

@@ -90,19 +90,19 @@ const ModuleDetails = () => {
 
     let {moduleName} = useParams();
     useEffect(() => {
-        axios.get(process.env.REACT_APP_CYCLOPS_CTRL_HOST + `/modules/` + moduleName).then(res => {
+        axios.get(window.__RUNTIME_CONFIG__.REACT_APP_CYCLOPS_CTRL_HOST + `/modules/` + moduleName).then(res => {
             setModule(res.data);
         });
 
-        axios.get(process.env.REACT_APP_CYCLOPS_CTRL_HOST + `/modules/` + moduleName + `/resources`).then(res => {
+        axios.get(window.__RUNTIME_CONFIG__.REACT_APP_CYCLOPS_CTRL_HOST + `/modules/` + moduleName + `/resources`).then(res => {
             setResources(res.data);
         });
 
         setInterval(function () {
-            axios.get(process.env.REACT_APP_CYCLOPS_CTRL_HOST + `/modules/` + moduleName + `/resources`).then(res => {
+            axios.get(window.__RUNTIME_CONFIG__.REACT_APP_CYCLOPS_CTRL_HOST + `/modules/` + moduleName + `/resources`).then(res => {
                 setResources(res.data);
             });
-        }, 2000);
+        }, 5000);
     }, []);
 
     const changeDeleteName = (e: any) => {
@@ -150,7 +150,7 @@ const ModuleDetails = () => {
     };
 
     const deleteDeployment = () => {
-        axios.delete(process.env.REACT_APP_CYCLOPS_CTRL_HOST + `/modules/` + moduleName).then(res => {
+        axios.delete(window.__RUNTIME_CONFIG__.REACT_APP_CYCLOPS_CTRL_HOST + `/modules/` + moduleName).then(res => {
             window.location.href = "/modules"
         });
     }
@@ -189,7 +189,7 @@ const ModuleDetails = () => {
     }
 
     const onLogsTabsChange = (container: string) => {
-        axios.get(process.env.REACT_APP_CYCLOPS_CTRL_HOST + '/resources/pods/' + logsModal.namespace + '/' + logsModal.pod + '/' + container + '/logs').then(res => {
+        axios.get(window.__RUNTIME_CONFIG__.REACT_APP_CYCLOPS_CTRL_HOST + '/resources/pods/' + logsModal.namespace + '/' + logsModal.pod + '/' + container + '/logs').then(res => {
             var log = ""
             res.data.forEach((s :string) => { log += s })
             setLogs(log);
@@ -233,7 +233,7 @@ const ModuleDetails = () => {
                 if (resource.deleted) {
                     deleteButton = (
                         <Button onClick={function () {
-                            axios.delete(process.env.REACT_APP_CYCLOPS_CTRL_HOST + `/modules/` + moduleName + `/resources`, {
+                            axios.delete(window.__RUNTIME_CONFIG__.REACT_APP_CYCLOPS_CTRL_HOST + `/modules/` + moduleName + `/resources`, {
                                     data: {
                                         group: resource.group,
                                         version: resource.version,
@@ -331,7 +331,7 @@ const ModuleDetails = () => {
                                         render={ pod => (
                                             <>
                                                 <Button onClick={function () {
-                                                    axios.get(process.env.REACT_APP_CYCLOPS_CTRL_HOST + '/resources/pods/' + resource.namespace + '/' + pod.name + '/' + pod.containers[0].name + '/logs').then(res => {
+                                                    axios.get(window.__RUNTIME_CONFIG__.REACT_APP_CYCLOPS_CTRL_HOST + '/resources/pods/' + resource.namespace + '/' + pod.name + '/' + pod.containers[0].name + '/logs').then(res => {
                                                         var log = ""
                                                         res.data.forEach((s :string) => { log += s })
                                                         setLogs(log);
@@ -368,7 +368,7 @@ const ModuleDetails = () => {
                 if (resource.deleted) {
                     deleteButton = (
                         <Button onClick={function () {
-                            axios.delete(process.env.REACT_APP_CYCLOPS_CTRL_HOST + `/modules/` + moduleName + `/resources`, {
+                            axios.delete(window.__RUNTIME_CONFIG__.REACT_APP_CYCLOPS_CTRL_HOST + `/modules/` + moduleName + `/resources`, {
                                     data: {
                                         group: resource.group,
                                         version: resource.version,

@@ -19,9 +19,6 @@ import axios from 'axios';
 import {useNavigate} from 'react-router';
 import {MinusCircleOutlined, PlusOutlined, InfoCircleOutlined} from "@ant-design/icons";
 
-import "ace-builds/src-noconflict/mode-java";
-import "ace-builds/src-noconflict/theme-github";
-import "ace-builds/src-noconflict/ext-language_tools";
 import {useParams} from "react-router-dom";
 
 const {TextArea} = Input;
@@ -83,7 +80,7 @@ const NewModule = () => {
             "template": config.name,
         })
 
-        axios.post(process.env.REACT_APP_CYCLOPS_CTRL_HOST + `/modules/new`,
+        axios.post(window.__RUNTIME_CONFIG__.REACT_APP_CYCLOPS_CTRL_HOST + `/modules/new`,
             {
                 name: values["cyclops_module_name"],
                 values: values,
@@ -121,7 +118,7 @@ const NewModule = () => {
             manifest: "",
         })
 
-        axios.get(process.env.REACT_APP_CYCLOPS_CTRL_HOST + `/configuration/` + value + `/versions`).then(res => {
+        axios.get(window.__RUNTIME_CONFIG__.REACT_APP_CYCLOPS_CTRL_HOST + `/configuration/` + value + `/versions`).then(res => {
             let configVersions = res.data.sort(function (a: string, b: string) {
                 if (a === "latest") {
                     return -1
@@ -150,13 +147,13 @@ const NewModule = () => {
     }
 
     const handleVersionChange = (value: any) => {
-        axios.get(process.env.REACT_APP_CYCLOPS_CTRL_HOST + `/create-config/` + config.name + `?version=` + value).then(res => {
+        axios.get(window.__RUNTIME_CONFIG__.REACT_APP_CYCLOPS_CTRL_HOST + `/create-config/` + config.name + `?version=` + value).then(res => {
             setConfig(res.data);
         });
     }
 
     const loadTemplate = () => {
-        axios.get(process.env.REACT_APP_CYCLOPS_CTRL_HOST + `/templates/git?repo=` + gitTemplate.repo + `&path=` + gitTemplate.path).then(res => {
+        axios.get(window.__RUNTIME_CONFIG__.REACT_APP_CYCLOPS_CTRL_HOST + `/templates/git?repo=` + gitTemplate.repo + `&path=` + gitTemplate.path).then(res => {
             setConfig(res.data);
 
             setError({

@@ -76,7 +76,7 @@ const EditModule = () => {
     let {moduleName} = useParams();
 
     useEffect(() => {
-        axios.get(process.env.REACT_APP_CYCLOPS_CTRL_HOST + `/modules/` + moduleName).then(res => {
+        axios.get(window.__RUNTIME_CONFIG__.REACT_APP_CYCLOPS_CTRL_HOST + `/modules/` + moduleName).then(res => {
             setModule({
                 name: res.data.name,
                 values: res.data.values,
@@ -86,11 +86,11 @@ const EditModule = () => {
             form.setFieldsValue(res.data.values);
 
             if (module.name.length !== 0 ) {
-                axios.get(process.env.REACT_APP_CYCLOPS_CTRL_HOST + `/create-config/` + res.data.template + `?version=` + res.data.version).then(res => {
+                axios.get(window.__RUNTIME_CONFIG__.REACT_APP_CYCLOPS_CTRL_HOST + `/create-config/` + res.data.template + `?version=` + res.data.version).then(res => {
                     setConfig(res.data);
                 });
             } else {
-                axios.get(process.env.REACT_APP_CYCLOPS_CTRL_HOST + `/templates/git?repo=` + res.data.template.git.repo + `&path=` + res.data.template.git.path).then(res => {
+                axios.get(window.__RUNTIME_CONFIG__.REACT_APP_CYCLOPS_CTRL_HOST + `/templates/git?repo=` + res.data.template.git.repo + `&path=` + res.data.template.git.path).then(res => {
                     setConfig(res.data);
                 }).catch(function (error) {
                     return
@@ -105,14 +105,14 @@ const EditModule = () => {
     })
 
     const handleVersionChange = (value: any) => {
-        axios.get(process.env.REACT_APP_CYCLOPS_CTRL_HOST + `/modules/` + module.name + `/template?version=` + value).then(res => {
+        axios.get(window.__RUNTIME_CONFIG__.REACT_APP_CYCLOPS_CTRL_HOST + `/modules/` + module.name + `/template?version=` + value).then(res => {
             setMigrateDiff(res.data);
         });
         setTargetVersion(value)
     }
 
     const getVersions = () => {
-        axios.get(process.env.REACT_APP_CYCLOPS_CTRL_HOST + `/configuration/` + module.template + `/versions`).then(res => {
+        axios.get(window.__RUNTIME_CONFIG__.REACT_APP_CYCLOPS_CTRL_HOST + `/configuration/` + module.template + `/versions`).then(res => {
             let configVersions = res.data.sort(function(a: string, b: string){
                 if (a === "latest") {return -1}
                 if (b === "latest") {return 1}
@@ -139,7 +139,7 @@ const EditModule = () => {
 
         values["cyclops_module_name"] = module.name;
 
-        axios.post(process.env.REACT_APP_CYCLOPS_CTRL_HOST + `/modules/update`,
+        axios.post(window.__RUNTIME_CONFIG__.REACT_APP_CYCLOPS_CTRL_HOST + `/modules/update`,
             {
                 "values": values,
                 "name": values["cyclops_module_name"],
@@ -161,7 +161,7 @@ const EditModule = () => {
     const handleMigrate = () => {
         console.log(targetVersion)
 
-        axios.post(process.env.REACT_APP_CYCLOPS_CTRL_HOST + `/modules/update`,
+        axios.post(window.__RUNTIME_CONFIG__.REACT_APP_CYCLOPS_CTRL_HOST + `/modules/update`,
             {
                 "values": module.values,
                 "name": module.name,
@@ -187,7 +187,7 @@ const EditModule = () => {
     };
 
     const handleChange = (value: any) => {
-        axios.get(process.env.REACT_APP_CYCLOPS_CTRL_HOST + `/create-config/` + value).then(res => {
+        axios.get(window.__RUNTIME_CONFIG__.REACT_APP_CYCLOPS_CTRL_HOST + `/create-config/` + value).then(res => {
             setConfig(res.data);
         });
     }
