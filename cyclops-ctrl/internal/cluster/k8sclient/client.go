@@ -60,7 +60,7 @@ func createLocalClient() (*KubernetesClient, error) {
 		}
 		flag.Parse()
 
-		fmt.Println("loading local config", *kubeconfig)
+		fmt.Println("loading local config")
 
 		config, err = clientcmd.BuildConfigFromFlags("", *kubeconfig)
 		if err != nil {
@@ -194,12 +194,6 @@ func (k *KubernetesClient) GetNamespaces() ([]apiv1.Namespace, error) {
 	return namespaces.Items, err
 }
 
-func (k *KubernetesClient) Delete(kind, name string) error {
-	cmd := exec.Command(kubectl, "delete", kind, name)
-	cmd.Stdout = os.Stdout
-	return cmd.Run()
-}
-
 func (k *KubernetesClient) GetDeploymentsYaml(name string, namespace string) (*bytes.Buffer, error) {
 	buff := new(bytes.Buffer)
 	command := exec.Command(kubectl, "get", "deployments", name, "-n", namespace, "-o", "yaml")
@@ -208,14 +202,12 @@ func (k *KubernetesClient) GetDeploymentsYaml(name string, namespace string) (*b
 	return buff, command.Run()
 }
 
-func (k *KubernetesClient) DeleteV2(resource dto.Resource) error {
+func (k *KubernetesClient) Delete(resource dto.Resource) error {
 	gvr := schema.GroupVersionResource{
 		Group:    resource.GetGroup(),
 		Version:  resource.GetVersion(),
 		Resource: strings.ToLower(resource.GetKind()) + "s",
 	}
-
-	fmt.Println()
 
 	return k.Dynamic.Resource(gvr).Namespace("default").Delete(
 		context.Background(),

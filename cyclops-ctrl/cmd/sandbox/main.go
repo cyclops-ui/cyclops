@@ -4,7 +4,6 @@ import (
 	"bufio"
 	"bytes"
 	"encoding/json"
-	"fmt"
 	"io"
 	path2 "path"
 	"strings"
@@ -19,7 +18,6 @@ import (
 )
 
 func main() {
-	fmt.Println(loadFromGit("https://github.com/cyclops-ui/templates", "application"))
 }
 
 func loadFromGit(repoURL, path string) (models.Template, error) {

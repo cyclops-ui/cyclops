@@ -69,7 +69,7 @@ func (m *Modules) DeleteModuleResource(ctx *gin.Context) {
 		return
 	}
 
-	err := m.kubernetesClient.DeleteV2(&request)
+	err := m.kubernetesClient.Delete(&request)
 	if err != nil {
 		fmt.Println(err)
 		ctx.Status(http.StatusInternalServerError)

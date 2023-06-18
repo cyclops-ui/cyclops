@@ -10,7 +10,6 @@ import (
 	"k8s.io/apimachinery/pkg/watch"
 
 	"github.com/cyclops-ui/cycops-ctrl/internal/cluster/k8sclient"
-	"github.com/cyclops-ui/cycops-ctrl/internal/models/dto"
 	"github.com/cyclops-ui/cycops-ctrl/internal/storage/templates"
 )
 
@@ -44,7 +43,7 @@ func (w Watcher) Start() {
 		case m := <-w.watch:
 			module, ok := m.Object.(*unstructured.Unstructured)
 			if !ok {
-				fmt.Println("Could not object into module")
+				fmt.Println("Could not cast object into module")
 				continue
 			}
 
@@ -70,12 +69,7 @@ func (w Watcher) Start() {
 				}
 
 				for _, resource := range resources {
-					switch v := resource.(type) {
-					case *dto.Deployment:
-						w.kubernetesClient.Delete("deployments", v.Name)
-					case *dto.Service:
-						w.kubernetesClient.Delete("services", v.Name)
-					}
+					w.kubernetesClient.Delete(resource)
 				}
 
 				if err := w.kubernetesClient.DeleteModule(module.GetName()); err != nil {
