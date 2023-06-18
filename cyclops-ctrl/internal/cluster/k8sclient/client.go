@@ -9,12 +9,15 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"strings"
 
+	"github.com/cyclops-ui/cycops-ctrl/internal/models/dto"
 	v12 "k8s.io/api/apps/v1"
 	"k8s.io/api/autoscaling/v1"
 	apiv1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/runtime/schema"
 	"k8s.io/client-go/discovery"
 	"k8s.io/client-go/dynamic"
 	"k8s.io/client-go/kubernetes"
@@ -58,7 +61,7 @@ func createLocalClient() (*KubernetesClient, error) {
 		}
 		flag.Parse()
 
-		fmt.Println("loading local config", *kubeconfig)
+		fmt.Println("loading local config")
 
 		config, err = clientcmd.BuildConfigFromFlags("", *kubeconfig)
 		if err != nil {
@@ -231,16 +234,24 @@ func (k *KubernetesClient) GetNamespaces() ([]apiv1.Namespace, error) {
 	return namespaces.Items, err
 }
 
-func (k *KubernetesClient) Delete(kind, name string) error {
-	cmd := exec.Command(kubectl, "delete", kind, name)
-	cmd.Stdout = os.Stdout
-	return cmd.Run()
-}
-
 func (k *KubernetesClient) GetDeploymentsYaml(name string, namespace string) (*bytes.Buffer, error) {
 	buff := new(bytes.Buffer)
 	command := exec.Command(kubectl, "get", "deployments", name, "-n", namespace, "-o", "yaml")
 	command.Stdout = buff
 	command.Stderr = os.Stderr
 	return buff, command.Run()
+}
+
+func (k *KubernetesClient) Delete(resource dto.Resource) error {
+	gvr := schema.GroupVersionResource{
+		Group:    resource.GetGroup(),
+		Version:  resource.GetVersion(),
+		Resource: strings.ToLower(resource.GetKind()) + "s",
+	}
+
+	return k.Dynamic.Resource(gvr).Namespace("default").Delete(
+		context.Background(),
+		resource.GetName(),
+		metav1.DeleteOptions{},
+	)
 }

@@ -7,10 +7,15 @@ import (
 	"errors"
 	"flag"
 	"fmt"
-	"github.com/joho/godotenv"
 	"gitops/internal/k8s/v1alpha1"
 	v1alpha12 "gitops/internal/models/crd/v1alpha1"
 	"gitops/internal/models/dto"
+	"os"
+	"os/exec"
+	"path/filepath"
+	"time"
+
+	"github.com/joho/godotenv"
 	"gopkg.in/yaml.v2"
 	v12 "k8s.io/api/apps/v1"
 	"k8s.io/api/autoscaling/v1"
@@ -22,10 +27,6 @@ import (
 	"k8s.io/client-go/rest"
 	"k8s.io/client-go/tools/clientcmd"
 	"k8s.io/client-go/util/homedir"
-	"os"
-	"os/exec"
-	"path/filepath"
-	"time"
 )
 
 const (
@@ -76,8 +77,6 @@ func createLocalClient() (*KubernetesClient, error) {
 	}
 	flag.Parse()
 
-	fmt.Println("loading local config", *kubeconfig)
-
 	config, err := clientcmd.BuildConfigFromFlags("", *kubeconfig)
 	if err != nil {
 		return nil, err
@@ -123,14 +122,11 @@ func Watch(moduleset *v1alpha1.ExampleV1Alpha1Client) {
 			if event.Type == "" {
 				continue
 			}
-
-			fmt.Println(event.Type, event.Object)
 		}
 	}
 }
 
 func (k *KubernetesClient) KubectlApply(manifest string) error {
-	fmt.Println(manifest)
 	f, err := os.Create("./tmp/manifest.yaml")
 	defer f.Close()
 	if err != nil {

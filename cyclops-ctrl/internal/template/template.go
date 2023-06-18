@@ -2,6 +2,7 @@ package template
 
 import (
 	"bytes"
+	"strconv"
 	"text/template"
 
 	"helm.sh/helm/v3/pkg/chart"
@@ -75,9 +76,19 @@ func HelmTemplate(module v1alpha1.Module, moduleTemplate models.Template) (strin
 		},
 	}
 
+	fields := templateFieldsMap(moduleTemplate)
+
 	values := make(chartutil.Values)
 	for _, value := range module.Spec.Values {
-		values[value.Name] = value.Value
+		switch fields[value.Name].Type {
+		case "boolean":
+			asBool, _ := strconv.ParseBool(value.Value)
+			values[value.Name] = asBool
+		case "string":
+			values[value.Name] = value.Value
+		case "number":
+			values[value.Name] = value.Value
+		}
 	}
 
 	top := make(chartutil.Values)
@@ -89,4 +100,14 @@ func HelmTemplate(module v1alpha1.Module, moduleTemplate models.Template) (strin
 	}
 
 	return out["all.yaml"], err
+}
+
+func templateFieldsMap(template models.Template) map[string]models.Field {
+	fields := make(map[string]models.Field)
+
+	for _, field := range template.Fields {
+		fields[field.Name] = field
+	}
+
+	return fields
 }

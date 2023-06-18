@@ -92,16 +92,7 @@ const EditModule = () => {
             } else {
                 axios.get(process.env.REACT_APP_CYCLOPS_CTRL_HOST + `/templates/git?repo=` + res.data.template.git.repo + `&path=` + res.data.template.git.path).then(res => {
                     setConfig(res.data);
-
-                    // setError({
-                    //     message: "",
-                    //     description: "",
-                    // });
-                    // setSuccessLoad(true);
                 }).catch(function (error) {
-                    // setError(error.response.data);
-                    // setSuccessLoad(false);
-
                     return
                 });
             }
@@ -232,13 +223,12 @@ const EditModule = () => {
                 )
                 return;
             case "boolean":
+                const map = new Map(Object.entries(module.values));
+                let checked = map.get(field.name) == "true" ? "checked" : "unchecked"
                 formFields.push(
                     <Form.Item initialValue={field.initialValue} name={field.name} id={field.name}
-                               label={field.display_name}>
+                               label={field.display_name} valuePropName={checked}>
                         <Switch />
-                        <Tooltip title={field.description} trigger="click">
-                            <InfoCircleOutlined style={{paddingLeft: '10px'}}/>
-                        </Tooltip>
                     </Form.Item>
                 )
                 return;
