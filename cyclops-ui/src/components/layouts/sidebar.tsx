@@ -35,10 +35,6 @@ const SideNav = () => {
                     <AppstoreAddOutlined />
                     <span> Modules</span>
                 </Menu.Item>
-                <Menu.Item key="4" onClick={handleFileClick}>
-                    <SettingOutlined />
-                    <span>Application templates</span>
-                </Menu.Item>
             </Menu>
         </div>
     );
