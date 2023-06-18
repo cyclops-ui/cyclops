@@ -1,8 +1,7 @@
 # Logs
 In this short tutorial we will demonstrate our logging feature and how it works. For the purposes of this tutorial you 
-will need to download our [Docker image](https://hub.docker.com/r/petarcvit223/logs) that creates a log every few 
-seconds, or use your own image that creates logs. If you intend to use our image, it is necessary for you to download
-it first.
+are free to use our [Docker image](https://hub.docker.com/r/petarcvit223/logs) that creates a log every few 
+seconds, or use your own image that creates logs.
 
 ## New Module
 We will create a new module, like we did in the [previous tutorial](new_module) but this time we will use a different
