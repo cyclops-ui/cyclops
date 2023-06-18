@@ -251,3 +251,15 @@ func (m *Modules) HelmTemplate(ctx *gin.Context) {
 //	ctx.Header("Access-Control-Allow-Origin", "*")
 //	ctx.JSON(http.StatusOK, resources)
 //}
+
+func (m *Modules) GetLogs(ctx *gin.Context) {
+	logs, err := m.kubernetesClient.GetPodLogs(ctx.Param("namespace"), ctx.Param("container"), ctx.Param("name"))
+	if err != nil {
+		fmt.Println(err)
+		ctx.Status(http.StatusInternalServerError)
+		return
+	}
+
+	ctx.Header("Access-Control-Allow-Origin", "*")
+	ctx.JSON(http.StatusOK, logs)
+}

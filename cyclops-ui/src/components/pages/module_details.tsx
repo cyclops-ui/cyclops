@@ -11,7 +11,10 @@ import {
     Row, Space,
     Switch,
     Table,
-    Tag, Tooltip,
+    Tabs,
+    TabsProps,
+    Tag,
+    Tooltip,
     Typography
 } from 'antd';
 import {Icon} from '@ant-design/compatible';
@@ -62,6 +65,13 @@ const ModuleDetails = () => {
         name: "",
         namespace: "",
     })
+    const [logsModal, setLogsModal] = useState({
+        on: false,
+        namespace: '',
+        pod: '',
+        containers: []
+    })
+    const [logs, setLogs] = useState('');
     const [loading, setLoading] = useState(false);
     const [deleteName, setDeleteName] = useState("");
     const [resources, setResources] = useState([]);
@@ -77,6 +87,7 @@ const ModuleDetails = () => {
             }
         }
     });
+
     let {moduleName} = useParams();
     useEffect(() => {
         axios.get(process.env.REACT_APP_CYCLOPS_CTRL_HOST + `/modules/` + moduleName).then(res => {
@@ -107,6 +118,15 @@ const ModuleDetails = () => {
         })
     };
 
+    const handleCancelLogs = () => {
+        setLogsModal({
+            on: false,
+            namespace: '',
+            pod: '',
+            containers: [],
+        })
+    };
+
     const handleCancel = () => {
         setLoading(false);
     };
@@ -124,6 +144,10 @@ const ModuleDetails = () => {
 
         return "{}"
     }
+
+    const getLogs = () => {
+        return logs; // Return the stored logs
+    };
 
     const deleteDeployment = () => {
         axios.delete(process.env.REACT_APP_CYCLOPS_CTRL_HOST + `/modules/` + moduleName).then(res => {
@@ -144,6 +168,33 @@ const ModuleDetails = () => {
     }
 
     const resourceCollapses: {} | any = [];
+
+    const getTabItems = () => {
+        var items: TabsProps['items'] = []
+
+        let cnt = 1;
+        let container :any
+        for (container of logsModal.containers) {
+            items.push(
+                {
+                    key: container.name,
+                    label: container.name,
+                    children: <AceEditor style={{width: "100%"}} mode={"sass"} value={logs} readOnly={true} />,
+                }
+            )
+            cnt++;
+        }
+
+        return items
+    }
+
+    const onLogsTabsChange = (container: string) => {
+        axios.get(process.env.REACT_APP_CYCLOPS_CTRL_HOST + '/resources/pods/' + logsModal.namespace + '/' + logsModal.pod + '/' + container + '/logs').then(res => {
+            var log = ""
+            res.data.forEach((s :string) => { log += s })
+            setLogs(log);
+        });
+    }
 
     const genExtra = (resource: any) => {
         if (resource.deleted) {
@@ -271,6 +322,27 @@ const ModuleDetails = () => {
                                                         );
                                                     })
                                                 }
+                                            </>
+                                        )}
+                                    />
+                                    <Table.Column
+                                        title='Logs'
+                                        width='15%'
+                                        render={ pod => (
+                                            <>
+                                                <Button onClick={function () {
+                                                    axios.get(process.env.REACT_APP_CYCLOPS_CTRL_HOST + '/resources/pods/' + resource.namespace + '/' + pod.name + '/' + pod.containers[0].name + '/logs').then(res => {
+                                                        var log = ""
+                                                        res.data.forEach((s :string) => { log += s })
+                                                        setLogs(log);
+                                                    });
+                                                    setLogsModal({
+                                                        on: true,
+                                                        namespace: resource.namespace,
+                                                        pod: pod .name,
+                                                        containers: pod.containers
+                                                    })
+                                                }} block>View Logs</Button>
                                             </>
                                         )}
                                     />
@@ -429,6 +501,14 @@ const ModuleDetails = () => {
                 width={'40%'}
             >
                 <AceEditor style={{width: "100%"}} mode={"sass"} value={getManifest()} readOnly={true} />
+            </Modal>
+            <Modal
+                title="Logs"
+                visible={logsModal.on}
+                onCancel={handleCancelLogs}
+                width={'40%'}
+            >
+                <Tabs defaultActiveKey="1" items={getTabItems()} onChange={onLogsTabsChange} />
             </Modal>
         </div>
     );

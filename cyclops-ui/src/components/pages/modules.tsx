@@ -24,11 +24,6 @@ const Modules = () => {
             setAllData(res.data);
             setFilteredData(res.data);
         });
-
-        axios.get(process.env.REACT_APP_CYCLOPS_CTRL_HOST + `/namespaces`).then(res => {
-            console.log(res.data)
-            setNamespacesState(res.data.namespaces)
-        });
     }, []);
 
     async function handleChange(value: any) {

@@ -5,6 +5,7 @@ import (
 	"context"
 	"flag"
 	"fmt"
+	"io"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -172,6 +173,45 @@ func (k *KubernetesClient) GetPods(namespace, name string) ([]apiv1.Pod, error) 
 	}
 
 	return podList.Items, err
+}
+
+func (k *KubernetesClient) GetPodLogs(namespace, container, name string) ([]string, error) {
+	count := int64(100)
+	podLogOptions := apiv1.PodLogOptions{
+		Container: container,
+		TailLines: &count,
+	}
+	podClient := k.clientset.CoreV1().Pods(namespace).GetLogs(name, &podLogOptions)
+	stream, err := podClient.Stream(context.Background())
+
+	if err != nil {
+		return nil, err
+	}
+
+	defer func(stream io.ReadCloser) {
+		err := stream.Close()
+		if err != nil {
+
+		}
+	}(stream)
+
+	var logs []string
+	for {
+		buf := make([]byte, 2000)
+		numBytes, err := stream.Read(buf)
+		if err == io.EOF {
+			break
+		}
+		if err != nil {
+			return nil, err
+		}
+		if numBytes == 0 {
+			continue
+		}
+		logs = append(logs, string(buf[:numBytes]))
+	}
+
+	return logs, nil
 }
 
 func (k *KubernetesClient) GetAllNamespacePods() ([]apiv1.Pod, error) {
