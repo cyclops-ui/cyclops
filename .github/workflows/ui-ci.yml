@@ -54,7 +54,7 @@ jobs:
       - name: Update install manifest
         run: |
           LATEST_VERSION_FILE=$GITHUB_WORKSPACE/install/ui-latest.txt
-          INSTALL_YAML=$GITHUB_WORKSPACE/install/cyclops.yaml
+          INSTALL_YAML=$GITHUB_WORKSPACE/install/cyclops-install.yaml
           # get current version
           VERSION=$(cat $LATEST_VERSION_FILE)
           sed -i 's/petarcvit223\/cyclops-ui\:.*/petarcvit223\/cyclops-ui\:'$VERSION'/' $INSTALL_YAML
