@@ -10,7 +10,9 @@ import {
     Modal,
     Row, Space,
     Switch,
-    Table, Tabs, TabsProps,
+    Table,
+    Tabs,
+    TabsProps,
     Tag,
     Typography
 } from 'antd';
