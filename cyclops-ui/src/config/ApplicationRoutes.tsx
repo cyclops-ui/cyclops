@@ -53,21 +53,21 @@ const ApplicationRoutes = () => {
                         <Routes>
                             <Route path="/" element={<Modules/>}/>
                             <Route path="/modules" element={<Modules/>}/>
-                            <Route path="/term" element={<Terminal/>}/>
+                            {/*<Route path="/term" element={<Terminal/>}/>*/}
                             <Route path="/modules/new" element={<NewModule/>}/>
                             <Route path="/modules/:moduleName" element={<ModuleDetails/>}/>
                             <Route path="/modules/:moduleName/edit" element={<EditModule/>}/>
-                            <Route path="/pods" element={<PodsApp/>}/>
-                            <Route path="/form" element={<Form/>}/>
-                            <Route path="/new-app" element={<NewAppForm/>}/>
-                            <Route path="/ns/:namespace/d/:name/edit-configurable" element={<EditAppForm/>}/>
-                            <Route path="/configurations/:name" element={<EditConfiguration/>}/>
-                            <Route path="/create-form" element={<CreateForm/>}/>
-                            <Route path="/configurations" element={<Configurations/>}/>
-                            <Route path="/diff" element={<Diff/>}/>
-                            <Route path="/ns/:namespace/d/:deployment" element={<Details/>}/>
-                            <Route path="/ns/:namespace/d/:deployment/edit" element={<Edit/>}/>
-                            <Route path="/ns/:namespace/d/:deployment/history" element={<DeploymentHistory/>}/>
+                            {/*<Route path="/pods" element={<PodsApp/>}/>*/}
+                            {/*<Route path="/form" element={<Form/>}/>*/}
+                            {/*<Route path="/new-app" element={<NewAppForm/>}/>*/}
+                            {/*<Route path="/ns/:namespace/d/:name/edit-configurable" element={<EditAppForm/>}/>*/}
+                            {/*<Route path="/configurations/:name" element={<EditConfiguration/>}/>*/}
+                            {/*<Route path="/create-form" element={<CreateForm/>}/>*/}
+                            {/*<Route path="/configurations" element={<Configurations/>}/>*/}
+                            {/*<Route path="/diff" element={<Diff/>}/>*/}
+                            {/*<Route path="/ns/:namespace/d/:deployment" element={<Details/>}/>*/}
+                            {/*<Route path="/ns/:namespace/d/:deployment/edit" element={<Edit/>}/>*/}
+                            {/*<Route path="/ns/:namespace/d/:deployment/history" element={<DeploymentHistory/>}/>*/}
                         </Routes>
                     </Content>
                 </Layout>
