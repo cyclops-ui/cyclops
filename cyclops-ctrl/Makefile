@@ -3,3 +3,4 @@ start:
 
 local-redis:
 	docker-compose up --detach
+

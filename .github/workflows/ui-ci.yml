@@ -8,6 +8,9 @@ on:
       - cyclops-ui/**
   workflow_dispatch:
 
+permissions:
+  contents: write
+
 jobs:
   cyclops-ui-CI:
     runs-on: ubuntu-latest
