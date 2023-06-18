@@ -2,13 +2,15 @@ package controller
 
 import (
 	"fmt"
+	"net/http"
+
+	"github.com/gin-gonic/gin"
+
 	"github.com/cyclops-ui/cycops-ctrl/internal/cluster/k8sclient"
 	"github.com/cyclops-ui/cycops-ctrl/internal/mapper"
 	"github.com/cyclops-ui/cycops-ctrl/internal/models/dto"
 	"github.com/cyclops-ui/cycops-ctrl/internal/storage/templates"
 	"github.com/cyclops-ui/cycops-ctrl/internal/template"
-	"github.com/gin-gonic/gin"
-	"net/http"
 )
 
 type Modules struct {
