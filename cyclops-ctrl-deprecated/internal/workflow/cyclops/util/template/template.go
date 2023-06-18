@@ -2,7 +2,6 @@ package template
 
 import (
 	"bytes"
-	"fmt"
 	"gitops/internal/models/crd/v1alpha1"
 	"gitops/internal/workflow/cyclops/models"
 	"io/ioutil"
@@ -35,7 +34,6 @@ func TemplateManifestNew(reqData models.ConfigurableRequest) (string, error) {
 		return "", err
 	}
 
-	fmt.Println(".fields", reqData.Fields)
 	var buff bytes.Buffer
 	if err = tmpl.Execute(&buff, reqData); err != nil {
 		return "", err

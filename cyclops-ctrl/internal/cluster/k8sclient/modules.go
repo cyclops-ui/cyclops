@@ -3,13 +3,18 @@ package k8sclient
 import (
 	"context"
 	"encoding/json"
+	"strings"
 
-	"gopkg.in/yaml.v2"
-	apiv1 "k8s.io/api/core/v1"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-
+	"github.com/cyclops-ui/cycops-ctrl/internal/models"
 	"github.com/cyclops-ui/cycops-ctrl/internal/models/crd/v1alpha1"
 	"github.com/cyclops-ui/cycops-ctrl/internal/models/dto"
+	template2 "github.com/cyclops-ui/cycops-ctrl/internal/template"
+	"gopkg.in/yaml.v2"
+	appsv1 "k8s.io/api/apps/v1"
+	apiv1 "k8s.io/api/core/v1"
+	v1 "k8s.io/api/core/v1"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/client-go/kubernetes/scheme"
 )
 
 func (k *KubernetesClient) ListModules() ([]v1alpha1.Module, error) {
@@ -53,10 +58,10 @@ func (k *KubernetesClient) GetModule(name string) (*v1alpha1.Module, error) {
 	return k.moduleset.Modules(cyclopsNamespace).Get(name)
 }
 
-func (k *KubernetesClient) GetResourcesForModule(name string) ([]interface{}, error) {
-	out := make([]interface{}, 0, 0)
+func (k *KubernetesClient) GetResourcesForModule(name string) ([]dto.Resource, error) {
+	out := make([]dto.Resource, 0, 0)
 
-	deployments, err := k.clientset.AppsV1().Deployments("").List(context.Background(), metav1.ListOptions{
+	deployments, err := k.clientset.AppsV1().Deployments("default").List(context.Background(), metav1.ListOptions{
 		LabelSelector: "cyclops.module=" + name,
 	})
 	if err != nil {
@@ -74,8 +79,10 @@ func (k *KubernetesClient) GetResourcesForModule(name string) ([]interface{}, er
 			return nil, err
 		}
 
-		out = append(out, dto.Deployment{
-			Kind:      "deployment",
+		out = append(out, &dto.Deployment{
+			Group:     "apps",
+			Version:   "v1",
+			Kind:      "Deployment",
 			Name:      item.Name,
 			Namespace: item.Namespace,
 			Replicas:  int(*item.Spec.Replicas),
@@ -85,7 +92,7 @@ func (k *KubernetesClient) GetResourcesForModule(name string) ([]interface{}, er
 		})
 	}
 
-	services, err := k.clientset.CoreV1().Services("").List(context.Background(), metav1.ListOptions{
+	services, err := k.clientset.CoreV1().Services("default").List(context.Background(), metav1.ListOptions{
 		LabelSelector: "cyclops.module=" + name,
 	})
 	if err != nil {
@@ -98,14 +105,83 @@ func (k *KubernetesClient) GetResourcesForModule(name string) ([]interface{}, er
 			return nil, err
 		}
 
-		out = append(out, dto.Service{
-			Kind:       "service",
+		out = append(out, &dto.Service{
+			Group:      "",
+			Version:    "v1",
+			Kind:       "Service",
 			Name:       item.Name,
 			Namespace:  item.Namespace,
 			Port:       int(item.Spec.Ports[0].Port),
 			TargetPort: item.Spec.Ports[0].TargetPort.IntValue(),
 			Manifest:   manifest,
 		})
+	}
+
+	return out, nil
+}
+
+func (k *KubernetesClient) GetDeletedResources(
+	resources []dto.Resource,
+	module v1alpha1.Module,
+	template models.Template,
+) ([]dto.Resource, error) {
+	manifest, err := template2.HelmTemplate(module, template)
+	if err != nil {
+		return nil, err
+	}
+
+	resourcesFromTemplate := make(map[string][]dto.Resource, 0)
+
+	for _, s := range strings.Split(manifest, "---") {
+		s := strings.TrimSpace(s)
+		if len(s) == 0 {
+			continue
+		}
+
+		obj, _, err := scheme.Codecs.UniversalDeserializer().Decode([]byte(s), nil, nil)
+		if err != nil {
+			return nil, err
+		}
+
+		objGVK := obj.GetObjectKind().GroupVersionKind().String()
+
+		switch rs := obj.(type) {
+		case *appsv1.Deployment:
+			resourcesFromTemplate[objGVK] = append(resourcesFromTemplate[objGVK], &dto.Deployment{
+				Name:      rs.GetName(),
+				Namespace: rs.GetNamespace(),
+			})
+		case *v1.Service:
+			resourcesFromTemplate[objGVK] = append(resourcesFromTemplate[objGVK], &dto.Service{
+				Name:      rs.GetName(),
+				Namespace: rs.GetNamespace(),
+			})
+		}
+	}
+
+	out := make([]dto.Resource, 0, len(resources))
+	for _, resource := range resources {
+		gvk := resource.GetGroupVersionKind()
+
+		if _, ok := resourcesFromTemplate[gvk]; !ok {
+			resource.SetDeleted(true)
+			out = append(out, resource)
+			continue
+		}
+
+		found := false
+		for _, rs := range resourcesFromTemplate[gvk] {
+			if resource.GetName() == rs.GetName() && (resource.GetNamespace() == rs.GetNamespace() || rs.GetNamespace() == "") {
+				found = true
+				break
+			}
+		}
+
+		if found == false {
+			resource.SetDeleted(true)
+		}
+
+		out = append(out, resource)
 	}
 
 	return out, nil

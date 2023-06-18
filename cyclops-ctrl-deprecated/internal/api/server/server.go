@@ -1,11 +1,11 @@
 package server
 
 import (
-	"fmt"
-	"github.com/gin-gonic/gin"
 	"gitops/internal/api/server/controller"
 	"gitops/internal/workflow/cyclops"
 	"net/http"
+
+	"github.com/gin-gonic/gin"
 )
 
 type Server struct {
@@ -67,14 +67,11 @@ func (s *Server) init() error {
 
 func (s *Server) pong() func(ctx *gin.Context) {
 	return func(ctx *gin.Context) {
-		fmt.Println("aleufhgalkuehfg")
 		ctx.String(http.StatusOK, "pong")
 	}
 }
 
 func (s *Server) options(ctx *gin.Context) {
-	fmt.Println("lirgarl;gi")
-
 	ctx.Header("Access-Control-Allow-Origin", "*")
 	if ctx.Request.Method != http.MethodOptions {
 		ctx.Next()

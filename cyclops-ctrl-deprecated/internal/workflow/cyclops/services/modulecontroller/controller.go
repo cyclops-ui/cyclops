@@ -1,11 +1,11 @@
 package modulecontroller
 
 import (
-	"fmt"
 	"gitops/internal/workflow/cyclops/services/k8s_client"
+	"strings"
+
 	v1 "k8s.io/api/core/v1"
 	v12 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"strings"
 
 	appsv1 "k8s.io/api/apps/v1"
 	"k8s.io/apimachinery/pkg/runtime"
@@ -21,8 +21,6 @@ func GenerateResources(kClient *k8s_client.KubernetesClient, module v1alpha1.Mod
 	if err != nil {
 		return err
 	}
-
-	fmt.Println(out)
 
 	// TODO: work with unstructured.Unstructured
 	objects := make([]runtime.Object, 0, 0)
