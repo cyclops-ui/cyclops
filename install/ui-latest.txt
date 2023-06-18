@@ -1,5 +1,1 @@
-v0.7.0
-
-First thing I noticed when running docker inspect that there is a label with name helmsman. It took me some time to remember that helmsman is kubernetes translated from greek. So I created a deployment in minikube with the given image. Then I needed to assign it the cluster role cluster-admin by creating a new binding and a service account.
-Then another thing where I spent a lot of time is on a meesage 'find me on 8888 ingress'. Then it got to me that ingress in extension api version was deprecated and I restarted my minikube instance with 'minikube start --kubernetes-version=v1.20.0' to have the ability to work with ingresses. Another weird thing for me is that the deployment pods would fail if I didn't have the ingress deployed.
-After I exposed it through the ingress, I got a message to look in the image and figured I need to add
+v0.0.0
