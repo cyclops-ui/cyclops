@@ -162,7 +162,7 @@ spec:
     spec:
       containers:
         - name: cyclops-ui
-          image: petarcvit223/cyclops-ui:v0.0.4
+          image: petarcvit223/cyclops-ui:v0.1.0
           ports:
             - containerPort: 80
           env:
@@ -208,7 +208,7 @@ spec:
       serviceAccountName: cyclops-ctrl
       containers:
         - name: cyclops-ctrl
-          image: petarcvit223/cyclops-ctrl:v0.0.7
+          image: petarcvit223/cyclops-ctrl:v0.4.0
           ports:
             - containerPort: 8080
           env:
