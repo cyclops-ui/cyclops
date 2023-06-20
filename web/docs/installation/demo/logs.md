@@ -13,6 +13,9 @@ template. When prompted to insert the GitHub repository and path, use these valu
 Fill in the values, but the image should be `petarcvit223/logs` if you are using our image. Set the version to `latest`.
 Services can be toggled off, they are not needed for this tutorial.
 
+![Module 'multi' Filled](../../../static/img/demo/filled_logs_form.png?raw=true "Module 'multi' Filled")
+
+
 ## Pods and Containers
 If you have successfully created the module, you should see the pods with multiple images.
 
@@ -23,7 +26,7 @@ containers.
 
 ## View Logs
 Now click on the _View Logs_ button. A new popup window has appeared. It contains the last 100 logs of our container. 
-Since we have 2 containers in the pod, there are 2 tabs in the popup window - one for each of the pods.
+Since we have 2 containers in the pod, there are 2 tabs in the popup window - one for each of the containers.
 
 ![Logs](../../../static/img/demo/logs.png?raw=true "Logs")
 

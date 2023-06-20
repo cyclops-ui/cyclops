@@ -9,14 +9,14 @@ empty at the moment. What we want to do next is click on the _Add module_ button
 ## Define your module
 Now we want to define our new module. Under the _Module template_ we want to put the url that leads towards a GitHub
 repository where we saved our configuration files. For the sake of this tutorial we will be using our own 
-[repository](https://github.com/cyclops-ui/templates) which holds a configuration template we made for testing purposes.
+[repository](https://github.com/cyclops-ui/templates) (`https://github.com/cyclops-ui/templates/tree/main/demo`) which holds a configuration template we made for testing purposes.
 Feel free to use our template repository! We will be using the _demo_ template from the repository.
 
 ![Filled Module Template](../../../static/img/demo/module_template.png?raw=true "Filled Module Template")
 
 The left field should be the root folder of your repository, while the right field should be the path towards the
-configuration file. If you filled the fields correctly, there will be a success message at the top of the screen and 
-you will receive new fields to fill.
+template directory. After populating the fields, click load and if you filled the fields correctly, there will be a success 
+message at the top of the screen and you will receive new fields to fill.
 
 ![Successfully loaded template](../../../static/img/demo/template_load_success.png?raw=true "Successfully loaded template")
 
@@ -24,7 +24,7 @@ Now all that's left to do is fill the form with values!
 Here is an example of values you could use:
 
     Module name: demo
-    name: demo1
+    name: demo-1
     replicas: 3,
     image: nginx,
     version: 1.14.2
