@@ -41,11 +41,11 @@ func (w Watcher) Start() {
 	for {
 		select {
 		case m := <-w.watch:
-			module, ok := m.Object.(*unstructured.Unstructured)
-			if !ok {
-				fmt.Println("Could not cast object into module")
-				continue
-			}
+			module, _ := m.Object.(*unstructured.Unstructured)
+			//if !ok {
+			//	fmt.Println("Could not cast object into module")
+			//	continue
+			//}
 
 			fmt.Println(fmt.Sprintf("got event %s for module %s", m.Type, module.GetName()))
 

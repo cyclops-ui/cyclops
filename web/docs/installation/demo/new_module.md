@@ -34,6 +34,23 @@ Now click save and you should see your new module listed!
 
 ![Listed Module](../../../static/img/demo/module_listed.png?raw=true "Listed Module")
 
+## Try it out
+
+Once you have deployed your application, you can check its resources and information on the Module details page. If you
+have tried out Cyclops with the suggested template and values, you can open your application by exposing it to the 
+outside world and visiting it.  
+You can expose it with the following command
+
+`kubectl port-forward svc/demo-1 8080:80`
+
+If this step was successful, you could try visiting http://localhost:8080, and you should see the Nginx hello message.
+
+![Welcome to Nginx](../../../static/img/demo/nginx_hello.png?raw=true "Listed Module")
+
+Of course, this is just a simple example, but using Cyclops and a predefined template, you could deploy and expose your
+application in a few clicks without having to get into the details of Kubernetes figuring out how to deploy your
+application.
+
 ## Potential problems
 ### Error loading template
 This usually means that you didn't input the right `url + path`. When loading the template to Cyclops, you need to copy

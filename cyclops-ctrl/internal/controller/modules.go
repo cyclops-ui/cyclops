@@ -26,6 +26,8 @@ func NewModulesController(templates *templates.Storage, kubernetes *k8sclient.Ku
 }
 
 func (m *Modules) GetModule(ctx *gin.Context) {
+	ctx.Header("Access-Control-Allow-Origin", "*")
+
 	module, err := m.kubernetesClient.GetModule(ctx.Param("name"))
 	if err != nil {
 		fmt.Println(err)
@@ -33,11 +35,12 @@ func (m *Modules) GetModule(ctx *gin.Context) {
 		return
 	}
 
-	ctx.Header("Access-Control-Allow-Origin", "*")
 	ctx.JSON(http.StatusOK, mapper.ModuleToDTO(*module))
 }
 
 func (m *Modules) ListModules(ctx *gin.Context) {
+	ctx.Header("Access-Control-Allow-Origin", "*")
+
 	modules, err := m.kubernetesClient.ListModules()
 	if err != nil {
 		fmt.Println(err)
@@ -45,11 +48,12 @@ func (m *Modules) ListModules(ctx *gin.Context) {
 		return
 	}
 
-	ctx.Header("Access-Control-Allow-Origin", "*")
 	ctx.JSON(http.StatusOK, mapper.ModuleListToDTO(modules))
 }
 
 func (m *Modules) DeleteModule(ctx *gin.Context) {
+	ctx.Header("Access-Control-Allow-Origin", "*")
+
 	err := m.kubernetesClient.DeleteModule(ctx.Param("name"))
 	if err != nil {
 		fmt.Println(err)
@@ -57,11 +61,12 @@ func (m *Modules) DeleteModule(ctx *gin.Context) {
 		return
 	}
 
-	ctx.Header("Access-Control-Allow-Origin", "*")
 	ctx.Status(http.StatusOK)
 }
 
 func (m *Modules) DeleteModuleResource(ctx *gin.Context) {
+	ctx.Header("Access-Control-Allow-Origin", "*")
+
 	var request dto.DeleteResource
 	if err := ctx.BindJSON(&request); err != nil {
 		fmt.Println("error binding request", request)
@@ -76,30 +81,32 @@ func (m *Modules) DeleteModuleResource(ctx *gin.Context) {
 		return
 	}
 
-	ctx.Header("Access-Control-Allow-Origin", "*")
 	ctx.Status(http.StatusOK)
 }
 
 func (m *Modules) CreateModule(ctx *gin.Context) {
+	ctx.Header("Access-Control-Allow-Origin", "*")
+
 	var request dto.Module
 	if err := ctx.BindJSON(&request); err != nil {
 		fmt.Println("error binding request", request)
-		ctx.Status(http.StatusBadRequest)
+		ctx.JSON(http.StatusBadRequest, dto.NewError("Error loading template", err.Error()))
 		return
 	}
 
 	err := m.kubernetesClient.CreateModule(mapper.RequestToModule(request))
 	if err != nil {
 		fmt.Println(err)
-		ctx.Status(http.StatusInternalServerError)
+		ctx.JSON(http.StatusInternalServerError, dto.NewError("Error creating module", err.Error()))
 		return
 	}
 
-	ctx.Header("Access-Control-Allow-Origin", "*")
 	ctx.Status(http.StatusOK)
 }
 
 func (m *Modules) UpdateModule(ctx *gin.Context) {
+	ctx.Header("Access-Control-Allow-Origin", "*")
+
 	var request dto.Module
 	if err := ctx.BindJSON(&request); err != nil {
 		fmt.Println("error binding request", request)
@@ -124,11 +131,12 @@ func (m *Modules) UpdateModule(ctx *gin.Context) {
 		return
 	}
 
-	ctx.Header("Access-Control-Allow-Origin", "*")
 	ctx.Status(http.StatusOK)
 }
 
 func (m *Modules) ResourcesForModule(ctx *gin.Context) {
+	ctx.Header("Access-Control-Allow-Origin", "*")
+
 	module, err := m.kubernetesClient.GetModule(ctx.Param("name"))
 	if err != nil {
 		fmt.Println(err)
@@ -157,11 +165,12 @@ func (m *Modules) ResourcesForModule(ctx *gin.Context) {
 		return
 	}
 
-	ctx.Header("Access-Control-Allow-Origin", "*")
 	ctx.JSON(http.StatusOK, resources)
 }
 
 func (m *Modules) Template(ctx *gin.Context) {
+	ctx.Header("Access-Control-Allow-Origin", "*")
+
 	module, err := m.kubernetesClient.GetModule(ctx.Param("name"))
 	if err != nil {
 		fmt.Println(err)
@@ -202,11 +211,12 @@ func (m *Modules) Template(ctx *gin.Context) {
 		New:     proposedManifest,
 	}
 
-	ctx.Header("Access-Control-Allow-Origin", "*")
 	ctx.JSON(http.StatusOK, res)
 }
 
 func (m *Modules) HelmTemplate(ctx *gin.Context) {
+	ctx.Header("Access-Control-Allow-Origin", "*")
+
 	module, err := m.kubernetesClient.GetModule(ctx.Param("name"))
 	if err != nil {
 		fmt.Println(err)
@@ -228,7 +238,6 @@ func (m *Modules) HelmTemplate(ctx *gin.Context) {
 		return
 	}
 
-	ctx.Header("Access-Control-Allow-Origin", "*")
 	ctx.JSON(http.StatusOK, "{}")
 }
 
@@ -253,6 +262,8 @@ func (m *Modules) HelmTemplate(ctx *gin.Context) {
 //}
 
 func (m *Modules) GetLogs(ctx *gin.Context) {
+	ctx.Header("Access-Control-Allow-Origin", "*")
+
 	logs, err := m.kubernetesClient.GetPodLogs(ctx.Param("namespace"), ctx.Param("container"), ctx.Param("name"))
 	if err != nil {
 		fmt.Println(err)
@@ -260,6 +271,5 @@ func (m *Modules) GetLogs(ctx *gin.Context) {
 		return
 	}
 
-	ctx.Header("Access-Control-Allow-Origin", "*")
 	ctx.JSON(http.StatusOK, logs)
 }
