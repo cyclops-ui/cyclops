@@ -24,7 +24,7 @@ only visible when it is toggled in the configuration.
 ![Service Toggle On](../../../static/img/demo/service_toggle.png?raw=true "Service Toggle On")
 
 ### Deployment
-Here are your deployments. Depending on the number of replicas u wanted, there should be an equal amount of pods.
+Here are your deployments. Depending on the number of replicas you wanted, there should be an equal amount of pods.
 ![Deployments](../../../static/img/demo/deployments.png?raw=true "Deployments")
 
 [//]: # (TO-DO: remove "...in the current version of Cyclops...")
