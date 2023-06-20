@@ -18,8 +18,8 @@ write the module name in it. If correctly written the _delete_ button will turn 
 This action deletes the module and all its associated resources from the cluster!
 
 ## Resources
-The modules resources are displayed here. These resources include _Deployments_ and/or _Services_. The _Services_ tab is
-only visible when it is toggled in the configuration.
+The modules resources are displayed here. These resources include _Deployments_ and/or _Services_ (other resources are 
+still in development!). The _Services_ tab is only visible when it is toggled in the configuration. 
 
 ![Service Toggle On](../../../static/img/demo/service_toggle.png?raw=true "Service Toggle On")
 
@@ -28,7 +28,7 @@ Here are your deployments. Depending on the number of replicas you wanted, there
 ![Deployments](../../../static/img/demo/deployments.png?raw=true "Deployments")
 
 [//]: # (TO-DO: remove "...in the current version of Cyclops...")
-The top most element we can see is the name of the deployment, which in our case is `demo1`. Right under we can see
+The top most element we can see is the name of the deployment, which in our case is `demo-1`. Right under we can see
 the namespace in which our deployment is located. In the current version of Cyclops, all of your deployments and
 services are put in the `default` namespace. Right under the namespace stands a button _View Manifest_. This button
 creates a popup that allows you to see the configuration file that Cyclops created after you filled in the values for
@@ -46,7 +46,7 @@ another popup window that displays the last 100 logs of the pod. If you are stil
 
 ### Service
 Here is your service. In Kubernetes, a Service is a method for exposing a network application that is running as one or 
-more Pods in your cluster. Here we can also see the name of our service `demo1`, the namespace it inhabits `default` and
+more Pods in your cluster. Here we can also see the name of our service `demo-1`, the namespace it inhabits `default` and
 the manifest. Underneath it shows the port of the service and where it is pointing (port of the pods).
 
 ## Potential problems
