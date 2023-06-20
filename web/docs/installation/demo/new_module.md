@@ -25,8 +25,8 @@ Here is an example of values you could use:
 
     Module name: demo
     name: demo-1
-    replicas: 3,
-    image: nginx,
+    replicas: 3
+    image: nginx
     version: 1.14.2
     service: true
 
