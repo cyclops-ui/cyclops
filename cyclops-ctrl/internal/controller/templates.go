@@ -30,8 +30,9 @@ func NewTemplatesController(templatesStorage *templates.Storage, kubernetes *k8s
 }
 
 func (c *Templates) StoreConfiguration(ctx *gin.Context) {
-	var request models.Template
+	ctx.Header("Access-Control-Allow-Origin", "*")
 
+	var request models.Template
 	if err := ctx.BindJSON(&request); err != nil {
 		fmt.Println("error binding request", request)
 		ctx.Status(http.StatusBadRequest)
@@ -50,7 +51,6 @@ func (c *Templates) StoreConfiguration(ctx *gin.Context) {
 		return
 	}
 
-	ctx.Header("Access-Control-Allow-Origin", "*")
 	ctx.Status(http.StatusOK)
 }
 
@@ -68,6 +68,8 @@ func semantic(current string) string {
 }
 
 func (c *Templates) GetConfiguration(ctx *gin.Context) {
+	ctx.Header("Access-Control-Allow-Origin", "*")
+
 	name := ctx.Param("name")
 	version := ctx.Query("version")
 
@@ -108,11 +110,12 @@ func (c *Templates) GetConfiguration(ctx *gin.Context) {
 
 	configuration.Modules = mapper.ModuleListToDTO(related)
 
-	ctx.Header("Access-Control-Allow-Origin", "*")
 	ctx.JSON(http.StatusOK, configuration)
 }
 
 func (c *Templates) GetConfigurationsDetails(ctx *gin.Context) {
+	ctx.Header("Access-Control-Allow-Origin", "*")
+
 	templates, err := c.templates.ListConfigLatest()
 	if err != nil {
 		fmt.Println(err)
@@ -122,11 +125,12 @@ func (c *Templates) GetConfigurationsDetails(ctx *gin.Context) {
 
 	templates = mapper.MapConfigDetails(templates)
 
-	ctx.Header("Access-Control-Allow-Origin", "*")
 	ctx.JSON(http.StatusOK, templates)
 }
 
 func (c *Templates) GetConfigurationsVersions(ctx *gin.Context) {
+	ctx.Header("Access-Control-Allow-Origin", "*")
+
 	versions, err := c.templates.GetConfigurationVersions(ctx.Param("name"))
 	if err != nil {
 		fmt.Println(err)
@@ -134,7 +138,6 @@ func (c *Templates) GetConfigurationsVersions(ctx *gin.Context) {
 		return
 	}
 
-	ctx.Header("Access-Control-Allow-Origin", "*")
 	ctx.JSON(http.StatusOK, versions)
 }
 

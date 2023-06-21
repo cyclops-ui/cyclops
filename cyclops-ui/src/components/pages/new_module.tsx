@@ -80,6 +80,8 @@ const NewModule = () => {
             "template": config.name,
         })
 
+        setLoading(true);
+
         axios.post(window.__RUNTIME_CONFIG__.REACT_APP_CYCLOPS_CTRL_HOST + `/modules/new`,
             {
                 name: values["cyclops_module_name"],
@@ -95,15 +97,25 @@ const NewModule = () => {
             })
             .then(res => {
                 console.log(res);
-                window.location.href = "/modules"
+                window.location.href = "/modules/" + values["cyclops_module_name"]
             })
             .catch(error => {
+                console.log(error)
+                console.log(error.response)
                 setLoading(false);
-                message.error(error);
+                if (error.response === undefined) {
+                    setError({
+                        message: String(error),
+                        description: "Check if Cyclops backend is available on: " + window.__RUNTIME_CONFIG__.REACT_APP_CYCLOPS_CTRL_HOST
+                    })
+                    setSuccessLoad(false);
+                } else {
+                    setError(error.response.data);
+                    setSuccessLoad(false);
+                }
             })
 
         setName(values.app_name);
-        setLoading(true);
     }
 
     const handleCancel = () => {
@@ -162,10 +174,16 @@ const NewModule = () => {
             });
             setSuccessLoad(true);
         }).catch(function (error) {
-            setError(error.response.data);
-            setSuccessLoad(false);
-
-            return
+            if (error.response === undefined) {
+                setError({
+                    message: String(error),
+                    description: "Check if Cyclops backend is available on: " + window.__RUNTIME_CONFIG__.REACT_APP_CYCLOPS_CTRL_HOST
+                })
+                setSuccessLoad(false);
+            } else {
+                setError(error.response.data);
+                setSuccessLoad(false);
+            }
         });
     }
 

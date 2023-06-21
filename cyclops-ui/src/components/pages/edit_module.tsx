@@ -283,43 +283,43 @@ const EditModule = () => {
             <Row gutter={[40, 0]}>
                 <Col span={18}>
                     <Form {...layout} form={form} autoComplete={"off"} onFinish={handleSubmit}>
-                        <Col span={18}>
-                            <Link aria-level={3} href={`/configurations/` + module.template}>
-                                <LinkOutlined/>
-                                { module.template.name.length === 0 && module.template.git.repo + '/' + module.template.git.path }
+                        {/*<Col span={18}>*/}
+                        {/*    <Link aria-level={3} href={`/configurations/` + module.template}>*/}
+                        {/*        <LinkOutlined/>*/}
+                        {/*        { module.template.name.length === 0 && module.template.git.repo + '/' + module.template.git.path }*/}
 
-                                { module.template.name.length !== 0 && module.template.name + '@' + module.template.version }
-                            </Link>
-                            <Button onClick={function () {
-                                setMigrating(true)
-                                getVersions()
-                            }} block>Migrate</Button>
-                        </Col>
-                        <Modal
-                            title="Migrate module to different template version"
-                            visible={migrating}
-                            onCancel={handleCancelMigrating}
-                            width={'40%'}
-                            footer={
-                                <Button block onClick={handleMigrate}>Migrate</Button>
-                            }
-                        >
-                            <Select
-                                placeholder={"Template version"}
-                                style={{width: '30%'}}
-                                onChange={handleVersionChange}
-                            >
-                                {versions}
-                            </Select>
-                            <ReactDiffViewer
-                                oldValue={migrateDiff.current}
-                                newValue={migrateDiff.new}
-                                splitView={true}
-                                leftTitle={"current manifest"}
-                                rightTitle={"updated manifest"}
-                                useDarkTheme={false}
-                            />
-                        </Modal>
+                        {/*        { module.template.name.length !== 0 && module.template.name + '@' + module.template.version }*/}
+                        {/*    </Link>*/}
+                        {/*    <Button onClick={function () {*/}
+                        {/*        setMigrating(true)*/}
+                        {/*        getVersions()*/}
+                        {/*    }} block>Migrate</Button>*/}
+                        {/*</Col>*/}
+                        {/*<Modal*/}
+                        {/*    title="Migrate module to different template version"*/}
+                        {/*    visible={migrating}*/}
+                        {/*    onCancel={handleCancelMigrating}*/}
+                        {/*    width={'40%'}*/}
+                        {/*    footer={*/}
+                        {/*        <Button block onClick={handleMigrate}>Migrate</Button>*/}
+                        {/*    }*/}
+                        {/*>*/}
+                        {/*    <Select*/}
+                        {/*        placeholder={"Template version"}*/}
+                        {/*        style={{width: '30%'}}*/}
+                        {/*        onChange={handleVersionChange}*/}
+                        {/*    >*/}
+                        {/*        {versions}*/}
+                        {/*    </Select>*/}
+                        {/*    <ReactDiffViewer*/}
+                        {/*        oldValue={migrateDiff.current}*/}
+                        {/*        newValue={migrateDiff.new}*/}
+                        {/*        splitView={true}*/}
+                        {/*        leftTitle={"current manifest"}*/}
+                        {/*        rightTitle={"updated manifest"}*/}
+                        {/*        useDarkTheme={false}*/}
+                        {/*    />*/}
+                        {/*</Modal>*/}
                         <Divider orientation="left" orientationMargin="0">
                             Edit Module
                         </Divider>
