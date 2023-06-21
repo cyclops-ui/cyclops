@@ -42,10 +42,10 @@ outside world and visiting it.
 You can expose it with the following command
 
 ```bash
-kubectl port-forward svc/demo-1 8080:80
+kubectl port-forward svc/demo-1 8888:80
 ```
 
-If this step was successful, you could try visiting [http://localhost:8080](http://localhost:8080), and you should see the Nginx hello message.
+If this step was successful, you could try visiting [http://localhost:8888](http://localhost:8888), and you should see the Nginx hello message.
 
 ![Welcome to Nginx](../../../static/img/demo/nginx_hello.png?raw=true "Listed Module")
 
