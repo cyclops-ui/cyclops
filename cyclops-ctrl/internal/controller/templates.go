@@ -6,13 +6,13 @@ import (
 	"strconv"
 	"time"
 
+	cyclopsv1alpha1 "github.com/cyclops-ui/cycops-ctrl/api/v1alpha1"
 	"github.com/gin-gonic/gin"
 
 	"github.com/cyclops-ui/cycops-ctrl/internal/cluster/k8sclient"
 	git "github.com/cyclops-ui/cycops-ctrl/internal/git/templates"
 	"github.com/cyclops-ui/cycops-ctrl/internal/mapper"
 	"github.com/cyclops-ui/cycops-ctrl/internal/models"
-	"github.com/cyclops-ui/cycops-ctrl/internal/models/crd/v1alpha1"
 	"github.com/cyclops-ui/cycops-ctrl/internal/models/dto"
 	"github.com/cyclops-ui/cycops-ctrl/internal/storage/templates"
 )
@@ -99,7 +99,7 @@ func (c *Templates) GetConfiguration(ctx *gin.Context) {
 		return
 	}
 
-	related := make([]v1alpha1.Module, 0)
+	related := make([]cyclopsv1alpha1.Module, 0)
 	for _, module := range modules {
 		if name != module.Spec.TemplateRef.Name {
 			continue

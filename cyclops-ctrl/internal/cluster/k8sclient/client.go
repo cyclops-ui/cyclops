@@ -3,12 +3,10 @@ package k8sclient
 import (
 	"bytes"
 	"context"
-	"flag"
 	"fmt"
 	"io"
 	"os"
 	"os/exec"
-	"path/filepath"
 	"strings"
 
 	"github.com/cyclops-ui/cycops-ctrl/internal/models/dto"
@@ -22,8 +20,7 @@ import (
 	"k8s.io/client-go/dynamic"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/rest"
-	"k8s.io/client-go/tools/clientcmd"
-	"k8s.io/client-go/util/homedir"
+	ctrl "sigs.k8s.io/controller-runtime"
 
 	"github.com/cyclops-ui/cycops-ctrl/internal/cluster/v1alpha1"
 )
@@ -53,20 +50,23 @@ func createLocalClient() (*KubernetesClient, error) {
 	var err error
 
 	if len(kubeconfigEnv) != 0 {
-		var kubeconfig *string
-		if home := homedir.HomeDir(); home != "" {
-			kubeconfig = flag.String("kubeconfig", filepath.Join(home, ".kube", "config"), "(optional) absolute path to the kubeconfig file")
-		} else {
-			kubeconfig = flag.String("kubeconfig", "", "absolute path to the kubeconfig file")
-		}
-		flag.Parse()
+		//var kubeconfig *string
+		//if home := homedir.HomeDir(); home != "" {
+		//	kubeconfig = flag.String("kubeconfig", filepath.Join(home, ".kube", "config"), "(optional) absolute path to the kubeconfig file")
+		//} else {
+		//	kubeconfig = flag.String("kubeconfig", "", "absolute path to the kubeconfig file")
+		//}
+		//flag.Parse()
+		//
+		//fmt.Println("loading local config")
+		//
+		//config, err = clientcmd.BuildConfigFromFlags("", *kubeconfig)
+		//if err != nil {
+		//	return nil, err
+		//}
 
-		fmt.Println("loading local config")
+		config = ctrl.GetConfigOrDie()
 
-		config, err = clientcmd.BuildConfigFromFlags("", *kubeconfig)
-		if err != nil {
-			return nil, err
-		}
 	} else {
 		fmt.Println("loading in cluster config")
 		config, err = rest.InClusterConfig()

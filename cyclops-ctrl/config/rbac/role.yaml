@@ -1,0 +1,33 @@
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  creationTimestamp: null
+  name: manager-role
+rules:
+- apiGroups:
+  - cyclops.cyclops-ui.com
+  resources:
+  - modules
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - cyclops.cyclops-ui.com
+  resources:
+  - modules/finalizers
+  verbs:
+  - update
+- apiGroups:
+  - cyclops.cyclops-ui.com
+  resources:
+  - modules/status
+  verbs:
+  - get
+  - patch
+  - update

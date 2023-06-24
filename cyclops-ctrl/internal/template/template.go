@@ -5,6 +5,7 @@ import (
 	"strconv"
 	"text/template"
 
+	cyclopsv1alpha1 "github.com/cyclops-ui/cycops-ctrl/api/v1alpha1"
 	"helm.sh/helm/v3/pkg/chart"
 	"helm.sh/helm/v3/pkg/chartutil"
 	"helm.sh/helm/v3/pkg/engine"
@@ -60,7 +61,7 @@ func TemplateModule(module v1alpha1.Module, moduleTemplate models.Template) (str
 //
 //}
 
-func HelmTemplate(module v1alpha1.Module, moduleTemplate models.Template) (string, error) {
+func HelmTemplate(module cyclopsv1alpha1.Module, moduleTemplate models.Template) (string, error) {
 	chart := &chart.Chart{
 		Raw:      []*chart.File{},
 		Metadata: &chart.Metadata{},

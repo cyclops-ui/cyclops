@@ -9,7 +9,6 @@ import (
 	"github.com/cyclops-ui/cycops-ctrl/internal/cluster/k8sclient"
 	"github.com/cyclops-ui/cycops-ctrl/internal/controller"
 	"github.com/cyclops-ui/cycops-ctrl/internal/storage/templates"
-	"github.com/cyclops-ui/cycops-ctrl/internal/watcher/module"
 )
 
 type Handler struct {
@@ -67,12 +66,12 @@ func (h *Handler) Start() error {
 
 	h.router.Use(h.options)
 
-	moduleWatcher, err := module.NewWatcher(k8sClient, templatesStorage)
-	if err != nil {
-		panic(err)
-	}
-
-	go moduleWatcher.Start()
+	//moduleWatcher, err := module.NewWatcher(k8sClient, templatesStorage)
+	//if err != nil {
+	//	panic(err)
+	//}
+	//
+	//go moduleWatcher.Start()
 
 	return h.router.Run()
 }

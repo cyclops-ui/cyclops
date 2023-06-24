@@ -6,7 +6,7 @@ import (
 	"k8s.io/apimachinery/pkg/runtime/schema"
 )
 
-const GroupName = "cyclops.com"
+const GroupName = "cyclops.cyclops-ui.com"
 
 const GroupVersion = "v1alpha1"
 
