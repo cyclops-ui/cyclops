@@ -161,3 +161,5 @@ start:
 local-redis:
 	docker-compose up --detach
 
+group-imports:
+	goimports-reviser -recursive -file-path .
