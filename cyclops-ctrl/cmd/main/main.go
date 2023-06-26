@@ -2,10 +2,13 @@ package main
 
 import (
 	"flag"
+	"fmt"
 	"os"
 
+	"github.com/cyclops-ui/cycops-ctrl/internal/cluster/k8sclient"
 	"github.com/cyclops-ui/cycops-ctrl/internal/handler"
 	"github.com/cyclops-ui/cycops-ctrl/internal/modulecontroller"
+	"github.com/cyclops-ui/cycops-ctrl/internal/storage/templates"
 
 	// Import all Kubernetes client auth plugins (e.g. Azure, GCP, OIDC, etc.)
 	// to ensure that exec-entrypoint and run can make use of them.
@@ -53,7 +56,19 @@ func main() {
 
 	setupLog.Info("starting handler")
 
-	handler, err := handler.New()
+	k8sClient, err := k8sclient.New()
+	if err != nil {
+		fmt.Println("error bootstrapping Kubernetes client", err)
+		panic(err)
+	}
+
+	templatesStorage, err := templates.NewStorage()
+	if err != nil {
+		fmt.Println("error bootstrapping redis", err)
+		//panic(err)
+	}
+
+	handler, err := handler.New(templatesStorage, k8sClient)
 	if err != nil {
 		panic(err)
 	}
@@ -84,10 +99,12 @@ func main() {
 		os.Exit(1)
 	}
 
-	if err = (&modulecontroller.ModuleReconciler{
-		Client: mgr.GetClient(),
-		Scheme: mgr.GetScheme(),
-	}).SetupWithManager(mgr); err != nil {
+	if err = (modulecontroller.NewModuleReconciler(
+		mgr.GetClient(),
+		mgr.GetScheme(),
+		templatesStorage,
+		k8sClient,
+	)).SetupWithManager(mgr); err != nil {
 		setupLog.Error(err, "unable to create controller", "controller", "Module")
 		os.Exit(1)
 	}

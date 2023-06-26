@@ -1,7 +1,6 @@
 package handler
 
 import (
-	"fmt"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -13,31 +12,24 @@ import (
 
 type Handler struct {
 	router *gin.Engine
+
+	templatesStorage *templates.Storage
+	k8sClient        *k8sclient.KubernetesClient
 }
 
-func New() (*Handler, error) {
+func New(templates *templates.Storage, kubernetesClient *k8sclient.KubernetesClient) (*Handler, error) {
 	return &Handler{
-		router: gin.New(),
+		templatesStorage: templates,
+		k8sClient:        kubernetesClient,
+		router:           gin.New(),
 	}, nil
 }
 
 func (h *Handler) Start() error {
 	gin.SetMode(gin.DebugMode)
 
-	templatesStorage, err := templates.NewStorage()
-	if err != nil {
-		fmt.Println("error bootstrapping redis", err)
-		//panic(err)
-	}
-
-	k8sClient, err := k8sclient.New()
-	if err != nil {
-		fmt.Println("error bootstrapping Kubernetes client", err)
-		panic(err)
-	}
-
-	templatesController := controller.NewTemplatesController(templatesStorage, k8sClient)
-	modulesController := controller.NewModulesController(templatesStorage, k8sClient)
+	templatesController := controller.NewTemplatesController(h.templatesStorage, h.k8sClient)
+	modulesController := controller.NewModulesController(h.templatesStorage, h.k8sClient)
 
 	h.router = gin.New()
 

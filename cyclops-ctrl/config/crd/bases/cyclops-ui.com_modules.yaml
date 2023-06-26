@@ -5,9 +5,9 @@ metadata:
   annotations:
     controller-gen.kubebuilder.io/version: v0.11.3
   creationTimestamp: null
-  name: modules.cyclops.cyclops-ui.com
+  name: modules.cyclops-ui.com
 spec:
-  group: cyclops.cyclops-ui.com
+  group: cyclops-ui.com
   names:
     kind: Module
     listKind: ModuleList

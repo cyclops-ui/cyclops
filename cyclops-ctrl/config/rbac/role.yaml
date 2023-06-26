@@ -6,7 +6,7 @@ metadata:
   name: manager-role
 rules:
 - apiGroups:
-  - cyclops.cyclops-ui.com
+  - cyclops-ui.com
   resources:
   - modules
   verbs:
@@ -18,13 +18,13 @@ rules:
   - update
   - watch
 - apiGroups:
-  - cyclops.cyclops-ui.com
+  - cyclops-ui.com
   resources:
   - modules/finalizers
   verbs:
   - update
 - apiGroups:
-  - cyclops.cyclops-ui.com
+  - cyclops-ui.com
   resources:
   - modules/status
   verbs:

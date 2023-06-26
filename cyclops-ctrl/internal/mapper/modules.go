@@ -21,7 +21,7 @@ func RequestToModule(req dto.Module) cyclopsv1alpha1.Module {
 	return cyclopsv1alpha1.Module{
 		TypeMeta: metav1.TypeMeta{
 			Kind:       "Module",
-			APIVersion: "cyclops.cyclops-ui.com/v1alpha1",
+			APIVersion: "cyclops-ui.com/v1alpha1",
 		},
 		ObjectMeta: metav1.ObjectMeta{
 			Name: req.Name,

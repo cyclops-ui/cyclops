@@ -1,4 +1,4 @@
-apiVersion: cyclops.cyclops-ui.com/v1alpha1
+apiVersion: cyclops-ui.com/v1alpha1
 kind: Module
 metadata:
   labels:
