@@ -21,10 +21,6 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/cyclops-ui/cycops-ctrl/internal/cluster/k8sclient"
-	"github.com/cyclops-ui/cycops-ctrl/internal/models"
-	"github.com/cyclops-ui/cycops-ctrl/internal/storage/templates"
-	template2 "github.com/cyclops-ui/cycops-ctrl/internal/template"
 	"github.com/go-logr/logr"
 	appsv1 "k8s.io/api/apps/v1"
 	v1 "k8s.io/api/core/v1"
@@ -36,6 +32,10 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/log"
 
 	cyclopsv1alpha1 "github.com/cyclops-ui/cycops-ctrl/api/v1alpha1"
+	"github.com/cyclops-ui/cycops-ctrl/internal/cluster/k8sclient"
+	"github.com/cyclops-ui/cycops-ctrl/internal/models"
+	"github.com/cyclops-ui/cycops-ctrl/internal/storage/templates"
+	template2 "github.com/cyclops-ui/cycops-ctrl/internal/template"
 )
 
 // ModuleReconciler reconciles a Module object

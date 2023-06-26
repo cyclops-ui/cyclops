@@ -9,7 +9,6 @@ import (
 	"os/exec"
 	"strings"
 
-	"github.com/cyclops-ui/cycops-ctrl/internal/models/dto"
 	v12 "k8s.io/api/apps/v1"
 	"k8s.io/api/autoscaling/v1"
 	apiv1 "k8s.io/api/core/v1"
@@ -23,6 +22,7 @@ import (
 	ctrl "sigs.k8s.io/controller-runtime"
 
 	"github.com/cyclops-ui/cycops-ctrl/internal/cluster/v1alpha1"
+	"github.com/cyclops-ui/cycops-ctrl/internal/models/dto"
 )
 
 const (

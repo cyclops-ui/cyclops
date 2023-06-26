@@ -1,10 +1,11 @@
 package v1alpha1
 
 import (
-	"github.com/cyclops-ui/cycops-ctrl/api/v1alpha1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/runtime/schema"
+
+	"github.com/cyclops-ui/cycops-ctrl/api/v1alpha1"
 )
 
 const GroupName = "cyclops-ui.com"
