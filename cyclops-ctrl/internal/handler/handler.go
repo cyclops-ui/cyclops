@@ -58,13 +58,6 @@ func (h *Handler) Start() error {
 
 	h.router.Use(h.options)
 
-	//moduleWatcher, err := module.NewWatcher(k8sClient, templatesStorage)
-	//if err != nil {
-	//	panic(err)
-	//}
-	//
-	//go moduleWatcher.Start()
-
 	return h.router.Run()
 }
 
