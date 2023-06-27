@@ -4,9 +4,11 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/runtime/schema"
+
+	"github.com/cyclops-ui/cycops-ctrl/api/v1alpha1"
 )
 
-const GroupName = "cyclops.com"
+const GroupName = "cyclops-ui.com"
 
 const GroupVersion = "v1alpha1"
 
@@ -19,7 +21,7 @@ var (
 
 func addKnownTypes(scheme *runtime.Scheme) error {
 	scheme.AddKnownTypes(SchemeGroupVersion,
-		&Module{},
+		&v1alpha1.Module{},
 		//&ModuleList{},
 	)
 

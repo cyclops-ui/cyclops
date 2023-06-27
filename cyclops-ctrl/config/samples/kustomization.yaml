@@ -1,0 +1,4 @@
+## Append samples of your project ##
+resources:
+- cyclops_v1alpha1_module.yaml
+#+kubebuilder:scaffold:manifestskustomizesamples

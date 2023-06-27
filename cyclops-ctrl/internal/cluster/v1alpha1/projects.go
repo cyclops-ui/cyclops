@@ -8,14 +8,14 @@ import (
 	"k8s.io/apimachinery/pkg/watch"
 	"k8s.io/client-go/rest"
 
-	"github.com/cyclops-ui/cycops-ctrl/internal/models/crd/v1alpha1"
+	cyclopsv1alpha1 "github.com/cyclops-ui/cycops-ctrl/api/v1alpha1"
 )
 
 type ModuleInterface interface {
-	List(opts metav1.ListOptions) ([]v1alpha1.Module, error)
-	Get(name string) (*v1alpha1.Module, error)
-	Create(*v1alpha1.Module) (*v1alpha1.Module, error)
-	Update(*v1alpha1.Module) (*v1alpha1.Module, error)
+	List(opts metav1.ListOptions) ([]cyclopsv1alpha1.Module, error)
+	Get(name string) (*cyclopsv1alpha1.Module, error)
+	Create(*cyclopsv1alpha1.Module) (*cyclopsv1alpha1.Module, error)
+	Update(*cyclopsv1alpha1.Module) (*cyclopsv1alpha1.Module, error)
 	Watch(opts metav1.ListOptions) (watch.Interface, error)
 	Delete(name string) error
 	// ...
@@ -26,8 +26,8 @@ type moduleClient struct {
 	ns         string
 }
 
-func (c *moduleClient) List(opts metav1.ListOptions) ([]v1alpha1.Module, error) {
-	result := v1alpha1.ModuleList{}
+func (c *moduleClient) List(opts metav1.ListOptions) ([]cyclopsv1alpha1.Module, error) {
+	result := cyclopsv1alpha1.ModuleList{}
 	err := c.restClient.
 		Get().
 		Namespace(c.ns).
@@ -38,8 +38,8 @@ func (c *moduleClient) List(opts metav1.ListOptions) ([]v1alpha1.Module, error) 
 	return result.Items, err
 }
 
-func (c *moduleClient) Get(name string) (*v1alpha1.Module, error) {
-	result := v1alpha1.Module{}
+func (c *moduleClient) Get(name string) (*cyclopsv1alpha1.Module, error) {
+	result := cyclopsv1alpha1.Module{}
 	err := c.restClient.
 		Get().
 		Namespace(c.ns).
@@ -51,8 +51,8 @@ func (c *moduleClient) Get(name string) (*v1alpha1.Module, error) {
 	return &result, err
 }
 
-func (c *moduleClient) Create(project *v1alpha1.Module) (*v1alpha1.Module, error) {
-	result := v1alpha1.Module{}
+func (c *moduleClient) Create(project *cyclopsv1alpha1.Module) (*cyclopsv1alpha1.Module, error) {
+	result := cyclopsv1alpha1.Module{}
 	err := c.restClient.
 		Post().
 		Namespace(c.ns).
@@ -65,8 +65,8 @@ func (c *moduleClient) Create(project *v1alpha1.Module) (*v1alpha1.Module, error
 }
 
 // Update takes the representation of a service and updates it. Returns the server's representation of the service, and an error, if there is any.
-func (c *moduleClient) Update(module *v1alpha1.Module) (project *v1alpha1.Module, err error) {
-	result := &v1alpha1.Module{}
+func (c *moduleClient) Update(module *cyclopsv1alpha1.Module) (project *cyclopsv1alpha1.Module, err error) {
+	result := &cyclopsv1alpha1.Module{}
 	err = c.restClient.Put().
 		Namespace(c.ns).
 		Resource("modules").

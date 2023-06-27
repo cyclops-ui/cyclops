@@ -7,9 +7,9 @@ import (
 
 	"github.com/go-redis/redis/v8"
 
+	cyclopsv1alpha1 "github.com/cyclops-ui/cycops-ctrl/api/v1alpha1"
 	git "github.com/cyclops-ui/cycops-ctrl/internal/git/templates"
 	"github.com/cyclops-ui/cycops-ctrl/internal/models"
-	"github.com/cyclops-ui/cycops-ctrl/internal/models/crd/v1alpha1"
 )
 
 const (
@@ -68,7 +68,7 @@ func (s *Storage) GetConfigByVersion(name, version string) (models.Template, err
 	return config, nil
 }
 
-func (s *Storage) GetConfig(ref v1alpha1.TemplateRef) (models.Template, error) {
+func (s *Storage) GetConfig(ref cyclopsv1alpha1.TemplateRef) (models.Template, error) {
 	if ref.TemplateGitRef.Repo != "" {
 		return git.LoadTemplate(ref.TemplateGitRef.Repo, ref.TemplateGitRef.Path)
 	}

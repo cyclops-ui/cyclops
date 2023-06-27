@@ -5,29 +5,30 @@ import (
 	"encoding/json"
 	"strings"
 
-	"github.com/cyclops-ui/cycops-ctrl/internal/models"
-	"github.com/cyclops-ui/cycops-ctrl/internal/models/crd/v1alpha1"
-	"github.com/cyclops-ui/cycops-ctrl/internal/models/dto"
-	template2 "github.com/cyclops-ui/cycops-ctrl/internal/template"
 	"gopkg.in/yaml.v2"
 	appsv1 "k8s.io/api/apps/v1"
 	apiv1 "k8s.io/api/core/v1"
 	v1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes/scheme"
+
+	cyclopsv1alpha1 "github.com/cyclops-ui/cycops-ctrl/api/v1alpha1"
+	"github.com/cyclops-ui/cycops-ctrl/internal/models"
+	"github.com/cyclops-ui/cycops-ctrl/internal/models/dto"
+	template2 "github.com/cyclops-ui/cycops-ctrl/internal/template"
 )
 
-func (k *KubernetesClient) ListModules() ([]v1alpha1.Module, error) {
+func (k *KubernetesClient) ListModules() ([]cyclopsv1alpha1.Module, error) {
 	moduleList, err := k.moduleset.Modules(cyclopsNamespace).List(metav1.ListOptions{})
 	return moduleList, err
 }
 
-func (k *KubernetesClient) CreateModule(module v1alpha1.Module) error {
+func (k *KubernetesClient) CreateModule(module cyclopsv1alpha1.Module) error {
 	_, err := k.moduleset.Modules(cyclopsNamespace).Create(&module)
 	return err
 }
 
-func (k *KubernetesClient) UpdateModule(module v1alpha1.Module) error {
+func (k *KubernetesClient) UpdateModule(module cyclopsv1alpha1.Module) error {
 	//if err := k.moduleset.Modules("default").Delete(module.Name); err != nil {
 	//	return err
 	//}
@@ -54,7 +55,7 @@ func (k *KubernetesClient) DeleteModule(name string) error {
 	return k.moduleset.Modules(cyclopsNamespace).Delete(name)
 }
 
-func (k *KubernetesClient) GetModule(name string) (*v1alpha1.Module, error) {
+func (k *KubernetesClient) GetModule(name string) (*cyclopsv1alpha1.Module, error) {
 	return k.moduleset.Modules(cyclopsNamespace).Get(name)
 }
 
@@ -122,7 +123,7 @@ func (k *KubernetesClient) GetResourcesForModule(name string) ([]dto.Resource, e
 
 func (k *KubernetesClient) GetDeletedResources(
 	resources []dto.Resource,
-	module v1alpha1.Module,
+	module cyclopsv1alpha1.Module,
 	template models.Template,
 ) ([]dto.Resource, error) {
 	manifest, err := template2.HelmTemplate(module, template)

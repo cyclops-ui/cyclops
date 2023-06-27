@@ -3,15 +3,12 @@ package k8sclient
 import (
 	"bytes"
 	"context"
-	"flag"
 	"fmt"
 	"io"
 	"os"
 	"os/exec"
-	"path/filepath"
 	"strings"
 
-	"github.com/cyclops-ui/cycops-ctrl/internal/models/dto"
 	v12 "k8s.io/api/apps/v1"
 	"k8s.io/api/autoscaling/v1"
 	apiv1 "k8s.io/api/core/v1"
@@ -21,11 +18,10 @@ import (
 	"k8s.io/client-go/discovery"
 	"k8s.io/client-go/dynamic"
 	"k8s.io/client-go/kubernetes"
-	"k8s.io/client-go/rest"
-	"k8s.io/client-go/tools/clientcmd"
-	"k8s.io/client-go/util/homedir"
+	ctrl "sigs.k8s.io/controller-runtime"
 
 	"github.com/cyclops-ui/cycops-ctrl/internal/cluster/v1alpha1"
+	"github.com/cyclops-ui/cycops-ctrl/internal/models/dto"
 )
 
 const (
@@ -48,33 +44,34 @@ func New() (*KubernetesClient, error) {
 }
 
 func createLocalClient() (*KubernetesClient, error) {
-	kubeconfigEnv := os.Getenv("LOCAL_DEV")
-	var config *rest.Config
-	var err error
+	//kubeconfigEnv := os.Getenv("LOCAL_DEV")
+	//var config *rest.Config
+	//var err error
+	//
+	//if len(kubeconfigEnv) != 0 {
+	//	var kubeconfig *string
+	//	if home := homedir.HomeDir(); home != "" {
+	//		kubeconfig = flag.String("kubeconfig", filepath.Join(home, ".kube", "config"), "(optional) absolute path to the kubeconfig file")
+	//	} else {
+	//		kubeconfig = flag.String("kubeconfig", "", "absolute path to the kubeconfig file")
+	//	}
+	//	flag.Parse()
+	//
+	//	fmt.Println("loading local config")
+	//
+	//	config, err = clientcmd.BuildConfigFromFlags("", *kubeconfig)
+	//	if err != nil {
+	//		return nil, err
+	//	}
+	//} else {
+	//	fmt.Println("loading in cluster config")
+	//	config, err = rest.InClusterConfig()
+	//	if err != nil {
+	//		return nil, err
+	//	}
+	//}
 
-	if len(kubeconfigEnv) != 0 {
-		var kubeconfig *string
-		if home := homedir.HomeDir(); home != "" {
-			kubeconfig = flag.String("kubeconfig", filepath.Join(home, ".kube", "config"), "(optional) absolute path to the kubeconfig file")
-		} else {
-			kubeconfig = flag.String("kubeconfig", "", "absolute path to the kubeconfig file")
-		}
-		flag.Parse()
-
-		fmt.Println("loading local config")
-
-		config, err = clientcmd.BuildConfigFromFlags("", *kubeconfig)
-		if err != nil {
-			return nil, err
-		}
-	} else {
-		fmt.Println("loading in cluster config")
-		config, err = rest.InClusterConfig()
-		if err != nil {
-			return nil, err
-		}
-	}
-
+	config := ctrl.GetConfigOrDie()
 	clientset, err := kubernetes.NewForConfig(config)
 	if err != nil {
 		return nil, err
