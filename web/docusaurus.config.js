@@ -96,8 +96,8 @@ const config = {
                 to: '/docs/about',
               },
               {
-                label: 'installation',
-                to: '/docs/installation/preerquisites',
+                label: 'Installation',
+                to: '/docs/installation/prerequisites',
               },
               {
                 label: 'Tutorial',
