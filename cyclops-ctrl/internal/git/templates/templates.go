@@ -80,7 +80,7 @@ func LoadTemplate(repoURL, path string) (models.Template, error) {
 		return models.Template{}, err
 	}
 
-	var schema helm.Schema
+	var schema helm.Property
 	if err := json.Unmarshal(b.Bytes(), &schema); err != nil {
 		return models.Template{}, err
 	}

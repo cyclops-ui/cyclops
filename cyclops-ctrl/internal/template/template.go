@@ -1,8 +1,11 @@
 package template
 
 import (
+	"encoding/json"
 	"strconv"
+	"strings"
 
+	"github.com/cyclops-ui/cycops-ctrl/internal/models/dto"
 	"helm.sh/helm/v3/pkg/chart"
 	"helm.sh/helm/v3/pkg/chartutil"
 	"helm.sh/helm/v3/pkg/engine"
@@ -74,18 +77,30 @@ func HelmTemplate(module cyclopsv1alpha1.Module, moduleTemplate models.Template)
 		},
 	}
 
-	fields := templateFieldsMap(moduleTemplate)
+	fields := flatten(moduleTemplate)
 
 	values := make(chartutil.Values)
 	for _, value := range module.Spec.Values {
 		switch fields[value.Name].Type {
 		case "boolean":
 			asBool, _ := strconv.ParseBool(value.Value)
-			values[value.Name] = asBool
+			values = setObjectValue(strings.Split(value.Name, "."), asBool, values)
 		case "string":
-			values[value.Name] = value.Value
+			values = setObjectValue(strings.Split(value.Name, "."), value.Value, values)
 		case "number":
-			values[value.Name] = value.Value
+			values = setObjectValue(strings.Split(value.Name, "."), value.Value, values)
+		case "map":
+			var keyValues []dto.KeyValue
+			if err := json.Unmarshal([]byte(value.Value), &keyValues); err != nil {
+				return "", err
+			}
+
+			asMap := make(map[string]string)
+			for _, kv := range keyValues {
+				asMap[kv.Key] = kv.Value
+			}
+
+			values = setObjectValue(strings.Split(value.Name, "."), asMap, values)
 		}
 	}
 
@@ -100,12 +115,48 @@ func HelmTemplate(module cyclopsv1alpha1.Module, moduleTemplate models.Template)
 	return out["all.yaml"], err
 }
 
-func templateFieldsMap(template models.Template) map[string]models.Field {
+func flatten(template models.Template) map[string]models.Field {
 	fields := make(map[string]models.Field)
 
 	for _, field := range template.Fields {
-		fields[field.Name] = field
+		for _, child := range flattenField(field) {
+			fields[child.Name] = child
+		}
 	}
 
 	return fields
+}
+
+func flattenField(field models.Field) []models.Field {
+	if len(field.Properties) == 0 {
+		return []models.Field{field}
+	}
+
+	children := make([]models.Field, 0)
+	for _, child := range field.Properties {
+		children = append(children, flattenField(child)...)
+	}
+
+	out := make([]models.Field, 0)
+	for _, child := range children {
+		child.Name = strings.Join([]string{field.Name, child.Name}, ".")
+		out = append(out, child)
+	}
+
+	return out
+}
+
+func setObjectValue(keyParts []string, value interface{}, values chartutil.Values) chartutil.Values {
+	if len(keyParts) == 1 {
+		values[keyParts[0]] = value
+		return values
+	}
+
+	if _, ok := values[keyParts[0]]; !ok {
+		values[keyParts[0]] = make(chartutil.Values)
+	}
+
+	values[keyParts[0]] = setObjectValue(keyParts[1:], value, values)
+
+	return values
 }

@@ -1,5 +1,6 @@
 import React, {useEffect, useState} from 'react';
 import {
+    Alert,
     Button,
     Col,
     Collapse,
@@ -88,19 +89,60 @@ const ModuleDetails = () => {
         }
     });
 
+    const [error, setError] = useState({
+        message: "",
+        description: "",
+    });
+
     let {moduleName} = useParams();
     useEffect(() => {
         axios.get(window.__RUNTIME_CONFIG__.REACT_APP_CYCLOPS_CTRL_HOST + `/modules/` + moduleName).then(res => {
             setModule(res.data);
-        });
+        }).catch(error => {
+            console.log(error)
+            console.log(error.response)
+            setLoading(false);
+            if (error.response === undefined) {
+                setError({
+                    message: String(error),
+                    description: "Check if Cyclops backend is available on: " + window.__RUNTIME_CONFIG__.REACT_APP_CYCLOPS_CTRL_HOST
+                })
+            } else {
+                setError(error.response.data);
+            }
+        })
 
         axios.get(window.__RUNTIME_CONFIG__.REACT_APP_CYCLOPS_CTRL_HOST + `/modules/` + moduleName + `/resources`).then(res => {
             setResources(res.data);
+        }).catch(error => {
+            console.log(error)
+            console.log(error.response)
+            setLoading(false);
+            if (error.response === undefined) {
+                setError({
+                    message: String(error),
+                    description: "Check if Cyclops backend is available on: " + window.__RUNTIME_CONFIG__.REACT_APP_CYCLOPS_CTRL_HOST
+                })
+            } else {
+                setError(error.response.data);
+            }
         });
 
         setInterval(function () {
             axios.get(window.__RUNTIME_CONFIG__.REACT_APP_CYCLOPS_CTRL_HOST + `/modules/` + moduleName + `/resources`).then(res => {
                 setResources(res.data);
+            }).catch(error => {
+                console.log(error)
+                console.log(error.response)
+                setLoading(false);
+                if (error.response === undefined) {
+                    setError({
+                        message: String(error),
+                        description: "Check if Cyclops backend is available on: " + window.__RUNTIME_CONFIG__.REACT_APP_CYCLOPS_CTRL_HOST
+                    })
+                } else {
+                    setError(error.response.data);
+                }
             });
         }, 5000);
     }, []);
@@ -152,6 +194,18 @@ const ModuleDetails = () => {
     const deleteDeployment = () => {
         axios.delete(window.__RUNTIME_CONFIG__.REACT_APP_CYCLOPS_CTRL_HOST + `/modules/` + moduleName).then(res => {
             window.location.href = "/modules"
+        }).catch(error => {
+            console.log(error)
+            console.log(error.response)
+            setLoading(false);
+            if (error.response === undefined) {
+                setError({
+                    message: String(error),
+                    description: "Check if Cyclops backend is available on: " + window.__RUNTIME_CONFIG__.REACT_APP_CYCLOPS_CTRL_HOST
+                })
+            } else {
+                setError(error.response.data);
+            }
         });
     }
 
@@ -199,7 +253,19 @@ const ModuleDetails = () => {
             } else {
                 setLogs("No logs available");
             }
-        });
+        }).catch(error => {
+            console.log(error)
+            console.log(error.response)
+            setLoading(false);
+            if (error.response === undefined) {
+                setError({
+                    message: String(error),
+                    description: "Check if Cyclops backend is available on: " + window.__RUNTIME_CONFIG__.REACT_APP_CYCLOPS_CTRL_HOST
+                })
+            } else {
+                setError(error.response.data);
+            }
+        });;
     }
 
     const genExtra = (resource: any) => {
@@ -248,8 +314,18 @@ const ModuleDetails = () => {
                                         namespace: resource.namespace,
                                     }
                                 }
-                            ).then(res => {
-
+                            ).then(res => {}).catch(error => {
+                                console.log(error)
+                                console.log(error.response)
+                                setLoading(false);
+                                if (error.response === undefined) {
+                                    setError({
+                                        message: String(error),
+                                        description: "Check if Cyclops backend is available on: " + window.__RUNTIME_CONFIG__.REACT_APP_CYCLOPS_CTRL_HOST
+                                    })
+                                } else {
+                                    setError(error.response.data);
+                                }
                             });
                         }} danger block>Delete</Button>
                     )
@@ -347,6 +423,18 @@ const ModuleDetails = () => {
                                                         } else {
                                                             setLogs("No logs available");
                                                         }
+                                                    }).catch(error => {
+                                                        console.log(error)
+                                                        console.log(error.response)
+                                                        setLoading(false);
+                                                        if (error.response === undefined) {
+                                                            setError({
+                                                                message: String(error),
+                                                                description: "Check if Cyclops backend is available on: " + window.__RUNTIME_CONFIG__.REACT_APP_CYCLOPS_CTRL_HOST
+                                                            })
+                                                        } else {
+                                                            setError(error.response.data);
+                                                        }
                                                     });
                                                     setLogsModal({
                                                         on: true,
@@ -389,8 +477,18 @@ const ModuleDetails = () => {
                                         namespace: resource.namespace,
                                     }
                                 }
-                            ).then(res => {
-
+                            ).then(res => {}).catch(error => {
+                                console.log(error)
+                                console.log(error.response)
+                                setLoading(false);
+                                if (error.response === undefined) {
+                                    setError({
+                                        message: String(error),
+                                        description: "Check if Cyclops backend is available on: " + window.__RUNTIME_CONFIG__.REACT_APP_CYCLOPS_CTRL_HOST
+                                    })
+                                } else {
+                                    setError(error.response.data);
+                                }
                             });
                         }} danger block>Delete</Button>
                     )
@@ -435,6 +533,19 @@ const ModuleDetails = () => {
 
     return (
         <div>
+            {
+                error.message.length !== 0 && <Alert
+                    message={error.message}
+                    description={error.description}
+                    type="error"
+                    closable
+                    afterClose={() => {setError({
+                        message: "",
+                        description: "",
+                    })}}
+                    style={{marginBottom: '20px'}}
+                />
+            }
             <Row gutter={[40, 0]}>
                 <Col span={9}>
                     <Title level={1}>
@@ -471,7 +582,7 @@ const ModuleDetails = () => {
             <Row gutter={[40, 0]}>
                 <Col>
                     <Button onClick={function () {
-                        window.location.href = "/modules/" + module.name + "/edit"
+                        window.location.href = "/modules/" + moduleName + "/edit"
                     }} block>Edit</Button>
                 </Col>
                 <Col>

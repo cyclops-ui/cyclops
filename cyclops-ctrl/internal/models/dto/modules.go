@@ -61,3 +61,8 @@ func (d *DeleteResource) GetDeleted() bool {
 }
 
 func (d *DeleteResource) SetDeleted(_ bool) {}
+
+type KeyValue struct {
+	Key   string `json:"key"`
+	Value string `json:"value"`
+}

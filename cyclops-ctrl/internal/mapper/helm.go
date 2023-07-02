@@ -7,16 +7,17 @@ import (
 	"github.com/cyclops-ui/cycops-ctrl/internal/models/helm"
 )
 
-func HelmSchemaToFields(schema helm.Schema) []models.Field {
+func HelmSchemaToFields(schema helm.Property) []models.Field {
 	fields := make([]models.Field, 0, len(schema.Properties))
 
 	for name, property := range schema.Properties {
 		fields = append(fields, models.Field{
 			Name:        name,
 			Description: property.Description,
-			Type:        mapHelmPropertyTypeToFieldType(property.Type),
+			Type:        mapHelmPropertyTypeToFieldType(property),
 			DisplayName: name,
 			ManifestKey: name,
+			Properties:  HelmSchemaToFields(property),
 		})
 	}
 
@@ -37,15 +38,21 @@ func sortFields(fields []models.Field, order []string) []models.Field {
 	return fields
 }
 
-func mapHelmPropertyTypeToFieldType(helmType string) string {
-	switch helmType {
+func mapHelmPropertyTypeToFieldType(property helm.Property) string {
+	switch property.Type {
 	case "string":
 		return "string"
 	case "integer":
 		return "number"
 	case "boolean":
 		return "boolean"
+	case "object":
+		if len(property.Properties) == 0 {
+			return "map"
+		}
+
+		return "object"
 	default:
-		return "string"
+		return property.Type
 	}
 }
