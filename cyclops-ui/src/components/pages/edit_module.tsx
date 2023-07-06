@@ -271,8 +271,6 @@ const EditModule = () => {
     function mapFields(fields: any[], parent: string, level: number) {
         const formFields: {} | any = [];
         fields.forEach((field: any) => {
-            console.log(field.name, level)
-
             let fieldName = parent === "" ? field.name : parent.concat(".").concat(field.name)
 
             switch (field.type) {
@@ -303,9 +301,11 @@ const EditModule = () => {
                     )
                     return;
                 case "boolean":
+                    const map = new Map(Object.entries(module.values));
+                    let checked = map.get(field.name) == "true" ? "checked" : "unchecked"
                     formFields.push(
                         <Form.Item initialValue={field.initialValue} name={fieldName} id={fieldName}
-                                   label={field.display_name} labelCol={{span: 4 + level}}>
+                                   label={field.display_name} valuePropName={checked}>
                             <Switch />
                         </Form.Item>
                     )
@@ -327,9 +327,14 @@ const EditModule = () => {
                     }
 
                     formFields.push(
-                        <Col span={level === 0 ? 19 : 24} offset={level === 0 ? 2 : 0} style={{paddingBottom: "15px"}}>
+                        <Col span={24} offset={level === 0 ? 2 : 0} style={{paddingBottom: "0px"}}>
                             <Collapse defaultActiveKey={fieldName}>
-                                <Collapse.Panel key={fieldName} header={header}>
+                                <Collapse.Panel key={fieldName} header={header} style={{
+                                    paddingLeft: "0px",
+                                    paddingRight: "0px",
+                                    marginLeft: "0px",
+                                    marginRight: "0px",
+                                }}>
                                     {mapFields(field.properties, fieldName, level + 1)}
                                 </Collapse.Panel>
                             </Collapse>

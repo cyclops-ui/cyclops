@@ -1,6 +1,8 @@
 package mapper
 
 import (
+	"fmt"
+	"reflect"
 	"sort"
 
 	"github.com/cyclops-ui/cycops-ctrl/internal/models"
@@ -55,4 +57,42 @@ func mapHelmPropertyTypeToFieldType(property helm.Property) string {
 	default:
 		return property.Type
 	}
+}
+
+func initialValue(name string, property helm.Property, initialValues interface{}) (interface{}, interface{}) {
+	//fmt.Println("start", name, initialValues)
+	if initialValues == nil {
+		fmt.Println(name, "je nil")
+		return nil, nil
+	}
+
+	fmt.Println(name, property.Type)
+	if property.Type == "object" {
+		valuesMap, ok := initialValues.(map[interface{}]interface{})
+		if !ok {
+			fmt.Println(name, "nije cast")
+			fmt.Println(name, reflect.TypeOf(initialValues))
+			return nil, nil
+		}
+
+		if next, ok := valuesMap[name]; !ok {
+			fmt.Println(name, "nemam ga")
+
+			for i, i2 := range valuesMap {
+				fmt.Println("\t", i, i2)
+			}
+
+			return nil, nil
+		} else {
+			fmt.Println(name, "nije list")
+			return nil, next
+		}
+	}
+
+	//if value, ok := initialValues; ok {
+	//	return value, nil
+	//}
+
+	fmt.Println(name, initialValues)
+	return initialValues, nil
 }
