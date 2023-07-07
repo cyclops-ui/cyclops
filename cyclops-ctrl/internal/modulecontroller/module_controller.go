@@ -111,7 +111,7 @@ func (r *ModuleReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctr
 
 	r.logger.Info("upsert module", "namespaced name", req.NamespacedName)
 	if err := r.moduleToResources(req.Name); err != nil {
-		r.logger.Error(err, "error on delete module", "namespaced name", req.NamespacedName)
+		r.logger.Error(err, "error on upsert module", "namespaced name", req.NamespacedName)
 		return ctrl.Result{}, err
 	}
 
