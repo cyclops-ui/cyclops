@@ -68,7 +68,7 @@ func HelmTemplate(module cyclopsv1alpha1.Module, moduleTemplate models.Template)
 		Lock:     &chart.Lock{},
 		Values:   map[string]interface{}{},
 		Schema:   []byte{},
-		Files:    []*chart.File{},
+		Files:    moduleTemplate.Files,
 		Templates: []*chart.File{
 			{
 				Name: "all.yaml",
@@ -153,10 +153,10 @@ func setObjectValue(keyParts []string, value interface{}, values chartutil.Value
 	}
 
 	if _, ok := values[keyParts[0]]; !ok {
-		values[keyParts[0]] = make(chartutil.Values)
+		values[keyParts[0]] = setObjectValue(keyParts[1:], value, make(chartutil.Values))
+	} else {
+		values[keyParts[0]] = setObjectValue(keyParts[1:], value, values[keyParts[0]].(chartutil.Values))
 	}
-
-	values[keyParts[0]] = setObjectValue(keyParts[1:], value, values)
 
 	return values
 }

@@ -22,11 +22,10 @@ import (
 	"strings"
 
 	"github.com/go-logr/logr"
-	appsv1 "k8s.io/api/apps/v1"
-	v1 "k8s.io/api/core/v1"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
+	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/runtime"
-	"k8s.io/client-go/kubernetes/scheme"
+	"k8s.io/apimachinery/pkg/util/yaml"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/log"
@@ -149,7 +148,7 @@ func generateResources(kClient *k8sclient.KubernetesClient, module cyclopsv1alph
 		return err
 	}
 
-	objects := make([]runtime.Object, 0, 0)
+	//objects := make([]runtime.Object, 0, 0)
 
 	for _, s := range strings.Split(out, "---") {
 		s := strings.TrimSpace(s)
@@ -157,42 +156,56 @@ func generateResources(kClient *k8sclient.KubernetesClient, module cyclopsv1alph
 			continue
 		}
 
-		obj, _, err := scheme.Codecs.UniversalDeserializer().Decode([]byte(s), nil, nil)
-		if err != nil {
+		var obj unstructured.Unstructured
+
+		decoder := yaml.NewYAMLOrJSONDecoder(strings.NewReader(s), len(s))
+		if err := decoder.Decode(&obj); err != nil {
+			panic(err)
+		}
+
+		labels := obj.GetLabels()
+		if labels == nil {
+			labels = make(map[string]string)
+		}
+
+		labels["cyclops.module"] = module.Name
+		obj.SetLabels(labels)
+
+		if err := kClient.CreateDynamic(&obj); err != nil {
 			return err
 		}
-
-		objects = append(objects, obj)
 	}
 
-	for _, object := range objects {
-		switch rs := object.(type) {
-		case *appsv1.Deployment:
-			labels := rs.GetLabels()
-			if labels == nil {
-				labels = make(map[string]string)
-			}
-
-			labels["cyclops.module"] = module.Name
-			rs.SetLabels(labels)
-
-			if err := kClient.Deploy(rs); err != nil {
-				return err
-			}
-		case *v1.Service:
-			labels := rs.GetLabels()
-			if labels == nil {
-				labels = make(map[string]string)
-			}
-
-			labels["cyclops.module"] = module.Name
-			rs.SetLabels(labels)
-
-			if err := kClient.DeployService(rs); err != nil {
-				return err
-			}
-		}
-	}
+	//for _, object := range objects {
+	//	switch rs := object.(type) {
+	//	case *appsv1.Deployment:
+	//		labels := rs.GetLabels()
+	//		if labels == nil {
+	//			labels = make(map[string]string)
+	//		}
+	//
+	//		labels["cyclops.module"] = module.Name
+	//		rs.SetLabels(labels)
+	//
+	//		if err := kClient.Deploy(rs); err != nil {
+	//			return err
+	//		}
+	//	case *v1.Service:
+	//		labels := rs.GetLabels()
+	//		if labels == nil {
+	//			labels = make(map[string]string)
+	//		}
+	//
+	//		labels["cyclops.module"] = module.Name
+	//		rs.SetLabels(labels)
+	//
+	//		if err := kClient.DeployService(rs); err != nil {
+	//			return err
+	//		}
+	//	default:
+	//
+	//	}
+	//}
 
 	return nil
 }

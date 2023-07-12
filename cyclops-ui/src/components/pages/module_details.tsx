@@ -3,13 +3,13 @@ import {
     Alert,
     Button,
     Col,
-    Collapse,
+    Collapse, Descriptions,
     Divider,
     Form,
     Input,
-    InputNumber,
+    InputNumber, List,
     Modal,
-    Row, Space,
+    Row, Space, Spin,
     Switch,
     Table,
     Tabs,
@@ -74,6 +74,8 @@ const ModuleDetails = () => {
     })
     const [logs, setLogs] = useState('');
     const [loading, setLoading] = useState(false);
+    const [loadModule, setLoadModule] = useState(false);
+    const [loadResources, setLoadResources] = useState(false);
     const [deleteName, setDeleteName] = useState("");
     const [resources, setResources] = useState([]);
     const [module, setModule] = useState<module>({
@@ -98,10 +100,12 @@ const ModuleDetails = () => {
     useEffect(() => {
         axios.get(window.__RUNTIME_CONFIG__.REACT_APP_CYCLOPS_CTRL_HOST + `/modules/` + moduleName).then(res => {
             setModule(res.data);
+            setLoadModule(true);
         }).catch(error => {
             console.log(error)
             console.log(error.response)
             setLoading(false);
+            setLoadModule(true);
             if (error.response === undefined) {
                 setError({
                     message: String(error),
@@ -114,10 +118,12 @@ const ModuleDetails = () => {
 
         axios.get(window.__RUNTIME_CONFIG__.REACT_APP_CYCLOPS_CTRL_HOST + `/modules/` + moduleName + `/resources`).then(res => {
             setResources(res.data);
+            setLoadResources(true);
         }).catch(error => {
             console.log(error)
             console.log(error.response)
             setLoading(false);
+            setLoadResources(true);
             if (error.response === undefined) {
                 setError({
                     message: String(error),
@@ -273,7 +279,7 @@ const ModuleDetails = () => {
             return (
                 <Row gutter={[0, 8]}>
                     <Col span={15} style={{display: 'flex', justifyContent: 'flex-start'}}>
-                        {resource.kind}
+                        {resource.kind} / {resource.name}
                     </Col>
                     <Col span={9} style={{display: 'flex', justifyContent: 'flex-end'}}>
                         <WarningFilled style={{color: 'red', right: "0px", fontSize: '20px'}}/>
@@ -282,10 +288,46 @@ const ModuleDetails = () => {
             );
         } else {
             return (
-                <Row>{resource.kind}</Row>
+                <Row>{resource.kind} / {resource.name}</Row>
             );
         }
     }
+
+    const configMapData = (resource: any) => {
+        if (resource.data) {
+            return <Descriptions style={{width: "100%"}} bordered>
+                {Object.entries<string>(resource.data).map(([key, dataValue]) => (
+                    <Descriptions.Item key={key} labelStyle={{width: "20%"}} label={key} span={24} >
+                        {configMapDataValues(dataValue)}
+                    </Descriptions.Item>
+                ))}
+            </Descriptions>
+        }
+    }
+
+    const configMapDataValues = (data: string) => {
+        const lines = data.split('\n').length;
+
+        if (lines > 1) {
+            return <AceEditor
+                value={data}
+                readOnly={true}
+                width="100%"
+                height={calculateEditorHeight(data, lines)}
+            />
+        } else {
+            return data
+        }
+    }
+
+    const calculateEditorHeight = (data: string, lines: number) => {
+        if (lines > 20) {
+            return '320px'
+        } else {
+            return '${lines * 16}px'
+        }
+
+    };
 
     resources.forEach((resource: any) => {
         switch (resource.kind) {
@@ -334,7 +376,7 @@ const ModuleDetails = () => {
                 let statusIcon = resource.status ? <CheckCircleTwoTone style={{fontSize: '200%', verticalAlign: 'middle'}} twoToneColor={'blue'} /> :
                     <CloseSquareTwoTone style={{fontSize: '200%', verticalAlign: 'middle'}} twoToneColor={'red'} />
                 resourceCollapses.push(
-                    <Collapse.Panel header={genExtra(resource)} key='deployment'>
+                    <Collapse.Panel header={genExtra(resource)} key={"deployment/" + resource.namespace + "/" + resource.name}>
                         <Row>
                             <Col>
                                 {deletedWarning}
@@ -495,7 +537,7 @@ const ModuleDetails = () => {
                 }
 
                 resourceCollapses.push(
-                    <Collapse.Panel header={genExtra(resource)} key='service' style={{color: "red"}}>
+                    <Collapse.Panel header={genExtra(resource)} key={"service/" + resource.namespace + "/" + resource.name}>
                         <Row>
                             <Col>
                                 {deletedWarning}
@@ -528,8 +570,137 @@ const ModuleDetails = () => {
                     </Collapse.Panel>
                 )
                 return;
+            case "ConfigMap":
+                var deletedWarning = (<p/>)
+
+                if (resource.deleted) {
+                    deletedWarning = (
+                        <Tooltip title={"The resource is not a part of the Module and can be deleted"} trigger="click">
+                            <WarningFilled style={{color: 'red', right: "0px", fontSize: '30px', paddingRight: "5px"}}/>
+                        </Tooltip>
+                    )
+                }
+
+                var deleteButton = (<p/>)
+
+                if (resource.deleted) {
+                    deleteButton = (
+                        <Button onClick={function () {
+                            axios.delete(window.__RUNTIME_CONFIG__.REACT_APP_CYCLOPS_CTRL_HOST + `/modules/` + moduleName + `/resources`, {
+                                    data: {
+                                        group: resource.group,
+                                        version: resource.version,
+                                        kind: resource.kind,
+                                        name: resource.name,
+                                        namespace: resource.namespace,
+                                    }
+                                }
+                            ).then(res => {}).catch(error => {
+                                console.log(error)
+                                console.log(error.response)
+                                setLoading(false);
+                                if (error.response === undefined) {
+                                    setError({
+                                        message: String(error),
+                                        description: "Check if Cyclops backend is available on: " + window.__RUNTIME_CONFIG__.REACT_APP_CYCLOPS_CTRL_HOST
+                                    })
+                                } else {
+                                    setError(error.response.data);
+                                }
+                            });
+                        }} danger block>Delete</Button>
+                    )
+                }
+
+                resourceCollapses.push(
+                    <Collapse.Panel header={genExtra(resource)} key={"configmap/" + resource.namespace + "/" + resource.name}>
+                        <Row>
+                            <Col>
+                                {deletedWarning}
+                            </Col>
+                            <Col span={19}>
+                                <Title level={3}>{resource.name}</Title>
+                            </Col>
+                            <Col span={4} style={{display: 'flex', justifyContent: 'flex-end'}}>
+                                {deleteButton}
+                            </Col>
+                        </Row>
+                        <Row>
+                            <Title level={4}>{resource.namespace}</Title>
+                        </Row>
+                        <Row>
+                            <Col style={{ float: "right" }}>
+                                <Button onClick={function () {
+                                    setManifestModal({
+                                        on: true,
+                                        kind: resource.kind,
+                                        name: resource.name,
+                                        namespace: resource.namespace,
+                                    })
+                                }} block>View Manifest</Button>
+                            </Col>
+                        </Row>
+                        <Row>
+                            <Title level={4} style={{paddingTop: "15px"}}>Data</Title>
+                        </Row>
+                        <Row>
+                            {configMapData(resource)}
+                        </Row>
+                    </Collapse.Panel>
+                )
+                return;
         }
     })
+
+    const resourcesLoading = () => {
+        if (loadResources === true) {
+            return <Collapse defaultActiveKey={['deployment']}>
+                {resourceCollapses}
+            </Collapse>
+        } else {
+            return <Spin tip="Loading" size="large"/>
+        }
+    }
+
+    const moduleLoading = () => {
+        if (loadModule === true) {
+            return <div>
+                <Row gutter={[40, 0]}>
+                    <Col span={9}>
+                        <Title level={1}>
+                            {module.name}
+                        </Title>
+                    </Col>
+                </Row>
+                <Row gutter={[40, 0]}>
+                    <Col span={9}>
+                        <Title level={3}>
+                            {module.namespace}
+                        </Title>
+                    </Col>
+                </Row>
+                <Row gutter={[40, 0]}>
+                    <Col span={9}>
+                        { module.template.name.length !== 0 &&
+                            <Link aria-level={3} href={`/configurations/` + module.template}>
+                                <LinkOutlined/>
+                                { module.template.name.length !== 0 && module.template.name + '@' + module.template.version }
+                            </Link>
+                        }
+
+                        { module.template.name.length === 0 &&
+                            <Link aria-level={3} href={ module.template.git.repo + `/tree/main/` + module.template.git.path }>
+                                <LinkOutlined/>
+                                { module.template.name.length === 0 && ' Template ref' }
+                            </Link>
+                        }
+                    </Col>
+                </Row>
+            </div>
+        } else {
+            return <Spin tip="Loading"/>
+        }
+    }
 
     return (
         <div>
@@ -546,37 +717,7 @@ const ModuleDetails = () => {
                     style={{marginBottom: '20px'}}
                 />
             }
-            <Row gutter={[40, 0]}>
-                <Col span={9}>
-                    <Title level={1}>
-                        {module.name}
-                    </Title>
-                </Col>
-            </Row>
-            <Row gutter={[40, 0]}>
-                <Col span={9}>
-                    <Title level={3}>
-                        {module.namespace}
-                    </Title>
-                </Col>
-            </Row>
-            <Row gutter={[40, 0]}>
-                <Col span={9}>
-                    { module.template.name.length !== 0 &&
-                        <Link aria-level={3} href={`/configurations/` + module.template}>
-                            <LinkOutlined/>
-                            { module.template.name.length !== 0 && module.template.name + '@' + module.template.version }
-                        </Link>
-                    }
-
-                    { module.template.name.length === 0 &&
-                        <Link aria-level={3} href={ module.template.git.repo + `/tree/main/` + module.template.git.path }>
-                            <LinkOutlined/>
-                            { module.template.name.length === 0 && ' Template ref' }
-                        </Link>
-                    }
-                </Col>
-            </Row>
+            {moduleLoading()}
             <Row><Title></Title></Row>
             <Divider style={{fontSize: '120%'}} orientationMargin="0" orientation={"left"}>Actions</Divider>
             <Row gutter={[40, 0]}>
@@ -592,9 +733,7 @@ const ModuleDetails = () => {
                 </Col>
             </Row>
             <Divider style={{fontSize: '120%'}} orientationMargin="0" orientation={"left"}>Resources</Divider>
-            <Collapse defaultActiveKey={['deployment']}>
-            {resourceCollapses}
-            </Collapse>
+            {resourcesLoading()}
             <Modal
                 title="Delete module"
                 visible={loading}

@@ -12,7 +12,7 @@ import {
     Modal,
     Row,
     Select,
-    Space,
+    Space, Spin,
     Switch, Tooltip,
     Typography
 } from 'antd';
@@ -33,8 +33,8 @@ const {TextArea} = Input;
 
 const {Title} = Typography;
 const layout = {
-    labelCol: {span: 4},
-    wrapperCol: {span: 16},
+    labelCol: {span: 3},
+    wrapperCol: {span: 13},
 };
 
 const EditModule = () => {
@@ -78,12 +78,21 @@ const EditModule = () => {
         new: ""
     })
 
+    const [loadValues, setLoadValues] = useState(false);
+    const [loadTemplate, setLoadTemplate] = useState(false);
+
+    const [activeCollapses, setActiveCollapses] = useState(new Map());
+    const updateActiveCollapses = (k: any, v: any) => {
+        setActiveCollapses(new Map(activeCollapses.set(k,v)));
+    }
+
     const history = useNavigate();
 
     let {moduleName} = useParams();
 
     useEffect(() => {
         axios.get(window.__RUNTIME_CONFIG__.REACT_APP_CYCLOPS_CTRL_HOST + `/modules/` + moduleName).then(res => {
+            setLoadValues(true)
             setModule({
                 name: res.data.name,
                 values: res.data.values,
@@ -109,8 +118,10 @@ const EditModule = () => {
             } else {
                 axios.get(window.__RUNTIME_CONFIG__.REACT_APP_CYCLOPS_CTRL_HOST + `/templates/git?repo=` + res.data.template.git.repo + `&path=` + res.data.template.git.path).then(res => {
                     setConfig(res.data);
+                    setLoadTemplate(true);
                 }).catch(error => {
                     setLoading(false);
+                    setLoadTemplate(true);
                     if (error.response === undefined) {
                         setError({
                             message: String(error),
@@ -252,6 +263,22 @@ const EditModule = () => {
         setMigrating(false);
     };
 
+    const addonAfter = (field: any) => {
+        if (field.description.length !== 0) {
+            return <Tooltip title={field.description} trigger="click">
+                <InfoCircleOutlined/>
+            </Tooltip>
+        }
+    }
+
+    const getCollapseColor = (fieldName: string) => {
+        if (activeCollapses.get(fieldName) && activeCollapses.get(fieldName) === true) {
+            return "#faca93"
+        } else {
+            return "#fae8d4"
+        }
+    }
+
     const handleChange = (value: any) => {
         axios.get(window.__RUNTIME_CONFIG__.REACT_APP_CYCLOPS_CTRL_HOST + `/create-config/` + value).then(res => {
             setConfig(res.data);
@@ -277,12 +304,8 @@ const EditModule = () => {
                 case "string":
                     formFields.push(
                         <Form.Item initialValue={field.initialValue} name={fieldName} id={fieldName}
-                                   label={field.display_name} labelCol={{span: 4 + level}}>
-                            <Input addonAfter={
-                                <Tooltip title={field.description} trigger="click">
-                                    <InfoCircleOutlined/>
-                                </Tooltip>
-                            }/>
+                                   label={field.display_name}>
+                            <Input addonAfter={addonAfter(field)}/>
                         </Form.Item>
                     )
                     return;
@@ -291,18 +314,14 @@ const EditModule = () => {
                         <Form.Item initialValue={field.initialValue} name={fieldName} id={fieldName} label={
                             <Tooltip title={field.description} trigger="click">
                                 {field.display_name}</Tooltip>
-                        } labelCol={{span: 4 + level}}>
-                            <InputNumber style={{width: '100%'}} addonAfter={
-                                <Tooltip title={field.description} trigger="click">
-                                    <InfoCircleOutlined/>
-                                </Tooltip>
-                            }/>
+                        }>
+                            <InputNumber style={{width: '100%'}} addonAfter={addonAfter(field)}/>
                         </Form.Item>
                     )
                     return;
                 case "boolean":
                     const map = new Map(Object.entries(module.values));
-                    let checked = map.get(field.name) == "true" ? "checked" : "unchecked"
+                    let checked = map.get(fieldName) == "true" ? "checked" : "unchecked"
                     formFields.push(
                         <Form.Item initialValue={field.initialValue} name={fieldName} id={fieldName}
                                    label={field.display_name} valuePropName={checked}>
@@ -327,14 +346,21 @@ const EditModule = () => {
                     }
 
                     formFields.push(
-                        <Col span={24} offset={level === 0 ? 2 : 0} style={{paddingBottom: "0px"}}>
-                            <Collapse defaultActiveKey={fieldName}>
-                                <Collapse.Panel key={fieldName} header={header} style={{
-                                    paddingLeft: "0px",
-                                    paddingRight: "0px",
-                                    marginLeft: "0px",
-                                    marginRight: "0px",
-                                }}>
+                        <Col span={level === 0 ? 16 : 24} offset={level === 0 ? 2 : 0} style={{
+                            paddingBottom: "15px",
+                            paddingLeft: "0px",
+                            paddingRight: "0px",
+                            marginLeft: "0px",
+                            marginRight: "0px",
+                        }}>
+                            <Collapse size={"small"} onChange={function (value: string | string[]) {
+                                if (value.length === 0) {
+                                    updateActiveCollapses(fieldName, false)
+                                } else {
+                                    updateActiveCollapses(fieldName, true)
+                                }
+                            }}>
+                                <Collapse.Panel key={fieldName} header={header} style={{backgroundColor: getCollapseColor(fieldName)}} forceRender={true}>
                                     {mapFields(field.properties, fieldName, level + 1)}
                                 </Collapse.Panel>
                             </Collapse>
@@ -343,7 +369,7 @@ const EditModule = () => {
                     return;
                 case "map":
                     formFields.push(
-                        <Form.Item name={fieldName} label={field.display_name} labelCol={{span: 4 + level}}>
+                        <Form.Item name={fieldName} label={field.display_name}>
                             <Form.List name={fieldName}>
                                 {(fields, {add, remove}) => (
                                     <>
@@ -381,6 +407,12 @@ const EditModule = () => {
         })
 
         return formFields
+    }
+
+    const formLoading = () => {
+        if (loadTemplate === false || loadValues === false) {
+            return <Spin tip="Loading" size="large" style={{alignContent: "center"}}/>
+        }
     }
 
     return (
@@ -448,6 +480,7 @@ const EditModule = () => {
                         <Divider orientation="left" orientationMargin="0">
                             Edit Module
                         </Divider>
+                        {formLoading()}
                         {mapFields (config.fields, "" , 0)}
                         <div style={{textAlign: "right"}}>
                             <Button type="primary" htmlType="submit" name="Save">

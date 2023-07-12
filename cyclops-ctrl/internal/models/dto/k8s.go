@@ -104,6 +104,49 @@ func (s *Service) SetDeleted(deleted bool) {
 	s.Deleted = deleted
 }
 
+type ConfigMap struct {
+	Group     string            `json:"group"`
+	Version   string            `json:"version"`
+	Kind      string            `json:"kind"`
+	Name      string            `json:"name"`
+	Namespace string            `json:"namespace"`
+	Data      map[string]string `json:"data"`
+	Manifest  string            `json:"manifest"`
+	Deleted   bool              `json:"deleted"`
+}
+
+func (c *ConfigMap) GetGroupVersionKind() string {
+	return c.Group + "/" + c.Version + ", Kind=" + c.Kind
+}
+
+func (c *ConfigMap) GetGroup() string {
+	return c.Group
+}
+
+func (c *ConfigMap) GetVersion() string {
+	return c.Version
+}
+
+func (c *ConfigMap) GetKind() string {
+	return c.Kind
+}
+
+func (c *ConfigMap) GetName() string {
+	return c.Name
+}
+
+func (c *ConfigMap) GetNamespace() string {
+	return c.Namespace
+}
+
+func (c *ConfigMap) GetDeleted() bool {
+	return c.Deleted
+}
+
+func (c *ConfigMap) SetDeleted(deleted bool) {
+	c.Deleted = deleted
+}
+
 type Container struct {
 	Name   string            `json:"name"`
 	Image  string            `json:"image"`

@@ -13,6 +13,18 @@ func HelmSchemaToFields(schema helm.Property) []models.Field {
 	fields := make([]models.Field, 0, len(schema.Properties))
 
 	for name, property := range schema.Properties {
+		if property.Type == "array" {
+			fields = append(fields, models.Field{
+				Name:        name,
+				Description: property.Description,
+				Type:        mapHelmPropertyTypeToFieldType(property),
+				DisplayName: name,
+				ManifestKey: name,
+				Items:       arrayItem(property.Items),
+			})
+			continue
+		}
+
 		fields = append(fields, models.Field{
 			Name:        name,
 			Description: property.Description,
@@ -48,6 +60,8 @@ func mapHelmPropertyTypeToFieldType(property helm.Property) string {
 		return "number"
 	case "boolean":
 		return "boolean"
+	case "array":
+		return "array"
 	case "object":
 		if len(property.Properties) == 0 {
 			return "map"
@@ -56,6 +70,17 @@ func mapHelmPropertyTypeToFieldType(property helm.Property) string {
 		return "object"
 	default:
 		return property.Type
+	}
+}
+
+func arrayItem(item *helm.Property) *models.Field {
+	if item == nil {
+		return nil
+	}
+
+	return &models.Field{
+		Type:       item.Type,
+		Properties: HelmSchemaToFields(*item),
 	}
 }
 
