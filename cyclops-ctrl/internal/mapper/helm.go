@@ -80,4 +80,4 @@ func arrayItem(item *helm.Property) *models.Field {
 		Type:       item.Type,
 		Properties: HelmSchemaToFields(*item),
 	}
-}g
+}
