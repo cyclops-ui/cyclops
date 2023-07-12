@@ -218,19 +218,18 @@ const NewModule = () => {
                 message: "",
                 description: "",
             });
-            setSuccessLoad(true);
-            setLoadingTemplate(false);
+            // setSuccessLoad(true);
+            // setLoadingTemplate(false);
         }).catch(function (error) {
-            setLoadingTemplate(false);
+            // setLoadingTemplate(false);
+            // setSuccessLoad(false);
             if (error.response === undefined) {
                 setError({
                     message: String(error),
                     description: "Check if Cyclops backend is available on: " + window.__RUNTIME_CONFIG__.REACT_APP_CYCLOPS_CTRL_HOST
                 })
-                setSuccessLoad(false);
             } else {
                 setError(error.response.data);
-                setSuccessLoad(false);
             }
         });
     }
