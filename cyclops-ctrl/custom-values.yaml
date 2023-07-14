@@ -1,0 +1,358 @@
+# Default values for devnet.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+nameOverride: ""
+fullnameOverride: ""
+
+nodeSelector: {}
+
+tolerations: []
+
+affinity: {}
+
+resources:
+  node:
+    # Default values for resources for chain and validator nodes
+    # Preference would be given to the resources directive in chain/relayer
+    cpu: "0.5"
+    memory: "500M"
+  wait:
+    cpu: "0.1"
+    memory: "100M"
+
+exposer:
+  image: ghcr.io/cosmology-tech/starship/exposer:20230617-eea58bd
+  ports:
+    rest: 8081
+  resources:
+    cpu: "0.2"
+    memory: "200M"
+
+faucet:
+  image: ghcr.io/cosmology-tech/starship/cosmjs-faucet:v0.31.0
+  ports:
+    rest: 8000
+  resources:
+    cpu: "0.2"
+    memory: "200M"
+
+# Chain timeouts
+timeouts:
+  time_iota_ms: 10
+  timeout_propose: 400ms
+  timeout_propose_delta: 400ms
+  timeout_prevote: 400ms
+  timeout_prevote_delta: 400ms
+  timeout_precommit: 400ms
+  timeout_precommit_delta: 400ms
+  timeout_commit: 800ms
+
+# API for interacting with the charts for devnet
+# TODO: need a way to create state reaching jobs, those will run user bash scripts
+# after the chain has been initialized, get the chain to a state and then complete
+defaultChains:
+  osmosis:
+    image: ghcr.io/cosmology-tech/starship/osmosis:v15.1.2-wasmvm1.1.2
+    home: /root/.osmosisd
+    binary: osmosisd
+    prefix: osmo
+    denom: uosmo
+    coins: 100000000000000uosmo,100000000000000uion
+    hdPath: m/44'/118'/0'/0/0
+    coinType: 118
+    repo: https://github.com/osmosis-labs/osmosis
+  juno:
+    image: ghcr.io/cosmology-tech/starship/juno:v15.0.0
+    home: /root/.juno
+    binary: junod
+    prefix: juno
+    denom: ujuno
+    coins: 100000000000000ujuno
+    hdPath: m/44'/118'/0'/0/0
+    coinType: 118
+    repo: https://github.com/CosmosContracts/juno
+  wasmd:
+    image: anmol1696/wasmd:latest
+    home: /root/.wasmd
+    binary: wasmd
+    prefix: wasm
+    denom: stake
+    coins: 100000000000000ucosm,100000000000000stake
+    hdPath: m/44'/118'/0'/0/0
+    coinType: 118
+    repo: https://github.com/CosmWasm/wasmd
+  cosmos:
+    image: ghcr.io/cosmology-tech/starship/gaia:v9.1.1
+    home: /root/.gaia
+    binary: gaiad
+    prefix: cosmos
+    denom: uatom
+    coins: 100000000000000stake,100000000000000uatom
+    hdPath: m/44'/118'/0'/0/0
+    coinType: 118
+    repo: https://github.com/cosmos/gaia
+  simapp:
+    image: ghcr.io/cosmology-tech/starship/simapp:v0.47.3
+    home: /root/.simapp
+    binary: simd
+    prefix: cosmos
+    denom: stake
+    coins: 100000000000000stake
+    hdPath: m/44'/118'/0'/0/0
+    coinType: 118
+    repo: https://github.com/cosmos/cosmos-sdk/tree/main/simapp
+  persistencecore:
+    image: anmol1696/persistencecore:latest
+    home: /root/.persistenceCore
+    binary: persistenceCore
+    prefix: persistence
+    denom: uxprt
+    coins: 100000000000000uxprt
+    hdPath: m/44'/118'/0'/0/0
+    coinType: 118
+    repo: https://github.com/persistenceOne/persistenceCore
+  stride:
+    image: ghcr.io/cosmology-tech/starship/stride:v9.2.1
+    home: /root/.stride
+    binary: strided
+    prefix: stride
+    denom: ustrd
+    coins: 100000000000000ustrd
+    hdPath: m/44'/118'/0'/0/0
+    coinType: 118
+    repo: https://github.com/Stride-Labs/stride
+  injective:
+    image: ghcr.io/cosmology-tech/starship/injective:v1.11-1685225746
+    home: /root/.injectived
+    binary: injectived
+    prefix: inj
+    denom: inj
+    coins: 100000000000000inj
+    hdPath: m/44'/60'/0'/0/0
+    coinType: 60
+    repo: https://github.com/InjectiveLabs/injective-chain-releases
+  ics:
+    image: ghcr.io/cosmology-tech/starship/ics:v0.1.0
+    home: /root/.ics
+    binary: interchain-security-pd
+    prefix: cosmos
+    denom: uatom
+    coins: 100000000000000stake,100000000000000uatom
+    hdPath: m/44'/118'/0'/0/0
+    coinType: 118
+    repo: https://github.com/cosmos/interchain-security
+  cronos:
+    image: ghcr.io/cosmology-tech/starship/cronos:v1.0.4
+    home: /root/.cronos
+    binary: cronosd
+    prefix: crc
+    denom: basecro
+    coins: 100000000000000basecro
+    hdPath: m/44'/60'/0'/0/0
+    coinType: 60
+    repo: https://github.com/crypto-org-chain/cronos
+  cryptoorgchain:
+    image: ghcr.io/cosmology-tech/starship/cryptoorgchain:v4.1.2
+    home: /root/.cryptoorgchain
+    binary: chain-maind
+    prefix: cro
+    denom: basecro
+    coins: 100000000000000basecro
+    hdPath: m/44'/118'/0'/0/0
+    coinType: 118
+    repo: https://github.com/crypto-org-chain/chain-main
+  evmos:
+    image: ghcr.io/cosmology-tech/starship/evmos:v12.1.5
+    home: /root/.evmosd
+    binary: evmosd
+    prefix: evmos
+    denom: aevmos
+    coins: 100000000000000aevmos
+    hdPath: m/44'/60'/0'/0/0
+    coinType: 60
+    repo: https://github.com/evmos/evmos
+  regen:
+    image: ghcr.io/cosmology-tech/starship/regen:v5.0.0
+    home: /root/.regen
+    binary: regen
+    prefix: regen
+    denom: uregen
+    coins: 100000000000000uregen
+    hdPath: m/44'/118'/0'/0/0
+    coinType: 118
+    repo: https://github.com/regen-network/regen-ledger
+  quasar:
+    image: ghcr.io/cosmology-tech/starship/quasar:v0.1.1
+    home: /root/.quasarnode
+    binary: quasarnoded
+    prefix: quasar
+    denom: uqsr
+    coins: 100000000000000uqsr
+    hdPath: m/44'/118'/0'/0/0
+    coinType: 118
+    repo: https://github.com/quasar-finance/quasar-preview
+  quicksilver:
+    image: ghcr.io/cosmology-tech/starship/quicksilver:v0.6.6
+    home: /root/.quicksilverd
+    binary: quicksilverd
+    prefix: quick
+    denom: uqck
+    coins: 100000000000000uqck
+    hdPath: m/44'/118'/0'/0/0
+    coinType: 118
+    repo: https://github.com/ingenuity-build/quicksilver
+  sei:
+    image: ghcr.io/cosmology-tech/starship/sei:2.0.46beta
+    home: /root/.seid
+    binary: seid
+    prefix: sei
+    denom: usei
+    coins: 100000000000000usei
+    hdPath: m/44'/118'/0'/0/0
+    coinType: 118
+    repo: https://github.com/sei-protocol/sei-chain
+  sommelier:
+    image: ghcr.io/cosmology-tech/starship/sommelier:v6.0.0
+    home: /root/.sommelier
+    binary: sommelier
+    prefix: somm
+    denom: usomm
+    coins: 100000000000000usomm
+    hdPath: m/44'/118'/0'/0/0
+    coinType: 118
+    repo: https://github.com/PeggyJV/sommelier
+  stargaze:
+    image: ghcr.io/cosmology-tech/starship/stargaze:v10.0.1
+    home: /root/.starsd
+    binary: starsd
+    prefix: stars
+    denom: ustars
+    coins: 100000000000000ustars
+    hdPath: m/44'/118'/0'/0/0
+    coinType: 118
+    repo: https://github.com/public-awesome/stargaze
+  umee:
+    image: ghcr.io/cosmology-tech/starship/umee:v3.1.0
+    home: /root/.umee
+    binary: umeed
+    prefix: umee
+    denom: uumee
+    coins: 100000000000000uumee
+    hdPath: m/44'/118'/0'/0/0
+    coinType: 118
+    repo: https://github.com/umee-network/umee
+
+defaultRelayers:
+  ts-relayer:
+    image: ghcr.io/cosmology-tech/starship/ts-relayer:0.9.0
+  hermes:
+    image: ghcr.io/cosmology-tech/starship/hermes:1.5.1
+
+chains: []
+  # Examples running chains
+  # - name: osmosis-1
+  #   type: osmosis
+  #   numValidators: 4
+  #   upgrade:
+  #     enabled: true
+  #     # type will indicate the way in which the upgrade binaries is supposed to be handled
+  #     # can be build, docker, fetch
+  #     # build: run build scripts for various versions
+  #     # docker (todo): copy binaries from docker images
+  #     # fetch (todo): fetch binaries directly from github releases
+  #     type: build
+  #     genesis: v11.0.1
+  #     upgrades:
+  #       - name: v12
+  #         version: v12.2.0
+  #   faucet:
+  #     # if not mentioned will use the default directive
+  #     # faucet directive will instruct the chart to deploy a certain version
+  #     # of the cosmjs-faucet with the chain. Make sure to use a version compatible
+  #     # with the chain version. Available images: https://github.com/cosmology-tech/starship/pkgs/container/starship%2Fcosmjs-faucet
+  #     image: <faucet image to use>
+  #   ports:
+  #     rpc: 26653
+  #     rest: 1313
+  # - name: core-1
+  #   type: persistencecore
+  #   numValidators: 3
+  #   upgrade:
+  #     enabled: true
+  #     type: build
+  #     genesis: v3.2.0
+  #     upgrades:
+  #       - name: v4
+  #         version: v4.0.0
+  #   ports:
+  #     rpc: 26657
+  #     rest: 1317
+  # - name: core-2
+  #   type: persistencecore
+  #   numValidators: 3
+  #   build:
+  #     # build directive will instruct the chart to build the chain source from
+  #     # given version tag or branch name
+  #     enabled: true
+  #     source: v3.2.0
+  #   ports:
+  #     rpc: 26658
+  #     rest: 1318
+  # - name: juno-1
+  #   type: juno
+  #   numValidators: 2
+  #   ports:
+  #     rpc: 26654
+  #     rest: 1314
+  # - name: wasmd
+  #   type: wasmd
+  #   numValidators: 3
+  #   ports:
+  #     rpc: 26659
+  #     rest: 1319
+
+# TODO: ability to check the srcConnection and destConnection to use
+relayers: []
+# Example relayers, default is set to none
+#  - name: osmo-wasm
+#    type: ts-relayer
+#    replicas: 1 # these are unique replicas, currently only support a single replica
+#    chains:
+#      - osmosis-1
+#      - wasmd
+#  - name: osmo-juno
+#    type: ts-relayer
+#    replicas: 1
+#    chains:
+#      - osmosis-1
+#      - juno-1
+
+explorer:
+  # Flag to enable explorer for cluster
+  enabled: false
+  type: ping-pub
+  image: ghcr.io/cosmology-tech/starship/ping-pub:6b7b0d096946b6bcd75d15350c7345da0d4576db
+  localhost: true
+  ports:
+    rest: 8080
+  # Currently the ping-pub explorer is using alot of memory dues to building the site
+  # at runtime (with custom configs). Anything bellow 2Gi will crash the pods on startup
+  # todo: make this more efficient with faster startuptime
+  resources:
+    cpu: "1"
+    memory: "2Gi"
+
+registry:
+  enabled: false
+  image: ghcr.io/cosmology-tech/starship/registry:20230614-7173db2
+  ports:
+    rest: 6060
+    grpc: 7070
+  resources:
+    cpu: "0.2"
+    memory: "200M"
+
+collector:
+  enabled: false
+

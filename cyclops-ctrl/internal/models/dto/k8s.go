@@ -161,9 +161,92 @@ type ContainerStatus struct {
 }
 
 type Pod struct {
+	Group      string       `json:"group"`
+	Version    string       `json:"version"`
+	Kind       string       `json:"kind"`
 	Name       string       `json:"name"`
+	Namespace  string       `json:"namespace"`
 	Containers []Container  `json:"containers"`
 	Node       string       `json:"node"`
 	PodPhase   string       `json:"podPhase"`
 	Started    *metav1.Time `json:"started"`
+	Manifest   string       `json:"manifest"`
+	Deleted    bool         `json:"deleted"`
+}
+
+func (p *Pod) GetGroupVersionKind() string {
+	return p.Group + "/" + p.Version + ", Kind=" + p.Kind
+}
+
+func (p *Pod) GetGroup() string {
+	return p.Group
+}
+
+func (p *Pod) GetVersion() string {
+	return p.Version
+}
+
+func (p *Pod) GetKind() string {
+	return p.Kind
+}
+
+func (p *Pod) GetName() string {
+	return p.Name
+}
+
+func (p *Pod) GetNamespace() string {
+	return p.Namespace
+}
+
+func (p *Pod) GetDeleted() bool {
+	return p.Deleted
+}
+
+func (p *Pod) SetDeleted(deleted bool) {
+	p.Deleted = deleted
+}
+
+type StatefulSet struct {
+	Group     string `json:"group"`
+	Version   string `json:"version"`
+	Kind      string `json:"kind"`
+	Name      string `json:"name"`
+	Namespace string `json:"namespace"`
+	Replicas  int    `json:"replicas"`
+	Manifest  string `json:"manifest"`
+	Pods      []Pod  `json:"pods"`
+	Status    bool   `json:"status"`
+	Deleted   bool   `json:"deleted"`
+}
+
+func (s *StatefulSet) GetGroupVersionKind() string {
+	return s.Group + "/" + s.Version + ", Kind=" + s.Kind
+}
+
+func (s *StatefulSet) GetGroup() string {
+	return s.Group
+}
+
+func (s *StatefulSet) GetVersion() string {
+	return s.Version
+}
+
+func (s *StatefulSet) GetKind() string {
+	return s.Kind
+}
+
+func (s *StatefulSet) GetName() string {
+	return s.Name
+}
+
+func (s *StatefulSet) GetNamespace() string {
+	return s.Namespace
+}
+
+func (s *StatefulSet) GetDeleted() bool {
+	return s.Deleted
+}
+
+func (s *StatefulSet) SetDeleted(deleted bool) {
+	s.Deleted = deleted
 }

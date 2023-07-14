@@ -5,7 +5,7 @@ import {
     Col,
     Collapse,
     Divider,
-    Form,
+    Form, FormListFieldData,
     Input,
     InputNumber,
     message,
@@ -295,15 +295,21 @@ const EditModule = () => {
         });
     }
 
-    function mapFields(fields: any[], parent: string, level: number) {
+    function mapFields(fields: any[], parent: string, level: number, arrayField?: any) {
         const formFields: {} | any = [];
         fields.forEach((field: any) => {
             let fieldName = parent === "" ? field.name : parent.concat(".").concat(field.name)
 
+            let formItemName = arrayField ? [arrayField.name, fieldName] : fieldName
+
+            if (arrayField) {
+                console.log("ja sam od arraya", fieldName)
+            }
+
             switch (field.type) {
                 case "string":
                     formFields.push(
-                        <Form.Item initialValue={field.initialValue} name={fieldName} id={fieldName}
+                        <Form.Item initialValue={field.initialValue} name={formItemName}
                                    label={field.display_name}>
                             <Input addonAfter={addonAfter(field)}/>
                         </Form.Item>
@@ -311,7 +317,7 @@ const EditModule = () => {
                     return;
                 case "number":
                     formFields.push(
-                        <Form.Item initialValue={field.initialValue} name={fieldName} id={fieldName} label={
+                        <Form.Item initialValue={field.initialValue} name={formItemName} label={
                             <Tooltip title={field.description} trigger="click">
                                 {field.display_name}</Tooltip>
                         }>
@@ -362,6 +368,64 @@ const EditModule = () => {
                             }}>
                                 <Collapse.Panel key={fieldName} header={header} style={{backgroundColor: getCollapseColor(fieldName)}} forceRender={true}>
                                     {mapFields(field.properties, fieldName, level + 1)}
+                                </Collapse.Panel>
+                            </Collapse>
+                        </Col>
+                    )
+                    return;
+                case "array":
+                    var header = <Row>{field.name}</Row>
+
+                    if (field.description && field.description.length !== 0) {
+                        header = <Row gutter={[0, 8]}>
+                            <Col span={15} style={{display: 'flex', justifyContent: 'flex-start'}}>
+                                {field.name}
+                            </Col>
+                            <Col span={9} style={{display: 'flex', justifyContent: 'flex-end'}}>
+                                <Tooltip title={field.description} trigger={["hover", "click"]}>
+                                    <InfoCircleOutlined style={{right: "0px", fontSize: '20px'}}/>
+                                </Tooltip>
+                            </Col>
+                        </Row>
+                    }
+
+                    console.log(new Map(Object.entries(module.values)).get(fieldName) as any[])
+
+                    formFields.push(
+                        <Col span={level === 0 ? 16 : 24} offset={level === 0 ? 2 : 0} style={{
+                            paddingBottom: "15px",
+                            marginLeft: "0px",
+                            marginRight: "0px",
+                            paddingLeft: "0px",
+                            paddingRight: "0px",
+                        }}>
+                            <Collapse size={"small"} onChange={function (value: string | string[]) {
+                                if (value.length === 0) {
+                                    updateActiveCollapses(fieldName, false)
+                                } else {
+                                    updateActiveCollapses(fieldName, true)
+                                }
+                            }}>
+                                <Collapse.Panel key={fieldName} header={header} style={{backgroundColor: getCollapseColor(fieldName)}} forceRender={true}>
+                                    <Form.List name={fieldName}>
+                                        {(arrFields, { add, remove }) => (
+                                            <>
+                                                {arrFields.map((arrField) => (
+                                                    <Col key={arrField.key}>
+                                                        {mapFields(field.items.properties, fieldName.concat(".").concat(arrField.name), level + 1, arrField)}
+                                                        <MinusCircleOutlined onClick={() => remove(arrField.name)} />
+                                                        <Divider/>
+                                                    </Col>
+                                                ))}
+
+                                                <Form.Item>
+                                                    <Button type="dashed" onClick={() => add()} block icon={<PlusOutlined />}>
+                                                        Add sights
+                                                    </Button>
+                                                </Form.Item>
+                                            </>
+                                        )}
+                                    </Form.List>
                                 </Collapse.Panel>
                             </Collapse>
                         </Col>

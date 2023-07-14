@@ -14,6 +14,8 @@ import (
 func RequestToModule(req dto.Module, template models.Template) (cyclopsv1alpha1.Module, error) {
 	fields := fieldsMap(template.Fields)
 
+	fmt.Println(fields["chains"])
+
 	values := make([]cyclopsv1alpha1.ModuleValue, 0, len(req.Values))
 	for k, v := range req.Values {
 		switch fields[k].Type {
@@ -27,6 +29,38 @@ func RequestToModule(req dto.Module, template models.Template) (cyclopsv1alpha1.
 				Name:  k,
 				Value: string(data),
 			})
+		case "array":
+			data, err := json.Marshal(v)
+			if err != nil {
+				return cyclopsv1alpha1.Module{}, err
+			}
+
+			values = append(values, cyclopsv1alpha1.ModuleValue{
+				Name:  k,
+				Value: string(data),
+			})
+		//case "array":
+		//	arrayValues, ok := v.([]interface{})
+		//	if !ok {
+		//		fmt.Println(reflect.TypeOf(v))
+		//		fmt.Println("could not cast into array", v)
+		//		continue
+		//	}
+		//
+		//	for i, arrayValue := range arrayValues {
+		//		recValues, err := setValuesRecursive(arrayValue.(map[string]interface{}), fieldsMap(fields[k].Items.Properties))
+		//		if err != nil {
+		//			fmt.Println("could not get recursive values")
+		//		}
+		//
+		//		for _, value := range recValues {
+		//			values = append(values, cyclopsv1alpha1.ModuleValue{
+		//				Name:  strings.Join([]string{k, fmt.Sprint(i), value.Name}, "."),
+		//				Value: value.Value,
+		//			})
+		//		}
+		//	}
+
 		default:
 			values = append(values, cyclopsv1alpha1.ModuleValue{
 				Name:  k,
@@ -58,6 +92,13 @@ func ModuleToDTO(module cyclopsv1alpha1.Module, template models.Template) (dto.M
 		switch fields[value.Name].Type {
 		case "map":
 			var keyValues []dto.KeyValue
+			if err := json.Unmarshal([]byte(value.Value), &keyValues); err != nil {
+				return dto.Module{}, err
+			}
+
+			values[value.Name] = keyValues
+		case "array":
+			var keyValues []interface{}
 			if err := json.Unmarshal([]byte(value.Value), &keyValues); err != nil {
 				return dto.Module{}, err
 			}
@@ -129,4 +170,46 @@ func fieldsMap(fields []models.Field) map[string]models.Field {
 	}
 
 	return out
+}
+
+func setValuesRecursive(moduleValues map[string]interface{}, fields map[string]models.Field) ([]cyclopsv1alpha1.ModuleValue, error) {
+	values := make([]cyclopsv1alpha1.ModuleValue, 0)
+	for k, v := range moduleValues {
+		switch fields[k].Type {
+		case "map":
+			data, err := json.Marshal(v)
+			if err != nil {
+				return nil, err
+			}
+
+			values = append(values, cyclopsv1alpha1.ModuleValue{
+				Name:  k,
+				Value: string(data),
+			})
+		//case "array":
+		//	//field := fields[k]
+		//
+		//	arrayValue, ok := v.([]interface{})
+		//	if !ok {
+		//		fmt.Println("could not cast into array", v)
+		//	}
+		//
+		//	fmt.Println(arrayValue)
+		//
+		//	for i, value := range arrayValue {
+		//		values = append(values, cyclopsv1alpha1.ModuleValue{
+		//			Name:  strings.Join([]string{k}, "."),
+		//			Value: "",
+		//		})
+		//	}
+
+		default:
+			values = append(values, cyclopsv1alpha1.ModuleValue{
+				Name:  k,
+				Value: fmt.Sprintf("%v", v),
+			})
+		}
+	}
+
+	return values, nil
 }

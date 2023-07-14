@@ -142,6 +142,89 @@ func (k *KubernetesClient) GetResourcesForModule(name string) ([]dto.Resource, e
 		})
 	}
 
+	pods, err := k.clientset.CoreV1().Pods("default").List(context.Background(), metav1.ListOptions{
+		LabelSelector: "cyclops.module=" + name,
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	for _, item := range pods.Items {
+		manifest, err := getManifest(item, "Pods", "v1")
+		if err != nil {
+			return nil, err
+		}
+
+		containers := make([]dto.Container, 0, len(item.Spec.Containers))
+
+		for _, cnt := range item.Spec.Containers {
+			env := make(map[string]string)
+			for _, envVar := range cnt.Env {
+				env[envVar.Name] = envVar.Value
+			}
+
+			var status apiv1.ContainerStatus
+			for _, c := range item.Status.ContainerStatuses {
+				if c.Name == cnt.Name {
+					status = c
+					break
+				}
+			}
+
+			containers = append(containers, dto.Container{
+				Name:   cnt.Name,
+				Image:  cnt.Image,
+				Env:    env,
+				Status: containerStatus(status),
+			})
+		}
+
+		out = append(out, &dto.Pod{
+			Group:      "",
+			Version:    "v1",
+			Kind:       "Pod",
+			Name:       item.Name,
+			Namespace:  item.Namespace,
+			Containers: containers,
+			Node:       item.Spec.NodeName,
+			PodPhase:   string(item.Status.Phase),
+			Started:    item.Status.StartTime,
+			Manifest:   manifest,
+			Deleted:    false,
+		})
+	}
+
+	statefulsets, err := k.clientset.AppsV1().StatefulSets("default").List(context.Background(), metav1.ListOptions{
+		LabelSelector: "cyclops.module=" + name,
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	for _, item := range statefulsets.Items {
+		manifest, err := getManifest(item, "StatefulSet", "apps/v1")
+		if err != nil {
+			return nil, err
+		}
+
+		pods, err := k.getStatefulsetPods(item)
+		if err != nil {
+			return nil, err
+		}
+
+		out = append(out, &dto.StatefulSet{
+			Group:     "apps",
+			Version:   "v1",
+			Kind:      "StatefulSet",
+			Name:      item.Name,
+			Namespace: item.Namespace,
+			Replicas:  int(*item.Spec.Replicas),
+			Manifest:  manifest,
+			Pods:      pods,
+			Status:    getDeploymentStatus(pods),
+		})
+	}
+
 	return out, nil
 }
 
@@ -206,6 +289,52 @@ func (k *KubernetesClient) GetDeletedResources(
 }
 
 func (k *KubernetesClient) getPods(deployment appsv1.Deployment) ([]dto.Pod, error) {
+	pods, err := k.clientset.CoreV1().Pods(deployment.Namespace).List(context.Background(), metav1.ListOptions{
+		LabelSelector: labels.Set(deployment.Spec.Selector.MatchLabels).String(),
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	out := make([]dto.Pod, 0, len(pods.Items))
+	for _, item := range pods.Items {
+		containers := make([]dto.Container, 0, len(item.Spec.Containers))
+
+		for _, cnt := range item.Spec.Containers {
+			env := make(map[string]string)
+			for _, envVar := range cnt.Env {
+				env[envVar.Name] = envVar.Value
+			}
+
+			var status apiv1.ContainerStatus
+			for _, c := range item.Status.ContainerStatuses {
+				if c.Name == cnt.Name {
+					status = c
+					break
+				}
+			}
+
+			containers = append(containers, dto.Container{
+				Name:   cnt.Name,
+				Image:  cnt.Image,
+				Env:    env,
+				Status: containerStatus(status),
+			})
+		}
+
+		out = append(out, dto.Pod{
+			Name:       item.Name,
+			Containers: containers,
+			Node:       item.Spec.NodeName,
+			PodPhase:   string(item.Status.Phase),
+			Started:    item.Status.StartTime,
+		})
+	}
+
+	return out, nil
+}
+
+func (k *KubernetesClient) getStatefulsetPods(deployment appsv1.StatefulSet) ([]dto.Pod, error) {
 	pods, err := k.clientset.CoreV1().Pods(deployment.Namespace).List(context.Background(), metav1.ListOptions{
 		LabelSelector: labels.Set(deployment.Spec.Selector.MatchLabels).String(),
 	})

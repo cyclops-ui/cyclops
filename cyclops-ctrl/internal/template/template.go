@@ -2,6 +2,7 @@ package template
 
 import (
 	"encoding/json"
+	"fmt"
 	"strconv"
 	"strings"
 
@@ -89,6 +90,18 @@ func HelmTemplate(module cyclopsv1alpha1.Module, moduleTemplate models.Template)
 			values = setObjectValue(strings.Split(value.Name, "."), value.Value, values)
 		case "number":
 			values = setObjectValue(strings.Split(value.Name, "."), value.Value, values)
+		case "array":
+			var asArray []map[string]interface{}
+			if err := json.Unmarshal([]byte(value.Value), &asArray); err != nil {
+				return "", err
+			}
+
+			for i, arrayValue := range asArray {
+				for k, v := range arrayValue {
+					values = setObjectValue(strings.Split(k, "."), v, values)
+					values = setObjectValue(strings.Split(strings.Join([]string{value.Name, fmt.Sprint(i), k}, "."), "."), v, values)
+				}
+			}
 		case "map":
 			var keyValues []dto.KeyValue
 			if err := json.Unmarshal([]byte(value.Value), &keyValues); err != nil {
@@ -106,6 +119,13 @@ func HelmTemplate(module cyclopsv1alpha1.Module, moduleTemplate models.Template)
 
 	top := make(chartutil.Values)
 	top["Values"] = values
+	top["Release"] = map[string]interface{}{
+		"Name":      "",
+		"Namespace": "",
+	}
+
+	data, err := json.Marshal(values)
+	fmt.Println(string(data))
 
 	out, err := engine.Render(chart, top)
 	if err != nil {

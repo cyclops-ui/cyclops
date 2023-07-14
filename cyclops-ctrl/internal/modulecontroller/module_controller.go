@@ -135,14 +135,14 @@ func (r *ModuleReconciler) moduleToResources(name string) error {
 		return err
 	}
 
-	if err := generateResources(r.kubernetesClient, *module, template); err != nil {
+	if err := r.generateResources(r.kubernetesClient, *module, template); err != nil {
 		return err
 	}
 
 	return nil
 }
 
-func generateResources(kClient *k8sclient.KubernetesClient, module cyclopsv1alpha1.Module, moduleTemplate models.Template) error {
+func (r *ModuleReconciler) generateResources(kClient *k8sclient.KubernetesClient, module cyclopsv1alpha1.Module, moduleTemplate models.Template) error {
 	out, err := template2.HelmTemplate(module, moduleTemplate)
 	if err != nil {
 		return err
@@ -160,7 +160,13 @@ func generateResources(kClient *k8sclient.KubernetesClient, module cyclopsv1alph
 
 		decoder := yaml.NewYAMLOrJSONDecoder(strings.NewReader(s), len(s))
 		if err := decoder.Decode(&obj); err != nil {
-			panic(err)
+			r.logger.Error(err, "could not decode resource",
+				"module namespaced name",
+				module.Name,
+				"resource namespaced name",
+				fmt.Sprintf("%s/%s", obj.GetNamespace(), obj.GetName()),
+			)
+			continue
 		}
 
 		labels := obj.GetLabels()
@@ -172,7 +178,13 @@ func generateResources(kClient *k8sclient.KubernetesClient, module cyclopsv1alph
 		obj.SetLabels(labels)
 
 		if err := kClient.CreateDynamic(&obj); err != nil {
-			return err
+			r.logger.Error(err, "could not decode resource",
+				"module namespaced name",
+				module.Name,
+				"resource namespaced name",
+				fmt.Sprintf("%s/%s", obj.GetNamespace(), obj.GetName()),
+			)
+			continue
 		}
 	}
 

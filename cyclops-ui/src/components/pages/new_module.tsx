@@ -35,8 +35,6 @@ const NewModule = () => {
     const [versions, setVersions] = useState([]);
     const [dplName, setName] = useState("");
     const [allConfigs, setAllConfigs] = useState([]);
-    const [manifest, setManifest] = useState("");
-    const [values, setValues] = useState({});
     const [config, setConfig] = useState({
         name: "",
         version: "",
@@ -91,9 +89,7 @@ const NewModule = () => {
             "template": config.name,
         })
 
-        return
-
-        setLoading(true);
+        // setLoading(true);
 
         axios.post(window.__RUNTIME_CONFIG__.REACT_APP_CYCLOPS_CTRL_HOST + `/modules/new`,
             {
@@ -110,7 +106,7 @@ const NewModule = () => {
             })
             .then(res => {
                 console.log(res);
-                window.location.href = "/modules/" + values["cyclops_module_name"]
+                // window.location.href = "/modules/" + values["cyclops_module_name"]
             })
             .catch(error => {
                 console.log(error)
@@ -181,13 +177,13 @@ const NewModule = () => {
     const loadTemplate = () => {
         setLoadingTemplate(true);
 
-        // setGitTemplate({
-        //     repo: "https://github.com/petar-cvit/starship",
-        //     path: "charts/devnet",
-        // })
+        setGitTemplate({
+            repo: "https://github.com/petar-cvit/starship",
+            path: "charts/devnet",
+        })
 
-        axios.get(window.__RUNTIME_CONFIG__.REACT_APP_CYCLOPS_CTRL_HOST + `/templates/git?repo=` + gitTemplate.repo + `&path=` + gitTemplate.path).then(res => {
-        // axios.get(window.__RUNTIME_CONFIG__.REACT_APP_CYCLOPS_CTRL_HOST + `/templates/git?repo=` + "https://github.com/petar-cvit/starship" + `&path=` + "charts/devnet").then(res => {
+        // axios.get(window.__RUNTIME_CONFIG__.REACT_APP_CYCLOPS_CTRL_HOST + `/templates/git?repo=` + gitTemplate.repo + `&path=` + gitTemplate.path).then(res => {
+        axios.get(window.__RUNTIME_CONFIG__.REACT_APP_CYCLOPS_CTRL_HOST + `/templates/git?repo=` + "https://github.com/petar-cvit/starship" + `&path=` + "charts/devnet").then(res => {
             setConfig(res.data);
 
             setError({
@@ -255,7 +251,11 @@ const NewModule = () => {
         fields.forEach((field: any) => {
             let fieldName = parent === "" ? field.name : parent.concat(".").concat(field.name)
 
-            let formItemName = arrayField ? [arrayField.key, fieldName] : fieldName
+            let formItemName = arrayField ? [arrayField.name, fieldName] : fieldName
+
+            if (arrayField) {
+                console.log(fieldName)
+            }
 
             switch (field.type) {
                 case "string":
@@ -318,7 +318,7 @@ const NewModule = () => {
                                 }
                             }}>
                                 <Collapse.Panel key={fieldName} header={header} style={{backgroundColor: getCollapseColor(fieldName)}} forceRender={true}>
-                                    {mapFields(field.properties, fieldName, level + 1)}
+                                    {mapFields(field.properties, fieldName, level + 1, arrayField)}
                                 </Collapse.Panel>
                             </Collapse>
                         </Col>
@@ -361,42 +361,9 @@ const NewModule = () => {
                                             <>
                                                 {arrFields.map((arrField) => (
                                                     <Col key={arrField.key}>
-                                                        {/*{mapFields(field.items.properties, "", level + 1, arrField)}*/}
-
-                                                        <Form.Item
-                                                            {...arrField}
-                                                            label="name"
-                                                            name={[arrField.name, 'name']}
-                                                        >
-                                                            <Input />
-                                                        </Form.Item>
-
-                                                        <Form.Item
-                                                            {...arrField}
-                                                            label="type"
-                                                            name={[arrField.name, 'type']}
-                                                        >
-                                                            <Input />
-                                                        </Form.Item>
-
-                                                        {/*<Form.Item */}
-                                                        {/*    {...arrayField} */}
-                                                        {/*    label={field.display_name}*/}
-                                                        {/*    initialValue={field.initialValue}*/}
-                                                        {/*    name={formItemName}*/}
-                                                        {/*>*/}
-                                                        {/*    <Input addonAfter={addonAfter(field)}/>*/}
-                                                        {/*</Form.Item>*/}
-
-                                                        <Form.Item
-                                                            {...arrField}
-                                                            label="numValidators"
-                                                            name={[arrField.name, 'numValidators']}
-                                                        >
-                                                            <InputNumber />
-                                                        </Form.Item>
-
+                                                        {mapFields(field.items.properties, "", level + 1, arrField)}
                                                         <MinusCircleOutlined onClick={() => remove(arrField.name)} />
+                                                        <Divider/>
                                                     </Col>
                                                 ))}
 

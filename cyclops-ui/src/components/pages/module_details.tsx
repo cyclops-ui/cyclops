@@ -35,6 +35,45 @@ import Link from "antd/lib/typography/Link";
 import AceEditor from "react-ace";
 import { formatDistanceToNow } from 'date-fns';
 
+import "ace-builds/src-noconflict/mode-jsx";
+const languages = [
+    "javascript",
+    "java",
+    "python",
+    "xml",
+    "ruby",
+    "sass",
+    "markdown",
+    "mysql",
+    "json",
+    "html",
+    "handlebars",
+    "golang",
+    "csharp",
+    "elixir",
+    "typescript",
+    "css"
+];
+
+const themes = [
+    "monokai",
+    "github",
+    "tomorrow",
+    "kuroir",
+    "twilight",
+    "xcode",
+    "textmate",
+    "solarized_dark",
+    "solarized_light",
+    "terminal"
+];
+
+languages.forEach(lang => {
+    require(`ace-builds/src-noconflict/mode-${lang}`);
+    require(`ace-builds/src-noconflict/snippets/${lang}`);
+});
+themes.forEach(theme => require(`ace-builds/src-noconflict/theme-${theme}`));
+
 const {Title, Text} = Typography;
 
 interface module {
@@ -298,14 +337,14 @@ const ModuleDetails = () => {
             return <Descriptions style={{width: "100%"}} bordered>
                 {Object.entries<string>(resource.data).map(([key, dataValue]) => (
                     <Descriptions.Item key={key} labelStyle={{width: "20%"}} label={key} span={24} >
-                        {configMapDataValues(dataValue)}
+                        {configMapDataValues(key, dataValue)}
                     </Descriptions.Item>
                 ))}
             </Descriptions>
         }
     }
 
-    const configMapDataValues = (data: string) => {
+    const configMapDataValues = (key: string, data: string) => {
         const lines = data.split('\n').length;
 
         if (lines > 1) {
@@ -313,6 +352,7 @@ const ModuleDetails = () => {
                 value={data}
                 readOnly={true}
                 width="100%"
+                mode={configMapDataExtension(key)}
                 height={calculateEditorHeight(data, lines)}
             />
         } else {
@@ -326,8 +366,17 @@ const ModuleDetails = () => {
         } else {
             return '${lines * 16}px'
         }
-
     };
+
+    const configMapDataExtension = (filename: string) => {
+        var ext = filename.split('.').pop();
+        switch (ext) {
+            case "json":
+                return "json"
+            default:
+                return ""
+        }
+    }
 
     resources.forEach((resource: any) => {
         switch (resource.kind) {
@@ -645,6 +694,79 @@ const ModuleDetails = () => {
                         </Row>
                         <Row>
                             {configMapData(resource)}
+                        </Row>
+                    </Collapse.Panel>
+                )
+                return;
+            default:
+                var deletedWarning = (<p/>)
+
+                if (resource.deleted) {
+                    deletedWarning = (
+                        <Tooltip title={"The resource is not a part of the Module and can be deleted"} trigger="click">
+                            <WarningFilled style={{color: 'red', right: "0px", fontSize: '30px', paddingRight: "5px"}}/>
+                        </Tooltip>
+                    )
+                }
+
+                var deleteButton = (<p/>)
+
+                if (resource.deleted) {
+                    deleteButton = (
+                        <Button onClick={function () {
+                            axios.delete(window.__RUNTIME_CONFIG__.REACT_APP_CYCLOPS_CTRL_HOST + `/modules/` + moduleName + `/resources`, {
+                                    data: {
+                                        group: resource.group,
+                                        version: resource.version,
+                                        kind: resource.kind,
+                                        name: resource.name,
+                                        namespace: resource.namespace,
+                                    }
+                                }
+                            ).then(res => {}).catch(error => {
+                                console.log(error)
+                                console.log(error.response)
+                                setLoading(false);
+                                if (error.response === undefined) {
+                                    setError({
+                                        message: String(error),
+                                        description: "Check if Cyclops backend is available on: " + window.__RUNTIME_CONFIG__.REACT_APP_CYCLOPS_CTRL_HOST
+                                    })
+                                } else {
+                                    setError(error.response.data);
+                                }
+                            });
+                        }} danger block>Delete</Button>
+                    )
+                }
+
+                resourceCollapses.push(
+                    <Collapse.Panel header={genExtra(resource)} key={resource.kind + "/" + resource.namespace + "/" + resource.name}>
+                        <Row>
+                            <Col>
+                                {deletedWarning}
+                            </Col>
+                            <Col span={19}>
+                                <Title level={3}>{resource.name}</Title>
+                            </Col>
+                            <Col span={4} style={{display: 'flex', justifyContent: 'flex-end'}}>
+                                {deleteButton}
+                            </Col>
+                        </Row>
+                        <Row>
+                            <Title level={4}>{resource.namespace}</Title>
+                        </Row>
+                        <Row>
+                            <Col style={{ float: "right" }}>
+                                <Button onClick={function () {
+                                    setManifestModal({
+                                        on: true,
+                                        kind: resource.kind,
+                                        name: resource.name,
+                                        namespace: resource.namespace,
+                                    })
+                                }} block>View Manifest</Button>
+                            </Col>
                         </Row>
                     </Collapse.Panel>
                 )
