@@ -3,6 +3,7 @@ package k8sclient
 import (
 	"context"
 	"encoding/json"
+	"sort"
 	"strings"
 
 	cyclopsv1alpha1 "github.com/cyclops-ui/cycops-ctrl/api/v1alpha1"
@@ -224,6 +225,10 @@ func (k *KubernetesClient) GetResourcesForModule(name string) ([]dto.Resource, e
 			Status:    getDeploymentStatus(pods),
 		})
 	}
+
+	sort.Slice(out, func(i, j int) bool {
+		return out[i].GetName() < out[j].GetName()
+	})
 
 	return out, nil
 }

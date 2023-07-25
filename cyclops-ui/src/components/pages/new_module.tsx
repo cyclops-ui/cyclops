@@ -246,7 +246,24 @@ const NewModule = () => {
         }
     }
 
-    function mapFields(fields: any[], parent: string, level: number, arrayField?: any) {
+    const arrayInnerField = (field: any, parentFieldID: string, parent: string, level: number, arrayField: any, remove: Function) => {
+        switch (field.items.type) {
+            case "object":
+                return <div>
+                    {mapFields(field.items.properties, parentFieldID, "", level + 1, arrayField)}
+                    <MinusCircleOutlined style={{ fontSize: '16px' }} onClick={() => remove(arrayField.name)} />
+                </div>
+            case "string":
+                return <Row>
+                    <Form.Item style={{paddingBottom: "0px", marginBottom: "0px"}} wrapperCol={24} {...arrayField} initialValue={field.initialValue} name={[arrayField.name]}>
+                        <Input addonAfter={addonAfter(field)}/>
+                    </Form.Item>
+                    <MinusCircleOutlined style={{ fontSize: '16px', paddingLeft: "10px"}} onClick={() => remove(arrayField.name)} />
+                </Row>
+        }
+    }
+
+    function mapFields(fields: any[], parentFieldID: string, parent: string, level: number, arrayField?: any) {
         const formFields: {} | any = [];
         fields.forEach((field: any) => {
             let fieldName = parent === "" ? field.name : parent.concat(".").concat(field.name)
@@ -254,7 +271,8 @@ const NewModule = () => {
             let formItemName = arrayField ? [arrayField.name, fieldName] : fieldName
 
             if (arrayField) {
-                console.log(fieldName)
+                // fieldName = field.name
+                // formItemName = [arrayField.name, fieldName]
             }
 
             switch (field.type) {
@@ -287,6 +305,7 @@ const NewModule = () => {
                     )
                     return;
                 case "object":
+                    let uniqueFieldName : any = parentFieldID.length === 0 ? field.name : parentFieldID.concat(".").concat(field.name)
                     var header = <Row>{field.name}</Row>
 
                     if (field.description && field.description.length !== 0) {
@@ -312,19 +331,20 @@ const NewModule = () => {
                         }}>
                             <Collapse size={"small"} onChange={function (value: string | string[]) {
                                 if (value.length === 0) {
-                                    updateActiveCollapses(fieldName, false)
+                                    updateActiveCollapses(uniqueFieldName, false)
                                 } else {
-                                    updateActiveCollapses(fieldName, true)
+                                    updateActiveCollapses(uniqueFieldName, true)
                                 }
                             }}>
-                                <Collapse.Panel key={fieldName} header={header} style={{backgroundColor: getCollapseColor(fieldName)}} forceRender={true}>
-                                    {mapFields(field.properties, fieldName, level + 1, arrayField)}
+                                <Collapse.Panel key={fieldName} header={header} style={{backgroundColor: getCollapseColor(uniqueFieldName)}} forceRender={true}>
+                                    {mapFields(field.properties, fieldName, fieldName, level + 1, arrayField)}
                                 </Collapse.Panel>
                             </Collapse>
                         </Col>
                     )
                     return;
                 case "array":
+                    uniqueFieldName = parentFieldID.length === 0 ? field.name : parentFieldID.concat(".").concat(field.name)
                     var header = <Row>{field.name}</Row>
 
                     if (field.description && field.description.length !== 0) {
@@ -350,26 +370,26 @@ const NewModule = () => {
                         }}>
                             <Collapse size={"small"} onChange={function (value: string | string[]) {
                                 if (value.length === 0) {
-                                    updateActiveCollapses(fieldName, false)
+                                    updateActiveCollapses(uniqueFieldName, false)
                                 } else {
-                                    updateActiveCollapses(fieldName, true)
+                                    updateActiveCollapses(uniqueFieldName, true)
                                 }
                             }}>
-                                <Collapse.Panel key={fieldName} header={header} style={{backgroundColor: getCollapseColor(fieldName)}} forceRender={true}>
-                                    <Form.List name={fieldName}>
+                                <Collapse.Panel key={fieldName} header={header} style={{backgroundColor: getCollapseColor(uniqueFieldName)}} forceRender={true}>
+                                    <Form.List name={formItemName}>
                                         {(arrFields, { add, remove }) => (
                                             <>
                                                 {arrFields.map((arrField) => (
                                                     <Col key={arrField.key}>
-                                                        {mapFields(field.items.properties, "", level + 1, arrField)}
-                                                        <MinusCircleOutlined onClick={() => remove(arrField.name)} />
+                                                        {arrayInnerField(field, uniqueFieldName.concat(".").concat(arrField.name), "", level + 1, arrField, remove)}
+                                                        {/*{mapFields(field.items.properties, uniqueFieldName.concat(".").concat(arrField.name), "", level + 1, arrField)}*/}
                                                         <Divider/>
                                                     </Col>
                                                 ))}
 
                                                 <Form.Item>
                                                     <Button type="dashed" onClick={() => add()} block icon={<PlusOutlined />}>
-                                                        Add sights
+                                                        Add
                                                     </Button>
                                                 </Form.Item>
                                             </>
@@ -503,7 +523,7 @@ const NewModule = () => {
                         <Divider orientation="left" orientationMargin="0">
                             Define Module
                         </Divider>
-                        {mapFields(config.fields, "" , 0)}
+                        {mapFields(config.fields, "", "", 0)}
                         <div style={{textAlign: "right"}}>
                             <Button type="primary" loading={loading} htmlType="submit" name="Save">
                                 Save

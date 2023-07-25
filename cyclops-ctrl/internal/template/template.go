@@ -98,7 +98,7 @@ func HelmTemplate(module cyclopsv1alpha1.Module, moduleTemplate models.Template)
 
 			for i, arrayValue := range asArray {
 				for k, v := range arrayValue {
-					values = setObjectValue(strings.Split(k, "."), v, values)
+					//values = setObjectValue(strings.Split(k, "."), v, values)
 					values = setObjectValue(strings.Split(strings.Join([]string{value.Name, fmt.Sprint(i), k}, "."), "."), v, values)
 				}
 			}
@@ -129,6 +129,9 @@ func HelmTemplate(module cyclopsv1alpha1.Module, moduleTemplate models.Template)
 
 	out, err := engine.Render(chart, top)
 	if err != nil {
+		fmt.Println("prije")
+		fmt.Println(string(data))
+		//fmt.Println(moduleTemplate.Manifest)
 		return "", err
 	}
 
@@ -168,6 +171,10 @@ func flattenField(field models.Field) []models.Field {
 
 func setObjectValue(keyParts []string, value interface{}, values chartutil.Values) chartutil.Values {
 	if len(keyParts) == 1 {
+		//if keyParts[0] == "chains" {
+		//	fmt.Println("mi smo keyevi", keyParts)
+		//	return values
+		//}
 		values[keyParts[0]] = value
 		return values
 	}

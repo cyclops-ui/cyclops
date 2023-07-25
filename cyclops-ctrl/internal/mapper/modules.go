@@ -103,6 +103,28 @@ func ModuleToDTO(module cyclopsv1alpha1.Module, template models.Template) (dto.M
 				return dto.Module{}, err
 			}
 
+			//if len(keyValues) == 0 {
+			//	continue
+			//}
+			//
+			//for i, keyValue := range keyValues {
+			//	if reflect.TypeOf(keyValues[0]).Kind() == reflect.Map {
+			//		keyType := reflect.TypeOf(keyValues[0]).Key()
+			//		valueType := reflect.TypeOf(keyValues[0]).Elem()
+			//
+			//		if keyType.Kind() == reflect.String && valueType.Kind() == reflect.Interface {
+			//			keyValueMap := keyValue.(map[string]interface{})
+			//
+			//			tmp := make(map[string]interface{})
+			//			for k, v := range keyValueMap {
+			//				tmp[strings.Join([]string{value.Name, fmt.Sprint(i), k}, ".")] = v
+			//			}
+			//
+			//			keyValues[i] = tmp
+			//		}
+			//	}
+			//}
+
 			values[value.Name] = keyValues
 		default:
 			values[value.Name] = value.Value
