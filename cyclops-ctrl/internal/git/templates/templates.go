@@ -101,7 +101,7 @@ func LoadTemplate(repoURL, path string) (models.Template, error) {
 	}, nil
 }
 
-func LoadInitialTemplateValues(repoURL, path string) (map[string]interface{}, error) {
+func LoadInitialTemplateValues(repoURL, path string) (map[interface{}]interface{}, error) {
 	repo, err := git.Clone(memory.NewStorage(), memfs.New(), &git.CloneOptions{
 		URL: repoURL,
 	})
@@ -168,13 +168,7 @@ func LoadInitialTemplateValues(repoURL, path string) (map[string]interface{}, er
 	}
 	// endregion
 
-	interfaceMap := flatten("", initialValues)
-	out := make(map[string]interface{})
-	for k, v := range interfaceMap {
-		out[fmt.Sprintf("%v", k)] = v
-	}
-
-	return out, nil
+	return initialValues, nil
 }
 
 func concatenateTemplates(path string, fs billy.Filesystem) ([]string, error) {

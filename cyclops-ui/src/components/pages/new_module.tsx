@@ -296,7 +296,7 @@ const NewModule = () => {
                     )
                     return;
                 case "boolean":
-                    let checked = form.getFieldValue(fieldName) === true ? "checked" : "unchecked"
+                    let checked = form.getFieldValue([parentFieldID.split("."), fieldName]) === true ? "checked" : "unchecked"
                     formFields.push(
                         <Form.Item initialValue={field.initialValue} name={fieldName} id={fieldName}
                                    label={field.display_name} valuePropName={checked}>
@@ -337,7 +337,13 @@ const NewModule = () => {
                                 }
                             }}>
                                 <Collapse.Panel key={fieldName} header={header} style={{backgroundColor: getCollapseColor(uniqueFieldName)}} forceRender={true}>
-                                    {mapFields(field.properties, fieldName, fieldName, level + 1, arrayField)}
+                                    <Form.List name={fieldName}>
+                                        {(arrFields, { add, remove }) => (
+                                            <>
+                                                {mapFields(field.properties, fieldName, "", level + 1, arrayField)}
+                                            </>
+                                        )}
+                                    </Form.List>
                                 </Collapse.Panel>
                             </Collapse>
                         </Col>

@@ -1,12 +1,9 @@
 package template
 
 import (
-	"encoding/json"
-	"fmt"
-	"strconv"
 	"strings"
 
-	"github.com/cyclops-ui/cycops-ctrl/internal/models/dto"
+	json "github.com/json-iterator/go"
 	"helm.sh/helm/v3/pkg/chart"
 	"helm.sh/helm/v3/pkg/chartutil"
 	"helm.sh/helm/v3/pkg/engine"
@@ -78,43 +75,46 @@ func HelmTemplate(module cyclopsv1alpha1.Module, moduleTemplate models.Template)
 		},
 	}
 
-	fields := flatten(moduleTemplate)
+	//fields := flatten(moduleTemplate)
+	//for _, value := range module.Spec.Values {
+	//	switch fields[value.Name].Type {
+	//	case "boolean":
+	//		asBool, _ := strconv.ParseBool(value.Value)
+	//		values = setObjectValue(strings.Split(value.Name, "."), asBool, values)
+	//	case "string":
+	//		values = setObjectValue(strings.Split(value.Name, "."), value.Value, values)
+	//	case "number":
+	//		values = setObjectValue(strings.Split(value.Name, "."), value.Value, values)
+	//	case "array":
+	//		var asArray []map[string]interface{}
+	//		if err := json.Unmarshal([]byte(value.Value), &asArray); err != nil {
+	//			return "", err
+	//		}
+	//
+	//		for i, arrayValue := range asArray {
+	//			for k, v := range arrayValue {
+	//				//values = setObjectValue(strings.Split(k, "."), v, values)
+	//				values = setObjectValue(strings.Split(strings.Join([]string{value.Name, fmt.Sprint(i), k}, "."), "."), v, values)
+	//			}
+	//		}
+	//	case "map":
+	//		var keyValues []dto.KeyValue
+	//		if err := json.Unmarshal([]byte(value.Value), &keyValues); err != nil {
+	//			return "", err
+	//		}
+	//
+	//		asMap := make(map[string]string)
+	//		for _, kv := range keyValues {
+	//			asMap[kv.Key] = kv.Value
+	//		}
+	//
+	//		values = setObjectValue(strings.Split(value.Name, "."), asMap, values)
+	//	}
+	//}
 
 	values := make(chartutil.Values)
-	for _, value := range module.Spec.Values {
-		switch fields[value.Name].Type {
-		case "boolean":
-			asBool, _ := strconv.ParseBool(value.Value)
-			values = setObjectValue(strings.Split(value.Name, "."), asBool, values)
-		case "string":
-			values = setObjectValue(strings.Split(value.Name, "."), value.Value, values)
-		case "number":
-			values = setObjectValue(strings.Split(value.Name, "."), value.Value, values)
-		case "array":
-			var asArray []map[string]interface{}
-			if err := json.Unmarshal([]byte(value.Value), &asArray); err != nil {
-				return "", err
-			}
-
-			for i, arrayValue := range asArray {
-				for k, v := range arrayValue {
-					//values = setObjectValue(strings.Split(k, "."), v, values)
-					values = setObjectValue(strings.Split(strings.Join([]string{value.Name, fmt.Sprint(i), k}, "."), "."), v, values)
-				}
-			}
-		case "map":
-			var keyValues []dto.KeyValue
-			if err := json.Unmarshal([]byte(value.Value), &keyValues); err != nil {
-				return "", err
-			}
-
-			asMap := make(map[string]string)
-			for _, kv := range keyValues {
-				asMap[kv.Key] = kv.Value
-			}
-
-			values = setObjectValue(strings.Split(value.Name, "."), asMap, values)
-		}
+	if err := json.Unmarshal(module.Spec.Values.Raw, &values); err != nil {
+		return "", err
 	}
 
 	top := make(chartutil.Values)
@@ -124,13 +124,8 @@ func HelmTemplate(module cyclopsv1alpha1.Module, moduleTemplate models.Template)
 		"Namespace": "",
 	}
 
-	data, err := json.Marshal(values)
-	fmt.Println(string(data))
-
 	out, err := engine.Render(chart, top)
 	if err != nil {
-		fmt.Println("prije")
-		fmt.Println(string(data))
 		//fmt.Println(moduleTemplate.Manifest)
 		return "", err
 	}

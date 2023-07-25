@@ -35,14 +35,14 @@ func (m *Modules) GetModule(ctx *gin.Context) {
 		return
 	}
 
-	template, err := m.templates.GetConfig(module.Spec.TemplateRef)
-	if err != nil {
-		fmt.Println(err)
-		ctx.JSON(http.StatusInternalServerError, dto.NewError("Error loading template", err.Error()))
-		return
-	}
+	//template, err := m.templates.GetConfig(module.Spec.TemplateRef)
+	//if err != nil {
+	//	fmt.Println(err)
+	//	ctx.JSON(http.StatusInternalServerError, dto.NewError("Error loading template", err.Error()))
+	//	return
+	//}
 
-	moduleDTO, err := mapper.ModuleToDTO(*module, template)
+	moduleDTO, err := mapper.ModuleToDTO(*module)
 	if err != nil {
 		fmt.Println(err)
 		ctx.JSON(http.StatusInternalServerError, dto.NewError("Error mapping module", err.Error()))
@@ -108,14 +108,7 @@ func (m *Modules) CreateModule(ctx *gin.Context) {
 		return
 	}
 
-	template, err := m.templates.GetConfig(mapper.DtoTemplateRefToK8s(request.Template))
-	if err != nil {
-		fmt.Println(err)
-		ctx.JSON(http.StatusBadRequest, dto.NewError("Error mapping module request", err.Error()))
-		return
-	}
-
-	module, err := mapper.RequestToModule(request, template)
+	module, err := mapper.RequestToModule(request)
 	if err != nil {
 		fmt.Println(err)
 		ctx.JSON(http.StatusInternalServerError, dto.NewError("Error mapping module", err.Error()))
@@ -149,14 +142,7 @@ func (m *Modules) UpdateModule(ctx *gin.Context) {
 		return
 	}
 
-	template, err := m.templates.GetConfig(mapper.DtoTemplateRefToK8s(request.Template))
-	if err != nil {
-		fmt.Println(err)
-		ctx.JSON(http.StatusInternalServerError, dto.NewError("Error creating module", err.Error()))
-		return
-	}
-
-	module, err := mapper.RequestToModule(request, template)
+	module, err := mapper.RequestToModule(request)
 	if err != nil {
 		fmt.Println(err)
 		ctx.JSON(http.StatusInternalServerError, dto.NewError("Error creating module", err.Error()))

@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
+	json "github.com/json-iterator/go"
 
 	cyclopsv1alpha1 "github.com/cyclops-ui/cycops-ctrl/api/v1alpha1"
 	"github.com/cyclops-ui/cycops-ctrl/internal/cluster/k8sclient"
@@ -180,5 +181,12 @@ func (c *Templates) GetTemplateInitialValuesFromGit(ctx *gin.Context) {
 		return
 	}
 
-	ctx.JSON(http.StatusOK, initial)
+	data, err := json.Marshal(initial)
+	if err != nil {
+		fmt.Println(err)
+		ctx.JSON(http.StatusInternalServerError, dto.NewError("Error marshaling data template", err.Error()))
+		return
+	}
+
+	ctx.Data(http.StatusOK, gin.MIMEJSON, data)
 }
