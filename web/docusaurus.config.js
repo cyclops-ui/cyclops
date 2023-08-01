@@ -58,7 +58,7 @@ const config = {
     /** @type {import('@docusaurus/preset-classic').ThemeConfig} */
     ({
       // Replace with your project's social card
-      image: 'img/cyclops_helmsman.jpg',
+      image: 'img/which-would-you-prefer.png',
       announcementBar: {
         backgroundColor: '#10357A',
         textColor: '#FFF',
