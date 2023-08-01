@@ -334,6 +334,7 @@ const EditModule = () => {
     const arrayInnerField = (field: any, parentFieldID: string, parent: string, level: number, arrayField: any, remove: Function) => {
         switch (field.items.type) {
             case "object":
+                console.log(parentFieldID)
                 return <div>
                     {mapFields(field.items.properties, parentFieldID, "", level + 1, arrayField)}
                     <MinusCircleOutlined style={{ fontSize: '16px' }} onClick={() => remove(arrayField.name)} />
@@ -348,10 +349,10 @@ const EditModule = () => {
         }
     }
 
-    function mapFields(fields: any[], parentFieldID: string, parent: string, level: number, arrayField?: any) {
+    function mapFields(fields: any[], parentFieldID: string | string[], parent: string, level: number, arrayField?: any) {
         const formFields: {} | any = [];
         fields.forEach((field: any) => {
-            let fieldName = parent === "" ? field.name : parent.concat(".").concat(field.name)
+            let fieldName = field.name
 
             let formItemName = arrayField ? [arrayField.name, fieldName] : fieldName
 
@@ -370,14 +371,18 @@ const EditModule = () => {
                             <Tooltip title={field.description} trigger="click">
                                 {field.display_name}</Tooltip>
                         }>
-                            <InputNumber style={{width: '100%'}} addonAfter={addonAfter(field)}/>
+                            <InputNumber style={{width: '100%'}} addonAfter={addonAfter(field)} onChange={function (v) {
+                                console.log(parentFieldID)
+                                console.log(formItemName)
+                                console.log(parentFieldID.concat(formItemName))
+                            }}/>
                         </Form.Item>
                     )
                     return;
                 case "boolean":
                     // const map = new Map(Object.entries(module.values));
                     // let checked = map.get(fieldName) == "true" ? "checked" : "unchecked"
-                    let checked = form.getFieldValue([parentFieldID.split("."), fieldName]) === true ? "checked" : "unchecked"
+                    let checked = form.getFieldValue([parentFieldID, fieldName]) === true ? "checked" : "unchecked"
                     formFields.push(
                         <Form.Item initialValue={field.initialValue} name={fieldName} id={fieldName}
                                    label={field.display_name} valuePropName={checked}>
@@ -402,6 +407,14 @@ const EditModule = () => {
                         </Row>
                     }
 
+                    if (arrayField) {
+                        // fieldName = [fieldName, arrayField.name]
+
+                        // fieldName = parentFieldID.concat(arrayField.name)
+
+                        console.log(fieldName)
+                    }
+
                     formFields.push(
                         <Col span={level === 0 ? 16 : 24} offset={level === 0 ? 2 : 0} style={{
                             paddingBottom: "15px",
@@ -421,7 +434,7 @@ const EditModule = () => {
                                     <Form.List name={fieldName}>
                                         {(arrFields, { add, remove }) => (
                                             <>
-                                                {mapFields(field.properties, fieldName, "", level + 1, arrayField)}
+                                                {mapFields(field.properties, [fieldName], "", level + 1, arrayField)}
                                             </>
                                         )}
                                     </Form.List>
@@ -447,7 +460,7 @@ const EditModule = () => {
                         </Row>
                     }
 
-                    console.log(new Map(Object.entries(module.values)).get(fieldName) as any[])
+                    // console.log(new Map(Object.entries(module.values)).get(fieldName) as any[])
 
                     formFields.push(
                         <Col span={level === 0 ? 16 : 24} offset={level === 0 ? 2 : 0} style={{
@@ -493,27 +506,27 @@ const EditModule = () => {
                 case "map":
                     formFields.push(
                         <Form.Item name={fieldName} label={field.display_name}>
-                            <Form.List name={fieldName}>
+                            <Form.List name={formItemName}>
                                 {(fields, {add, remove}) => (
                                     <>
-                                        {fields.map(({key, name, ...restField}) => (
-                                            <Space key={key} style={{display: 'flex', marginBottom: 8}}
+                                        {fields.map((arrField) => (
+                                            <Space key={arrField.key} style={{display: 'flex', marginBottom: 8}}
                                                    align="baseline">
                                                 <Form.Item
-                                                    {...restField}
-                                                    name={[name, 'key']}
+                                                    {...arrField}
+                                                    name={[arrField.name, 'key']}
                                                     rules={[{required: true, message: 'Missing key'}]}
                                                 >
                                                     <Input/>
                                                 </Form.Item>
                                                 <Form.Item
-                                                    {...restField}
-                                                    name={[name, 'value']}
+                                                    {...arrField}
+                                                    name={[arrField.name, 'value']}
                                                     rules={[{required: true, message: 'Missing value'}]}
                                                 >
                                                     <Input/>
                                                 </Form.Item>
-                                                <MinusCircleOutlined onClick={() => remove(name)}/>
+                                                <MinusCircleOutlined onClick={() => remove(arrField.name)}/>
                                             </Space>
                                         ))}
                                         <Form.Item>

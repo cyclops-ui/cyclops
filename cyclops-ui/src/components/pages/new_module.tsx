@@ -409,27 +409,27 @@ const NewModule = () => {
                 case "map":
                     formFields.push(
                         <Form.Item name={fieldName} label={field.display_name}>
-                            <Form.List name={fieldName}>
+                            <Form.List name={formItemName}>
                                 {(fields, {add, remove}) => (
                                     <>
-                                        {fields.map(({key, name, ...restField}) => (
-                                            <Space key={key} style={{display: 'flex', marginBottom: 8}}
+                                        {fields.map((arrField) => (
+                                            <Space key={arrField.key} style={{display: 'flex', marginBottom: 8}}
                                                    align="baseline">
                                                 <Form.Item
-                                                    {...restField}
-                                                    name={[name, 'key']}
+                                                    {...arrField}
+                                                    name={[arrField.name, 'key']}
                                                     rules={[{required: true, message: 'Missing key'}]}
                                                 >
                                                     <Input/>
                                                 </Form.Item>
                                                 <Form.Item
-                                                    {...restField}
-                                                    name={[name, 'value']}
+                                                    {...arrField}
+                                                    name={[arrField.name, 'value']}
                                                     rules={[{required: true, message: 'Missing value'}]}
                                                 >
                                                     <Input/>
                                                 </Form.Item>
-                                                <MinusCircleOutlined onClick={() => remove(name)}/>
+                                                <MinusCircleOutlined onClick={() => remove(arrField.name)}/>
                                             </Space>
                                         ))}
                                         <Form.Item>
