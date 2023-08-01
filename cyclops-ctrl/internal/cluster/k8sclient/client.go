@@ -126,7 +126,11 @@ func (k *KubernetesClient) UpdateScale(namespace, name string, sc v1.Scale) erro
 }
 
 func (k *KubernetesClient) Deploy(deploymentSpec *v12.Deployment) error {
-	deploymentClient := k.clientset.AppsV1().Deployments(apiv1.NamespaceDefault)
+	namespace := deploymentSpec.Namespace
+	if len(namespace) == 0 {
+		namespace = apiv1.NamespaceDefault
+	}
+	deploymentClient := k.clientset.AppsV1().Deployments(namespace)
 
 	_, err := deploymentClient.Get(context.TODO(), deploymentSpec.Name, metav1.GetOptions{})
 	if err != nil {
@@ -143,7 +147,11 @@ func (k *KubernetesClient) Deploy(deploymentSpec *v12.Deployment) error {
 }
 
 func (k *KubernetesClient) DeployService(service *apiv1.Service) error {
-	serviceClient := k.clientset.CoreV1().Services(apiv1.NamespaceDefault)
+	namespace := service.Namespace
+	if len(namespace) == 0 {
+		namespace = apiv1.NamespaceDefault
+	}
+	serviceClient := k.clientset.CoreV1().Services(namespace)
 
 	_, err := serviceClient.Get(context.TODO(), service.Name, metav1.GetOptions{})
 	if err != nil {
@@ -246,7 +254,7 @@ func (k *KubernetesClient) Delete(resource dto.Resource) error {
 		Resource: strings.ToLower(resource.GetKind()) + "s",
 	}
 
-	return k.Dynamic.Resource(gvr).Namespace("default").Delete(
+	return k.Dynamic.Resource(gvr).Namespace(resource.GetNamespace()).Delete(
 		context.Background(),
 		resource.GetName(),
 		metav1.DeleteOptions{},
