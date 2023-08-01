@@ -60,10 +60,11 @@ const config = {
       // Replace with your project's social card
       image: 'img/cyclops_helmsman.jpg',
       announcementBar: {
-        backgroundColor: '#dea731',
-        textColor: '#000',
+        backgroundColor: '#10357A',
+        textColor: '#FFF',
+        isCloseable: false,
         content:
-            '🚧️ Under construction! Schedule a demo or reach out to us to find out more! 🚧',
+            '⭐ Help us shine brighter by showing your support - give us a star on <a href="https://github.com/cyclops-ui/cyclops">GitHub</a>! ⭐',
       },
       navbar: {
         title: 'Cyclops',
@@ -79,7 +80,7 @@ const config = {
             label: 'Docs',
           },
           {
-            href: 'https://github.com/cyclops-ui/cyclops-ui.github.io',
+            href: 'https://github.com/cyclops-ui/cyclops',
             label: 'Github',
             position: 'right',
           },
@@ -119,7 +120,7 @@ const config = {
             items: [
               {
                 label: 'GitHub',
-                href: 'https://github.com/cyclops-ui',
+                href: 'https://github.com/cyclops-ui/cyclops',
               },
               {
                 label: 'Schedule a demo',
