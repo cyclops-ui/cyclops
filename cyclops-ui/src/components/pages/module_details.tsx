@@ -929,8 +929,29 @@ const ModuleDetails = () => {
                                 }} block>View Manifest</Button>
                             </Col>
                         </Row>
+                        <Divider/>
                         <Row>
-                            <Text>{resource.port} {'->'} {resource.targetPort}</Text>
+                            <Col span={24} style={{overflowX: "auto"}}>
+                                <Table dataSource={resource.ports}>
+                                    <Table.Column
+                                        title='Name'
+                                        dataIndex='name'
+                                        key='name'
+                                    />
+                                    <Table.Column
+                                        title='Protocol'
+                                        dataIndex='protocol'
+                                    />
+                                    <Table.Column
+                                        title='Port'
+                                        dataIndex='port'
+                                    />
+                                    <Table.Column
+                                        title='Target port'
+                                        dataIndex='targetPort'
+                                    />
+                                </Table>
+                            </Col>
                         </Row>
                     </Collapse.Panel>
                 )

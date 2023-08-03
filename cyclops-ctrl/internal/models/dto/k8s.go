@@ -1,6 +1,7 @@
 package dto
 
 import (
+	v1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
@@ -61,15 +62,14 @@ func (d *Deployment) SetDeleted(deleted bool) {
 }
 
 type Service struct {
-	Group      string `json:"group"`
-	Version    string `json:"version"`
-	Kind       string `json:"kind"`
-	Name       string `json:"name"`
-	Namespace  string `json:"namespace"`
-	Port       int    `json:"port"`
-	TargetPort int    `json:"targetPort"`
-	Manifest   string `json:"manifest"`
-	Deleted    bool   `json:"deleted"`
+	Group     string           `json:"group"`
+	Version   string           `json:"version"`
+	Kind      string           `json:"kind"`
+	Name      string           `json:"name"`
+	Namespace string           `json:"namespace"`
+	Ports     []v1.ServicePort `json:"ports"`
+	Manifest  string           `json:"manifest"`
+	Deleted   bool             `json:"deleted"`
 }
 
 func (s *Service) GetGroupVersionKind() string {

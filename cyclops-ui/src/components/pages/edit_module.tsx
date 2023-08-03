@@ -369,13 +369,10 @@ const EditModule = () => {
                     formFields.push(
                         <Form.Item {...arrayField} initialValue={field.initialValue} name={formItemName} label={
                             <Tooltip title={field.description} trigger="click">
-                                {field.display_name}</Tooltip>
+                                {field.display_name}
+                            </Tooltip>
                         }>
-                            <InputNumber style={{width: '100%'}} addonAfter={addonAfter(field)} onChange={function (v) {
-                                console.log(parentFieldID)
-                                console.log(formItemName)
-                                console.log(parentFieldID.concat(formItemName))
-                            }}/>
+                            <InputNumber style={{width: '100%'}} addonAfter={addonAfter(field)}/>
                         </Form.Item>
                     )
                     return;
@@ -405,14 +402,6 @@ const EditModule = () => {
                                 </Tooltip>
                             </Col>
                         </Row>
-                    }
-
-                    if (arrayField) {
-                        // fieldName = [fieldName, arrayField.name]
-
-                        // fieldName = parentFieldID.concat(arrayField.name)
-
-                        console.log(fieldName)
                     }
 
                     formFields.push(
@@ -460,8 +449,6 @@ const EditModule = () => {
                         </Row>
                     }
 
-                    // console.log(new Map(Object.entries(module.values)).get(fieldName) as any[])
-
                     formFields.push(
                         <Col span={level === 0 ? 16 : 24} offset={level === 0 ? 2 : 0} style={{
                             paddingBottom: "15px",
@@ -483,8 +470,6 @@ const EditModule = () => {
                                             <>
                                                 {arrFields.map((arrField) => (
                                                     <Col key={arrField.key}>
-                                                        {/*{arrayInnerField(field, uniqueFieldName.concat(".").concat(arrField.name), "", level + 1, arrField)}*/}
-                                                        {/*<MinusCircleOutlined onClick={() => remove(arrField.name)} />*/}
                                                         {arrayInnerField(field, uniqueFieldName.concat(".").concat(arrField.name), "", level + 1, arrField, remove)}
                                                         <Divider/>
                                                     </Col>
@@ -617,7 +602,7 @@ const EditModule = () => {
                             Edit Module
                         </Divider>
                         {formLoading()}
-                        {mapFields (config.fields, "",  "" , 0)}
+                        {mapFields(config.fields, "",  "" , 0)}
                         <div style={{textAlign: "right"}}>
                             <Button type="primary" htmlType="submit" name="Save">
                                 Save

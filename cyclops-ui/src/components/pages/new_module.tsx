@@ -106,7 +106,7 @@ const NewModule = () => {
             })
             .then(res => {
                 console.log(res);
-                // window.location.href = "/modules/" + values["cyclops_module_name"]
+                window.location.href = "/modules/" + values["cyclops_module_name"]
             })
             .catch(error => {
                 console.log(error)
@@ -177,13 +177,13 @@ const NewModule = () => {
     const loadTemplate = () => {
         setLoadingTemplate(true);
 
-        setGitTemplate({
-            repo: "https://github.com/petar-cvit/starship",
-            path: "charts/devnet",
-        })
+        // setGitTemplate({
+        //     repo: "https://github.com/petar-cvit/starship",
+        //     path: "charts/devnet",
+        // })
 
-        // axios.get(window.__RUNTIME_CONFIG__.REACT_APP_CYCLOPS_CTRL_HOST + `/templates/git?repo=` + gitTemplate.repo + `&path=` + gitTemplate.path).then(res => {
-        axios.get(window.__RUNTIME_CONFIG__.REACT_APP_CYCLOPS_CTRL_HOST + `/templates/git?repo=` + "https://github.com/petar-cvit/starship" + `&path=` + "charts/devnet").then(res => {
+        // axios.get(window.__RUNTIME_CONFIG__.REACT_APP_CYCLOPS_CTRL_HOST + `/templates/git?repo=` + "https://github.com/petar-cvit/starship" + `&path=` + "charts/devnet").then(res => {
+        axios.get(window.__RUNTIME_CONFIG__.REACT_APP_CYCLOPS_CTRL_HOST + `/templates/git?repo=` + gitTemplate.repo + `&path=` + gitTemplate.path).then(res => {
             setConfig(res.data);
 
             setError({
@@ -263,22 +263,17 @@ const NewModule = () => {
         }
     }
 
-    function mapFields(fields: any[], parentFieldID: string, parent: string, level: number, arrayField?: any) {
+    function mapFields(fields: any[], parentFieldID: string | string[], parent: string, level: number, arrayField?: any) {
         const formFields: {} | any = [];
         fields.forEach((field: any) => {
-            let fieldName = parent === "" ? field.name : parent.concat(".").concat(field.name)
+            let fieldName = field.name
 
             let formItemName = arrayField ? [arrayField.name, fieldName] : fieldName
-
-            if (arrayField) {
-                // fieldName = field.name
-                // formItemName = [arrayField.name, fieldName]
-            }
 
             switch (field.type) {
                 case "string":
                     formFields.push(
-                        <Form.Item {...arrayField} initialValue={field.initialValue} name={formItemName}
+                        <Form.Item {...arrayField} name={formItemName}
                                    label={field.display_name}>
                             <Input addonAfter={addonAfter(field)}/>
                         </Form.Item>
@@ -296,7 +291,7 @@ const NewModule = () => {
                     )
                     return;
                 case "boolean":
-                    let checked = form.getFieldValue([parentFieldID.split("."), fieldName]) === true ? "checked" : "unchecked"
+                    let checked = form.getFieldValue([parentFieldID, fieldName]) === true ? "checked" : "unchecked"
                     formFields.push(
                         <Form.Item initialValue={field.initialValue} name={fieldName} id={fieldName}
                                    label={field.display_name} valuePropName={checked}>
@@ -340,7 +335,7 @@ const NewModule = () => {
                                     <Form.List name={fieldName}>
                                         {(arrFields, { add, remove }) => (
                                             <>
-                                                {mapFields(field.properties, fieldName, "", level + 1, arrayField)}
+                                                {mapFields(field.properties, [fieldName], "", level + 1, arrayField)}
                                             </>
                                         )}
                                     </Form.List>
@@ -388,7 +383,6 @@ const NewModule = () => {
                                                 {arrFields.map((arrField) => (
                                                     <Col key={arrField.key}>
                                                         {arrayInnerField(field, uniqueFieldName.concat(".").concat(arrField.name), "", level + 1, arrField, remove)}
-                                                        {/*{mapFields(field.items.properties, uniqueFieldName.concat(".").concat(arrField.name), "", level + 1, arrField)}*/}
                                                         <Divider/>
                                                     </Col>
                                                 ))}

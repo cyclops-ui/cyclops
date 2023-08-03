@@ -108,14 +108,13 @@ func (k *KubernetesClient) GetResourcesForModule(name string) ([]dto.Resource, e
 		}
 
 		out = append(out, &dto.Service{
-			Group:      "",
-			Version:    "v1",
-			Kind:       "Service",
-			Name:       item.Name,
-			Namespace:  item.Namespace,
-			Port:       int(item.Spec.Ports[0].Port),
-			TargetPort: item.Spec.Ports[0].TargetPort.IntValue(),
-			Manifest:   manifest,
+			Group:     "",
+			Version:   "v1",
+			Kind:      "Service",
+			Name:      item.Name,
+			Namespace: item.Namespace,
+			Ports:     item.Spec.Ports,
+			Manifest:  manifest,
 		})
 	}
 

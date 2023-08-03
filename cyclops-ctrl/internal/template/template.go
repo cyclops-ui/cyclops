@@ -1,15 +1,16 @@
 package template
 
 import (
+	"fmt"
 	"strings"
-
-	json "github.com/json-iterator/go"
-	"helm.sh/helm/v3/pkg/chart"
-	"helm.sh/helm/v3/pkg/chartutil"
-	"helm.sh/helm/v3/pkg/engine"
 
 	cyclopsv1alpha1 "github.com/cyclops-ui/cycops-ctrl/api/v1alpha1"
 	"github.com/cyclops-ui/cycops-ctrl/internal/models"
+	json "github.com/json-iterator/go"
+	"github.com/pkg/errors"
+	"helm.sh/helm/v3/pkg/chart"
+	"helm.sh/helm/v3/pkg/chartutil"
+	"helm.sh/helm/v3/pkg/engine"
 )
 
 // TemplateModule
@@ -181,4 +182,40 @@ func setObjectValue(keyParts []string, value interface{}, values chartutil.Value
 	}
 
 	return values
+}
+
+// delete ASAP
+func mapHack(values chartutil.Values, field models.Field) (chartutil.Values, error) {
+	switch field.Type {
+	case "boolean":
+		return values, nil
+	case "string":
+		return values, nil
+	case "number":
+		return values, nil
+	case "array":
+		fmt.Println("array")
+		fmt.Println(values.AsMap())
+
+		return nil, nil
+	case "map":
+		fmt.Println("map")
+		fmt.Println(values)
+
+		return nil, nil
+
+		//var keyValues []dto.KeyValue
+		//if err := json.Unmarshal([]byte(value.Value), &keyValues); err != nil {
+		//	return "", err
+		//}
+		//
+		//asMap := make(map[string]string)
+		//for _, kv := range keyValues {
+		//	asMap[kv.Key] = kv.Value
+		//}
+		//
+		//values = setObjectValue(strings.Split(value.Name, "."), asMap, values)
+	}
+
+	return nil, errors.New("type not found")
 }
