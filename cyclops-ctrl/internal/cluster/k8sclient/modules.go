@@ -63,7 +63,7 @@ func (k *KubernetesClient) GetModule(name string) (*cyclopsv1alpha1.Module, erro
 func (k *KubernetesClient) GetResourcesForModule(name string) ([]dto.Resource, error) {
 	out := make([]dto.Resource, 0, 0)
 
-	deployments, err := k.clientset.AppsV1().Deployments("default").List(context.Background(), metav1.ListOptions{
+	deployments, err := k.clientset.AppsV1().Deployments("").List(context.Background(), metav1.ListOptions{
 		LabelSelector: "cyclops.module=" + name,
 	})
 	if err != nil {
@@ -94,7 +94,7 @@ func (k *KubernetesClient) GetResourcesForModule(name string) ([]dto.Resource, e
 		})
 	}
 
-	services, err := k.clientset.CoreV1().Services("default").List(context.Background(), metav1.ListOptions{
+	services, err := k.clientset.CoreV1().Services("").List(context.Background(), metav1.ListOptions{
 		LabelSelector: "cyclops.module=" + name,
 	})
 	if err != nil {
