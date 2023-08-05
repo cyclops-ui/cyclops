@@ -3,6 +3,7 @@ import {
     Alert,
     Button,
     Col,
+    Collapse,
     Divider,
     Form,
     Input,
@@ -13,7 +14,7 @@ import {
     Space,
     Switch,
     Typography,
-    Tooltip
+    Tooltip, Spin
 } from 'antd';
 import axios from 'axios';
 import {useNavigate} from 'react-router';
@@ -25,8 +26,8 @@ const {TextArea} = Input;
 
 const {Title} = Typography;
 const layout = {
-    labelCol: {span: 8},
-    wrapperCol: {span: 16},
+    labelCol: {span: 3},
+    wrapperCol: {span: 13},
 };
 
 const NewModule = () => {
@@ -34,13 +35,12 @@ const NewModule = () => {
     const [versions, setVersions] = useState([]);
     const [dplName, setName] = useState("");
     const [allConfigs, setAllConfigs] = useState([]);
-    const [manifest, setManifest] = useState("");
-    const [values, setValues] = useState({});
     const [config, setConfig] = useState({
         name: "",
         version: "",
         manifest: "",
-        fields: []
+        fields: [],
+        properties: [],
     })
 
     const [gitTemplate, setGitTemplate] = useState({
@@ -55,7 +55,16 @@ const NewModule = () => {
 
     const [successLoad, setSuccessLoad] = useState(false);
 
+    const [loadingTemplate, setLoadingTemplate] = useState(false);
+
+    const [activeCollapses, setActiveCollapses] = useState(new Map());
+    const updateActiveCollapses = (k: any, v: any) => {
+        setActiveCollapses(new Map(activeCollapses.set(k,v)));
+    }
+
     const history = useNavigate();
+
+    const [form] = Form.useForm();
 
     let {name} = useParams();
 
@@ -80,7 +89,7 @@ const NewModule = () => {
             "template": config.name,
         })
 
-        setLoading(true);
+        // setLoading(true);
 
         axios.post(window.__RUNTIME_CONFIG__.REACT_APP_CYCLOPS_CTRL_HOST + `/modules/new`,
             {
@@ -126,8 +135,9 @@ const NewModule = () => {
         setConfig({
             name: value,
             version: "",
-            fields: [],
             manifest: "",
+            fields: [],
+            properties: [],
         })
 
         axios.get(window.__RUNTIME_CONFIG__.REACT_APP_CYCLOPS_CTRL_HOST + `/configuration/` + value + `/versions`).then(res => {
@@ -165,6 +175,14 @@ const NewModule = () => {
     }
 
     const loadTemplate = () => {
+        setLoadingTemplate(true);
+
+        // setGitTemplate({
+        //     repo: "https://github.com/petar-cvit/starship",
+        //     path: "charts/devnet",
+        // })
+
+        // axios.get(window.__RUNTIME_CONFIG__.REACT_APP_CYCLOPS_CTRL_HOST + `/templates/git?repo=` + "https://github.com/petar-cvit/starship" + `&path=` + "charts/devnet").then(res => {
         axios.get(window.__RUNTIME_CONFIG__.REACT_APP_CYCLOPS_CTRL_HOST + `/templates/git?repo=` + gitTemplate.repo + `&path=` + gitTemplate.path).then(res => {
             setConfig(res.data);
 
@@ -173,7 +191,9 @@ const NewModule = () => {
                 description: "",
             });
             setSuccessLoad(true);
+            setLoadingTemplate(false);
         }).catch(function (error) {
+            setLoadingTemplate(false);
             if (error.response === undefined) {
                 setError({
                     message: String(error),
@@ -185,85 +205,242 @@ const NewModule = () => {
                 setSuccessLoad(false);
             }
         });
+
+        // axios.get(window.__RUNTIME_CONFIG__.REACT_APP_CYCLOPS_CTRL_HOST + `/templates/git/initial?repo=` + gitTemplate.repo + `&path=` + gitTemplate.path).then(res => {
+        axios.get(window.__RUNTIME_CONFIG__.REACT_APP_CYCLOPS_CTRL_HOST + `/templates/git/initial?repo=` + "https://github.com/petar-cvit/starship" + `&path=` + "charts/devnet").then(res => {
+            form.setFieldsValue(res.data);
+
+            setError({
+                message: "",
+                description: "",
+            });
+            // setSuccessLoad(true);
+            // setLoadingTemplate(false);
+        }).catch(function (error) {
+            // setLoadingTemplate(false);
+            // setSuccessLoad(false);
+            if (error.response === undefined) {
+                setError({
+                    message: String(error),
+                    description: "Check if Cyclops backend is available on: " + window.__RUNTIME_CONFIG__.REACT_APP_CYCLOPS_CTRL_HOST
+                })
+            } else {
+                setError(error.response.data);
+            }
+        });
     }
 
-
-    const formFields: {} | any = [];
-    config.fields.forEach((field: any) => {
-        switch (field.type) {
-            case "string":
-                formFields.push(
-                    <Form.Item initialValue={field.initialValue} name={field.name} id={field.name}
-                               label={field.display_name}>
-                        <Input addonAfter={
-                            <Tooltip title={field.description} trigger="click">
-                                <InfoCircleOutlined/>
-                            </Tooltip>
-                        }/>
-                    </Form.Item>
-                )
-                return;
-            case "number":
-                formFields.push(
-                    <Form.Item initialValue={field.initialValue} name={field.name} id={field.name} label={
-                        <Tooltip title={field.description} trigger="click">
-                            {field.display_name}
-                        </Tooltip>
-                    }>
-                        <InputNumber style={{width: '100%'}} addonAfter={
-                            <Tooltip title={field.description} trigger="click">
-                                <InfoCircleOutlined/>
-                            </Tooltip>
-                        }/>
-                    </Form.Item>
-                )
-                return;
-            case "boolean":
-                formFields.push(
-                    <Form.Item initialValue={field.initialValue} name={field.name} id={field.name}
-                               label={field.display_name}>
-                        <Switch />
-                    </Form.Item>
-                )
-                return;
-            case "map":
-                formFields.push(
-                    <Form.Item name={field.name} label={field.display_name}>
-                        <Form.List name={field.name}>
-                            {(fields, {add, remove}) => (
-                                <>
-                                    {fields.map(({key, name, ...restField}) => (
-                                        <Space key={key} style={{display: 'flex', marginBottom: 8}}
-                                               align="baseline">
-                                            <Form.Item
-                                                {...restField}
-                                                name={[name, 'key']}
-                                                rules={[{required: true, message: 'Missing key'}]}
-                                            >
-                                                <Input/>
-                                            </Form.Item>
-                                            <Form.Item
-                                                {...restField}
-                                                name={[name, 'value']}
-                                                rules={[{required: true, message: 'Missing value'}]}
-                                            >
-                                                <Input/>
-                                            </Form.Item>
-                                            <MinusCircleOutlined onClick={() => remove(name)}/>
-                                        </Space>
-                                    ))}
-                                    <Form.Item>
-                                        <Button type="dashed" onClick={() => add()} block icon={<PlusOutlined/>}>
-                                            Add
-                                        </Button>
-                                    </Form.Item>
-                                </>
-                            )}
-                        </Form.List>
-                    </Form.Item>
-                )
+    const getCollapseColor = (fieldName: string) => {
+        if (activeCollapses.get(fieldName) && activeCollapses.get(fieldName) === true) {
+            return "#faca93"
+        } else {
+            return "#fae8d4"
         }
-    })
+    }
+
+    const addonAfter = (field: any) => {
+        if (field.description.length !== 0) {
+            return <Tooltip title={field.description} trigger="click">
+                <InfoCircleOutlined/>
+            </Tooltip>
+        }
+    }
+
+    const arrayInnerField = (field: any, parentFieldID: string, parent: string, level: number, arrayField: any, remove: Function) => {
+        switch (field.items.type) {
+            case "object":
+                return <div>
+                    {mapFields(field.items.properties, parentFieldID, "", level + 1, arrayField)}
+                    <MinusCircleOutlined style={{ fontSize: '16px' }} onClick={() => remove(arrayField.name)} />
+                </div>
+            case "string":
+                return <Row>
+                    <Form.Item style={{paddingBottom: "0px", marginBottom: "0px"}} wrapperCol={24} {...arrayField} initialValue={field.initialValue} name={[arrayField.name]}>
+                        <Input addonAfter={addonAfter(field)}/>
+                    </Form.Item>
+                    <MinusCircleOutlined style={{ fontSize: '16px', paddingLeft: "10px"}} onClick={() => remove(arrayField.name)} />
+                </Row>
+        }
+    }
+
+    function mapFields(fields: any[], parentFieldID: string | string[], parent: string, level: number, arrayField?: any) {
+        const formFields: {} | any = [];
+        fields.forEach((field: any) => {
+            let fieldName = field.name
+
+            let formItemName = arrayField ? [arrayField.name, fieldName] : fieldName
+
+            switch (field.type) {
+                case "string":
+                    formFields.push(
+                        <Form.Item {...arrayField} name={formItemName}
+                                   label={field.display_name}>
+                            <Input addonAfter={addonAfter(field)}/>
+                        </Form.Item>
+                    )
+                    return;
+                case "number":
+                    formFields.push(
+                        <Form.Item {...arrayField} initialValue={field.initialValue} name={formItemName} label={
+                            <Tooltip title={field.description} trigger="click">
+                                {field.display_name}
+                            </Tooltip>
+                        }>
+                            <InputNumber style={{width: '100%'}} addonAfter={addonAfter(field)}/>
+                        </Form.Item>
+                    )
+                    return;
+                case "boolean":
+                    let checked = form.getFieldValue([parentFieldID, fieldName]) === true ? "checked" : "unchecked"
+                    formFields.push(
+                        <Form.Item initialValue={field.initialValue} name={fieldName} id={fieldName}
+                                   label={field.display_name} valuePropName={checked}>
+                            <Switch />
+                        </Form.Item>
+                    )
+                    return;
+                case "object":
+                    let uniqueFieldName : any = parentFieldID.length === 0 ? field.name : parentFieldID.concat(".").concat(field.name)
+                    var header = <Row>{field.name}</Row>
+
+                    if (field.description && field.description.length !== 0) {
+                        header = <Row gutter={[0, 8]}>
+                            <Col span={15} style={{display: 'flex', justifyContent: 'flex-start'}}>
+                                {field.name}
+                            </Col>
+                            <Col span={9} style={{display: 'flex', justifyContent: 'flex-end'}}>
+                                <Tooltip title={field.description} trigger={["hover", "click"]}>
+                                    <InfoCircleOutlined style={{right: "0px", fontSize: '20px'}}/>
+                                </Tooltip>
+                            </Col>
+                        </Row>
+                    }
+
+                    formFields.push(
+                        <Col span={level === 0 ? 16 : 24} offset={level === 0 ? 2 : 0} style={{
+                            paddingBottom: "15px",
+                            marginLeft: "0px",
+                            marginRight: "0px",
+                            paddingLeft: "0px",
+                            paddingRight: "0px",
+                        }}>
+                            <Collapse size={"small"} onChange={function (value: string | string[]) {
+                                if (value.length === 0) {
+                                    updateActiveCollapses(uniqueFieldName, false)
+                                } else {
+                                    updateActiveCollapses(uniqueFieldName, true)
+                                }
+                            }}>
+                                <Collapse.Panel key={fieldName} header={header} style={{backgroundColor: getCollapseColor(uniqueFieldName)}} forceRender={true}>
+                                    <Form.List name={fieldName}>
+                                        {(arrFields, { add, remove }) => (
+                                            <>
+                                                {mapFields(field.properties, [fieldName], "", level + 1, arrayField)}
+                                            </>
+                                        )}
+                                    </Form.List>
+                                </Collapse.Panel>
+                            </Collapse>
+                        </Col>
+                    )
+                    return;
+                case "array":
+                    uniqueFieldName = parentFieldID.length === 0 ? field.name : parentFieldID.concat(".").concat(field.name)
+                    var header = <Row>{field.name}</Row>
+
+                    if (field.description && field.description.length !== 0) {
+                        header = <Row gutter={[0, 8]}>
+                            <Col span={15} style={{display: 'flex', justifyContent: 'flex-start'}}>
+                                {field.name}
+                            </Col>
+                            <Col span={9} style={{display: 'flex', justifyContent: 'flex-end'}}>
+                                <Tooltip title={field.description} trigger={["hover", "click"]}>
+                                    <InfoCircleOutlined style={{right: "0px", fontSize: '20px'}}/>
+                                </Tooltip>
+                            </Col>
+                        </Row>
+                    }
+
+                    formFields.push(
+                        <Col span={level === 0 ? 16 : 24} offset={level === 0 ? 2 : 0} style={{
+                            paddingBottom: "15px",
+                            marginLeft: "0px",
+                            marginRight: "0px",
+                            paddingLeft: "0px",
+                            paddingRight: "0px",
+                        }}>
+                            <Collapse size={"small"} onChange={function (value: string | string[]) {
+                                if (value.length === 0) {
+                                    updateActiveCollapses(uniqueFieldName, false)
+                                } else {
+                                    updateActiveCollapses(uniqueFieldName, true)
+                                }
+                            }}>
+                                <Collapse.Panel key={fieldName} header={header} style={{backgroundColor: getCollapseColor(uniqueFieldName)}} forceRender={true}>
+                                    <Form.List name={formItemName}>
+                                        {(arrFields, { add, remove }) => (
+                                            <>
+                                                {arrFields.map((arrField) => (
+                                                    <Col key={arrField.key}>
+                                                        {arrayInnerField(field, uniqueFieldName.concat(".").concat(arrField.name), "", level + 1, arrField, remove)}
+                                                        <Divider/>
+                                                    </Col>
+                                                ))}
+
+                                                <Form.Item>
+                                                    <Button type="dashed" onClick={() => add()} block icon={<PlusOutlined />}>
+                                                        Add
+                                                    </Button>
+                                                </Form.Item>
+                                            </>
+                                        )}
+                                    </Form.List>
+                                </Collapse.Panel>
+                            </Collapse>
+                        </Col>
+                    )
+                    return;
+                case "map":
+                    formFields.push(
+                        <Form.Item name={fieldName} label={field.display_name}>
+                            <Form.List name={formItemName}>
+                                {(fields, {add, remove}) => (
+                                    <>
+                                        {fields.map((arrField) => (
+                                            <Space key={arrField.key} style={{display: 'flex', marginBottom: 8}}
+                                                   align="baseline">
+                                                <Form.Item
+                                                    {...arrField}
+                                                    name={[arrField.name, 'key']}
+                                                    rules={[{required: true, message: 'Missing key'}]}
+                                                >
+                                                    <Input/>
+                                                </Form.Item>
+                                                <Form.Item
+                                                    {...arrField}
+                                                    name={[arrField.name, 'value']}
+                                                    rules={[{required: true, message: 'Missing value'}]}
+                                                >
+                                                    <Input/>
+                                                </Form.Item>
+                                                <MinusCircleOutlined onClick={() => remove(arrField.name)}/>
+                                            </Space>
+                                        ))}
+                                        <Form.Item>
+                                            <Button type="dashed" onClick={() => add()} block icon={<PlusOutlined/>}>
+                                                Add
+                                            </Button>
+                                        </Form.Item>
+                                    </>
+                                )}
+                            </Form.List>
+                        </Form.Item>
+                    )
+            }
+        })
+
+        return formFields
+    }
 
     return (
         <div>
@@ -300,8 +477,8 @@ const NewModule = () => {
                 </Col>
             </Row>
             <Row gutter={[40, 0]}>
-                <Col span={18}>
-                    <Form {...layout} autoComplete={"off"} onFinish={handleSubmit}>
+                <Col span={24}>
+                    <Form {...layout} form={form} autoComplete={"off"} onFinish={handleSubmit}>
                         <Divider orientation="left" orientationMargin="0">
                             Module template
                         </Divider>
@@ -327,27 +504,9 @@ const NewModule = () => {
                             }}
                         />
                         {'  '}
-                        <Button type="primary" htmlType="button" onClick={loadTemplate}>
+                        <Button type="primary" htmlType="button" onClick={loadTemplate} loading={loadingTemplate}>
                             Load
                         </Button>
-                        {/*<Divider orientation="left" orientationMargin="0">*/}
-                        {/*    Select configuration*/}
-                        {/*</Divider>*/}
-                        {/*<Select*/}
-                        {/*    placeholder={"Template"}*/}
-                        {/*    style={{width: '30%'}}*/}
-                        {/*    onChange={handleChange}*/}
-                        {/*>*/}
-                        {/*    {configNames}*/}
-                        {/*</Select>*/}
-                        {/*{'  '}*/}
-                        {/*<Select*/}
-                        {/*    placeholder={"Template version"}*/}
-                        {/*    style={{width: '30%'}}*/}
-                        {/*    onChange={handleVersionChange}*/}
-                        {/*>*/}
-                        {/*    {versions}*/}
-                        {/*</Select>*/}
                         <Divider orientation="left" orientationMargin="0">
                             Module name
                         </Divider>
@@ -364,7 +523,7 @@ const NewModule = () => {
                         <Divider orientation="left" orientationMargin="0">
                             Define Module
                         </Divider>
-                        {formFields}
+                        {mapFields(config.fields, "", "", 0)}
                         <div style={{textAlign: "right"}}>
                             <Button type="primary" loading={loading} htmlType="submit" name="Save">
                                 Save

@@ -1,0 +1,42 @@
+apiVersion: cyclops-ui.com/v1alpha1
+kind: Module
+metadata:
+  name: test
+  namespace: cyclops
+spec:
+  template:
+    name: ""
+    version: ""
+    git:
+      repo: https://github.com/cyclops-ui/templates
+      path: application
+  values:
+    chains:
+      - name: osmosis-1
+        type: osmosis
+        numValidators: 1
+        ports:
+          rest: 1313
+          rpc: 26653
+      - name: gaia-1
+        type: cosmos
+        numValidators: 1
+        ports:
+          rest: 1317
+          rpc: 26657
+    relayers:
+      - name: osmos-gaia
+        type: hermes
+        replicas: 1
+        chains:
+          - osmosis-1
+          - gaia-1
+    explorer:
+      enabled: true
+      ports:
+        rest: 8080
+    registry:
+      enabled: true
+      ports:
+        rest: 8081
+

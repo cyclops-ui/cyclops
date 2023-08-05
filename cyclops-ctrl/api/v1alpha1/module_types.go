@@ -17,6 +17,7 @@ limitations under the License.
 package v1alpha1
 
 import (
+	apiextensionsv1 "k8s.io/apiextensions-apiserver/pkg/apis/apiextensions/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
@@ -28,8 +29,8 @@ type ModuleSpec struct {
 	// INSERT ADDITIONAL SPEC FIELDS - desired state of cluster
 	// Important: Run "make" to regenerate code after modifying this file
 
-	TemplateRef TemplateRef   `json:"template"`
-	Values      []ModuleValue `json:"values"`
+	TemplateRef TemplateRef          `json:"template"`
+	Values      apiextensionsv1.JSON `json:"values"`
 }
 
 type ModuleValue struct {

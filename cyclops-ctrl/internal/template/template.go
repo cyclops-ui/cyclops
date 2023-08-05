@@ -1,14 +1,16 @@
 package template
 
 import (
-	"strconv"
-
-	"helm.sh/helm/v3/pkg/chart"
-	"helm.sh/helm/v3/pkg/chartutil"
-	"helm.sh/helm/v3/pkg/engine"
+	"fmt"
+	"strings"
 
 	cyclopsv1alpha1 "github.com/cyclops-ui/cycops-ctrl/api/v1alpha1"
 	"github.com/cyclops-ui/cycops-ctrl/internal/models"
+	json "github.com/json-iterator/go"
+	"github.com/pkg/errors"
+	"helm.sh/helm/v3/pkg/chart"
+	"helm.sh/helm/v3/pkg/chartutil"
+	"helm.sh/helm/v3/pkg/engine"
 )
 
 // TemplateModule
@@ -65,7 +67,7 @@ func HelmTemplate(module cyclopsv1alpha1.Module, moduleTemplate models.Template)
 		Lock:     &chart.Lock{},
 		Values:   map[string]interface{}{},
 		Schema:   []byte{},
-		Files:    []*chart.File{},
+		Files:    moduleTemplate.Files,
 		Templates: []*chart.File{
 			{
 				Name: "all.yaml",
@@ -74,38 +76,146 @@ func HelmTemplate(module cyclopsv1alpha1.Module, moduleTemplate models.Template)
 		},
 	}
 
-	fields := templateFieldsMap(moduleTemplate)
+	//fields := flatten(moduleTemplate)
+	//for _, value := range module.Spec.Values {
+	//	switch fields[value.Name].Type {
+	//	case "boolean":
+	//		asBool, _ := strconv.ParseBool(value.Value)
+	//		values = setObjectValue(strings.Split(value.Name, "."), asBool, values)
+	//	case "string":
+	//		values = setObjectValue(strings.Split(value.Name, "."), value.Value, values)
+	//	case "number":
+	//		values = setObjectValue(strings.Split(value.Name, "."), value.Value, values)
+	//	case "array":
+	//		var asArray []map[string]interface{}
+	//		if err := json.Unmarshal([]byte(value.Value), &asArray); err != nil {
+	//			return "", err
+	//		}
+	//
+	//		for i, arrayValue := range asArray {
+	//			for k, v := range arrayValue {
+	//				//values = setObjectValue(strings.Split(k, "."), v, values)
+	//				values = setObjectValue(strings.Split(strings.Join([]string{value.Name, fmt.Sprint(i), k}, "."), "."), v, values)
+	//			}
+	//		}
+	//	case "map":
+	//		var keyValues []dto.KeyValue
+	//		if err := json.Unmarshal([]byte(value.Value), &keyValues); err != nil {
+	//			return "", err
+	//		}
+	//
+	//		asMap := make(map[string]string)
+	//		for _, kv := range keyValues {
+	//			asMap[kv.Key] = kv.Value
+	//		}
+	//
+	//		values = setObjectValue(strings.Split(value.Name, "."), asMap, values)
+	//	}
+	//}
 
 	values := make(chartutil.Values)
-	for _, value := range module.Spec.Values {
-		switch fields[value.Name].Type {
-		case "boolean":
-			asBool, _ := strconv.ParseBool(value.Value)
-			values[value.Name] = asBool
-		case "string":
-			values[value.Name] = value.Value
-		case "number":
-			values[value.Name] = value.Value
-		}
+	if err := json.Unmarshal(module.Spec.Values.Raw, &values); err != nil {
+		return "", err
 	}
 
 	top := make(chartutil.Values)
 	top["Values"] = values
+	top["Release"] = map[string]interface{}{
+		"Name":      "",
+		"Namespace": "",
+	}
 
 	out, err := engine.Render(chart, top)
 	if err != nil {
+		//fmt.Println(moduleTemplate.Manifest)
 		return "", err
 	}
 
 	return out["all.yaml"], err
 }
 
-func templateFieldsMap(template models.Template) map[string]models.Field {
+func flatten(template models.Template) map[string]models.Field {
 	fields := make(map[string]models.Field)
 
 	for _, field := range template.Fields {
-		fields[field.Name] = field
+		for _, child := range flattenField(field) {
+			fields[child.Name] = child
+		}
 	}
 
 	return fields
+}
+
+func flattenField(field models.Field) []models.Field {
+	if len(field.Properties) == 0 {
+		return []models.Field{field}
+	}
+
+	children := make([]models.Field, 0)
+	for _, child := range field.Properties {
+		children = append(children, flattenField(child)...)
+	}
+
+	out := make([]models.Field, 0)
+	for _, child := range children {
+		child.Name = strings.Join([]string{field.Name, child.Name}, ".")
+		out = append(out, child)
+	}
+
+	return out
+}
+
+func setObjectValue(keyParts []string, value interface{}, values chartutil.Values) chartutil.Values {
+	if len(keyParts) == 1 {
+		//if keyParts[0] == "chains" {
+		//	fmt.Println("mi smo keyevi", keyParts)
+		//	return values
+		//}
+		values[keyParts[0]] = value
+		return values
+	}
+
+	if _, ok := values[keyParts[0]]; !ok {
+		values[keyParts[0]] = setObjectValue(keyParts[1:], value, make(chartutil.Values))
+	} else {
+		values[keyParts[0]] = setObjectValue(keyParts[1:], value, values[keyParts[0]].(chartutil.Values))
+	}
+
+	return values
+}
+
+// delete ASAP
+func mapHack(values chartutil.Values, field models.Field) (chartutil.Values, error) {
+	switch field.Type {
+	case "boolean":
+		return values, nil
+	case "string":
+		return values, nil
+	case "number":
+		return values, nil
+	case "array":
+		fmt.Println("array")
+		fmt.Println(values.AsMap())
+
+		return nil, nil
+	case "map":
+		fmt.Println("map")
+		fmt.Println(values)
+
+		return nil, nil
+
+		//var keyValues []dto.KeyValue
+		//if err := json.Unmarshal([]byte(value.Value), &keyValues); err != nil {
+		//	return "", err
+		//}
+		//
+		//asMap := make(map[string]string)
+		//for _, kv := range keyValues {
+		//	asMap[kv.Key] = kv.Value
+		//}
+		//
+		//values = setObjectValue(strings.Split(value.Name, "."), asMap, values)
+	}
+
+	return nil, errors.New("type not found")
 }

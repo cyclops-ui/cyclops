@@ -35,7 +35,21 @@ func (m *Modules) GetModule(ctx *gin.Context) {
 		return
 	}
 
-	ctx.JSON(http.StatusOK, mapper.ModuleToDTO(*module))
+	//template, err := m.templates.GetConfig(module.Spec.TemplateRef)
+	//if err != nil {
+	//	fmt.Println(err)
+	//	ctx.JSON(http.StatusInternalServerError, dto.NewError("Error loading template", err.Error()))
+	//	return
+	//}
+
+	moduleDTO, err := mapper.ModuleToDTO(*module)
+	if err != nil {
+		fmt.Println(err)
+		ctx.JSON(http.StatusInternalServerError, dto.NewError("Error mapping module", err.Error()))
+		return
+	}
+
+	ctx.JSON(http.StatusOK, moduleDTO)
 }
 
 func (m *Modules) ListModules(ctx *gin.Context) {
@@ -44,7 +58,7 @@ func (m *Modules) ListModules(ctx *gin.Context) {
 	modules, err := m.kubernetesClient.ListModules()
 	if err != nil {
 		fmt.Println(err)
-		ctx.Status(http.StatusInternalServerError)
+		ctx.JSON(http.StatusInternalServerError, dto.NewError("Error fetching modules", err.Error()))
 		return
 	}
 
@@ -57,7 +71,7 @@ func (m *Modules) DeleteModule(ctx *gin.Context) {
 	err := m.kubernetesClient.DeleteModule(ctx.Param("name"))
 	if err != nil {
 		fmt.Println(err)
-		ctx.Status(http.StatusInternalServerError)
+		ctx.JSON(http.StatusInternalServerError, dto.NewError("Error deleting module", err.Error()))
 		return
 	}
 
@@ -69,15 +83,15 @@ func (m *Modules) DeleteModuleResource(ctx *gin.Context) {
 
 	var request dto.DeleteResource
 	if err := ctx.BindJSON(&request); err != nil {
-		fmt.Println("error binding request", request)
-		ctx.Status(http.StatusBadRequest)
+		fmt.Println(err)
+		ctx.JSON(http.StatusBadRequest, dto.NewError("Error mapping module request", err.Error()))
 		return
 	}
 
 	err := m.kubernetesClient.Delete(&request)
 	if err != nil {
 		fmt.Println(err)
-		ctx.Status(http.StatusInternalServerError)
+		ctx.JSON(http.StatusInternalServerError, dto.NewError("Error deleting module", err.Error()))
 		return
 	}
 
@@ -94,7 +108,14 @@ func (m *Modules) CreateModule(ctx *gin.Context) {
 		return
 	}
 
-	err := m.kubernetesClient.CreateModule(mapper.RequestToModule(request))
+	module, err := mapper.RequestToModule(request)
+	if err != nil {
+		fmt.Println(err)
+		ctx.JSON(http.StatusInternalServerError, dto.NewError("Error mapping module", err.Error()))
+		return
+	}
+
+	err = m.kubernetesClient.CreateModule(module)
 	if err != nil {
 		fmt.Println(err)
 		ctx.JSON(http.StatusInternalServerError, dto.NewError("Error creating module", err.Error()))
@@ -109,25 +130,31 @@ func (m *Modules) UpdateModule(ctx *gin.Context) {
 
 	var request dto.Module
 	if err := ctx.BindJSON(&request); err != nil {
-		fmt.Println("error binding request", request)
-		ctx.Status(http.StatusBadRequest)
+		fmt.Println(err)
+		ctx.JSON(http.StatusBadRequest, dto.NewError("Error mapping module request", err.Error()))
 		return
 	}
 
 	curr, err := m.kubernetesClient.GetModule(request.Name)
 	if err != nil {
 		fmt.Println(err)
-		ctx.Status(http.StatusInternalServerError)
+		ctx.JSON(http.StatusInternalServerError, dto.NewError("Error fetcing module", err.Error()))
 		return
 	}
 
-	module := mapper.RequestToModule(request)
+	module, err := mapper.RequestToModule(request)
+	if err != nil {
+		fmt.Println(err)
+		ctx.JSON(http.StatusInternalServerError, dto.NewError("Error creating module", err.Error()))
+		return
+	}
+
 	module.SetResourceVersion(curr.GetResourceVersion())
 
 	err = m.kubernetesClient.UpdateModule(module)
 	if err != nil {
 		fmt.Println(err)
-		ctx.Status(http.StatusInternalServerError)
+		ctx.JSON(http.StatusInternalServerError, dto.NewError("Error updating module", err.Error()))
 		return
 	}
 
@@ -140,28 +167,28 @@ func (m *Modules) ResourcesForModule(ctx *gin.Context) {
 	module, err := m.kubernetesClient.GetModule(ctx.Param("name"))
 	if err != nil {
 		fmt.Println(err)
-		ctx.Status(http.StatusInternalServerError)
+		ctx.JSON(http.StatusBadRequest, dto.NewError("Error mapping module request", err.Error()))
 		return
 	}
 
 	template, err := m.templates.GetConfig(module.Spec.TemplateRef)
 	if err != nil {
 		fmt.Println(err)
-		ctx.Status(http.StatusInternalServerError)
+		ctx.JSON(http.StatusInternalServerError, dto.NewError("Error fetching template", err.Error()))
 		return
 	}
 
 	resources, err := m.kubernetesClient.GetResourcesForModule(ctx.Param("name"))
 	if err != nil {
 		fmt.Println(err)
-		ctx.Status(http.StatusInternalServerError)
+		ctx.JSON(http.StatusInternalServerError, dto.NewError("Error fetching module resources", err.Error()))
 		return
 	}
 
 	resources, err = m.kubernetesClient.GetDeletedResources(resources, *module, template)
 	if err != nil {
 		fmt.Println(err)
-		ctx.Status(http.StatusInternalServerError)
+		ctx.JSON(http.StatusInternalServerError, dto.NewError("Error fetching deleted module resources", err.Error()))
 		return
 	}
 
@@ -174,35 +201,35 @@ func (m *Modules) Template(ctx *gin.Context) {
 	module, err := m.kubernetesClient.GetModule(ctx.Param("name"))
 	if err != nil {
 		fmt.Println(err)
-		ctx.Status(http.StatusInternalServerError)
+		ctx.JSON(http.StatusInternalServerError, dto.NewError("Error fetching module", err.Error()))
 		return
 	}
 
 	currentTemplate, err := m.templates.GetConfig(module.Spec.TemplateRef)
 	if err != nil {
 		fmt.Println(err)
-		ctx.Status(http.StatusInternalServerError)
+		ctx.JSON(http.StatusInternalServerError, dto.NewError("Error fetching template", err.Error()))
 		return
 	}
 
 	currentManifest, err := template.HelmTemplate(*module, currentTemplate)
 	if err != nil {
-		fmt.Println("error templating current", err)
-		ctx.Status(http.StatusInternalServerError)
+		fmt.Println(err)
+		ctx.JSON(http.StatusInternalServerError, dto.NewError("Error templating current", err.Error()))
 		return
 	}
 
 	proposedTemplate, err := m.templates.GetConfig(module.Spec.TemplateRef)
 	if err != nil {
 		fmt.Println(err)
-		ctx.Status(http.StatusInternalServerError)
+		ctx.JSON(http.StatusInternalServerError, dto.NewError("Error creating proposed template", err.Error()))
 		return
 	}
 
 	proposedManifest, err := template.HelmTemplate(*module, proposedTemplate)
 	if err != nil {
-		fmt.Println("error templating current", err)
-		ctx.Status(http.StatusInternalServerError)
+		fmt.Println(err)
+		ctx.JSON(http.StatusInternalServerError, dto.NewError("Error templating proposed", err.Error()))
 		return
 	}
 
@@ -220,21 +247,21 @@ func (m *Modules) HelmTemplate(ctx *gin.Context) {
 	module, err := m.kubernetesClient.GetModule(ctx.Param("name"))
 	if err != nil {
 		fmt.Println(err)
-		ctx.Status(http.StatusInternalServerError)
+		ctx.JSON(http.StatusInternalServerError, dto.NewError("Error fetching module", err.Error()))
 		return
 	}
 
 	currentTemplate, err := m.templates.GetConfig(module.Spec.TemplateRef)
 	if err != nil {
 		fmt.Println(err)
-		ctx.Status(http.StatusInternalServerError)
+		ctx.JSON(http.StatusInternalServerError, dto.NewError("Error fetching template", err.Error()))
 		return
 	}
 
 	_, err = template.HelmTemplate(*module, currentTemplate)
 	if err != nil {
-		fmt.Println("error templating current", err)
-		ctx.Status(http.StatusInternalServerError)
+		fmt.Println(err)
+		ctx.JSON(http.StatusInternalServerError, dto.NewError("Error templating", err.Error()))
 		return
 	}
 
@@ -267,7 +294,7 @@ func (m *Modules) GetLogs(ctx *gin.Context) {
 	logs, err := m.kubernetesClient.GetPodLogs(ctx.Param("namespace"), ctx.Param("container"), ctx.Param("name"))
 	if err != nil {
 		fmt.Println(err)
-		ctx.Status(http.StatusInternalServerError)
+		ctx.JSON(http.StatusInternalServerError, dto.NewError("Error fetching logs", err.Error()))
 		return
 	}
 

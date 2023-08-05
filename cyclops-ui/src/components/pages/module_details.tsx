@@ -1,14 +1,15 @@
 import React, {useEffect, useState} from 'react';
 import {
+    Alert,
     Button,
     Col,
-    Collapse,
+    Collapse, Descriptions,
     Divider,
     Form,
     Input,
-    InputNumber,
+    InputNumber, List,
     Modal,
-    Row, Space,
+    Row, Space, Spin,
     Switch,
     Table,
     Tabs,
@@ -33,6 +34,45 @@ import {
 import Link from "antd/lib/typography/Link";
 import AceEditor from "react-ace";
 import { formatDistanceToNow } from 'date-fns';
+
+import "ace-builds/src-noconflict/mode-jsx";
+const languages = [
+    "javascript",
+    "java",
+    "python",
+    "xml",
+    "ruby",
+    "sass",
+    "markdown",
+    "mysql",
+    "json",
+    "html",
+    "handlebars",
+    "golang",
+    "csharp",
+    "elixir",
+    "typescript",
+    "css"
+];
+
+const themes = [
+    "monokai",
+    "github",
+    "tomorrow",
+    "kuroir",
+    "twilight",
+    "xcode",
+    "textmate",
+    "solarized_dark",
+    "solarized_light",
+    "terminal"
+];
+
+languages.forEach(lang => {
+    require(`ace-builds/src-noconflict/mode-${lang}`);
+    require(`ace-builds/src-noconflict/snippets/${lang}`);
+});
+themes.forEach(theme => require(`ace-builds/src-noconflict/theme-${theme}`));
 
 const {Title, Text} = Typography;
 
@@ -73,6 +113,8 @@ const ModuleDetails = () => {
     })
     const [logs, setLogs] = useState('');
     const [loading, setLoading] = useState(false);
+    const [loadModule, setLoadModule] = useState(false);
+    const [loadResources, setLoadResources] = useState(false);
     const [deleteName, setDeleteName] = useState("");
     const [resources, setResources] = useState([]);
     const [module, setModule] = useState<module>({
@@ -88,22 +130,80 @@ const ModuleDetails = () => {
         }
     });
 
+    const [activeCollapses, setActiveCollapses] = useState(new Map());
+    const updateActiveCollapses = (k: any, v: any) => {
+        setActiveCollapses(new Map(activeCollapses.set(k,v)));
+    }
+
+    const [error, setError] = useState({
+        message: "",
+        description: "",
+    });
+
     let {moduleName} = useParams();
     useEffect(() => {
         axios.get(window.__RUNTIME_CONFIG__.REACT_APP_CYCLOPS_CTRL_HOST + `/modules/` + moduleName).then(res => {
             setModule(res.data);
-        });
+            setLoadModule(true);
+        }).catch(error => {
+            console.log(error)
+            console.log(error.response)
+            setLoading(false);
+            setLoadModule(true);
+            if (error.response === undefined) {
+                setError({
+                    message: String(error),
+                    description: "Check if Cyclops backend is available on: " + window.__RUNTIME_CONFIG__.REACT_APP_CYCLOPS_CTRL_HOST
+                })
+            } else {
+                setError(error.response.data);
+            }
+        })
 
         axios.get(window.__RUNTIME_CONFIG__.REACT_APP_CYCLOPS_CTRL_HOST + `/modules/` + moduleName + `/resources`).then(res => {
             setResources(res.data);
+            setLoadResources(true);
+        }).catch(error => {
+            console.log(error)
+            console.log(error.response)
+            setLoading(false);
+            setLoadResources(true);
+            if (error.response === undefined) {
+                setError({
+                    message: String(error),
+                    description: "Check if Cyclops backend is available on: " + window.__RUNTIME_CONFIG__.REACT_APP_CYCLOPS_CTRL_HOST
+                })
+            } else {
+                setError(error.response.data);
+            }
         });
 
         setInterval(function () {
             axios.get(window.__RUNTIME_CONFIG__.REACT_APP_CYCLOPS_CTRL_HOST + `/modules/` + moduleName + `/resources`).then(res => {
                 setResources(res.data);
+            }).catch(error => {
+                console.log(error)
+                console.log(error.response)
+                setLoading(false);
+                if (error.response === undefined) {
+                    setError({
+                        message: String(error),
+                        description: "Check if Cyclops backend is available on: " + window.__RUNTIME_CONFIG__.REACT_APP_CYCLOPS_CTRL_HOST
+                    })
+                } else {
+                    setError(error.response.data);
+                }
             });
         }, 5000);
     }, []);
+
+    const getCollapseColor = (fieldName: string) => {
+        if (activeCollapses.get(fieldName) && activeCollapses.get(fieldName) === true) {
+            return "#faca93"
+        } else {
+            return "#fae8d4"
+        }
+    }
 
     const changeDeleteName = (e: any) => {
         setDeleteName(e.target.value)
@@ -152,6 +252,18 @@ const ModuleDetails = () => {
     const deleteDeployment = () => {
         axios.delete(window.__RUNTIME_CONFIG__.REACT_APP_CYCLOPS_CTRL_HOST + `/modules/` + moduleName).then(res => {
             window.location.href = "/modules"
+        }).catch(error => {
+            console.log(error)
+            console.log(error.response)
+            setLoading(false);
+            if (error.response === undefined) {
+                setError({
+                    message: String(error),
+                    description: "Check if Cyclops backend is available on: " + window.__RUNTIME_CONFIG__.REACT_APP_CYCLOPS_CTRL_HOST
+                })
+            } else {
+                setError(error.response.data);
+            }
         });
     }
 
@@ -199,7 +311,19 @@ const ModuleDetails = () => {
             } else {
                 setLogs("No logs available");
             }
-        });
+        }).catch(error => {
+            console.log(error)
+            console.log(error.response)
+            setLoading(false);
+            if (error.response === undefined) {
+                setError({
+                    message: String(error),
+                    description: "Check if Cyclops backend is available on: " + window.__RUNTIME_CONFIG__.REACT_APP_CYCLOPS_CTRL_HOST
+                })
+            } else {
+                setError(error.response.data);
+            }
+        });;
     }
 
     const genExtra = (resource: any) => {
@@ -207,7 +331,7 @@ const ModuleDetails = () => {
             return (
                 <Row gutter={[0, 8]}>
                     <Col span={15} style={{display: 'flex', justifyContent: 'flex-start'}}>
-                        {resource.kind}
+                        {resource.name} {resource.kind}
                     </Col>
                     <Col span={9} style={{display: 'flex', justifyContent: 'flex-end'}}>
                         <WarningFilled style={{color: 'red', right: "0px", fontSize: '20px'}}/>
@@ -216,12 +340,59 @@ const ModuleDetails = () => {
             );
         } else {
             return (
-                <Row>{resource.kind}</Row>
+                <Row>{resource.name} {resource.kind}</Row>
             );
         }
     }
 
+    const configMapData = (resource: any) => {
+        if (resource.data) {
+            return <Descriptions style={{width: "100%"}} bordered>
+                {Object.entries<string>(resource.data).map(([key, dataValue]) => (
+                    <Descriptions.Item key={key} labelStyle={{width: "20%"}} label={key} span={24} >
+                        {configMapDataValues(key, dataValue)}
+                    </Descriptions.Item>
+                ))}
+            </Descriptions>
+        }
+    }
+
+    const configMapDataValues = (key: string, data: string) => {
+        const lines = data.split('\n').length;
+
+        if (lines > 1) {
+            return <AceEditor
+                value={data}
+                readOnly={true}
+                width="100%"
+                mode={configMapDataExtension(key)}
+                height={calculateEditorHeight(data, lines)}
+            />
+        } else {
+            return data
+        }
+    }
+
+    const calculateEditorHeight = (data: string, lines: number) => {
+        if (lines > 20) {
+            return '320px'
+        } else {
+            return '${lines * 16}px'
+        }
+    };
+
+    const configMapDataExtension = (filename: string) => {
+        var ext = filename.split('.').pop();
+        switch (ext) {
+            case "json":
+                return "json"
+            default:
+                return ""
+        }
+    }
+
     resources.forEach((resource: any) => {
+        let collapseKey = resource.kind + "/" + resource.namespace + "/" + resource.name;
         switch (resource.kind) {
             case "Deployment":
                 var deletedWarning = (<p/>)
@@ -248,8 +419,18 @@ const ModuleDetails = () => {
                                         namespace: resource.namespace,
                                     }
                                 }
-                            ).then(res => {
-
+                            ).then(res => {}).catch(error => {
+                                console.log(error)
+                                console.log(error.response)
+                                setLoading(false);
+                                if (error.response === undefined) {
+                                    setError({
+                                        message: String(error),
+                                        description: "Check if Cyclops backend is available on: " + window.__RUNTIME_CONFIG__.REACT_APP_CYCLOPS_CTRL_HOST
+                                    })
+                                } else {
+                                    setError(error.response.data);
+                                }
                             });
                         }} danger block>Delete</Button>
                     )
@@ -258,7 +439,7 @@ const ModuleDetails = () => {
                 let statusIcon = resource.status ? <CheckCircleTwoTone style={{fontSize: '200%', verticalAlign: 'middle'}} twoToneColor={'blue'} /> :
                     <CloseSquareTwoTone style={{fontSize: '200%', verticalAlign: 'middle'}} twoToneColor={'red'} />
                 resourceCollapses.push(
-                    <Collapse.Panel header={genExtra(resource)} key='deployment'>
+                    <Collapse.Panel header={genExtra(resource)} key={collapseKey} style={{backgroundColor: getCollapseColor(collapseKey)}}>
                         <Row>
                             <Col>
                                 {deletedWarning}
@@ -347,6 +528,18 @@ const ModuleDetails = () => {
                                                         } else {
                                                             setLogs("No logs available");
                                                         }
+                                                    }).catch(error => {
+                                                        console.log(error)
+                                                        console.log(error.response)
+                                                        setLoading(false);
+                                                        if (error.response === undefined) {
+                                                            setError({
+                                                                message: String(error),
+                                                                description: "Check if Cyclops backend is available on: " + window.__RUNTIME_CONFIG__.REACT_APP_CYCLOPS_CTRL_HOST
+                                                            })
+                                                        } else {
+                                                            setError(error.response.data);
+                                                        }
                                                     });
                                                     setLogsModal({
                                                         on: true,
@@ -361,6 +554,308 @@ const ModuleDetails = () => {
                                 </Table>
                             </Col>
                         </Row>
+                    </Collapse.Panel>
+                )
+                return;
+            case "StatefulSet":
+                var deletedWarning = (<p/>)
+
+                if (resource.deleted) {
+                    deletedWarning = (
+                        <Tooltip title={"The resource is not a part of the Module and can be deleted"} trigger="click">
+                            <WarningFilled style={{color: 'red', right: "0px", fontSize: '30px', paddingRight: "5px"}}/>
+                        </Tooltip>
+                    )
+                }
+
+                var deleteButton = (<p/>)
+
+                if (resource.deleted) {
+                    deleteButton = (
+                        <Button onClick={function () {
+                            axios.delete(window.__RUNTIME_CONFIG__.REACT_APP_CYCLOPS_CTRL_HOST + `/modules/` + moduleName + `/resources`, {
+                                    data: {
+                                        group: resource.group,
+                                        version: resource.version,
+                                        kind: resource.kind,
+                                        name: resource.name,
+                                        namespace: resource.namespace,
+                                    }
+                                }
+                            ).then(res => {}).catch(error => {
+                                console.log(error)
+                                console.log(error.response)
+                                setLoading(false);
+                                if (error.response === undefined) {
+                                    setError({
+                                        message: String(error),
+                                        description: "Check if Cyclops backend is available on: " + window.__RUNTIME_CONFIG__.REACT_APP_CYCLOPS_CTRL_HOST
+                                    })
+                                } else {
+                                    setError(error.response.data);
+                                }
+                            });
+                        }} danger block>Delete</Button>
+                    )
+                }
+
+                statusIcon = resource.status ? <CheckCircleTwoTone style={{fontSize: '200%', verticalAlign: 'middle'}} twoToneColor={'blue'} /> :
+                    <CloseSquareTwoTone style={{fontSize: '200%', verticalAlign: 'middle'}} twoToneColor={'red'} />
+                resourceCollapses.push(
+                    <Collapse.Panel header={genExtra(resource)} key={collapseKey} style={{backgroundColor: getCollapseColor(collapseKey)}}>
+                        <Row>
+                            <Col>
+                                {deletedWarning}
+                            </Col>
+                            <Col span={19}>
+                                <Title level={3}>{resource.name}</Title>
+                            </Col>
+                            <Col span={4} style={{display: 'flex', justifyContent: 'flex-end'}}>
+                                {deleteButton}
+                            </Col>
+                        </Row>
+                        <Row>
+                            <Title level={4}>{resource.namespace}</Title>
+                        </Row>
+                        <Row>
+                            <Col style={{ float: "right" }}>
+                                <Button onClick={function () {
+                                    setManifestModal({
+                                        on: true,
+                                        kind: resource.kind,
+                                        name: resource.name,
+                                        namespace: resource.namespace,
+                                    })
+                                }} block>View Manifest</Button>
+                            </Col>
+                        </Row>
+                        <Divider style={{fontSize: '120%'}} orientationMargin="0" orientation={"left"}>Replicas: {resource.replicas}</Divider>
+                        <Row>
+                            <Col span={24} style={{overflowX: "auto"}}>
+                                <Table dataSource={resource.pods}>
+                                    <Table.Column
+                                        title='Name'
+                                        dataIndex='name'
+                                        filterSearch={true}
+                                        key='name'
+                                    />
+                                    <Table.Column
+                                        title='Node'
+                                        dataIndex='node'
+                                    />
+                                    <Table.Column
+                                        title='Phase'
+                                        dataIndex='podPhase'
+                                    />
+                                    <Table.Column
+                                        title='Started'
+                                        dataIndex='started'
+                                        render={(value) => (
+                                            <span>{formatPodAge(value)}</span>
+                                        )}
+                                    />
+                                    <Table.Column
+                                        title='Images'
+                                        dataIndex='containers'
+                                        key='containers'
+                                        width='15%'
+                                        render={containers => (
+                                            <>
+                                                {
+                                                    containers.map((container: any) => {
+                                                        let color = container.status.running ? 'green' : 'red';
+
+                                                        return (
+                                                            <Tag color={color} key={container.image} style={{fontSize: '100%'}}>
+                                                                {container.image}
+                                                            </Tag>
+                                                        );
+                                                    })
+                                                }
+                                            </>
+                                        )}
+                                    />
+                                    <Table.Column
+                                        title='Logs'
+                                        width='15%'
+                                        render={ pod => (
+                                            <>
+                                                <Button onClick={function () {
+                                                    axios.get(window.__RUNTIME_CONFIG__.REACT_APP_CYCLOPS_CTRL_HOST + '/resources/pods/' + resource.namespace + '/' + pod.name + '/' + pod.containers[0].name + '/logs').then(res => {
+                                                        if (res.data) {
+                                                            var log = "";
+                                                            res.data.forEach((s :string) => {
+                                                                log += s;
+                                                            });
+                                                            setLogs(log);
+                                                        } else {
+                                                            setLogs("No logs available");
+                                                        }
+                                                    }).catch(error => {
+                                                        console.log(error)
+                                                        console.log(error.response)
+                                                        setLoading(false);
+                                                        if (error.response === undefined) {
+                                                            setError({
+                                                                message: String(error),
+                                                                description: "Check if Cyclops backend is available on: " + window.__RUNTIME_CONFIG__.REACT_APP_CYCLOPS_CTRL_HOST
+                                                            })
+                                                        } else {
+                                                            setError(error.response.data);
+                                                        }
+                                                    });
+                                                    setLogsModal({
+                                                        on: true,
+                                                        namespace: resource.namespace,
+                                                        pod: pod.name,
+                                                        containers: pod.containers
+                                                    })
+                                                }} block>View Logs</Button>
+                                            </>
+                                        )}
+                                    />
+                                </Table>
+                            </Col>
+                        </Row>
+                    </Collapse.Panel>
+                )
+                return;
+            case "Pod":
+                var deletedWarning = (<p/>)
+
+                if (resource.deleted) {
+                    deletedWarning = (
+                        <Tooltip title={"The resource is not a part of the Module and can be deleted"} trigger="click">
+                            <WarningFilled style={{color: 'red', right: "0px", fontSize: '30px', paddingRight: "5px"}}/>
+                        </Tooltip>
+                    )
+                }
+
+                var deleteButton = (<p/>)
+
+                if (resource.deleted) {
+                    deleteButton = (
+                        <Button onClick={function () {
+                            axios.delete(window.__RUNTIME_CONFIG__.REACT_APP_CYCLOPS_CTRL_HOST + `/modules/` + moduleName + `/resources`, {
+                                    data: {
+                                        group: resource.group,
+                                        version: resource.version,
+                                        kind: resource.kind,
+                                        name: resource.name,
+                                        namespace: resource.namespace,
+                                    }
+                                }
+                            ).then(res => {}).catch(error => {
+                                console.log(error)
+                                console.log(error.response)
+                                setLoading(false);
+                                if (error.response === undefined) {
+                                    setError({
+                                        message: String(error),
+                                        description: "Check if Cyclops backend is available on: " + window.__RUNTIME_CONFIG__.REACT_APP_CYCLOPS_CTRL_HOST
+                                    })
+                                } else {
+                                    setError(error.response.data);
+                                }
+                            });
+                        }} danger block>Delete</Button>
+                    )
+                }
+
+                statusIcon = resource.status ? <CheckCircleTwoTone style={{fontSize: '200%', verticalAlign: 'middle'}} twoToneColor={'blue'} /> :
+                    <CloseSquareTwoTone style={{fontSize: '200%', verticalAlign: 'middle'}} twoToneColor={'red'} />
+                resourceCollapses.push(
+                    <Collapse.Panel header={genExtra(resource)} key={collapseKey} style={{backgroundColor: getCollapseColor(collapseKey)}}>
+                        <Row>
+                            <Col>
+                                {deletedWarning}
+                            </Col>
+                            <Col span={19}>
+                                <Title level={3}>{resource.name}</Title>
+                            </Col>
+                            <Col span={4} style={{display: 'flex', justifyContent: 'flex-end'}}>
+                                {deleteButton}
+                            </Col>
+                        </Row>
+                        <Row>
+                            <Title level={4}>{resource.namespace}</Title>
+                        </Row>
+                        <Row>
+                            <Col style={{ float: "right" }}>
+                                <Button onClick={function () {
+                                    setManifestModal({
+                                        on: true,
+                                        kind: resource.kind,
+                                        name: resource.name,
+                                        namespace: resource.namespace,
+                                    })
+                                }} block>View Manifest</Button>
+                            </Col>
+                        </Row>
+                        <Divider/>
+                        <Row>
+                            <Title level={5}>Phase: {resource.podPhase}</Title>
+                        </Row>
+                        <Row>
+                            <Title level={5}>Node: {resource.node}</Title>
+                        </Row>
+                        <Row>
+                            <Title level={5}> Started: {formatPodAge(resource.started)}</Title>
+                        </Row>
+                        <Row>
+                            <Title level={5}>Containers:</Title>
+                        </Row>
+                        <Row>
+                            <>
+                                {
+                                    resource.containers.map((container: any) => {
+                                        let color = container.status.running ? 'green' : 'red';
+
+                                        return (
+                                            <Tag color={color} key={container.image} style={{fontSize: '100%'}}>
+                                                {container.image}
+                                            </Tag>
+                                        );
+                                    })
+                                }
+                            </>
+                        </Row>
+                        <Row style={{marginTop: "15px"}}>
+                            <Col style={{ float: "right" }}>
+                                <Button onClick={function () {
+                                    axios.get(window.__RUNTIME_CONFIG__.REACT_APP_CYCLOPS_CTRL_HOST + '/resources/pods/' + resource.namespace + '/' + resource.name + '/' + resource.containers[0].name + '/logs').then(res => {
+                                        if (res.data) {
+                                            var log = "";
+                                            res.data.forEach((s :string) => {
+                                                log += s;
+                                            });
+                                            setLogs(log);
+                                        } else {
+                                            setLogs("No logs available");
+                                        }
+                                    }).catch(error => {
+                                        console.log(error)
+                                        console.log(error.response)
+                                        setLoading(false);
+                                        if (error.response === undefined) {
+                                            setError({
+                                                message: String(error),
+                                                description: "Check if Cyclops backend is available on: " + window.__RUNTIME_CONFIG__.REACT_APP_CYCLOPS_CTRL_HOST
+                                            })
+                                        } else {
+                                            setError(error.response.data);
+                                        }
+                                    });
+                                    setLogsModal({
+                                        on: true,
+                                        namespace: resource.namespace,
+                                        pod: resource.name,
+                                        containers: resource.containers
+                                    })
+                                }} block>View Logs</Button>
+                            </Col>
+                        </Row>
+
                     </Collapse.Panel>
                 )
                 return;
@@ -389,15 +884,122 @@ const ModuleDetails = () => {
                                         namespace: resource.namespace,
                                     }
                                 }
-                            ).then(res => {
-
+                            ).then(res => {}).catch(error => {
+                                console.log(error)
+                                console.log(error.response)
+                                setLoading(false);
+                                if (error.response === undefined) {
+                                    setError({
+                                        message: String(error),
+                                        description: "Check if Cyclops backend is available on: " + window.__RUNTIME_CONFIG__.REACT_APP_CYCLOPS_CTRL_HOST
+                                    })
+                                } else {
+                                    setError(error.response.data);
+                                }
                             });
                         }} danger block>Delete</Button>
                     )
                 }
 
                 resourceCollapses.push(
-                    <Collapse.Panel header={genExtra(resource)} key='service' style={{color: "red"}}>
+                    <Collapse.Panel header={genExtra(resource)} key={collapseKey} style={{backgroundColor: getCollapseColor(collapseKey)}}>
+                        <Row>
+                            <Col>
+                                {deletedWarning}
+                            </Col>
+                            <Col span={19}>
+                                <Title level={3}>{resource.name}</Title>
+                            </Col>
+                            <Col span={4} style={{display: 'flex', justifyContent: 'flex-end'}}>
+                                {deleteButton}
+                            </Col>
+                        </Row>
+                        <Row>
+                            <Title level={4}>{resource.namespace}</Title>
+                        </Row>
+                        <Row>
+                            <Col style={{ float: "right" }}>
+                                <Button onClick={function () {
+                                    setManifestModal({
+                                        on: true,
+                                        kind: resource.kind,
+                                        name: resource.name,
+                                        namespace: resource.namespace,
+                                    })
+                                }} block>View Manifest</Button>
+                            </Col>
+                        </Row>
+                        <Divider/>
+                        <Row>
+                            <Col span={24} style={{overflowX: "auto"}}>
+                                <Table dataSource={resource.ports}>
+                                    <Table.Column
+                                        title='Name'
+                                        dataIndex='name'
+                                        key='name'
+                                    />
+                                    <Table.Column
+                                        title='Protocol'
+                                        dataIndex='protocol'
+                                    />
+                                    <Table.Column
+                                        title='Port'
+                                        dataIndex='port'
+                                    />
+                                    <Table.Column
+                                        title='Target port'
+                                        dataIndex='targetPort'
+                                    />
+                                </Table>
+                            </Col>
+                        </Row>
+                    </Collapse.Panel>
+                )
+                return;
+            case "ConfigMap":
+                var deletedWarning = (<p/>)
+
+                if (resource.deleted) {
+                    deletedWarning = (
+                        <Tooltip title={"The resource is not a part of the Module and can be deleted"} trigger="click">
+                            <WarningFilled style={{color: 'red', right: "0px", fontSize: '30px', paddingRight: "5px"}}/>
+                        </Tooltip>
+                    )
+                }
+
+                var deleteButton = (<p/>)
+
+                if (resource.deleted) {
+                    deleteButton = (
+                        <Button onClick={function () {
+                            axios.delete(window.__RUNTIME_CONFIG__.REACT_APP_CYCLOPS_CTRL_HOST + `/modules/` + moduleName + `/resources`, {
+                                    data: {
+                                        group: resource.group,
+                                        version: resource.version,
+                                        kind: resource.kind,
+                                        name: resource.name,
+                                        namespace: resource.namespace,
+                                    }
+                                }
+                            ).then(res => {}).catch(error => {
+                                console.log(error)
+                                console.log(error.response)
+                                setLoading(false);
+                                if (error.response === undefined) {
+                                    setError({
+                                        message: String(error),
+                                        description: "Check if Cyclops backend is available on: " + window.__RUNTIME_CONFIG__.REACT_APP_CYCLOPS_CTRL_HOST
+                                    })
+                                } else {
+                                    setError(error.response.data);
+                                }
+                            });
+                        }} danger block>Delete</Button>
+                    )
+                }
+
+                resourceCollapses.push(
+                    <Collapse.Panel header={genExtra(resource)} key={collapseKey} style={{backgroundColor: getCollapseColor(collapseKey)}}>
                         <Row>
                             <Col>
                                 {deletedWarning}
@@ -425,7 +1027,83 @@ const ModuleDetails = () => {
                             </Col>
                         </Row>
                         <Row>
-                            <Text>{resource.port} {'->'} {resource.targetPort}</Text>
+                            <Title level={4} style={{paddingTop: "15px"}}>Data</Title>
+                        </Row>
+                        <Row>
+                            {configMapData(resource)}
+                        </Row>
+                    </Collapse.Panel>
+                )
+                return;
+            default:
+                var deletedWarning = (<p/>)
+
+                if (resource.deleted) {
+                    deletedWarning = (
+                        <Tooltip title={"The resource is not a part of the Module and can be deleted"} trigger="click">
+                            <WarningFilled style={{color: 'red', right: "0px", fontSize: '30px', paddingRight: "5px"}}/>
+                        </Tooltip>
+                    )
+                }
+
+                var deleteButton = (<p/>)
+
+                if (resource.deleted) {
+                    deleteButton = (
+                        <Button onClick={function () {
+                            axios.delete(window.__RUNTIME_CONFIG__.REACT_APP_CYCLOPS_CTRL_HOST + `/modules/` + moduleName + `/resources`, {
+                                    data: {
+                                        group: resource.group,
+                                        version: resource.version,
+                                        kind: resource.kind,
+                                        name: resource.name,
+                                        namespace: resource.namespace,
+                                    }
+                                }
+                            ).then(res => {}).catch(error => {
+                                console.log(error)
+                                console.log(error.response)
+                                setLoading(false);
+                                if (error.response === undefined) {
+                                    setError({
+                                        message: String(error),
+                                        description: "Check if Cyclops backend is available on: " + window.__RUNTIME_CONFIG__.REACT_APP_CYCLOPS_CTRL_HOST
+                                    })
+                                } else {
+                                    setError(error.response.data);
+                                }
+                            });
+                        }} danger block>Delete</Button>
+                    )
+                }
+
+                resourceCollapses.push(
+                    <Collapse.Panel header={genExtra(resource)} key={collapseKey} style={{backgroundColor: getCollapseColor(collapseKey)}}>
+                        <Row>
+                            <Col>
+                                {deletedWarning}
+                            </Col>
+                            <Col span={19}>
+                                <Title level={3}>{resource.name}</Title>
+                            </Col>
+                            <Col span={4} style={{display: 'flex', justifyContent: 'flex-end'}}>
+                                {deleteButton}
+                            </Col>
+                        </Row>
+                        <Row>
+                            <Title level={4}>{resource.namespace}</Title>
+                        </Row>
+                        <Row>
+                            <Col style={{ float: "right" }}>
+                                <Button onClick={function () {
+                                    setManifestModal({
+                                        on: true,
+                                        kind: resource.kind,
+                                        name: resource.name,
+                                        namespace: resource.namespace,
+                                    })
+                                }} block>View Manifest</Button>
+                            </Col>
                         </Row>
                     </Collapse.Panel>
                 )
@@ -433,45 +1111,85 @@ const ModuleDetails = () => {
         }
     })
 
+    const resourcesLoading = () => {
+        if (loadResources === true) {
+            return <Collapse onChange={function (values: string | string[]) {
+                let m = new Map();
+                for (let value of values) {
+                    m.set(value, true);
+                }
+
+                setActiveCollapses(m);
+            }}>
+                {resourceCollapses}
+            </Collapse>
+        } else {
+            return <Spin tip="Loading" size="large"/>
+        }
+    }
+
+    const moduleLoading = () => {
+        if (loadModule === true) {
+            return <div>
+                <Row gutter={[40, 0]}>
+                    <Col span={9}>
+                        <Title level={1}>
+                            {module.name}
+                        </Title>
+                    </Col>
+                </Row>
+                <Row gutter={[40, 0]}>
+                    <Col span={9}>
+                        <Title level={3}>
+                            {module.namespace}
+                        </Title>
+                    </Col>
+                </Row>
+                <Row gutter={[40, 0]}>
+                    <Col span={9}>
+                        { module.template.name.length !== 0 &&
+                            <Link aria-level={3} href={`/configurations/` + module.template}>
+                                <LinkOutlined/>
+                                { module.template.name.length !== 0 && module.template.name + '@' + module.template.version }
+                            </Link>
+                        }
+
+                        { module.template.name.length === 0 &&
+                            <Link aria-level={3} href={ module.template.git.repo + `/tree/main/` + module.template.git.path }>
+                                <LinkOutlined/>
+                                { module.template.name.length === 0 && ' Template ref' }
+                            </Link>
+                        }
+                    </Col>
+                </Row>
+            </div>
+        } else {
+            return <Spin tip="Loading"/>
+        }
+    }
+
     return (
         <div>
-            <Row gutter={[40, 0]}>
-                <Col span={9}>
-                    <Title level={1}>
-                        {module.name}
-                    </Title>
-                </Col>
-            </Row>
-            <Row gutter={[40, 0]}>
-                <Col span={9}>
-                    <Title level={3}>
-                        {module.namespace}
-                    </Title>
-                </Col>
-            </Row>
-            <Row gutter={[40, 0]}>
-                <Col span={9}>
-                    { module.template.name.length !== 0 &&
-                        <Link aria-level={3} href={`/configurations/` + module.template}>
-                            <LinkOutlined/>
-                            { module.template.name.length !== 0 && module.template.name + '@' + module.template.version }
-                        </Link>
-                    }
-
-                    { module.template.name.length === 0 &&
-                        <Link aria-level={3} href={ module.template.git.repo + `/tree/main/` + module.template.git.path }>
-                            <LinkOutlined/>
-                            { module.template.name.length === 0 && ' Template ref' }
-                        </Link>
-                    }
-                </Col>
-            </Row>
+            {
+                error.message.length !== 0 && <Alert
+                    message={error.message}
+                    description={error.description}
+                    type="error"
+                    closable
+                    afterClose={() => {setError({
+                        message: "",
+                        description: "",
+                    })}}
+                    style={{marginBottom: '20px'}}
+                />
+            }
+            {moduleLoading()}
             <Row><Title></Title></Row>
             <Divider style={{fontSize: '120%'}} orientationMargin="0" orientation={"left"}>Actions</Divider>
             <Row gutter={[40, 0]}>
                 <Col>
                     <Button onClick={function () {
-                        window.location.href = "/modules/" + module.name + "/edit"
+                        window.location.href = "/modules/" + moduleName + "/edit"
                     }} block>Edit</Button>
                 </Col>
                 <Col>
@@ -481,9 +1199,7 @@ const ModuleDetails = () => {
                 </Col>
             </Row>
             <Divider style={{fontSize: '120%'}} orientationMargin="0" orientation={"left"}>Resources</Divider>
-            <Collapse defaultActiveKey={['deployment']}>
-            {resourceCollapses}
-            </Collapse>
+            {resourcesLoading()}
             <Modal
                 title="Delete module"
                 visible={loading}
@@ -518,7 +1234,7 @@ const ModuleDetails = () => {
                 title="Logs"
                 visible={logsModal.on}
                 onCancel={handleCancelLogs}
-                width={'40%'}
+                width={'60%'}
             >
                 <Tabs defaultActiveKey="1" items={getTabItems()} onChange={onLogsTabsChange} />
             </Modal>

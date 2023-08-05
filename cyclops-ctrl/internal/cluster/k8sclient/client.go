@@ -14,6 +14,7 @@ import (
 	apiv1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/runtime/schema"
 	"k8s.io/client-go/discovery"
 	"k8s.io/client-go/dynamic"
@@ -259,4 +260,34 @@ func (k *KubernetesClient) Delete(resource dto.Resource) error {
 		resource.GetName(),
 		metav1.DeleteOptions{},
 	)
+}
+
+func (k *KubernetesClient) CreateDynamic(obj *unstructured.Unstructured) error {
+	gvr := schema.GroupVersionResource{
+		Group:    obj.GroupVersionKind().Group,
+		Version:  obj.GroupVersionKind().Version,
+		Resource: strings.ToLower(obj.GroupVersionKind().Kind) + "s",
+	}
+
+	_, err := k.Dynamic.Resource(gvr).Namespace("default").Get(context.TODO(), obj.GetName(), metav1.GetOptions{})
+	if err != nil {
+		if errors.IsNotFound(err) {
+			_, err := k.Dynamic.Resource(gvr).Namespace("default").Create(
+				context.Background(),
+				obj,
+				metav1.CreateOptions{},
+			)
+
+			return err
+		}
+		return err
+	}
+
+	_, err = k.Dynamic.Resource(gvr).Namespace("default").Update(
+		context.Background(),
+		obj,
+		metav1.UpdateOptions{},
+	)
+
+	return err
 }

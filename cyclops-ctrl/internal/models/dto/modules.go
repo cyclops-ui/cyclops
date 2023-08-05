@@ -1,11 +1,11 @@
 package dto
 
 type Module struct {
-	Name      string                 `json:"name"`
-	Namespace string                 `json:"namespace"`
-	Template  Template               `json:"template"`
-	Version   string                 `json:"version"`
-	Values    map[string]interface{} `json:"values"`
+	Name      string      `json:"name"`
+	Namespace string      `json:"namespace"`
+	Template  Template    `json:"template"`
+	Version   string      `json:"version"`
+	Values    interface{} `json:"values"`
 }
 
 type Template struct {
@@ -61,3 +61,8 @@ func (d *DeleteResource) GetDeleted() bool {
 }
 
 func (d *DeleteResource) SetDeleted(_ bool) {}
+
+type KeyValue struct {
+	Key   string `json:"key"`
+	Value string `json:"value"`
+}

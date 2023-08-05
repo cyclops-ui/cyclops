@@ -41,6 +41,7 @@ func (h *Handler) Start() error {
 	h.router.GET("/configuration-details", templatesController.GetConfigurationsDetails)
 	h.router.GET("/configuration/:name/versions", templatesController.GetConfigurationsVersions)
 	h.router.GET("/templates/git", templatesController.GetTemplateFromGit)
+	h.router.GET("/templates/git/initial", templatesController.GetTemplateInitialValuesFromGit)
 
 	// modules
 	h.router.GET("/modules/:name", modulesController.GetModule)

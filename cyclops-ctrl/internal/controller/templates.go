@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
+	json "github.com/json-iterator/go"
 
 	cyclopsv1alpha1 "github.com/cyclops-ui/cycops-ctrl/api/v1alpha1"
 	"github.com/cyclops-ui/cycops-ctrl/internal/cluster/k8sclient"
@@ -160,4 +161,32 @@ func (c *Templates) GetTemplateFromGit(ctx *gin.Context) {
 	}
 
 	ctx.JSON(http.StatusOK, template)
+}
+
+func (c *Templates) GetTemplateInitialValuesFromGit(ctx *gin.Context) {
+	ctx.Header("Access-Control-Allow-Origin", "*")
+
+	repo := ctx.Query("repo")
+	path := ctx.Query("path")
+
+	if repo == "" {
+		ctx.String(http.StatusBadRequest, "set repo field")
+		return
+	}
+
+	initial, err := git.LoadInitialTemplateValues(repo, path)
+	if err != nil {
+		fmt.Println(err)
+		ctx.JSON(http.StatusBadRequest, dto.NewError("Error loading template", err.Error()))
+		return
+	}
+
+	data, err := json.Marshal(initial)
+	if err != nil {
+		fmt.Println(err)
+		ctx.JSON(http.StatusInternalServerError, dto.NewError("Error marshaling data template", err.Error()))
+		return
+	}
+
+	ctx.Data(http.StatusOK, gin.MIMEJSON, data)
 }

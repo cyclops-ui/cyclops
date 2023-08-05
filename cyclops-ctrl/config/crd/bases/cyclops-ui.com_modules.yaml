@@ -57,17 +57,7 @@ spec:
                 - version
                 type: object
               values:
-                items:
-                  properties:
-                    name:
-                      type: string
-                    value:
-                      type: string
-                  required:
-                  - name
-                  - value
-                  type: object
-                type: array
+                x-kubernetes-preserve-unknown-fields: true
             required:
             - template
             - values
