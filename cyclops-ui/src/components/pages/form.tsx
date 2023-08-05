@@ -239,7 +239,7 @@ const FormApp = () => {
                             <Button type="primary" loading={loading} htmlType="submit" name="Save">
                                 Save
                             </Button>{' '}
-                            <Button type="ghost" htmlType="button" onClick={() => history('/list')}>
+                            <Button htmlType="button" onClick={() => history('/list')}>
                                 Back
                             </Button>
                             <Modal title="Staging area" visible={loading} onOk={handleOk} onCancel={handleCancel}

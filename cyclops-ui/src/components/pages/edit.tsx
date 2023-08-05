@@ -294,7 +294,7 @@ const Edit = () => {
                             <Button type="primary" loading={loading} htmlType="submit" name="Save">
                                 Save
                             </Button>{' '}
-                            <Button type="ghost" htmlType="button" name="Undo" onClick={() => {
+                            <Button htmlType="button" name="Undo" onClick={() => {
                                 form.setFieldsValue({
                                     app_name: oldConfig.app_name,
                                     image_name: oldConfig.image_name,
@@ -314,7 +314,7 @@ const Edit = () => {
                             }}>
                                 Undo
                             </Button> {' '}
-                            <Button type="ghost" htmlType="button" onClick={() => history('/list')}>
+                            <Button htmlType="button" onClick={() => history('/list')}>
                                 Back
                             </Button>
                             <Modal title="Staging area" visible={loading} onOk={handleOk} onCancel={handleCancel}

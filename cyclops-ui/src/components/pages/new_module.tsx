@@ -8,21 +8,18 @@ import {
     Form,
     Input,
     InputNumber,
-    message,
     Row,
     Select,
     Space,
     Switch,
     Typography,
-    Tooltip, Spin
+    Tooltip
 } from 'antd';
 import axios from 'axios';
 import {useNavigate} from 'react-router';
 import {MinusCircleOutlined, PlusOutlined, InfoCircleOutlined} from "@ant-design/icons";
 
 import {useParams} from "react-router-dom";
-
-const {TextArea} = Input;
 
 const {Title} = Typography;
 const layout = {
@@ -32,9 +29,6 @@ const layout = {
 
 const NewModule = () => {
     const [loading, setLoading] = useState(false);
-    const [versions, setVersions] = useState([]);
-    const [dplName, setName] = useState("");
-    const [allConfigs, setAllConfigs] = useState([]);
     const [config, setConfig] = useState({
         name: "",
         version: "",
@@ -66,8 +60,6 @@ const NewModule = () => {
 
     const [form] = Form.useForm();
 
-    let {name} = useParams();
-
     useEffect(() => {
         setLoading(true);
         // axios.get(process.env.REACT_APP_CYCLOPS_CTRL_HOST + `/configuration-details`).then(res => {
@@ -76,11 +68,6 @@ const NewModule = () => {
 
         setLoading(false);
     }, []);
-
-    const configNames: {} | any = [];
-    allConfigs.map((c: any) => {
-        configNames.push(<Select.Option key={c.name}>{c.name}</Select.Option>)
-    })
 
     const handleSubmit = (values: any) => {
         console.log({
@@ -123,56 +110,49 @@ const NewModule = () => {
                     setSuccessLoad(false);
                 }
             })
-
-        setName(values.app_name);
     }
 
-    const handleCancel = () => {
-        setLoading(false)
-    };
-
-    const handleChange = (value: any) => {
-        setConfig({
-            name: value,
-            version: "",
-            manifest: "",
-            fields: [],
-            properties: [],
-        })
-
-        axios.get(window.__RUNTIME_CONFIG__.REACT_APP_CYCLOPS_CTRL_HOST + `/configuration/` + value + `/versions`).then(res => {
-            let configVersions = res.data.sort(function (a: string, b: string) {
-                if (a === "latest") {
-                    return -1
-                }
-                if (b === "latest") {
-                    return 1
-                }
-                if (a < b) {
-                    return 1;
-                }
-                if (a > b) {
-                    return -1;
-                }
-                return 0;
-            })
-
-            console.log(configVersions);
-
-            const versionOptions: {} | any = [];
-            configVersions.map((v: any) => {
-                versionOptions.push(<Select.Option key={v}>{v}</Select.Option>)
-            })
-
-            setVersions(versionOptions);
-        });
-    }
-
-    const handleVersionChange = (value: any) => {
-        axios.get(window.__RUNTIME_CONFIG__.REACT_APP_CYCLOPS_CTRL_HOST + `/create-config/` + config.name + `?version=` + value).then(res => {
-            setConfig(res.data);
-        });
-    }
+    // TODO: will be used later for commit references
+    // const handleChange = (value: any) => {
+    //     setConfig({
+    //         name: value,
+    //         version: "",
+    //         manifest: "",
+    //         fields: [],
+    //         properties: [],
+    //     })
+    //
+    //     axios.get(window.__RUNTIME_CONFIG__.REACT_APP_CYCLOPS_CTRL_HOST + `/configuration/` + value + `/versions`).then(res => {
+    //         let configVersions = res.data.sort(function (a: string, b: string) {
+    //             if (a === "latest") {
+    //                 return -1
+    //             }
+    //             if (b === "latest") {
+    //                 return 1
+    //             }
+    //             if (a < b) {
+    //                 return 1;
+    //             }
+    //             if (a > b) {
+    //                 return -1;
+    //             }
+    //             return 0;
+    //         })
+    //
+    //         console.log(configVersions);
+    //
+    //         const versionOptions: {} | any = [];
+    //         configVersions.map((v: any) => {
+    //             versionOptions.push(<Select.Option key={v}>{v}</Select.Option>)
+    //         })
+    //     });
+    // }
+    //
+    // const handleVersionChange = (value: any) => {
+    //     axios.get(window.__RUNTIME_CONFIG__.REACT_APP_CYCLOPS_CTRL_HOST + `/create-config/` + config.name + `?version=` + value).then(res => {
+    //         setConfig(res.data);
+    //     });
+    // }
 
     const loadTemplate = () => {
         setLoadingTemplate(true);
@@ -528,7 +508,7 @@ const NewModule = () => {
                             <Button type="primary" loading={loading} htmlType="submit" name="Save">
                                 Save
                             </Button>{' '}
-                            <Button type="ghost" htmlType="button" onClick={() => history('/')}>
+                            <Button htmlType="button" onClick={() => history('/')}>
                                 Back
                             </Button>
                         </div>
