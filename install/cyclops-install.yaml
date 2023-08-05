@@ -51,19 +51,11 @@ spec:
                       type: string
                   required:
                     - git
+                    - name
+                    - version
                   type: object
                 values:
-                  items:
-                    properties:
-                      name:
-                        type: string
-                      value:
-                        type: string
-                    required:
-                      - name
-                      - value
-                    type: object
-                  type: array
+                  x-kubernetes-preserve-unknown-fields: true
               required:
                 - template
                 - values
@@ -238,7 +230,7 @@ spec:
     spec:
       containers:
         - name: cyclops-ui
-          image: petarcvit223/cyclops-ui:v0.2.0
+          image: petarcvit223/cyclops-ui:v0.3.0
           ports:
             - containerPort: 80
           env:
