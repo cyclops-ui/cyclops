@@ -250,6 +250,8 @@ const NewModule = () => {
 
             let formItemName = arrayField ? [arrayField.name, fieldName] : fieldName
 
+            let uniqueFieldName : any = parentFieldID.length === 0 ? field.name : parentFieldID.concat(".").concat(field.name)
+
             switch (field.type) {
                 case "string":
                     formFields.push(
@@ -280,7 +282,7 @@ const NewModule = () => {
                     )
                     return;
                 case "object":
-                    let uniqueFieldName : any = parentFieldID.length === 0 ? field.name : parentFieldID.concat(".").concat(field.name)
+                    uniqueFieldName = parentFieldID.length === 0 ? field.name : parentFieldID.concat(".").concat(field.name)
                     var header = <Row>{field.name}</Row>
 
                     if (field.description && field.description.length !== 0) {

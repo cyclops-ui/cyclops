@@ -91,11 +91,11 @@ interface module {
     }
 }
 
-const green = "#BDFEAE"
-const greenSelected = "#B2FFA2"
+const green = "#D1FFBD"
+const greenSelected = "#BDFEAE"
 
-const red = "#FF7276"
-const redSelected = "#FF6266"
+const red = "#FF8484"
+const redSelected = "#FF7276"
 
 
 
@@ -205,18 +205,24 @@ const ModuleDetails = () => {
     }, []);
 
     const getCollapseColor = (fieldName: string, healthy: boolean) => {
+        // if (activeCollapses.get(fieldName) && activeCollapses.get(fieldName) === true) {
+        //     if (healthy) {
+        //         return greenSelected
+        //     } else {
+        //         return redSelected
+        //     }
+        // } else {
+        //     if (healthy) {
+        //         return green
+        //     } else {
+        //         return red
+        //     }
+        // }
+
         if (activeCollapses.get(fieldName) && activeCollapses.get(fieldName) === true) {
-            if (healthy) {
-                return greenSelected
-            } else {
-                return redSelected
-            }
+            return "#fadab3"
         } else {
-            if (healthy) {
-                return green
-            } else {
-                return red
-            }
+            return "#fae8d4"
         }
     }
 
@@ -341,23 +347,23 @@ const ModuleDetails = () => {
         });;
     }
 
-    const genExtra = (resource: any) => {
-        if (resource.deleted) {
-            return (
-                <Row gutter={[0, 8]}>
-                    <Col span={15} style={{display: 'flex', justifyContent: 'flex-start'}}>
-                        {resource.name} {resource.kind}
-                    </Col>
-                    <Col span={9} style={{display: 'flex', justifyContent: 'flex-end'}}>
-                        <WarningTwoTone twoToneColor="red" style={{right: "0px", fontSize: '25px'}}/>
-                    </Col>
-                </Row>
-            );
-        } else {
-            return (
-                <Row>{resource.name} {resource.kind}</Row>
-            );
+    const genExtra = (resource: any, status?: boolean) => {
+        let statusIcon = <></>
+        if(status === true) {
+            statusIcon = <CheckCircleTwoTone style={{paddingLeft: "5px", fontSize: "110%", verticalAlign: 'middle'}} twoToneColor={'#52c41a'} />
         }
+        if (status === false) {
+            statusIcon = <CloseSquareTwoTone style={{paddingLeft: "5px", fontSize: "110%", verticalAlign: 'middle'}} twoToneColor={'red'} />
+        }
+
+        let deletedIcon = <></>
+        if (resource.deleted) {
+            deletedIcon = <WarningTwoTone twoToneColor="#F3801A" style={{paddingLeft: "5px", fontSize: "110%", verticalAlign: 'middle'}}/>
+        }
+
+        return (
+            <Row>{resource.name} {resource.kind} {statusIcon} {deletedIcon}</Row>
+        );
     }
 
     const configMapData = (resource: any) => {
@@ -417,7 +423,7 @@ const ModuleDetails = () => {
                 if (resource.deleted) {
                     deletedWarning = (
                         <Tooltip title={"The resource is not a part of the Module and can be deleted"} trigger="click">
-                            <WarningTwoTone twoToneColor="red" style={{right: "0px", fontSize: '30px', paddingRight: "5px"}}/>
+                            <WarningTwoTone twoToneColor="#F3801A" style={{right: "0px", fontSize: '30px', paddingRight: "5px"}}/>
                         </Tooltip>
                     )
                 }
@@ -453,10 +459,10 @@ const ModuleDetails = () => {
                     )
                 }
 
-                statusIcon = resource.status ? <CheckCircleTwoTone style={{fontSize: '200%', verticalAlign: 'middle'}} twoToneColor={'blue'} /> :
+                statusIcon = resource.status ? <CheckCircleTwoTone style={{fontSize: '200%', verticalAlign: 'middle'}} twoToneColor={'#52c41a'} /> :
                     <CloseSquareTwoTone style={{fontSize: '200%', verticalAlign: 'middle'}} twoToneColor={'red'} />
                 resourceCollapses.push(
-                    <Collapse.Panel header={genExtra(resource)} key={collapseKey} style={{backgroundColor: getCollapseColor(collapseKey, resource.status)}}>
+                    <Collapse.Panel header={genExtra(resource, resource.status)} key={collapseKey} style={{backgroundColor: getCollapseColor(collapseKey, resource.status)}}>
                         <Row>
                             <Col>
                                 {deletedWarning}
@@ -583,7 +589,7 @@ const ModuleDetails = () => {
                 if (resource.deleted) {
                     deletedWarning = (
                         <Tooltip title={"The resource is not a part of the Module and can be deleted"} trigger="click">
-                            <WarningTwoTone twoToneColor="red" style={{right: "0px", fontSize: '30px', paddingRight: "5px"}}/>
+                            <WarningTwoTone twoToneColor="#F3801A" style={{right: "0px", fontSize: '30px', paddingRight: "5px"}}/>
                         </Tooltip>
                     )
                 }
@@ -619,10 +625,10 @@ const ModuleDetails = () => {
                     )
                 }
 
-                statusIcon = resource.status ? <CheckCircleTwoTone style={{fontSize: '200%', verticalAlign: 'middle'}} twoToneColor={'blue'} /> :
+                statusIcon = resource.status ? <CheckCircleTwoTone style={{fontSize: '200%', verticalAlign: 'middle'}} twoToneColor={'#52c41a'} /> :
                     <CloseSquareTwoTone style={{fontSize: '200%', verticalAlign: 'middle'}} twoToneColor={'red'} />
                 resourceCollapses.push(
-                    <Collapse.Panel header={genExtra(resource)} key={collapseKey} style={{backgroundColor: getCollapseColor(collapseKey, resource.status)}}>
+                    <Collapse.Panel header={genExtra(resource, resource.status)} key={collapseKey} style={{backgroundColor: getCollapseColor(collapseKey, resource.status)}}>
                         <Row>
                             <Col>
                                 {deletedWarning}
@@ -749,7 +755,7 @@ const ModuleDetails = () => {
                 if (resource.deleted) {
                     deletedWarning = (
                         <Tooltip title={"The resource is not a part of the Module and can be deleted"} trigger="click">
-                            <WarningTwoTone twoToneColor="red" style={{right: "0px", fontSize: '30px', paddingRight: "5px"}}/>
+                            <WarningTwoTone twoToneColor="#F3801A" style={{right: "0px", fontSize: '30px', paddingRight: "5px"}}/>
                         </Tooltip>
                     )
                 }
@@ -785,16 +791,19 @@ const ModuleDetails = () => {
                     )
                 }
 
-                statusIcon = resource.status ? <CheckCircleTwoTone style={{fontSize: '200%', verticalAlign: 'middle'}} twoToneColor={'blue'} /> :
+                statusIcon = resource.status ? <CheckCircleTwoTone style={{fontSize: '200%', verticalAlign: 'middle'}} twoToneColor={'#52c41a'} /> :
                     <CloseSquareTwoTone style={{fontSize: '200%', verticalAlign: 'middle'}} twoToneColor={'red'} />
                 resourceCollapses.push(
-                    <Collapse.Panel header={genExtra(resource)} key={collapseKey} style={{backgroundColor: getCollapseColor(collapseKey, resource.status)}}>
+                    <Collapse.Panel header={genExtra(resource, resource.status)} key={collapseKey} style={{backgroundColor: getCollapseColor(collapseKey, resource.status)}}>
                         <Row>
                             <Col>
                                 {deletedWarning}
                             </Col>
                             <Col span={19}>
-                                <Title level={3}>{resource.name}</Title>
+                                <Row>
+                                    <Title style={{paddingRight: "10px"}} level={3}>{resource.name}</Title>
+                                    {statusIcon}
+                                </Row>
                             </Col>
                             <Col span={4} style={{display: 'flex', justifyContent: 'flex-end'}}>
                                 {deleteButton}
@@ -888,7 +897,7 @@ const ModuleDetails = () => {
                 if (resource.deleted) {
                     deletedWarning = (
                             <Tooltip title={"The resource is not a part of the Module and can be deleted"} trigger="click">
-                                <WarningTwoTone twoToneColor="red" style={{right: "0px", fontSize: '30px', paddingRight: "5px"}}/>
+                                <WarningTwoTone twoToneColor="#F3801A" style={{right: "0px", fontSize: '30px', paddingRight: "5px"}}/>
                             </Tooltip>
                     )
                 }
@@ -985,7 +994,7 @@ const ModuleDetails = () => {
                 if (resource.deleted) {
                     deletedWarning = (
                         <Tooltip title={"The resource is not a part of the Module and can be deleted"} trigger="click">
-                            <WarningTwoTone twoToneColor="red" style={{right: "0px", fontSize: '30px', paddingRight: "5px"}}/>
+                            <WarningTwoTone twoToneColor="#F3801A" style={{right: "0px", fontSize: '30px', paddingRight: "5px"}}/>
                         </Tooltip>
                     )
                 }
@@ -1064,7 +1073,7 @@ const ModuleDetails = () => {
                 if (resource.deleted) {
                     deletedWarning = (
                         <Tooltip title={"The resource is not a part of the Module and can be deleted"} trigger="click">
-                            <WarningTwoTone twoToneColor="red" style={{right: "0px", fontSize: '30px', paddingRight: "5px"}}/>
+                            <WarningTwoTone twoToneColor="#F3801A" style={{right: "0px", fontSize: '30px', paddingRight: "5px"}}/>
                         </Tooltip>
                     )
                 }

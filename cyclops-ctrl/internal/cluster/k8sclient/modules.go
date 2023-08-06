@@ -188,6 +188,7 @@ func (k *KubernetesClient) GetResourcesForModule(name string) ([]dto.Resource, e
 			Containers: containers,
 			Node:       item.Spec.NodeName,
 			PodPhase:   string(item.Status.Phase),
+			Status:     getPodStatus(containers),
 			Started:    item.Status.StartTime,
 			Manifest:   manifest,
 			Deleted:    false,
@@ -413,6 +414,16 @@ func getDeploymentStatus(pods []dto.Pod) bool {
 			if !container.Status.Running {
 				return false
 			}
+		}
+	}
+
+	return true
+}
+
+func getPodStatus(containers []dto.Container) bool {
+	for _, container := range containers {
+		if !container.Status.Running {
+			return false
 		}
 	}
 

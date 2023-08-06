@@ -169,6 +169,7 @@ type Pod struct {
 	Containers []Container  `json:"containers"`
 	Node       string       `json:"node"`
 	PodPhase   string       `json:"podPhase"`
+	Status     bool         `json:"status"`
 	Started    *metav1.Time `json:"started"`
 	Manifest   string       `json:"manifest"`
 	Deleted    bool         `json:"deleted"`
