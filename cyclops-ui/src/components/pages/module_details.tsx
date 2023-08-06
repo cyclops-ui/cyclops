@@ -344,27 +344,54 @@ const ModuleDetails = () => {
             } else {
                 setError(error.response.data);
             }
-        });;
+        });
     }
 
     const genExtra = (resource: any, status?: boolean) => {
         let statusIcon = <></>
         if(status === true) {
-            statusIcon = <CheckCircleTwoTone style={{paddingLeft: "5px", fontSize: "110%", verticalAlign: 'middle'}} twoToneColor={'#52c41a'} />
+            statusIcon = <CheckCircleTwoTone style={{paddingLeft: "5px", fontSize: "20px", verticalAlign: 'middle'}} twoToneColor={'#52c41a'} />
         }
         if (status === false) {
-            statusIcon = <CloseSquareTwoTone style={{paddingLeft: "5px", fontSize: "110%", verticalAlign: 'middle'}} twoToneColor={'red'} />
+            statusIcon = <CloseSquareTwoTone style={{paddingLeft: "5px", fontSize: "20px", verticalAlign: 'middle'}} twoToneColor={'red'} />
         }
 
         let deletedIcon = <></>
         if (resource.deleted) {
-            deletedIcon = <WarningTwoTone twoToneColor="#F3801A" style={{paddingLeft: "5px", fontSize: "110%", verticalAlign: 'middle'}}/>
+            deletedIcon = <WarningTwoTone twoToneColor="#F3801A" style={{paddingLeft: "5px", fontSize: "20px", verticalAlign: 'middle'}}/>
         }
 
         return (
-            <Row>{resource.name} {resource.kind} {statusIcon} {deletedIcon}</Row>
+            <Row gutter={[0, 8]}>
+                <Col span={15} style={{display: 'flex', justifyContent: 'flex-start'}}>
+                    {resource.name} {resource.kind} {statusIcon}
+                </Col>
+                <Col span={9} style={{display: 'flex', justifyContent: 'flex-end'}}>
+                    {deletedIcon}
+                </Col>
+            </Row>
         );
     }
+
+
+    // const genExtra = (resource: any, status?: boolean) => {
+    //     let statusIcon = <></>
+    //     if(status === true) {
+    //         statusIcon = <CheckCircleTwoTone style={{paddingLeft: "5px", fontSize: "110%", verticalAlign: 'middle'}} twoToneColor={'#52c41a'} />
+    //     }
+    //     if (status === false) {
+    //         statusIcon = <CloseSquareTwoTone style={{paddingLeft: "5px", fontSize: "110%", verticalAlign: 'middle'}} twoToneColor={'red'} />
+    //     }
+    //
+    //     let deletedIcon = <></>
+    //     if (resource.deleted) {
+    //         deletedIcon = <WarningTwoTone twoToneColor="#F3801A" style={{paddingLeft: "5px", fontSize: "110%", verticalAlign: 'middle'}}/>
+    //     }
+    //
+    //     return (
+    //         <Row>{resource.name} {resource.kind} {statusIcon} {deletedIcon}</Row>
+    //     );
+    // }
 
     const configMapData = (resource: any) => {
         if (resource.data) {
