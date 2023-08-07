@@ -311,29 +311,31 @@ const ModuleDetails = () => {
         let cnt = 1;
         let container :any
 
-        for (container of logsModal.containers) {
-            items.push(
-                {
-                    key: container.name,
-                    label: container.name,
-                    children: <ReactAce style={{width: "100%"}} mode={"sass"} value={logs} readOnly={true} />,
-                }
-            )
-            cnt++;
+        if (logsModal.containers !== null && logsModal.containers !== null) {
+            for (container of logsModal.containers) {
+                items.push(
+                    {
+                        key: container.name,
+                        label: container.name,
+                        children: <ReactAce style={{width: "100%"}} mode={"sass"} value={logs} readOnly={true} />,
+                    }
+                )
+                cnt++;
+            }
         }
 
-        for (container of logsModal.initContainers) {
-            items.push(
-                {
-                    key: container.name,
-                    label: "(init container) " + container.name,
-                    children: <ReactAce style={{width: "100%"}} mode={"sass"} value={logs} readOnly={true} />,
-                }
-            )
-            cnt++;
+        if (logsModal.initContainers !== null && logsModal.initContainers !== null) {
+            for (container of logsModal.initContainers) {
+                items.push(
+                    {
+                        key: container.name,
+                        label: "(init container) " + container.name,
+                        children: <ReactAce style={{width: "100%"}} mode={"sass"} value={logs} readOnly={true} />,
+                    }
+                )
+                cnt++;
+            }
         }
-
-        console.log(items)
 
         return items
     }

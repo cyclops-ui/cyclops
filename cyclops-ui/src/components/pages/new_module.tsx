@@ -69,18 +69,60 @@ const NewModule = () => {
         setLoading(false);
     }, []);
 
-    const handleSubmit = (values: any) => {
-        console.log({
-            "values": values,
-            "name": values["cyclops_module_name"],
-            "template": config.name,
+    const findMaps = (fields: any[], values: any): any => {
+        let out: any = {};
+        fields.forEach(field => {
+            let valuesList: any[] = [];
+            switch (field.type) {
+                case "string":
+                    out[field.name] = values[field.name]
+                    break
+                case "number":
+                    out[field.name] = values[field.name]
+                    break
+                case "boolean":
+                    out[field.name] = values[field.name]
+                    break
+                case "object":
+                    out[field.name] = findMaps(field.properties, values[field.name])
+                    break
+                case "array":
+                    valuesList = values[field.name] as any[]
+
+                    let objectArr: any[] = []
+                    valuesList.forEach(valueFromList => {
+                        objectArr.push(findMaps(field.items.properties, valueFromList))
+                    })
+                    out[field.name] = objectArr
+                    break
+                case "map":
+                    valuesList = values[field.name] as any[]
+
+                    let object: any = {};
+                    valuesList.forEach(valueFromList => {
+                        object[valueFromList.key] = valueFromList.value
+                    })
+                    out[field.name] = object
+                    break
+            }
         })
 
-        // setLoading(true);
+        return out
+    }
+
+    const handleSubmit = (values: any) => {
+        const moduleName = values["cyclops_module_name"]
+
+        values = findMaps(config.fields, values)
+        console.log({
+            "values": values,
+        })
+
+        console.log(values)
 
         axios.post(window.__RUNTIME_CONFIG__.REACT_APP_CYCLOPS_CTRL_HOST + `/modules/new`,
             {
-                name: values["cyclops_module_name"],
+                name: moduleName,
                 values: values,
                 template: {
                     name: config.name,
@@ -157,10 +199,25 @@ const NewModule = () => {
     const loadTemplate = () => {
         setLoadingTemplate(true);
 
+        setError({
+            message: "",
+            description: "",
+        })
+
         // setGitTemplate({
         //     repo: "https://github.com/petar-cvit/starship",
         //     path: "charts/devnet",
         // })
+
+        if (gitTemplate.repo.trim() === "") {
+            setError({
+                message: "Invalid repository name",
+                description: "Repository name must not be empty",
+            })
+            setLoadingTemplate(false);
+            return
+        }
+
 
         // axios.get(window.__RUNTIME_CONFIG__.REACT_APP_CYCLOPS_CTRL_HOST + `/templates/git?repo=` + "https://github.com/petar-cvit/starship" + `&path=` + "charts/devnet").then(res => {
         axios.get(window.__RUNTIME_CONFIG__.REACT_APP_CYCLOPS_CTRL_HOST + `/templates/git?repo=` + gitTemplate.repo + `&path=` + gitTemplate.path).then(res => {
