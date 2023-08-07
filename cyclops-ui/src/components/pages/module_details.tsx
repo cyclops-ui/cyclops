@@ -116,7 +116,8 @@ const ModuleDetails = () => {
         on: false,
         namespace: '',
         pod: '',
-        containers: []
+        containers: [],
+        initContainers: []
     })
     const [logs, setLogs] = useState('');
     const [loading, setLoading] = useState(false);
@@ -245,7 +246,9 @@ const ModuleDetails = () => {
             namespace: '',
             pod: '',
             containers: [],
+            initContainers: []
         })
+        setLogs('')
     };
 
     const handleCancel = () => {
@@ -307,6 +310,7 @@ const ModuleDetails = () => {
 
         let cnt = 1;
         let container :any
+
         for (container of logsModal.containers) {
             items.push(
                 {
@@ -317,6 +321,19 @@ const ModuleDetails = () => {
             )
             cnt++;
         }
+
+        for (container of logsModal.initContainers) {
+            items.push(
+                {
+                    key: container.name,
+                    label: "(init container) " + container.name,
+                    children: <ReactAce style={{width: "100%"}} mode={"sass"} value={logs} readOnly={true} />,
+                }
+            )
+            cnt++;
+        }
+
+        console.log(items)
 
         return items
     }
@@ -598,7 +615,8 @@ const ModuleDetails = () => {
                                                         on: true,
                                                         namespace: resource.namespace,
                                                         pod: pod.name,
-                                                        containers: pod.containers
+                                                        containers: pod.containers,
+                                                        initContainers: pod.initContainers
                                                     })
                                                 }} block>View Logs</Button>
                                             </>
@@ -758,13 +776,15 @@ const ModuleDetails = () => {
                                                             })
                                                         } else {
                                                             setError(error.response.data);
+                                                            setLogs(error.response.data.description)
                                                         }
                                                     });
                                                     setLogsModal({
                                                         on: true,
                                                         namespace: resource.namespace,
                                                         pod: pod.name,
-                                                        containers: pod.containers
+                                                        containers: pod.containers,
+                                                        initContainers: pod.initContainers
                                                     })
                                                 }} block>View Logs</Button>
                                             </>
@@ -909,7 +929,8 @@ const ModuleDetails = () => {
                                         on: true,
                                         namespace: resource.namespace,
                                         pod: resource.name,
-                                        containers: resource.containers
+                                        containers: resource.containers,
+                                        initContainers: resource.initContainers
                                     })
                                 }} block>View Logs</Button>
                             </Col>
@@ -1295,7 +1316,7 @@ const ModuleDetails = () => {
                 onCancel={handleCancelLogs}
                 width={'60%'}
             >
-                <Tabs defaultActiveKey="1" items={getTabItems()} onChange={onLogsTabsChange} />
+                <Tabs items={getTabItems()} onChange={onLogsTabsChange} />
             </Modal>
         </div>
     );

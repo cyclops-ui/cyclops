@@ -189,7 +189,6 @@ func (k *KubernetesClient) GetPodLogs(namespace, container, name string) ([]stri
 	}
 	podClient := k.clientset.CoreV1().Pods(namespace).GetLogs(name, &podLogOptions)
 	stream, err := podClient.Stream(context.Background())
-
 	if err != nil {
 		return nil, err
 	}
