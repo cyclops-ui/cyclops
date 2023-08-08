@@ -82,24 +82,75 @@ const EditModule = () => {
     const [loadTemplate, setLoadTemplate] = useState(false);
 
     const [activeCollapses, setActiveCollapses] = useState(new Map());
-    const updateActiveCollapses = (k: any, v: any) => {
-        setActiveCollapses(new Map(activeCollapses.set(k,v)));
+    const updateActiveCollapses = (k: string[] | string, v: any) => {
+        let kk = new Array(k);
+        setActiveCollapses(new Map(activeCollapses.set(kk.join(''),v)));
     }
 
     const history = useNavigate();
 
     let {moduleName} = useParams();
 
+    const mapsToArray = (fields: any[], values: any): any => {
+        let out: any = {};
+        fields.forEach(field => {
+            let valuesList: any[] = [];
+            switch (field.type) {
+                case "string":
+                    out[field.name] = values[field.name]
+                    break
+                case "number":
+                    out[field.name] = values[field.name]
+                    break
+                case "boolean":
+                    out[field.name] = values[field.name]
+                    break
+                case "object":
+                    out[field.name] = mapsToArray(field.properties, values[field.name])
+                    break
+                case "array":
+                    valuesList = values[field.name] as any[]
+
+                    let objectArr: any[] = []
+                    valuesList.forEach(valueFromList => {
+                        switch (field.items.type) {
+                            case "string":
+                                objectArr.push(valueFromList)
+                                break
+                            case "object":
+                                objectArr.push(mapsToArray(field.items.properties, valueFromList))
+                                break
+                        }
+                    })
+                    out[field.name] = objectArr
+                    break
+                case "map":
+                    let object: any[] = [];
+
+                    Object.keys(values[field.name]).forEach(key => {
+                        object.push({
+                            key: key,
+                            value: values[field.name][key],
+                        })
+                    })
+
+                    out[field.name] = object
+
+                    // valuesList.forEach(valueFromList => {
+                    //     // object.push({})
+                    //     // object[valueFromList.key] = valueFromList.value
+                    // })
+                    // out[field.name] = object
+                    break
+            }
+        })
+
+        return out
+    }
+
     useEffect(() => {
         axios.get(window.__RUNTIME_CONFIG__.REACT_APP_CYCLOPS_CTRL_HOST + `/modules/` + moduleName).then(res => {
             setLoadValues(true)
-            setModule({
-                name: res.data.name,
-                values: res.data.values,
-                template: res.data.template,
-            });
-
-            form.setFieldsValue(res.data.values);
 
             if (module.name.length !== 0 ) {
                 axios.get(window.__RUNTIME_CONFIG__.REACT_APP_CYCLOPS_CTRL_HOST + `/create-config/` + res.data.template + `?version=` + res.data.version).then(res => {
@@ -116,9 +167,18 @@ const EditModule = () => {
                     }
                 });
             } else {
-                axios.get(window.__RUNTIME_CONFIG__.REACT_APP_CYCLOPS_CTRL_HOST + `/templates/git?repo=` + res.data.template.git.repo + `&path=` + res.data.template.git.path).then(res => {
-                    setConfig(res.data);
+                axios.get(window.__RUNTIME_CONFIG__.REACT_APP_CYCLOPS_CTRL_HOST + `/templates/git?repo=` + res.data.template.git.repo + `&path=` + res.data.template.git.path).then(templatesRes => {
+                    setConfig(templatesRes.data);
                     setLoadTemplate(true);
+
+                    let values = mapsToArray(templatesRes.data.fields, res.data.values);
+
+                    setModule({
+                        name: res.data.name,
+                        values: values,
+                        template: res.data.template,
+                    });
+                    form.setFieldsValue(values);
                 }).catch(error => {
                     setLoading(false);
                     setLoadTemplate(true);
@@ -216,22 +276,63 @@ const EditModule = () => {
         });
     }
 
-    const handleSubmit = (values: any) => {
-        console.log({
-            "values": values,
-            "name": values["cyclops_module_name"],
-            "template": config.name,
+    const findMaps = (fields: any[], values: any): any => {
+        let out: any = {};
+        fields.forEach(field => {
+            let valuesList: any[] = [];
+            switch (field.type) {
+                case "string":
+                    out[field.name] = values[field.name]
+                    break
+                case "number":
+                    out[field.name] = values[field.name]
+                    break
+                case "boolean":
+                    out[field.name] = values[field.name]
+                    break
+                case "object":
+                    out[field.name] = findMaps(field.properties, values[field.name])
+                    break
+                case "array":
+                    valuesList = values[field.name] as any[]
+
+                    let objectArr: any[] = []
+                    valuesList.forEach(valueFromList => {
+                        switch (field.items.type) {
+                            case "string":
+                                objectArr.push(valueFromList)
+                                break
+                            case "object":
+                                objectArr.push(findMaps(field.items.properties, valueFromList))
+                                break
+                        }
+                    })
+                    out[field.name] = objectArr
+                    break
+                case "map":
+                    valuesList = values[field.name] as any[]
+
+                    let object: any = {};
+                    valuesList.forEach(valueFromList => {
+                        object[valueFromList.key] = valueFromList.value
+                    })
+                    out[field.name] = object
+                    break
+            }
         })
 
-        values["cyclops_module_name"] = module.name;
+        return out
+    }
+
+    const handleSubmit = (values: any) => {
+        values = findMaps(config.fields, values)
 
         axios.post(window.__RUNTIME_CONFIG__.REACT_APP_CYCLOPS_CTRL_HOST + `/modules/update`,
             {
                 "values": values,
-                "name": values["cyclops_module_name"],
+                "name": module.name,
                 "template": module.template,
             }).then(res => {
-                console.log(res);
                 window.location.href = "/modules/" + moduleName
             }).catch(error => {
             setLoading(false);
@@ -250,8 +351,6 @@ const EditModule = () => {
     }
 
     const handleMigrate = () => {
-        console.log(targetVersion)
-
         axios.post(window.__RUNTIME_CONFIG__.REACT_APP_CYCLOPS_CTRL_HOST + `/modules/update`,
             {
                 "values": module.values,
@@ -260,7 +359,6 @@ const EditModule = () => {
                 "version": targetVersion,
             })
             .then(res => {
-                console.log(res);
                 window.location.href = "/modules/" + moduleName
             }).catch(error => {
             setLoading(false);
@@ -292,7 +390,9 @@ const EditModule = () => {
     }
 
     const getCollapseColor = (fieldName: string) => {
-        if (activeCollapses.get(fieldName) && activeCollapses.get(fieldName) === true) {
+        let kk = new Array(fieldName);
+        let key = kk.join('')
+        if (activeCollapses.get(key) && activeCollapses.get(key) === true) {
             return "#faca93"
         } else {
             return "#fae8d4"
@@ -334,7 +434,6 @@ const EditModule = () => {
     const arrayInnerField = (field: any, parentFieldID: string, parent: string, level: number, arrayField: any, remove: Function) => {
         switch (field.items.type) {
             case "object":
-                console.log(parentFieldID)
                 return <div>
                     {mapFields(field.items.properties, parentFieldID, "", level + 1, arrayField)}
                     <MinusCircleOutlined style={{ fontSize: '16px' }} onClick={() => remove(arrayField.name)} />
@@ -355,6 +454,8 @@ const EditModule = () => {
             let fieldName = field.name
 
             let formItemName = arrayField ? [arrayField.name, fieldName] : fieldName
+
+            let uniqueFieldName : any = parentFieldID.length === 0 ? field.name : parentFieldID.concat(".").concat(field.name)
 
             switch (field.type) {
                 case "string":
@@ -388,7 +489,7 @@ const EditModule = () => {
                     )
                     return;
                 case "object":
-                    let uniqueFieldName : any = parentFieldID.length === 0 ? field.name : parentFieldID.concat(".").concat(field.name)
+                    uniqueFieldName = parentFieldID.length === 0 ? field.name : parentFieldID.concat(".").concat(field.name)
                     var header = <Row>{field.name}</Row>
 
                     if (field.description && field.description.length !== 0) {
@@ -607,7 +708,7 @@ const EditModule = () => {
                             <Button type="primary" htmlType="submit" name="Save">
                                 Save
                             </Button>{' '}
-                            <Button type="ghost" htmlType="button" onClick={() => history('/modules/' + moduleName)}>
+                            <Button htmlType="button" onClick={() => history('/modules/' + moduleName)}>
                                 Back
                             </Button>
                         </div>

@@ -8,21 +8,18 @@ import {
     Form,
     Input,
     InputNumber,
-    message,
     Row,
     Select,
     Space,
     Switch,
     Typography,
-    Tooltip, Spin
+    Tooltip
 } from 'antd';
 import axios from 'axios';
 import {useNavigate} from 'react-router';
 import {MinusCircleOutlined, PlusOutlined, InfoCircleOutlined} from "@ant-design/icons";
 
 import {useParams} from "react-router-dom";
-
-const {TextArea} = Input;
 
 const {Title} = Typography;
 const layout = {
@@ -32,9 +29,6 @@ const layout = {
 
 const NewModule = () => {
     const [loading, setLoading] = useState(false);
-    const [versions, setVersions] = useState([]);
-    const [dplName, setName] = useState("");
-    const [allConfigs, setAllConfigs] = useState([]);
     const [config, setConfig] = useState({
         name: "",
         version: "",
@@ -58,15 +52,14 @@ const NewModule = () => {
     const [loadingTemplate, setLoadingTemplate] = useState(false);
 
     const [activeCollapses, setActiveCollapses] = useState(new Map());
-    const updateActiveCollapses = (k: any, v: any) => {
-        setActiveCollapses(new Map(activeCollapses.set(k,v)));
+    const updateActiveCollapses = (k: string[] | string, v: any) => {
+        let kk = new Array(k);
+        setActiveCollapses(new Map(activeCollapses.set(kk.join(''),v)));
     }
 
     const history = useNavigate();
 
     const [form] = Form.useForm();
-
-    let {name} = useParams();
 
     useEffect(() => {
         setLoading(true);
@@ -77,23 +70,62 @@ const NewModule = () => {
         setLoading(false);
     }, []);
 
-    const configNames: {} | any = [];
-    allConfigs.map((c: any) => {
-        configNames.push(<Select.Option key={c.name}>{c.name}</Select.Option>)
-    })
+    const findMaps = (fields: any[], values: any): any => {
+        let out: any = {};
+        fields.forEach(field => {
+            let valuesList: any[] = [];
+            switch (field.type) {
+                case "string":
+                    out[field.name] = values[field.name]
+                    break
+                case "number":
+                    out[field.name] = values[field.name]
+                    break
+                case "boolean":
+                    out[field.name] = values[field.name]
+                    break
+                case "object":
+                    out[field.name] = findMaps(field.properties, values[field.name])
+                    break
+                case "array":
+                    valuesList = values[field.name] as any[]
 
-    const handleSubmit = (values: any) => {
-        console.log({
-            "values": values,
-            "name": values["cyclops_module_name"],
-            "template": config.name,
+                    let objectArr: any[] = []
+                    valuesList.forEach(valueFromList => {
+                        switch (field.items.type) {
+                            case "string":
+                                objectArr.push(valueFromList)
+                                break
+                            case "object":
+                                objectArr.push(findMaps(field.items.properties, valueFromList))
+                                break
+                        }
+                    })
+                    out[field.name] = objectArr
+                    break
+                case "map":
+                    valuesList = values[field.name] as any[]
+
+                    let object: any = {};
+                    valuesList.forEach(valueFromList => {
+                        object[valueFromList.key] = valueFromList.value
+                    })
+                    out[field.name] = object
+                    break
+            }
         })
 
-        // setLoading(true);
+        return out
+    }
+
+    const handleSubmit = (values: any) => {
+        const moduleName = values["cyclops_module_name"]
+
+        values = findMaps(config.fields, values)
 
         axios.post(window.__RUNTIME_CONFIG__.REACT_APP_CYCLOPS_CTRL_HOST + `/modules/new`,
             {
-                name: values["cyclops_module_name"],
+                name: moduleName,
                 values: values,
                 template: {
                     name: config.name,
@@ -105,12 +137,9 @@ const NewModule = () => {
                 },
             })
             .then(res => {
-                console.log(res);
-                window.location.href = "/modules/" + values["cyclops_module_name"]
+                window.location.href = "/modules/" + moduleName
             })
             .catch(error => {
-                console.log(error)
-                console.log(error.response)
                 setLoading(false);
                 if (error.response === undefined) {
                     setError({
@@ -123,64 +152,72 @@ const NewModule = () => {
                     setSuccessLoad(false);
                 }
             })
-
-        setName(values.app_name);
     }
 
-    const handleCancel = () => {
-        setLoading(false)
-    };
-
-    const handleChange = (value: any) => {
-        setConfig({
-            name: value,
-            version: "",
-            manifest: "",
-            fields: [],
-            properties: [],
-        })
-
-        axios.get(window.__RUNTIME_CONFIG__.REACT_APP_CYCLOPS_CTRL_HOST + `/configuration/` + value + `/versions`).then(res => {
-            let configVersions = res.data.sort(function (a: string, b: string) {
-                if (a === "latest") {
-                    return -1
-                }
-                if (b === "latest") {
-                    return 1
-                }
-                if (a < b) {
-                    return 1;
-                }
-                if (a > b) {
-                    return -1;
-                }
-                return 0;
-            })
-
-            console.log(configVersions);
-
-            const versionOptions: {} | any = [];
-            configVersions.map((v: any) => {
-                versionOptions.push(<Select.Option key={v}>{v}</Select.Option>)
-            })
-
-            setVersions(versionOptions);
-        });
-    }
-
-    const handleVersionChange = (value: any) => {
-        axios.get(window.__RUNTIME_CONFIG__.REACT_APP_CYCLOPS_CTRL_HOST + `/create-config/` + config.name + `?version=` + value).then(res => {
-            setConfig(res.data);
-        });
-    }
+    // TODO: will be used later for commit references
+    // const handleChange = (value: any) => {
+    //     setConfig({
+    //         name: value,
+    //         version: "",
+    //         manifest: "",
+    //         fields: [],
+    //         properties: [],
+    //     })
+    //
+    //     axios.get(window.__RUNTIME_CONFIG__.REACT_APP_CYCLOPS_CTRL_HOST + `/configuration/` + value + `/versions`).then(res => {
+    //         let configVersions = res.data.sort(function (a: string, b: string) {
+    //             if (a === "latest") {
+    //                 return -1
+    //             }
+    //             if (b === "latest") {
+    //                 return 1
+    //             }
+    //             if (a < b) {
+    //                 return 1;
+    //             }
+    //             if (a > b) {
+    //                 return -1;
+    //             }
+    //             return 0;
+    //         })
+    //
+    //         console.log(configVersions);
+    //
+    //         const versionOptions: {} | any = [];
+    //         configVersions.map((v: any) => {
+    //             versionOptions.push(<Select.Option key={v}>{v}</Select.Option>)
+    //         })
+    //     });
+    // }
+    //
+    // const handleVersionChange = (value: any) => {
+    //     axios.get(window.__RUNTIME_CONFIG__.REACT_APP_CYCLOPS_CTRL_HOST + `/create-config/` + config.name + `?version=` + value).then(res => {
+    //         setConfig(res.data);
+    //     });
+    // }
 
     const loadTemplate = () => {
         setLoadingTemplate(true);
+
+        setError({
+            message: "",
+            description: "",
+        })
 
         // setGitTemplate({
         //     repo: "https://github.com/petar-cvit/starship",
         //     path: "charts/devnet",
         // })
+
+        if (gitTemplate.repo.trim() === "") {
+            setError({
+                message: "Invalid repository name",
+                description: "Repository name must not be empty",
+            })
+            setLoadingTemplate(false);
+            return
+        }
+
 
         // axios.get(window.__RUNTIME_CONFIG__.REACT_APP_CYCLOPS_CTRL_HOST + `/templates/git?repo=` + "https://github.com/petar-cvit/starship" + `&path=` + "charts/devnet").then(res => {
         axios.get(window.__RUNTIME_CONFIG__.REACT_APP_CYCLOPS_CTRL_HOST + `/templates/git?repo=` + gitTemplate.repo + `&path=` + gitTemplate.path).then(res => {
@@ -231,7 +268,9 @@ const NewModule = () => {
     }
 
     const getCollapseColor = (fieldName: string) => {
-        if (activeCollapses.get(fieldName) && activeCollapses.get(fieldName) === true) {
+        let kk = new Array(fieldName);
+        let key = kk.join('')
+        if (activeCollapses.get(key) && activeCollapses.get(key) === true) {
             return "#faca93"
         } else {
             return "#fae8d4"
@@ -270,6 +309,8 @@ const NewModule = () => {
 
             let formItemName = arrayField ? [arrayField.name, fieldName] : fieldName
 
+            let uniqueFieldName : any = parentFieldID.length === 0 ? field.name : parentFieldID.concat(".").concat(field.name)
+
             switch (field.type) {
                 case "string":
                     formFields.push(
@@ -300,7 +341,7 @@ const NewModule = () => {
                     )
                     return;
                 case "object":
-                    let uniqueFieldName : any = parentFieldID.length === 0 ? field.name : parentFieldID.concat(".").concat(field.name)
+                    uniqueFieldName = parentFieldID.length === 0 ? field.name : parentFieldID.concat(".").concat(field.name)
                     var header = <Row>{field.name}</Row>
 
                     if (field.description && field.description.length !== 0) {
@@ -528,7 +569,7 @@ const NewModule = () => {
                             <Button type="primary" loading={loading} htmlType="submit" name="Save">
                                 Save
                             </Button>{' '}
-                            <Button type="ghost" htmlType="button" onClick={() => history('/')}>
+                            <Button htmlType="button" onClick={() => history('/')}>
                                 Back
                             </Button>
                         </div>

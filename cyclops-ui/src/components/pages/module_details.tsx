@@ -19,6 +19,7 @@ import {
     Typography
 } from 'antd';
 import {Icon} from '@ant-design/compatible';
+import 'ace-builds/src-noconflict/ace';
 import {useNavigate} from 'react-router';
 import {useParams} from "react-router-dom";
 import axios from 'axios';
@@ -29,13 +30,14 @@ import {
     CloseSquareTwoTone, InfoCircleOutlined,
     LinkOutlined,
     MinusCircleOutlined,
-    PlusOutlined, WarningFilled
+    PlusOutlined, WarningTwoTone
 } from "@ant-design/icons";
 import Link from "antd/lib/typography/Link";
-import AceEditor from "react-ace";
 import { formatDistanceToNow } from 'date-fns';
 
 import "ace-builds/src-noconflict/mode-jsx";
+import {CodeBlock} from "react-code-blocks";
+import ReactAce from "react-ace";
 const languages = [
     "javascript",
     "java",
@@ -89,8 +91,13 @@ interface module {
     }
 }
 
-const colors = ["pink", "yellow", "orange", "cyan", "green", "blue", "purple", "magenta", "lime"];
-const pieColors = ["#ffb6c1", "#ffffe0", "#ffd580", "#e0ffff", "#90ee90", "#add8e6", "#cbc3e3", "#ff80ff", "#bfff00"];
+const green = "#D1FFBD"
+const greenSelected = "#BDFEAE"
+
+const red = "#FF8484"
+const redSelected = "#FF7276"
+
+
 
 function formatPodAge(podAge: string): string {
     const parsedDate = new Date(podAge);
@@ -109,7 +116,8 @@ const ModuleDetails = () => {
         on: false,
         namespace: '',
         pod: '',
-        containers: []
+        containers: [],
+        initContainers: []
     })
     const [logs, setLogs] = useState('');
     const [loading, setLoading] = useState(false);
@@ -197,9 +205,23 @@ const ModuleDetails = () => {
         }, 5000);
     }, []);
 
-    const getCollapseColor = (fieldName: string) => {
+    const getCollapseColor = (fieldName: string, healthy: boolean) => {
+        // if (activeCollapses.get(fieldName) && activeCollapses.get(fieldName) === true) {
+        //     if (healthy) {
+        //         return greenSelected
+        //     } else {
+        //         return redSelected
+        //     }
+        // } else {
+        //     if (healthy) {
+        //         return green
+        //     } else {
+        //         return red
+        //     }
+        // }
+
         if (activeCollapses.get(fieldName) && activeCollapses.get(fieldName) === true) {
-            return "#faca93"
+            return "#fadab3"
         } else {
             return "#fae8d4"
         }
@@ -224,7 +246,9 @@ const ModuleDetails = () => {
             namespace: '',
             pod: '',
             containers: [],
+            initContainers: []
         })
+        setLogs('')
     };
 
     const handleCancel = () => {
@@ -286,15 +310,31 @@ const ModuleDetails = () => {
 
         let cnt = 1;
         let container :any
-        for (container of logsModal.containers) {
-            items.push(
-                {
-                    key: container.name,
-                    label: container.name,
-                    children: <AceEditor style={{width: "100%"}} mode={"sass"} value={logs} readOnly={true} />,
-                }
-            )
-            cnt++;
+
+        if (logsModal.containers !== null && logsModal.containers !== null) {
+            for (container of logsModal.containers) {
+                items.push(
+                    {
+                        key: container.name,
+                        label: container.name,
+                        children: <ReactAce style={{width: "100%"}} mode={"sass"} value={logs} readOnly={true} />,
+                    }
+                )
+                cnt++;
+            }
+        }
+
+        if (logsModal.initContainers !== null && logsModal.initContainers !== null) {
+            for (container of logsModal.initContainers) {
+                items.push(
+                    {
+                        key: container.name,
+                        label: "(init container) " + container.name,
+                        children: <ReactAce style={{width: "100%"}} mode={"sass"} value={logs} readOnly={true} />,
+                    }
+                )
+                cnt++;
+            }
         }
 
         return items
@@ -323,27 +363,54 @@ const ModuleDetails = () => {
             } else {
                 setError(error.response.data);
             }
-        });;
+        });
     }
 
-    const genExtra = (resource: any) => {
-        if (resource.deleted) {
-            return (
-                <Row gutter={[0, 8]}>
-                    <Col span={15} style={{display: 'flex', justifyContent: 'flex-start'}}>
-                        {resource.name} {resource.kind}
-                    </Col>
-                    <Col span={9} style={{display: 'flex', justifyContent: 'flex-end'}}>
-                        <WarningFilled style={{color: 'red', right: "0px", fontSize: '20px'}}/>
-                    </Col>
-                </Row>
-            );
-        } else {
-            return (
-                <Row>{resource.name} {resource.kind}</Row>
-            );
+    const genExtra = (resource: any, status?: boolean) => {
+        let statusIcon = <></>
+        if(status === true) {
+            statusIcon = <CheckCircleTwoTone style={{paddingLeft: "5px", fontSize: "20px", verticalAlign: 'middle'}} twoToneColor={'#52c41a'} />
         }
+        if (status === false) {
+            statusIcon = <CloseSquareTwoTone style={{paddingLeft: "5px", fontSize: "20px", verticalAlign: 'middle'}} twoToneColor={'red'} />
+        }
+
+        let deletedIcon = <></>
+        if (resource.deleted) {
+            deletedIcon = <WarningTwoTone twoToneColor="#F3801A" style={{paddingLeft: "5px", fontSize: "20px", verticalAlign: 'middle'}}/>
+        }
+
+        return (
+            <Row gutter={[0, 8]}>
+                <Col span={15} style={{display: 'flex', justifyContent: 'flex-start'}}>
+                    {resource.name} {resource.kind} {statusIcon}
+                </Col>
+                <Col span={9} style={{display: 'flex', justifyContent: 'flex-end'}}>
+                    {deletedIcon}
+                </Col>
+            </Row>
+        );
     }
+
+
+    // const genExtra = (resource: any, status?: boolean) => {
+    //     let statusIcon = <></>
+    //     if(status === true) {
+    //         statusIcon = <CheckCircleTwoTone style={{paddingLeft: "5px", fontSize: "110%", verticalAlign: 'middle'}} twoToneColor={'#52c41a'} />
+    //     }
+    //     if (status === false) {
+    //         statusIcon = <CloseSquareTwoTone style={{paddingLeft: "5px", fontSize: "110%", verticalAlign: 'middle'}} twoToneColor={'red'} />
+    //     }
+    //
+    //     let deletedIcon = <></>
+    //     if (resource.deleted) {
+    //         deletedIcon = <WarningTwoTone twoToneColor="#F3801A" style={{paddingLeft: "5px", fontSize: "110%", verticalAlign: 'middle'}}/>
+    //     }
+    //
+    //     return (
+    //         <Row>{resource.name} {resource.kind} {statusIcon} {deletedIcon}</Row>
+    //     );
+    // }
 
     const configMapData = (resource: any) => {
         if (resource.data) {
@@ -361,7 +428,8 @@ const ModuleDetails = () => {
         const lines = data.split('\n').length;
 
         if (lines > 1) {
-            return <AceEditor
+            return <ReactAce
+                setOptions={{ useWorker: false }}
                 value={data}
                 readOnly={true}
                 width="100%"
@@ -387,12 +455,13 @@ const ModuleDetails = () => {
             case "json":
                 return "json"
             default:
-                return ""
+                return "json"
         }
     }
 
     resources.forEach((resource: any) => {
         let collapseKey = resource.kind + "/" + resource.namespace + "/" + resource.name;
+        let statusIcon = (<p/>)
         switch (resource.kind) {
             case "Deployment":
                 var deletedWarning = (<p/>)
@@ -400,7 +469,7 @@ const ModuleDetails = () => {
                 if (resource.deleted) {
                     deletedWarning = (
                         <Tooltip title={"The resource is not a part of the Module and can be deleted"} trigger="click">
-                            <WarningFilled style={{color: 'red', right: "0px", fontSize: '30px', paddingRight: "5px"}}/>
+                            <WarningTwoTone twoToneColor="#F3801A" style={{right: "0px", fontSize: '30px', paddingRight: "5px"}}/>
                         </Tooltip>
                     )
                 }
@@ -436,16 +505,19 @@ const ModuleDetails = () => {
                     )
                 }
 
-                let statusIcon = resource.status ? <CheckCircleTwoTone style={{fontSize: '200%', verticalAlign: 'middle'}} twoToneColor={'blue'} /> :
+                statusIcon = resource.status ? <CheckCircleTwoTone style={{fontSize: '200%', verticalAlign: 'middle'}} twoToneColor={'#52c41a'} /> :
                     <CloseSquareTwoTone style={{fontSize: '200%', verticalAlign: 'middle'}} twoToneColor={'red'} />
                 resourceCollapses.push(
-                    <Collapse.Panel header={genExtra(resource)} key={collapseKey} style={{backgroundColor: getCollapseColor(collapseKey)}}>
+                    <Collapse.Panel header={genExtra(resource, resource.status)} key={collapseKey} style={{backgroundColor: getCollapseColor(collapseKey, resource.status)}}>
                         <Row>
                             <Col>
                                 {deletedWarning}
                             </Col>
                             <Col span={19}>
-                                <Title level={3}>{resource.name}</Title>
+                                <Row>
+                                    <Title style={{paddingRight: "10px"}} level={3}>{resource.name}</Title>
+                                    {statusIcon}
+                                </Row>
                             </Col>
                             <Col span={4} style={{display: 'flex', justifyContent: 'flex-end'}}>
                                 {deleteButton}
@@ -545,7 +617,8 @@ const ModuleDetails = () => {
                                                         on: true,
                                                         namespace: resource.namespace,
                                                         pod: pod.name,
-                                                        containers: pod.containers
+                                                        containers: pod.containers,
+                                                        initContainers: pod.initContainers
                                                     })
                                                 }} block>View Logs</Button>
                                             </>
@@ -563,7 +636,7 @@ const ModuleDetails = () => {
                 if (resource.deleted) {
                     deletedWarning = (
                         <Tooltip title={"The resource is not a part of the Module and can be deleted"} trigger="click">
-                            <WarningFilled style={{color: 'red', right: "0px", fontSize: '30px', paddingRight: "5px"}}/>
+                            <WarningTwoTone twoToneColor="#F3801A" style={{right: "0px", fontSize: '30px', paddingRight: "5px"}}/>
                         </Tooltip>
                     )
                 }
@@ -599,16 +672,19 @@ const ModuleDetails = () => {
                     )
                 }
 
-                statusIcon = resource.status ? <CheckCircleTwoTone style={{fontSize: '200%', verticalAlign: 'middle'}} twoToneColor={'blue'} /> :
+                statusIcon = resource.status ? <CheckCircleTwoTone style={{fontSize: '200%', verticalAlign: 'middle'}} twoToneColor={'#52c41a'} /> :
                     <CloseSquareTwoTone style={{fontSize: '200%', verticalAlign: 'middle'}} twoToneColor={'red'} />
                 resourceCollapses.push(
-                    <Collapse.Panel header={genExtra(resource)} key={collapseKey} style={{backgroundColor: getCollapseColor(collapseKey)}}>
+                    <Collapse.Panel header={genExtra(resource, resource.status)} key={collapseKey} style={{backgroundColor: getCollapseColor(collapseKey, resource.status)}}>
                         <Row>
                             <Col>
                                 {deletedWarning}
                             </Col>
                             <Col span={19}>
-                                <Title level={3}>{resource.name}</Title>
+                                <Row>
+                                    <Title style={{paddingRight: "10px"}} level={3}>{resource.name}</Title>
+                                    {statusIcon}
+                                </Row>
                             </Col>
                             <Col span={4} style={{display: 'flex', justifyContent: 'flex-end'}}>
                                 {deleteButton}
@@ -702,13 +778,15 @@ const ModuleDetails = () => {
                                                             })
                                                         } else {
                                                             setError(error.response.data);
+                                                            setLogs(error.response.data.description)
                                                         }
                                                     });
                                                     setLogsModal({
                                                         on: true,
                                                         namespace: resource.namespace,
                                                         pod: pod.name,
-                                                        containers: pod.containers
+                                                        containers: pod.containers,
+                                                        initContainers: pod.initContainers
                                                     })
                                                 }} block>View Logs</Button>
                                             </>
@@ -726,7 +804,7 @@ const ModuleDetails = () => {
                 if (resource.deleted) {
                     deletedWarning = (
                         <Tooltip title={"The resource is not a part of the Module and can be deleted"} trigger="click">
-                            <WarningFilled style={{color: 'red', right: "0px", fontSize: '30px', paddingRight: "5px"}}/>
+                            <WarningTwoTone twoToneColor="#F3801A" style={{right: "0px", fontSize: '30px', paddingRight: "5px"}}/>
                         </Tooltip>
                     )
                 }
@@ -762,16 +840,19 @@ const ModuleDetails = () => {
                     )
                 }
 
-                statusIcon = resource.status ? <CheckCircleTwoTone style={{fontSize: '200%', verticalAlign: 'middle'}} twoToneColor={'blue'} /> :
+                statusIcon = resource.status ? <CheckCircleTwoTone style={{fontSize: '200%', verticalAlign: 'middle'}} twoToneColor={'#52c41a'} /> :
                     <CloseSquareTwoTone style={{fontSize: '200%', verticalAlign: 'middle'}} twoToneColor={'red'} />
                 resourceCollapses.push(
-                    <Collapse.Panel header={genExtra(resource)} key={collapseKey} style={{backgroundColor: getCollapseColor(collapseKey)}}>
+                    <Collapse.Panel header={genExtra(resource, resource.status)} key={collapseKey} style={{backgroundColor: getCollapseColor(collapseKey, resource.status)}}>
                         <Row>
                             <Col>
                                 {deletedWarning}
                             </Col>
                             <Col span={19}>
-                                <Title level={3}>{resource.name}</Title>
+                                <Row>
+                                    <Title style={{paddingRight: "10px"}} level={3}>{resource.name}</Title>
+                                    {statusIcon}
+                                </Row>
                             </Col>
                             <Col span={4} style={{display: 'flex', justifyContent: 'flex-end'}}>
                                 {deleteButton}
@@ -850,7 +931,8 @@ const ModuleDetails = () => {
                                         on: true,
                                         namespace: resource.namespace,
                                         pod: resource.name,
-                                        containers: resource.containers
+                                        containers: resource.containers,
+                                        initContainers: resource.initContainers
                                     })
                                 }} block>View Logs</Button>
                             </Col>
@@ -865,7 +947,7 @@ const ModuleDetails = () => {
                 if (resource.deleted) {
                     deletedWarning = (
                             <Tooltip title={"The resource is not a part of the Module and can be deleted"} trigger="click">
-                                <WarningFilled style={{color: 'red', right: "0px", fontSize: '30px', paddingRight: "5px"}}/>
+                                <WarningTwoTone twoToneColor="#F3801A" style={{right: "0px", fontSize: '30px', paddingRight: "5px"}}/>
                             </Tooltip>
                     )
                 }
@@ -902,7 +984,7 @@ const ModuleDetails = () => {
                 }
 
                 resourceCollapses.push(
-                    <Collapse.Panel header={genExtra(resource)} key={collapseKey} style={{backgroundColor: getCollapseColor(collapseKey)}}>
+                    <Collapse.Panel header={genExtra(resource)} key={collapseKey} style={{backgroundColor: getCollapseColor(collapseKey, true)}}>
                         <Row>
                             <Col>
                                 {deletedWarning}
@@ -962,7 +1044,7 @@ const ModuleDetails = () => {
                 if (resource.deleted) {
                     deletedWarning = (
                         <Tooltip title={"The resource is not a part of the Module and can be deleted"} trigger="click">
-                            <WarningFilled style={{color: 'red', right: "0px", fontSize: '30px', paddingRight: "5px"}}/>
+                            <WarningTwoTone twoToneColor="#F3801A" style={{right: "0px", fontSize: '30px', paddingRight: "5px"}}/>
                         </Tooltip>
                     )
                 }
@@ -999,7 +1081,7 @@ const ModuleDetails = () => {
                 }
 
                 resourceCollapses.push(
-                    <Collapse.Panel header={genExtra(resource)} key={collapseKey} style={{backgroundColor: getCollapseColor(collapseKey)}}>
+                    <Collapse.Panel header={genExtra(resource)} key={collapseKey} style={{backgroundColor: getCollapseColor(collapseKey, true)}}>
                         <Row>
                             <Col>
                                 {deletedWarning}
@@ -1041,7 +1123,7 @@ const ModuleDetails = () => {
                 if (resource.deleted) {
                     deletedWarning = (
                         <Tooltip title={"The resource is not a part of the Module and can be deleted"} trigger="click">
-                            <WarningFilled style={{color: 'red', right: "0px", fontSize: '30px', paddingRight: "5px"}}/>
+                            <WarningTwoTone twoToneColor="#F3801A" style={{right: "0px", fontSize: '30px', paddingRight: "5px"}}/>
                         </Tooltip>
                     )
                 }
@@ -1078,7 +1160,7 @@ const ModuleDetails = () => {
                 }
 
                 resourceCollapses.push(
-                    <Collapse.Panel header={genExtra(resource)} key={collapseKey} style={{backgroundColor: getCollapseColor(collapseKey)}}>
+                    <Collapse.Panel header={genExtra(resource)} key={collapseKey} style={{backgroundColor: getCollapseColor(collapseKey, true)}}>
                         <Row>
                             <Col>
                                 {deletedWarning}
@@ -1228,7 +1310,7 @@ const ModuleDetails = () => {
                 onCancel={handleCancelManifest}
                 width={'40%'}
             >
-                <AceEditor style={{width: "100%"}} mode={"sass"} value={getManifest()} readOnly={true} />
+                <ReactAce style={{width: "100%"}} mode={"sass"} value={getManifest()} readOnly={true} />
             </Modal>
             <Modal
                 title="Logs"
@@ -1236,7 +1318,7 @@ const ModuleDetails = () => {
                 onCancel={handleCancelLogs}
                 width={'60%'}
             >
-                <Tabs defaultActiveKey="1" items={getTabItems()} onChange={onLogsTabsChange} />
+                <Tabs items={getTabItems()} onChange={onLogsTabsChange} />
             </Modal>
         </div>
     );

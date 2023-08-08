@@ -161,17 +161,19 @@ type ContainerStatus struct {
 }
 
 type Pod struct {
-	Group      string       `json:"group"`
-	Version    string       `json:"version"`
-	Kind       string       `json:"kind"`
-	Name       string       `json:"name"`
-	Namespace  string       `json:"namespace"`
-	Containers []Container  `json:"containers"`
-	Node       string       `json:"node"`
-	PodPhase   string       `json:"podPhase"`
-	Started    *metav1.Time `json:"started"`
-	Manifest   string       `json:"manifest"`
-	Deleted    bool         `json:"deleted"`
+	Group          string       `json:"group"`
+	Version        string       `json:"version"`
+	Kind           string       `json:"kind"`
+	Name           string       `json:"name"`
+	Namespace      string       `json:"namespace"`
+	InitContainers []Container  `json:"initContainers"`
+	Containers     []Container  `json:"containers"`
+	Node           string       `json:"node"`
+	PodPhase       string       `json:"podPhase"`
+	Status         bool         `json:"status"`
+	Started        *metav1.Time `json:"started"`
+	Manifest       string       `json:"manifest"`
+	Deleted        bool         `json:"deleted"`
 }
 
 func (p *Pod) GetGroupVersionKind() string {

@@ -179,18 +179,43 @@ func (k *KubernetesClient) GetResourcesForModule(name string) ([]dto.Resource, e
 			})
 		}
 
+		initContainers := make([]dto.Container, 0, len(item.Spec.InitContainers))
+		for _, cnt := range item.Spec.InitContainers {
+			env := make(map[string]string)
+			for _, envVar := range cnt.Env {
+				env[envVar.Name] = envVar.Value
+			}
+
+			var status apiv1.ContainerStatus
+			for _, c := range item.Status.ContainerStatuses {
+				if c.Name == cnt.Name {
+					status = c
+					break
+				}
+			}
+
+			initContainers = append(initContainers, dto.Container{
+				Name:   cnt.Name,
+				Image:  cnt.Image,
+				Env:    env,
+				Status: containerStatus(status),
+			})
+		}
+
 		out = append(out, &dto.Pod{
-			Group:      "",
-			Version:    "v1",
-			Kind:       "Pod",
-			Name:       item.Name,
-			Namespace:  item.Namespace,
-			Containers: containers,
-			Node:       item.Spec.NodeName,
-			PodPhase:   string(item.Status.Phase),
-			Started:    item.Status.StartTime,
-			Manifest:   manifest,
-			Deleted:    false,
+			Group:          "",
+			Version:        "v1",
+			Kind:           "Pod",
+			Name:           item.Name,
+			Namespace:      item.Namespace,
+			Containers:     containers,
+			InitContainers: initContainers,
+			Node:           item.Spec.NodeName,
+			PodPhase:       string(item.Status.Phase),
+			Status:         getPodStatus(containers),
+			Started:        item.Status.StartTime,
+			Manifest:       manifest,
+			Deleted:        false,
 		})
 	}
 
@@ -372,12 +397,36 @@ func (k *KubernetesClient) getStatefulsetPods(deployment appsv1.StatefulSet) ([]
 			})
 		}
 
+		initContainers := make([]dto.Container, 0, len(item.Spec.Containers))
+		for _, cnt := range item.Spec.InitContainers {
+			env := make(map[string]string)
+			for _, envVar := range cnt.Env {
+				env[envVar.Name] = envVar.Value
+			}
+
+			var status apiv1.ContainerStatus
+			for _, c := range item.Status.ContainerStatuses {
+				if c.Name == cnt.Name {
+					status = c
+					break
+				}
+			}
+
+			initContainers = append(initContainers, dto.Container{
+				Name:   cnt.Name,
+				Image:  cnt.Image,
+				Env:    env,
+				Status: containerStatus(status),
+			})
+		}
+
 		out = append(out, dto.Pod{
-			Name:       item.Name,
-			Containers: containers,
-			Node:       item.Spec.NodeName,
-			PodPhase:   string(item.Status.Phase),
-			Started:    item.Status.StartTime,
+			Name:           item.Name,
+			Containers:     containers,
+			InitContainers: initContainers,
+			Node:           item.Spec.NodeName,
+			PodPhase:       string(item.Status.Phase),
+			Started:        item.Status.StartTime,
 		})
 	}
 
@@ -397,7 +446,7 @@ func containerStatus(status apiv1.ContainerStatus) dto.ContainerStatus {
 		return dto.ContainerStatus{
 			Status:  status.State.Terminated.Reason,
 			Message: status.State.Terminated.Message,
-			Running: false,
+			Running: status.State.Terminated.ExitCode == 0,
 		}
 	}
 
@@ -413,6 +462,16 @@ func getDeploymentStatus(pods []dto.Pod) bool {
 			if !container.Status.Running {
 				return false
 			}
+		}
+	}
+
+	return true
+}
+
+func getPodStatus(containers []dto.Container) bool {
+	for _, container := range containers {
+		if !container.Status.Running {
+			return false
 		}
 	}
 
