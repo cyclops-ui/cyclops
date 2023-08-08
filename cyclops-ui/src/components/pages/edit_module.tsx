@@ -82,8 +82,9 @@ const EditModule = () => {
     const [loadTemplate, setLoadTemplate] = useState(false);
 
     const [activeCollapses, setActiveCollapses] = useState(new Map());
-    const updateActiveCollapses = (k: any, v: any) => {
-        setActiveCollapses(new Map(activeCollapses.set(k,v)));
+    const updateActiveCollapses = (k: string[] | string, v: any) => {
+        let kk = new Array(k);
+        setActiveCollapses(new Map(activeCollapses.set(kk.join(''),v)));
     }
 
     const history = useNavigate();
@@ -295,8 +296,6 @@ const EditModule = () => {
                 case "array":
                     valuesList = values[field.name] as any[]
 
-                    console.log(valuesList)
-
                     let objectArr: any[] = []
                     valuesList.forEach(valueFromList => {
                         switch (field.items.type) {
@@ -327,9 +326,6 @@ const EditModule = () => {
 
     const handleSubmit = (values: any) => {
         values = findMaps(config.fields, values)
-        console.log({
-            "values": values,
-        })
 
         axios.post(window.__RUNTIME_CONFIG__.REACT_APP_CYCLOPS_CTRL_HOST + `/modules/update`,
             {
@@ -337,7 +333,6 @@ const EditModule = () => {
                 "name": module.name,
                 "template": module.template,
             }).then(res => {
-                console.log(res);
                 window.location.href = "/modules/" + moduleName
             }).catch(error => {
             setLoading(false);
@@ -356,8 +351,6 @@ const EditModule = () => {
     }
 
     const handleMigrate = () => {
-        console.log(targetVersion)
-
         axios.post(window.__RUNTIME_CONFIG__.REACT_APP_CYCLOPS_CTRL_HOST + `/modules/update`,
             {
                 "values": module.values,
@@ -366,7 +359,6 @@ const EditModule = () => {
                 "version": targetVersion,
             })
             .then(res => {
-                console.log(res);
                 window.location.href = "/modules/" + moduleName
             }).catch(error => {
             setLoading(false);
@@ -398,7 +390,9 @@ const EditModule = () => {
     }
 
     const getCollapseColor = (fieldName: string) => {
-        if (activeCollapses.get(fieldName) && activeCollapses.get(fieldName) === true) {
+        let kk = new Array(fieldName);
+        let key = kk.join('')
+        if (activeCollapses.get(key) && activeCollapses.get(key) === true) {
             return "#faca93"
         } else {
             return "#fae8d4"
@@ -440,7 +434,6 @@ const EditModule = () => {
     const arrayInnerField = (field: any, parentFieldID: string, parent: string, level: number, arrayField: any, remove: Function) => {
         switch (field.items.type) {
             case "object":
-                console.log(parentFieldID)
                 return <div>
                     {mapFields(field.items.properties, parentFieldID, "", level + 1, arrayField)}
                     <MinusCircleOutlined style={{ fontSize: '16px' }} onClick={() => remove(arrayField.name)} />

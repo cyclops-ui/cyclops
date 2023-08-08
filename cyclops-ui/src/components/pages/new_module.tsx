@@ -52,8 +52,9 @@ const NewModule = () => {
     const [loadingTemplate, setLoadingTemplate] = useState(false);
 
     const [activeCollapses, setActiveCollapses] = useState(new Map());
-    const updateActiveCollapses = (k: any, v: any) => {
-        setActiveCollapses(new Map(activeCollapses.set(k,v)));
+    const updateActiveCollapses = (k: string[] | string, v: any) => {
+        let kk = new Array(k);
+        setActiveCollapses(new Map(activeCollapses.set(kk.join(''),v)));
     }
 
     const history = useNavigate();
@@ -91,7 +92,14 @@ const NewModule = () => {
 
                     let objectArr: any[] = []
                     valuesList.forEach(valueFromList => {
-                        objectArr.push(findMaps(field.items.properties, valueFromList))
+                        switch (field.items.type) {
+                            case "string":
+                                objectArr.push(valueFromList)
+                                break
+                            case "object":
+                                objectArr.push(findMaps(field.items.properties, valueFromList))
+                                break
+                        }
                     })
                     out[field.name] = objectArr
                     break
@@ -114,11 +122,6 @@ const NewModule = () => {
         const moduleName = values["cyclops_module_name"]
 
         values = findMaps(config.fields, values)
-        console.log({
-            "values": values,
-        })
-
-        console.log(values)
 
         axios.post(window.__RUNTIME_CONFIG__.REACT_APP_CYCLOPS_CTRL_HOST + `/modules/new`,
             {
@@ -134,12 +137,9 @@ const NewModule = () => {
                 },
             })
             .then(res => {
-                console.log(res);
-                window.location.href = "/modules/" + values["cyclops_module_name"]
+                window.location.href = "/modules/" + moduleName
             })
             .catch(error => {
-                console.log(error)
-                console.log(error.response)
                 setLoading(false);
                 if (error.response === undefined) {
                     setError({
@@ -268,7 +268,9 @@ const NewModule = () => {
     }
 
     const getCollapseColor = (fieldName: string) => {
-        if (activeCollapses.get(fieldName) && activeCollapses.get(fieldName) === true) {
+        let kk = new Array(fieldName);
+        let key = kk.join('')
+        if (activeCollapses.get(key) && activeCollapses.get(key) === true) {
             return "#faca93"
         } else {
             return "#fae8d4"
