@@ -2,6 +2,8 @@
 
 # Cyclops
 
+![which-would-you-prefer.png](web%2Fstatic%2Fimg%2Fwhich-would-you-prefer.png)
+
 Welcome to Cyclops, a powerful user interface for managing and interacting with Kubernetes clusters. Cyclops is designed
 to simplify the management of containerized applications on Kubernetes, providing an intuitive and user-friendly
 experience for developers, system administrators, and DevOps professionals. Divide the responsibility between your
