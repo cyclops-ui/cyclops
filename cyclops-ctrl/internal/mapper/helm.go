@@ -16,9 +16,10 @@ func HelmSchemaToFields(schema helm.Property) []models.Field {
 				Name:        name,
 				Description: property.Description,
 				Type:        mapHelmPropertyTypeToFieldType(property),
-				DisplayName: name,
+				DisplayName: mapTitle(name, property),
 				ManifestKey: name,
 				Items:       arrayItem(property.Items),
+				Enum:        property.Enum,
 			})
 			continue
 		}
@@ -27,9 +28,10 @@ func HelmSchemaToFields(schema helm.Property) []models.Field {
 			Name:        name,
 			Description: property.Description,
 			Type:        mapHelmPropertyTypeToFieldType(property),
-			DisplayName: name,
+			DisplayName: mapTitle(name, property),
 			ManifestKey: name,
 			Properties:  HelmSchemaToFields(property),
+			Enum:        property.Enum,
 		})
 	}
 
@@ -80,4 +82,12 @@ func arrayItem(item *helm.Property) *models.Field {
 		Type:       item.Type,
 		Properties: HelmSchemaToFields(*item),
 	}
+}
+
+func mapTitle(name string, field helm.Property) string {
+	if len(field.Title) != 0 {
+		return field.Title
+	}
+
+	return name
 }

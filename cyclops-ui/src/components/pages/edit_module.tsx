@@ -296,6 +296,10 @@ const EditModule = () => {
                 case "array":
                     valuesList = values[field.name] as any[]
 
+                    if (!valuesList) {
+                        break
+                    }
+
                     let objectArr: any[] = []
                     valuesList.forEach(valueFromList => {
                         switch (field.items.type) {
@@ -311,6 +315,10 @@ const EditModule = () => {
                     break
                 case "map":
                     valuesList = values[field.name] as any[]
+
+                    if (!valuesList) {
+                        break
+                    }
 
                     let object: any = {};
                     valuesList.forEach(valueFromList => {
@@ -431,6 +439,28 @@ const EditModule = () => {
     //     }
     // }
 
+    const selectInputField = (field: any, formItemName: string | string[], arrayField: any) => {
+        let options: {value: string, label: string}[] = []
+        field.enum.forEach((option: any) => {
+            options.push({
+                value: option,
+                label: option,
+            })
+        })
+
+        return <Form.Item {...arrayField} name={formItemName} label={field.display_name}>
+            <Select
+                showSearch
+                placeholder={field.name}
+                optionFilterProp="children"
+                filterOption={(input, option) =>
+                    (option?.label ?? '').toLowerCase().includes(input.toLowerCase())
+                }
+                options={options}
+            />
+        </Form.Item>
+    }
+
     const arrayInnerField = (field: any, parentFieldID: string, parent: string, level: number, arrayField: any, remove: Function) => {
         switch (field.items.type) {
             case "object":
@@ -459,6 +489,11 @@ const EditModule = () => {
 
             switch (field.type) {
                 case "string":
+                    if (field.enum) {
+                        formFields.push(selectInputField(field, formItemName, arrayField))
+                        return;
+                    }
+
                     formFields.push(
                         <Form.Item {...arrayField} name={formItemName}
                                    label={field.display_name}>
