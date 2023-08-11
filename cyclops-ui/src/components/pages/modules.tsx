@@ -52,6 +52,18 @@ const Modules = () => {
         setFilteredData(updatedList);
     }
 
+    const getStatusColor = (module: any) => {
+        if (module.status === "undefined") {
+            return "gray"
+        }
+
+        if (module.status === "healthy") {
+            return "#27D507"
+        }
+
+        return "#FF0000"
+    }
+
     return (
         <div>
             <Row gutter={[40, 0]}>
@@ -78,7 +90,9 @@ const Modules = () => {
             <Row gutter={[16, 16]}>
                 {filteredData.map((module:any, index) => (
                     <Col key={index} span={6}>
-                        <Card title={module.name}>
+                        <Card title={module.name} style={{
+                            borderLeft: "solid " + getStatusColor(module) + " 5px"
+                        }}>
                             <Row gutter={[16, 16]}>
                                 <Col span={24}>
                                     Repo:
