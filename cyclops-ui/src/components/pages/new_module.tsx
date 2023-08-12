@@ -70,6 +70,68 @@ const NewModule = () => {
         setLoading(false);
     }, []);
 
+    const mapsToArray = (fields: any[], values: any): any => {
+        let out: any = {};
+        fields.forEach(field => {
+            let valuesList: any[] = [];
+            switch (field.type) {
+                case "string":
+                    out[field.name] = values[field.name]
+                    break
+                case "number":
+                    out[field.name] = values[field.name]
+                    break
+                case "boolean":
+                    out[field.name] = values[field.name]
+                    break
+                case "object":
+                    out[field.name] = mapsToArray(field.properties, values[field.name])
+                    break
+                case "array":
+                    valuesList = values[field.name] as any[]
+
+                    let objectArr: any[] = []
+                    valuesList.forEach(valueFromList => {
+                        switch (field.items.type) {
+                            case "string":
+                                objectArr.push(valueFromList)
+                                break
+                            case "object":
+                                objectArr.push(mapsToArray(field.items.properties, valueFromList))
+                                break
+                        }
+                    })
+                    out[field.name] = objectArr
+                    break
+                case "map":
+                    let object: any[] = [];
+
+                    if (values[field.name] === undefined || values[field.name] === null) {
+                        out[field.name] = {}
+                        break
+                    }
+
+                    Object.keys(values[field.name]).forEach(key => {
+                        object.push({
+                            key: key,
+                            value: values[field.name][key],
+                        })
+                    })
+
+                    out[field.name] = object
+
+                    // valuesList.forEach(valueFromList => {
+                    //     // object.push({})
+                    //     // object[valueFromList.key] = valueFromList.value
+                    // })
+                    // out[field.name] = object
+                    break
+            }
+        })
+
+        return out
+    }
+
     const findMaps = (fields: any[], values: any): any => {
         let out: any = {};
         fields.forEach(field => {
@@ -91,6 +153,7 @@ const NewModule = () => {
                     valuesList = values[field.name] as any[]
 
                     if (!valuesList) {
+                        out[field.name] = []
                         break
                     }
 
@@ -111,10 +174,12 @@ const NewModule = () => {
                     valuesList = values[field.name] as any[]
 
                     if (!valuesList) {
+                        out[field.name] = {}
                         break
                     }
 
                     let object: any = {};
+                    console.log(valuesList)
                     valuesList.forEach(valueFromList => {
                         object[valueFromList.key] = valueFromList.value
                     })
@@ -204,7 +269,7 @@ const NewModule = () => {
     //     });
     // }
 
-    const loadTemplate = () => {
+    const loadTemplate = async () => {
         setLoadingTemplate(true);
 
         setError({
@@ -226,10 +291,12 @@ const NewModule = () => {
             return
         }
 
+        let tmpConfig: any = {}
 
         // axios.get(window.__RUNTIME_CONFIG__.REACT_APP_CYCLOPS_CTRL_HOST + `/templates/git?repo=` + "https://github.com/petar-cvit/starship" + `&path=` + "charts/devnet").then(res => {
-        axios.get(window.__RUNTIME_CONFIG__.REACT_APP_CYCLOPS_CTRL_HOST + `/templates/git?repo=` + gitTemplate.repo + `&path=` + gitTemplate.path).then(res => {
-            setConfig(res.data);
+        await axios.get(window.__RUNTIME_CONFIG__.REACT_APP_CYCLOPS_CTRL_HOST + `/templates/git?repo=` + gitTemplate.repo + `&path=` + gitTemplate.path).then(templatesRes => {
+            setConfig(templatesRes.data);
+            tmpConfig = templatesRes.data;
 
             setError({
                 message: "",
@@ -253,7 +320,7 @@ const NewModule = () => {
 
         // axios.get(window.__RUNTIME_CONFIG__.REACT_APP_CYCLOPS_CTRL_HOST + `/templates/git/initial?repo=` + gitTemplate.repo + `&path=` + gitTemplate.path).then(res => {
         axios.get(window.__RUNTIME_CONFIG__.REACT_APP_CYCLOPS_CTRL_HOST + `/templates/git/initial?repo=` + "https://github.com/petar-cvit/starship" + `&path=` + "charts/devnet").then(res => {
-            form.setFieldsValue(res.data);
+            form.setFieldsValue(mapsToArray(tmpConfig.fields, res.data))
 
             setError({
                 message: "",
@@ -479,7 +546,7 @@ const NewModule = () => {
                 case "map":
                     formFields.push(
                         <Form.Item name={fieldName} label={field.display_name}>
-                            <Form.List name={formItemName}>
+                            <Form.List name={formItemName} initialValue={[]}>
                                 {(fields, {add, remove}) => (
                                     <>
                                         {fields.map((arrField) => (
@@ -503,7 +570,11 @@ const NewModule = () => {
                                             </Space>
                                         ))}
                                         <Form.Item>
-                                            <Button type="dashed" onClick={() => add()} block icon={<PlusOutlined/>}>
+                                            <Button type="dashed" onClick={() => {
+                                                console.log(form.getFieldsValue())
+                                                console.log(formItemName, fieldName, uniqueFieldName)
+                                                add()
+                                            }} block icon={<PlusOutlined/>}>
                                                 Add
                                             </Button>
                                         </Form.Item>
@@ -536,7 +607,6 @@ const NewModule = () => {
             {
                 successLoad && <Alert
                     message={"Loaded template successfully"}
-                    description={error.description}
                     type="success"
                     closable
                     afterClose={() => {
@@ -580,7 +650,7 @@ const NewModule = () => {
                             }}
                         />
                         {'  '}
-                        <Button type="primary" htmlType="button" onClick={loadTemplate} loading={loadingTemplate}>
+                        <Button type="primary" htmlType="button" onClick={async () => {await loadTemplate()}} loading={loadingTemplate}>
                             Load
                         </Button>
                         <Divider orientation="left" orientationMargin="0">

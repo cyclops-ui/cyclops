@@ -127,6 +127,11 @@ const EditModule = () => {
                 case "map":
                     let object: any[] = [];
 
+                    if (values[field.name] === undefined || values[field.name] === null) {
+                        out[field.name] = {}
+                        break
+                    }
+
                     Object.keys(values[field.name]).forEach(key => {
                         object.push({
                             key: key,
@@ -297,6 +302,7 @@ const EditModule = () => {
                     valuesList = values[field.name] as any[]
 
                     if (!valuesList) {
+                        out[field.name] = []
                         break
                     }
 
@@ -317,6 +323,7 @@ const EditModule = () => {
                     valuesList = values[field.name] as any[]
 
                     if (!valuesList) {
+                        out[field.name] = {}
                         break
                     }
 

@@ -169,6 +169,10 @@ func (r *ModuleReconciler) generateResources(kClient *k8sclient.KubernetesClient
 			continue
 		}
 
+		if len(obj.UnstructuredContent()) == 0 {
+			continue
+		}
+
 		labels := obj.GetLabels()
 		if labels == nil {
 			labels = make(map[string]string)
@@ -178,7 +182,7 @@ func (r *ModuleReconciler) generateResources(kClient *k8sclient.KubernetesClient
 		obj.SetLabels(labels)
 
 		if err := kClient.CreateDynamic(&obj); err != nil {
-			r.logger.Error(err, "could not decode resource",
+			r.logger.Error(err, "could not apply resource",
 				"module namespaced name",
 				module.Name,
 				"resource namespaced name",

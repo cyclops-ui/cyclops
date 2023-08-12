@@ -72,8 +72,6 @@ func (m *Modules) ListModules(ctx *gin.Context) {
 			return
 		}
 
-		fmt.Println(dtoModule, dtoModuleStatus)
-
 		dtoModules[i].Status = dtoModuleStatus
 	}
 
