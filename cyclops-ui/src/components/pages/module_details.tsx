@@ -1216,7 +1216,7 @@ const ModuleDetails = () => {
                 <Row gutter={[40, 0]}>
                     <Col span={9}>
                         <Title level={1}>
-                            {module.name}
+                            {module.name} {moduleStatusIcon()}
                         </Title>
                     </Col>
                 </Row>
@@ -1248,6 +1248,38 @@ const ModuleDetails = () => {
         } else {
             return <Spin tip="Loading"/>
         }
+    }
+
+    const moduleStatusIcon = () => {
+        let resourcesWithStatus = 0
+        let status = true
+        for (let i = resources.length - 1; i >= 0; i--) {
+            let resource = resources[i] as any;
+            if (resource.status === undefined) {
+                continue
+            }
+
+            resourcesWithStatus++
+
+            if (resource.status === false) {
+                status = false
+                break;
+            }
+        }
+
+        if (resourcesWithStatus === 0) {
+            return <></>
+        }
+
+        let statusIcon = <></>
+        if(status) {
+            statusIcon = <CheckCircleTwoTone style={{verticalAlign: 'middle'}} twoToneColor={'#52c41a'} />
+        }
+        if (!status) {
+            statusIcon = <CloseSquareTwoTone style={{verticalAlign: 'middle'}} twoToneColor={'red'} />
+        }
+
+        return statusIcon
     }
 
     return (
