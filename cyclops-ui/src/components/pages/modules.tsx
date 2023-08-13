@@ -1,5 +1,5 @@
 import React, {useEffect, useState} from 'react';
-import {Button, Col, Divider, Row, Select, Table, Tag, Typography, Input, Space, Card} from 'antd';
+import {Button, Col, Divider, Row, Select, Table, Tag, Typography, Input, Space, Card, Alert} from 'antd';
 import {Icon} from '@ant-design/compatible';
 import {useNavigate} from 'react-router';
 import axios from 'axios';
@@ -14,12 +14,25 @@ const Modules = () => {
     const [allData, setAllData] = useState([]);
     const [filteredData, setFilteredData] = useState([]);
     const [namespacesState, setNamespacesState] = useState([]);
+    const [error, setError] = useState({
+        message: "",
+        description: "",
+    });
+
     useEffect(() => {
         axios.get(window.__RUNTIME_CONFIG__.REACT_APP_CYCLOPS_CTRL_HOST + `/modules/list`).then(res => {
-            console.log(res.data)
             setAllData(res.data);
             setFilteredData(res.data);
-        });
+        }).catch(error => {
+            if (error.response === undefined) {
+                setError({
+                    message: String(error),
+                    description: "Check if Cyclops backend is available on: " + window.__RUNTIME_CONFIG__.REACT_APP_CYCLOPS_CTRL_HOST
+                })
+            } else {
+                setError(error.response.data);
+            }
+        })
     }, []);
 
     async function handleChange(value: any) {
@@ -52,8 +65,33 @@ const Modules = () => {
         setFilteredData(updatedList);
     }
 
+    const getStatusColor = (module: any) => {
+        if (module.status === "undefined") {
+            return "gray"
+        }
+
+        if (module.status === "healthy") {
+            return "#27D507"
+        }
+
+        return "#FF0000"
+    }
+
     return (
         <div>
+            {
+                error.message.length !== 0 && <Alert
+                    message={error.message}
+                    description={error.description}
+                    type="error"
+                    closable
+                    afterClose={() => {setError({
+                        message: "",
+                        description: "",
+                    })}}
+                    style={{marginBottom: '20px'}}
+                />
+            }
             <Row gutter={[40, 0]}>
                 <Col span={18}>
                     <Title level={2}>
@@ -77,18 +115,30 @@ const Modules = () => {
             <Divider orientationMargin="0"/>
             <Row gutter={[16, 16]}>
                 {filteredData.map((module:any, index) => (
-                    <Col key={index} span={6}>
-                        <Card title={module.name}>
+                    <Col key={index} span={8}>
+                        <Card title={ module.name } style={{
+                            borderLeft: "solid " + getStatusColor(module) + " 5px"
+                        }}>
                             <Row gutter={[16, 16]}>
-                                <Col span={24}>
+                                <Col span={24} style={{
+                                    whiteSpace: "nowrap",
+                                    overflow: "hidden",
+                                    textOverflow: "ellipsis",
+                                    display: "block"
+                                }}>
                                     Repo:
                                     <Link aria-level={3} href={module.template.git.repo}>
                                         {module.template.name.length === 0 && " " + module.template.git.repo}
                                     </Link>
                                 </Col>
                             </Row>
-                            <Row gutter={[16, 16]}>
-                                <Col span={24}>
+                            <Row gutter={[16, 16]} >
+                                <Col span={24} style={{
+                                    whiteSpace: "nowrap",
+                                    overflow: "hidden",
+                                    textOverflow: "ellipsis",
+                                    display: "block"
+                                }}>
                                     Path:
                                     <Link aria-level={3} href={ module.template.git.repo + `/tree/master/` + module.template.git.path }>
                                         { module.template.name.length === 0 && " " + module.template.git.path }

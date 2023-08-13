@@ -317,6 +317,84 @@ func (k *KubernetesClient) GetDeletedResources(
 	return out, nil
 }
 
+func (k *KubernetesClient) GetModuleResourcesHealth(name string) (string, error) {
+	resourcesWithHealth := 0
+	const (
+		statusUndefined = "undefined"
+		statusHealthy   = "healthy"
+		statusUnhealthy = "unhealthy"
+	)
+
+	deployments, err := k.clientset.AppsV1().Deployments("").List(context.Background(), metav1.ListOptions{
+		LabelSelector: "cyclops.module=" + name,
+	})
+	if err != nil {
+		return statusUndefined, err
+	}
+
+	resourcesWithHealth += len(deployments.Items)
+	for _, item := range deployments.Items {
+		pods, err := k.getPods(item)
+		if err != nil {
+			return statusUndefined, err
+		}
+
+		if !getDeploymentStatus(pods) {
+			return statusUnhealthy, nil
+		}
+
+	}
+
+	pods, err := k.clientset.CoreV1().Pods("default").List(context.Background(), metav1.ListOptions{
+		LabelSelector: "cyclops.module=" + name,
+	})
+	if err != nil {
+		return statusUndefined, err
+	}
+
+	resourcesWithHealth += len(pods.Items)
+	for _, item := range pods.Items {
+		for _, cnt := range item.Spec.Containers {
+			var status apiv1.ContainerStatus
+			for _, c := range item.Status.ContainerStatuses {
+				if c.Name == cnt.Name {
+					status = c
+					break
+				}
+			}
+
+			if !containerStatus(status).Running {
+				return statusUnhealthy, nil
+			}
+		}
+	}
+
+	statefulsets, err := k.clientset.AppsV1().StatefulSets("default").List(context.Background(), metav1.ListOptions{
+		LabelSelector: "cyclops.module=" + name,
+	})
+	if err != nil {
+		return statusUndefined, err
+	}
+
+	resourcesWithHealth += len(statefulsets.Items)
+	for _, item := range statefulsets.Items {
+		pods, err := k.getStatefulsetPods(item)
+		if err != nil {
+			return statusUndefined, err
+		}
+
+		if !getDeploymentStatus(pods) {
+			return statusUnhealthy, nil
+		}
+	}
+
+	if resourcesWithHealth == 0 {
+		return statusUndefined, nil
+	}
+
+	return statusHealthy, nil
+}
+
 func (k *KubernetesClient) getPods(deployment appsv1.Deployment) ([]dto.Pod, error) {
 	pods, err := k.clientset.CoreV1().Pods(deployment.Namespace).List(context.Background(), metav1.ListOptions{
 		LabelSelector: labels.Set(deployment.Spec.Selector.MatchLabels).String(),

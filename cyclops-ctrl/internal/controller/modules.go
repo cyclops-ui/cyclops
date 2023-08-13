@@ -62,7 +62,20 @@ func (m *Modules) ListModules(ctx *gin.Context) {
 		return
 	}
 
-	ctx.JSON(http.StatusOK, mapper.ModuleListToDTO(modules))
+	dtoModules := mapper.ModuleListToDTO(modules)
+
+	for i, dtoModule := range dtoModules {
+		dtoModuleStatus, err := m.kubernetesClient.GetModuleResourcesHealth(dtoModule.Name)
+		if err != nil {
+			fmt.Println(err)
+			ctx.JSON(http.StatusInternalServerError, dto.NewError("Error fetching modules", err.Error()))
+			return
+		}
+
+		dtoModules[i].Status = dtoModuleStatus
+	}
+
+	ctx.JSON(http.StatusOK, dtoModules)
 }
 
 func (m *Modules) DeleteModule(ctx *gin.Context) {
