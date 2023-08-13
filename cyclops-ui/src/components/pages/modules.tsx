@@ -4,7 +4,7 @@ import {Icon} from '@ant-design/compatible';
 import {useNavigate} from 'react-router';
 import axios from 'axios';
 import SearchInput from "../searchbar";
-import {CheckCircleTwoTone, CloseSquareTwoTone, LinkOutlined, SearchOutlined} from '@ant-design/icons';
+import {LinkOutlined, SearchOutlined} from '@ant-design/icons';
 import Link from "antd/lib/typography/Link";
 
 const {Title} = Typography;
