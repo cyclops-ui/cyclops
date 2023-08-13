@@ -485,6 +485,20 @@ const EditModule = () => {
         }
     }
 
+    function getValueFromNestedObject(obj: any, keys: string[]): any {
+        let currentObj = obj;
+
+        for (const key of keys) {
+            if (typeof currentObj === 'object' && currentObj !== null && key in currentObj) {
+                currentObj = currentObj[key];
+            } else {
+                return false;
+            }
+        }
+
+        return currentObj;
+    }
+
     function mapFields(fields: any[], parentFieldID: string | string[], parent: string, level: number, arrayField?: any) {
         const formFields: {} | any = [];
         fields.forEach((field: any) => {
@@ -522,7 +536,19 @@ const EditModule = () => {
                 case "boolean":
                     // const map = new Map(Object.entries(module.values));
                     // let checked = map.get(fieldName) == "true" ? "checked" : "unchecked"
-                    let checked = form.getFieldValue([parentFieldID, fieldName]) === true ? "checked" : "unchecked"
+                    let moduleValues: any = module.values
+
+                    let k = []
+                    for (const item of parentFieldID) {
+                        if (item === '') {
+                            continue
+                        }
+
+                        k.push(item)
+                    }
+                    k.push(fieldName)
+
+                    let checked = getValueFromNestedObject(moduleValues, k) === true ? "checked" : "unchecked"
                     formFields.push(
                         <Form.Item initialValue={field.initialValue} name={fieldName} id={fieldName}
                                    label={field.display_name} valuePropName={checked}>
