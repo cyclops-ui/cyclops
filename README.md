@@ -1,6 +1,16 @@
-<img width="25%" alt="Screenshot 2022-04-03 at 21 48 18" src="https://user-images.githubusercontent.com/72022639/162230553-e669e572-1346-4289-814b-bd23d5b2d100.png">
-
 # Cyclops
+
+<p align="center" width="100%">
+<img width="25%" alt="Screenshot 2022-04-03 at 21 48 18" src="https://user-images.githubusercontent.com/72022639/162230553-e669e572-1346-4289-814b-bd23d5b2d100.png">
+<p/>
+
+Developer friendly Kubernetes
+
+<a href="https://github.com/cyclops-ui/cyclops/blob/main/LICENSE"><img height="20" src="https://img.shields.io/github/license/cyclops-ui/cyclops"></a>
+<a href="https://github.com/cyclops-ui/cyclops/actions/workflows/web.yaml"><img height="20" src="https://github.com/cyclops-ui/cyclops/actions/workflows/web.yaml/badge.svg"></a>
+
+[//]: # (<a href="https://github.com/cyclops-ui/cyclops/actions/workflows/ctrl-ci.yml"><img height="20" src="https://github.com/cyclops-ui/cyclops/actions/workflows/ctrl-ci.yml/badge.svg"></a>)
+[//]: # (<a href="https://github.com/cyclops-ui/cyclops/actions/workflows/ui-ci.yml"><img height="20" src="https://github.com/cyclops-ui/cyclops/actions/workflows/ui-ci.yml/badge.svg"></a>)
 
 ![which-would-you-prefer.png](web%2Fstatic%2Fimg%2Fwhich-would-you-prefer.png)
 
