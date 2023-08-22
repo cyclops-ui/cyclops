@@ -23,4 +23,4 @@ and backend through:
 kubectl port-forward svc/cyclops-ctrl 8080:8080 -n cyclops
 ```
 
-You can now try to access Cyclops in your browser on [http://localhost:3000](http://localhost:3000).
+You can now access Cyclops in your browser on [http://localhost:3000](http://localhost:3000).
