@@ -45,6 +45,8 @@ class Comparison extends React.Component {
             'metadata:\n' +
             '  name: ' + this.state.name + '\n' +
             'spec:\n' +
+            '  selector:\n' +
+            '    app: ' + this.state.name + '\n' +
             '  ports:\n' +
             '    - protocol: TCP\n' +
             '      port: ' + this.state.port + '\n' +
