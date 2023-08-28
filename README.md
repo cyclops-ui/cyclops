@@ -26,7 +26,7 @@ and give it a go! (~10 minute tutorial)
 
 # Install
 
-⚠️ Before installing Cyclops, make sure you have all the [prerequisites](./prerequisites) ⚠️
+⚠️ Before installing Cyclops, make sure you have all the [prerequisites](https://cyclops-ui.com/docs/installation/prerequisites) ⚠️
 
 To install Cyclops in your cluster, run commands below:
 
