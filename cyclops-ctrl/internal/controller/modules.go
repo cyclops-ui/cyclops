@@ -3,6 +3,7 @@ package controller
 import (
 	"fmt"
 	"net/http"
+	"os"
 
 	"github.com/gin-gonic/gin"
 
@@ -304,7 +305,13 @@ func (m *Modules) HelmTemplate(ctx *gin.Context) {
 func (m *Modules) GetLogs(ctx *gin.Context) {
 	ctx.Header("Access-Control-Allow-Origin", "*")
 
-	logs, err := m.kubernetesClient.GetPodLogs(ctx.Param("namespace"), ctx.Param("container"), ctx.Param("name"))
+	logCount := int64(100)
+	logs, err := m.kubernetesClient.GetPodLogs(
+		ctx.Param("namespace"),
+		ctx.Param("container"),
+		ctx.Param("name"),
+		&logCount,
+	)
 	if err != nil {
 		fmt.Println(err)
 		ctx.JSON(http.StatusInternalServerError, dto.NewError("Error fetching logs", err.Error()))
@@ -312,4 +319,45 @@ func (m *Modules) GetLogs(ctx *gin.Context) {
 	}
 
 	ctx.JSON(http.StatusOK, logs)
+}
+
+func (m *Modules) DownloadLogs(ctx *gin.Context) {
+	ctx.Header("Access-Control-Allow-Origin", "*")
+
+	namespace := ctx.Param("namespace")
+	container := ctx.Param("container")
+	name := ctx.Param("name")
+
+	logs, err := m.kubernetesClient.GetPodLogs(
+		namespace,
+		container,
+		name,
+		nil,
+	)
+	if err != nil {
+		fmt.Println(err)
+		ctx.JSON(http.StatusInternalServerError, dto.NewError("Error fetching logs", err.Error()))
+		return
+	}
+
+	tempFile, err := os.CreateTemp("", fmt.Sprintf("%v-%v-*.txt", name, container))
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create file"})
+		return
+	}
+	defer tempFile.Close()
+
+	for _, log := range logs {
+		_, err = tempFile.WriteString(log)
+		if err != nil {
+			ctx.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to write to file"})
+			return
+		}
+	}
+
+	ctx.Header("Content-Description", "File Transfer")
+	ctx.Header("Content-Disposition", "attachment; filename="+fmt.Sprintf("%v-%v.txt", name, container))
+	ctx.Header("Content-Type", "application/octet-stream")
+	ctx.Header("Content-Transfer-Encoding", "binary")
+	ctx.File(tempFile.Name())
 }
