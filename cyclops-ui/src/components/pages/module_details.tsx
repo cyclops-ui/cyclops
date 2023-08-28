@@ -30,7 +30,9 @@ import {
     CloseSquareTwoTone, InfoCircleOutlined,
     LinkOutlined,
     MinusCircleOutlined,
-    PlusOutlined, WarningTwoTone
+    PlusOutlined,
+    WarningTwoTone,
+    DownloadOutlined
 } from "@ant-design/icons";
 import Link from "antd/lib/typography/Link";
 import { formatDistanceToNow } from 'date-fns';
@@ -186,23 +188,23 @@ const ModuleDetails = () => {
             }
         });
 
-        setInterval(function () {
-            axios.get(window.__RUNTIME_CONFIG__.REACT_APP_CYCLOPS_CTRL_HOST + `/modules/` + moduleName + `/resources`).then(res => {
-                setResources(res.data);
-            }).catch(error => {
-                console.log(error)
-                console.log(error.response)
-                setLoading(false);
-                if (error.response === undefined) {
-                    setError({
-                        message: String(error),
-                        description: "Check if Cyclops backend is available on: " + window.__RUNTIME_CONFIG__.REACT_APP_CYCLOPS_CTRL_HOST
-                    })
-                } else {
-                    setError(error.response.data);
-                }
-            });
-        }, 5000);
+        // setInterval(function () {
+        //     axios.get(window.__RUNTIME_CONFIG__.REACT_APP_CYCLOPS_CTRL_HOST + `/modules/` + moduleName + `/resources`).then(res => {
+        //         setResources(res.data);
+        //     }).catch(error => {
+        //         console.log(error)
+        //         console.log(error.response)
+        //         setLoading(false);
+        //         if (error.response === undefined) {
+        //             setError({
+        //                 message: String(error),
+        //                 description: "Check if Cyclops backend is available on: " + window.__RUNTIME_CONFIG__.REACT_APP_CYCLOPS_CTRL_HOST
+        //             })
+        //         } else {
+        //             setError(error.response.data);
+        //         }
+        //     });
+        // }, 5000);
     }, []);
 
     const getCollapseColor = (fieldName: string, healthy: boolean) => {
@@ -303,6 +305,12 @@ const ModuleDetails = () => {
 
     const resourceCollapses: {} | any = [];
 
+    const downloadLogs = (container: string) => {
+        return function () {
+            window.location.href = window.__RUNTIME_CONFIG__.REACT_APP_CYCLOPS_CTRL_HOST + '/resources/pods/' + logsModal.namespace + '/' + logsModal.pod + '/' + container + '/logs/download';
+        }
+    }
+
     const getTabItems = () => {
         var items: TabsProps['items'] = []
 
@@ -315,7 +323,13 @@ const ModuleDetails = () => {
                     {
                         key: container.name,
                         label: container.name,
-                        children: <ReactAce style={{width: "100%"}} mode={"sass"} value={logs} readOnly={true} />,
+                        children: <Col>
+                            <Button type="primary" icon={<DownloadOutlined />} onClick={downloadLogs(container.name)}>
+                                Download
+                            </Button>
+                            <Divider style={{marginTop: "16px", marginBottom: "16px"}}/>
+                            <ReactAce style={{width: "100%"}} mode={"sass"} value={logs} readOnly={true} />
+                        </Col>,
                     }
                 )
                 cnt++;
@@ -328,7 +342,13 @@ const ModuleDetails = () => {
                     {
                         key: container.name,
                         label: "(init container) " + container.name,
-                        children: <ReactAce style={{width: "100%"}} mode={"sass"} value={logs} readOnly={true} />,
+                        children: <Col>
+                            <Button type="primary" icon={<DownloadOutlined />} onClick={downloadLogs(container.name)}>
+                                Download
+                            </Button>
+                            <Divider style={{marginTop: "16px", marginBottom: "16px"}}/>
+                            <ReactAce style={{width: "100%"}} mode={"sass"} value={logs} readOnly={true} />
+                        </Col>,
                     }
                 )
                 cnt++;

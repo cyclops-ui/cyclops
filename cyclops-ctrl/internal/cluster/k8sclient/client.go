@@ -181,11 +181,10 @@ func (k *KubernetesClient) GetPods(namespace, name string) ([]apiv1.Pod, error) 
 	return podList.Items, err
 }
 
-func (k *KubernetesClient) GetPodLogs(namespace, container, name string) ([]string, error) {
-	count := int64(100)
+func (k *KubernetesClient) GetPodLogs(namespace, container, name string, numLogs *int64) ([]string, error) {
 	podLogOptions := apiv1.PodLogOptions{
 		Container: container,
-		TailLines: &count,
+		TailLines: numLogs,
 	}
 	podClient := k.clientset.CoreV1().Pods(namespace).GetLogs(name, &podLogOptions)
 	stream, err := podClient.Stream(context.Background())
