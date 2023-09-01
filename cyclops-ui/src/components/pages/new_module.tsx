@@ -39,7 +39,8 @@ const NewModule = () => {
 
     const [gitTemplate, setGitTemplate] = useState({
         repo: "",
-        path: ""
+        path: "",
+        commit: "",
     })
 
     const [error, setError] = useState({
@@ -635,17 +636,31 @@ const NewModule = () => {
                                 setGitTemplate({
                                     repo: value.target.value,
                                     path: gitTemplate.path,
+                                    commit: gitTemplate.commit,
                                 })
                             }}
                         />
                         {' / '}
                         <Input
                             placeholder={"Path"}
-                            style={{width: '30%'}}
+                            style={{width: '20%'}}
                             onChange={(value: any) => {
                                 setGitTemplate({
                                     repo: gitTemplate.repo,
                                     path: value.target.value,
+                                    commit: gitTemplate.commit,
+                                })
+                            }}
+                        />
+                        {' @ '}
+                        <Input
+                            placeholder={"Commit"}
+                            style={{width: '10%'}}
+                            onChange={(value: any) => {
+                                setGitTemplate({
+                                    repo: gitTemplate.repo,
+                                    path: gitTemplate.commit,
+                                    commit: value.target.value
                                 })
                             }}
                         />
