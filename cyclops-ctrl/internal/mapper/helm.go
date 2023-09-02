@@ -20,6 +20,7 @@ func HelmSchemaToFields(schema helm.Property) []models.Field {
 				ManifestKey: name,
 				Items:       arrayItem(property.Items),
 				Enum:        property.Enum,
+				Required:    property.Required,
 			})
 			continue
 		}
@@ -32,6 +33,7 @@ func HelmSchemaToFields(schema helm.Property) []models.Field {
 			ManifestKey: name,
 			Properties:  HelmSchemaToFields(property),
 			Enum:        property.Enum,
+			Required:    property.Required,
 		})
 	}
 

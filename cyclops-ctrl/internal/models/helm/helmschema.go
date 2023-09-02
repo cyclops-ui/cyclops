@@ -8,4 +8,5 @@ type Property struct {
 	Properties  map[string]Property `json:"properties"`
 	Items       *Property           `json:"items"`
 	Enum        []string            `json:"enum"`
+	Required    []string            `json:"required"`
 }

@@ -499,7 +499,7 @@ const EditModule = () => {
         return currentObj;
     }
 
-    function mapFields(fields: any[], parentFieldID: string | string[], parent: string, level: number, arrayField?: any) {
+    function mapFields(fields: any[], parentFieldID: string | string[], parent: string, level: number, arrayField?: any, required?: string[]) {
         const formFields: {} | any = [];
         fields.forEach((field: any) => {
             let fieldName = field.name
@@ -507,6 +507,17 @@ const EditModule = () => {
             let formItemName = arrayField ? [arrayField.name, fieldName] : fieldName
 
             let uniqueFieldName : any = parentFieldID.length === 0 ? field.name : parentFieldID.concat(".").concat(field.name)
+
+            let isRequired = false;
+
+            if (required) {
+                for (let r of required) {
+                    if (r === field.name) {
+                        isRequired = true
+                        break
+                    }
+                }
+            }
 
             switch (field.type) {
                 case "string":
@@ -517,7 +528,13 @@ const EditModule = () => {
 
                     formFields.push(
                         <Form.Item {...arrayField} name={formItemName}
-                                   label={field.display_name}>
+                                   label={field.display_name}
+                                   rules={[{
+                                       required: isRequired,
+                                       message: "aelfiaeflb",
+
+                                   }]}
+                        >
                             <Input addonAfter={addonAfter(field)}/>
                         </Form.Item>
                     )
@@ -528,7 +545,7 @@ const EditModule = () => {
                             <Tooltip title={field.description} trigger="click">
                                 {field.display_name}
                             </Tooltip>
-                        }>
+                        } rules={[{required: isRequired}]}>
                             <InputNumber style={{width: '100%'}} addonAfter={addonAfter(field)}/>
                         </Form.Item>
                     )
@@ -592,7 +609,7 @@ const EditModule = () => {
                                     <Form.List name={fieldName}>
                                         {(arrFields, { add, remove }) => (
                                             <>
-                                                {mapFields(field.properties, [fieldName], "", level + 1, arrayField)}
+                                                {mapFields(field.properties, [fieldName], "", level + 1, arrayField, field.required)}
                                             </>
                                         )}
                                     </Form.List>
@@ -659,7 +676,7 @@ const EditModule = () => {
                     return;
                 case "map":
                     formFields.push(
-                        <Form.Item name={fieldName} label={field.display_name}>
+                        <Form.Item name={fieldName} label={field.display_name} rules={[{required: isRequired}]}>
                             <Form.List name={formItemName}>
                                 {(fields, {add, remove}) => (
                                     <>
@@ -705,6 +722,10 @@ const EditModule = () => {
         }
     }
 
+    const onFinishFailed = () => {
+        message.error('Submit failed!');
+    };
+
     return (
         <div>
             {
@@ -729,7 +750,13 @@ const EditModule = () => {
             </Row>
             <Row gutter={[40, 0]}>
                 <Col span={24}>
-                    <Form {...layout} form={form} autoComplete={"off"} onFinish={handleSubmit}>
+                    <Form
+                        {...layout}
+                        form={form}
+                        autoComplete={"off"}
+                        onFinish={handleSubmit}
+                        onFinishFailed={onFinishFailed}
+                    >
                         {/*<Col span={18}>*/}
                         {/*    <Link aria-level={3} href={`/configurations/` + module.template}>*/}
                         {/*        <LinkOutlined/>*/}
