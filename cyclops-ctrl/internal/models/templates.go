@@ -28,4 +28,5 @@ type Field struct {
 	Properties  []Field  `json:"properties"`
 	Items       *Field   `json:"items"`
 	Enum        []string `json:"enum"`
+	Required    []string `json:"required"`
 }
