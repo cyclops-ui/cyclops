@@ -89,6 +89,7 @@ interface module {
         git: {
             repo: String,
             path: String,
+            commit: String,
         }
     }
 }
@@ -136,6 +137,7 @@ const ModuleDetails = () => {
             git: {
                 repo: "",
                 path: "",
+                commit: "",
             }
         }
     });
@@ -1230,6 +1232,14 @@ const ModuleDetails = () => {
 
     const moduleLoading = () => {
         if (loadModule === true) {
+            let commit = "";
+            let commitLink = module.template.git.repo + `/tree/main/` + module.template.git.path;
+
+            if (module.template.git.commit && module.template.git.commit !== "") {
+                commit = " @ " + module.template.git.commit
+                commitLink = module.template.git.repo + `/tree/` + module.template.git.commit + `/` + module.template.git.path;
+            }
+
             return <div>
                 <Row gutter={[40, 0]}>
                     <Col span={9}>
@@ -1255,9 +1265,9 @@ const ModuleDetails = () => {
                         }
 
                         { module.template.name.length === 0 &&
-                            <Link aria-level={3} href={ module.template.git.repo + `/tree/main/` + module.template.git.path }>
+                            <Link aria-level={3} href={ commitLink }>
                                 <LinkOutlined/>
-                                { module.template.name.length === 0 && ' Template ref' }
+                                { module.template.name.length === 0 && ' Template ref' + commit}
                             </Link>
                         }
                     </Col>

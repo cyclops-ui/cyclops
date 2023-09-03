@@ -172,7 +172,7 @@ const EditModule = () => {
                     }
                 });
             } else {
-                axios.get(window.__RUNTIME_CONFIG__.REACT_APP_CYCLOPS_CTRL_HOST + `/templates/git?repo=` + res.data.template.git.repo + `&path=` + res.data.template.git.path).then(templatesRes => {
+                axios.get(window.__RUNTIME_CONFIG__.REACT_APP_CYCLOPS_CTRL_HOST + `/templates/git?repo=` + res.data.template.git.repo + `&path=` + res.data.template.git.path + `&commit=` + res.data.template.git.commit).then(templatesRes => {
                     setConfig(templatesRes.data);
                     setLoadTemplate(true);
 

@@ -122,12 +122,17 @@ func (m *Modules) CreateModule(ctx *gin.Context) {
 		return
 	}
 
+	fmt.Println("cile")
+	fmt.Println(request)
+
 	module, err := mapper.RequestToModule(request)
 	if err != nil {
 		fmt.Println(err)
 		ctx.JSON(http.StatusInternalServerError, dto.NewError("Error mapping module", err.Error()))
 		return
 	}
+
+	fmt.Println(module.Spec.TemplateRef)
 
 	err = m.kubernetesClient.CreateModule(module)
 	if err != nil {

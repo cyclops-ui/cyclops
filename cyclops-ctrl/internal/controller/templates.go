@@ -76,7 +76,7 @@ func (c *Templates) GetConfiguration(ctx *gin.Context) {
 
 	// TODO delete this is for testing
 	if name == "git" {
-		template, err := git.LoadTemplate("https://github.com/cyclops-ui/templates", "application")
+		template, err := git.LoadTemplate("https://github.com/cyclops-ui/templates", "application", "")
 		if err != nil {
 			panic(err)
 		}
@@ -147,13 +147,14 @@ func (c *Templates) GetTemplateFromGit(ctx *gin.Context) {
 
 	repo := ctx.Query("repo")
 	path := ctx.Query("path")
+	commit := ctx.Query("commit")
 
 	if repo == "" {
 		ctx.String(http.StatusBadRequest, "set repo field")
 		return
 	}
 
-	template, err := git.LoadTemplate(repo, path)
+	template, err := git.LoadTemplate(repo, path, commit)
 	if err != nil {
 		fmt.Println(err)
 		ctx.JSON(http.StatusBadRequest, dto.NewError("Error loading template", err.Error()))
@@ -168,13 +169,14 @@ func (c *Templates) GetTemplateInitialValuesFromGit(ctx *gin.Context) {
 
 	repo := ctx.Query("repo")
 	path := ctx.Query("path")
+	commit := ctx.Query("commit")
 
 	if repo == "" {
 		ctx.String(http.StatusBadRequest, "set repo field")
 		return
 	}
 
-	initial, err := git.LoadInitialTemplateValues(repo, path)
+	initial, err := git.LoadInitialTemplateValues(repo, path, commit)
 	if err != nil {
 		fmt.Println(err)
 		ctx.JSON(http.StatusBadRequest, dto.NewError("Error loading template", err.Error()))

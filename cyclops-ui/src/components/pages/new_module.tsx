@@ -180,7 +180,6 @@ const NewModule = () => {
                     }
 
                     let object: any = {};
-                    console.log(valuesList)
                     valuesList.forEach(valueFromList => {
                         object[valueFromList.key] = valueFromList.value
                     })
@@ -207,6 +206,7 @@ const NewModule = () => {
                     git: {
                         repo: gitTemplate.repo,
                         path: gitTemplate.path,
+                        commit: gitTemplate.commit,
                     }
                 },
             })
@@ -294,8 +294,7 @@ const NewModule = () => {
 
         let tmpConfig: any = {}
 
-        // axios.get(window.__RUNTIME_CONFIG__.REACT_APP_CYCLOPS_CTRL_HOST + `/templates/git?repo=` + "https://github.com/petar-cvit/starship" + `&path=` + "charts/devnet").then(res => {
-        await axios.get(window.__RUNTIME_CONFIG__.REACT_APP_CYCLOPS_CTRL_HOST + `/templates/git?repo=` + gitTemplate.repo + `&path=` + gitTemplate.path).then(templatesRes => {
+        await axios.get(window.__RUNTIME_CONFIG__.REACT_APP_CYCLOPS_CTRL_HOST + `/templates/git?repo=` + gitTemplate.repo + `&path=` + gitTemplate.path + `&commit=` + gitTemplate.commit).then(templatesRes => {
             setConfig(templatesRes.data);
             tmpConfig = templatesRes.data;
 
@@ -319,8 +318,7 @@ const NewModule = () => {
             }
         });
 
-        // axios.get(window.__RUNTIME_CONFIG__.REACT_APP_CYCLOPS_CTRL_HOST + `/templates/git/initial?repo=` + gitTemplate.repo + `&path=` + gitTemplate.path).then(res => {
-        axios.get(window.__RUNTIME_CONFIG__.REACT_APP_CYCLOPS_CTRL_HOST + `/templates/git/initial?repo=` + "https://github.com/petar-cvit/starship" + `&path=` + "charts/devnet").then(res => {
+        axios.get(window.__RUNTIME_CONFIG__.REACT_APP_CYCLOPS_CTRL_HOST + `/templates/git/initial?repo=` + gitTemplate.repo + `&path=` + gitTemplate.path + `&commit=` + gitTemplate.commit).then(res => {
             form.setFieldsValue(mapsToArray(tmpConfig.fields, res.data))
 
             setError({
@@ -402,6 +400,11 @@ const NewModule = () => {
 
     function mapFields(fields: any[], parentFieldID: string | string[], parent: string, level: number, arrayField?: any) {
         const formFields: {} | any = [];
+
+        if (!fields) {
+            return <></>
+        }
+
         fields.forEach((field: any) => {
             let fieldName = field.name
 
@@ -654,12 +657,12 @@ const NewModule = () => {
                         />
                         {' @ '}
                         <Input
-                            placeholder={"Commit"}
+                            placeholder={"Branch"}
                             style={{width: '10%'}}
                             onChange={(value: any) => {
                                 setGitTemplate({
                                     repo: gitTemplate.repo,
-                                    path: gitTemplate.commit,
+                                    path: gitTemplate.path,
                                     commit: value.target.value
                                 })
                             }}
