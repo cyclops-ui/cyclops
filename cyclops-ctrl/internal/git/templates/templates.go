@@ -17,27 +17,17 @@ import (
 	"gopkg.in/src-d/go-billy.v4"
 	"gopkg.in/src-d/go-billy.v4/memfs"
 	git "gopkg.in/src-d/go-git.v4"
+	"gopkg.in/src-d/go-git.v4/plumbing"
 	"gopkg.in/src-d/go-git.v4/storage/memory"
 	"gopkg.in/yaml.v2"
 	"helm.sh/helm/v3/pkg/chart"
 )
 
-func LoadTemplate(repoURL, path string) (models.Template, error) {
-	// region clone from git
-	repo, err := git.Clone(memory.NewStorage(), memfs.New(), &git.CloneOptions{
-		URL: repoURL,
-	})
-	if err != nil {
-		return models.Template{}, errors.Wrap(err, fmt.Sprintf("repo %s was not cloned sucessfully; authentication might be required; check if repository exists and you referenced it correctly", repoURL))
-	}
-
-	wt, err := repo.Worktree()
+func LoadTemplate(repoURL, path, commit string) (models.Template, error) {
+	fs, err := clone(repoURL, commit)
 	if err != nil {
 		return models.Template{}, err
 	}
-
-	fs := wt.Filesystem
-	// endregion
 
 	// region check if helm chart
 	_, err = fs.Open(path2.Join(path, "Chart.yaml"))
@@ -101,20 +91,11 @@ func LoadTemplate(repoURL, path string) (models.Template, error) {
 	}, nil
 }
 
-func LoadInitialTemplateValues(repoURL, path string) (map[interface{}]interface{}, error) {
-	repo, err := git.Clone(memory.NewStorage(), memfs.New(), &git.CloneOptions{
-		URL: repoURL,
-	})
-	if err != nil {
-		return nil, errors.Wrap(err, fmt.Sprintf("repo %s was not cloned sucessfully; authentication might be required; check if repository exists and you referenced it correctly", repoURL))
-	}
-
-	wt, err := repo.Worktree()
+func LoadInitialTemplateValues(repoURL, path, commit string) (map[interface{}]interface{}, error) {
+	fs, err := clone(repoURL, commit)
 	if err != nil {
 		return nil, err
 	}
-
-	fs := wt.Filesystem
 
 	// check if helm chart
 	_, err = fs.Open(path2.Join(path, "Chart.yaml"))
@@ -169,6 +150,77 @@ func LoadInitialTemplateValues(repoURL, path string) (map[interface{}]interface{
 	// endregion
 
 	return initialValues, nil
+}
+
+func clone(repoURL, commit string) (billy.Filesystem, error) {
+	// region clone from git
+	repo, err := git.Clone(memory.NewStorage(), memfs.New(), &git.CloneOptions{
+		URL:  repoURL,
+		Tags: git.AllTags,
+	})
+	if err != nil {
+		return nil, errors.Wrap(err, fmt.Sprintf("repo %s was not cloned sucessfully; authentication might be required; check if repository exists and you referenced it correctly", repoURL))
+	}
+
+	wt, err := repo.Worktree()
+	if err != nil {
+		return nil, err
+	}
+
+	if len(commit) != 0 {
+		remoteName := "origin"
+		branchPrefix := "refs/heads/"
+		tagPrefix := "refs/tags/"
+		remote, err := repo.Remote(remoteName)
+		if err != nil {
+			panic(err)
+		}
+		refList, err := remote.List(&git.ListOptions{})
+		if err != nil {
+			panic(err)
+		}
+
+		var reference *plumbing.Reference
+
+		for _, ref := range refList {
+			refName := ref.Name().String()
+			if strings.HasPrefix(refName, branchPrefix) {
+				branchName := refName[len(branchPrefix):]
+				if branchName != commit {
+					continue
+				}
+
+				refName := plumbing.NewRemoteReferenceName(remoteName, branchName)
+				reference, err = repo.Reference(refName, true)
+				if err != nil {
+					return nil, err
+				}
+			} else if strings.HasPrefix(refName, tagPrefix) {
+				tagName := refName[len(tagPrefix):]
+				if tagName != commit {
+					continue
+				}
+
+				reference, err = repo.Tag(tagName)
+				if err != nil {
+					return nil, err
+				}
+			}
+		}
+
+		if reference == nil {
+			reference = plumbing.NewHashReference(plumbing.HEAD, plumbing.NewHash(commit))
+		}
+
+		err = wt.Checkout(&git.CheckoutOptions{
+			Hash: reference.Hash(),
+		})
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	return wt.Filesystem, nil
 }
 
 func concatenateTemplates(path string, fs billy.Filesystem) ([]string, error) {
@@ -249,40 +301,4 @@ func readFiles(path string, fs billy.Filesystem) ([]*chart.File, error) {
 	}
 
 	return chartFiles, nil
-}
-
-func flatten(key string, value interface{}) map[interface{}]interface{} {
-	switch value.(type) {
-	case string:
-		return map[interface{}]interface{}{
-			"": value,
-		}
-	case int:
-		return map[interface{}]interface{}{
-			"": value,
-		}
-	case bool:
-		return map[interface{}]interface{}{
-			"": value,
-		}
-	case map[interface{}]interface{}:
-		out := make(map[interface{}]interface{})
-
-		cast := value.(map[interface{}]interface{})
-
-		for k, v := range cast {
-			t := flatten(fmt.Sprintf("%v", k), v)
-			for tk, tv := range t {
-				if len(fmt.Sprintf("%v", tk)) == 0 {
-					out[fmt.Sprintf("%v", k)] = tv
-				} else {
-					out[strings.Join([]string{fmt.Sprintf("%v", k), fmt.Sprintf("%v", tk)}, ".")] = tv
-				}
-			}
-		}
-
-		return out
-	}
-
-	return map[interface{}]interface{}{}
 }

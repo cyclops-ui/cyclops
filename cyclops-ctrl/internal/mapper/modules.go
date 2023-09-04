@@ -176,8 +176,9 @@ func DtoTemplateRefToK8s(dto dto.Template) cyclopsv1alpha1.TemplateRef {
 		Name:    dto.Name,
 		Version: dto.Version,
 		TemplateGitRef: cyclopsv1alpha1.TemplateGitRef{
-			Repo: dto.GitRef.Repo,
-			Path: dto.GitRef.Path,
+			Repo:   dto.GitRef.Repo,
+			Path:   dto.GitRef.Path,
+			Commit: dto.GitRef.Commit,
 		},
 	}
 }
@@ -187,8 +188,9 @@ func k8sTemplateRefToDTO(templateRef cyclopsv1alpha1.TemplateRef) dto.Template {
 		Name:    templateRef.Name,
 		Version: templateRef.Version,
 		GitRef: dto.TemplateGitRef{
-			Repo: templateRef.TemplateGitRef.Repo,
-			Path: templateRef.TemplateGitRef.Path,
+			Repo:   templateRef.TemplateGitRef.Repo,
+			Path:   templateRef.TemplateGitRef.Path,
+			Commit: templateRef.TemplateGitRef.Commit,
 		},
 	}
 }

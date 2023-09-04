@@ -16,8 +16,9 @@ type Template struct {
 }
 
 type TemplateGitRef struct {
-	Repo string `json:"repo"`
-	Path string `json:"path"`
+	Repo   string `json:"repo"`
+	Path   string `json:"path"`
+	Commit string `json:"commit"`
 }
 
 type TemplatesResponse struct {
