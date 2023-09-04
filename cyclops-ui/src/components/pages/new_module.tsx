@@ -70,9 +70,14 @@ const NewModule = () => {
             setGitTemplate({
                 repo: window.__RUNTIME_CONFIG__.DEFAULT_TEMPLATE_REPO,
                 path: window.__RUNTIME_CONFIG__.DEFAULT_TEMPLATE_PATH,
+                commit: window.__RUNTIME_CONFIG__.DEFAULT_TEMPLATE_VERSION,
             })
 
-            loadTemplate(window.__RUNTIME_CONFIG__.DEFAULT_TEMPLATE_REPO, window.__RUNTIME_CONFIG__.DEFAULT_TEMPLATE_PATH)
+            loadTemplate(
+                window.__RUNTIME_CONFIG__.DEFAULT_TEMPLATE_REPO,
+                window.__RUNTIME_CONFIG__.DEFAULT_TEMPLATE_PATH,
+                window.__RUNTIME_CONFIG__.DEFAULT_TEMPLATE_VERSION
+            )
         }
 
         setLoading(false);
@@ -278,7 +283,7 @@ const NewModule = () => {
     //     });
     // }
 
-    const loadTemplate = async (repo: string, path: string) => {
+    const loadTemplate = async (repo: string, path: string, commit: string) => {
         setLoadingTemplate(true);
 
         setError({
@@ -297,7 +302,7 @@ const NewModule = () => {
 
         let tmpConfig: any = {}
 
-        await axios.get(window.__RUNTIME_CONFIG__.REACT_APP_CYCLOPS_CTRL_HOST + `/templates/git?repo=` + gitTemplate.repo + `&path=` + gitTemplate.path + `&commit=` + gitTemplate.commit).then(templatesRes => {
+        await axios.get(window.__RUNTIME_CONFIG__.REACT_APP_CYCLOPS_CTRL_HOST + `/templates/git?repo=` + repo + `&path=` + path + `&commit=` + commit).then(templatesRes => {
             setConfig(templatesRes.data);
             tmpConfig = templatesRes.data;
 
@@ -321,7 +326,7 @@ const NewModule = () => {
             }
         });
 
-        axios.get(window.__RUNTIME_CONFIG__.REACT_APP_CYCLOPS_CTRL_HOST + `/templates/git/initial?repo=` + gitTemplate.repo + `&path=` + gitTemplate.path + `&commit=` + gitTemplate.commit).then(res => {
+        axios.get(window.__RUNTIME_CONFIG__.REACT_APP_CYCLOPS_CTRL_HOST + `/templates/git/initial?repo=` + repo + `&path=` + path + `&commit=` + commit).then(res => {
             form.setFieldsValue(mapsToArray(tmpConfig.fields, res.data))
 
             setError({
@@ -681,10 +686,11 @@ const NewModule = () => {
                                     commit: gitTemplate.commit,
                                 })
                             }}
+                            value={window.__RUNTIME_CONFIG__.DEFAULT_TEMPLATE_PATH}
                         />
                         {' @ '}
                         <Input
-                            placeholder={"Branch"}
+                            placeholder={"Version"}
                             style={{width: '10%'}}
                             onChange={(value: any) => {
                                 setGitTemplate({
@@ -693,7 +699,7 @@ const NewModule = () => {
                                     commit: value.target.value
                                 })
                             }}
-                            value={window.__RUNTIME_CONFIG__.DEFAULT_TEMPLATE_PATH}
+                            value={window.__RUNTIME_CONFIG__.DEFAULT_TEMPLATE_VERSION}
                         />
                         {'  '}
                         <Button
@@ -701,7 +707,8 @@ const NewModule = () => {
                             htmlType="button"
                             onClick={async () => {await loadTemplate(
                                 gitTemplate.repo,
-                                gitTemplate.path
+                                gitTemplate.path,
+                                gitTemplate.commit,
                             )}}
                             loading={loadingTemplate}
                         >
