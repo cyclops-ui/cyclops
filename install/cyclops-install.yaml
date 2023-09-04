@@ -37,11 +37,14 @@ spec:
                   properties:
                     git:
                       properties:
+                        commit:
+                          type: string
                         path:
                           type: string
                         repo:
                           type: string
                       required:
+                        - commit
                         - path
                         - repo
                       type: object

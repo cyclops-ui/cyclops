@@ -45,8 +45,9 @@ type TemplateRef struct {
 }
 
 type TemplateGitRef struct {
-	Repo string `json:"repo"`
-	Path string `json:"path"`
+	Repo   string `json:"repo"`
+	Path   string `json:"path"`
+	Commit string `json:"commit"`
 }
 
 // ModuleStatus defines the observed state of Module

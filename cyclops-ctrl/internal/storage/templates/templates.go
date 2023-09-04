@@ -70,7 +70,7 @@ func (s *Storage) GetConfigByVersion(name, version string) (models.Template, err
 
 func (s *Storage) GetConfig(ref cyclopsv1alpha1.TemplateRef) (models.Template, error) {
 	if ref.TemplateGitRef.Repo != "" {
-		return git.LoadTemplate(ref.TemplateGitRef.Repo, ref.TemplateGitRef.Path)
+		return git.LoadTemplate(ref.TemplateGitRef.Repo, ref.TemplateGitRef.Path, ref.TemplateGitRef.Commit)
 	}
 
 	return s.GetConfigByVersion(ref.Name, ref.Version)
