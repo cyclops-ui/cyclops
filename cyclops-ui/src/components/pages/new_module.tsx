@@ -63,9 +63,16 @@ const NewModule = () => {
 
     useEffect(() => {
         setLoading(true);
-        // axios.get(process.env.REACT_APP_CYCLOPS_CTRL_HOST + `/configuration-details`).then(res => {
-        //     setAllConfigs(res.data);
-        // });
+
+        if (window.__RUNTIME_CONFIG__.DEFAULT_TEMPLATE_REPO &&
+            window.__RUNTIME_CONFIG__.DEFAULT_TEMPLATE_REPO.length > 0) {
+            setGitTemplate({
+                repo: window.__RUNTIME_CONFIG__.DEFAULT_TEMPLATE_REPO,
+                path: window.__RUNTIME_CONFIG__.DEFAULT_TEMPLATE_PATH,
+            })
+
+            loadTemplate(window.__RUNTIME_CONFIG__.DEFAULT_TEMPLATE_REPO, window.__RUNTIME_CONFIG__.DEFAULT_TEMPLATE_PATH)
+        }
 
         setLoading(false);
     }, []);
@@ -269,7 +276,7 @@ const NewModule = () => {
     //     });
     // }
 
-    const loadTemplate = async () => {
+    const loadTemplate = async (repo: string, path: string) => {
         setLoadingTemplate(true);
 
         setError({
@@ -277,12 +284,7 @@ const NewModule = () => {
             description: "",
         })
 
-        // setGitTemplate({
-        //     repo: "https://github.com/petar-cvit/starship",
-        //     path: "charts/devnet",
-        // })
-
-        if (gitTemplate.repo.trim() === "") {
+        if (repo.trim() === "") {
             setError({
                 message: "Invalid repository name",
                 description: "Repository name must not be empty",
@@ -294,7 +296,7 @@ const NewModule = () => {
         let tmpConfig: any = {}
 
         // axios.get(window.__RUNTIME_CONFIG__.REACT_APP_CYCLOPS_CTRL_HOST + `/templates/git?repo=` + "https://github.com/petar-cvit/starship" + `&path=` + "charts/devnet").then(res => {
-        await axios.get(window.__RUNTIME_CONFIG__.REACT_APP_CYCLOPS_CTRL_HOST + `/templates/git?repo=` + gitTemplate.repo + `&path=` + gitTemplate.path).then(templatesRes => {
+        await axios.get(window.__RUNTIME_CONFIG__.REACT_APP_CYCLOPS_CTRL_HOST + `/templates/git?repo=` + repo + `&path=` + path).then(templatesRes => {
             setConfig(templatesRes.data);
             tmpConfig = templatesRes.data;
 
@@ -318,8 +320,7 @@ const NewModule = () => {
             }
         });
 
-        // axios.get(window.__RUNTIME_CONFIG__.REACT_APP_CYCLOPS_CTRL_HOST + `/templates/git/initial?repo=` + gitTemplate.repo + `&path=` + gitTemplate.path).then(res => {
-        axios.get(window.__RUNTIME_CONFIG__.REACT_APP_CYCLOPS_CTRL_HOST + `/templates/git/initial?repo=` + "https://github.com/petar-cvit/starship" + `&path=` + "charts/devnet").then(res => {
+        axios.get(window.__RUNTIME_CONFIG__.REACT_APP_CYCLOPS_CTRL_HOST + `/templates/git/initial?repo=` + repo + `&path=` + path).then(res => {
             form.setFieldsValue(mapsToArray(tmpConfig.fields, res.data))
 
             setError({
@@ -660,6 +661,7 @@ const NewModule = () => {
                                     path: gitTemplate.path,
                                 })
                             }}
+                            value={window.__RUNTIME_CONFIG__.DEFAULT_TEMPLATE_REPO}
                         />
                         {' / '}
                         <Input
@@ -671,9 +673,18 @@ const NewModule = () => {
                                     path: value.target.value,
                                 })
                             }}
+                            value={window.__RUNTIME_CONFIG__.DEFAULT_TEMPLATE_PATH}
                         />
                         {'  '}
-                        <Button type="primary" htmlType="button" onClick={async () => {await loadTemplate()}} loading={loadingTemplate}>
+                        <Button
+                            type="primary"
+                            htmlType="button"
+                            onClick={async () => {await loadTemplate(
+                                gitTemplate.repo,
+                                gitTemplate.path
+                            )}}
+                            loading={loadingTemplate}
+                        >
                             Load
                         </Button>
                         <Divider orientation="left" orientationMargin="0">
