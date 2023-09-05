@@ -91,65 +91,37 @@ func LoadTemplate(repoURL, path, commit string) (models.Template, error) {
 	}, nil
 }
 
-func LoadInitialTemplateValues(repoURL, path, commit string) (map[interface{}]interface{}, error) {
+func LoadInitialTemplateValues(repoURL, path, commit string) (map[interface{}]interface{}, bool, error) {
 	fs, err := clone(repoURL, commit)
 	if err != nil {
-		return nil, err
+		return nil, false, err
 	}
 
 	// check if helm chart
 	_, err = fs.Open(path2.Join(path, "Chart.yaml"))
 	if err != nil {
-		return nil, errors.Wrap(err, "could not read 'Chart.yaml' file; it should be placed in the repo/path you provided; make sure you provided the correct path")
-	}
-
-	templatesPath := path2.Join(path, "templates")
-
-	files, err := fs.ReadDir(templatesPath)
-	if err != nil {
-		return nil, errors.Wrap(err, "could not find 'templates' dir; it should be placed in the repo/path you provided; make sure 'templates' directory exists")
-	}
-
-	manifests := make([]string, 0, len(files))
-
-	for _, fileInfo := range files {
-		if fileInfo.IsDir() {
-			continue
-		}
-
-		file, err := fs.Open(path2.Join(templatesPath, fileInfo.Name()))
-		if err != nil {
-			return nil, err
-		}
-
-		var b bytes.Buffer
-		_, err = io.Copy(bufio.NewWriter(&b), file)
-		if err != nil {
-			return nil, err
-		}
-
-		manifests = append(manifests, b.String())
+		return nil, false, errors.Wrap(err, "could not read 'Chart.yaml' file; it should be placed in the repo/path you provided; make sure you provided the correct path")
 	}
 
 	// region read values
 	valuesFile, err := fs.Open(path2.Join(path, "values.yaml"))
 	if err != nil {
-		return nil, errors.Wrap(err, "could not read 'values.yaml' file; it should be placed in the repo/path you provided; make sure 'templates' directory exists")
+		return nil, false, nil
 	}
 
 	var c bytes.Buffer
 	_, err = io.Copy(bufio.NewWriter(&c), valuesFile)
 	if err != nil {
-		return nil, err
+		return nil, false, err
 	}
 
 	var initialValues map[interface{}]interface{}
 	if err := yaml.Unmarshal(c.Bytes(), &initialValues); err != nil {
-		return nil, err
+		return nil, false, err
 	}
 	// endregion
 
-	return initialValues, nil
+	return initialValues, true, nil
 }
 
 func clone(repoURL, commit string) (billy.Filesystem, error) {

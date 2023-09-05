@@ -77,6 +77,14 @@ const Modules = () => {
         return "#FF0000"
     }
 
+    const getTemplateVersion = (version: string) => {
+        if (version === "") {
+            return "main"
+        }
+
+        return version
+    }
+
     return (
         <div>
             {
@@ -140,9 +148,19 @@ const Modules = () => {
                                     display: "block"
                                 }}>
                                     Path:
-                                    <Link aria-level={3} href={ module.template.git.repo + `/tree/master/` + module.template.git.path }>
+                                    <Link aria-level={3} href={ module.template.git.repo + `/tree/` + getTemplateVersion(module.template.git.commit) + `/` + module.template.git.path }>
                                         { module.template.name.length === 0 && " " + module.template.git.path }
                                     </Link>
+                                </Col>
+                            </Row>
+                            <Row gutter={[16, 16]}>
+                                <Col span={24} style={{
+                                    whiteSpace: "nowrap",
+                                    overflow: "hidden",
+                                    textOverflow: "ellipsis",
+                                    display: "block"
+                                }}>
+                                    Version: {getTemplateVersion(module.template.git.commit)}
                                 </Col>
                             </Row>
                             <Row style={{paddingTop: "15px"}}>

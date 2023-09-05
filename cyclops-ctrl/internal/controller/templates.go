@@ -172,14 +172,18 @@ func (c *Templates) GetTemplateInitialValuesFromGit(ctx *gin.Context) {
 	commit := ctx.Query("commit")
 
 	if repo == "" {
-		ctx.String(http.StatusBadRequest, "set repo field")
+		ctx.JSON(http.StatusBadRequest, dto.NewError("Specify repo field", "Repo not specified"))
 		return
 	}
 
-	initial, err := git.LoadInitialTemplateValues(repo, path, commit)
+	initial, ok, err := git.LoadInitialTemplateValues(repo, path, commit)
 	if err != nil {
 		fmt.Println(err)
 		ctx.JSON(http.StatusBadRequest, dto.NewError("Error loading template", err.Error()))
+		return
+	}
+	if !ok {
+		ctx.JSON(http.StatusOK, dto.NewResponse("Default values not found"))
 		return
 	}
 
