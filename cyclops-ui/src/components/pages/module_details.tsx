@@ -447,6 +447,8 @@ const ModuleDetails = () => {
     const configMapDataValues = (key: string, data: string) => {
         const lines = data.split('\n').length;
 
+        console.log(configMapDataExtension(key), calculateEditorHeight(data, lines), data, lines)
+
         if (lines > 1) {
             return <ReactAce
                 setOptions={{ useWorker: false }}
@@ -465,7 +467,7 @@ const ModuleDetails = () => {
         if (lines > 20) {
             return '320px'
         } else {
-            return '${lines * 16}px'
+            return `${lines * 16}px`
         }
     };
 
