@@ -11,3 +11,13 @@ func NewError(message, description string) Error {
 		Description: description,
 	}
 }
+
+type Response struct {
+	Message string `json:"message"`
+}
+
+func NewResponse(message string) Response {
+	return Response{
+		Message: message,
+	}
+}
