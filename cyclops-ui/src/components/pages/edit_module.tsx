@@ -495,7 +495,6 @@ const EditModule = () => {
                     useWorker: false
                 }}
                 style={{
-                    width: "100%",
                     height: "15em"
                 }}
             />
