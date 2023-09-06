@@ -233,7 +233,7 @@ spec:
     spec:
       containers:
         - name: cyclops-ui
-          image: petarcvit223/cyclops-ui:v0.10.0
+          image: petarcvit223/cyclops-ui:v0.11.0
           ports:
             - containerPort: 80
           env:
