@@ -19,14 +19,15 @@ type Template struct {
 }
 
 type Field struct {
-	Name        string   `json:"name"`
-	Description string   `json:"description"`
-	Type        string   `json:"type"`
-	DisplayName string   `json:"display_name"`
-	ManifestKey string   `json:"manifest_key"`
-	Value       string   `json:"value"`
-	Properties  []Field  `json:"properties"`
-	Items       *Field   `json:"items"`
-	Enum        []string `json:"enum"`
-	Required    []string `json:"required"`
+	Name          string   `json:"name"`
+	Description   string   `json:"description"`
+	Type          string   `json:"type"`
+	DisplayName   string   `json:"display_name"`
+	ManifestKey   string   `json:"manifest_key"`
+	Value         string   `json:"value"`
+	Properties    []Field  `json:"properties"`
+	Items         *Field   `json:"items"`
+	Enum          []string `json:"enum"`
+	Required      []string `json:"required"`
+	FileExtension string   `json:"fileExtension"`
 }

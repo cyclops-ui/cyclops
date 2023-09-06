@@ -13,27 +13,29 @@ func HelmSchemaToFields(schema helm.Property) []models.Field {
 	for name, property := range schema.Properties {
 		if property.Type == "array" {
 			fields = append(fields, models.Field{
-				Name:        name,
-				Description: property.Description,
-				Type:        mapHelmPropertyTypeToFieldType(property),
-				DisplayName: mapTitle(name, property),
-				ManifestKey: name,
-				Items:       arrayItem(property.Items),
-				Enum:        property.Enum,
-				Required:    property.Required,
+				Name:          name,
+				Description:   property.Description,
+				Type:          mapHelmPropertyTypeToFieldType(property),
+				DisplayName:   mapTitle(name, property),
+				ManifestKey:   name,
+				Items:         arrayItem(property.Items),
+				Enum:          property.Enum,
+				Required:      property.Required,
+				FileExtension: property.FileExtension,
 			})
 			continue
 		}
 
 		fields = append(fields, models.Field{
-			Name:        name,
-			Description: property.Description,
-			Type:        mapHelmPropertyTypeToFieldType(property),
-			DisplayName: mapTitle(name, property),
-			ManifestKey: name,
-			Properties:  HelmSchemaToFields(property),
-			Enum:        property.Enum,
-			Required:    property.Required,
+			Name:          name,
+			Description:   property.Description,
+			Type:          mapHelmPropertyTypeToFieldType(property),
+			DisplayName:   mapTitle(name, property),
+			ManifestKey:   name,
+			Properties:    HelmSchemaToFields(property),
+			Enum:          property.Enum,
+			Required:      property.Required,
+			FileExtension: property.FileExtension,
 		})
 	}
 

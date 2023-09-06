@@ -28,6 +28,7 @@ import "ace-builds/src-noconflict/ext-language_tools";
 import {useParams} from "react-router-dom";
 import Link from "antd/lib/typography/Link";
 import ReactDiffViewer from "react-diff-viewer";
+import ReactAce from "react-ace";
 
 const {TextArea} = Input;
 
@@ -106,7 +107,9 @@ const EditModule = () => {
                     out[field.name] = values[field.name]
                     break
                 case "object":
-                    out[field.name] = mapsToArray(field.properties, values[field.name])
+                    if (values[field.name]) {
+                        out[field.name] = mapsToArray(field.properties, values[field.name])
+                    }
                     break
                 case "array":
                     valuesList = values[field.name] as any[]
@@ -296,7 +299,9 @@ const EditModule = () => {
                     out[field.name] = values[field.name]
                     break
                 case "object":
-                    out[field.name] = findMaps(field.properties, values[field.name])
+                    if (values[field.name]) {
+                        out[field.name] = findMaps(field.properties, values[field.name])
+                    }
                     break
                 case "array":
                     valuesList = values[field.name] as any[]
@@ -446,7 +451,7 @@ const EditModule = () => {
     //     }
     // }
 
-    const selectInputField = (field: any, formItemName: string | string[], arrayField: any) => {
+    const selectInputField = (field: any, formItemName: string | string[], arrayField: any, isRequired: boolean) => {
         let options: {value: string, label: string}[] = []
         field.enum.forEach((option: any) => {
             options.push({
@@ -455,7 +460,7 @@ const EditModule = () => {
             })
         })
 
-        return <Form.Item {...arrayField} name={formItemName} label={field.display_name}>
+        return <Form.Item {...arrayField} name={formItemName} label={field.display_name} rules={[{required: isRequired}]}>
             <Select
                 showSearch
                 placeholder={field.name}
@@ -468,11 +473,39 @@ const EditModule = () => {
         </Form.Item>
     }
 
+    const fileField = (field: any, formItemName: string | string[], arrayField: any, isRequired: boolean) => {
+        return <Form.Item {...arrayField} name={formItemName}
+                          label={field.display_name}
+                          rules={[{required: isRequired}]}
+        >
+            <AceEditor
+                mode={field.fileExtension}
+                theme="github"
+                fontSize={12}
+                showPrintMargin={true}
+                showGutter={true}
+                highlightActiveLine={true}
+                setOptions={{
+                    enableBasicAutocompletion: true,
+                    enableLiveAutocompletion: true,
+                    enableSnippets: false,
+                    showLineNumbers: true,
+                    tabSize: 4,
+                    useWorker: false
+                }}
+                style={{
+                    height: "25em",
+                    width: "100%"
+                }}
+            />
+        </Form.Item>
+    }
+
     const arrayInnerField = (field: any, parentFieldID: string, parent: string, level: number, arrayField: any, remove: Function) => {
         switch (field.items.type) {
             case "object":
                 return <div>
-                    {mapFields(field.items.properties, parentFieldID, "", level + 1, arrayField)}
+                    {mapFields(field.items.properties, parentFieldID, "", level + 1, 2, arrayField)}
                     <MinusCircleOutlined style={{ fontSize: '16px' }} onClick={() => remove(arrayField.name)} />
                 </div>
             case "string":
@@ -499,7 +532,7 @@ const EditModule = () => {
         return currentObj;
     }
 
-    function mapFields(fields: any[], parentFieldID: string | string[], parent: string, level: number, arrayField?: any, required?: string[]) {
+    function mapFields(fields: any[], parentFieldID: string | string[], parent: string, level: number, arrayIndexLifetime: number, arrayField?: any, required?: string[]) {
         const formFields: {} | any = [];
         fields.forEach((field: any) => {
             let fieldName = field.name
@@ -519,21 +552,26 @@ const EditModule = () => {
                 }
             }
 
+            if (arrayIndexLifetime > 0) {
+                arrayIndexLifetime = arrayIndexLifetime - 1;
+            }
+
             switch (field.type) {
                 case "string":
                     if (field.enum) {
-                        formFields.push(selectInputField(field, formItemName, arrayField))
+                        formFields.push(selectInputField(field, formItemName, arrayField, isRequired))
+                        return;
+                    }
+
+                    if (field.fileExtension && field.fileExtension.length > 0) {
+                        formFields.push(fileField(field, formItemName, arrayField, isRequired))
                         return;
                     }
 
                     formFields.push(
                         <Form.Item {...arrayField} name={formItemName}
                                    label={field.display_name}
-                                   rules={[{
-                                       required: isRequired,
-                                       message: "aelfiaeflb",
-
-                                   }]}
+                                   rules={[{required: isRequired}]}
                         >
                             <Input addonAfter={addonAfter(field)}/>
                         </Form.Item>
@@ -545,14 +583,14 @@ const EditModule = () => {
                             <Tooltip title={field.description} trigger="click">
                                 {field.display_name}
                             </Tooltip>
-                        } rules={[{required: isRequired}]}>
-                            <InputNumber style={{width: '100%'}} addonAfter={addonAfter(field)}/>
+                        }
+                           rules={[{required: isRequired}]}
+                        >
+                            <InputNumber style={{width: '100%'}} />
                         </Form.Item>
                     )
                     return;
                 case "boolean":
-                    // const map = new Map(Object.entries(module.values));
-                    // let checked = map.get(fieldName) == "true" ? "checked" : "unchecked"
                     let moduleValues: any = module.values
 
                     let k = []
@@ -606,10 +644,10 @@ const EditModule = () => {
                                 }
                             }}>
                                 <Collapse.Panel key={fieldName} header={header} style={{backgroundColor: getCollapseColor(uniqueFieldName)}} forceRender={true}>
-                                    <Form.List name={fieldName}>
+                                    <Form.List name={formItemName}>
                                         {(arrFields, { add, remove }) => (
                                             <>
-                                                {mapFields(field.properties, [fieldName], "", level + 1, arrayField, field.required)}
+                                                {mapFields(field.properties, [fieldName], "", level + 1, arrayIndexLifetime, arrayIndexLifetime > 0 ? arrayField : undefined, field.required)}
                                             </>
                                         )}
                                     </Form.List>
@@ -757,48 +795,11 @@ const EditModule = () => {
                         onFinish={handleSubmit}
                         onFinishFailed={onFinishFailed}
                     >
-                        {/*<Col span={18}>*/}
-                        {/*    <Link aria-level={3} href={`/configurations/` + module.template}>*/}
-                        {/*        <LinkOutlined/>*/}
-                        {/*        { module.template.name.length === 0 && module.template.git.repo + '/' + module.template.git.path }*/}
-
-                        {/*        { module.template.name.length !== 0 && module.template.name + '@' + module.template.version }*/}
-                        {/*    </Link>*/}
-                        {/*    <Button onClick={function () {*/}
-                        {/*        setMigrating(true)*/}
-                        {/*        getVersions()*/}
-                        {/*    }} block>Migrate</Button>*/}
-                        {/*</Col>*/}
-                        {/*<Modal*/}
-                        {/*    title="Migrate module to different template version"*/}
-                        {/*    visible={migrating}*/}
-                        {/*    onCancel={handleCancelMigrating}*/}
-                        {/*    width={'40%'}*/}
-                        {/*    footer={*/}
-                        {/*        <Button block onClick={handleMigrate}>Migrate</Button>*/}
-                        {/*    }*/}
-                        {/*>*/}
-                        {/*    <Select*/}
-                        {/*        placeholder={"Template version"}*/}
-                        {/*        style={{width: '30%'}}*/}
-                        {/*        onChange={handleVersionChange}*/}
-                        {/*    >*/}
-                        {/*        {versions}*/}
-                        {/*    </Select>*/}
-                        {/*    <ReactDiffViewer*/}
-                        {/*        oldValue={migrateDiff.current}*/}
-                        {/*        newValue={migrateDiff.new}*/}
-                        {/*        splitView={true}*/}
-                        {/*        leftTitle={"current manifest"}*/}
-                        {/*        rightTitle={"updated manifest"}*/}
-                        {/*        useDarkTheme={false}*/}
-                        {/*    />*/}
-                        {/*</Modal>*/}
                         <Divider orientation="left" orientationMargin="0">
                             Edit Module
                         </Divider>
                         {formLoading()}
-                        {mapFields(config.fields, "",  "" , 0)}
+                        {mapFields(config.fields, "",  "" , 0, 0)}
                         <div style={{textAlign: "right"}}>
                             <Button type="primary" htmlType="submit" name="Save">
                                 Save

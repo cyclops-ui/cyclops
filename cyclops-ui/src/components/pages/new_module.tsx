@@ -20,6 +20,7 @@ import {useNavigate} from 'react-router';
 import {MinusCircleOutlined, PlusOutlined, InfoCircleOutlined} from "@ant-design/icons";
 
 import {useParams} from "react-router-dom";
+import AceEditor from "react-ace";
 
 const {Title} = Typography;
 const layout = {
@@ -98,7 +99,9 @@ const NewModule = () => {
                     out[field.name] = values[field.name]
                     break
                 case "object":
-                    out[field.name] = mapsToArray(field.properties, values[field.name])
+                    if (values[field.name]) {
+                        out[field.name] = mapsToArray(field.properties, values[field.name])
+                    }
                     break
                 case "array":
                     valuesList = values[field.name] as any[]
@@ -160,7 +163,9 @@ const NewModule = () => {
                     out[field.name] = values[field.name]
                     break
                 case "object":
-                    out[field.name] = findMaps(field.properties, values[field.name])
+                    if (values[field.name]) {
+                        out[field.name] = findMaps(field.properties, values[field.name])
+                    }
                     break
                 case "array":
                     valuesList = values[field.name] as any[]
@@ -192,7 +197,6 @@ const NewModule = () => {
                     }
 
                     let object: any = {};
-                    console.log(valuesList)
                     valuesList.forEach(valueFromList => {
                         object[valueFromList.key] = valueFromList.value
                     })
@@ -347,6 +351,8 @@ const NewModule = () => {
                 setError(error.response.data);
             }
         });
+
+        setActiveCollapses(new Map());
     }
 
     const getCollapseColor = (fieldName: string) => {
@@ -367,7 +373,7 @@ const NewModule = () => {
         }
     }
 
-    const selectInputField = (field: any, formItemName: string | string[], arrayField: any) => {
+    const selectInputField = (field: any, formItemName: string | string[], arrayField: any, isRequired: boolean) => {
         let options: {value: string, label: string}[] = []
         field.enum.forEach((option: any) => {
             options.push({
@@ -376,7 +382,7 @@ const NewModule = () => {
             })
         })
 
-        return <Form.Item {...arrayField} name={formItemName} label={field.display_name}>
+        return <Form.Item {...arrayField} name={formItemName} label={field.display_name} rules={[{required: isRequired}]}>
             <Select
                 showSearch
                 placeholder={field.name}
@@ -389,11 +395,39 @@ const NewModule = () => {
         </Form.Item>
     }
 
+    const fileField = (field: any, formItemName: string | string[], arrayField: any, isRequired: boolean) => {
+        return <Form.Item {...arrayField} name={formItemName}
+                          label={field.display_name}
+                          rules={[{required: isRequired}]}
+        >
+            <AceEditor
+                mode={field.fileExtension}
+                theme="github"
+                fontSize={12}
+                showPrintMargin={true}
+                showGutter={true}
+                highlightActiveLine={true}
+                setOptions={{
+                    enableBasicAutocompletion: true,
+                    enableLiveAutocompletion: true,
+                    enableSnippets: false,
+                    showLineNumbers: true,
+                    tabSize: 4,
+                    useWorker: false
+                }}
+                style={{
+                    height: "25em",
+                    width: "100%"
+                }}
+            />
+        </Form.Item>
+    }
+
     const arrayInnerField = (field: any, parentFieldID: string, parent: string, level: number, arrayField: any, remove: Function) => {
         switch (field.items.type) {
             case "object":
                 return <div>
-                    {mapFields(field.items.properties, parentFieldID, "", level + 1, arrayField)}
+                    {mapFields(field.items.properties, parentFieldID, "", level + 1, 2, arrayField)}
                     <MinusCircleOutlined style={{ fontSize: '16px' }} onClick={() => remove(arrayField.name)} />
                 </div>
             case "string":
@@ -406,7 +440,7 @@ const NewModule = () => {
         }
     }
 
-    function mapFields(fields: any[], parentFieldID: string | string[], parent: string, level: number, arrayField?: any, required?: string[]) {
+    function mapFields(fields: any[], parentFieldID: string | string[], parent: string, level: number, arrayIndexLifetime: number, arrayField?: any, required?: string[]) {
         const formFields: {} | any = [];
 
         if (!fields) {
@@ -431,10 +465,19 @@ const NewModule = () => {
                 }
             }
 
+            if (arrayIndexLifetime > 0) {
+                arrayIndexLifetime = arrayIndexLifetime - 1;
+            }
+
             switch (field.type) {
                 case "string":
                     if (field.enum) {
-                        formFields.push(selectInputField(field, formItemName, arrayField))
+                        formFields.push(selectInputField(field, formItemName, arrayField, isRequired))
+                        return;
+                    }
+
+                    if (field.fileExtension && field.fileExtension.length > 0) {
+                        formFields.push(fileField(field, formItemName, arrayField, isRequired))
                         return;
                     }
 
@@ -453,8 +496,10 @@ const NewModule = () => {
                             <Tooltip title={field.description} trigger="click">
                                 {field.display_name}
                             </Tooltip>
-                        } rules={[{required: isRequired}]}>
-                            <InputNumber style={{width: '100%'}} addonAfter={addonAfter(field)}/>
+                        }
+                            rules={[{required: isRequired}]}
+                        >
+                            <InputNumber style={{width: '100%'}} />
                         </Form.Item>
                     )
                     return;
@@ -500,10 +545,10 @@ const NewModule = () => {
                                 }
                             }}>
                                 <Collapse.Panel key={fieldName} header={header} style={{backgroundColor: getCollapseColor(uniqueFieldName)}} forceRender={true}>
-                                    <Form.List name={fieldName}>
+                                    <Form.List name={formItemName}>
                                         {(arrFields, { add, remove }) => (
                                             <>
-                                                {mapFields(field.properties, [fieldName], "", level + 1, arrayField, field.required)}
+                                                {mapFields(field.properties, [fieldName], "", level + 1, arrayIndexLifetime, arrayIndexLifetime > 0 ? arrayField : undefined, field.required)}
                                             </>
                                         )}
                                     </Form.List>
@@ -596,8 +641,6 @@ const NewModule = () => {
                                         ))}
                                         <Form.Item>
                                             <Button type="dashed" onClick={() => {
-                                                console.log(form.getFieldsValue())
-                                                console.log(formItemName, fieldName, uniqueFieldName)
                                                 add()
                                             }} block icon={<PlusOutlined/>}>
                                                 Add
@@ -730,7 +773,7 @@ const NewModule = () => {
                         <Divider orientation="left" orientationMargin="0">
                             Define Module
                         </Divider>
-                        {mapFields(config.fields, "", "", 0)}
+                        {mapFields(config.fields, "",  "" , 0, 0)}
                         <div style={{textAlign: "right"}}>
                             <Button type="primary" loading={loading} htmlType="submit" name="Save">
                                 Save

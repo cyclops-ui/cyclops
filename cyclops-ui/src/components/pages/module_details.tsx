@@ -465,7 +465,7 @@ const ModuleDetails = () => {
         if (lines > 20) {
             return '320px'
         } else {
-            return '${lines * 16}px'
+            return `${lines * 16}px`
         }
     };
 
