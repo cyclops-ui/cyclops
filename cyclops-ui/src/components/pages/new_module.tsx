@@ -417,7 +417,8 @@ const NewModule = () => {
                     useWorker: false
                 }}
                 style={{
-                    height: "15em"
+                    height: "25em",
+                    width: "100%"
                 }}
             />
         </Form.Item>

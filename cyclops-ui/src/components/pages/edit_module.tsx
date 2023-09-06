@@ -477,7 +477,6 @@ const EditModule = () => {
         return <Form.Item {...arrayField} name={formItemName}
                           label={field.display_name}
                           rules={[{required: isRequired}]}
-                          wrapperCol={24}
         >
             <AceEditor
                 mode={field.fileExtension}
@@ -495,7 +494,8 @@ const EditModule = () => {
                     useWorker: false
                 }}
                 style={{
-                    height: "15em"
+                    height: "25em",
+                    width: "100%"
                 }}
             />
         </Form.Item>
