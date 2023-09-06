@@ -197,7 +197,6 @@ const NewModule = () => {
                     }
 
                     let object: any = {};
-                    console.log(valuesList)
                     valuesList.forEach(valueFromList => {
                         object[valueFromList.key] = valueFromList.value
                     })
@@ -642,8 +641,6 @@ const NewModule = () => {
                                         ))}
                                         <Form.Item>
                                             <Button type="dashed" onClick={() => {
-                                                console.log(form.getFieldsValue())
-                                                console.log(formItemName, fieldName, uniqueFieldName)
                                                 add()
                                             }} block icon={<PlusOutlined/>}>
                                                 Add
