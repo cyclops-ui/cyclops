@@ -66,18 +66,18 @@ const NewModule = () => {
     useEffect(() => {
         setLoading(true);
 
-        if (window.__RUNTIME_CONFIG__.DEFAULT_TEMPLATE_REPO &&
-            window.__RUNTIME_CONFIG__.DEFAULT_TEMPLATE_REPO.length > 0) {
+        if (window.__RUNTIME_CONFIG__.REACT_APP_DEFAULT_TEMPLATE_REPO &&
+            window.__RUNTIME_CONFIG__.REACT_APP_DEFAULT_TEMPLATE_REPO.length > 0) {
             setGitTemplate({
-                repo: window.__RUNTIME_CONFIG__.DEFAULT_TEMPLATE_REPO,
-                path: window.__RUNTIME_CONFIG__.DEFAULT_TEMPLATE_PATH,
-                commit: window.__RUNTIME_CONFIG__.DEFAULT_TEMPLATE_VERSION,
+                repo: window.__RUNTIME_CONFIG__.REACT_APP_DEFAULT_TEMPLATE_REPO,
+                path: window.__RUNTIME_CONFIG__.REACT_APP_DEFAULT_TEMPLATE_PATH,
+                commit: window.__RUNTIME_CONFIG__.REACT_APP_DEFAULT_TEMPLATE_VERSION,
             })
 
             loadTemplate(
-                window.__RUNTIME_CONFIG__.DEFAULT_TEMPLATE_REPO,
-                window.__RUNTIME_CONFIG__.DEFAULT_TEMPLATE_PATH,
-                window.__RUNTIME_CONFIG__.DEFAULT_TEMPLATE_VERSION
+                window.__RUNTIME_CONFIG__.REACT_APP_DEFAULT_TEMPLATE_REPO,
+                window.__RUNTIME_CONFIG__.REACT_APP_DEFAULT_TEMPLATE_PATH,
+                window.__RUNTIME_CONFIG__.REACT_APP_DEFAULT_TEMPLATE_VERSION
             )
         }
 
@@ -716,7 +716,7 @@ const NewModule = () => {
                                     commit: gitTemplate.commit,
                                 })
                             }}
-                            value={window.__RUNTIME_CONFIG__.DEFAULT_TEMPLATE_REPO}
+                            value={window.__RUNTIME_CONFIG__.REACT_APP_DEFAULT_TEMPLATE_REPO}
                         />
                         {' / '}
                         <Input
@@ -729,7 +729,7 @@ const NewModule = () => {
                                     commit: gitTemplate.commit,
                                 })
                             }}
-                            value={window.__RUNTIME_CONFIG__.DEFAULT_TEMPLATE_PATH}
+                            value={window.__RUNTIME_CONFIG__.REACT_APP_DEFAULT_TEMPLATE_PATH}
                         />
                         {' @ '}
                         <Input
@@ -742,7 +742,7 @@ const NewModule = () => {
                                     commit: value.target.value
                                 })
                             }}
-                            value={window.__RUNTIME_CONFIG__.DEFAULT_TEMPLATE_VERSION}
+                            value={window.__RUNTIME_CONFIG__.REACT_APP_DEFAULT_TEMPLATE_VERSION}
                         />
                         {'  '}
                         <Button
