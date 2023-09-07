@@ -40,6 +40,7 @@ const sidebars = {
       items: [
         'installation/prerequisites',
         'installation/install',
+        'installation/configuration',
         {
           type: 'category',
           label: 'Demo',
