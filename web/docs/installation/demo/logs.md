@@ -33,6 +33,7 @@ Since we have 2 containers in the pod, there are 2 tabs in the popup window - on
 
 If the pod doesn't have any logs, it will be indicated that there are no logs available for the pod.
 
+Also, you can download the logs into a file to inspect all container logs.
 
 ## Potential problems
 ### Error loading template

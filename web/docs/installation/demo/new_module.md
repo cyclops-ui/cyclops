@@ -9,8 +9,11 @@ empty at the moment. What we want to do next is click on the _Add module_ button
 ## Define your module
 Now we want to define our new module. Under the _Module template_ we want to put the url that leads towards a GitHub
 repository where we saved our configuration files. For the sake of this tutorial we will be using our own 
-[repository](https://github.com/cyclops-ui/templates) (`https://github.com/cyclops-ui/templates/tree/main/demo`) which holds a configuration template we made for testing purposes.
-Feel free to use our template repository! We will be using the _demo_ template from the repository.
+[template](https://github.com/cyclops-ui/templates) which holds a configuration template we made for testing purposes.
+Feel free to use our template repository! We will be using the _demo_ template from the repository. Also for any
+template you can specify the version which is the third field. If you are referncing a template stored in git you can 
+specify a version as a branch name, tag or a commit hash. If you don't specify anything, it would default to the latest
+commit on the default branch.
 
 ![Filled Module Template](../../../static/img/demo/module_template.png?raw=true "Filled Module Template")
 
@@ -55,15 +58,16 @@ application.
 
 ## Potential problems
 ### Error loading template
-This usually means that you didn't input the right `url + path`. When loading the template to Cyclops, you need to copy
-the URL from the GitHub repository that leads to the template. The URL must lead towards a directory that holds a 
-`template` folder.
+This usually means that you didn't input the right `url + path + version`. When loading the template to Cyclops, you 
+need to copy the URL from the GitHub repository that leads to the template. The URL must lead towards a directory that
+holds a `template` folder.
 
 In our example we used this URL { https://github.com/cyclops-ui/templates/tree/main/demo } and filled
 the form with the values bellow:
     
     repository: https://github.com/cyclops-ui/templates
     path: demo    
+    version: main
 
 ### Naming
 If Cyclops seemingly freezes when trying to save the module, it probably means you didn't follow [the Kubernetes naming
