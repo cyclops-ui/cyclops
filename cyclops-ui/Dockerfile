@@ -1,35 +1,41 @@
-#FROM node:18.0-alpine
-#WORKDIR /app
-#COPY package.json ./
-#COPY package-lock.json ./
-#COPY ./ ./
-#RUN npm install -f
-#CMD ["npm", "run", "prod"]
+#==================== Building Stage ===================
+FROM node:18.0-alpine as builder
+WORKDIR /app
 
+# Install dependencies
 
-FROM node:18.0-alpine as build
-WORKDIR /usr/src/app
+COPY package.json ./
 
-COPY package* ./
+RUN npm config set scripts-prepend-node-path true
+
+RUN yarn install
+
+# Copy source, static and config files (node_modules is ignored)
 COPY . .
 
-RUN npm install -f
-RUN NODE_OPTIONS=--openssl-legacy-provider npm run build
+ARG version=0.0.0
+ENV VITE_APP_VERSION=$version
 
-# -- RELEASE --
-FROM nginx:stable-alpine as release
+# Build application
+ENV NODE_OPTIONS=--max-old-space-size=1536
+RUN yarn build
 
-COPY --from=build /usr/src/app/build /usr/share/nginx/html
-# copy .env.example as .env to the release build
-COPY --from=build /usr/src/app/.env /usr/share/nginx/html/.env
-COPY --from=build /usr/src/app/nginx/default.conf /etc/nginx/conf.d/default.conf
-
-RUN apk add --update nodejs
-RUN apk add --update npm
-RUN npm install -g runtime-env-cra@0.2.2
+#==================== Nginx stage ======================
+FROM nginx:stable-alpine as app
 
 WORKDIR /usr/share/nginx/html
 
-EXPOSE 80
+RUN apk add --no-cache gettext
 
-CMD ["/bin/sh", "-c", "runtime-env-cra && nginx -g \"daemon off;\""]
+COPY nginx-entrypoint.sh /
+
+# Copy env file
+COPY env.js ./
+
+# Copy app files
+COPY --from=0 app/build/ ./
+
+# Copy reverse proxy configuration
+COPY ./nginx/default.conf /etc/nginx/conf.d/default.conf
+
+ENTRYPOINT [ "sh", "/nginx-entrypoint.sh" ]
