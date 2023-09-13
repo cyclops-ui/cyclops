@@ -1,15 +1,15 @@
-# Cyclops
-
 <p align="center" width="100%">
 <img width="25%" alt="Screenshot 2022-04-03 at 21 48 18" src="https://user-images.githubusercontent.com/72022639/162230553-e669e572-1346-4289-814b-bd23d5b2d100.png">
 <p/>
+<h1 align="center">Cyclops</h1>
+<p align="center">Developer friendly Kubernetes</p>
 
-Developer friendly Kubernetes
-
-<a href="https://github.com/cyclops-ui/cyclops/blob/main/LICENSE"><img height="20" src="https://img.shields.io/github/license/cyclops-ui/cyclops"></a>
-<a href="https://github.com/cyclops-ui/cyclops/actions/workflows/web.yaml"><img height="20" src="https://github.com/cyclops-ui/cyclops/actions/workflows/web.yaml/badge.svg"></a>
-<a href="https://github.com/cyclops-ui/cyclops/actions/workflows/ctrl-ci.yml"><img height="20" src="https://github.com/cyclops-ui/cyclops/actions/workflows/ctrl-ci.yml/badge.svg"></a>
-<a href="https://github.com/cyclops-ui/cyclops/actions/workflows/ui-ci.yml"><img height="20" src="https://github.com/cyclops-ui/cyclops/actions/workflows/ui-ci.yml/badge.svg"></a>
+<div align="center">
+    <a href="https://github.com/cyclops-ui/cyclops/blob/main/LICENSE"><img height="20" src="https://img.shields.io/github/license/cyclops-ui/cyclops"></a>
+    <a href="https://github.com/cyclops-ui/cyclops/actions/workflows/web.yaml"><img height="20" src="https://github.com/cyclops-ui/cyclops/actions/workflows/web.yaml/badge.svg"></a>
+    <a href="https://github.com/cyclops-ui/cyclops/actions/workflows/ctrl-ci.yml"><img height="20" src="https://github.com/cyclops-ui/cyclops/actions/workflows/ctrl-ci.yml/badge.svg"></a>
+    <a href="https://github.com/cyclops-ui/cyclops/actions/workflows/ui-ci.yml"><img height="20" src="https://github.com/cyclops-ui/cyclops/actions/workflows/ui-ci.yml/badge.svg"></a>
+</div>
 
 ![which-would-you-prefer.png](web%2Fstatic%2Fimg%2Fwhich-would-you-prefer.png)
 
@@ -24,7 +24,12 @@ the window for deployment mistakes. [Find out more!](https://cyclops-ui.com)
 Find out how to [install](https://cyclops-ui.com/docs/installation/prerequisites) it to your cluster on our landing page
 and give it a go! (~10 minute tutorial)
 
-# Install
+## :star2: Supporters
+[![Stargazers repo roster for @cyclops-ui/cyclops](https://reporoster.com/stars/cyclops-ui/cyclops)](https://github.com/cyclops-ui/cyclops/stargazers)
+
+[//]: # ([![Forkers repo roster for @cyclops-ui/cyclops]&#40;https://reporoster.com/forks/cyclops-ui/cyclops&#41;])
+
+## :gear: Install
 
 ⚠️ Before installing Cyclops, make sure you have all the [prerequisites](https://cyclops-ui.com/docs/installation/prerequisites) ⚠️
 
@@ -51,7 +56,7 @@ kubectl port-forward svc/cyclops-ctrl 8080:8080 -n cyclops
 
 You can now access Cyclops in your browser on [http://localhost:3000](http://localhost:3000).
 
-# Future work
+## :chart_with_upwards_trend: Future work
 
 * Better error handling
 * Make Cyclops work with all resources (initial version supporting only Deployments and Services)
