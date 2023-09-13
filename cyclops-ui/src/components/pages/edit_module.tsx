@@ -22,13 +22,16 @@ import {InfoCircleOutlined, LinkOutlined, MinusCircleOutlined, PlusOutlined, War
 
 import AceEditor from "react-ace";
 
-import "ace-builds/src-noconflict/mode-java";
-import "ace-builds/src-noconflict/theme-github";
-import "ace-builds/src-noconflict/ext-language_tools";
 import {useParams} from "react-router-dom";
-import Link from "antd/lib/typography/Link";
-import ReactDiffViewer from "react-diff-viewer";
-import ReactAce from "react-ace";
+
+import 'ace-builds/src-noconflict/theme-github';
+
+import 'ace-builds/src-noconflict/mode-yaml';
+import 'ace-builds/src-noconflict/mode-toml';
+import 'ace-builds/src-noconflict/mode-javascript';
+import 'ace-builds/src-noconflict/mode-typescript';
+import 'ace-builds/src-noconflict/snippets/yaml'
+import {fileExtension} from "../../utils/form";
 
 const {TextArea} = Input;
 
@@ -479,7 +482,7 @@ const EditModule = () => {
                           rules={[{required: isRequired}]}
         >
             <AceEditor
-                mode={field.fileExtension}
+                mode={fileExtension(field.fileExtension)}
                 theme="github"
                 fontSize={12}
                 showPrintMargin={true}

@@ -18,9 +18,18 @@ import {
 import axios from 'axios';
 import {useNavigate} from 'react-router';
 import {MinusCircleOutlined, PlusOutlined, InfoCircleOutlined} from "@ant-design/icons";
+import {fileExtension} from "../../utils/form";
 
 import {useParams} from "react-router-dom";
 import AceEditor from "react-ace";
+
+import 'ace-builds/src-noconflict/theme-github';
+
+import 'ace-builds/src-noconflict/mode-yaml';
+import 'ace-builds/src-noconflict/mode-toml';
+import 'ace-builds/src-noconflict/mode-javascript';
+import 'ace-builds/src-noconflict/mode-typescript';
+import 'ace-builds/src-noconflict/snippets/yaml'
 
 const {Title} = Typography;
 const layout = {
@@ -401,7 +410,7 @@ const NewModule = () => {
                           rules={[{required: isRequired}]}
         >
             <AceEditor
-                mode={field.fileExtension}
+                mode={fileExtension(field.fileExtension)}
                 theme="github"
                 fontSize={12}
                 showPrintMargin={true}
