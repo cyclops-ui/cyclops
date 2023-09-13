@@ -13,12 +13,14 @@ import {
     Space,
     Switch,
     Typography,
-    Tooltip, message
+    Tooltip, message, Modal, CollapseProps
 } from 'antd';
 import axios from 'axios';
 import {useNavigate} from 'react-router';
 import {MinusCircleOutlined, PlusOutlined, InfoCircleOutlined} from "@ant-design/icons";
 import {fileExtension} from "../../utils/form";
+
+import YAML from 'yaml'
 
 import {useParams} from "react-router-dom";
 import AceEditor from "react-ace";
@@ -67,6 +69,14 @@ const NewModule = () => {
         let kk = new Array(k);
         setActiveCollapses(new Map(activeCollapses.set(kk.join(''),v)));
     }
+
+    var initLoadedFrom: string[];
+    initLoadedFrom = [];
+    const [newFile, setNewFile] = useState("");
+    const [loadedFrom, setLoadedFrom] = useState(initLoadedFrom);
+    const [loadedValues, setLoadedValues] = useState("");
+    // const [loadingValuesFile, setLoadingValuesFile] = useState(false);
+    const [loadingValuesModal, setLoadingValuesModal] = useState(false);
 
     const history = useNavigate();
 
@@ -362,6 +372,24 @@ const NewModule = () => {
         });
 
         setActiveCollapses(new Map());
+    }
+
+    const onLoadFromFile = () => {
+        if (newFile.trim() === "") {
+            setError({
+                message: "Invalid values file",
+                description: "Values file can't be empty"
+            })
+            return
+        }
+
+        setLoadingValuesModal(true)
+
+        let tmp = loadedFrom
+        tmp.push(newFile)
+        setLoadedFrom(tmp)
+
+        loadValues(newFile)
     }
 
     const getCollapseColor = (fieldName: string) => {
@@ -666,6 +694,56 @@ const NewModule = () => {
         return formFields
     }
 
+    const handleCancel = () => {
+        setLoadingValuesModal(false);
+    };
+
+    const handleImportValues = () => {
+        form.setFieldsValue(YAML.parse(loadedValues))
+        setLoadedValues("")
+        setLoadingValuesModal(false);
+    };
+
+    const renderLoadedFromFiles = () => {
+        if (loadedFrom.length === 0) {
+            return
+        }
+
+        const files: {} | any = [];
+
+        loadedFrom.forEach((value: string) => {
+            files.push(<p>{value}</p>)
+        })
+
+        return <Collapse ghost items={[
+            {
+                key: '1',
+                label: 'Imported values from',
+                children: files,
+            }
+        ]} />
+    }
+
+    const loadValues = (fileName: string) => {
+        axios.get(fileName).then(res => {
+            setLoadedValues(res.data)
+        }).catch(function (error) {
+            // setLoadingTemplate(false);
+            // setSuccessLoad(false);
+            if (error.response === undefined) {
+                setError({
+                    message: String(error),
+                    description: "Check if Cyclops backend is available on: " + window.__RUNTIME_CONFIG__.REACT_APP_CYCLOPS_CTRL_HOST
+                })
+            } else {
+                setError({
+                    message: error.response.data,
+                    description: "Unable to fetch values file; Check if the file name was spelled correctly"
+                })
+            }
+        });
+    }
+
     const onFinishFailed = () => {
         message.error('Submit failed!');
     };
@@ -784,6 +862,9 @@ const NewModule = () => {
                         </Divider>
                         {mapFields(config.fields, "",  "" , 0, 0)}
                         <div style={{textAlign: "right"}}>
+                            <Button loading={loading} onClick={function () {setLoadingValuesModal(true)}} name="Save">
+                                Load values from file
+                            </Button>{' '}
                             <Button type="primary" loading={loading} htmlType="submit" name="Save">
                                 Save
                             </Button>{' '}
@@ -794,6 +875,66 @@ const NewModule = () => {
                     </Form>
                 </Col>
             </Row>
+            <Modal
+                title="Values to import"
+                visible={loadingValuesModal}
+                onCancel={handleCancel}
+                onOk={handleImportValues}
+                width={'70%'}
+            >
+                {
+                    error.message.length !== 0 && <Alert
+                        message={error.message}
+                        description={error.description}
+                        type="error"
+                        closable
+                        afterClose={() => {setError({
+                            message: "",
+                            description: "",
+                        })}}
+                        style={{marginBottom: '20px'}}
+                    />
+                }
+                {renderLoadedFromFiles()}
+                <Input
+                    placeholder={"File reference"}
+                    style={{width: '90%', marginBottom: "10px"}}
+                    onChange={(value: any) => {
+                        setNewFile(value.target.value)
+                    }}
+                />
+                {'  '}
+                <Button
+                    type="primary"
+                    htmlType="button"
+                    style={{width: '9%'}}
+                    onClick={onLoadFromFile}
+                    loading={loadingTemplate}
+                >
+                    Load
+                </Button>
+                <AceEditor
+                    mode={"yaml"}
+                    theme="github"
+                    fontSize={12}
+                    showPrintMargin={true}
+                    showGutter={true}
+                    highlightActiveLine={true}
+                    setOptions={{
+                        enableBasicAutocompletion: true,
+                        enableLiveAutocompletion: true,
+                        enableSnippets: false,
+                        showLineNumbers: true,
+                        tabSize: 4,
+                        useWorker: false
+                    }}
+                    style={{
+                        height: "25em",
+                        width: "100%"
+                    }}
+                    value={loadedValues}
+                />
+            </Modal>
         </div>
     );
 }
