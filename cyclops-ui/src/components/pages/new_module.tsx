@@ -728,7 +728,6 @@ const NewModule = () => {
         form.setFieldsValue(YAML.parse(loadedValues))
         setLoadedValues("")
         setLoadingValuesModal(false);
-        console.log(form.getFieldsValue());
     };
 
     const renderLoadedFromFiles = () => {
