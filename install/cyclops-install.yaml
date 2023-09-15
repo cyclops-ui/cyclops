@@ -279,7 +279,7 @@ spec:
       serviceAccountName: cyclops-ctrl
       containers:
         - name: cyclops-ctrl
-          image: petarcvit223/cyclops-ctrl:v0.14.0
+          image: petarcvit223/cyclops-ctrl:v0.15.0
           ports:
             - containerPort: 8080
           env:
