@@ -13,12 +13,14 @@ import {
     Space,
     Switch,
     Typography,
-    Tooltip, message
+    Tooltip, message, Modal, CollapseProps, Checkbox
 } from 'antd';
 import axios from 'axios';
 import {useNavigate} from 'react-router';
 import {MinusCircleOutlined, PlusOutlined, InfoCircleOutlined} from "@ant-design/icons";
 import {fileExtension} from "../../utils/form";
+
+import YAML from 'yaml'
 
 import {useParams} from "react-router-dom";
 import AceEditor from "react-ace";
@@ -67,6 +69,14 @@ const NewModule = () => {
         let kk = new Array(k);
         setActiveCollapses(new Map(activeCollapses.set(kk.join(''),v)));
     }
+
+    var initLoadedFrom: string[];
+    initLoadedFrom = [];
+    const [newFile, setNewFile] = useState("");
+    const [loadedFrom, setLoadedFrom] = useState(initLoadedFrom);
+    const [loadedValues, setLoadedValues] = useState("");
+    const [loadingValuesFile, setLoadingValuesFile] = useState(false);
+    const [loadingValuesModal, setLoadingValuesModal] = useState(false);
 
     const history = useNavigate();
 
@@ -364,6 +374,24 @@ const NewModule = () => {
         setActiveCollapses(new Map());
     }
 
+    const onLoadFromFile = () => {
+        setLoadingValuesFile(true)
+        setLoadedValues("")
+
+        if (newFile.trim() === "") {
+            setError({
+                message: "Invalid values file",
+                description: "Values file can't be empty"
+            })
+            return
+        }
+
+        setLoadingValuesModal(true)
+
+        loadValues(newFile)
+        setLoadingValuesFile(false)
+    }
+
     const getCollapseColor = (fieldName: string) => {
         let kk = new Array(fieldName);
         let key = kk.join('')
@@ -449,6 +477,20 @@ const NewModule = () => {
         }
     }
 
+    function getValueFromNestedObject(obj: any, keys: string[]): any {
+        let currentObj = obj;
+
+        for (const key of keys) {
+            if (typeof currentObj === 'object' && currentObj !== null && key in currentObj) {
+                currentObj = currentObj[key];
+            } else {
+                return false;
+            }
+        }
+
+        return currentObj;
+    }
+
     function mapFields(fields: any[], parentFieldID: string | string[], parent: string, level: number, arrayIndexLifetime: number, arrayField?: any, required?: string[]) {
         const formFields: {} | any = [];
 
@@ -513,7 +555,19 @@ const NewModule = () => {
                     )
                     return;
                 case "boolean":
-                    let checked = form.getFieldValue([parentFieldID, fieldName]) === true ? "checked" : "unchecked"
+                    let moduleValues: any = form.getFieldsValue()
+
+                    let k = []
+                    for (const item of parentFieldID) {
+                        if (item === '') {
+                            continue
+                        }
+
+                        k.push(item)
+                    }
+                    k.push(fieldName)
+
+                    let checked = getValueFromNestedObject(moduleValues, k) === true ? "checked" : "unchecked"
                     formFields.push(
                         <Form.Item initialValue={field.initialValue} name={fieldName} id={fieldName}
                                    label={field.display_name} valuePropName={checked}>
@@ -666,6 +720,63 @@ const NewModule = () => {
         return formFields
     }
 
+    const handleCancel = () => {
+        setLoadingValuesModal(false);
+    };
+
+    const handleImportValues = () => {
+        form.setFieldsValue(YAML.parse(loadedValues))
+        setLoadedValues("")
+        setLoadingValuesModal(false);
+    };
+
+    const renderLoadedFromFiles = () => {
+        if (loadedFrom.length === 0) {
+            return
+        }
+
+        const files: {} | any = [];
+
+        loadedFrom.forEach((value: string) => {
+            files.push(<p>{value}</p>)
+        })
+
+        return <Collapse ghost items={[
+            {
+                key: '1',
+                label: 'Imported values from',
+                children: files,
+            }
+        ]} />
+    }
+
+    const loadValues = (fileName: string) => {
+        axios.get(fileName).then(res => {
+            setLoadedValues(res.data)
+            setError({
+                message: "",
+                description: ""
+            })
+            let tmp = loadedFrom
+            tmp.push(newFile)
+            setLoadedFrom(tmp)
+        }).catch(function (error) {
+            // setLoadingTemplate(false);
+            // setSuccessLoad(false);
+            if (error.response === undefined) {
+                setError({
+                    message: String(error),
+                    description: "Error loading file; Check if the file path is correct"
+                })
+            } else {
+                setError({
+                    message: error.response.data,
+                    description: "Unable to fetch values file; Check if the file path is correct"
+                })
+            }
+        });
+    }
+
     const onFinishFailed = () => {
         message.error('Submit failed!');
     };
@@ -784,6 +895,9 @@ const NewModule = () => {
                         </Divider>
                         {mapFields(config.fields, "",  "" , 0, 0)}
                         <div style={{textAlign: "right"}}>
+                            <Button loading={loading} onClick={function () {setLoadingValuesModal(true)}} name="Save">
+                                Load values from file
+                            </Button>{' '}
                             <Button type="primary" loading={loading} htmlType="submit" name="Save">
                                 Save
                             </Button>{' '}
@@ -794,6 +908,67 @@ const NewModule = () => {
                     </Form>
                 </Col>
             </Row>
+            <Modal
+                title="Values to import"
+                visible={loadingValuesModal}
+                onCancel={handleCancel}
+                onOk={handleImportValues}
+                width={'50%'}
+            >
+                {
+                    error.message.length !== 0 && <Alert
+                        message={error.message}
+                        description={error.description}
+                        type="error"
+                        closable
+                        afterClose={() => {setError({
+                            message: "",
+                            description: "",
+                        })}}
+                        style={{marginBottom: '20px'}}
+                    />
+                }
+                {renderLoadedFromFiles()}
+                <Input
+                    placeholder={"File reference"}
+                    style={{width: '90%', marginBottom: "10px"}}
+                    onChange={(value: any) => {
+                        setNewFile(value.target.value)
+                    }}
+                />
+                {'  '}
+                <Button
+                    type="primary"
+                    htmlType="button"
+                    style={{width: '9%'}}
+                    onClick={onLoadFromFile}
+                    loading={loadingValuesFile}
+                >
+                    Load
+                </Button>
+                <AceEditor
+                    mode={"yaml"}
+                    theme="github"
+                    fontSize={12}
+                    showPrintMargin={true}
+                    showGutter={true}
+                    highlightActiveLine={true}
+                    onChange={setLoadedValues}
+                    setOptions={{
+                        enableBasicAutocompletion: true,
+                        enableLiveAutocompletion: true,
+                        enableSnippets: false,
+                        showLineNumbers: true,
+                        tabSize: 4,
+                        useWorker: false
+                    }}
+                    style={{
+                        height: "25em",
+                        width: "100%"
+                    }}
+                    value={loadedValues}
+                />
+            </Modal>
         </div>
     );
 }
