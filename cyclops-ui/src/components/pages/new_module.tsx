@@ -13,7 +13,7 @@ import {
     Space,
     Switch,
     Typography,
-    Tooltip, message, Modal, CollapseProps
+    Tooltip, message, Modal, CollapseProps, Checkbox
 } from 'antd';
 import axios from 'axios';
 import {useNavigate} from 'react-router';
@@ -75,7 +75,7 @@ const NewModule = () => {
     const [newFile, setNewFile] = useState("");
     const [loadedFrom, setLoadedFrom] = useState(initLoadedFrom);
     const [loadedValues, setLoadedValues] = useState("");
-    // const [loadingValuesFile, setLoadingValuesFile] = useState(false);
+    const [loadingValuesFile, setLoadingValuesFile] = useState(false);
     const [loadingValuesModal, setLoadingValuesModal] = useState(false);
 
     const history = useNavigate();
@@ -375,6 +375,9 @@ const NewModule = () => {
     }
 
     const onLoadFromFile = () => {
+        setLoadingValuesFile(true)
+        setLoadedValues("")
+
         if (newFile.trim() === "") {
             setError({
                 message: "Invalid values file",
@@ -385,11 +388,8 @@ const NewModule = () => {
 
         setLoadingValuesModal(true)
 
-        let tmp = loadedFrom
-        tmp.push(newFile)
-        setLoadedFrom(tmp)
-
         loadValues(newFile)
+        setLoadingValuesFile(false)
     }
 
     const getCollapseColor = (fieldName: string) => {
@@ -477,6 +477,20 @@ const NewModule = () => {
         }
     }
 
+    function getValueFromNestedObject(obj: any, keys: string[]): any {
+        let currentObj = obj;
+
+        for (const key of keys) {
+            if (typeof currentObj === 'object' && currentObj !== null && key in currentObj) {
+                currentObj = currentObj[key];
+            } else {
+                return false;
+            }
+        }
+
+        return currentObj;
+    }
+
     function mapFields(fields: any[], parentFieldID: string | string[], parent: string, level: number, arrayIndexLifetime: number, arrayField?: any, required?: string[]) {
         const formFields: {} | any = [];
 
@@ -541,7 +555,19 @@ const NewModule = () => {
                     )
                     return;
                 case "boolean":
-                    let checked = form.getFieldValue([parentFieldID, fieldName]) === true ? "checked" : "unchecked"
+                    let moduleValues: any = form.getFieldsValue()
+
+                    let k = []
+                    for (const item of parentFieldID) {
+                        if (item === '') {
+                            continue
+                        }
+
+                        k.push(item)
+                    }
+                    k.push(fieldName)
+
+                    let checked = getValueFromNestedObject(moduleValues, k) === true ? "checked" : "unchecked"
                     formFields.push(
                         <Form.Item initialValue={field.initialValue} name={fieldName} id={fieldName}
                                    label={field.display_name} valuePropName={checked}>
@@ -702,6 +728,7 @@ const NewModule = () => {
         form.setFieldsValue(YAML.parse(loadedValues))
         setLoadedValues("")
         setLoadingValuesModal(false);
+        console.log(form.getFieldsValue());
     };
 
     const renderLoadedFromFiles = () => {
@@ -727,18 +754,25 @@ const NewModule = () => {
     const loadValues = (fileName: string) => {
         axios.get(fileName).then(res => {
             setLoadedValues(res.data)
+            setError({
+                message: "",
+                description: ""
+            })
+            let tmp = loadedFrom
+            tmp.push(newFile)
+            setLoadedFrom(tmp)
         }).catch(function (error) {
             // setLoadingTemplate(false);
             // setSuccessLoad(false);
             if (error.response === undefined) {
                 setError({
                     message: String(error),
-                    description: "Check if Cyclops backend is available on: " + window.__RUNTIME_CONFIG__.REACT_APP_CYCLOPS_CTRL_HOST
+                    description: "Error loading file; Check if the file path is correct"
                 })
             } else {
                 setError({
                     message: error.response.data,
-                    description: "Unable to fetch values file; Check if the file name was spelled correctly"
+                    description: "Unable to fetch values file; Check if the file path is correct"
                 })
             }
         });
@@ -880,7 +914,7 @@ const NewModule = () => {
                 visible={loadingValuesModal}
                 onCancel={handleCancel}
                 onOk={handleImportValues}
-                width={'70%'}
+                width={'50%'}
             >
                 {
                     error.message.length !== 0 && <Alert
@@ -909,7 +943,7 @@ const NewModule = () => {
                     htmlType="button"
                     style={{width: '9%'}}
                     onClick={onLoadFromFile}
-                    loading={loadingTemplate}
+                    loading={loadingValuesFile}
                 >
                     Load
                 </Button>
@@ -920,6 +954,7 @@ const NewModule = () => {
                     showPrintMargin={true}
                     showGutter={true}
                     highlightActiveLine={true}
+                    onChange={setLoadedValues}
                     setOptions={{
                         enableBasicAutocompletion: true,
                         enableLiveAutocompletion: true,
