@@ -63,12 +63,8 @@ You can now access Cyclops in your browser on [http://localhost:3000](http://loc
 ## :chart_with_upwards_trend: Future work
 
 * RBAC
-    * Set permissions for each Cyclops user
-* Cluster Nodes overview
-    * Check out node resources
+* Cluster nodes overview
 * Git as manifest destination
-    * Cyclops is currently deploying rendered manifests directly to the cluster, but it should support Git as the destination
-* Customizable details page
-    * Cherry pick information about your module to be shown on your module page
+* Customizable Module details page
 
 Feel free to suggest features you would like to see!
