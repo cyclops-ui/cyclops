@@ -3,7 +3,9 @@ package k8sclient
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"sort"
+	"strconv"
 	"strings"
 
 	cyclopsv1alpha1 "github.com/cyclops-ui/cycops-ctrl/api/v1alpha1"
@@ -16,6 +18,7 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/labels"
+	"k8s.io/apimachinery/pkg/runtime"
 	yaml2 "k8s.io/apimachinery/pkg/util/yaml"
 )
 
@@ -578,4 +581,239 @@ func getManifest(object interface{}, kind, apiVersion string) (string, error) {
 	}
 
 	return string(manifest), err
+}
+
+func (k *KubernetesClient) GetAllResourcesForModule(name string) (*dto.Hierarchy, error) {
+	out := make([]unstructured.Unstructured, 0, 0)
+
+	deployments, err := k.clientset.AppsV1().Deployments("").List(context.Background(), metav1.ListOptions{
+		LabelSelector: "cyclops.module=" + name,
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	for _, item := range deployments.Items {
+		unstructuredDeployment, err := runtime.DefaultUnstructuredConverter.ToUnstructured(&item)
+		if err != nil {
+			fmt.Println("Error converting Deployment to unstructured:", err)
+			continue
+		}
+		unstructuredDeployment["kind"] = "Deployment"
+		unstructuredDeployment["apiVersion"] = "apps/v1"
+		out = append(out, unstructured.Unstructured{Object: unstructuredDeployment})
+
+		// region get replicasets
+		replicasets, err := k.clientset.AppsV1().ReplicaSets(item.Namespace).List(context.Background(), metav1.ListOptions{
+			LabelSelector: labels.Set(item.Spec.Selector.MatchLabels).String(),
+		})
+		if err != nil {
+			fmt.Println("Error getting replicasets for deployment", item.Name)
+			continue
+		}
+
+		for _, rs := range replicasets.Items {
+			unstructuredReplicaset, err := runtime.DefaultUnstructuredConverter.ToUnstructured(&rs)
+			if err != nil {
+				fmt.Println("Error converting Deployment to unstructured:", err)
+				continue
+			}
+			unstructuredReplicaset["kind"] = "ReplicaSet"
+			unstructuredReplicaset["apiVersion"] = "apps/v1"
+			out = append(out, unstructured.Unstructured{Object: unstructuredReplicaset})
+		}
+		// endregion
+
+		// region get pods
+		pods, err := k.clientset.CoreV1().Pods(item.Namespace).List(context.Background(), metav1.ListOptions{
+			LabelSelector: labels.Set(item.Spec.Selector.MatchLabels).String(),
+		})
+		if err != nil {
+			fmt.Println("Error getting pods for deployment", item.Name)
+			continue
+		}
+
+		for _, pod := range pods.Items {
+			unstructuredPod, err := runtime.DefaultUnstructuredConverter.ToUnstructured(&pod)
+			if err != nil {
+				fmt.Println("Error converting Deployment to unstructured:", err)
+				continue
+			}
+			unstructuredPod["kind"] = "Pod"
+			unstructuredPod["apiVersion"] = ""
+			out = append(out, unstructured.Unstructured{Object: unstructuredPod})
+		}
+		// endregion
+	}
+
+	statefulsets, err := k.clientset.AppsV1().StatefulSets("").List(context.Background(), metav1.ListOptions{
+		LabelSelector: "cyclops.module=" + name,
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	for _, item := range statefulsets.Items {
+		unstructuredStatefulset, err := runtime.DefaultUnstructuredConverter.ToUnstructured(&item)
+		if err != nil {
+			fmt.Println("Error converting Deployment to unstructured:", err)
+			continue
+		}
+		unstructuredStatefulset["kind"] = "StatefulSet"
+		unstructuredStatefulset["apiVersion"] = "apps/v1"
+		out = append(out, unstructured.Unstructured{Object: unstructuredStatefulset})
+
+		// region get pods
+		pods, err := k.clientset.CoreV1().Pods(item.Namespace).List(context.Background(), metav1.ListOptions{
+			LabelSelector: labels.Set(item.Spec.Selector.MatchLabels).String(),
+		})
+		if err != nil {
+			fmt.Println("Error getting pods for statefulset", item.Name)
+			continue
+		}
+
+		for _, pod := range pods.Items {
+			unstructuredPod, err := runtime.DefaultUnstructuredConverter.ToUnstructured(&pod)
+			if err != nil {
+				fmt.Println("Error converting Deployment to unstructured:", err)
+				continue
+			}
+			unstructuredPod["kind"] = "Pod"
+			unstructuredPod["apiVersion"] = ""
+			out = append(out, unstructured.Unstructured{Object: unstructuredPod})
+		}
+		// endregion
+	}
+
+	pods, err := k.clientset.CoreV1().Pods("").List(context.Background(), metav1.ListOptions{
+		LabelSelector: "cyclops.module=" + name,
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	for _, item := range pods.Items {
+		unstructuredPod, err := runtime.DefaultUnstructuredConverter.ToUnstructured(&item)
+		if err != nil {
+			fmt.Println("Error converting Deployment to unstructured:", err)
+			continue
+		}
+		unstructuredPod["kind"] = "Pod"
+		unstructuredPod["apiVersion"] = ""
+		out = append(out, unstructured.Unstructured{Object: unstructuredPod})
+	}
+
+	services, err := k.clientset.CoreV1().Services("").List(context.Background(), metav1.ListOptions{
+		LabelSelector: "cyclops.module=" + name,
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	for _, item := range services.Items {
+		unstructuredService, err := runtime.DefaultUnstructuredConverter.ToUnstructured(&item)
+		if err != nil {
+			fmt.Println("Error converting Deployment to unstructured:", err)
+			continue
+		}
+		unstructuredService["kind"] = "Pod"
+		unstructuredService["apiVersion"] = ""
+		out = append(out, unstructured.Unstructured{Object: unstructuredService})
+	}
+
+	hierarchy := &dto.Hierarchy{
+		Nodes: []dto.Node{
+			{
+				ID: "0",
+				Value: dto.NodeValue{
+					Title: fmt.Sprintf("Module %v", name),
+					Items: []dto.NodeValueItems{
+						{
+							Text:  "Name",
+							Value: name,
+						},
+					},
+				},
+			},
+		},
+		Edges: make([]dto.Edge, 0),
+	}
+
+	indexes := make(map[metav1.OwnerReference]int)
+	for i, u := range out {
+		indexes[unstructuredToOwnerReference(u)] = i + 1
+		if u.GetLabels()["cyclops.module"] == name {
+			hierarchy.Edges = append(hierarchy.Edges, dto.Edge{
+				Source: "0",
+				Target: strconv.Itoa(i + 1),
+			})
+		}
+	}
+
+	relationships := make(map[metav1.OwnerReference][]metav1.OwnerReference)
+	for _, u := range out {
+		self := unstructuredToOwnerReference(u)
+		for _, reference := range u.GetOwnerReferences() {
+			mapped := remapOwnerReference(reference)
+
+			if _, ok := relationships[mapped]; !ok {
+				relationships[mapped] = make([]metav1.OwnerReference, 0)
+			}
+
+			relationships[mapped] = append(relationships[mapped], self)
+		}
+	}
+
+	for reference, i := range indexes {
+		hierarchy.Nodes = append(hierarchy.Nodes, dto.Node{
+			ID: strconv.Itoa(i),
+			Value: dto.NodeValue{
+				Title: reference.Name,
+				Items: []dto.NodeValueItems{
+					{
+						Text: reference.Kind,
+						//Value: reference.Kind,
+						//Icon:  "https://raw.githubusercontent.com/kubernetes/community/master/icons/png/resources/labeled/pod-128.png",
+					},
+				},
+			},
+		})
+	}
+
+	sort.Slice(hierarchy.Nodes, func(i, j int) bool {
+		if hierarchy.Nodes[i].Value.Title != hierarchy.Nodes[j].Value.Title {
+			return hierarchy.Nodes[i].Value.Title < hierarchy.Nodes[j].Value.Title
+		}
+
+		return hierarchy.Nodes[i].Value.Items[0].Text < hierarchy.Nodes[j].Value.Items[0].Text
+	})
+
+	for parent, children := range relationships {
+		for _, child := range children {
+			hierarchy.Edges = append(hierarchy.Edges, dto.Edge{
+				Source: strconv.Itoa(indexes[parent]),
+				Target: strconv.Itoa(indexes[child]),
+			})
+		}
+	}
+
+	return hierarchy, nil
+}
+
+func unstructuredToOwnerReference(u unstructured.Unstructured) metav1.OwnerReference {
+	return metav1.OwnerReference{
+		APIVersion: u.GetAPIVersion(),
+		Kind:       u.GetKind(),
+		Name:       u.GetName(),
+		UID:        u.GetUID(),
+	}
+}
+
+func remapOwnerReference(or metav1.OwnerReference) metav1.OwnerReference {
+	return metav1.OwnerReference{
+		APIVersion: or.APIVersion,
+		Kind:       or.Kind,
+		Name:       or.Name,
+		UID:        or.UID,
+	}
 }
