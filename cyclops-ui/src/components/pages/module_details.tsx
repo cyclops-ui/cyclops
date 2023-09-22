@@ -3,7 +3,7 @@ import {
     Alert,
     Button,
     Col,
-    Collapse, Descriptions,
+    Collapse, CollapseProps, Descriptions,
     Divider,
     Form,
     Input,
@@ -36,10 +36,13 @@ import {
 } from "@ant-design/icons";
 import Link from "antd/lib/typography/Link";
 import { formatDistanceToNow } from 'date-fns';
+import { FlowAnalysisGraph } from '@ant-design/graphs';
 
 import "ace-builds/src-noconflict/mode-jsx";
 import {CodeBlock} from "react-code-blocks";
 import ReactAce from "react-ace";
+import {FlowGraphEdgeData} from "@ant-design/graphs/es/interface";
+import {FlowAnalysisNodeData} from "@ant-design/graphs/es/components/flow-analysis-graph";
 const languages = [
     "javascript",
     "java",
@@ -126,6 +129,7 @@ const ModuleDetails = () => {
     const [loading, setLoading] = useState(false);
     const [loadModule, setLoadModule] = useState(false);
     const [loadResources, setLoadResources] = useState(false);
+    const [loadResourcesHierarchy, setLoadResourcesHierarchy] = useState(false);
     const [deleteName, setDeleteName] = useState("");
     const [resources, setResources] = useState([]);
     const [module, setModule] = useState<module>({
@@ -141,6 +145,11 @@ const ModuleDetails = () => {
             }
         }
     });
+
+    const [hierarchyData, setHierarchyData] = useState({
+        nodes: [],
+        edges: []
+    })
 
     const [activeCollapses, setActiveCollapses] = useState(new Map());
     const updateActiveCollapses = (k: any, v: any) => {
@@ -190,13 +199,33 @@ const ModuleDetails = () => {
             }
         });
 
+        axios.get(window.__RUNTIME_CONFIG__.REACT_APP_CYCLOPS_CTRL_HOST + `/modules/` + moduleName + `/resources/hierarchy`).then(res => {
+            setHierarchyData(res.data);
+            setLoadResourcesHierarchy(true);
+        }).catch(error => {
+            console.log(error)
+            console.log(error.response)
+            setLoading(false);
+            setLoadResourcesHierarchy(true);
+            if (error.response === undefined) {
+                setError({
+                    message: String(error),
+                    description: "Check if Cyclops backend is available on: " + window.__RUNTIME_CONFIG__.REACT_APP_CYCLOPS_CTRL_HOST
+                })
+            } else {
+                setError(error.response.data);
+            }
+        });
+
         // setInterval(function () {
-        //     axios.get(window.__RUNTIME_CONFIG__.REACT_APP_CYCLOPS_CTRL_HOST + `/modules/` + moduleName + `/resources`).then(res => {
-        //         setResources(res.data);
+        //     axios.get(window.__RUNTIME_CONFIG__.REACT_APP_CYCLOPS_CTRL_HOST + `/modules/` + moduleName + `/resources/hierarchy`).then(res => {
+        //         setHierarchyData(res.data);
+        //         setLoadResources(true);
         //     }).catch(error => {
         //         console.log(error)
         //         console.log(error.response)
         //         setLoading(false);
+        //         setLoadResources(true);
         //         if (error.response === undefined) {
         //             setError({
         //                 message: String(error),
@@ -649,7 +678,7 @@ const ModuleDetails = () => {
                         </Row>
                     </Collapse.Panel>
                 )
-                return;
+                return
             case "StatefulSet":
                 var deletedWarning = (<p/>)
 
@@ -1214,7 +1243,7 @@ const ModuleDetails = () => {
     })
 
     const resourcesLoading = () => {
-        if (loadResources === true) {
+        if (loadResources) {
             return <Collapse onChange={function (values: string | string[]) {
                 let m = new Map();
                 for (let value of values) {
@@ -1225,6 +1254,32 @@ const ModuleDetails = () => {
             }}>
                 {resourceCollapses}
             </Collapse>
+        } else {
+            return <Spin tip="Loading" size="large"/>
+        }
+    }
+
+    const resourceHierarchyLoading = () => {
+        if (loadResourcesHierarchy) {
+            return <FlowAnalysisGraph
+                style={{height: "900px"}}
+                edgeCfg={{
+                    endArrow: {
+                        show: true
+                    }
+                }}
+                nodeCfg={{
+                    size: [200, 50],
+                    style: edge => {
+                        return {
+                            radius: 2,
+                        };
+                    }
+                }}
+                autoFit={true}
+                data={hierarchyData}
+                behaviors={['drag-canvas', 'drag-node']}
+            />
         } else {
             return <Spin tip="Loading" size="large"/>
         }
@@ -1310,6 +1365,20 @@ const ModuleDetails = () => {
         return statusIcon
     }
 
+    const items: TabsProps['items'] = [
+        {
+            key: '1',
+            label: 'Details',
+            children: resourcesLoading(),
+        },
+        {
+            key: '2',
+            label: 'Hierarchy',
+            children:  resourceHierarchyLoading(),
+        }
+    ];
+
+
     return (
         <div>
             {
@@ -1340,8 +1409,10 @@ const ModuleDetails = () => {
                     }} danger block loading={loading}>Delete</Button>
                 </Col>
             </Row>
-            <Divider style={{fontSize: '120%'}} orientationMargin="0" orientation={"left"}>Resources</Divider>
-            {resourcesLoading()}
+            {/*<Divider style={{fontSize: '120%'}} orientationMargin="0" orientation={"left"}>Resources</Divider>*/}
+
+            <Tabs defaultActiveKey="1" items={items}/>
+
             <Modal
                 title="Delete module"
                 visible={loading}

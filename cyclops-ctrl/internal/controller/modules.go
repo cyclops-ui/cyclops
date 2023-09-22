@@ -209,6 +209,19 @@ func (m *Modules) ResourcesForModule(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, resources)
 }
 
+func (m *Modules) ResourcesHierarchyForModule(ctx *gin.Context) {
+	ctx.Header("Access-Control-Allow-Origin", "*")
+
+	resourcesHierarchy, err := m.kubernetesClient.GetAllResourcesForModule(ctx.Param("name"))
+	if err != nil {
+		fmt.Println(err)
+		ctx.JSON(http.StatusInternalServerError, dto.NewError("Error fetching module resources", err.Error()))
+		return
+	}
+
+	ctx.JSON(http.StatusOK, resourcesHierarchy)
+}
+
 func (m *Modules) Template(ctx *gin.Context) {
 	ctx.Header("Access-Control-Allow-Origin", "*")
 
