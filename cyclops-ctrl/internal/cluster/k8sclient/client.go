@@ -21,6 +21,8 @@ import (
 	"k8s.io/client-go/kubernetes"
 	ctrl "sigs.k8s.io/controller-runtime"
 
+	metrics "k8s.io/metrics/pkg/client/clientset/versioned"
+
 	"github.com/cyclops-ui/cycops-ctrl/internal/cluster/v1alpha1"
 	"github.com/cyclops-ui/cycops-ctrl/internal/models/dto"
 )
@@ -38,6 +40,8 @@ type KubernetesClient struct {
 	discovery *discovery.DiscoveryClient
 
 	moduleset *v1alpha1.ExampleV1Alpha1Client
+
+	metrics *metrics.Clientset
 }
 
 func New() (*KubernetesClient, error) {
@@ -90,6 +94,11 @@ func createLocalClient() (*KubernetesClient, error) {
 		panic(err.Error())
 	}
 
+	mc, err := metrics.NewForConfig(config)
+	if err != nil {
+		panic(err)
+	}
+
 	//clientset.CoreV1().Services("").Watch()
 
 	return &KubernetesClient{
@@ -97,6 +106,7 @@ func createLocalClient() (*KubernetesClient, error) {
 		discovery: discovery,
 		clientset: clientset,
 		moduleset: moduleSet,
+		metrics:   mc,
 	}, nil
 }
 
@@ -288,4 +298,14 @@ func (k *KubernetesClient) CreateDynamic(obj *unstructured.Unstructured) error {
 	)
 
 	return err
+}
+
+func (k *KubernetesClient) ListNodes() ([]apiv1.Node, error) {
+	nodeList, err := k.clientset.CoreV1().Nodes().List(context.TODO(), metav1.ListOptions{})
+	return nodeList.Items, err
+}
+
+func (k *KubernetesClient) GetNode(name string) (*apiv1.Node, error) {
+	node, err := k.clientset.CoreV1().Nodes().Get(context.TODO(), name, metav1.GetOptions{})
+	return node, err
 }
