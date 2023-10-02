@@ -89,6 +89,7 @@ func RequestToModule(req dto.Module) (cyclopsv1alpha1.Module, error) {
 				Raw: data,
 			},
 		},
+		History: make([]cyclopsv1alpha1.HistoryEntry, 0),
 	}, nil
 }
 
