@@ -4,14 +4,15 @@ import (
 	"fmt"
 	"net/http"
 	"os"
+	"strings"
 
-	"github.com/gin-gonic/gin"
-
+	"github.com/cyclops-ui/cycops-ctrl/api/v1alpha1"
 	"github.com/cyclops-ui/cycops-ctrl/internal/cluster/k8sclient"
 	"github.com/cyclops-ui/cycops-ctrl/internal/mapper"
 	"github.com/cyclops-ui/cycops-ctrl/internal/models/dto"
 	"github.com/cyclops-ui/cycops-ctrl/internal/storage/templates"
 	"github.com/cyclops-ui/cycops-ctrl/internal/template"
+	"github.com/gin-gonic/gin"
 )
 
 type Modules struct {
@@ -92,6 +93,79 @@ func (m *Modules) DeleteModule(ctx *gin.Context) {
 	ctx.Status(http.StatusOK)
 }
 
+func (m *Modules) GetModuleHistory(ctx *gin.Context) {
+	ctx.Header("Access-Control-Allow-Origin", "*")
+
+	module, err := m.kubernetesClient.GetModule(ctx.Param("name"))
+	if err != nil {
+		fmt.Println(err)
+		ctx.Status(http.StatusInternalServerError)
+		return
+	}
+
+	ctx.JSON(http.StatusOK, module.History)
+}
+
+func (m *Modules) Manifest(ctx *gin.Context) {
+	ctx.Header("Access-Control-Allow-Origin", "*")
+
+	var request v1alpha1.ModuleSpec
+	if err := ctx.BindJSON(&request); err != nil {
+		fmt.Println("error binding request", request)
+		ctx.JSON(http.StatusBadRequest, dto.NewError("Error loading template", err.Error()))
+		return
+	}
+
+	targetTemplate, err := m.templates.GetConfig(request.TemplateRef)
+	if err != nil {
+		fmt.Println(err)
+		ctx.Status(http.StatusInternalServerError)
+		return
+	}
+
+	manifest, err := template.HelmTemplate(v1alpha1.Module{Spec: request}, targetTemplate)
+	if err != nil {
+		fmt.Println(err)
+		ctx.Status(http.StatusInternalServerError)
+		return
+	}
+
+	manifest = strings.TrimPrefix(manifest, "\n---")
+	manifest = strings.TrimSuffix(manifest, "---\n")
+
+	ctx.String(http.StatusOK, manifest)
+}
+
+func (m *Modules) CurrentManifest(ctx *gin.Context) {
+	ctx.Header("Access-Control-Allow-Origin", "*")
+
+	module, err := m.kubernetesClient.GetModule(ctx.Param("name"))
+	if err != nil {
+		fmt.Println(err)
+		ctx.Status(http.StatusInternalServerError)
+		return
+	}
+
+	targetTemplate, err := m.templates.GetConfig(module.Spec.TemplateRef)
+	if err != nil {
+		fmt.Println(err)
+		ctx.Status(http.StatusInternalServerError)
+		return
+	}
+
+	manifest, err := template.HelmTemplate(*module, targetTemplate)
+	if err != nil {
+		fmt.Println(err)
+		ctx.Status(http.StatusInternalServerError)
+		return
+	}
+
+	manifest = strings.TrimPrefix(manifest, "---\n")
+	manifest = strings.TrimSuffix(manifest, "---\n")
+
+	ctx.String(http.StatusOK, manifest)
+}
+
 func (m *Modules) DeleteModuleResource(ctx *gin.Context) {
 	ctx.Header("Access-Control-Allow-Origin", "*")
 
@@ -162,6 +236,17 @@ func (m *Modules) UpdateModule(ctx *gin.Context) {
 		ctx.JSON(http.StatusInternalServerError, dto.NewError("Error creating module", err.Error()))
 		return
 	}
+
+	history := curr.History
+	if curr.History == nil {
+		history = make([]v1alpha1.HistoryEntry, 0)
+	}
+
+	module.History = append(history, v1alpha1.HistoryEntry{
+		Generation:  curr.Generation,
+		TemplateRef: curr.Spec.TemplateRef,
+		Values:      curr.Spec.Values,
+	})
 
 	module.SetResourceVersion(curr.GetResourceVersion())
 
@@ -360,4 +445,29 @@ func (m *Modules) DownloadLogs(ctx *gin.Context) {
 	ctx.Header("Content-Type", "application/octet-stream")
 	ctx.Header("Content-Transfer-Encoding", "binary")
 	ctx.File(tempFile.Name())
+}
+
+func getTargetGeneration(generation string, module *v1alpha1.Module) (*v1alpha1.Module, bool) {
+	// no generation specified means current generation
+	if len(generation) == 0 {
+		return module, true
+	}
+
+	var target *v1alpha1.HistoryEntry
+	for _, entry := range module.History {
+		if fmt.Sprintf("%v", entry.Generation) == generation {
+			target = &entry
+		}
+	}
+
+	if target == nil {
+		return nil, false
+	}
+
+	return &v1alpha1.Module{
+		TypeMeta:   module.TypeMeta,
+		ObjectMeta: module.ObjectMeta,
+		Spec:       module.Spec,
+		Status:     module.Status,
+	}, true
 }

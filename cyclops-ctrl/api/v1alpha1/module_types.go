@@ -66,6 +66,12 @@ type Resource struct {
 	Health    string `json:"health,omitempty" protobuf:"bytes,7,opt,name=health"`
 }
 
+type HistoryEntry struct {
+	Generation  int64                `json:"generation"`
+	TemplateRef TemplateRef          `json:"template"`
+	Values      apiextensionsv1.JSON `json:"values"`
+}
+
 //+kubebuilder:object:root=true
 //+kubebuilder:subresource:status
 
@@ -74,8 +80,9 @@ type Module struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`
 
-	Spec   ModuleSpec   `json:"spec,omitempty"`
-	Status ModuleStatus `json:"status,omitempty"`
+	Spec    ModuleSpec     `json:"spec,omitempty"`
+	Status  ModuleStatus   `json:"status,omitempty"`
+	History []HistoryEntry `json:"history,omitempty"`
 }
 
 //+kubebuilder:object:root=true

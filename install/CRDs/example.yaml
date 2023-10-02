@@ -1,0 +1,26 @@
+apiVersion: cyclops-ui.com/v1alpha1
+kind: Module
+metadata:
+  name: test
+spec:
+  template:
+    git:
+      commit: head
+      path: path
+      repo: repo
+    name: ""
+    version: ""
+  values: 
+    replicas: 3
+status:
+  history:
+    - generation: 3
+      template:
+        git:
+          commit: head
+          path: path
+          repo: repo
+        name: ""
+        version: ""
+      values:
+        replicas: 2

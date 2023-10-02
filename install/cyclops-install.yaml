@@ -23,6 +23,44 @@ spec:
               of an object. Servers should convert recognized schemas to the latest
               internal value, and may reject unrecognized values. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources'
               type: string
+            history:
+              items:
+                properties:
+                  generation:
+                    format: int64
+                    type: integer
+                  template:
+                    properties:
+                      git:
+                        properties:
+                          commit:
+                            type: string
+                          path:
+                            type: string
+                          repo:
+                            type: string
+                        required:
+                          - commit
+                          - path
+                          - repo
+                        type: object
+                      name:
+                        type: string
+                      version:
+                        type: string
+                    required:
+                      - git
+                      - name
+                      - version
+                    type: object
+                  values:
+                    x-kubernetes-preserve-unknown-fields: true
+                required:
+                  - generation
+                  - template
+                  - values
+                type: object
+              type: array
             kind:
               description: 'Kind is a string value representing the REST resource this
               object represents. Servers may infer this from the endpoint the client

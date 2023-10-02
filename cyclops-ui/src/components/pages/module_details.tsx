@@ -1336,6 +1336,11 @@ const ModuleDetails = () => {
                 </Col>
                 <Col>
                     <Button onClick={function () {
+                        window.location.href = "/modules/" + moduleName + "/rollback"
+                    }} block>Rollback</Button>
+                </Col>
+                <Col>
+                    <Button onClick={function () {
                         setLoading(true)
                     }} danger block loading={loading}>Delete</Button>
                 </Col>
