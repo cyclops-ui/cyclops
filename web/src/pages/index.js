@@ -36,7 +36,7 @@ function HomepageHeader() {
                     <Link
                         className="button button--secondary button--lg"
                         to="/docs/about">
-                        Read the docs
+                        Try it for free
                     </Link>
                 </div>
                 <div className={styles.support}>
