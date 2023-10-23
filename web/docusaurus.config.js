@@ -63,6 +63,7 @@ const config = {
         backgroundColor: '#10357A',
         textColor: '#FFF',
         isCloseable: false,
+
         content:
             '⭐ Help us shine brighter by showing your support - give us a star on <a href="https://github.com/cyclops-ui/cyclops">GitHub</a>! ⭐',
       },
@@ -81,8 +82,13 @@ const config = {
           },
           {
             href: 'https://github.com/cyclops-ui/cyclops',
-            label: 'Github',
             position: 'right',
+            className: 'header-github-link',
+          },
+          {
+            href: "https://discord.com/invite/8ErnK3qDb3",
+            className: "header-discord-link",
+            position: "right",
           },
         ],
       },
