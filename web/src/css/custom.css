@@ -30,6 +30,30 @@ html[data-theme='light'] footer {
   background-color: #e37a00;
 }
 
+.button.button--discord {
+  width: 80%;
+  background-color: #7e61ab;
+  color: #FFFFFF;
+  padding-left: 25px;
+  padding-right: 20px;
+}
+
+.button.button--discord:hover {
+  background-color: #634c86;
+}
+
+.button.button--github {
+  width: 80%;
+  background-color: #000000;
+  color: #FFFFFF;
+  padding-left: 25px;
+  padding-right: 25px;
+}
+
+.button.button--github:hover {
+  background-color: #333333;
+}
+
 /* GitHub */
 .header-github-link:hover {
   opacity: 0.6;
