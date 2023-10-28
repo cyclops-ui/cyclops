@@ -1,25 +1,19 @@
 ---
 slug: welcome
 title: Welcome
-authors: [slorber, yangshun]
-tags: [facebook, hello, docusaurus]
+authors: [petarc]
 ---
 
-[Docusaurus blogging features](https://docusaurus.io/docs/blog) are powered by the [blog plugin](https://docusaurus.io/docs/api/plugins/@docusaurus/plugin-content-blog).
+Hi all!
 
-Simply add Markdown files (or folders) to the `blog` directory.
+We are launching a blog post series on topics relevant to people following our startup journey. From technical topics 
+like building high availability apps in Kubernetes to nontechnical ones, like our experience in some of the accelerators
+we have been through.
 
-Regular blog authors can be added to `authors.yml`.
+Overall, we hope you will enjoy the content, and of course, you are more than encouraged to propose some topics you 
+would like to see here on our Discord.
 
-The blog post date can be extracted from filenames, such as:
+Also, if you are interested in contributing to our project, you can find open issues on our GitHub repository, and while
+you are there, give it a star :star:
 
-- `2019-05-30-welcome.md`
-- `2019-05-30-welcome/index.md`
-
-A blog post folder can be convenient to co-locate blog post images:
-
-![Docusaurus Plushie](./docusaurus-plushie-banner.jpeg)
-
-The blog supports tags as well!
-
-**And if you don't want a blog**: just delete this directory, and use `blog: false` in your Docusaurus config.
+**Blog posts coming soon...**
