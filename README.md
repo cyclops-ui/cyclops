@@ -1,5 +1,5 @@
 <p align="center" width="100%">
-<img width="25%" alt="Screenshot 2022-04-03 at 21 48 18" src="https://user-images.githubusercontent.com/72022639/162230553-e669e572-1346-4289-814b-bd23d5b2d100.png">
+<img width="40%" src="https://github.com/cyclops-ui/cyclops/assets/72022639/53009fdd-ff0a-45c8-a04e-cda495e8b34e">
 <p/>
 <h1 align="center">Cyclops</h1>
 <p align="center">Developer friendly Kubernetes</p>
