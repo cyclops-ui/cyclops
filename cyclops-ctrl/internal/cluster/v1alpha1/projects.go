@@ -18,7 +18,6 @@ type ModuleInterface interface {
 	Update(*cyclopsv1alpha1.Module) (*cyclopsv1alpha1.Module, error)
 	Watch(opts metav1.ListOptions) (watch.Interface, error)
 	Delete(name string) error
-	// ...
 }
 
 type moduleClient struct {

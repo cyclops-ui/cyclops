@@ -31,24 +31,6 @@ func (k *KubernetesClient) CreateModule(module cyclopsv1alpha1.Module) error {
 }
 
 func (k *KubernetesClient) UpdateModule(module cyclopsv1alpha1.Module) error {
-	//if err := k.moduleset.Modules("default").Delete(module.Name); err != nil {
-	//	return err
-	//}
-	//
-	//if module.Status.Conditions == nil {
-	//	module.Status.Conditions = make([]metav1.Condition, 0)
-	//}
-	//
-	//module.Status.Conditions = append(module.Status.Conditions, metav1.Condition{
-	//	Type:   "Availability",
-	//	Status: "Available",
-	//	LastTransitionTime: metav1.Time{
-	//		time.Now(),
-	//	},
-	//	Reason:  "All good",
-	//	Message: "good job",
-	//})
-
 	m, err := k.moduleset.Modules(cyclopsNamespace).Update(&module)
 
 	b, err := json.Marshal(m)
