@@ -37,13 +37,6 @@ func (m *Modules) GetModule(ctx *gin.Context) {
 		return
 	}
 
-	//template, err := m.templates.GetConfig(module.Spec.TemplateRef)
-	//if err != nil {
-	//	fmt.Println(err)
-	//	ctx.JSON(http.StatusInternalServerError, dto.NewError("Error loading template", err.Error()))
-	//	return
-	//}
-
 	moduleDTO, err := mapper.ModuleToDTO(*module)
 	if err != nil {
 		fmt.Println(err)

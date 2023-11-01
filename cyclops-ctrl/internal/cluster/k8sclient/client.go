@@ -45,33 +45,6 @@ func New() (*KubernetesClient, error) {
 }
 
 func createLocalClient() (*KubernetesClient, error) {
-	//kubeconfigEnv := os.Getenv("LOCAL_DEV")
-	//var config *rest.Config
-	//var err error
-	//
-	//if len(kubeconfigEnv) != 0 {
-	//	var kubeconfig *string
-	//	if home := homedir.HomeDir(); home != "" {
-	//		kubeconfig = flag.String("kubeconfig", filepath.Join(home, ".kube", "config"), "(optional) absolute path to the kubeconfig file")
-	//	} else {
-	//		kubeconfig = flag.String("kubeconfig", "", "absolute path to the kubeconfig file")
-	//	}
-	//	flag.Parse()
-	//
-	//	fmt.Println("loading local config")
-	//
-	//	config, err = clientcmd.BuildConfigFromFlags("", *kubeconfig)
-	//	if err != nil {
-	//		return nil, err
-	//	}
-	//} else {
-	//	fmt.Println("loading in cluster config")
-	//	config, err = rest.InClusterConfig()
-	//	if err != nil {
-	//		return nil, err
-	//	}
-	//}
-
 	config := ctrl.GetConfigOrDie()
 	clientset, err := kubernetes.NewForConfig(config)
 	if err != nil {
@@ -89,8 +62,6 @@ func createLocalClient() (*KubernetesClient, error) {
 	if err != nil {
 		panic(err.Error())
 	}
-
-	//clientset.CoreV1().Services("").Watch()
 
 	return &KubernetesClient{
 		Dynamic:   dynamic,
