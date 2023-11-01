@@ -107,10 +107,6 @@ const config = {
                 label: 'Installation',
                 to: '/docs/installation/prerequisites',
               },
-              {
-                label: 'Tutorial',
-                to: '/docs/tutorial',
-              },
             ],
           },
           {
