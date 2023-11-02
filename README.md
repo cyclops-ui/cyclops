@@ -24,12 +24,12 @@ the window for deployment mistakes. [Find out more!](https://cyclops-ui.com)
 Find out how to [install](https://cyclops-ui.com/docs/installation/prerequisites) it to your cluster on our landing page
 and give it a go! (~10 minute tutorial)
 
-## :star2: Supporters
-<p>
-    <a href="https://github.com/cyclops-ui/cyclops/stargazers">
-        <img width="100%" src="https://reporoster.com/stars/cyclops-ui/cyclops" alt="Stargazers repo roster for @cyclops-ui/cyclops">
-    </a>
-</p>
+[//]: # (## :star2: Supporters)
+[//]: # (<p>)
+[//]: # (    <a href="https://github.com/cyclops-ui/cyclops/stargazers">)
+[//]: # (        <img width="100%" src="https://reporoster.com/stars/cyclops-ui/cyclops" alt="Stargazers repo roster for @cyclops-ui/cyclops">)
+[//]: # (    </a>)
+[//]: # (</p>)
 
 [//]: # ([![Forkers repo roster for @cyclops-ui/cyclops]&#40;https://reporoster.com/forks/cyclops-ui/cyclops&#41;])
 
