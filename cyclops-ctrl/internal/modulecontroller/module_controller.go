@@ -178,6 +178,7 @@ func (r *ModuleReconciler) generateResources(kClient *k8sclient.KubernetesClient
 			labels = make(map[string]string)
 		}
 
+		labels["app.kubernetes.io/managed-by"] = "cyclops"
 		labels["cyclops.module"] = module.Name
 		obj.SetLabels(labels)
 
@@ -191,37 +192,6 @@ func (r *ModuleReconciler) generateResources(kClient *k8sclient.KubernetesClient
 			continue
 		}
 	}
-
-	//for _, object := range objects {
-	//	switch rs := object.(type) {
-	//	case *appsv1.Deployment:
-	//		labels := rs.GetLabels()
-	//		if labels == nil {
-	//			labels = make(map[string]string)
-	//		}
-	//
-	//		labels["cyclops.module"] = module.Name
-	//		rs.SetLabels(labels)
-	//
-	//		if err := kClient.Deploy(rs); err != nil {
-	//			return err
-	//		}
-	//	case *v1.Service:
-	//		labels := rs.GetLabels()
-	//		if labels == nil {
-	//			labels = make(map[string]string)
-	//		}
-	//
-	//		labels["cyclops.module"] = module.Name
-	//		rs.SetLabels(labels)
-	//
-	//		if err := kClient.DeployService(rs); err != nil {
-	//			return err
-	//		}
-	//	default:
-	//
-	//	}
-	//}
 
 	return nil
 }
