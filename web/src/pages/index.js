@@ -8,9 +8,10 @@ import HomepageFeatures from '@site/src/components/HomepageFeatures';
 
 import helmsman from '/static/img/cyclops_helmsman.png';
 import nuqleus from '/static/img/nuqleus_landscape.png';
-// import nuqleus from '/static/img/nuqleus_logo.png';
-import EITDigital from '/static/img/EIT_digital.png';
-import EIT from '/static/img/EIT.png';
+import zicer from '/static/img/zicer.png';
+
+// import EITDigital from '/static/img/EIT_digital.png';
+// import EIT from '/static/img/EIT.png';
 
 import styles from './index.module.css';
 import Comparison from "../components/Comparison";
@@ -81,7 +82,12 @@ function HomepageHeader() {
                     <ul>
                         <li>
                             <Link to="https://nuqleus.io/">
-                                <img style={{width: 'auto', height: '32px'}} src={nuqleus}/>
+                                <img style={{heigh: 'auto', width: '50%', paddingBottom: '5px'}} src={nuqleus}/>
+                            </Link>
+                        </li>
+                        <li>
+                            <Link to="https://nuqleus.io/">
+                                <img style={{heigh: 'auto', width: '25%'}} src={zicer}/>
                             </Link>
                         </li>
                     </ul>
