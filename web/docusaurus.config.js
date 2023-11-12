@@ -79,6 +79,11 @@ const config = {
           },
           {to: 'blog', label: 'Blog', position: 'left'},
           {
+            href: 'https://www.linkedin.com/company/cyclops-ui',
+            position: 'right',
+            className: 'header-linkedin-link',
+          },
+          {
             href: 'https://github.com/cyclops-ui/cyclops',
             position: 'right',
             className: 'header-github-link',
