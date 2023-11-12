@@ -54,4 +54,4 @@ Once values are entered and saved in the UI, they are passed to the Helm templat
 
 ## Final thoughts
 
-Hope this blog post helped you understand how the rendering part of Cyclops works and demystified the whole project. We briefly touched on [Helm](https://helm.sh/docs/) and [JSON schema](https://json-schema.org/), but both are larger pieces of software than we can't describe in such a short blog post, so we encourage you to check their documentation.
+Hope this blog post helped you understand how the rendering part of Cyclops works and demystified the whole project. We briefly touched on [Helm](https://helm.sh/docs/) and [JSON schema](https://json-schema.org/), but both are larger pieces of software that we can't describe in such a short blog post, so we encourage you to check their documentation.
