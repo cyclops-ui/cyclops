@@ -28,13 +28,13 @@ The usual Helm chart structure is as follows:
 > A few other Helm chart parts are left out on purpose since they are not tangible to the rest of the blog. You can read more about each of those in [Helm’s official documentation](https://helm.sh/docs/topics/charts/)
 
 - `Chart.yaml` - A YAML file containing information about the chart (like name, version…)
-- `templates` - A directory of templates that, when combined with values, will generate valid Kubernetes manifest files.
+- `templates` - A directory of templates that, when combined with values, will generate valid Kubernetes manifest files
 - `values.yaml` - The default configuration values for this chart
 - `values.schema.json` - A JSON Schema for imposing a structure on the `values.yaml` file
 
 When using Helm, you can change your `values.yaml` however you see fit for your application. The problem is that you can change them __however__ you like, which allows you to misconfigure some parts of your application because you misspelled a field or messed up indentation in the `values.yaml`.
 
-Here is where JSON schema from the `values.schema.json` comes in. It is represented as a [JSON schema](https://json-schema.org). It will define which fields you should set and even to which values (e.g., you can specify that a field called replicas can’t be set to lower than 0). Helm won’t let you render a Kubernetes manifest with values that don’t comply with the schema. There is an example of such schema later in the blog, but you can also check it out on [Helms official docs](https://helm.sh/docs/topics/charts/#schema-files)
+Here is where [JSON schema](https://json-schema.org) from the `values.schema.json` comes in. It will define which fields you should set and even to which values (e.g., you can specify that a field called replicas can’t be set to lower than 0). Helm won’t let you render a Kubernetes manifest with values that don’t comply with the schema. There is an example of such schema later in the blog, but you can also check it out on [Helms official docs](https://helm.sh/docs/topics/charts/#schema-files)
 
 ## Helm values schema and Cyclops UI
 
