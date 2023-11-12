@@ -86,7 +86,7 @@ function HomepageHeader() {
                             </Link>
                         </li>
                         <li>
-                            <Link to="https://nuqleus.io/">
+                            <Link to="https://www.zicer.hr/?lang=en">
                                 <img style={{heigh: 'auto', width: '25%'}} src={zicer}/>
                             </Link>
                         </li>
