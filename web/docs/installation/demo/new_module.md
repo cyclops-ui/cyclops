@@ -25,13 +25,14 @@ message at the top of the screen and you will receive new fields to fill.
 
 Now all that's left to do is fill the form with values!
 Here is an example of values you could use:
-
-    Module name: demo
-    name: demo-1
-    replicas: 3
-    image: nginx
-    version: 1.14.2
-    service: true
+```yaml
+Module name: demo
+name: demo-1
+replicas: 3
+image: nginx
+version: 1.14.2
+service: true
+```
 
 Now click save and you should see your new module listed!
 
@@ -62,12 +63,12 @@ This usually means that you didn't input the right `url + path + version`. When 
 need to copy the URL from the GitHub repository that leads to the template. The URL must lead towards a directory that
 holds a `template` folder.
 
-In our example we used this URL { https://github.com/cyclops-ui/templates/tree/main/demo } and filled
-the form with the values bellow:
-    
-    repository: https://github.com/cyclops-ui/templates
-    path: demo    
-    version: main
+In our example we filled the form with the values bellow:
+```yaml
+repository: https://github.com/cyclops-ui/templates
+path: demo    
+version: main
+```
 
 ### Naming
 If Cyclops seemingly freezes when trying to save the module, it probably means you didn't follow [the Kubernetes naming
