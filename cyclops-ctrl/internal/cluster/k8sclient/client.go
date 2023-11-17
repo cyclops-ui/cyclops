@@ -306,6 +306,12 @@ func (k *KubernetesClient) ListNodes() ([]apiv1.Node, error) {
 }
 
 func (k *KubernetesClient) GetNode(name string) (*apiv1.Node, error) {
-	node, err := k.clientset.CoreV1().Nodes().Get(context.TODO(), name, metav1.GetOptions{})
-	return node, err
+	return k.clientset.CoreV1().Nodes().Get(context.TODO(), name, metav1.GetOptions{})
+}
+
+func (k *KubernetesClient) GetPodsForNode(nodeName string) ([]apiv1.Pod, error) {
+	podList, err := k.clientset.CoreV1().Pods("").List(context.TODO(), metav1.ListOptions{
+		FieldSelector: "spec.nodeName=" + nodeName,
+	})
+	return podList.Items, err
 }

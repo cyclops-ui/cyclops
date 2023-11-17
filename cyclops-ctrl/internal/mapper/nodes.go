@@ -1,36 +1,65 @@
 package mapper
 
 import (
-	"fmt"
-
 	"github.com/cyclops-ui/cycops-ctrl/internal/models/dto"
 	apiv1 "k8s.io/api/core/v1"
 )
 
-func MapNode(nodes []apiv1.Node) []dto.Node {
-	DTONode := make([]dto.Node, 0, len(nodes))
+func MapNode(node *apiv1.Node, pods []apiv1.Pod) dto.Node {
+	nodePods := mapNodePods(pods)
+	var totalCPURequests, totalMemoryRequests int64
 
-	for _, node := range nodes {
-		nodeCapacity := node.Status.Capacity
-		nodeAllocatable := node.Status.Allocatable
+	for _, pod := range nodePods {
+		totalCPURequests += pod.CPU
+		totalMemoryRequests += pod.Memory
+	}
 
-		cpuCapacity := nodeCapacity.Cpu()
-		memoryCapacity := nodeCapacity.Memory()
+	allocatableCPU := node.Status.Allocatable[apiv1.ResourceCPU]
+	allocatableMemory := node.Status.Allocatable[apiv1.ResourceMemory]
+	allocatablePods := node.Status.Allocatable[apiv1.ResourcePods]
 
-		cpuAllocatable := nodeAllocatable.Cpu()
-		memoryAllocatable := nodeAllocatable.Memory()
+	return dto.Node{
+		Name: node.GetName(),
+		//Node:               node,
+		Pods: mapNodePods(pods),
 
-		cpuUsagePercent := (cpuCapacity.MilliValue() - cpuAllocatable.MilliValue()) * 100 / cpuCapacity.MilliValue()
-		memoryUsagePercent := (memoryCapacity.Value() - memoryAllocatable.Value()) * 100 / memoryCapacity.Value()
+		AvailableResources: dto.NodeResources{
+			CPU:      allocatableCPU.MilliValue(),
+			Memory:   allocatableMemory.Value(),
+			PodCount: allocatablePods.Value(),
+		},
+		RequestedResources: dto.NodeResources{
+			CPU:      totalCPURequests,
+			Memory:   totalMemoryRequests,
+			PodCount: int64(len(nodePods)),
+		},
+	}
+}
 
-		fmt.Println(cpuCapacity.String(), cpuAllocatable.String())
+func mapNodePods(pods []apiv1.Pod) []dto.NodePod {
+	out := make([]dto.NodePod, 0, len(pods))
 
-		DTONode = append(DTONode, dto.Node{
-			Name:             node.Name,
-			CPUPercentage:    cpuUsagePercent,
-			MemoryPercentage: memoryUsagePercent,
+	for _, pod := range pods {
+		var totalCPURequests, totalMemoryRequests int64
+
+		for _, container := range pod.Spec.Containers {
+			cpuQuantity := container.Resources.Requests[apiv1.ResourceCPU]
+			cpuQuantityMilli := cpuQuantity.MilliValue()
+			totalCPURequests += cpuQuantityMilli
+
+			memoryQuantity := container.Resources.Requests[apiv1.ResourceMemory]
+			memoryQuantityMilli := memoryQuantity.Value()
+			totalMemoryRequests += memoryQuantityMilli
+		}
+
+		out = append(out, dto.NodePod{
+			Name:      pod.Name,
+			Namespace: pod.Namespace,
+			Health:    true,
+			CPU:       totalCPURequests,
+			Memory:    totalMemoryRequests,
 		})
 	}
 
-	return DTONode
+	return out
 }

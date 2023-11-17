@@ -23,39 +23,13 @@ import 'ace-builds/src-noconflict/ace';
 import {useNavigate} from 'react-router';
 import {useParams} from "react-router-dom";
 import axios from 'axios';
-import {Pie} from "@ant-design/charts";
-import {release} from "os";
-import {
-    CheckCircleTwoTone,
-    CloseSquareTwoTone, InfoCircleOutlined,
-    LinkOutlined,
-    MinusCircleOutlined,
-    PlusOutlined,
-    WarningTwoTone,
-    DownloadOutlined
-} from "@ant-design/icons";
-import Link from "antd/lib/typography/Link";
-import { formatDistanceToNow } from 'date-fns';
-
+import GaugeChart from "react-gauge-chart";
 import "ace-builds/src-noconflict/mode-jsx";
 import {CodeBlock} from "react-code-blocks";
 import ReactAce from "react-ace";
 
 const {Title, Text} = Typography;
 
-interface module {
-    name: String,
-    namespace: String,
-    template: {
-        name: String,
-        version: String,
-        git: {
-            repo: String,
-            path: String,
-            commit: String,
-        }
-    }
-}
 
 const green = "#D1FFBD"
 const greenSelected = "#BDFEAE"
@@ -63,38 +37,29 @@ const greenSelected = "#BDFEAE"
 const red = "#FF8484"
 const redSelected = "#FF7276"
 
-
-
-function formatPodAge(podAge: string): string {
-    const parsedDate = new Date(podAge);
-    return formatDistanceToNow(parsedDate, { addSuffix: true });
-}
-
 const NodeDetails = () => {
     const history = useNavigate();
-    const [manifestModal, setManifestModal] = useState({
-        on: false,
-        kind: "",
-        name: "",
-        namespace: "",
-    })
-    const [logsModal, setLogsModal] = useState({
-        on: false,
-        namespace: '',
-        pod: '',
-        containers: [],
-        initContainers: []
-    })
-    const [logs, setLogs] = useState('');
-    const [loading, setLoading] = useState(false);
-    const [loadModule, setLoadModule] = useState(false);
-    const [loadResources, setLoadResources] = useState(false);
-    const [deleteName, setDeleteName] = useState("");
-    const [resources, setResources] = useState([]);
+    let {nodeName} = useParams();
+
     const [node, setNode] = useState({
-        metadata: {
-            name: String,
+        name: String,
+        pods: [],
+        available: {
+            cpu: 0,
+            memory: 0,
+            pod_count: 0
+        },
+        requested: {
+            cpu: 0,
+            memory: 0,
+            pod_count: 0
         }
+    });
+
+    const [resources, setResources] = useState({
+        cpu: 0,
+        memory: 0,
+        pod_count: 0
     });
 
     const [activeCollapses, setActiveCollapses] = useState(new Map());
@@ -107,16 +72,15 @@ const NodeDetails = () => {
         description: "",
     });
 
-    let {nodeName} = useParams();
-    useEffect(() => {
+    const fetchNodeData = () => {
         axios.get(window.__RUNTIME_CONFIG__.REACT_APP_CYCLOPS_CTRL_HOST + `/nodes/` + nodeName).then(res => {
-            setNode(res.data);
-            setLoadModule(true);
+            setNode(res.data)
+            setResources({
+                cpu: res.data.requested.cpu / res.data.available.cpu,
+                memory: (res.data.requested.memory / 100000000) / (res.data.available.memory / 100000000),
+                pod_count: res.data.requested.pod_count / res.data.available.pod_count,
+            })
         }).catch(error => {
-            console.log(error)
-            console.log(error.response)
-            setLoading(false);
-            setLoadModule(true);
             if (error.response === undefined) {
                 setError({
                     message: String(error),
@@ -126,6 +90,18 @@ const NodeDetails = () => {
                 setError(error.response.data);
             }
         })
+    };
+
+    useEffect(() => {
+        fetchNodeData();
+
+        // setInterval to refresh data every 15 seconds
+        const intervalId = setInterval(() => {
+            fetchNodeData();
+        }, 15000);
+
+        // Cleanup the interval when the component is unmounted
+        return () => clearInterval(intervalId);
     }, []);
 
     return (
@@ -145,8 +121,49 @@ const NodeDetails = () => {
             }
             <Row>
                 <Title>
-                    {node.metadata.name}
+                    {nodeName}
                 </Title>
+            </Row>
+            <Row>
+                <Col span={8}>
+                    <GaugeChart id="cpu"
+                        animate={false}
+                        needleColor={"#949494"}
+                        needleBaseColor={"#949494"}
+                        textColor={"#000"}
+                        nrOfLevels={20}
+                        percent={resources.cpu}
+                    />
+                    <div style={{ textAlign: 'center' }}>
+                        <h1>CPU</h1>
+                    </div>
+                </Col>
+                <Col span={8}>
+                    <GaugeChart id="memory"
+                        animate={false}
+                        needleColor={"#949494"}
+                        needleBaseColor={"#949494"}
+                        textColor={"#000"}
+                        nrOfLevels={20}
+                        percent={resources.memory}
+                    />
+                    <div style={{ textAlign: 'center' }}>
+                        <h1>Memory</h1>
+                    </div>
+                </Col>
+                <Col span={8}>
+                    <GaugeChart id="pods"
+                        animate={false}
+                        needleColor={"#949494"}
+                        needleBaseColor={"#949494"}
+                        textColor={"#000"}
+                        nrOfLevels={20}
+                        percent={resources.pod_count}
+                    />
+                    <div style={{ textAlign: 'center' }}>
+                        <h1>Pod count</h1>
+                    </div>
+                </Col>
             </Row>
             <Divider/>
         </div>

@@ -65,5 +65,9 @@
       "last 1 firefox version",
       "last 1 safari version"
     ]
+  },
+  "devDependencies": {
+    "@types/react-gauge-chart": "^0.4.3",
+    "react-gauge-chart": "^0.4.1"
   }
 }

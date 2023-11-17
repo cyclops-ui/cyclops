@@ -5,6 +5,7 @@ import (
 	"net/http"
 
 	"github.com/cyclops-ui/cycops-ctrl/internal/cluster/k8sclient"
+	"github.com/cyclops-ui/cycops-ctrl/internal/mapper"
 	"github.com/cyclops-ui/cycops-ctrl/internal/models/dto"
 	"github.com/gin-gonic/gin"
 	"k8s.io/apimachinery/pkg/api/errors"
@@ -53,5 +54,16 @@ func (c *Cluster) GetNode(ctx *gin.Context) {
 		return
 	}
 
-	ctx.JSON(http.StatusOK, node)
+	pods, err := c.kubernetesClient.GetPodsForNode(nodeName)
+	if err != nil {
+		fmt.Printf("Error listing pods for node: %v", nodeName)
+		ctx.JSON(http.StatusInternalServerError, dto.Error{
+			Message: fmt.Sprintf("Error listing pods for node: %v", nodeName),
+		})
+		return
+	}
+
+	dto := mapper.MapNode(node, pods)
+
+	ctx.JSON(http.StatusOK, dto)
 }
