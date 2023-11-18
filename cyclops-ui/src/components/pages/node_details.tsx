@@ -1,32 +1,28 @@
-import React, {useEffect, useState} from 'react';
+import React, {useEffect, useRef, useState} from 'react';
 import {
     Alert,
     Button,
+    Card,
     Col,
-    Collapse, Descriptions,
     Divider,
-    Form,
     Input,
-    InputNumber, List,
-    Modal,
-    Row, Space, Spin,
-    Switch,
+    Row,
+    Space,
     Table,
-    Tabs,
-    TabsProps,
-    Tag,
-    Tooltip,
     Typography
 } from 'antd';
-import {Icon} from '@ant-design/compatible';
 import 'ace-builds/src-noconflict/ace';
 import {useNavigate} from 'react-router';
 import {useParams} from "react-router-dom";
 import axios from 'axios';
-import GaugeChart from "react-gauge-chart";
 import "ace-builds/src-noconflict/mode-jsx";
-import {CodeBlock} from "react-code-blocks";
-import ReactAce from "react-ace";
+import GaugeComponent from 'react-gauge-component'
+import type { InputRef } from 'antd';
+import {formatBytes} from "../../utils/common";
+import {ColumnType} from "antd/lib/table";
+import type { FilterConfirmProps } from 'antd/es/table/interface';
+import {SearchOutlined} from "@ant-design/icons";
+import Highlighter from 'react-highlight-words';
 
 const {Title, Text} = Typography;
 
@@ -36,6 +32,15 @@ const greenSelected = "#BDFEAE"
 
 const red = "#FF8484"
 const redSelected = "#FF7276"
+
+interface DataSourceType {
+    name: string;
+    namespace: string;
+    cpu: number;
+    memory: string;
+}
+
+type DataIndex = keyof DataSourceType;
 
 const NodeDetails = () => {
     const history = useNavigate();
@@ -72,13 +77,110 @@ const NodeDetails = () => {
         description: "",
     });
 
+    const [searchText, setSearchText] = useState('');
+    const [searchedColumn, setSearchedColumn] = useState('');
+    const searchInput = useRef<InputRef>(null);
+
+    const handleSearch = (
+        selectedKeys: string[],
+        confirm: (param?: FilterConfirmProps) => void,
+        dataIndex: DataIndex,
+    ) => {
+        confirm();
+        setSearchText(selectedKeys[0]);
+        setSearchedColumn(dataIndex);
+    };
+
+    const handleReset = (clearFilters: () => void, confirm: (param?: FilterConfirmProps) => void,) => {
+        clearFilters();
+        setSearchText('');
+        confirm();
+    };
+
+    const getColumnSearchProps = (dataIndex: DataIndex): ColumnType<DataSourceType> => ({
+        filterDropdown: ({ setSelectedKeys, selectedKeys, confirm, clearFilters, close }) => (
+            <div style={{ padding: 8 }} onKeyDown={(e) => e.stopPropagation()}>
+                <Input
+                    ref={searchInput}
+                    placeholder={`Search ${dataIndex}`}
+                    value={selectedKeys[0]}
+                    onChange={(e) => setSelectedKeys(e.target.value ? [e.target.value] : [])}
+                    onPressEnter={() => handleSearch(selectedKeys as string[], confirm, dataIndex)}
+                    style={{ marginBottom: 8, display: 'block' }}
+                />
+                <Space>
+                    <Button
+                        type="primary"
+                        onClick={() => handleSearch(selectedKeys as string[], confirm, dataIndex)}
+                        icon={<SearchOutlined />}
+                        size="small"
+                        style={{ width: 90 }}
+                    >
+                        Search
+                    </Button>
+                    <Button
+                        onClick={() => clearFilters && handleReset(clearFilters, confirm)}
+                        size="small"
+                        style={{ width: 90 }}
+                    >
+                        Reset
+                    </Button>
+                    {/*<Button*/}
+                    {/*    type="link"*/}
+                    {/*    size="small"*/}
+                    {/*    onClick={() => {*/}
+                    {/*        confirm({ closeDropdown: false });*/}
+                    {/*        setSearchText((selectedKeys as string[])[0]);*/}
+                    {/*        setSearchedColumn(dataIndex);*/}
+                    {/*    }}*/}
+                    {/*>*/}
+                    {/*    Filter*/}
+                    {/*</Button>*/}
+                    <Button
+                        type="link"
+                        size="small"
+                        onClick={() => {
+                            close();
+                        }}
+                    >
+                        close
+                    </Button>
+                </Space>
+            </div>
+        ),
+        filterIcon: (filtered: boolean) => (
+            <SearchOutlined style={{ color: filtered ? '#1677ff' : undefined }} />
+        ),
+        onFilter: (value, record) =>
+            record[dataIndex]
+                .toString()
+                .toLowerCase()
+                .includes((value as string).toLowerCase()),
+        onFilterDropdownOpenChange: (visible) => {
+            if (visible) {
+                setTimeout(() => searchInput.current?.select(), 100);
+            }
+        },
+        render: (text) =>
+            searchedColumn === dataIndex ? (
+                <Highlighter
+                    highlightStyle={{ backgroundColor: '#ffc069', padding: 0 }}
+                    searchWords={[searchText]}
+                    autoEscape
+                    textToHighlight={text ? text.toString() : ''}
+                />
+            ) : (
+                text
+            ),
+    });
+
     const fetchNodeData = () => {
         axios.get(window.__RUNTIME_CONFIG__.REACT_APP_CYCLOPS_CTRL_HOST + `/nodes/` + nodeName).then(res => {
             setNode(res.data)
             setResources({
-                cpu: res.data.requested.cpu / res.data.available.cpu,
-                memory: (res.data.requested.memory / 100000000) / (res.data.available.memory / 100000000),
-                pod_count: res.data.requested.pod_count / res.data.available.pod_count,
+                cpu: +((res.data.requested.cpu / res.data.available.cpu).toFixed(4)),
+                memory: +((res.data.requested.memory / res.data.available.memory).toFixed(4)),
+                pod_count: +((res.data.requested.pod_count / res.data.available.pod_count).toFixed(4)),
             })
         }).catch(error => {
             if (error.response === undefined) {
@@ -104,6 +206,36 @@ const NodeDetails = () => {
         return () => clearInterval(intervalId);
     }, []);
 
+    const columns: ColumnType<DataSourceType>[] = [
+        {
+            title: 'Name',
+            dataIndex: 'name',
+            key: 'name',
+            width: '30%',
+            ...getColumnSearchProps('name'),
+        },
+        {
+            title: 'Namespace',
+            dataIndex: 'namespace',
+            key: 'namespace',
+            width: '30%',
+        },
+        {
+            title:'CPU',
+            dataIndex: 'cpu',
+            render: cpu => cpu + 'm',
+            sorter: (a: any, b: any) => a.cpu - b.cpu,
+            sortDirections: ['descend', 'ascend'],
+        },
+        {
+            title: 'Memory',
+            dataIndex: 'memory',
+            render: memory => formatBytes(memory),
+            sorter: (a: any, b: any) => a.memory - b.memory,
+            sortDirections: ['descend', 'ascend'],
+        }
+    ];
+
     return (
         <div>
             {
@@ -125,47 +257,150 @@ const NodeDetails = () => {
                 </Title>
             </Row>
             <Row>
-                <Col span={8}>
-                    <GaugeChart id="cpu"
-                        animate={false}
-                        needleColor={"#949494"}
-                        needleBaseColor={"#949494"}
-                        textColor={"#000"}
-                        nrOfLevels={20}
-                        percent={resources.cpu}
-                    />
-                    <div style={{ textAlign: 'center' }}>
-                        <h1>CPU</h1>
+                <Divider style={{fontSize: '120%'}} orientationMargin="0" orientation={"left"}>Resources requested</Divider>
+                <Col span={8} style={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+                    <div style={{ boxSizing: "border-box", textAlign: 'center', width: "80%" }}>
+                        <GaugeComponent
+                            labels={{
+                                valueLabel: {
+                                    style: {fill: "#000", textShadow: ""},
+                                    // formatTextValue: (value) => `CPU ${value}%`
+                                }
+                            }}
+                            type={"grafana"}
+                            value={resources.cpu * 100}
+                        />
+                        <h1>CPU ({node.requested.cpu}m / {node.available.cpu}m)</h1>
                     </div>
                 </Col>
                 <Col span={8}>
-                    <GaugeChart id="memory"
-                        animate={false}
-                        needleColor={"#949494"}
-                        needleBaseColor={"#949494"}
-                        textColor={"#000"}
-                        nrOfLevels={20}
-                        percent={resources.memory}
-                    />
-                    <div style={{ textAlign: 'center' }}>
-                        <h1>Memory</h1>
+                    <div style={{ textAlign: 'center', width: "80%" }}>
+                        <GaugeComponent
+                            labels={{
+                                valueLabel: {
+                                    style: {fill: "#000", textShadow: ""},
+                                    // formatTextValue: (value) => `memory ${value}%`
+                                }
+                            }}
+                            type={"grafana"}
+                            value={resources.memory * 100}
+                        />
+                        <h1>Memory ({formatBytes(node.requested.memory)} / {formatBytes(node.available.memory)})</h1>
                     </div>
                 </Col>
                 <Col span={8}>
-                    <GaugeChart id="pods"
-                        animate={false}
-                        needleColor={"#949494"}
-                        needleBaseColor={"#949494"}
-                        textColor={"#000"}
-                        nrOfLevels={20}
-                        percent={resources.pod_count}
-                    />
-                    <div style={{ textAlign: 'center' }}>
-                        <h1>Pod count</h1>
+                    <div style={{ textAlign: 'center', width: "80%" }}>
+                        <GaugeComponent
+                            labels={{
+                                valueLabel: {
+                                    style: {fill: "#000", textShadow: ""},
+                                    // formatTextValue: (value) => `pods ${value}%`
+                                }
+                            }}
+                            type={"grafana"}
+                            value={resources.pod_count * 100}
+                        />
+                        <h1>Pods ({node.requested.pod_count} / {node.available.pod_count})</h1>
                     </div>
                 </Col>
             </Row>
-            <Divider/>
+            <Row>
+                <Divider style={{fontSize: '120%'}} orientationMargin="0" orientation={"left"}>Conditions</Divider>
+                <Col span={6} style={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+                    <Card
+                        style={{
+                        borderRadius: '10px',
+                        backgroundColor: 'green',
+                        width: "100%",
+                        margin: "5px",
+                        textAlign: "center",
+                        color: "white"
+                        }}
+                    >
+                        <h1 style={{margin: "0"}}>
+                            MemoryPressure
+                        </h1>
+                    </Card>
+                </Col>
+                <Col span={6} style={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+                    <Card
+                        style={{
+                            borderRadius: '10px',
+                            backgroundColor: 'green',
+                            width: "100%",
+                            margin: "5px",
+                            textAlign: "center",
+                            color: "white"
+                        }}
+                    >
+                        <h1 style={{margin: "0"}}>
+                            DiskPressure
+                        </h1>
+                    </Card>
+                </Col>
+                <Col span={6} style={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+                    <Card
+                        style={{
+                            borderRadius: '10px',
+                            backgroundColor: 'green',
+                            width: "100%",
+                            margin: "5px",
+                            textAlign: "center",
+                            color: "white"
+                        }}
+                    >
+                        <h1 style={{margin: "0"}}>
+                            PIDPressure
+                        </h1>
+                    </Card>
+                </Col>
+                <Col span={6} style={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+                    <Card
+                        style={{
+                            borderRadius: '10px',
+                            backgroundColor: 'green',
+                            width: "100%",
+                            margin: "5px",
+                            textAlign: "center",
+                            color: "white"
+                        }}
+                    >
+                        <h1 style={{margin: "0"}}>
+                            Ready
+                        </h1>
+                    </Card>
+                </Col>
+            </Row>
+            <Divider style={{fontSize: '120%'}} orientationMargin="0" orientation={"left"}>Pods: {node.pods.length}</Divider>
+            <Col span={24} style={{overflowX: "auto"}}>
+                <Table dataSource={node.pods} columns={columns}>
+                    {/*<Table.Column*/}
+                    {/*    title='Name'*/}
+                    {/*    dataIndex='name'*/}
+                    {/*    ...getColumnSearchProps('name', 'Search by Name')*/}
+                    {/*    width={"30%"}*/}
+                    {/*/>*/}
+                    {/*<Table.Column*/}
+                    {/*    title='Namespace'*/}
+                    {/*    dataIndex='namespace'*/}
+                    {/*    width={"30%"}*/}
+                    {/*/>*/}
+                    {/*<Table.Column*/}
+                    {/*    title='CPU'*/}
+                    {/*    dataIndex='cpu'*/}
+                    {/*    render={cpu => cpu + 'm'}*/}
+                    {/*    sorter={(a: any, b: any) => a.cpu - b.cpu}*/}
+                    {/*    sortDirections={['descend', 'ascend']}*/}
+                    {/*/>*/}
+                    {/*<Table.Column*/}
+                    {/*    title='Memory'*/}
+                    {/*    dataIndex='memory'*/}
+                    {/*    render={memory => formatBytes(memory)}*/}
+                    {/*    sorter={(a: any, b: any) => a.memory - b.memory}*/}
+                    {/*    sortDirections={['descend', 'ascend']}*/}
+                    {/*/>*/}
+                </Table>
+            </Col>
         </div>
     );
 }

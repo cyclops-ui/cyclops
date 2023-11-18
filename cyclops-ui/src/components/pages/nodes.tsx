@@ -1,19 +1,15 @@
 import React, {useEffect, useState} from 'react';
-import {Button, Col, Divider, Row, Select, Table, Tag, Typography, Input, Space, Card, Alert} from 'antd';
-import {Icon} from '@ant-design/compatible';
+import {Button, Col, Divider, Row, Table, Typography, Alert} from 'antd';
 import {useNavigate} from 'react-router';
 import axios from 'axios';
-import SearchInput from "../searchbar";
-import {LinkOutlined, SearchOutlined} from '@ant-design/icons';
-import Link from "antd/lib/typography/Link";
+import {formatBytes} from "../../utils/common";
 
 const {Title} = Typography;
 
 const Nodes = () => {
     const history = useNavigate();
-    const [allData, setAllData] = useState([]);
-    const [filteredData, setFilteredData] = useState([]);
-    const [namespacesState, setNamespacesState] = useState([]);
+    const [nodes, setNodes] = useState([]);
+    const [filteredNodes, setFilteredNodes] = useState([]);
     const [error, setError] = useState({
         message: "",
         description: "",
@@ -21,8 +17,8 @@ const Nodes = () => {
 
     useEffect(() => {
         axios.get(window.__RUNTIME_CONFIG__.REACT_APP_CYCLOPS_CTRL_HOST + `/nodes`).then(res => {
-            setAllData(res.data);
-            setFilteredData(res.data);
+            setNodes(res.data);
+            setFilteredNodes(res.data);
         }).catch(error => {
             if (error.response === undefined) {
                 setError({
@@ -35,32 +31,14 @@ const Nodes = () => {
         })
     }, []);
 
-    async function handleChange(value: any) {
-        await axios.get(window.__RUNTIME_CONFIG__.REACT_APP_CYCLOPS_CTRL_HOST + `/modules/list`).then(res => {
-            setAllData(res.data);
-        });
-    }
-
-    const handleSearch = (event: any) => {
-        const query = event.target.value;
-        var updatedList = [...allData];
-        updatedList = updatedList.filter((module: any) => {
-            return module.name.toLowerCase().indexOf(query.toLowerCase()) !== -1;
-        });
-        setFilteredData(updatedList);
-    }
-
-    const getStatusColor = (module: any) => {
-        if (module.status === "undefined") {
-            return "gray"
-        }
-
-        if (module.status === "healthy") {
-            return "#27D507"
-        }
-
-        return "#FF0000"
-    }
+    // const handleSearch = (event: any) => {
+    //     const query = event.target.value;
+    //     var updatedList = [...allData];
+    //     updatedList = updatedList.filter((module: any) => {
+    //         return module.name.toLowerCase().indexOf(query.toLowerCase()) !== -1;
+    //     });
+    //     setFilteredData(updatedList);
+    // }
 
     return (
         <div>
@@ -80,34 +58,44 @@ const Nodes = () => {
             <Row gutter={[40, 0]}>
                 <Col span={18}>
                     <Title level={2}>
-                        Running nodes
+                        Nodes: {nodes.length}
                     </Title>
                 </Col>
             </Row>
-            {/*<Row gutter={[40, 0]}>*/}
-            {/*    <Col span={18}>*/}
-            {/*        <Input*/}
-            {/*            placeholder={"Search modules"}*/}
-            {/*            style={{width: '30%'}}*/}
-            {/*            onChange={handleSearch}*/}
-            {/*        >*/}
-            {/*        </Input>*/}
-            {/*    </Col>*/}
-            {/*</Row>*/}
-            <Divider orientationMargin="0"/>
-            <Row gutter={[16, 16]}>
-                {filteredData.map((module:any, index) => (
-                    <Col key={index} span={8}>
-                        <Card title={ module.metadata.name } >
-                            <Row style={{paddingTop: "15px"}}>
-                                <Col>
-                                    <Button type={"primary"} onClick={ function() {window.location.href = "/nodes/" + module.metadata.name} } block>Details</Button>
-                                </Col>
-                            </Row>
-                        </Card>
-                    </Col>
-                ))}
-            </Row>
+            <Col span={24} style={{overflowX: "auto"}}>
+                <Table dataSource={nodes}>
+                    <Table.Column
+                        title='Name'
+                        dataIndex='name'
+                        width={"30%"}
+                    />
+                    <Table.Column
+                        title='CPU'
+                        dataIndex='available'
+                        render={available => available.cpu + 'm'}
+                    />
+                    <Table.Column
+                        title='Memory'
+                        dataIndex='available'
+                        render={available => formatBytes(available.memory)}
+                    />
+                    <Table.Column
+                        title='Max pod count'
+                        dataIndex='available'
+                        render={available => available.pod_count}
+                    />
+                    <Table.Column
+                        width='15%'
+                        render={ node => (
+                            <>
+                                <Button onClick={function () {
+                                    window.location.href = '/nodes/' + node.name
+                                }} block type={"primary"}>Details</Button>
+                            </>
+                        )}
+                    />
+                </Table>
+            </Col>
         </div>
     );
 }
