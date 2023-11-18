@@ -31,7 +31,7 @@ func (c *Cluster) ListNodes(ctx *gin.Context) {
 		return
 	}
 
-	ctx.JSON(http.StatusOK, nodes)
+	ctx.JSON(http.StatusOK, mapper.MapNodes(nodes))
 }
 
 func (c *Cluster) GetNode(ctx *gin.Context) {
