@@ -30,6 +30,7 @@ func (h *Handler) Start() error {
 
 	templatesController := controller.NewTemplatesController(h.templatesStorage, h.k8sClient)
 	modulesController := controller.NewModulesController(h.templatesStorage, h.k8sClient)
+	clusterController := controller.NewClusterController(h.k8sClient)
 
 	h.router = gin.New()
 
@@ -60,6 +61,9 @@ func (h *Handler) Start() error {
 
 	h.router.GET("/resources/pods/:namespace/:name/:container/logs", modulesController.GetLogs)
 	h.router.GET("/resources/pods/:namespace/:name/:container/logs/download", modulesController.DownloadLogs)
+
+	h.router.GET("/nodes", clusterController.ListNodes)
+	h.router.GET("/nodes/:name", clusterController.GetNode)
 
 	h.router.Use(h.options)
 

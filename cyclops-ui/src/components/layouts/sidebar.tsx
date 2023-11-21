@@ -20,8 +20,8 @@ const SideNav = () => {
     const handleModulesClick = () => {
         history('/modules');
     }
-    const handlePodsClick = () => {
-        history('/pods');
+    const handleNodesClick = () => {
+        history('/nodes');
     }
     return (
         <div>
@@ -33,9 +33,13 @@ const SideNav = () => {
                 </div>
             </a>
             <Menu theme="dark" mode="inline" defaultSelectedKeys={['1']}>
-                <Menu.Item key="2" onClick={handleModulesClick}>
+                <Menu.Item key="1" onClick={handleModulesClick}>
                     <AppstoreAddOutlined />
                     <span> Modules</span>
+                </Menu.Item>
+                <Menu.Item key="2" onClick={handleNodesClick}>
+                    <AppstoreAddOutlined />
+                    <span> Nodes</span>
                 </Menu.Item>
             </Menu>
         </div>

@@ -25,6 +25,8 @@ import NewModule from "../components/pages/new_module";
 import ModuleDetails from "../components/pages/module_details";
 import EditModule from "../components/pages/edit_module";
 import Terminal from "../components/pages/terminal";
+import Nodes from "../components/pages/nodes";
+import NodeDetails from "../components/pages/node_details";
 import ModuleHistory from "../components/pages/history";
 const { Header, Sider, Content} = Layout;
 const ApplicationRoutes = () => {
@@ -58,6 +60,10 @@ const ApplicationRoutes = () => {
                             <Route path="/modules/new" element={<NewModule/>}/>
                             <Route path="/modules/:moduleName" element={<ModuleDetails/>}/>
                             <Route path="/modules/:moduleName/edit" element={<EditModule/>}/>
+
+                            <Route path="/nodes" element={<Nodes/>}/>
+                            <Route path="/nodes/:nodeName" element={<NodeDetails/>}/>
+
                             <Route path="/modules/:moduleName/rollback" element={<ModuleHistory/>}/>
                             {/*<Route path="/pods" element={<PodsApp/>}/>*/}
                             {/*<Route path="/form" element={<Form/>}/>*/}

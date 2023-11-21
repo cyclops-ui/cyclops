@@ -63,6 +63,8 @@ func createLocalClient() (*KubernetesClient, error) {
 		panic(err.Error())
 	}
 
+	//clientset.CoreV1().Services("").Watch()
+
 	return &KubernetesClient{
 		Dynamic:   dynamic,
 		discovery: discovery,
@@ -259,4 +261,20 @@ func (k *KubernetesClient) CreateDynamic(obj *unstructured.Unstructured) error {
 	)
 
 	return err
+}
+
+func (k *KubernetesClient) ListNodes() ([]apiv1.Node, error) {
+	nodeList, err := k.clientset.CoreV1().Nodes().List(context.TODO(), metav1.ListOptions{})
+	return nodeList.Items, err
+}
+
+func (k *KubernetesClient) GetNode(name string) (*apiv1.Node, error) {
+	return k.clientset.CoreV1().Nodes().Get(context.TODO(), name, metav1.GetOptions{})
+}
+
+func (k *KubernetesClient) GetPodsForNode(nodeName string) ([]apiv1.Pod, error) {
+	podList, err := k.clientset.CoreV1().Pods("").List(context.TODO(), metav1.ListOptions{
+		FieldSelector: "spec.nodeName=" + nodeName,
+	})
+	return podList.Items, err
 }
