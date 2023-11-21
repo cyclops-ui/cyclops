@@ -7,8 +7,10 @@ seconds, or use your own image that creates logs.
 We will create a new module, like we did in the [previous tutorial](new_module) but this time we will use a different
 template. When prompted to insert the GitHub repository and path, use these values:
 
-    repository: https://github.com/cyclops-ui/templates
-    path: multi
+```yaml
+repository: https://github.com/cyclops-ui/templates
+path: multi
+```
 
 Fill in the values, but the image should be `petarcvit223/logs` if you are using our image. Set the version to `latest`.
 Services can be toggled off, they are not needed for this tutorial.
@@ -41,11 +43,11 @@ This usually means that you didn't input the right `url + path`. When loading th
 the URL from the GitHub repository that leads to the template. The URL must lead towards a directory that holds a
 `template` folder.
 
-In our example we used this URL { https://github.com/cyclops-ui/templates/tree/main/multi } and filled
-the form with the values bellow:
-
-    repository: https://github.com/cyclops-ui/templates
-    path: multi    
+In our example we filled the form with the values bellow:
+```yaml
+repository: https://github.com/cyclops-ui/templates
+path: multi
+```
 
 ### Naming
 If Cyclops seemingly freezes when trying to save the module, it probably means you didn't follow [the Kubernetes naming

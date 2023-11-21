@@ -13,7 +13,7 @@ const FeatureList = [
     svg: configurable,
     description: (
       <>
-        Fully configurable UI that allows you you to deploy any K8s resource
+        Fully configurable UI that allows you to deploy any K8s resource
       </>
     ),
   },

@@ -1,5 +1,5 @@
 <p align="center" width="100%">
-<img width="25%" alt="Screenshot 2022-04-03 at 21 48 18" src="https://user-images.githubusercontent.com/72022639/162230553-e669e572-1346-4289-814b-bd23d5b2d100.png">
+<img width="40%" src="https://github.com/cyclops-ui/cyclops/assets/72022639/53009fdd-ff0a-45c8-a04e-cda495e8b34e">
 <p/>
 <h1 align="center">Cyclops</h1>
 <p align="center">Developer friendly Kubernetes</p>
@@ -24,12 +24,12 @@ the window for deployment mistakes. [Find out more!](https://cyclops-ui.com)
 Find out how to [install](https://cyclops-ui.com/docs/installation/prerequisites) it to your cluster on our landing page
 and give it a go! (~10 minute tutorial)
 
-## :star2: Supporters
-<p>
-    <a href="https://github.com/cyclops-ui/cyclops/stargazers">
-        <img width="100%" src="https://reporoster.com/stars/cyclops-ui/cyclops" alt="Stargazers repo roster for @cyclops-ui/cyclops">
-    </a>
-</p>
+[//]: # (## :star2: Supporters)
+[//]: # (<p>)
+[//]: # (    <a href="https://github.com/cyclops-ui/cyclops/stargazers">)
+[//]: # (        <img width="100%" src="https://reporoster.com/stars/cyclops-ui/cyclops" alt="Stargazers repo roster for @cyclops-ui/cyclops">)
+[//]: # (    </a>)
+[//]: # (</p>)
 
 [//]: # ([![Forkers repo roster for @cyclops-ui/cyclops]&#40;https://reporoster.com/forks/cyclops-ui/cyclops&#41;])
 

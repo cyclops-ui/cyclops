@@ -2,7 +2,8 @@
 
 You can create your own template UIs by creating a helm template and pushing to a git repository. Cyclops renders the
 form based on the `values.schema.json` file. That file is used to define values structure in Helm. You can learn more
-about it and learn how to create one by following [Helm docs](https://helm.sh/docs/topics/charts/#schema-files).
+about it and learn how to create one by following [Helm docs](https://helm.sh/docs/topics/charts/#schema-files). The 
+schema is represented as a [JSON Schema](https://json-schema.org/)
 
 On top of the usual schema, we added some more fields to help our users get as much from the UI.
 

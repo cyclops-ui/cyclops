@@ -1,9 +1,6 @@
 // @ts-check
 // Note: type annotations allow type checking and IDEs autocompletion
 
-const lightCodeTheme = require('prism-react-renderer/themes/github');
-const darkCodeTheme = require('prism-react-renderer/themes/dracula');
-
 /** @type {import('@docusaurus/types').Config} */
 const config = {
   title: 'Cyclops',
@@ -63,6 +60,7 @@ const config = {
         backgroundColor: '#10357A',
         textColor: '#FFF',
         isCloseable: false,
+
         content:
             '⭐ Help us shine brighter by showing your support - give us a star on <a href="https://github.com/cyclops-ui/cyclops">GitHub</a>! ⭐',
       },
@@ -79,10 +77,21 @@ const config = {
             position: 'left',
             label: 'Docs',
           },
+          {to: 'blog', label: 'Blog', position: 'left'},
+          {
+            href: 'https://www.linkedin.com/company/cyclops-ui',
+            position: 'right',
+            className: 'header-linkedin-link',
+          },
           {
             href: 'https://github.com/cyclops-ui/cyclops',
-            label: 'Github',
             position: 'right',
+            className: 'header-github-link',
+          },
+          {
+            href: "https://discord.com/invite/8ErnK3qDb3",
+            className: "header-discord-link",
+            position: "right",
           },
         ],
       },
@@ -100,10 +109,6 @@ const config = {
                 label: 'Installation',
                 to: '/docs/installation/prerequisites',
               },
-              {
-                label: 'Tutorial',
-                to: '/docs/tutorial',
-              },
             ],
           },
           {
@@ -111,7 +116,7 @@ const config = {
             items: [
               {
                 label: 'Discord',
-                href: 'https://discord.gg/M6tCEn5f5U',
+                href: 'https://discord.com/invite/8ErnK3qDb3',
               },
             ],
           },
@@ -141,10 +146,6 @@ const config = {
             ]
           }
         ],
-      },
-      prism: {
-        theme: lightCodeTheme,
-        darkTheme: darkCodeTheme,
       },
       colorMode: {
         defaultMode: 'light',

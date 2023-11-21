@@ -21,8 +21,6 @@ import (
 	"k8s.io/client-go/kubernetes"
 	ctrl "sigs.k8s.io/controller-runtime"
 
-	metrics "k8s.io/metrics/pkg/client/clientset/versioned"
-
 	"github.com/cyclops-ui/cycops-ctrl/internal/cluster/v1alpha1"
 	"github.com/cyclops-ui/cycops-ctrl/internal/models/dto"
 )
@@ -40,8 +38,6 @@ type KubernetesClient struct {
 	discovery *discovery.DiscoveryClient
 
 	moduleset *v1alpha1.ExampleV1Alpha1Client
-
-	metrics *metrics.Clientset
 }
 
 func New() (*KubernetesClient, error) {
@@ -49,33 +45,6 @@ func New() (*KubernetesClient, error) {
 }
 
 func createLocalClient() (*KubernetesClient, error) {
-	//kubeconfigEnv := os.Getenv("LOCAL_DEV")
-	//var config *rest.Config
-	//var err error
-	//
-	//if len(kubeconfigEnv) != 0 {
-	//	var kubeconfig *string
-	//	if home := homedir.HomeDir(); home != "" {
-	//		kubeconfig = flag.String("kubeconfig", filepath.Join(home, ".kube", "config"), "(optional) absolute path to the kubeconfig file")
-	//	} else {
-	//		kubeconfig = flag.String("kubeconfig", "", "absolute path to the kubeconfig file")
-	//	}
-	//	flag.Parse()
-	//
-	//	fmt.Println("loading local config")
-	//
-	//	config, err = clientcmd.BuildConfigFromFlags("", *kubeconfig)
-	//	if err != nil {
-	//		return nil, err
-	//	}
-	//} else {
-	//	fmt.Println("loading in cluster config")
-	//	config, err = rest.InClusterConfig()
-	//	if err != nil {
-	//		return nil, err
-	//	}
-	//}
-
 	config := ctrl.GetConfigOrDie()
 	clientset, err := kubernetes.NewForConfig(config)
 	if err != nil {
@@ -94,11 +63,6 @@ func createLocalClient() (*KubernetesClient, error) {
 		panic(err.Error())
 	}
 
-	mc, err := metrics.NewForConfig(config)
-	if err != nil {
-		panic(err)
-	}
-
 	//clientset.CoreV1().Services("").Watch()
 
 	return &KubernetesClient{
@@ -106,7 +70,6 @@ func createLocalClient() (*KubernetesClient, error) {
 		discovery: discovery,
 		clientset: clientset,
 		moduleset: moduleSet,
-		metrics:   mc,
 	}, nil
 }
 

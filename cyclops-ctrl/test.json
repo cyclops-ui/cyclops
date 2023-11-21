@@ -1,0 +1,48 @@
+{
+  "kind": "Module",
+  "apiVersion": "cyclops-ui.com/v1alpha1",
+  "metadata": {
+    "name": "test2",
+    "resourceVersion": "918",
+    "creationTimestamp": null
+  },
+  "spec": {
+    "template": {
+      "name": "",
+      "version": "",
+      "git": {
+        "repo": "https://github.com/cyclops-ui/templates",
+        "path": "demo",
+        "commit": ""
+      }
+    },
+    "values": {
+      "name": "test",
+      "replicas": 3,
+      "image": "nginx",
+      "version": "1.14.2"
+    }
+  },
+  "status": {
+    "history": [
+      {
+        "generation": 2,
+        "template": {
+          "name": "",
+          "version": "",
+          "git": {
+            "repo": "https://github.com/cyclops-ui/templates",
+            "path": "demo",
+            "commit": ""
+          }
+        },
+        "values": {
+          "image": "nginx",
+          "name": "test",
+          "replicas": 2,
+          "version": "1.14.2"
+        }
+      }
+    ]
+  }
+}

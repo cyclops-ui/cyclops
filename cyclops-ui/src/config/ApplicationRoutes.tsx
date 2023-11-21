@@ -13,7 +13,7 @@ import PodsApp from "../components/pages/sshable_pods";
 import Details from "../components/pages/details";
 import Edit from "../components/pages/edit";
 import Diff from "../components/pages/diff";
-import DeploymentHistory from "../components/pages/histroy";
+import DeploymentHistory from "../components/pages/history";
 import ConfiguredForm from "../components/pages/configured_form";
 import CreateForm from "../components/pages/create_form";
 import Configurations from "../components/pages/configurations";
@@ -27,6 +27,7 @@ import EditModule from "../components/pages/edit_module";
 import Terminal from "../components/pages/terminal";
 import Nodes from "../components/pages/nodes";
 import NodeDetails from "../components/pages/node_details";
+import ModuleHistory from "../components/pages/history";
 const { Header, Sider, Content} = Layout;
 const ApplicationRoutes = () => {
     const [collapse, setCollapse] = useState(false);
@@ -62,6 +63,8 @@ const ApplicationRoutes = () => {
 
                             <Route path="/nodes" element={<Nodes/>}/>
                             <Route path="/nodes/:nodeName" element={<NodeDetails/>}/>
+
+                            <Route path="/modules/:moduleName/rollback" element={<ModuleHistory/>}/>
                             {/*<Route path="/pods" element={<PodsApp/>}/>*/}
                             {/*<Route path="/form" element={<Form/>}/>*/}
                             {/*<Route path="/new-app" element={<NewAppForm/>}/>*/}
