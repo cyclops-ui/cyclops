@@ -240,10 +240,15 @@ func (k *KubernetesClient) CreateDynamic(obj *unstructured.Unstructured) error {
 		Resource: strings.ToLower(obj.GroupVersionKind().Kind) + "s",
 	}
 
-	_, err := k.Dynamic.Resource(gvr).Namespace("default").Get(context.TODO(), obj.GetName(), metav1.GetOptions{})
+	objNamespace := obj.GetNamespace()
+	if len(strings.TrimSpace(objNamespace)) == 0 {
+		objNamespace = apiv1.NamespaceDefault
+	}
+
+	_, err := k.Dynamic.Resource(gvr).Namespace(objNamespace).Get(context.TODO(), obj.GetName(), metav1.GetOptions{})
 	if err != nil {
 		if errors.IsNotFound(err) {
-			_, err := k.Dynamic.Resource(gvr).Namespace("default").Create(
+			_, err := k.Dynamic.Resource(gvr).Namespace(objNamespace).Create(
 				context.Background(),
 				obj,
 				metav1.CreateOptions{},
@@ -254,7 +259,7 @@ func (k *KubernetesClient) CreateDynamic(obj *unstructured.Unstructured) error {
 		return err
 	}
 
-	_, err = k.Dynamic.Resource(gvr).Namespace("default").Update(
+	_, err = k.Dynamic.Resource(gvr).Namespace(objNamespace).Update(
 		context.Background(),
 		obj,
 		metav1.UpdateOptions{},

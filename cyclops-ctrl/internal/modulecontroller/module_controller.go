@@ -148,8 +148,6 @@ func (r *ModuleReconciler) generateResources(kClient *k8sclient.KubernetesClient
 		return err
 	}
 
-	//objects := make([]runtime.Object, 0, 0)
-
 	for _, s := range strings.Split(out, "---") {
 		s := strings.TrimSpace(s)
 		if len(s) == 0 {
@@ -163,6 +161,8 @@ func (r *ModuleReconciler) generateResources(kClient *k8sclient.KubernetesClient
 			r.logger.Error(err, "could not decode resource",
 				"module namespaced name",
 				module.Name,
+				"gvk",
+				obj.GroupVersionKind().String(),
 				"resource namespaced name",
 				fmt.Sprintf("%s/%s", obj.GetNamespace(), obj.GetName()),
 			)
@@ -186,6 +186,8 @@ func (r *ModuleReconciler) generateResources(kClient *k8sclient.KubernetesClient
 			r.logger.Error(err, "could not apply resource",
 				"module namespaced name",
 				module.Name,
+				"gvk",
+				obj.GroupVersionKind().String(),
 				"resource namespaced name",
 				fmt.Sprintf("%s/%s", obj.GetNamespace(), obj.GetName()),
 			)

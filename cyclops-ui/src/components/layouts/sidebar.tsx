@@ -1,9 +1,8 @@
 import React from 'react';
 import { Menu } from 'antd';
 import {
-    UserOutlined,
-    SettingOutlined,
     AppstoreAddOutlined,
+    HddOutlined,
 } from '@ant-design/icons';
 import {useNavigate}  from 'react-router';
 const SideNav = () => {
@@ -38,7 +37,7 @@ const SideNav = () => {
                     <span> Modules</span>
                 </Menu.Item>
                 <Menu.Item key="2" onClick={handleNodesClick}>
-                    <AppstoreAddOutlined />
+                    <HddOutlined />
                     <span> Nodes</span>
                 </Menu.Item>
             </Menu>
