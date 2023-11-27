@@ -49,6 +49,11 @@ const NodeDetails = () => {
     const [node, setNode] = useState({
         name: String,
         pods: [],
+        node: {
+            status: {
+                conditions: [],
+            }
+        },
         available: {
             cpu: 0,
             memory: 0,
@@ -236,6 +241,29 @@ const NodeDetails = () => {
         }
     ];
 
+    const conditionColor = (type: string): string => {
+        for (let i = 0; i < node.node.status.conditions.length; i++) {
+            let cond: any = node.node.status.conditions[i]
+            if (cond.type === type) {
+                switch (type) {
+                    case "MemoryPressure":
+                        return cond.status == "True" ? "#de3428" : "green";
+                    case "DiskPressure":
+                        return cond.status == "True" ? "#de3428" : "green";
+                    case "PIDPressure":
+                        return cond.status == "True" ? "#de3428" : "green";
+                    case "Ready":
+                        return cond.status == "True" ? "green" : "#de3428";
+                    default:
+                        console.log("default", type)
+                }
+            }
+        }
+
+        return "gray"
+
+    };
+
     return (
         <div>
             {
@@ -310,7 +338,7 @@ const NodeDetails = () => {
                     <Card
                         style={{
                         borderRadius: '10px',
-                        backgroundColor: 'green',
+                        backgroundColor: conditionColor("MemoryPressure"),
                         width: "100%",
                         margin: "5px",
                         textAlign: "center",
@@ -326,7 +354,7 @@ const NodeDetails = () => {
                     <Card
                         style={{
                             borderRadius: '10px',
-                            backgroundColor: 'green',
+                            backgroundColor: conditionColor("DiskPressure"),
                             width: "100%",
                             margin: "5px",
                             textAlign: "center",
@@ -342,7 +370,7 @@ const NodeDetails = () => {
                     <Card
                         style={{
                             borderRadius: '10px',
-                            backgroundColor: 'green',
+                            backgroundColor: conditionColor("PIDPressure"),
                             width: "100%",
                             margin: "5px",
                             textAlign: "center",
@@ -358,7 +386,7 @@ const NodeDetails = () => {
                     <Card
                         style={{
                             borderRadius: '10px',
-                            backgroundColor: 'green',
+                            backgroundColor: conditionColor("Ready"),
                             width: "100%",
                             margin: "5px",
                             textAlign: "center",
