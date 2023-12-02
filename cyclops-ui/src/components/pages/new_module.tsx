@@ -13,12 +13,13 @@ import {
     Space,
     Switch,
     Typography,
-    Tooltip, message, Modal, CollapseProps, Checkbox
+    Tooltip, message, Modal, CollapseProps, Checkbox, Tag
 } from 'antd';
 import axios from 'axios';
 import {useNavigate} from 'react-router';
-import {MinusCircleOutlined, PlusOutlined, InfoCircleOutlined} from "@ant-design/icons";
+import {MinusCircleOutlined, PlusOutlined, InfoCircleOutlined, StarFilled} from "@ant-design/icons";
 import {fileExtension} from "../../utils/form";
+import './custom.css';
 
 import YAML from 'yaml'
 
@@ -35,8 +36,7 @@ import 'ace-builds/src-noconflict/snippets/yaml'
 
 const {Title} = Typography;
 const layout = {
-    labelCol: {span: 3},
-    wrapperCol: {span: 13},
+    wrapperCol: {span: 16},
 };
 
 const NewModule = () => {
@@ -402,14 +402,6 @@ const NewModule = () => {
         }
     }
 
-    const addonAfter = (field: any) => {
-        if (field.description.length !== 0) {
-            return <Tooltip title={field.description} trigger="click">
-                <InfoCircleOutlined/>
-            </Tooltip>
-        }
-    }
-
     const selectInputField = (field: any, formItemName: string | string[], arrayField: any, isRequired: boolean) => {
         let options: {value: string, label: string}[] = []
         field.enum.forEach((option: any) => {
@@ -419,7 +411,14 @@ const NewModule = () => {
             })
         })
 
-        return <Form.Item {...arrayField} name={formItemName} label={field.display_name} rules={[{required: isRequired}]}>
+        return <Form.Item {...arrayField} name={formItemName} rules={[{required: isRequired}]}
+                  label={
+                      <div>
+                          {field.display_name}
+                          <p style={{color: "#8b8e91", marginBottom: "0px"}}>{field.description}</p>
+                      </div>
+                  }
+            >
             <Select
                 showSearch
                 placeholder={field.name}
@@ -434,9 +433,15 @@ const NewModule = () => {
 
     const fileField = (field: any, formItemName: string | string[], arrayField: any, isRequired: boolean) => {
         return <Form.Item {...arrayField} name={formItemName}
-                          label={field.display_name}
+                          label={
+                              <div>
+                                  {field.display_name}
+                                  <p style={{color: "#8b8e91", marginBottom: "0px"}}>{field.description}</p>
+                              </div>
+                          }
                           rules={[{required: isRequired}]}
         >
+            <p style={{color: "#8b8e91", marginBottom: "0px"}}>{field.description}</p>
             <AceEditor
                 mode={fileExtension(field.fileExtension)}
                 theme="github"
@@ -470,7 +475,7 @@ const NewModule = () => {
             case "string":
                 return <Row>
                     <Form.Item style={{paddingBottom: "0px", marginBottom: "0px"}} wrapperCol={24} {...arrayField} initialValue={field.initialValue} name={[arrayField.name]}>
-                        <Input addonAfter={addonAfter(field)}/>
+                        <Input/>
                     </Form.Item>
                     <MinusCircleOutlined style={{ fontSize: '16px', paddingLeft: "10px"}} onClick={() => remove(arrayField.name)} />
                 </Row>
@@ -534,20 +539,27 @@ const NewModule = () => {
 
                     formFields.push(
                         <Form.Item {...arrayField} name={formItemName}
-                                   label={field.display_name}
-                                   rules={[{required: isRequired}]}
+                            label={
+                                <div>
+                                    {field.display_name}
+                                    <p style={{color: "#8b8e91", marginBottom: "0px"}}>{field.description}</p>
+                                </div>
+                            }
+                            rules={[{required: isRequired}]}
                         >
-                            <Input addonAfter={addonAfter(field)}/>
+                            <Input/>
                         </Form.Item>
                     )
                     return;
                 case "number":
                     formFields.push(
-                        <Form.Item {...arrayField} initialValue={field.initialValue} name={formItemName} label={
-                            <Tooltip title={field.description} trigger="click">
-                                {field.display_name}
-                            </Tooltip>
-                        }
+                        <Form.Item {...arrayField} initialValue={field.initialValue} name={formItemName}
+                            label={
+                                <div>
+                                    {field.display_name}
+                                    <p style={{color: "#8b8e91", marginBottom: "0px"}}>{field.description}</p>
+                                </div>
+                            }
                             rules={[{required: isRequired}]}
                         >
                             <InputNumber style={{width: '100%'}} />
@@ -570,7 +582,14 @@ const NewModule = () => {
                     let checked = getValueFromNestedObject(moduleValues, k) === true ? "checked" : "unchecked"
                     formFields.push(
                         <Form.Item initialValue={field.initialValue} name={fieldName} id={fieldName}
-                                   label={field.display_name} valuePropName={checked}>
+                            valuePropName={checked}
+                            label={
+                                <div>
+                                   {field.display_name}
+                                   <p style={{color: "#8b8e91", marginBottom: "0px"}}>{field.description}</p>
+                                </div>
+                            }
+                        >
                             <Switch />
                         </Form.Item>
                     )
@@ -678,7 +697,14 @@ const NewModule = () => {
                     return;
                 case "map":
                     formFields.push(
-                        <Form.Item name={fieldName} label={field.display_name} rules={[{required: isRequired}]}>
+                        <Form.Item name={fieldName} rules={[{required: isRequired}]}
+                            label={
+                                <div>
+                                   {field.display_name}
+                                   <p style={{color: "#8b8e91", marginBottom: "0px"}}>{field.description}</p>
+                                </div>
+                            }
+                        >
                             <Form.List name={formItemName} initialValue={[]}>
                                 {(fields, {add, remove}) => (
                                     <>
@@ -819,6 +845,7 @@ const NewModule = () => {
                     <Form
                         {...layout}
                         form={form}
+                        layout="vertical"
                         autoComplete={"off"}
                         onFinish={handleSubmit}
                         onFinishFailed={onFinishFailed}
@@ -880,11 +907,17 @@ const NewModule = () => {
                         <Divider orientation="left" orientationMargin="0">
                             Module name
                         </Divider>
-                        <Form.Item name="cyclops_module_name" id="cyclops_module_name" label="Module name"
+                        <Form.Item name="cyclops_module_name" id="cyclops_module_name"
+                                   label={
+                                       <div>
+                                           Module name
+                                           <p style={{color: "#8b8e91", marginBottom: "0px"}}>Enter a unique module name</p>
+                                       </div>
+                                   }
                                    rules={[
                                        {
                                            required: true,
-                                           message: 'Module name',
+                                           message: 'Module name is required',
                                        }
                                    ]}
                         >
