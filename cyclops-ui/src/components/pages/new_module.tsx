@@ -441,7 +441,6 @@ const NewModule = () => {
                           }
                           rules={[{required: isRequired}]}
         >
-            <p style={{color: "#8b8e91", marginBottom: "0px"}}>{field.description}</p>
             <AceEditor
                 mode={fileExtension(field.fileExtension)}
                 theme="github"

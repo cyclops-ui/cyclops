@@ -742,7 +742,6 @@ const EditModule = () => {
                                        </div>
                                    }
                         >
-                            <p style={{color: "#8b8e91", marginBottom: "0px"}}>{field.description}</p>
                             <Form.List name={formItemName}>
                                 {(fields, {add, remove}) => (
                                     <>
