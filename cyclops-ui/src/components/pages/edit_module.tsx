@@ -32,13 +32,13 @@ import 'ace-builds/src-noconflict/mode-javascript';
 import 'ace-builds/src-noconflict/mode-typescript';
 import 'ace-builds/src-noconflict/snippets/yaml'
 import {fileExtension} from "../../utils/form";
+import './custom.css';
 
 const {TextArea} = Input;
 
 const {Title} = Typography;
 const layout = {
-    labelCol: {span: 3},
-    wrapperCol: {span: 13},
+    wrapperCol: {span: 16},
 };
 
 const EditModule = () => {
@@ -404,14 +404,6 @@ const EditModule = () => {
         setMigrating(false);
     };
 
-    const addonAfter = (field: any) => {
-        if (field.description.length !== 0) {
-            return <Tooltip title={field.description} trigger="click">
-                <InfoCircleOutlined/>
-            </Tooltip>
-        }
-    }
-
     const getCollapseColor = (fieldName: string) => {
         let kk = new Array(fieldName);
         let key = kk.join('')
@@ -463,7 +455,14 @@ const EditModule = () => {
             })
         })
 
-        return <Form.Item {...arrayField} name={formItemName} label={field.display_name} rules={[{required: isRequired}]}>
+        return <Form.Item {...arrayField} name={formItemName} rules={[{required: isRequired}]}
+                          label={
+                              <div>
+                                  {field.display_name}
+                                  <p style={{color: "#8b8e91", marginBottom: "0px"}}>{field.description}</p>
+                              </div>
+                          }
+        >
             <Select
                 showSearch
                 placeholder={field.name}
@@ -478,7 +477,12 @@ const EditModule = () => {
 
     const fileField = (field: any, formItemName: string | string[], arrayField: any, isRequired: boolean) => {
         return <Form.Item {...arrayField} name={formItemName}
-                          label={field.display_name}
+                          label={
+                              <div>
+                                  {field.display_name}
+                                  <p style={{color: "#8b8e91", marginBottom: "0px"}}>{field.description}</p>
+                              </div>
+                          }
                           rules={[{required: isRequired}]}
         >
             <AceEditor
@@ -514,7 +518,7 @@ const EditModule = () => {
             case "string":
                 return <Row>
                     <Form.Item style={{paddingBottom: "0px", marginBottom: "0px"}} wrapperCol={24} {...arrayField} initialValue={field.initialValue} name={[arrayField.name]}>
-                        <Input addonAfter={addonAfter(field)}/>
+                        <Input/>
                     </Form.Item>
                     <MinusCircleOutlined style={{ fontSize: '16px', paddingLeft: "10px"}} onClick={() => remove(arrayField.name)} />
                 </Row>
@@ -573,20 +577,27 @@ const EditModule = () => {
 
                     formFields.push(
                         <Form.Item {...arrayField} name={formItemName}
-                                   label={field.display_name}
+                                   label={
+                                       <div>
+                                           {field.display_name}
+                                           <p style={{color: "#8b8e91", marginBottom: "0px"}}>{field.description}</p>
+                                       </div>
+                                   }
                                    rules={[{required: isRequired}]}
                         >
-                            <Input addonAfter={addonAfter(field)}/>
+                            <Input/>
                         </Form.Item>
                     )
                     return;
                 case "number":
                     formFields.push(
-                        <Form.Item {...arrayField} initialValue={field.initialValue} name={formItemName} label={
-                            <Tooltip title={field.description} trigger="click">
-                                {field.display_name}
-                            </Tooltip>
-                        }
+                        <Form.Item {...arrayField} initialValue={field.initialValue} name={formItemName}
+                           label={
+                               <div>
+                                   {field.display_name}
+                                   <p style={{color: "#8b8e91", marginBottom: "0px"}}>{field.description}</p>
+                               </div>
+                           }
                            rules={[{required: isRequired}]}
                         >
                             <InputNumber style={{width: '100%'}} />
@@ -609,7 +620,13 @@ const EditModule = () => {
                     let checked = getValueFromNestedObject(moduleValues, k) === true ? "checked" : "unchecked"
                     formFields.push(
                         <Form.Item initialValue={field.initialValue} name={fieldName} id={fieldName}
-                                   label={field.display_name} valuePropName={checked}>
+                                   label={
+                                       <div>
+                                           {field.display_name}
+                                           <p style={{color: "#8b8e91", marginBottom: "0px"}}>{field.description}</p>
+                                       </div>
+                                   }
+                                   valuePropName={checked}>
                             <Switch />
                         </Form.Item>
                     )
@@ -717,7 +734,14 @@ const EditModule = () => {
                     return;
                 case "map":
                     formFields.push(
-                        <Form.Item name={fieldName} label={field.display_name} rules={[{required: isRequired}]}>
+                        <Form.Item name={fieldName} rules={[{required: isRequired}]}
+                                   label={
+                                       <div>
+                                           {field.display_name}
+                                           <p style={{color: "#8b8e91", marginBottom: "0px"}}>{field.description}</p>
+                                       </div>
+                                   }
+                        >
                             <Form.List name={formItemName}>
                                 {(fields, {add, remove}) => (
                                     <>
@@ -794,6 +818,7 @@ const EditModule = () => {
                     <Form
                         {...layout}
                         form={form}
+                        layout="vertical"
                         autoComplete={"off"}
                         onFinish={handleSubmit}
                         onFinishFailed={onFinishFailed}
