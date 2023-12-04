@@ -7,6 +7,8 @@ import HomepageFeatures from '@site/src/components/HomepageFeatures';
 
 import helmsman from '/static/img/cyclops_helmsman.png';
 import nuqleus from '/static/img/nuqleus_landscape.png';
+import frc from '/static/img/frc.png';
+import esif from '/static/img/esif.png';
 import zicer from '/static/img/zicer.png';
 
 // import EITDigital from '/static/img/EIT_digital.png';
@@ -14,8 +16,9 @@ import zicer from '/static/img/zicer.png';
 
 import styles from './index.module.css';
 import Comparison from "../components/Comparison";
-import {Button} from "antd";
+import {Button, Row} from "antd";
 import {StarFilled} from "@ant-design/icons";
+import Support from "../components/Support";
 
 function HomepageHeader() {
     const {siteConfig} = useDocusaurusContext();
@@ -77,21 +80,6 @@ function HomepageHeader() {
                         Join the community
                     </Link>
                 </div>
-                <div className={styles.support}>
-                    <p style={{padding: 0, margin: 0, paddingBottom: '5px'}}>Supported by</p>
-                    <ul>
-                        <li>
-                            <Link to="https://nuqleus.io/">
-                                <img style={{heigh: 'auto', width: '50%', paddingBottom: '5px'}} src={nuqleus}/>
-                            </Link>
-                        </li>
-                        <li>
-                            <Link to="https://www.zicer.hr/?lang=en">
-                                <img style={{heigh: 'auto', width: '25%'}} src={zicer}/>
-                            </Link>
-                        </li>
-                    </ul>
-                </div>
             </div>
         </header>
     );
@@ -106,6 +94,7 @@ export default function Home() {
             <main>
                 <HomepageFeatures/>
                 <Comparison/>
+                <Support/>
             </main>
         </Layout>
     );

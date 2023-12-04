@@ -1,0 +1,55 @@
+.support {
+  display: flex;
+  margin: 3%;
+  float: left;
+  width: 11%;
+  transform: translateY(-50%);
+}
+
+.nuqleus {
+  display: flex;
+  margin: 3% 3% 3% 19%;
+  float: left;
+  width: 11%;
+  transform: translateY(-50%);
+}
+
+.esif {
+  display: flex;
+  float: left;
+  transform: translateY(-50%);
+  width: 20%;
+  margin: 3% 3% 3% 3%;
+}
+
+@media screen and (max-width: 950px) {
+  .container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .support {
+    width: 50%;
+    display: flex;
+    justify-content: center;
+    margin-bottom: 10px;
+    transform: translateY(0%);
+  }
+
+  .nuqleus {
+    width: 50%;
+    display: flex;
+    justify-content: center;
+    margin: 0px 0px 10px 0px;
+    transform: translateY(0%);
+  }
+
+  .esif {
+    width: 90%;
+    /*margin: 2%;*/
+    display: flex;
+    justify-content: center;
+    transform: translateY(0%);
+  }
+}
