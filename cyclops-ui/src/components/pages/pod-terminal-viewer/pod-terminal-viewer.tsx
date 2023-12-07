@@ -107,7 +107,6 @@ export const PodTerminalViewer: React.FC<PodTerminalViewerProps> = ({
         terminal = new Terminal({
             convertEol: true,
             fontFamily: 'Menlo, Monaco, Courier New, monospace',
-            bellStyle: 'sound',
             fontSize: 14,
             fontWeight: 400,
             cursorBlink: true

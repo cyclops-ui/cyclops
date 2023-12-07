@@ -33,18 +33,7 @@ const SearchInput = () => {
     console.log(namespaces);
 
     return (
-        <Select
-            id={"options"}
-            mode="tags"
-            defaultActiveFirstOption={false}
-            placeholder={"Select namespaces"}
-            style={{width: '20%'}}
-            showArrow={false}
-            filterOption={false}
-            notFoundContent={null}
-        >
-            {namespaces}
-        </Select>
+        <div/>
     );
 }
 

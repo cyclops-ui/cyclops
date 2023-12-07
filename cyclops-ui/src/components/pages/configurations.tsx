@@ -1,10 +1,7 @@
 import React, {useEffect, useState} from 'react';
 import {Button, Col, Divider, Row, Select, Table, Tag, Typography, Input, Space} from 'antd';
-import {Icon} from '@ant-design/compatible';
 import {useNavigate} from 'react-router';
 import axios from 'axios';
-import SearchInput from "../searchbar";
-import { SearchOutlined } from '@ant-design/icons';
 
 const {Title} = Typography;
 

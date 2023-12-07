@@ -3,10 +3,6 @@ import {Button, Col, Divider, Row, Select, Table, Tag, Typography, Input, Space}
 import {Icon} from '@ant-design/compatible';
 import {useNavigate} from 'react-router';
 import axios from 'axios';
-import SearchInput from "../searchbar";
-import { SearchOutlined } from '@ant-design/icons';
-import {ReactTerminal} from "react-terminal";
-import {XTerm} from "xterm-for-react";
 import {PodTerminalViewer} from "./pod-terminal-viewer/pod-terminal-viewer";
 
 const {Title} = Typography;
