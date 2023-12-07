@@ -148,23 +148,6 @@ export const PodTerminalViewer: React.FC<PodTerminalViewerProps> = ({
         webSocket.onmessage = onConnectionMessage;
     }
 
-    const setTerminalRef = useCallback(
-        node => {
-            if (terminal && connected) {
-                disconnect();
-            }
-
-            if (node) {
-                initTerminal(node);
-                setupConnection();
-            }
-
-            // Save a reference to the node
-            terminalRef.current = node;
-        },
-        [containerName]
-    );
-
     useEffect(() => {
         const resizeHandler = fromEvent(window, 'resize')
             .pipe(debounceTime(1000))
@@ -195,44 +178,7 @@ export const PodTerminalViewer: React.FC<PodTerminalViewerProps> = ({
         };
     }, [containerName]);
 
-    const containerGroups = [
-        {
-            offset: 0,
-            title: 'CONTAINERS',
-            containers: []
-        },
-        {
-            offset: ([]).length,
-            title: 'INIT CONTAINERS',
-            containers: []
-        }
-    ];
-
     return (
-        <div className='row'>
-            <div className='columns small-3 medium-2'>
-                {containerGroups.map(group => (
-                    <div key={group.title} style={{marginBottom: '1em'}}>
-                        {group.containers.length > 0 && <p>{group.title}</p>}
-                        {group.containers.map((container: any, i: number) => (
-                            <div
-                                className='application-details__container'
-                                key={container.name}
-                                onClick={() => {
-                                    if (container.name !== containerName) {
-                                        disconnect();
-                                    }
-                                }}>
-                                {container.name === containerName && <i className='fa fa-angle-right' />}
-                                <span title={container.name}>{container.name}</span>
-                            </div>
-                        ))}
-                    </div>
-                ))}
-            </div>
-            <div className='columns small-9 medium-10'>
-                <div ref={setTerminalRef} className='pod-terminal-viewer' />
-            </div>
-        </div>
+        <div className='row'/>
     );
 };
