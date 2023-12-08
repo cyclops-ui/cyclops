@@ -9,7 +9,7 @@ Kubernetes has become the go-to platform for managing containerized applications
 
 Several powerful development tools have emerged to simplify the management of Kubernetes clusters and streamline the deployment process. In this article, we will explore five Kubernetes development tools: 
 
-1. [**1. Pometheus**](https://prometheus.io/)
+1. [**1. Prometheus**](https://prometheus.io/)
 2. [**2. Cyclops**](https://cyclops-ui.com/)
 3. [**3. Keda**](https://keda.sh/)
 4. [**4. Karpenter**](https://karpenter.sh/)
