@@ -1,0 +1,28 @@
+name: cyclops-ctrl-CI
+
+on:
+  push:
+    tags:
+      - '*'
+
+permissions:
+  contents: write
+
+jobs:
+  controller:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Print tag
+        run: |
+          TAG=$(git describe --tags --abbrev=0)
+          echo "The tag is $TAG"
+
+  UI:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Print tag
+        run: |
+          TAG=$(git describe --tags --abbrev=0)
+          echo "The tag is $TAG"
