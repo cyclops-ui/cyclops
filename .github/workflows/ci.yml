@@ -1,4 +1,4 @@
-name: cyclops-ctrl-CI
+name: cyclops-CI
 
 on:
   push:
