@@ -9,20 +9,56 @@ permissions:
   contents: write
 
 jobs:
-  controller:
+  build-UI:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
-      - name: Print tag
-        run: |
-          TAG=$(git describe --tags --abbrev=0)
-          echo "The tag is $TAG"
+      - name: Login to DockerHub
+        uses: docker/login-action@v1
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-  UI:
+      - name: Build and push
+        run: |
+          TAG=$(git describe --tags --abbrev=0)
+
+          docker build cyclops-ui -t petarcvit223/cyclops-ui:$TAG
+          docker push petarcvit223/cyclops-ui:$TAG
+
+  build-controller:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
-      - name: Print tag
+      - name: Login to DockerHub
+        uses: docker/login-action@v1
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Build and push
         run: |
           TAG=$(git describe --tags --abbrev=0)
-          echo "The tag is $TAG"
+
+          docker build cyclops-ctrl -t petarcvit223/cyclops-ctrl:$TAG
+          docker push petarcvit223/cyclops-ctrl:$TAG
+
+  update-install-manifest:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: update install manifest
+        run: |
+          TAG=$(git describe --tags --abbrev=0)
+          INSTALL_YAML=$GITHUB_WORKSPACE/install/cyclops-install.yaml
+
+          sed -i 's/petarcvit223\/cyclops-ctrl\:.*/petarcvit223\/cyclops-ctrl\:'$TAG'/' $INSTALL_YAML
+          sed -i 's/petarcvit223\/cyclops-ui\:.*/petarcvit223\/cyclops-ui\:'$TAG'/' $INSTALL_YAML
+
+          # update file
+          git config --global user.email "petar.cvitanovic@gmail.com"
+          git config --global user.name "petar-cvit"
+          git status
+          git add .
+          git commit -m 'ci update cyclops ctrl to '$TAG
+          git push
