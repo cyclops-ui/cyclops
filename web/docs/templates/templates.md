@@ -12,3 +12,12 @@ On top of the usual schema, we added some more fields to help our users get as m
 | `order`         | string array | Defines the order of the fields in an object type property. <br/> Basically each time you use `properties`, you should also define the order of those properties                  | -                                                                |
 | `fileExtension` | string       | Sometimes you would like your text field not to be just a field, but also to get some highlighting based on the type of string you are saving. You can specify that in this field | `text`, `sh`, `json`, `yaml`, `toml`, `javascript`, `typescript` |
 
+<br/>
+
+:::info
+
+**To be implemented**
+- [Templates can be referenced only from git, and cannot be fetched from a Helm repo](https://github.com/cyclops-ui/cyclops/issues/74)
+- [Helm chart dependencies are not yet supported](https://github.com/cyclops-ui/cyclops/issues/75)
+
+:::
