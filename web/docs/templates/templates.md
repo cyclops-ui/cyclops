@@ -13,7 +13,6 @@ On top of the usual schema, we added some more fields to help our users get as m
 | `fileExtension` | string       | Sometimes you would like your text field not to be just a field, but also to get some highlighting based on the type of string you are saving. You can specify that in this field | `text`, `sh`, `json`, `yaml`, `toml`, `javascript`, `typescript` |
 
 <br/>
-
 :::info
 
 **To be implemented**
