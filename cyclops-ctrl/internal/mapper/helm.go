@@ -25,6 +25,8 @@ func HelmSchemaToFields(schema helm.Property) []models.Field {
 				Minimum:       property.Minimum,
 				Maximum:       property.Maximum,
 				MultipleOf:    property.MultipleOf,
+				MinLength:     property.MinLength,
+				MaxLength:     property.MaxLength,
 			})
 			continue
 		}
@@ -42,6 +44,8 @@ func HelmSchemaToFields(schema helm.Property) []models.Field {
 			Minimum:       property.Minimum,
 			Maximum:       property.Maximum,
 			MultipleOf:    property.MultipleOf,
+			MinLength:     property.MinLength,
+			MaxLength:     property.MaxLength,
 		})
 	}
 

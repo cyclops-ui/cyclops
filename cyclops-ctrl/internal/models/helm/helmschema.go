@@ -15,4 +15,8 @@ type Property struct {
 	Minimum    *float64 `json:"minimum"`
 	Maximum    *float64 `json:"maximum"`
 	MultipleOf *float64 `json:"multipleOf"`
+
+	// string validation
+	MinLength *int `json:"minLength"`
+	MaxLength *int `json:"maxLength"`
 }
