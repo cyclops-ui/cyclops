@@ -22,6 +22,9 @@ func HelmSchemaToFields(schema helm.Property) []models.Field {
 				Enum:          property.Enum,
 				Required:      property.Required,
 				FileExtension: property.FileExtension,
+				Minimum:       property.Minimum,
+				Maximum:       property.Maximum,
+				MultipleOf:    property.MultipleOf,
 			})
 			continue
 		}
@@ -36,6 +39,9 @@ func HelmSchemaToFields(schema helm.Property) []models.Field {
 			Enum:          property.Enum,
 			Required:      property.Required,
 			FileExtension: property.FileExtension,
+			Minimum:       property.Minimum,
+			Maximum:       property.Maximum,
+			MultipleOf:    property.MultipleOf,
 		})
 	}
 
