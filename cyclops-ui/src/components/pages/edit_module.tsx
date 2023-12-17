@@ -33,6 +33,8 @@ import 'ace-builds/src-noconflict/mode-typescript';
 import 'ace-builds/src-noconflict/snippets/yaml'
 import {fileExtension} from "../../utils/form";
 import './custom.css';
+import {numberInputValidators} from "../../utils/validators/number";
+import {stringInputValidators} from "../../utils/validators/string";
 
 const {TextArea} = Input;
 
@@ -483,7 +485,7 @@ const EditModule = () => {
                                   <p style={{color: "#8b8e91", marginBottom: "0px"}}>{field.description}</p>
                               </div>
                           }
-                          rules={[{required: isRequired}]}
+                          rules={stringInputValidators(field, isRequired)}
         >
             <AceEditor
                 mode={fileExtension(field.fileExtension)}
@@ -583,7 +585,7 @@ const EditModule = () => {
                                            <p style={{color: "#8b8e91", marginBottom: "0px"}}>{field.description}</p>
                                        </div>
                                    }
-                                   rules={[{required: isRequired}]}
+                                   rules={stringInputValidators(field, isRequired)}
                         >
                             <Input/>
                         </Form.Item>
@@ -598,7 +600,7 @@ const EditModule = () => {
                                    <p style={{color: "#8b8e91", marginBottom: "0px"}}>{field.description}</p>
                                </div>
                            }
-                           rules={[{required: isRequired}]}
+                           rules={numberInputValidators(field, isRequired)}
                         >
                             <InputNumber style={{width: '100%'}} />
                         </Form.Item>

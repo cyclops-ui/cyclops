@@ -33,6 +33,8 @@ import 'ace-builds/src-noconflict/mode-toml';
 import 'ace-builds/src-noconflict/mode-javascript';
 import 'ace-builds/src-noconflict/mode-typescript';
 import 'ace-builds/src-noconflict/snippets/yaml'
+import {numberInputValidators} from "../../utils/validators/number";
+import {stringInputValidators} from "../../utils/validators/string";
 
 const {Title} = Typography;
 const layout = {
@@ -439,7 +441,7 @@ const NewModule = () => {
                                   <p style={{color: "#8b8e91", marginBottom: "0px"}}>{field.description}</p>
                               </div>
                           }
-                          rules={[{required: isRequired}]}
+                          rules={stringInputValidators(field, isRequired)}
         >
             <AceEditor
                 mode={fileExtension(field.fileExtension)}
@@ -544,7 +546,7 @@ const NewModule = () => {
                                     <p style={{color: "#8b8e91", marginBottom: "0px"}}>{field.description}</p>
                                 </div>
                             }
-                            rules={[{required: isRequired}]}
+                            rules={stringInputValidators(field, isRequired)}
                         >
                             <Input/>
                         </Form.Item>
@@ -559,7 +561,7 @@ const NewModule = () => {
                                     <p style={{color: "#8b8e91", marginBottom: "0px"}}>{field.description}</p>
                                 </div>
                             }
-                            rules={[{required: isRequired}]}
+                            rules={numberInputValidators(field, isRequired)}
                         >
                             <InputNumber style={{width: '100%'}} />
                         </Form.Item>

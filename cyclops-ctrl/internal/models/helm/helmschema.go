@@ -10,4 +10,13 @@ type Property struct {
 	Enum          []string            `json:"enum"`
 	Required      []string            `json:"required"`
 	FileExtension string              `json:"fileExtension"`
+
+	// number validation
+	Minimum    *float64 `json:"minimum"`
+	Maximum    *float64 `json:"maximum"`
+	MultipleOf *float64 `json:"multipleOf"`
+
+	// string validation
+	MinLength *int `json:"minLength"`
+	MaxLength *int `json:"maxLength"`
 }
