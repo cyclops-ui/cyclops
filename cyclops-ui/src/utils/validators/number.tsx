@@ -1,4 +1,5 @@
 import type { Rule, RuleObject } from 'rc-field-form/lib/interface';
+import {isFieldNullOrUndefined} from "./common";
 
 export function numberInputValidators(field: any, isRequired: boolean): Rule[] {
     let rules: Rule[] = [];
@@ -17,7 +18,7 @@ function validateMin(field: any) {
     }
 
     return (_: RuleObject, value: any): Promise<any> => {
-        return value > field.minimum ? Promise.resolve() : Promise.reject(`Number must be greater than ${field.minimum}`);
+        return value >= field.minimum ? Promise.resolve() : Promise.reject(`Number must be greater or equal to ${field.minimum}`);
     };
 }
 
@@ -27,7 +28,7 @@ function validateMax(field: any) {
     }
 
     return (_: RuleObject, value: any): Promise<any> => {
-        return value < field.maximum ? Promise.resolve() : Promise.reject(`Number must be less than ${field.maximum}`);
+        return value <= field.maximum ? Promise.resolve() : Promise.reject(`Number must be less or equal to ${field.maximum}`);
     };
 }
 
@@ -44,7 +45,3 @@ function validateMultiple(field: any) {
             Promise.reject(`Number must be a multiple of ${field.multipleOf}`);
     };
 }
-
-const isFieldNullOrUndefined = (obj: Record<string, any>, fieldName: string): boolean => {
-    return !obj || obj[fieldName] === null || obj[fieldName] === undefined;
-};
