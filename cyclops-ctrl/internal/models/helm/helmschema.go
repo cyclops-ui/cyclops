@@ -11,6 +11,7 @@ type Property struct {
 	Required      []string            `json:"required"`
 	FileExtension string              `json:"fileExtension"`
 
+	// number validation
 	Minimum    *float64 `json:"minimum"`
 	Maximum    *float64 `json:"maximum"`
 	MultipleOf *float64 `json:"multipleOf"`
