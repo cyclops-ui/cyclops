@@ -10,6 +10,7 @@ import (
 	"path/filepath"
 	"strings"
 
+	"github.com/cyclops-ui/cycops-ctrl/internal/helmclient"
 	"github.com/cyclops-ui/cycops-ctrl/internal/mapper"
 	"github.com/cyclops-ui/cycops-ctrl/internal/models"
 	"github.com/cyclops-ui/cycops-ctrl/internal/models/helm"
@@ -29,10 +30,21 @@ func LoadTemplate(repoURL, path, commit string) (models.Template, error) {
 		return models.Template{}, err
 	}
 
-	// region check if helm chart
-	_, err = fs.Open(path2.Join(path, "Chart.yaml"))
+	// load helm chart metadata
+	chartMetadata, err := fs.Open(path2.Join(path, "Chart.yaml"))
 	if err != nil {
 		return models.Template{}, errors.Wrap(err, "could not read 'Chart.yaml' file; it should be placed in the repo/path you provided; make sure you provided the correct path")
+	}
+
+	var chartMetadataBuffer bytes.Buffer
+	_, err = io.Copy(bufio.NewWriter(&chartMetadataBuffer), chartMetadata)
+	if err != nil {
+		return models.Template{}, err
+	}
+
+	var metadata chart.Metadata
+	if err := yaml.Unmarshal(chartMetadataBuffer.Bytes(), &metadata); err != nil {
+		return models.Template{}, err
 	}
 	// endregion
 
@@ -68,26 +80,34 @@ func LoadTemplate(repoURL, path, commit string) (models.Template, error) {
 		return models.Template{}, errors.Wrap(err, "could not read 'values.schema.json' file; it should be placed in the repo/path you provided; make sure 'templates' directory exists")
 	}
 
-	var b bytes.Buffer
-	_, err = io.Copy(bufio.NewWriter(&b), schemaFile)
+	var schemaChartBuffer bytes.Buffer
+	_, err = io.Copy(bufio.NewWriter(&schemaChartBuffer), schemaFile)
 	if err != nil {
 		return models.Template{}, err
 	}
 
 	var schema helm.Property
-	if err := json.Unmarshal(b.Bytes(), &schema); err != nil {
+	if err := json.Unmarshal(schemaChartBuffer.Bytes(), &schema); err != nil {
+		return models.Template{}, err
+	}
+	// endregion
+
+	// region load dependencies
+	dependecies, err := loadDependencies(metadata)
+	if err != nil {
 		return models.Template{}, err
 	}
 	// endregion
 
 	return models.Template{
-		Name:     "",
-		Manifest: strings.Join(manifests, "---\n"),
-		Fields:   mapper.HelmSchemaToFields(schema),
-		Created:  "",
-		Edited:   "",
-		Version:  "",
-		Files:    chartFiles,
+		Name:         "",
+		Manifest:     strings.Join(manifests, "---\n"),
+		Fields:       mapper.HelmSchemaToFields(schema),
+		Created:      "",
+		Edited:       "",
+		Version:      "",
+		Files:        chartFiles,
+		Dependencies: dependecies,
 	}, nil
 }
 
@@ -273,4 +293,18 @@ func readFiles(path string, fs billy.Filesystem) ([]*chart.File, error) {
 	}
 
 	return chartFiles, nil
+}
+
+func loadDependencies(metadata chart.Metadata) ([]*models.Template, error) {
+	deps := make([]*models.Template, 0)
+	for _, dependency := range metadata.Dependencies {
+		dep, err := helmclient.LoadHelmChart(dependency.Repository, dependency.Name, dependency.Version)
+		if err != nil {
+			return nil, err
+		}
+
+		deps = append(deps, dep)
+	}
+
+	return deps, nil
 }
