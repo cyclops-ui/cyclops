@@ -753,40 +753,40 @@ const NewModule = () => {
             return <></>
         }
 
-        var formFields = mapFields(config.fields, "",  "" , 0, 0)
+        return mapFields(config.fields, "",  "" , 0, 0)
 
-        config.dependencies.forEach((dependency: any) => {
-            var header = <Row>{dependency.name}</Row>
-            formFields.push(
-                <Col span={16} offset={2} style={{
-                    paddingBottom: "15px",
-                    marginLeft: "0px",
-                    marginRight: "0px",
-                    paddingLeft: "0px",
-                    paddingRight: "0px",
-                }}>
-                    <Collapse size={"small"} onChange={function (value: string | string[]) {
-                        if (value.length === 0) {
-                            updateActiveCollapses(dependency.name, false)
-                        } else {
-                            updateActiveCollapses(dependency.name, true)
-                        }
-                    }}>
-                        <Collapse.Panel key={dependency.name} header={header} style={{backgroundColor: getCollapseColor(dependency.name)}} forceRender={true}>
-                            <Form.List name={dependency.name}>
-                                {(arrFields, { add, remove }) => (
-                                    <>
-                                        {mapFields(dependency.fields, [dependency.name], "", 1, 0)}
-                                    </>
-                                )}
-                            </Form.List>
-                        </Collapse.Panel>
-                    </Collapse>
-                </Col>
-            )
-        })
-
-        return formFields;
+        // config.dependencies.forEach((dependency: any) => {
+        //     var header = <Row>{dependency.name}</Row>
+        //     formFields.push(
+        //         <Col span={16} offset={2} style={{
+        //             paddingBottom: "15px",
+        //             marginLeft: "0px",
+        //             marginRight: "0px",
+        //             paddingLeft: "0px",
+        //             paddingRight: "0px",
+        //         }}>
+        //             <Collapse size={"small"} onChange={function (value: string | string[]) {
+        //                 if (value.length === 0) {
+        //                     updateActiveCollapses(dependency.name, false)
+        //                 } else {
+        //                     updateActiveCollapses(dependency.name, true)
+        //                 }
+        //             }}>
+        //                 <Collapse.Panel key={dependency.name} header={header} style={{backgroundColor: getCollapseColor(dependency.name)}} forceRender={true}>
+        //                     <Form.List name={dependency.name}>
+        //                         {(arrFields, { add, remove }) => (
+        //                             <>
+        //                                 {mapFields(dependency.fields, [dependency.name], "", 1, 0)}
+        //                             </>
+        //                         )}
+        //                     </Form.List>
+        //                 </Collapse.Panel>
+        //             </Collapse>
+        //         </Col>
+        //     )
+        // })
+        //
+        // return formFields;
     }
 
     const handleCancel = () => {

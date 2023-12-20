@@ -72,12 +72,49 @@ func LoadHelmChart(repo, chart, version string) (*models.Template, error) {
 	return &models.Template{
 		Name:     chart,
 		Manifest: strings.Join(manifestParts, "---\n"),
-		Fields:   mapper.HelmSchemaToFields(schema),
+		Fields:   mapper.HelmSchemaToFields(schema, nil),
 		Created:  "",
 		Edited:   "",
 		Version:  "",
 		Files:    chartFiles,
 	}, nil
+}
+
+func LoadHelmChartInitialValues(repo, chart, version string) (map[interface{}]interface{}, error) {
+	tgzURL, err := getTarUrl(repo, chart, version)
+	if err != nil {
+		return nil, err
+	}
+
+	// Download the .tgz file
+	tgzData, err := downloadFile(tgzURL)
+	if err != nil {
+		return nil, err
+	}
+
+	// Extract the contents in memory
+	extractedFiles, err := unpackTgzInMemory(tgzData)
+	if err != nil {
+		return nil, err
+	}
+
+	valuesBytes := []byte{}
+
+	for name, content := range extractedFiles {
+		parts := strings.Split(name, "/")
+
+		if len(parts) == 2 && parts[1] == "values.yaml" {
+			valuesBytes = content
+			break
+		}
+	}
+
+	var values map[interface{}]interface{}
+	if err := yaml.Unmarshal(valuesBytes, &values); err != nil {
+		return nil, err
+	}
+
+	return values, nil
 }
 
 func getTarUrl(repo, chart, version string) (string, error) {

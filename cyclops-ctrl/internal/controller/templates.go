@@ -176,14 +176,10 @@ func (c *Templates) GetTemplateInitialValuesFromGit(ctx *gin.Context) {
 		return
 	}
 
-	initial, ok, err := git.LoadInitialTemplateValues(repo, path, commit)
+	initial, err := git.LoadInitialTemplateValues(repo, path, commit)
 	if err != nil {
 		fmt.Println(err)
 		ctx.JSON(http.StatusBadRequest, dto.NewError("Error loading template", err.Error()))
-		return
-	}
-	if !ok {
-		ctx.JSON(http.StatusOK, dto.NewResponse("Default values not found"))
 		return
 	}
 
