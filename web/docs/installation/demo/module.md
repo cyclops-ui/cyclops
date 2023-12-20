@@ -48,8 +48,3 @@ another popup window that displays the last 100 logs of the pod. If you are stil
 Here is your service. In Kubernetes, a Service is a method for exposing a network application that is running as one or 
 more Pods in your cluster. Here we can also see the name of our service `demo-1`, the namespace it inhabits `default` and
 the manifest. Underneath it shows the port of the service and where it is pointing (port of the pods).
-
-## Potential problems
-### Contact info@cyclops-ui.com
-If you have any problems with following the tutorial or the application itself, please contact us and we will reply as
-soon as possible!
