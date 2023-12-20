@@ -19,8 +19,7 @@ These tools offer intuitive user interfaces, automated scaling capabilities, dis
 
 ### Show us your support 🙏🏻
 
-Before we start, we would love it if you starred our repository and helped us get our 
-tool in front of other developers. Our GitHub repo is here: https://github.com/cyclops-ui/cyclops ⭐
+Before we start, we would love it if you starred our repository and helped us get our tool in front of other developers. Our GitHub repo is here: https://github.com/cyclops-ui/cyclops ⭐
 
 ## 1. Prometheus: Monitoring and Alerting for Kubernetes
 ![Prometheus logo](../../static/img/2023-12-08-five-kubernetes-tools/prometheus_logo.png)

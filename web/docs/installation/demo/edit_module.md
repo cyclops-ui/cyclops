@@ -24,7 +24,3 @@ convention](https://kubernetes.io/docs/concepts/overview/working-with-objects/na
 2. [x] contain only **lowercase** alphanumeric characters, '-' or '. '
 3. [x] start with an alphanumeric character
 4. [x] end with an alphanumeric character
-
-### Contact info@cyclops-ui.com
-If you have any problems with following the tutorial or the application itself, please contact us and we will reply as
-soon as possible!

@@ -129,7 +129,7 @@ When the Controller Manager hears about the new Replicaset, it will create all t
 
 ![ As we said, a lot of things happened, so we decided to create a GIF that might help you understand the whole process under the hood.](../../static/img/2023-12-18-k8s-cluster-components/gif_k8s_final.gif)
 
- As we said, a lot of things happened, so we decided to create a GIF that might help you understand the whole process under the hood.
+ *As we said, a lot of things happened, so we decided to create a GIF that might help you understand the whole process under the hood.*
 
 Here, we include the Scheduler, which is subscribed to the Pod creation event. Each time it hears about a new Pod, it decides on which node it should be run. The Scheduler is not running the Pod but **only telling the API** which node it chose for it. The API will then save that information.
 
