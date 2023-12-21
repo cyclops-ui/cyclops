@@ -153,7 +153,8 @@ const ModuleDetails = () => {
     });
 
     let {moduleName} = useParams();
-    useEffect(() => {
+
+    function fetchModule() {
         axios.get(window.__RUNTIME_CONFIG__.REACT_APP_CYCLOPS_CTRL_HOST + `/modules/` + moduleName).then(res => {
             setModule(res.data);
             setLoadModule(true);
@@ -171,7 +172,9 @@ const ModuleDetails = () => {
                 setError(error.response.data);
             }
         })
+    }
 
+    function fetchModuleResources() {
         axios.get(window.__RUNTIME_CONFIG__.REACT_APP_CYCLOPS_CTRL_HOST + `/modules/` + moduleName + `/resources`).then(res => {
             setResources(res.data);
             setLoadResources(true);
@@ -189,25 +192,16 @@ const ModuleDetails = () => {
                 setError(error.response.data);
             }
         });
+    }
 
-        // setInterval(function () {
-        //     axios.get(window.__RUNTIME_CONFIG__.REACT_APP_CYCLOPS_CTRL_HOST + `/modules/` + moduleName + `/resources`).then(res => {
-        //         setResources(res.data);
-        //     }).catch(error => {
-        //         console.log(error)
-        //         console.log(error.response)
-        //         setLoading(false);
-        //         if (error.response === undefined) {
-        //             setError({
-        //                 message: String(error),
-        //                 description: "Check if Cyclops backend is available on: " + window.__RUNTIME_CONFIG__.REACT_APP_CYCLOPS_CTRL_HOST
-        //             })
-        //         } else {
-        //             setError(error.response.data);
-        //         }
-        //     });
-        // }, 5000);
-    }, []);
+    useEffect(() => {
+        fetchModule()
+        fetchModuleResources()
+        const interval = setInterval(() => fetchModuleResources(), 5000)
+        return () => {
+            clearInterval(interval);
+        }
+    }, [])
 
     const getCollapseColor = (fieldName: string, healthy: boolean) => {
         // if (activeCollapses.get(fieldName) && activeCollapses.get(fieldName) === true) {

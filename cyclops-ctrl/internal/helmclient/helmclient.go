@@ -22,11 +22,29 @@ import (
 	"github.com/cyclops-ui/cycops-ctrl/internal/models/helm"
 )
 
-func LoadHelmChart(repo, chart, version string) (*models.Template, error) {
+func LoadDependencies(metadata helmchart.Metadata) ([]*models.Template, error) {
+	deps := make([]*models.Template, 0)
+	for _, dependency := range metadata.Dependencies {
+		fmt.Println("dep", dependency.Name)
+
+		dep, err := loadHelmChart(dependency.Repository, dependency.Name, dependency.Version)
+		if err != nil {
+			return nil, err
+		}
+
+		deps = append(deps, dep)
+	}
+
+	return deps, nil
+}
+
+func loadHelmChart(repo, chart, version string) (*models.Template, error) {
 	tgzURL, err := getTarUrl(repo, chart, version)
 	if err != nil {
 		return nil, err
 	}
+
+	fmt.Println(tgzURL)
 
 	// Download the .tgz file
 	tgzData, err := downloadFile(tgzURL)
@@ -40,12 +58,18 @@ func LoadHelmChart(repo, chart, version string) (*models.Template, error) {
 		return nil, err
 	}
 
+	metadataBytes := []byte{}
 	schemaBytes := []byte{}
 	manifestParts := make([]string, 0)
 	chartFiles := make([]*helmchart.File, 0)
 
 	for name, content := range extractedFiles {
 		parts := strings.Split(name, "/")
+
+		if len(parts) == 2 && parts[1] == "Chart.yaml" {
+			metadataBytes = content
+			continue
+		}
 
 		if len(parts) == 2 && parts[1] == "values.schema.json" {
 			schemaBytes = content
@@ -69,14 +93,29 @@ func LoadHelmChart(repo, chart, version string) (*models.Template, error) {
 		return &models.Template{}, err
 	}
 
+	var metadata helmchart.Metadata
+	if err := yaml.Unmarshal(metadataBytes, &metadata); err != nil {
+		return &models.Template{}, err
+	}
+
+	// region load dependencies
+	fmt.Println(metadata)
+	fmt.Println(string(metadataBytes))
+	dependencies, err := LoadDependencies(metadata)
+	if err != nil {
+		return &models.Template{}, err
+	}
+	// endregion
+
 	return &models.Template{
-		Name:     chart,
-		Manifest: strings.Join(manifestParts, "---\n"),
-		Fields:   mapper.HelmSchemaToFields(schema, nil),
-		Created:  "",
-		Edited:   "",
-		Version:  "",
-		Files:    chartFiles,
+		Name:         chart,
+		Manifest:     strings.Join(manifestParts, "---\n"),
+		Fields:       mapper.HelmSchemaToFields(schema, dependencies),
+		Created:      "",
+		Edited:       "",
+		Version:      "",
+		Files:        chartFiles,
+		Dependencies: dependencies,
 	}, nil
 }
 

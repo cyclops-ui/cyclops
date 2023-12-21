@@ -93,25 +93,21 @@ func LoadTemplate(repoURL, path, commit string) (models.Template, error) {
 	// endregion
 
 	// region load dependencies
-	dependecies, err := loadDependencies(metadata)
+	dependencies, err := helmclient.LoadDependencies(metadata)
 	if err != nil {
 		return models.Template{}, err
-	}
-
-	for _, dependency := range dependecies {
-		manifests = append(manifests, dependency.Manifest)
 	}
 	// endregion
 
 	return models.Template{
 		Name:         "",
 		Manifest:     strings.Join(manifests, "---\n"),
-		Fields:       mapper.HelmSchemaToFields(schema, dependecies),
+		Fields:       mapper.HelmSchemaToFields(schema, dependencies),
 		Created:      "",
 		Edited:       "",
 		Version:      "",
 		Files:        chartFiles,
-		Dependencies: dependecies,
+		Dependencies: dependencies,
 	}, nil
 }
 
@@ -337,20 +333,6 @@ func readFiles(path string, fs billy.Filesystem) ([]*chart.File, error) {
 	}
 
 	return chartFiles, nil
-}
-
-func loadDependencies(metadata chart.Metadata) ([]*models.Template, error) {
-	deps := make([]*models.Template, 0)
-	for _, dependency := range metadata.Dependencies {
-		dep, err := helmclient.LoadHelmChart(dependency.Repository, dependency.Name, dependency.Version)
-		if err != nil {
-			return nil, err
-		}
-
-		deps = append(deps, dep)
-	}
-
-	return deps, nil
 }
 
 func loadDependenciesInitialValues(metadata chart.Metadata) (map[interface{}]interface{}, error) {
