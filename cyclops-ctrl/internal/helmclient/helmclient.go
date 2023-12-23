@@ -10,7 +10,7 @@ import (
 	"io/ioutil"
 	"net/http"
 	"net/url"
-	path2 "path"
+	"path"
 	"strings"
 
 	"github.com/cyclops-ui/cycops-ctrl/internal/mapper"
@@ -22,101 +22,23 @@ import (
 	"github.com/cyclops-ui/cycops-ctrl/internal/models/helm"
 )
 
-func LoadDependencies(metadata helmchart.Metadata) ([]*models.Template, error) {
-	deps := make([]*models.Template, 0)
-	for _, dependency := range metadata.Dependencies {
-		fmt.Println("dep", dependency.Name)
-
-		dep, err := loadHelmChart(dependency.Repository, dependency.Name, dependency.Version)
-		if err != nil {
-			return nil, err
-		}
-
-		deps = append(deps, dep)
-	}
-
-	return deps, nil
-}
-
-func loadHelmChart(repo, chart, version string) (*models.Template, error) {
+func LoadHelmChart(repo, chart, version string) (*models.Template, error) {
 	tgzURL, err := getTarUrl(repo, chart, version)
 	if err != nil {
 		return nil, err
 	}
 
-	fmt.Println(tgzURL)
-
-	// Download the .tgz file
 	tgzData, err := downloadFile(tgzURL)
 	if err != nil {
 		return nil, err
 	}
 
-	// Extract the contents in memory
 	extractedFiles, err := unpackTgzInMemory(tgzData)
 	if err != nil {
 		return nil, err
 	}
 
-	metadataBytes := []byte{}
-	schemaBytes := []byte{}
-	manifestParts := make([]string, 0)
-	chartFiles := make([]*helmchart.File, 0)
-
-	for name, content := range extractedFiles {
-		parts := strings.Split(name, "/")
-
-		if len(parts) == 2 && parts[1] == "Chart.yaml" {
-			metadataBytes = content
-			continue
-		}
-
-		if len(parts) == 2 && parts[1] == "values.schema.json" {
-			schemaBytes = content
-			continue
-		}
-
-		if len(parts) > 2 && parts[1] == "templates" {
-			manifestParts = append(manifestParts, string(content))
-			continue
-		}
-
-		chartFiles = append(chartFiles, &helmchart.File{
-			Name: path2.Join(name[1:]),
-			Data: content,
-		})
-
-	}
-
-	var schema helm.Property
-	if err := json.Unmarshal(schemaBytes, &schema); err != nil {
-		return &models.Template{}, err
-	}
-
-	var metadata helmchart.Metadata
-	if err := yaml.Unmarshal(metadataBytes, &metadata); err != nil {
-		return &models.Template{}, err
-	}
-
-	// region load dependencies
-	fmt.Println(metadata)
-	fmt.Println(string(metadataBytes))
-	dependencies, err := LoadDependencies(metadata)
-	if err != nil {
-		return &models.Template{}, err
-	}
-	// endregion
-
-	return &models.Template{
-		Name:         chart,
-		Manifest:     strings.Join(manifestParts, "---\n"),
-		Fields:       mapper.HelmSchemaToFields(schema, dependencies),
-		Created:      "",
-		Edited:       "",
-		Version:      "",
-		Files:        chartFiles,
-		Dependencies: dependencies,
-	}, nil
+	return mapHelmChart(chart, extractedFiles)
 }
 
 func LoadHelmChartInitialValues(repo, chart, version string) (map[interface{}]interface{}, error) {
@@ -125,13 +47,11 @@ func LoadHelmChartInitialValues(repo, chart, version string) (map[interface{}]in
 		return nil, err
 	}
 
-	// Download the .tgz file
 	tgzData, err := downloadFile(tgzURL)
 	if err != nil {
 		return nil, err
 	}
 
-	// Extract the contents in memory
 	extractedFiles, err := unpackTgzInMemory(tgzData)
 	if err != nil {
 		return nil, err
@@ -152,6 +72,179 @@ func LoadHelmChartInitialValues(repo, chart, version string) (map[interface{}]in
 	if err := yaml.Unmarshal(valuesBytes, &values); err != nil {
 		return nil, err
 	}
+
+	return mapHelmChartInitialValues(extractedFiles)
+}
+
+func LoadDependencies(metadata helmchart.Metadata) ([]*models.Template, error) {
+	deps := make([]*models.Template, 0)
+	for _, dependency := range metadata.Dependencies {
+		dep, err := LoadHelmChart(dependency.Repository, dependency.Name, dependency.Version)
+		if err != nil {
+			return nil, err
+		}
+
+		deps = append(deps, dep)
+	}
+
+	return deps, nil
+}
+
+func LoadDependenciesInitialValues(metadata helmchart.Metadata) (map[interface{}]interface{}, error) {
+	initialValues := make(map[interface{}]interface{})
+	for _, dependency := range metadata.Dependencies {
+		depInitialValues, err := LoadHelmChartInitialValues(dependency.Repository, dependency.Name, dependency.Version)
+		if err != nil {
+			return nil, err
+		}
+
+		initialValues[dependency.Name] = depInitialValues
+	}
+
+	return initialValues, nil
+}
+
+func mapHelmChart(chartName string, files map[string][]byte) (*models.Template, error) {
+	metadataBytes := []byte{}
+	schemaBytes := []byte{}
+	manifestParts := make([]string, 0)
+	chartFiles := make([]*helmchart.File, 0)
+	dependenciesFromChartsDir := make(map[string]map[string][]byte, 0)
+
+	for name, content := range files {
+		parts := strings.Split(name, "/")
+
+		if len(parts) == 2 && parts[1] == "Chart.yaml" {
+			metadataBytes = content
+			continue
+		}
+
+		if len(parts) == 2 && parts[1] == "values.schema.json" {
+			schemaBytes = content
+			continue
+		}
+
+		if len(parts) > 2 && parts[1] == "templates" {
+			manifestParts = append(manifestParts, string(content))
+			continue
+		}
+
+		if len(parts) > 3 && parts[1] == "charts" {
+			depName := parts[2]
+			if _, ok := dependenciesFromChartsDir[depName]; !ok {
+				dependenciesFromChartsDir[depName] = make(map[string][]byte)
+			}
+
+			dependenciesFromChartsDir[depName][path.Join(parts[2:]...)] = content
+			continue
+		}
+
+		chartFiles = append(chartFiles, &helmchart.File{
+			Name: path.Join(name[1:]),
+			Data: content,
+		})
+
+	}
+
+	var schema helm.Property
+	if err := json.Unmarshal(schemaBytes, &schema); err != nil {
+		return &models.Template{}, err
+	}
+
+	var metadata helmchart.Metadata
+	if err := yaml.Unmarshal(metadataBytes, &metadata); err != nil {
+		return &models.Template{}, err
+	}
+
+	// region load dependencies
+	dependencies := make([]*models.Template, 0)
+	for depName, files := range dependenciesFromChartsDir {
+		dep, err := mapHelmChart(depName, files)
+		if err != nil {
+			return nil, err
+		}
+
+		dependencies = append(dependencies, dep)
+	}
+
+	dependenciesFromMeta, err := LoadDependencies(metadata)
+	if err != nil {
+		return &models.Template{}, err
+	}
+
+	dependencies = append(dependencies, dependenciesFromMeta...)
+	// endregion
+
+	return &models.Template{
+		Name:         chartName,
+		Manifest:     strings.Join(manifestParts, "---\n"),
+		Fields:       mapper.HelmSchemaToFields(schema, dependencies),
+		Created:      "",
+		Edited:       "",
+		Version:      "",
+		Files:        chartFiles,
+		Dependencies: dependencies,
+	}, nil
+}
+
+func mapHelmChartInitialValues(files map[string][]byte) (map[interface{}]interface{}, error) {
+	metadataBytes := []byte{}
+	valuesBytes := []byte{}
+	dependenciesFromChartsDir := make(map[string]map[string][]byte, 0)
+
+	for name, content := range files {
+		parts := strings.Split(name, "/")
+
+		if len(parts) == 2 && parts[1] == "Chart.yaml" {
+			metadataBytes = content
+			continue
+		}
+
+		if len(parts) == 2 && parts[1] == "values.yaml" {
+			valuesBytes = content
+			continue
+		}
+
+		if len(parts) > 3 && parts[1] == "charts" {
+			depName := parts[2]
+			if _, ok := dependenciesFromChartsDir[depName]; !ok {
+				dependenciesFromChartsDir[depName] = make(map[string][]byte)
+			}
+
+			dependenciesFromChartsDir[depName][path.Join(parts[2:]...)] = content
+			continue
+		}
+	}
+
+	var values map[interface{}]interface{}
+	if err := yaml.Unmarshal(valuesBytes, &values); err != nil {
+		return nil, err
+	}
+
+	var metadata helmchart.Metadata
+	if err := yaml.Unmarshal(metadataBytes, &metadata); err != nil {
+		return nil, err
+	}
+
+	// region load dependencies
+	for depName, files := range dependenciesFromChartsDir {
+		dep, err := mapHelmChartInitialValues(files)
+		if err != nil {
+			return nil, err
+		}
+
+		values[depName] = dep
+	}
+
+	dependenciesFromMeta, err := LoadDependenciesInitialValues(metadata)
+	if err != nil {
+		return nil, err
+	}
+
+	for depName, depValues := range dependenciesFromMeta {
+		values[depName] = depValues
+	}
+	// endregion
 
 	return values, nil
 }

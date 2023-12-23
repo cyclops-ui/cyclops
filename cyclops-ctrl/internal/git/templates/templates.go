@@ -152,7 +152,7 @@ func LoadInitialTemplateValues(repoURL, path, commit string) (map[interface{}]in
 		initialValues = make(map[interface{}]interface{})
 	}
 
-	depInitialValues, err := loadDependenciesInitialValues(metadata)
+	depInitialValues, err := helmclient.LoadDependenciesInitialValues(metadata)
 	if err != nil {
 		return nil, err
 	}
@@ -333,18 +333,4 @@ func readFiles(path string, fs billy.Filesystem) ([]*chart.File, error) {
 	}
 
 	return chartFiles, nil
-}
-
-func loadDependenciesInitialValues(metadata chart.Metadata) (map[interface{}]interface{}, error) {
-	initialValues := make(map[interface{}]interface{})
-	for _, dependency := range metadata.Dependencies {
-		depInitialValues, err := helmclient.LoadHelmChartInitialValues(dependency.Repository, dependency.Name, dependency.Version)
-		if err != nil {
-			return nil, err
-		}
-
-		initialValues[dependency.Name] = depInitialValues
-	}
-
-	return initialValues, nil
 }
