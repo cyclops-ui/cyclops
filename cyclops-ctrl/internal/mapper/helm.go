@@ -7,7 +7,7 @@ import (
 	"github.com/cyclops-ui/cycops-ctrl/internal/models/helm"
 )
 
-func HelmSchemaToFields(schema helm.Property) []models.Field {
+func HelmSchemaToFields(schema helm.Property, dependencies []*models.Template) []models.Field {
 	fields := make([]models.Field, 0, len(schema.Properties))
 
 	for name, property := range schema.Properties {
@@ -37,7 +37,7 @@ func HelmSchemaToFields(schema helm.Property) []models.Field {
 			Type:          mapHelmPropertyTypeToFieldType(property),
 			DisplayName:   mapTitle(name, property),
 			ManifestKey:   name,
-			Properties:    HelmSchemaToFields(property),
+			Properties:    HelmSchemaToFields(property, nil),
 			Enum:          property.Enum,
 			Required:      property.Required,
 			FileExtension: property.FileExtension,
@@ -49,7 +49,18 @@ func HelmSchemaToFields(schema helm.Property) []models.Field {
 		})
 	}
 
-	return sortFields(fields, schema.Order)
+	fields = sortFields(fields, schema.Order)
+
+	for _, dependency := range dependencies {
+		fields = append(fields, models.Field{
+			Name:        dependency.Name,
+			Type:        "object",
+			DisplayName: dependency.Name,
+			Properties:  dependency.Fields,
+		})
+	}
+
+	return fields
 }
 
 func sortFields(fields []models.Field, order []string) []models.Field {
@@ -94,7 +105,7 @@ func arrayItem(item *helm.Property) *models.Field {
 
 	return &models.Field{
 		Type:       item.Type,
-		Properties: HelmSchemaToFields(*item),
+		Properties: HelmSchemaToFields(*item, nil),
 	}
 }
 

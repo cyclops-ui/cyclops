@@ -7,6 +7,7 @@ import (
 	"helm.sh/helm/v3/pkg/chart"
 	"helm.sh/helm/v3/pkg/chartutil"
 	"helm.sh/helm/v3/pkg/engine"
+	apiextensionsv1 "k8s.io/apiextensions-apiserver/pkg/apis/apiextensions/v1"
 )
 
 func HelmTemplate(module cyclopsv1alpha1.Module, moduleTemplate models.Template) (string, error) {
@@ -43,5 +44,28 @@ func HelmTemplate(module cyclopsv1alpha1.Module, moduleTemplate models.Template)
 		return "", err
 	}
 
-	return out["all.yaml"], err
+	manifest := out["all.yaml"]
+
+	for _, dependency := range moduleTemplate.Dependencies {
+		data, err := json.Marshal(values[dependency.Name])
+		if err != nil {
+			return "", err
+		}
+
+		dependencyManifest, err := HelmTemplate(cyclopsv1alpha1.Module{
+			Spec: cyclopsv1alpha1.ModuleSpec{
+				Values: apiextensionsv1.JSON{
+					Raw: data,
+				},
+			},
+		}, *dependency)
+		if err != nil {
+			return "", err
+		}
+
+		manifest += "\n---\n"
+		manifest += dependencyManifest
+	}
+
+	return manifest, err
 }

@@ -49,6 +49,7 @@ const NewModule = () => {
         manifest: "",
         fields: [],
         properties: [],
+        dependencies: []
     })
 
     const [gitTemplate, setGitTemplate] = useState({

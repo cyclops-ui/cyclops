@@ -10,6 +10,7 @@ import (
 	"path/filepath"
 	"strings"
 
+	"github.com/cyclops-ui/cycops-ctrl/internal/helmclient"
 	"github.com/cyclops-ui/cycops-ctrl/internal/mapper"
 	"github.com/cyclops-ui/cycops-ctrl/internal/models"
 	"github.com/cyclops-ui/cycops-ctrl/internal/models/helm"
@@ -29,10 +30,21 @@ func LoadTemplate(repoURL, path, commit string) (models.Template, error) {
 		return models.Template{}, err
 	}
 
-	// region check if helm chart
-	_, err = fs.Open(path2.Join(path, "Chart.yaml"))
+	// load helm chart metadata
+	chartMetadata, err := fs.Open(path2.Join(path, "Chart.yaml"))
 	if err != nil {
 		return models.Template{}, errors.Wrap(err, "could not read 'Chart.yaml' file; it should be placed in the repo/path you provided; make sure you provided the correct path")
+	}
+
+	var chartMetadataBuffer bytes.Buffer
+	_, err = io.Copy(bufio.NewWriter(&chartMetadataBuffer), chartMetadata)
+	if err != nil {
+		return models.Template{}, err
+	}
+
+	var metadata chart.Metadata
+	if err := yaml.Unmarshal(chartMetadataBuffer.Bytes(), &metadata); err != nil {
+		return models.Template{}, err
 	}
 	// endregion
 
@@ -68,60 +80,108 @@ func LoadTemplate(repoURL, path, commit string) (models.Template, error) {
 		return models.Template{}, errors.Wrap(err, "could not read 'values.schema.json' file; it should be placed in the repo/path you provided; make sure 'templates' directory exists")
 	}
 
-	var b bytes.Buffer
-	_, err = io.Copy(bufio.NewWriter(&b), schemaFile)
+	var schemaChartBuffer bytes.Buffer
+	_, err = io.Copy(bufio.NewWriter(&schemaChartBuffer), schemaFile)
 	if err != nil {
 		return models.Template{}, err
 	}
 
 	var schema helm.Property
-	if err := json.Unmarshal(b.Bytes(), &schema); err != nil {
+	if err := json.Unmarshal(schemaChartBuffer.Bytes(), &schema); err != nil {
+		return models.Template{}, err
+	}
+	// endregion
+
+	// region load dependencies
+	dependencies, err := helmclient.LoadDependencies(metadata)
+	if err != nil {
 		return models.Template{}, err
 	}
 	// endregion
 
 	return models.Template{
-		Name:     "",
-		Manifest: strings.Join(manifests, "---\n"),
-		Fields:   mapper.HelmSchemaToFields(schema),
-		Created:  "",
-		Edited:   "",
-		Version:  "",
-		Files:    chartFiles,
+		Name:         "",
+		Manifest:     strings.Join(manifests, "---\n"),
+		Fields:       mapper.HelmSchemaToFields(schema, dependencies),
+		Created:      "",
+		Edited:       "",
+		Version:      "",
+		Files:        chartFiles,
+		Dependencies: dependencies,
 	}, nil
 }
 
-func LoadInitialTemplateValues(repoURL, path, commit string) (map[interface{}]interface{}, bool, error) {
+func LoadInitialTemplateValues(repoURL, path, commit string) (map[interface{}]interface{}, error) {
 	fs, err := clone(repoURL, commit)
 	if err != nil {
-		return nil, false, err
+		return nil, err
 	}
 
-	// check if helm chart
-	_, err = fs.Open(path2.Join(path, "Chart.yaml"))
+	// load helm chart metadata
+	chartMetadata, err := fs.Open(path2.Join(path, "Chart.yaml"))
 	if err != nil {
-		return nil, false, errors.Wrap(err, "could not read 'Chart.yaml' file; it should be placed in the repo/path you provided; make sure you provided the correct path")
+		return nil, errors.Wrap(err, "could not read 'Chart.yaml' file; it should be placed in the repo/path you provided; make sure you provided the correct path")
 	}
+
+	var chartMetadataBuffer bytes.Buffer
+	_, err = io.Copy(bufio.NewWriter(&chartMetadataBuffer), chartMetadata)
+	if err != nil {
+		return nil, err
+	}
+
+	var metadata chart.Metadata
+	if err := yaml.Unmarshal(chartMetadataBuffer.Bytes(), &metadata); err != nil {
+		return nil, err
+	}
+	// endregion
 
 	// region read values
+	data, err := readValuesFile(fs, path)
+	if err != nil {
+		return nil, err
+	}
+
+	var initialValues map[interface{}]interface{}
+	if err := yaml.Unmarshal(data, &initialValues); err != nil {
+		return nil, err
+	}
+	// endregion
+
+	// region read dependency values
+	if initialValues == nil {
+		initialValues = make(map[interface{}]interface{})
+	}
+
+	depInitialValues, err := helmclient.LoadDependenciesInitialValues(metadata)
+	if err != nil {
+		return nil, err
+	}
+
+	for key, values := range depInitialValues {
+		initialValues[key] = values
+	}
+	// endregion
+
+	return initialValues, nil
+}
+
+func readValuesFile(fs billy.Filesystem, path string) ([]byte, error) {
 	valuesFile, err := fs.Open(path2.Join(path, "values.yaml"))
 	if err != nil {
-		return nil, false, nil
+		if err.Error() == "file does not exist" {
+			return []byte(""), nil
+		}
+
+		return nil, err
 	}
 
 	var c bytes.Buffer
 	_, err = io.Copy(bufio.NewWriter(&c), valuesFile)
 	if err != nil {
-		return nil, false, err
+		return nil, err
 	}
 
-	var initialValues map[interface{}]interface{}
-	if err := yaml.Unmarshal(c.Bytes(), &initialValues); err != nil {
-		return nil, false, err
-	}
-	// endregion
-
-	return initialValues, true, nil
+	return c.Bytes(), nil
 }
 
 func clone(repoURL, commit string) (billy.Filesystem, error) {
