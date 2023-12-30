@@ -44,14 +44,22 @@ spec:
                           - path
                           - repo
                         type: object
-                      name:
-                        type: string
-                      version:
-                        type: string
+                      helm:
+                        properties:
+                          chart:
+                            type: string
+                          repo:
+                            type: string
+                          version:
+                            type: string
+                        required:
+                          - chart
+                          - repo
+                          - version
+                        type: object
                     required:
                       - git
-                      - name
-                      - version
+                      - helm
                     type: object
                   values:
                     x-kubernetes-preserve-unknown-fields: true
@@ -86,14 +94,22 @@ spec:
                         - path
                         - repo
                       type: object
-                    name:
-                      type: string
-                    version:
-                      type: string
+                    helm:
+                      properties:
+                        chart:
+                          type: string
+                        repo:
+                          type: string
+                        version:
+                          type: string
+                      required:
+                        - chart
+                        - repo
+                        - version
+                      type: object
                   required:
                     - git
-                    - name
-                    - version
+                    - helm
                   type: object
                 values:
                   x-kubernetes-preserve-unknown-fields: true
