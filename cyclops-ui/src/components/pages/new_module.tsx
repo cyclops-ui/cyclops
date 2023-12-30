@@ -41,6 +41,18 @@ const layout = {
     wrapperCol: {span: 16},
 };
 
+const gitRefPlaceholder = {
+    repo: "repository",
+    path: "path",
+    version: "revision",
+}
+
+const helmRefPlaceholder = {
+    repo: "repository",
+    path: "chart",
+    version: "version",
+}
+
 const NewModule = () => {
     const [loading, setLoading] = useState(false);
     const [config, setConfig] = useState({
@@ -53,6 +65,7 @@ const NewModule = () => {
     })
 
     const [gitTemplate, setGitTemplate] = useState({
+        source: "git",
         repo: "",
         path: "",
         commit: "",
@@ -62,6 +75,8 @@ const NewModule = () => {
         message: "",
         description: "",
     });
+
+    const [templateRefPlaceholder, setTemplateRefPlaceholder] = useState(gitRefPlaceholder)
 
     const [successLoad, setSuccessLoad] = useState(false);
 
@@ -91,12 +106,14 @@ const NewModule = () => {
         if (window.__RUNTIME_CONFIG__.REACT_APP_DEFAULT_TEMPLATE_REPO &&
             window.__RUNTIME_CONFIG__.REACT_APP_DEFAULT_TEMPLATE_REPO.length > 0) {
             setGitTemplate({
+                source: "git",
                 repo: window.__RUNTIME_CONFIG__.REACT_APP_DEFAULT_TEMPLATE_REPO,
                 path: window.__RUNTIME_CONFIG__.REACT_APP_DEFAULT_TEMPLATE_PATH,
                 commit: window.__RUNTIME_CONFIG__.REACT_APP_DEFAULT_TEMPLATE_VERSION,
             })
 
             loadTemplate(
+                "git",
                 window.__RUNTIME_CONFIG__.REACT_APP_DEFAULT_TEMPLATE_REPO,
                 window.__RUNTIME_CONFIG__.REACT_APP_DEFAULT_TEMPLATE_PATH,
                 window.__RUNTIME_CONFIG__.REACT_APP_DEFAULT_TEMPLATE_VERSION
@@ -309,7 +326,7 @@ const NewModule = () => {
     //     });
     // }
 
-    const loadTemplate = async (repo: string, path: string, commit: string) => {
+    const loadTemplate = async (source: string, repo: string, path: string, commit: string) => {
         setLoadingTemplate(true);
 
         setError({
@@ -328,7 +345,7 @@ const NewModule = () => {
 
         let tmpConfig: any = {}
 
-        await axios.get(window.__RUNTIME_CONFIG__.REACT_APP_CYCLOPS_CTRL_HOST + `/templates/git?repo=` + repo + `&path=` + path + `&commit=` + commit).then(templatesRes => {
+        await axios.get(window.__RUNTIME_CONFIG__.REACT_APP_CYCLOPS_CTRL_HOST + `/templates/git?source=` + source +`&repo=` + repo + `&path=` + path + `&commit=` + commit).then(templatesRes => {
             setConfig(templatesRes.data);
             tmpConfig = templatesRes.data;
 
@@ -352,7 +369,7 @@ const NewModule = () => {
             }
         });
 
-        axios.get(window.__RUNTIME_CONFIG__.REACT_APP_CYCLOPS_CTRL_HOST + `/templates/git/initial?repo=` + repo + `&path=` + path + `&commit=` + commit).then(res => {
+        axios.get(window.__RUNTIME_CONFIG__.REACT_APP_CYCLOPS_CTRL_HOST + `/templates/git/initial?source=` + source +`&repo=` + repo + `&path=` + path + `&commit=` + commit).then(res => {
             form.setFieldsValue(mapsToArray(tmpConfig.fields, res.data))
 
             setError({
@@ -855,11 +872,44 @@ const NewModule = () => {
                         <Divider orientation="left" orientationMargin="0">
                             Module template
                         </Divider>
+                        <Select
+                            style={{width: '8%'}}
+                            optionFilterProp="children"
+                            filterOption={(input, option) =>
+                                (option?.label ?? '').toLowerCase().includes(input.toLowerCase())
+                            }
+                            defaultValue={"git"}
+                            options={[
+                                {
+                                    value: "git",
+                                    label: "git",
+                                },
+                                {
+                                    value: "helm",
+                                    label: "helm",
+                                }
+                            ]}
+                            onChange={function (value: any) {
+                                if (value === "helm") {
+                                    setTemplateRefPlaceholder(helmRefPlaceholder)
+                                } else if (value === "git") {
+                                    setTemplateRefPlaceholder(gitRefPlaceholder)
+                                }
+                                setGitTemplate({
+                                    source: value,
+                                    repo: gitTemplate.repo,
+                                    path: gitTemplate.path,
+                                    commit: gitTemplate.commit,
+                                })
+                            }}
+                        />
+                        {' '}
                         <Input
-                            placeholder={"Repository"}
+                            placeholder={templateRefPlaceholder.repo}
                             style={{width: '40%'}}
                             onChange={(value: any) => {
                                 setGitTemplate({
+                                    source: gitTemplate.source,
                                     repo: value.target.value,
                                     path: gitTemplate.path,
                                     commit: gitTemplate.commit,
@@ -869,10 +919,11 @@ const NewModule = () => {
                         />
                         {' / '}
                         <Input
-                            placeholder={"Path"}
+                            placeholder={templateRefPlaceholder.path}
                             style={{width: '20%'}}
                             onChange={(value: any) => {
                                 setGitTemplate({
+                                    source: gitTemplate.source,
                                     repo: gitTemplate.repo,
                                     path: value.target.value,
                                     commit: gitTemplate.commit,
@@ -882,10 +933,11 @@ const NewModule = () => {
                         />
                         {' @ '}
                         <Input
-                            placeholder={"Version"}
+                            placeholder={templateRefPlaceholder.version}
                             style={{width: '10%'}}
                             onChange={(value: any) => {
                                 setGitTemplate({
+                                    source: gitTemplate.source,
                                     repo: gitTemplate.repo,
                                     path: gitTemplate.path,
                                     commit: value.target.value
@@ -898,6 +950,7 @@ const NewModule = () => {
                             type="primary"
                             htmlType="button"
                             onClick={async () => {await loadTemplate(
+                                gitTemplate.source,
                                 gitTemplate.repo,
                                 gitTemplate.path,
                                 gitTemplate.commit,
