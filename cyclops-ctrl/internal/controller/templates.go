@@ -2,6 +2,7 @@ package controller
 
 import (
 	"fmt"
+	"github.com/cyclops-ui/cycops-ctrl/internal/helmclient"
 	"net/http"
 	"strconv"
 	"time"
@@ -145,20 +146,37 @@ func (c *Templates) GetConfigurationsVersions(ctx *gin.Context) {
 func (c *Templates) GetTemplateFromGit(ctx *gin.Context) {
 	ctx.Header("Access-Control-Allow-Origin", "*")
 
+	source := ctx.Query("source")
 	repo := ctx.Query("repo")
 	path := ctx.Query("path")
-	commit := ctx.Query("commit")
+	version := ctx.Query("commit")
 
 	if repo == "" {
 		ctx.String(http.StatusBadRequest, "set repo field")
 		return
 	}
 
-	template, err := git.LoadTemplate(repo, path, commit)
-	if err != nil {
-		fmt.Println(err)
-		ctx.JSON(http.StatusBadRequest, dto.NewError("Error loading template", err.Error()))
-		return
+	var template models.Template
+	var err error
+
+	if source == "git" {
+		template, err = git.LoadTemplate(repo, path, version)
+		if err != nil {
+			fmt.Println(err)
+			ctx.JSON(http.StatusBadRequest, dto.NewError("Error loading template", err.Error()))
+			return
+		}
+	} else if source == "helm" {
+		helmTemplate, err := helmclient.LoadHelmChart(repo, path, version)
+		if err != nil {
+			fmt.Println(err)
+			ctx.JSON(http.StatusBadRequest, dto.NewError("Error loading template", err.Error()))
+			return
+		}
+
+		template = *helmTemplate
+	} else {
+		ctx.JSON(http.StatusBadRequest, dto.NewError("Error loading template", "define template source: only `git` or `helm` are acceptable"))
 	}
 
 	ctx.JSON(http.StatusOK, template)
@@ -167,20 +185,35 @@ func (c *Templates) GetTemplateFromGit(ctx *gin.Context) {
 func (c *Templates) GetTemplateInitialValuesFromGit(ctx *gin.Context) {
 	ctx.Header("Access-Control-Allow-Origin", "*")
 
+	source := ctx.Query("source")
 	repo := ctx.Query("repo")
 	path := ctx.Query("path")
-	commit := ctx.Query("commit")
+	version := ctx.Query("commit")
 
 	if repo == "" {
 		ctx.JSON(http.StatusBadRequest, dto.NewError("Specify repo field", "Repo not specified"))
 		return
 	}
 
-	initial, err := git.LoadInitialTemplateValues(repo, path, commit)
-	if err != nil {
-		fmt.Println(err)
-		ctx.JSON(http.StatusBadRequest, dto.NewError("Error loading template", err.Error()))
-		return
+	initial := make(map[interface{}]interface{})
+	var err error
+
+	if source == "git" {
+		initial, err = git.LoadInitialTemplateValues(repo, path, version)
+		if err != nil {
+			fmt.Println(err)
+			ctx.JSON(http.StatusBadRequest, dto.NewError("Error loading template initial values", err.Error()))
+			return
+		}
+	} else if source == "helm" {
+		initial, err = helmclient.LoadHelmChartInitialValues(repo, path, version)
+		if err != nil {
+			fmt.Println(err)
+			ctx.JSON(http.StatusBadRequest, dto.NewError("Error loading template initial values", err.Error()))
+			return
+		}
+	} else {
+		ctx.JSON(http.StatusBadRequest, dto.NewError("Error loading template initial values", "define template source: only `git` or `helm` are acceptable"))
 	}
 
 	data, err := json.Marshal(initial)

@@ -63,22 +63,38 @@ func ModuleListToDTO(modules []cyclopsv1alpha1.Module) []dto.Module {
 	return out
 }
 
-func DtoTemplateRefToK8s(dto dto.Template) cyclopsv1alpha1.TemplateRef {
+func DtoTemplateRefToK8s(dto dto.TemplateRef) cyclopsv1alpha1.TemplateRef {
+	var gitRef *cyclopsv1alpha1.TemplateGitRef
+	var helmRef *cyclopsv1alpha1.TemplateHelmRef
+
+	if dto.Source == "git" {
+		gitRef.Repo = dto.Repo
+		gitRef.Path = dto.Name
+		gitRef.Commit = dto.Version
+	}
+
+	if dto.Source == "helm" {
+		helmRef.Repo = dto.Repo
+		helmRef.Chart = dto.Name
+		helmRef.Version = dto.Version
+	}
+
 	return cyclopsv1alpha1.TemplateRef{
-		Name:    dto.Name,
-		Version: dto.Version,
-		TemplateGitRef: cyclopsv1alpha1.TemplateGitRef{
-			Repo:   dto.GitRef.Repo,
-			Path:   dto.GitRef.Path,
-			Commit: dto.GitRef.Commit,
-		},
+		TemplateGitRef:  gitRef,
+		TemplateHelmRef: helmRef,
 	}
 }
 
-func k8sTemplateRefToDTO(templateRef cyclopsv1alpha1.TemplateRef) dto.Template {
-	return dto.Template{
-		Name:    templateRef.Name,
-		Version: templateRef.Version,
+func k8sTemplateRefToDTO(templateRef cyclopsv1alpha1.TemplateRef) dto.TemplateRef {
+	return dto.TemplateRef{
+		Source:  "",
+		Repo:    "",
+		Name:    "",
+		Version: "",
+	}
+
+	return dto.TemplateRef{
+
 		GitRef: dto.TemplateGitRef{
 			Repo:   templateRef.TemplateGitRef.Repo,
 			Path:   templateRef.TemplateGitRef.Path,

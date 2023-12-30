@@ -3,22 +3,17 @@ package dto
 type Module struct {
 	Name      string      `json:"name"`
 	Namespace string      `json:"namespace"`
-	Template  Template    `json:"template"`
+	Template  TemplateRef `json:"template"`
 	Version   string      `json:"version"`
 	Values    interface{} `json:"values"`
 	Status    string      `json:"status"`
 }
 
-type Template struct {
-	Name    string         `json:"name"`
-	Version string         `json:"version"`
-	GitRef  TemplateGitRef `json:"git"`
-}
-
-type TemplateGitRef struct {
-	Repo   string `json:"repo"`
-	Path   string `json:"path"`
-	Commit string `json:"commit"`
+type TemplateRef struct {
+	Source  string `json:"source"`
+	Repo    string `json:"repo"`
+	Name    string `json:"name"`
+	Version string `json:"version"`
 }
 
 type TemplatesResponse struct {
