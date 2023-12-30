@@ -23,7 +23,13 @@ On top of the usual schema, we added some more fields to help our users get as m
 
 :::
 
-## Helm schema
+## Helm schema validation
+
+:::info
+
+Available from [ v0.0.1-alpha.7 ](https://github.com/cyclops-ui/cyclops/releases/tag/v0.0.1-alpha.7)
+
+:::
 
 As mentioned, Cyclops renders its UI based on the JSON schema. JSON schema provides some fields to help with validations. Those fields are listed below, as well as whether or not Cyclops currently supports those.
 
