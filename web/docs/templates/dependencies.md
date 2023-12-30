@@ -14,7 +14,7 @@ This part will go over how Cyclops implements Helm chart dependencies. You can f
 
 Dependencies allow us to reference another Helm chart and use it in the context of our application without having to configure multiple deployments separately.
 
-For instance, you might want to deploy an application that uses Redis as its cache storage, but you don't want to add all of those resources for a Redis deployment into your template. You can simply add a Redis Helm chart as a dependency to your application chart and get your Redis up and running in the same chart as your app.
+For instance, you might want to deploy an application that uses Redis as its cache storage, but you don't want to add all of those resources for a Redis deployment into your template. You can simply add a [Redis Helm chart](https://github.com/bitnami/charts/tree/main/bitnami/redis) as a dependency to your application chart and get your Redis up and running in the same chart as your app.
 
 Since Helm supports dependencies, it makes sense that Cyclops also supports them. You can reference dependencies in the `Chart.yaml` of your root template if you want to use dependencies. Refer to Helm docs for more info on how to do it, but here is an [example](https://github.com/cyclops-ui/templates/blob/chart-deps/demo/Chart.yaml) of how to do it.
 
@@ -25,9 +25,20 @@ apiVersion: v1
 name: application
 version: 0.0.0
 dependencies:
-  - name: application
-    version: "0.1.0"
-    repository: "https://petar-cvit.github.io"
+    - name: redis
+      version: "18.5.0"
+      repository: "https://charts.bitnami.com/bitnami"
 ```
 
-For each dependency you specify, Cyclops will render 
+For each dependency you specify, Cyclops will render a new object in your UI named after the dependency based on the dependencies JSON schema. It does that recursively for all dependencies.
+
+![Dependencies rendering](../../static/img/writing-templates/dependencies.jpeg?raw=true "Dependencies rendering")
+
+At the moment, when you reference a dependency, it is automatically included in your chart. `condition` and `tags` are not yet supported.
+
+:::info
+
+Also, version `v0.0.7-alpha` does not support `alias` and `import-values`.
+
+:::
+
