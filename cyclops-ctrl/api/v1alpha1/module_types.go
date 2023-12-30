@@ -39,15 +39,20 @@ type ModuleValue struct {
 }
 
 type TemplateRef struct {
-	Name           string         `json:"name"`
-	Version        string         `json:"version"`
-	TemplateGitRef TemplateGitRef `json:"git"`
+	TemplateGitRef  *TemplateGitRef  `json:"git"`
+	TemplateHelmRef *TemplateHelmRef `json:"helm"`
 }
 
 type TemplateGitRef struct {
 	Repo   string `json:"repo"`
 	Path   string `json:"path"`
 	Commit string `json:"commit"`
+}
+
+type TemplateHelmRef struct {
+	Repo    string `json:"repo"`
+	Chart   string `json:"chart"`
+	Version string `json:"version"`
 }
 
 // ModuleStatus defines the observed state of Module
