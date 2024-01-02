@@ -23,8 +23,8 @@ jobs:
         run: |
           TAG=$(git describe --tags --abbrev=0)
 
-          docker build cyclops-ui -t cyclops-ui/cyclops-ui:$TAG
-          docker push cyclops-ui/cyclops-ui:$TAG
+          docker build cyclops-ui -t cyclopsui/cyclops-ui:$TAG
+          docker push cyclopsui/cyclops-ui:$TAG
 
   build-controller:
     runs-on: ubuntu-latest
@@ -40,8 +40,8 @@ jobs:
         run: |
           TAG=$(git describe --tags --abbrev=0)
 
-          docker build cyclops-ctrl -t cyclops-ui/cyclops-ctrl:$TAG
-          docker push cyclops-ui/cyclops-ctrl:$TAG
+          docker build cyclops-ctrl -t cyclopsui/cyclops-ctrl:$TAG
+          docker push cyclopsui/cyclops-ctrl:$TAG
 
   update-install-manifest:
     runs-on: ubuntu-latest
@@ -52,13 +52,13 @@ jobs:
           TAG=$(git describe --tags --abbrev=0)
           INSTALL_YAML=$GITHUB_WORKSPACE/install/cyclops-install.yaml
 
-          sed -i 's/cyclops-ui\/cyclops-ctrl\:.*/cyclops-ui\/cyclops-ctrl\:'$TAG'/' $INSTALL_YAML
-          sed -i 's/cyclops-ui\/cyclops-ui\:.*/cyclops-ui\/cyclops-ui\:'$TAG'/' $INSTALL_YAML
+          sed -i 's/cyclopsui\/cyclops-ctrl\:.*/cyclopsui\/cyclops-ctrl\:'$TAG'/' $INSTALL_YAML
+          sed -i 's/cyclopsui\/cyclops-ui\:.*/cyclopsui\/cyclops-ui\:'$TAG'/' $INSTALL_YAML
 
           # update file
           git config --global user.email "petar.cvitanovic@gmail.com"
           git config --global user.name "petar-cvit"
           git status
           git add .
-          git commit -m 'ci update cyclops ctrl to '$TAG
+          git commit -m '⚙️ update cyclops to '$TAG
           git push
