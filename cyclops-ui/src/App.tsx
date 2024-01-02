@@ -1,9 +1,21 @@
-import React from 'react';
-import ApplicationRoutes from "./config/ApplicationRoutes";
-function App() {
-  //process.env.REACT_APP_CYCLOPS_CTRL_HOST = 'http://localhost:8080'
+import {
+  createBrowserRouter,
+  RouterProvider,
+} from "react-router-dom"
+import routes from "./routes"
+import Page404 from "./components/pages/Page404"
+import AppLayout from "./components/layouts/AppLayout";
+
+export default function App() {
+  const router = createBrowserRouter([
+    {
+      element: <AppLayout />,
+      errorElement: <Page404 />,
+      children: routes
+    },
+  ])
+
   return (
-      <ApplicationRoutes />
-  );
+      <RouterProvider router={router} />
+  )
 }
-export default App;
