@@ -1,5 +1,5 @@
 import {Outlet} from "react-router-dom";
-import SideNav from "./components/layouts/sidebar";
+import SideNav from "./sidebar";
 import {Suspense} from "react";
 import Sider from "antd/es/layout/Sider";
 import {Content, Header} from "antd/es/layout/layout";
