@@ -1,10 +1,7 @@
-import PathConstants from "../../routes/PathConstants";
 import Sider from "antd/es/layout/Sider";
 import SideNav from "../layouts/sidebar";
 import {Layout} from "antd";
 import {Content, Header} from "antd/es/layout/layout";
-import React, {Suspense} from "react";
-import {Outlet} from "react-router-dom";
 
 export default function Page404() {
     return (

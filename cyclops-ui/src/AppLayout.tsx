@@ -1,6 +1,6 @@
 import {Outlet} from "react-router-dom";
 import SideNav from "./components/layouts/sidebar";
-import React, {Suspense} from "react";
+import {Suspense} from "react";
 import Sider from "antd/es/layout/Sider";
 import {Content, Header} from "antd/es/layout/layout";
 import {Layout} from 'antd';
