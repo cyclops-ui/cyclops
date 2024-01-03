@@ -10,17 +10,16 @@ import { Link } from 'react-router-dom';
 
 
 const SideNav = () => {
-    const location = useLocation();
-    const locationKey = location.pathname.split('/', 2).join('/')
+    const location = useLocation().pathname.split('/')[1]
 
     const sidebarItems: MenuProps['items'] = [{
         label: <Link to={PathConstants.MODULES}> Modules</Link>,
         icon: <AppstoreAddOutlined/>,
-        key: '/modules'
+        key: 'modules'
     }, {
         label: <Link to={PathConstants.NODES}> Nodes</Link>,
         icon: <HddOutlined/>,
-        key: '/nodes'
+        key: 'nodes'
     }];
 
 
@@ -34,7 +33,7 @@ const SideNav = () => {
                          src={require("./KIKLOPcic.png")} alt="Cyclops" />
                 </div>
             </a>
-            <Menu theme="dark" mode="inline" selectedKeys={[locationKey]} items={sidebarItems}/>
+            <Menu theme="dark" mode="inline" selectedKeys={[location]} items={sidebarItems}/>
         </div>
     );
 }
