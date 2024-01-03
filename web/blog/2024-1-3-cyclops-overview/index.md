@@ -40,9 +40,9 @@ The main thing you are going to need to test out Cyclops is a Kubernetes cluster
 play with, great; if not, we will show you how to spin up a cluster on your own computer. So, the three prerequisites 
 for doing this are:
 
-- [Docker](https://www.docker.com/products/docker-desktop/)
-- [Minikube](https://minikube.sigs.k8s.io/docs/)
-- [kubectl](https://kubernetes.io/docs/tasks/tools/)
+1. [**1. Docker**](https://www.docker.com/products/docker-desktop/)
+2. [**2. Minikube**](https://minikube.sigs.k8s.io/docs/)
+3. [**3. kubectl**](https://kubernetes.io/docs/tasks/tools/)
 
 Docker is the most popular containerization tool, and we will use it to download and spin up a Minikube image. 
 Downloading Docker is straightforward: go to their webpage and download the Docker Desktop application.
@@ -115,11 +115,13 @@ You can fill out the fields as you wish, but be mindful of
 
 If you want to follow along, my input is as follows:
 
-- name: `demo`
-- replicas: `1`
-- image: `nginx`
-- version: `1.14.2`
-- service: `true`
+```
+name: demo
+replicas: 1
+image: nginx
+version: 1.14.2
+service: true
+```
 
 We will set the module name to `demo` as well. Click save, and Cyclops will show you the details of your new module.
 
