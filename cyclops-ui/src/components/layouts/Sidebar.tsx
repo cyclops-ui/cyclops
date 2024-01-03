@@ -5,17 +5,10 @@ import {
     HddOutlined,
 } from '@ant-design/icons';
 import {useNavigate}  from 'react-router';
+import PathConstants from "../../routes/PathConstants";
+
 const SideNav = () => {
     const history = useNavigate();
-    const handleUserClick = () => {
-        history('/');
-    }
-    const handleVideosClick = () => {
-        history('/videos');
-    }
-    const handleFileClick = () => {
-        history('/configurations');
-    }
     const handleModulesClick = () => {
         history('/modules');
     }
@@ -24,10 +17,10 @@ const SideNav = () => {
     }
     return (
         <div>
-            <a href={'/'}>
-                <div style={{top: "0", height: "32px", width: "100%", margin: "1rem", display: "inline-flex", alignContent: "center"}}>
-                    <h2 style={{verticalAlign: "center", color: "white", textAlign: "center", textSizeAdjust: "120%"}}><b>Cyclops</b></h2>{'       '}
-                    <img  style={{height: "120%", objectFit: "contain", marginLeft: "6px"}}
+            <a href={PathConstants.HOME}>
+                <div style={{height: "32px", width: "70%", margin: "0.9rem 1rem 0.6rem 2rem", display: "inline-flex"}}>
+                    <h2 style={{color: "white", marginTop: "5px"}}><b>Cyclops</b></h2>
+                    <img  style={{height: "120%", marginLeft: "6px"}}
                          src={require("./KIKLOPcic.png")} alt="Cyclops" />
                 </div>
             </a>

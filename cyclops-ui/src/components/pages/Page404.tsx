@@ -1,5 +1,5 @@
 import Sider from "antd/es/layout/Sider";
-import SideNav from "../layouts/sidebar";
+import SideNav from "../layouts/Sidebar";
 import {Layout} from "antd";
 import {Content, Header} from "antd/es/layout/layout";
 
