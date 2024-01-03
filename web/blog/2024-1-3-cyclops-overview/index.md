@@ -27,7 +27,7 @@ Cyclops is used for deploying and managing applications INSIDE the cluster.
 ### Show us your support 🙏🏻
 
 We are building Cyclops to be **open-source**, and your support would mean the world to us. Consider giving us a star 
-on [GitHub](https://github.com/cyclops-ui/cyclops) and following us on ProductHunt, where we scheduled our very 
+on [GitHub](https://github.com/cyclops-ui/cyclops) and following us on [ProductHunt](https://www.producthunt.com/products/cyclops), where we scheduled our very 
 first release!
 
 ## Before we start
