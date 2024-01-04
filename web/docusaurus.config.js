@@ -57,12 +57,12 @@ const config = {
       // Replace with your project's social card
       image: 'img/which-would-you-prefer.png',
       announcementBar: {
-        backgroundColor: '#ff6154',
+        backgroundColor: '#68b6ac',
         textColor: '#ffffff',
         isCloseable: false,
 
         content:
-            '🔔 We are launching our first release on <a href="https://www.producthunt.com/posts/cyclops">Product Hunt</a> - show us your support 🔔',
+            '<b>🔔 We are launching our first release on <a href="https://www.producthunt.com/posts/cyclops">Product Hunt</a> - show us your support 🔔</b>'
       },
       navbar: {
         title: 'Cyclops',
