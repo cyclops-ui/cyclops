@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"context"
 	"fmt"
+	"gopkg.in/yaml.v2"
 	"io"
 	"os"
 	"os/exec"
@@ -62,8 +63,6 @@ func createLocalClient() (*KubernetesClient, error) {
 	if err != nil {
 		panic(err.Error())
 	}
-
-	//clientset.CoreV1().Services("").Watch()
 
 	return &KubernetesClient{
 		Dynamic:   dynamic,
@@ -191,6 +190,41 @@ func (k *KubernetesClient) GetPodLogs(namespace, container, name string, numLogs
 	return logs, nil
 }
 
+func (k *KubernetesClient) GetManifest(group, version, kind, name, namespace string) (string, error) {
+	resource, err := k.Dynamic.Resource(schema.GroupVersionResource{
+		Group:    group,
+		Version:  version,
+		Resource: strings.ToLower(kind) + "s",
+	}).Namespace(namespace).Get(context.Background(), name, metav1.GetOptions{})
+	if err != nil {
+		return "", err
+	}
+
+	data, err := yaml.Marshal(resource.Object)
+	if err != nil {
+		return "", err
+	}
+
+	return string(data), nil
+}
+
+func (k *KubernetesClient) GetResource(group, version, kind, name, namespace string) (any, error) {
+	switch {
+	case isDeployment(group, version, kind):
+		return k.mapDeployment(group, version, kind, name, namespace)
+	case isService(group, version, kind):
+		return k.mapService(group, version, kind, name, namespace)
+	case isStatefulSet(group, version, kind):
+		return k.mapStatefulSet(group, version, kind, name, namespace)
+	case isPod(group, version, kind):
+		return k.mapPod(group, version, kind, name, namespace)
+	case isConfigMap(group, version, kind):
+		return k.mapConfigMap(group, version, kind, name, namespace)
+	}
+
+	return nil, nil
+}
+
 func (k *KubernetesClient) GetAllNamespacePods() ([]apiv1.Pod, error) {
 	podClient := k.clientset.CoreV1().Pods(apiv1.NamespaceDefault)
 	podList, err := podClient.List(context.TODO(), metav1.ListOptions{})
@@ -282,4 +316,171 @@ func (k *KubernetesClient) GetPodsForNode(nodeName string) ([]apiv1.Pod, error) 
 		FieldSelector: "spec.nodeName=" + nodeName,
 	})
 	return podList.Items, err
+}
+
+func (k *KubernetesClient) mapDeployment(group, version, kind, name, namespace string) (*dto.Deployment, error) {
+	deployment, err := k.clientset.AppsV1().Deployments(namespace).Get(context.Background(), name, metav1.GetOptions{})
+	if err != nil {
+		return nil, err
+	}
+
+	pods, err := k.getPods(*deployment)
+	if err != nil {
+		return nil, err
+	}
+
+	return &dto.Deployment{
+		Group:     group,
+		Version:   version,
+		Kind:      kind,
+		Name:      deployment.Name,
+		Namespace: deployment.Namespace,
+		Replicas:  int(*deployment.Spec.Replicas),
+		Pods:      pods,
+		Status:    getDeploymentStatus(pods),
+	}, nil
+}
+
+func (k *KubernetesClient) mapStatefulSet(group, version, kind, name, namespace string) (*dto.StatefulSet, error) {
+	statefulset, err := k.clientset.AppsV1().StatefulSets(namespace).Get(context.Background(), name, metav1.GetOptions{})
+	if err != nil {
+		return nil, err
+	}
+
+	pods, err := k.getStatefulsetPods(*statefulset)
+	if err != nil {
+		return nil, err
+	}
+
+	return &dto.StatefulSet{
+		Group:     group,
+		Version:   version,
+		Kind:      kind,
+		Name:      name,
+		Namespace: namespace,
+		Replicas:  int(*statefulset.Spec.Replicas),
+		Pods:      pods,
+		Status:    getDeploymentStatus(pods),
+	}, nil
+}
+
+func (k *KubernetesClient) mapPod(group, version, kind, name, namespace string) (*dto.Pod, error) {
+	item, err := k.clientset.CoreV1().Pods(namespace).Get(context.Background(), name, metav1.GetOptions{})
+	if err != nil {
+		return nil, err
+	}
+
+	containers := make([]dto.Container, 0, len(item.Spec.Containers))
+
+	for _, cnt := range item.Spec.Containers {
+		env := make(map[string]string)
+		for _, envVar := range cnt.Env {
+			env[envVar.Name] = envVar.Value
+		}
+
+		var status apiv1.ContainerStatus
+		for _, c := range item.Status.ContainerStatuses {
+			if c.Name == cnt.Name {
+				status = c
+				break
+			}
+		}
+
+		containers = append(containers, dto.Container{
+			Name:   cnt.Name,
+			Image:  cnt.Image,
+			Env:    env,
+			Status: containerStatus(status),
+		})
+	}
+
+	initContainers := make([]dto.Container, 0, len(item.Spec.InitContainers))
+	for _, cnt := range item.Spec.InitContainers {
+		env := make(map[string]string)
+		for _, envVar := range cnt.Env {
+			env[envVar.Name] = envVar.Value
+		}
+
+		var status apiv1.ContainerStatus
+		for _, c := range item.Status.ContainerStatuses {
+			if c.Name == cnt.Name {
+				status = c
+				break
+			}
+		}
+
+		initContainers = append(initContainers, dto.Container{
+			Name:   cnt.Name,
+			Image:  cnt.Image,
+			Env:    env,
+			Status: containerStatus(status),
+		})
+	}
+
+	return &dto.Pod{
+		Group:          group,
+		Version:        version,
+		Kind:           kind,
+		Name:           name,
+		Namespace:      namespace,
+		Containers:     containers,
+		InitContainers: initContainers,
+		Node:           item.Spec.NodeName,
+		PodPhase:       string(item.Status.Phase),
+		Status:         getPodStatus(containers),
+		Started:        item.Status.StartTime,
+		Deleted:        false,
+	}, nil
+}
+
+func (k *KubernetesClient) mapService(group, version, kind, name, namespace string) (*dto.Service, error) {
+	service, err := k.clientset.CoreV1().Services(namespace).Get(context.Background(), name, metav1.GetOptions{})
+	if err != nil {
+		return nil, err
+	}
+
+	return &dto.Service{
+		Group:     group,
+		Version:   version,
+		Kind:      kind,
+		Name:      name,
+		Namespace: namespace,
+		Ports:     service.Spec.Ports,
+	}, nil
+}
+
+func (k *KubernetesClient) mapConfigMap(group, version, kind, name, namespace string) (*dto.ConfigMap, error) {
+	configmap, err := k.clientset.CoreV1().ConfigMaps(namespace).Get(context.Background(), name, metav1.GetOptions{})
+	if err != nil {
+		return nil, err
+	}
+
+	return &dto.ConfigMap{
+		Group:     group,
+		Version:   version,
+		Kind:      kind,
+		Name:      name,
+		Namespace: namespace,
+		Data:      configmap.Data,
+	}, nil
+}
+
+func isDeployment(group, version, kind string) bool {
+	return group == "apps" && version == "v1" && kind == "Deployment"
+}
+
+func isStatefulSet(group, version, kind string) bool {
+	return group == "apps" && version == "v1" && kind == "StatefulSet"
+}
+
+func isPod(group, version, kind string) bool {
+	return group == "" && version == "v1" && kind == "Pod"
+}
+
+func isService(group, version, kind string) bool {
+	return group == "" && version == "v1" && kind == "Service"
+}
+
+func isConfigMap(group, version, kind string) bool {
+	return group == "" && version == "v1" && kind == "ConfigMap"
 }
