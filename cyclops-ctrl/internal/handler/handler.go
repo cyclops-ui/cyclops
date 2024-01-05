@@ -62,6 +62,9 @@ func (h *Handler) Start() error {
 	h.router.GET("/resources/pods/:namespace/:name/:container/logs", modulesController.GetLogs)
 	h.router.GET("/resources/pods/:namespace/:name/:container/logs/download", modulesController.DownloadLogs)
 
+	h.router.GET("/manifest", modulesController.GetManifest)
+	h.router.GET("/resources", modulesController.GetResource)
+
 	h.router.GET("/nodes", clusterController.ListNodes)
 	h.router.GET("/nodes/:name", clusterController.GetNode)
 

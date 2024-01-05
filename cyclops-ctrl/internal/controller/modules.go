@@ -440,6 +440,48 @@ func (m *Modules) DownloadLogs(ctx *gin.Context) {
 	ctx.File(tempFile.Name())
 }
 
+func (m *Modules) GetManifest(ctx *gin.Context) {
+	ctx.Header("Access-Control-Allow-Origin", "*")
+
+	group := ctx.Query("group")
+	version := ctx.Query("version")
+	kind := ctx.Query("kind")
+	name := ctx.Query("name")
+	namespace := ctx.Query("namespace")
+
+	manifest, err := m.kubernetesClient.GetManifest(group, version, kind, name, namespace)
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, gin.H{
+			"error":  "Failed to fetch resource manifest",
+			"reason": err.Error(),
+		})
+		return
+	}
+
+	ctx.String(http.StatusOK, manifest)
+}
+
+func (m *Modules) GetResource(ctx *gin.Context) {
+	ctx.Header("Access-Control-Allow-Origin", "*")
+
+	group := ctx.Query("group")
+	version := ctx.Query("version")
+	kind := ctx.Query("kind")
+	name := ctx.Query("name")
+	namespace := ctx.Query("namespace")
+
+	resource, err := m.kubernetesClient.GetResource(group, version, kind, name, namespace)
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, gin.H{
+			"error":  "Failed to fetch resource",
+			"reason": err.Error(),
+		})
+		return
+	}
+
+	ctx.JSON(http.StatusOK, resource)
+}
+
 func getTargetGeneration(generation string, module *v1alpha1.Module) (*v1alpha1.Module, bool) {
 	// no generation specified means current generation
 	if len(generation) == 0 {
