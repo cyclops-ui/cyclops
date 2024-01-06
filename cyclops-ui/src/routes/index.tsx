@@ -4,7 +4,7 @@ import PathConstants from "./PathConstants"
 const Home = React.lazy(() => import("../components/pages/modules"))
 const Modules = React.lazy(() => import("../components/pages/modules"))
 const NewModule = React.lazy(() => import("../components/pages/new_module"))
-const ModuleDetails = React.lazy(() => import("../components/pages/module_details"))
+const ModuleDetails = React.lazy(() => import("../components/pages/ModuleDetails"))
 const EditModule = React.lazy(() => import("../components/pages/edit_module"))
 const ModuleHistory = React.lazy(() => import("../components/pages/history"))
 const Nodes = React.lazy(() => import("../components/pages/nodes"))

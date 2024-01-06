@@ -1,9 +1,9 @@
 import React, {useEffect, useState} from 'react';
 import {Button, Col, Divider, Row, Typography, Alert, Tag, Tabs, Modal, TabsProps} from 'antd';
 import axios from 'axios';
-import {formatPodAge} from "../../utils/pods";
 import {DownloadOutlined} from "@ant-design/icons";
 import ReactAce from "react-ace";
+import {formatPodAge} from "../../utils/pods";
 const {Title} = Typography;
 
 interface Props {
