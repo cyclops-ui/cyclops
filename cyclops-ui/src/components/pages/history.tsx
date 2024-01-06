@@ -31,12 +31,12 @@ const ModuleHistory = () => {
     const [allData, setAllData] = useState([]);
     let {moduleName} = useParams();
     useEffect(() => {
-        axios.get(process.env.REACT_APP_CYCLOPS_CTRL_HOST + `/modules/` + moduleName + `/history`).then(res => {
+        axios.get(window.__RUNTIME_CONFIG__.REACT_APP_CYCLOPS_CTRL_HOST + `/modules/` + moduleName + `/history`).then(res => {
             console.log(res.data)
             setAllData(res.data);
         });
 
-        axios.get(process.env.REACT_APP_CYCLOPS_CTRL_HOST + `/modules/` + moduleName + `/currentManifest`).then(res => {
+        axios.get(window.__RUNTIME_CONFIG__.REACT_APP_CYCLOPS_CTRL_HOST + `/modules/` + moduleName + `/currentManifest`).then(res => {
             setDiff({
                 curr: res.data,
                 previous: diff.previous,
@@ -112,7 +112,7 @@ const ModuleHistory = () => {
             }
         })
 
-        axios.post(process.env.REACT_APP_CYCLOPS_CTRL_HOST + '/modules/' + moduleName + '/manifest',
+        axios.post(window.__RUNTIME_CONFIG__.REACT_APP_CYCLOPS_CTRL_HOST + '/modules/' + moduleName + '/manifest',
             {
                 template: target.template,
                 values: target.values,
@@ -142,7 +142,7 @@ const ModuleHistory = () => {
             }
         })
 
-        axios.post(process.env.REACT_APP_CYCLOPS_CTRL_HOST + '/modules/' + moduleName + '/manifest',
+        axios.post(window.__RUNTIME_CONFIG__.REACT_APP_CYCLOPS_CTRL_HOST + '/modules/' + moduleName + '/manifest',
             {
                 template: target.template,
                 values: target.values,
