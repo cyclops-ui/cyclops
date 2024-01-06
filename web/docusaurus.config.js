@@ -62,7 +62,7 @@ const config = {
         isCloseable: false,
 
         content:
-            '<b>🔔 We are launching our first release on <a href="https://www.producthunt.com/posts/cyclops">Product Hunt</a> - show us your support 🔔</b>'
+            '<b>🔔 We are launching our first release on <a href="https://www.producthunt.com/products/cyclops">Product Hunt</a> - show us your support 🔔</b>'
       },
       navbar: {
         title: 'Cyclops',
@@ -121,6 +121,10 @@ const config = {
               {
                 label: 'DEV Community',
                 href: 'https://dev.to/cyclops-ui'
+              },
+              {
+                label: 'Product Hunt',
+                href: 'https://www.producthunt.com/products/cyclops'
               }
             ],
           },
