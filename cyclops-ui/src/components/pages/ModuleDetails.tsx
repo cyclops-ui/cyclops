@@ -3,44 +3,29 @@ import {
     Alert,
     Button,
     Col,
-    Collapse, Descriptions,
+    Collapse,
     Divider,
-    Form,
     Input,
-    InputNumber, List,
     Modal,
-    Row, Space, Spin,
-    Switch,
-    Table,
-    Tabs,
-    TabsProps,
-    Tag,
+    Row,
+    Spin,
     Tooltip,
     Typography
 } from 'antd';
-import {Icon} from '@ant-design/compatible';
 import 'ace-builds/src-noconflict/ace';
 import {useNavigate} from 'react-router';
 import {useParams} from "react-router-dom";
 import axios from 'axios';
-import {Pie} from "@ant-design/charts";
-import {release} from "os";
 import {
     CheckCircleTwoTone,
-    CloseSquareTwoTone, InfoCircleOutlined,
+    CloseSquareTwoTone,
     LinkOutlined,
-    MinusCircleOutlined,
-    PlusOutlined,
     WarningTwoTone,
-    DownloadOutlined
 } from "@ant-design/icons";
 import Link from "antd/lib/typography/Link";
-import { formatDistanceToNow } from 'date-fns';
 
 import "ace-builds/src-noconflict/mode-jsx";
-import {CodeBlock} from "react-code-blocks";
 import ReactAce from "react-ace";
-import {formatPodAge} from "../../utils/pods";
 import Deployment from "../k8s-resources/Deployment";
 import StatefulSet from "../k8s-resources/StatefulSet";
 import Pod from "../k8s-resources/Pod";
@@ -101,7 +86,6 @@ interface module {
 }
 
 const ModuleDetails = () => {
-    const history = useNavigate();
     const [manifestModal, setManifestModal] = useState({
         on: false,
         manifest: "",

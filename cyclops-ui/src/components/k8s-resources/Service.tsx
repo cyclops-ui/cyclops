@@ -1,11 +1,6 @@
 import React, {useEffect, useState} from 'react';
-import {Button, Col, Divider, Row, Table, Typography, Alert, Tag, Tabs, Modal, TabsProps} from 'antd';
-import {useNavigate} from 'react-router';
+import {Col, Divider, Row, Table, Alert} from 'antd';
 import axios from 'axios';
-import {formatPodAge} from "../../utils/pods";
-import {DownloadOutlined} from "@ant-design/icons";
-import ReactAce from "react-ace";
-const {Title} = Typography;
 
 interface Props {
     name: string;
@@ -24,8 +19,6 @@ interface service {
 }
 
 const Service = ({name, namespace}: Props) => {
-    const history = useNavigate();
-    const [loading, setLoading] = useState(false);
     const [service, setService] = useState<service>({
         ports: []
     });
@@ -47,8 +40,6 @@ const Service = ({name, namespace}: Props) => {
             setService(res.data)
         }).catch(error => {
             console.log(error)
-            console.log(error.response)
-            setLoading(false);
             if (error.response === undefined) {
                 setError({
                     message: String(error),

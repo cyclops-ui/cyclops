@@ -22,7 +22,7 @@ import EditConfiguration from "../components/pages/edit_configuration";
 import EditAppForm from "../components/pages/edit_app_by_config";
 import Modules from "../components/pages/modules";
 import NewModule from "../components/pages/new_module";
-import ModuleDetails from "../components/pages/module_details";
+import ModuleDetails from "../components/pages/ModuleDetails";
 import EditModule from "../components/pages/edit_module";
 import Terminal from "../components/pages/terminal";
 import Nodes from "../components/pages/nodes";

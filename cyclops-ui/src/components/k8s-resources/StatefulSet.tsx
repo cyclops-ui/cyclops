@@ -1,12 +1,9 @@
 import React, {useEffect, useState} from 'react';
-import {Button, Col, Divider, Row, Table, Typography, Alert, Tag, Tabs, Modal, TabsProps} from 'antd';
-import {useNavigate} from 'react-router';
+import {Button, Col, Divider, Row, Table, Alert, Tag, Tabs, Modal, TabsProps} from 'antd';
 import axios from 'axios';
 import {formatPodAge} from "../../utils/pods";
-import {CheckCircleTwoTone, CloseSquareTwoTone, DownloadOutlined} from "@ant-design/icons";
+import {DownloadOutlined} from "@ant-design/icons";
 import ReactAce from "react-ace";
-
-const {Title} = Typography;
 
 interface Props {
     name: string;
@@ -14,8 +11,6 @@ interface Props {
 }
 
 const StatefulSet = ({name, namespace}: Props) => {
-    const history = useNavigate();
-    const [loading, setLoading] = useState(false);
     const [statefulSet, setStatefulSet] = useState({
         status: "",
         pods: []
@@ -46,8 +41,6 @@ const StatefulSet = ({name, namespace}: Props) => {
             setStatefulSet(res.data)
         }).catch(error => {
             console.log(error)
-            console.log(error.response)
-            setLoading(false);
             if (error.response === undefined) {
                 setError({
                     message: String(error),
@@ -87,10 +80,9 @@ const StatefulSet = ({name, namespace}: Props) => {
     const getTabItems = () => {
         var items: TabsProps['items'] = []
 
-        let cnt = 1;
         let container :any
 
-        if (logsModal.containers !== null && logsModal.containers !== null) {
+        if (logsModal.containers !== null) {
             for (container of logsModal.containers) {
                 items.push(
                     {
@@ -105,11 +97,10 @@ const StatefulSet = ({name, namespace}: Props) => {
                         </Col>,
                     }
                 )
-                cnt++;
             }
         }
 
-        if (logsModal.initContainers !== null && logsModal.initContainers !== null) {
+        if (logsModal.initContainers !== null) {
             for (container of logsModal.initContainers) {
                 items.push(
                     {
@@ -124,7 +115,6 @@ const StatefulSet = ({name, namespace}: Props) => {
                         </Col>,
                     }
                 )
-                cnt++;
             }
         }
 
@@ -134,7 +124,7 @@ const StatefulSet = ({name, namespace}: Props) => {
     const onLogsTabsChange = (container: string) => {
         axios.get(window.__RUNTIME_CONFIG__.REACT_APP_CYCLOPS_CTRL_HOST + '/resources/pods/' + logsModal.namespace + '/' + logsModal.pod + '/' + container + '/logs').then(res => {
             if (res.data) {
-                var log = "";
+                let log = "";
                 res.data.forEach((s :string) => {
                     log += s;
                 });
@@ -144,8 +134,6 @@ const StatefulSet = ({name, namespace}: Props) => {
             }
         }).catch(error => {
             console.log(error)
-            console.log(error.response)
-            setLoading(false);
             if (error.response === undefined) {
                 setError({
                     message: String(error),
@@ -226,7 +214,7 @@ const StatefulSet = ({name, namespace}: Props) => {
                                     <Button onClick={function () {
                                         axios.get(window.__RUNTIME_CONFIG__.REACT_APP_CYCLOPS_CTRL_HOST + '/resources/pods/' + namespace + '/' + pod.name + '/' + pod.containers[0].name + '/logs').then(res => {
                                             if (res.data) {
-                                                var log = "";
+                                                let log = "";
                                                 res.data.forEach((s :string) => {
                                                     log += s;
                                                 });
@@ -236,8 +224,6 @@ const StatefulSet = ({name, namespace}: Props) => {
                                             }
                                         }).catch(error => {
                                             console.log(error)
-                                            console.log(error.response)
-                                            setLoading(false);
                                             if (error.response === undefined) {
                                                 setError({
                                                     message: String(error),
@@ -263,7 +249,7 @@ const StatefulSet = ({name, namespace}: Props) => {
             </Row>
             <Modal
                 title="Logs"
-                visible={logsModal.on}
+                open={logsModal.on}
                 onCancel={handleCancelLogs}
                 width={'60%'}
             >

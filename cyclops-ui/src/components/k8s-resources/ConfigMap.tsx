@@ -1,11 +1,7 @@
 import React, {useEffect, useState} from 'react';
-import {Button, Col, Divider, Row, Table, Typography, Alert, Tag, Tabs, Modal, TabsProps, Descriptions} from 'antd';
-import {useNavigate} from 'react-router';
+import {Divider, Row, Alert, Descriptions} from 'antd';
 import axios from 'axios';
-import {formatPodAge} from "../../utils/pods";
-import {DownloadOutlined} from "@ant-design/icons";
 import ReactAce from "react-ace";
-const {Title} = Typography;
 
 interface Props {
     name: string;
@@ -13,8 +9,6 @@ interface Props {
 }
 
 const ConfigMap = ({name, namespace}: Props) => {
-    const history = useNavigate();
-    const [loading, setLoading] = useState(false);
     const [configMap, setConfigMap] = useState({});
     const [error, setError] = useState({
         message: "",
@@ -34,8 +28,6 @@ const ConfigMap = ({name, namespace}: Props) => {
             setConfigMap(res.data)
         }).catch(error => {
             console.log(error)
-            console.log(error.response)
-            setLoading(false);
             if (error.response === undefined) {
                 setError({
                     message: String(error),
@@ -78,14 +70,14 @@ const ConfigMap = ({name, namespace}: Props) => {
                 readOnly={true}
                 width="100%"
                 mode={configMapDataExtension(key)}
-                height={calculateEditorHeight(data, lines)}
+                height={calculateEditorHeight(lines)}
             />
         } else {
             return data
         }
     }
 
-    const calculateEditorHeight = (data: string, lines: number) => {
+    const calculateEditorHeight = (lines: number) => {
         if (lines > 20) {
             return '320px'
         } else {
@@ -94,7 +86,7 @@ const ConfigMap = ({name, namespace}: Props) => {
     };
 
     const configMapDataExtension = (filename: string) => {
-        var ext = filename.split('.').pop();
+        const ext = filename.split('.').pop();
         switch (ext) {
             case "json":
                 return "json"

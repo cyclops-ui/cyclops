@@ -1,6 +1,5 @@
 import React, {useEffect, useState} from 'react';
-import {Button, Col, Divider, Row, Table, Typography, Alert, Tag, Tabs, Modal, TabsProps} from 'antd';
-import {useNavigate} from 'react-router';
+import {Button, Col, Divider, Row, Typography, Alert, Tag, Tabs, Modal, TabsProps} from 'antd';
 import axios from 'axios';
 import {formatPodAge} from "../../utils/pods";
 import {DownloadOutlined} from "@ant-design/icons";
@@ -33,8 +32,6 @@ interface logsModal {
 }
 
 const Pod = ({name, namespace}: Props) => {
-    const history = useNavigate();
-    const [loading, setLoading] = useState(false);
     const [pod, setPod] = useState<pod>({
         status: "",
         containers: [],
@@ -67,8 +64,6 @@ const Pod = ({name, namespace}: Props) => {
             setPod(res.data)
         }).catch(error => {
             console.log(error)
-            console.log(error.response)
-            setLoading(false);
             if (error.response === undefined) {
                 setError({
                     message: String(error),
@@ -104,12 +99,11 @@ const Pod = ({name, namespace}: Props) => {
     }
 
     const getTabItems = () => {
-        var items: TabsProps['items'] = []
+        let items: TabsProps['items'] = []
 
-        let cnt = 1;
         let container :any
 
-        if (logsModal.containers !== null && logsModal.containers !== null) {
+        if (logsModal.containers !== null) {
             for (container of logsModal.containers) {
                 items.push(
                     {
@@ -124,11 +118,10 @@ const Pod = ({name, namespace}: Props) => {
                         </Col>,
                     }
                 )
-                cnt++;
             }
         }
 
-        if (logsModal.initContainers !== null && logsModal.initContainers !== null) {
+        if (logsModal.initContainers !== null) {
             for (container of logsModal.initContainers) {
                 items.push(
                     {
@@ -143,7 +136,6 @@ const Pod = ({name, namespace}: Props) => {
                         </Col>,
                     }
                 )
-                cnt++;
             }
         }
 
@@ -153,7 +145,7 @@ const Pod = ({name, namespace}: Props) => {
     const onLogsTabsChange = (container: string) => {
         axios.get(window.__RUNTIME_CONFIG__.REACT_APP_CYCLOPS_CTRL_HOST + '/resources/pods/' + namespace + '/' + pod + '/' + container + '/logs').then(res => {
             if (res.data) {
-                var log = "";
+                let log = "";
                 res.data.forEach((s :string) => {
                     log += s;
                 });
@@ -163,8 +155,6 @@ const Pod = ({name, namespace}: Props) => {
             }
         }).catch(error => {
             console.log(error)
-            console.log(error.response)
-            setLoading(false);
             if (error.response === undefined) {
                 setError({
                     message: String(error),
@@ -222,7 +212,7 @@ const Pod = ({name, namespace}: Props) => {
                     <Button onClick={function () {
                         axios.get(window.__RUNTIME_CONFIG__.REACT_APP_CYCLOPS_CTRL_HOST + '/resources/pods/' + namespace + '/' + name + '/' + pod.containers[0].name + '/logs').then(res => {
                             if (res.data) {
-                                var log = "";
+                                let log = "";
                                 res.data.forEach((s :string) => {
                                     log += s;
                                 });
@@ -232,8 +222,6 @@ const Pod = ({name, namespace}: Props) => {
                             }
                         }).catch(error => {
                             console.log(error)
-                            console.log(error.response)
-                            setLoading(false);
                             if (error.response === undefined) {
                                 setError({
                                     message: String(error),
@@ -253,7 +241,7 @@ const Pod = ({name, namespace}: Props) => {
             </Row>
             <Modal
                 title="Logs"
-                visible={logsModal.on}
+                open={logsModal.on}
                 onCancel={handleCancelLogs}
                 width={'60%'}
             >
