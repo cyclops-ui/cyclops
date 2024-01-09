@@ -78,7 +78,7 @@ const StatefulSet = ({name, namespace}: Props) => {
     }
 
     const getTabItems = () => {
-        var items: TabsProps['items'] = []
+        let items: TabsProps['items'] = []
 
         let container :any
 

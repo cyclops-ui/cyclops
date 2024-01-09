@@ -13,7 +13,6 @@ import {
     Typography
 } from 'antd';
 import 'ace-builds/src-noconflict/ace';
-import {useNavigate} from 'react-router';
 import {useParams} from "react-router-dom";
 import axios from 'axios';
 import {
@@ -69,7 +68,7 @@ languages.forEach(lang => {
 });
 themes.forEach(theme => require(`ace-builds/src-noconflict/theme-${theme}`));
 
-const {Title, Text} = Typography;
+const {Title} = Typography;
 
 interface module {
     name: String,
@@ -110,9 +109,6 @@ const ModuleDetails = () => {
     });
 
     const [activeCollapses, setActiveCollapses] = useState(new Map());
-    const updateActiveCollapses = (k: any, v: any) => {
-        setActiveCollapses(new Map(activeCollapses.set(k,v)));
-    }
 
     const [error, setError] = useState({
         message: "",
@@ -200,21 +196,7 @@ const ModuleDetails = () => {
         }
     }, [])
 
-    const getCollapseColor = (fieldName: string, healthy: boolean) => {
-        // if (activeCollapses.get(fieldName) && activeCollapses.get(fieldName) === true) {
-        //     if (healthy) {
-        //         return greenSelected
-        //     } else {
-        //         return redSelected
-        //     }
-        // } else {
-        //     if (healthy) {
-        //         return green
-        //     } else {
-        //         return red
-        //     }
-        // }
-
+    const getCollapseColor = (fieldName: string) => {
         if (activeCollapses.get(fieldName) && activeCollapses.get(fieldName) === true) {
             return "#fadab3"
         } else {
@@ -238,7 +220,7 @@ const ModuleDetails = () => {
     };
 
     const deleteDeployment = () => {
-        axios.delete(window.__RUNTIME_CONFIG__.REACT_APP_CYCLOPS_CTRL_HOST + `/modules/` + moduleName).then(res => {
+        axios.delete(window.__RUNTIME_CONFIG__.REACT_APP_CYCLOPS_CTRL_HOST + `/modules/` + moduleName).then(()  => {
             window.location.href = "/modules"
         }).catch(error => {
             console.log(error)
@@ -319,7 +301,7 @@ const ModuleDetails = () => {
                 break;
         }
 
-        var deletedWarning = (<p/>)
+        let deletedWarning = (<p/>)
 
         if (resource.deleted) {
             deletedWarning = (
@@ -329,7 +311,7 @@ const ModuleDetails = () => {
             )
         }
 
-        var deleteButton = (<p/>)
+        let deleteButton = (<p/>)
 
         if (resource.deleted) {
             deleteButton = (
@@ -343,7 +325,7 @@ const ModuleDetails = () => {
                                 namespace: resource.namespace,
                             }
                         }
-                    ).then(res => {}).catch(error => {
+                    ).then(() => {}).catch(error => {
                         console.log(error)
                         console.log(error.response)
                         setLoading(false);
@@ -369,7 +351,7 @@ const ModuleDetails = () => {
         }
 
         resourceCollapses.push(
-            <Collapse.Panel header={genExtra(resource, resource.status)} key={collapseKey} style={{backgroundColor: getCollapseColor(collapseKey, resource.status)}}>
+            <Collapse.Panel header={genExtra(resource, resource.status)} key={collapseKey} style={{backgroundColor: getCollapseColor(collapseKey)}}>
                 <Row>
                     <Col>
                         {deletedWarning}
@@ -400,7 +382,7 @@ const ModuleDetails = () => {
     })
 
     const resourcesLoading = () => {
-        if (loadResources === true) {
+        if (loadResources) {
             return <Collapse onChange={function (values: string | string[]) {
                 let m = new Map();
                 for (let value of values) {
@@ -412,12 +394,12 @@ const ModuleDetails = () => {
                 {resourceCollapses}
             </Collapse>
         } else {
-            return <Spin tip="Loading" size="large"/>
+            return <Spin size="large"/>
         }
     }
 
     const moduleLoading = () => {
-        if (loadModule === true) {
+        if (loadModule) {
             let commit = "";
             let commitLink = module.template.git.repo + `/tree/main/` + module.template.git.path;
 
@@ -460,7 +442,7 @@ const ModuleDetails = () => {
                 </Row>
             </div>
         } else {
-            return <Spin tip="Loading"/>
+            return <Spin/>
         }
     }
 
@@ -535,7 +517,7 @@ const ModuleDetails = () => {
             {resourcesLoading()}
             <Modal
                 title="Delete module"
-                visible={loading}
+                open={loading}
                 onCancel={handleCancel}
                 width={'40%'}
                 footer={
@@ -557,7 +539,7 @@ const ModuleDetails = () => {
             </Modal>
             <Modal
                 title="Manifest"
-                visible={manifestModal.on}
+                open={manifestModal.on}
                 onCancel={handleCancelManifest}
                 width={'40%'}
             >
