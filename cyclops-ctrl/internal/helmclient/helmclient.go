@@ -6,6 +6,7 @@ import (
 	"compress/gzip"
 	"errors"
 	"fmt"
+	"helm.sh/helm/v3/pkg/registry"
 	"io"
 	"io/ioutil"
 	"net/http"
@@ -23,14 +24,18 @@ import (
 )
 
 func LoadHelmChart(repo, chart, version string) (*models.Template, error) {
-	tgzURL, err := getTarUrl(repo, chart, version)
-	if err != nil {
-		return nil, err
-	}
-
-	tgzData, err := downloadFile(tgzURL)
-	if err != nil {
-		return nil, err
+	var tgzData []byte
+	var err error
+	if registry.IsOCI(repo) {
+		tgzData, err = LoadOCIHelmChart(repo, chart, version)
+		if err != nil {
+			return nil, err
+		}
+	} else {
+		tgzData, err = loadFromHelmChartRepo(repo, chart, version)
+		if err != nil {
+			return nil, err
+		}
 	}
 
 	extractedFiles, err := unpackTgzInMemory(tgzData)
@@ -42,14 +47,18 @@ func LoadHelmChart(repo, chart, version string) (*models.Template, error) {
 }
 
 func LoadHelmChartInitialValues(repo, chart, version string) (map[interface{}]interface{}, error) {
-	tgzURL, err := getTarUrl(repo, chart, version)
-	if err != nil {
-		return nil, err
-	}
-
-	tgzData, err := downloadFile(tgzURL)
-	if err != nil {
-		return nil, err
+	var tgzData []byte
+	var err error
+	if registry.IsOCI(repo) {
+		tgzData, err = LoadOCIHelmChart(repo, chart, version)
+		if err != nil {
+			return nil, err
+		}
+	} else {
+		tgzData, err = loadFromHelmChartRepo(repo, chart, version)
+		if err != nil {
+			return nil, err
+		}
 	}
 
 	extractedFiles, err := unpackTgzInMemory(tgzData)
@@ -104,6 +113,15 @@ func LoadDependenciesInitialValues(metadata helmchart.Metadata) (map[interface{}
 	return initialValues, nil
 }
 
+func loadFromHelmChartRepo(repo, chart, version string) ([]byte, error) {
+	tgzURL, err := getTarUrl(repo, chart, version)
+	if err != nil {
+		return nil, err
+	}
+
+	return downloadFile(tgzURL)
+}
+
 func mapHelmChart(chartName string, files map[string][]byte) (*models.Template, error) {
 	metadataBytes := []byte{}
 	schemaBytes := []byte{}
@@ -147,8 +165,11 @@ func mapHelmChart(chartName string, files map[string][]byte) (*models.Template, 
 	}
 
 	var schema helm.Property
-	if err := json.Unmarshal(schemaBytes, &schema); err != nil {
-		return &models.Template{}, err
+	// unmarshal values schema only if present
+	if len(schemaBytes) != 0 {
+		if err := json.Unmarshal(schemaBytes, &schema); err != nil {
+			return &models.Template{}, err
+		}
 	}
 
 	var metadata helmchart.Metadata
@@ -157,8 +178,16 @@ func mapHelmChart(chartName string, files map[string][]byte) (*models.Template, 
 	}
 
 	// region load dependencies
-	dependencies := make([]*models.Template, 0)
+	dependencies, err := LoadDependencies(metadata)
+	if err != nil {
+		return &models.Template{}, err
+	}
+
 	for depName, files := range dependenciesFromChartsDir {
+		if dependencyExists(depName, dependencies) {
+			continue
+		}
+
 		dep, err := mapHelmChart(depName, files)
 		if err != nil {
 			return nil, err
@@ -166,13 +195,6 @@ func mapHelmChart(chartName string, files map[string][]byte) (*models.Template, 
 
 		dependencies = append(dependencies, dep)
 	}
-
-	dependenciesFromMeta, err := LoadDependencies(metadata)
-	if err != nil {
-		return &models.Template{}, err
-	}
-
-	dependencies = append(dependencies, dependenciesFromMeta...)
 	// endregion
 
 	return &models.Template{
@@ -276,8 +298,13 @@ func getTarUrl(repo, chart, version string) (string, error) {
 		return "", errors.New(fmt.Sprintf("chart %v not found in repo %v", chart, repo))
 	}
 
+	v, err := resolveVersion(data.Entries[chart], version)
+	if err != nil {
+		return "", err
+	}
+
 	for _, entry := range data.Entries[chart] {
-		if entry.Version == version {
+		if entry.Version == v {
 			if len(entry.URLs) == 0 {
 				return "", errors.New(fmt.Sprintf("no URL on version %v of chart %v and repo %v", version, chart, repo))
 			}
@@ -287,6 +314,19 @@ func getTarUrl(repo, chart, version string) (string, error) {
 	}
 
 	return "", errors.New(fmt.Sprintf("version %v not found in chart %v and repo %v", version, chart, repo))
+}
+
+func resolveVersion(indexEntries []helm.IndexEntry, version string) (string, error) {
+	if isValidVersion(version) {
+		return version, nil
+	}
+
+	versions := make([]string, 0, len(indexEntries))
+	for _, entry := range indexEntries {
+		versions = append(versions, entry.Version)
+	}
+
+	return resolveSemver(version, versions)
 }
 
 func downloadFile(url string) ([]byte, error) {
@@ -340,4 +380,14 @@ func unpackTgzInMemory(tgzData []byte) (map[string][]byte, error) {
 	}
 
 	return files, nil
+}
+
+func dependencyExists(name string, existing []*models.Template) bool {
+	for _, ed := range existing {
+		if ed.Name == name {
+			return true
+		}
+	}
+
+	return false
 }
