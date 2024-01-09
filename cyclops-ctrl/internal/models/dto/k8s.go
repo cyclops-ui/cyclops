@@ -23,7 +23,6 @@ type Deployment struct {
 	Name      string `json:"name"`
 	Namespace string `json:"namespace"`
 	Replicas  int    `json:"replicas"`
-	Manifest  string `json:"manifest"`
 	Pods      []Pod  `json:"pods"`
 	Status    bool   `json:"status"`
 	Deleted   bool   `json:"deleted"`
@@ -68,7 +67,6 @@ type Service struct {
 	Name      string           `json:"name"`
 	Namespace string           `json:"namespace"`
 	Ports     []v1.ServicePort `json:"ports"`
-	Manifest  string           `json:"manifest"`
 	Deleted   bool             `json:"deleted"`
 }
 
@@ -111,7 +109,6 @@ type ConfigMap struct {
 	Name      string            `json:"name"`
 	Namespace string            `json:"namespace"`
 	Data      map[string]string `json:"data"`
-	Manifest  string            `json:"manifest"`
 	Deleted   bool              `json:"deleted"`
 }
 
@@ -172,7 +169,6 @@ type Pod struct {
 	PodPhase       string       `json:"podPhase"`
 	Status         bool         `json:"status"`
 	Started        *metav1.Time `json:"started"`
-	Manifest       string       `json:"manifest"`
 	Deleted        bool         `json:"deleted"`
 }
 
@@ -215,7 +211,6 @@ type StatefulSet struct {
 	Name      string `json:"name"`
 	Namespace string `json:"namespace"`
 	Replicas  int    `json:"replicas"`
-	Manifest  string `json:"manifest"`
 	Pods      []Pod  `json:"pods"`
 	Status    bool   `json:"status"`
 	Deleted   bool   `json:"deleted"`
@@ -250,5 +245,47 @@ func (s *StatefulSet) GetDeleted() bool {
 }
 
 func (s *StatefulSet) SetDeleted(deleted bool) {
+	s.Deleted = deleted
+}
+
+type Other struct {
+	Group     string `json:"group"`
+	Version   string `json:"version"`
+	Kind      string `json:"kind"`
+	Name      string `json:"name"`
+	Namespace string `json:"namespace"`
+	Status    string `json:"status"`
+	Deleted   bool   `json:"deleted"`
+}
+
+func (s *Other) GetGroupVersionKind() string {
+	return s.Group + "/" + s.Version + ", Kind=" + s.Kind
+}
+
+func (s *Other) GetGroup() string {
+	return s.Group
+}
+
+func (s *Other) GetVersion() string {
+	return s.Version
+}
+
+func (s *Other) GetKind() string {
+	return s.Kind
+}
+
+func (s *Other) GetName() string {
+	return s.Name
+}
+
+func (s *Other) GetNamespace() string {
+	return s.Namespace
+}
+
+func (s *Other) GetDeleted() bool {
+	return s.Deleted
+}
+
+func (s *Other) SetDeleted(deleted bool) {
 	s.Deleted = deleted
 }
