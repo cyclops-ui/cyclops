@@ -43,27 +43,27 @@ jobs:
           docker build cyclops-ctrl -t cyclopsui/cyclops-ctrl:$TAG
           docker push cyclopsui/cyclops-ctrl:$TAG
 
-  update-install-manifest:
-    needs:
-      - build-UI
-      - build-controller
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v2
-      - name: update install manifest
-        run: |
-          TAG=$(git describe --tags --abbrev=0)
-          INSTALL_YAML=$GITHUB_WORKSPACE/install/cyclops-install.yaml
-
-          sed -i 's/cyclopsui\/cyclops-ctrl\:.*/cyclopsui\/cyclops-ctrl\:'$TAG'/' $INSTALL_YAML
-          sed -i 's/cyclopsui\/cyclops-ui\:.*/cyclopsui\/cyclops-ui\:'$TAG'/' $INSTALL_YAML
-
-          # update file
-          git fetch origin main
-          git checkout main
-          git config --global user.email "petar.cvitanovic@gmail.com"
-          git config --global user.name "petar-cvit"
-          git status
-          git add $INSTALL_YAML
-          git commit -m '⚙️ update cyclops to '$TAG
-          git push origin HEAD:main
+#  update-install-manifest:
+#    needs:
+#      - build-UI
+#      - build-controller
+#    runs-on: ubuntu-latest
+#    steps:
+#      - uses: actions/checkout@v2
+#      - name: update install manifest
+#        run: |
+#          TAG=$(git describe --tags --abbrev=0)
+#          INSTALL_YAML=$GITHUB_WORKSPACE/install/cyclops-install.yaml
+#
+#          sed -i 's/cyclopsui\/cyclops-ctrl\:.*/cyclopsui\/cyclops-ctrl\:'$TAG'/' $INSTALL_YAML
+#          sed -i 's/cyclopsui\/cyclops-ui\:.*/cyclopsui\/cyclops-ui\:'$TAG'/' $INSTALL_YAML
+#
+#          # update file
+#          git fetch origin main
+#          git checkout main
+#          git config --global user.email "petar.cvitanovic@gmail.com"
+#          git config --global user.name "petar-cvit"
+#          git status
+#          git add $INSTALL_YAML
+#          git commit -m '⚙️ update cyclops to '$TAG
+#          git push origin HEAD:main
