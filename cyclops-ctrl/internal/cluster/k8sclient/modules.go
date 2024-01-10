@@ -74,6 +74,10 @@ func (k *KubernetesClient) GetResourcesForModule(name string) ([]dto.Resource, e
 		}
 
 		for _, apiResource := range resource.APIResources {
+			if gvk.Group == "discovery.k8s.io" && gvk.Version == "v1" && apiResource.Kind == "EndpointSlice" {
+				continue
+			}
+
 			rs, err := k.Dynamic.Resource(schema.GroupVersionResource{
 				Group:    gvk.Group,
 				Version:  gvk.Version,
@@ -82,7 +86,6 @@ func (k *KubernetesClient) GetResourcesForModule(name string) ([]dto.Resource, e
 				LabelSelector: "cyclops.module=" + name,
 			})
 			if err != nil {
-				//fmt.Println(err)
 				continue
 			}
 
