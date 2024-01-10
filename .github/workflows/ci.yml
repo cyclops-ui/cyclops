@@ -43,6 +43,7 @@ jobs:
           docker build cyclops-ctrl -t cyclopsui/cyclops-ctrl:$TAG
           docker push cyclopsui/cyclops-ctrl:$TAG
 
+#  update manifest job needs to be refactored
 #  update-install-manifest:
 #    needs:
 #      - build-UI
