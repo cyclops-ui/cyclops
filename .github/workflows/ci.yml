@@ -44,6 +44,9 @@ jobs:
           docker push cyclopsui/cyclops-ctrl:$TAG
 
   update-install-manifest:
+    needs:
+      - build-UI
+      - build-controller
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
