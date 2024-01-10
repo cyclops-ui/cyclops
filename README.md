@@ -7,7 +7,7 @@
 <div align="center">
     <a href="https://github.com/cyclops-ui/cyclops/blob/main/LICENSE"><img height="20" src="https://img.shields.io/github/license/cyclops-ui/cyclops"></a>
     <a href="https://github.com/cyclops-ui/cyclops/actions/workflows/web.yaml"><img height="20" src="https://github.com/cyclops-ui/cyclops/actions/workflows/web.yaml/badge.svg"></a>
-    <a href="https://github.com/cyclops-ui/cyclops/actions/workflows/ctrl-ci.yml"><img height="20" src="https://github.com/cyclops-ui/cyclops/actions/workflows/ctrl-ci.yml/badge.svg"></a>
+    <a href="https://github.com/cyclops-ui/cyclops/actions/workflows/ci.yml"><img height="20" src="https://github.com/cyclops-ui/cyclops/actions/workflows/ci.yml/badge.svg"></a>
 </div>
 
 ![which-would-you-prefer.png](web%2Fstatic%2Fimg%2Fwhich-would-you-prefer.png)
