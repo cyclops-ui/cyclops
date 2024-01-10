@@ -6,7 +6,6 @@ import (
 	"compress/gzip"
 	"errors"
 	"fmt"
-	"helm.sh/helm/v3/pkg/registry"
 	"io"
 	"io/ioutil"
 	"net/http"
@@ -18,6 +17,7 @@ import (
 	json "github.com/json-iterator/go"
 	"gopkg.in/yaml.v2"
 	helmchart "helm.sh/helm/v3/pkg/chart"
+	"helm.sh/helm/v3/pkg/registry"
 
 	"github.com/cyclops-ui/cycops-ctrl/internal/models"
 	"github.com/cyclops-ui/cycops-ctrl/internal/models/helm"
