@@ -1,13 +1,11 @@
 import React, {useEffect, useState} from 'react';
-import {Button, Col, Collapse, Modal, Row, Table, Typography} from 'antd';
-import {Icon} from '@ant-design/compatible';
+import {Button, Col, Modal, Row, Table, Typography} from 'antd';
 import {useNavigate} from 'react-router';
 import axios from 'axios';
 import {useParams} from "react-router-dom";
 import ReactDiffViewer from "react-diff-viewer";
-import {NumberOutlined} from "@ant-design/icons";
-import ReactAce from "react-ace";
 import AceEditor from "react-ace";
+import ReactAce from "react-ace";
 
 const {Title, Text} = Typography;
 
@@ -28,12 +26,13 @@ const ModuleHistory = () => {
         generation: 0,
     });
 
-    const [allData, setAllData] = useState([]);
+    const [historyEntries, setHistoryEntries] = useState([]);
+
     let {moduleName} = useParams();
     useEffect(() => {
         axios.get(window.__RUNTIME_CONFIG__.REACT_APP_CYCLOPS_CTRL_HOST + `/modules/` + moduleName + `/history`).then(res => {
             console.log(res.data)
-            setAllData(res.data);
+            setHistoryEntries(res.data);
         });
 
         axios.get(window.__RUNTIME_CONFIG__.REACT_APP_CYCLOPS_CTRL_HOST + `/modules/` + moduleName + `/currentManifest`).then(res => {
@@ -44,19 +43,6 @@ const ModuleHistory = () => {
         });
     }, []);
 
-    const data = [{}];
-    allData.map((entry: any) => {
-        data.push({
-            generation: entry.generation,
-            template: entry.template,
-            values: entry.values,
-        })
-        return data;
-    });
-
-    const [dataSource, setDataSource] = useState(data);
-    const [value, setValue] = useState('');
-
     const handleOk = () => {
         setDiffModal({
             open: false,
@@ -64,7 +50,7 @@ const ModuleHistory = () => {
         });
 
         let target: any = {}
-        allData.forEach((h: any) => {
+        historyEntries.forEach((h: any) => {
             if (h.generation === diffModal.generation) {
                 target = h
             }
@@ -106,7 +92,7 @@ const ModuleHistory = () => {
 
     const openRollbackModal = (text: any, record: any, index: any) => {
         let target: any = {}
-        allData.forEach((h: any) => {
+        historyEntries.forEach((h: any) => {
             if (h.generation === record.generation) {
                 target = h
             }
@@ -136,7 +122,7 @@ const ModuleHistory = () => {
 
     const openManifestModal = (text: any, record: any, index: any) => {
         let target: any = {}
-        allData.forEach((h: any) => {
+        historyEntries.forEach((h: any) => {
             if (h.generation === record.generation) {
                 target = h
             }
@@ -171,7 +157,7 @@ const ModuleHistory = () => {
                 </Col>
             </Row>
             <Col span={24} style={{overflowX: "auto"}}>
-                <Table dataSource={data.slice(1, data.length)}>
+                <Table dataSource={historyEntries}>
                     <Table.Column
                         title='Generation'
                         dataIndex='generation'
@@ -193,6 +179,7 @@ const ModuleHistory = () => {
                     <Table.Column
                         dataIndex="Manifest"
                         key="manifest"
+                        width='15%'
                         render={(text, record, index) =>
                             <Button onClick={() => openManifestModal(text, record, index)} block>Manifest</Button>
                         }
@@ -200,6 +187,7 @@ const ModuleHistory = () => {
                     <Table.Column
                         dataIndex="Manifest changes"
                         key="diff"
+                        width='15%'
                         render={(text, record, index) =>
                             <Button onClick={() => openRollbackModal(text, record, index)} block>Rollback</Button>
                         }
@@ -227,9 +215,7 @@ const ModuleHistory = () => {
                 onCancel={handleCancelManifest}
                 width={'40%'}
             >
-                <AceEditor
-                    mode={"yaml"}
-                    theme="github"
+                <ReactAce
                     fontSize={12}
                     showPrintMargin={true}
                     showGutter={true}
