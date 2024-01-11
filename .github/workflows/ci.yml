@@ -23,7 +23,7 @@ jobs:
 
       - name: Build and push
         run: |
-          TAG=$(git describe --tags --abbrev=0)
+          TAG=${{ github.event.inputs.version }}
 
           docker build cyclops-ui -t cyclopsui/cyclops-ui:$TAG
           docker push cyclopsui/cyclops-ui:$TAG
@@ -40,7 +40,7 @@ jobs:
 
       - name: Build and push
         run: |
-          TAG=$(git describe --tags --abbrev=0)
+          TAG=${{ github.event.inputs.version }}
 
           docker build cyclops-ctrl -t cyclopsui/cyclops-ctrl:$TAG
           docker push cyclopsui/cyclops-ctrl:$TAG
