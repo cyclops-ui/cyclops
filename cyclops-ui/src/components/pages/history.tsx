@@ -9,6 +9,10 @@ import ReactAce from "react-ace";
 
 const {Title, Text} = Typography;
 
+require(`ace-builds/src-noconflict/mode-sass`);
+require(`ace-builds/src-noconflict/snippets/sass`);
+require(`ace-builds/src-noconflict/theme-github`)
+
 const ModuleHistory = () => {
     const history = useNavigate();
     const [diff, setDiff] = useState({
@@ -216,6 +220,8 @@ const ModuleHistory = () => {
                 width={'40%'}
             >
                 <ReactAce
+                    mode={"sass"}
+                    theme={"github"}
                     fontSize={12}
                     showPrintMargin={true}
                     showGutter={true}
@@ -229,7 +235,6 @@ const ModuleHistory = () => {
                         useWorker: false
                     }}
                     style={{
-                        height: "25em",
                         width: "100%"
                     }}
                     value={manifest}
