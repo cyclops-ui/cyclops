@@ -235,11 +235,15 @@ func (m *Modules) UpdateModule(ctx *gin.Context) {
 		history = make([]v1alpha1.HistoryEntry, 0)
 	}
 
-	module.History = append(history, v1alpha1.HistoryEntry{
+	module.History = append([]v1alpha1.HistoryEntry{{
 		Generation:  curr.Generation,
 		TemplateRef: curr.Spec.TemplateRef,
 		Values:      curr.Spec.Values,
-	})
+	}}, history...)
+
+	if len(module.History) > 10 {
+		module.History = module.History[:len(module.History)-1]
+	}
 
 	module.SetResourceVersion(curr.GetResourceVersion())
 
