@@ -55,9 +55,13 @@ const sidebars = {
       ],
     },
     {
-      label: 'Writing templates',
-      id: 'templates/templates',
-      type: 'doc',
+      type: 'category',
+      label: 'Writing Templates',
+      items: [
+        'templates/templates',
+        'templates/validations',
+        'templates/dependencies',
+      ],
     },
     {
       label: 'Roadmap',
