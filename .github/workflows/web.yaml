@@ -1,4 +1,4 @@
-name: Deploy landing page to GitHub Pages
+name: deploy landing page to GitHub Pages
 
 on:
   push:

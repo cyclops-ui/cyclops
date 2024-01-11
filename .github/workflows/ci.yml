@@ -85,5 +85,5 @@ jobs:
           commitish: main
           tag_name: ${{ github.event.inputs.version }}
           release_name: ${{ github.event.inputs.version }}
-          draft: true
-          prerelease: true
+          draft: false
+          prerelease: false
