@@ -6,7 +6,7 @@ title: Validation
 
 :::info
 
-Supported from [ v0.0.1-alpha.7 ](https://github.com/cyclops-ui/cyclops/releases/tag/v0.0.1-alpha.7)
+Supported from [ v0.0.1-alpha.8 ](https://github.com/cyclops-ui/cyclops/releases/tag/v0.0.1-alpha.8)
 
 :::
 
