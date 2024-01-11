@@ -1,9 +1,11 @@
 name: cyclops-CI
 
 on:
-  push:
-    tags:
-      - '*'
+  workflow_dispatch:
+    inputs:
+      version:
+        required: true
+        description: Version to be used as release name and image tagging
 
 permissions:
   contents: write
