@@ -78,7 +78,7 @@ its customization with skins and plugins gives you room for additional utility.
 
 ## Cyclops
 
-If you are having difficulties fighting with manifest files,[**Cyclops**](https://cyclops-ui.com/) is the tool for you! 
+If you are having difficulties fighting with manifest files, [**Cyclops**](https://cyclops-ui.com/) is the tool for you! 
 Cyclops removes the clutter and complexity when dealing with manifests by transforming them into a structured web-based 
 form, eliminating the need for manual configuration and command-line interactions.
 
