@@ -13,15 +13,13 @@ export default function AppLayout() {
                 <SideNav/>
             </Sider>
             <Layout>
-                <>
-                    <Header style={{ display: 'flex', alignItems: 'center'}} >
-                        <Button
-                            style={{ marginLeft: 'auto' }}
-                            icon={ <BugFilled/> }
-                            href={"https://github.com/cyclops-ui/cyclops/issues/new?assignees=&labels=&projects=&template=bug_report.md&title="}
-                        />
-                    </Header>
-                </>
+                <Header style={{ display: 'flex', alignItems: 'center'}} >
+                    <Button
+                        style={{ marginLeft: 'auto' }}
+                        icon={ <BugFilled/> }
+                        href={"https://github.com/cyclops-ui/cyclops/issues/new?assignees=&labels=&projects=&template=bug_report.md&title="}
+                    />
+                </Header>
                 <Content style={{margin: '24px 16px', padding: 24, minHeight: "calc(100vh - 112px)", background: "#fff"}}>
                     <Suspense fallback={<h1 style={{textAlign: "center"}}>Loading...</h1>}>
                         <Outlet/>
