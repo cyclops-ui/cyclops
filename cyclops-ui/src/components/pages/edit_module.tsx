@@ -48,12 +48,9 @@ const EditModule = () => {
         name: "",
         values: {},
         template: {
-            name: "",
+            repo: "",
+            path: "",
             version: "",
-            git: {
-                repo: "",
-                path: "",
-            }
         }
     });
 
@@ -165,46 +162,30 @@ const EditModule = () => {
         axios.get(window.__RUNTIME_CONFIG__.REACT_APP_CYCLOPS_CTRL_HOST + `/modules/` + moduleName).then(res => {
             setLoadValues(true)
 
-            if (module.name.length !== 0 ) {
-                axios.get(window.__RUNTIME_CONFIG__.REACT_APP_CYCLOPS_CTRL_HOST + `/create-config/` + res.data.template + `?version=` + res.data.version).then(res => {
-                    setConfig(res.data);
-                }).catch(error => {
-                    setLoading(false);
-                    if (error.response === undefined) {
-                        setError({
-                            message: String(error),
-                            description: "Check if Cyclops backend is available on: " + window.__RUNTIME_CONFIG__.REACT_APP_CYCLOPS_CTRL_HOST
-                        })
-                    } else {
-                        setError(error.response.data);
-                    }
-                });
-            } else {
-                axios.get(window.__RUNTIME_CONFIG__.REACT_APP_CYCLOPS_CTRL_HOST + `/templates/git?repo=` + res.data.template.git.repo + `&path=` + res.data.template.git.path + `&commit=` + res.data.template.git.commit).then(templatesRes => {
-                    setConfig(templatesRes.data);
-                    setLoadTemplate(true);
+            axios.get(window.__RUNTIME_CONFIG__.REACT_APP_CYCLOPS_CTRL_HOST + `/templates?repo=` + res.data.template.repo + `&path=` + res.data.template.path + `&commit=` + res.data.template.version).then(templatesRes => {
+                setConfig(templatesRes.data);
+                setLoadTemplate(true);
 
-                    let values = mapsToArray(templatesRes.data.fields, res.data.values);
+                let values = mapsToArray(templatesRes.data.fields, res.data.values);
 
-                    setModule({
-                        name: res.data.name,
-                        values: values,
-                        template: res.data.template,
-                    });
-                    form.setFieldsValue(values);
-                }).catch(error => {
-                    setLoading(false);
-                    setLoadTemplate(true);
-                    if (error.response === undefined) {
-                        setError({
-                            message: String(error),
-                            description: "Check if Cyclops backend is available on: " + window.__RUNTIME_CONFIG__.REACT_APP_CYCLOPS_CTRL_HOST
-                        })
-                    } else {
-                        setError(error.response.data);
-                    }
+                setModule({
+                    name: res.data.name,
+                    values: values,
+                    template: res.data.template,
                 });
-            }
+                form.setFieldsValue(values);
+            }).catch(error => {
+                setLoading(false);
+                setLoadTemplate(true);
+                if (error.response === undefined) {
+                    setError({
+                        message: String(error),
+                        description: "Check if Cyclops backend is available on: " + window.__RUNTIME_CONFIG__.REACT_APP_CYCLOPS_CTRL_HOST
+                    })
+                } else {
+                    setError(error.response.data);
+                }
+            });
 
             // form.setFieldsValue(res.data.values);
             // form.setFieldValue('chains.0.name', "ja sam prvi name")

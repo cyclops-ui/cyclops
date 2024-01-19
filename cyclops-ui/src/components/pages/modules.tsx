@@ -132,8 +132,8 @@ const Modules = () => {
                                     display: "block"
                                 }}>
                                     Repo:
-                                    <Link aria-level={3} href={module.template.git.repo}>
-                                        {module.template.name.length === 0 && " " + module.template.git.repo}
+                                    <Link aria-level={3} href={module.template.repo}>
+                                        {" " + module.template.repo}
                                     </Link>
                                 </Col>
                             </Row>
@@ -145,8 +145,8 @@ const Modules = () => {
                                     display: "block"
                                 }}>
                                     Path:
-                                    <Link aria-level={3} href={ module.template.git.repo + `/tree/` + getTemplateVersion(module.template.git.commit) + `/` + module.template.git.path }>
-                                        { module.template.name.length === 0 && " " + module.template.git.path }
+                                    <Link aria-level={3} href={ module.template.repo + `/tree/` + getTemplateVersion(module.template.version) + `/` + module.template.path }>
+                                        { " " + module.template.path }
                                     </Link>
                                 </Col>
                             </Row>
@@ -157,7 +157,7 @@ const Modules = () => {
                                     textOverflow: "ellipsis",
                                     display: "block"
                                 }}>
-                                    Version: {getTemplateVersion(module.template.git.commit)}
+                                    Version: {getTemplateVersion(module.template.version)}
                                 </Col>
                             </Row>
                             <Row style={{paddingTop: "15px"}}>

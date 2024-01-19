@@ -13,7 +13,9 @@ import {
     Space,
     Switch,
     Typography,
-    Tooltip, message, Modal, CollapseProps, Checkbox, Tag
+    Tooltip,
+    message,
+    Modal
 } from 'antd';
 import axios from 'axios';
 import {useNavigate} from 'react-router';
@@ -52,10 +54,10 @@ const NewModule = () => {
         dependencies: []
     })
 
-    const [gitTemplate, setGitTemplate] = useState({
+    const [template, setTemplate] = useState({
         repo: "",
         path: "",
-        commit: "",
+        version: "",
     })
 
     const [error, setError] = useState({
@@ -90,10 +92,10 @@ const NewModule = () => {
 
         if (window.__RUNTIME_CONFIG__.REACT_APP_DEFAULT_TEMPLATE_REPO &&
             window.__RUNTIME_CONFIG__.REACT_APP_DEFAULT_TEMPLATE_REPO.length > 0) {
-            setGitTemplate({
+            setTemplate({
                 repo: window.__RUNTIME_CONFIG__.REACT_APP_DEFAULT_TEMPLATE_REPO,
                 path: window.__RUNTIME_CONFIG__.REACT_APP_DEFAULT_TEMPLATE_PATH,
-                commit: window.__RUNTIME_CONFIG__.REACT_APP_DEFAULT_TEMPLATE_VERSION,
+                version: window.__RUNTIME_CONFIG__.REACT_APP_DEFAULT_TEMPLATE_VERSION,
             })
 
             loadTemplate(
@@ -240,13 +242,9 @@ const NewModule = () => {
                 name: moduleName,
                 values: values,
                 template: {
-                    name: config.name,
-                    version: config.version,
-                    git: {
-                        repo: gitTemplate.repo,
-                        path: gitTemplate.path,
-                        commit: gitTemplate.commit,
-                    }
+                    repo: template.repo,
+                    path: template.path,
+                    version: template.version,
                 },
             })
             .then(res => {
@@ -328,7 +326,7 @@ const NewModule = () => {
 
         let tmpConfig: any = {}
 
-        await axios.get(window.__RUNTIME_CONFIG__.REACT_APP_CYCLOPS_CTRL_HOST + `/templates/git?repo=` + repo + `&path=` + path + `&commit=` + commit).then(templatesRes => {
+        await axios.get(window.__RUNTIME_CONFIG__.REACT_APP_CYCLOPS_CTRL_HOST + `/templates?repo=` + repo + `&path=` + path + `&commit=` + commit).then(templatesRes => {
             setConfig(templatesRes.data);
             tmpConfig = templatesRes.data;
 
@@ -352,7 +350,7 @@ const NewModule = () => {
             }
         });
 
-        axios.get(window.__RUNTIME_CONFIG__.REACT_APP_CYCLOPS_CTRL_HOST + `/templates/git/initial?repo=` + repo + `&path=` + path + `&commit=` + commit).then(res => {
+        axios.get(window.__RUNTIME_CONFIG__.REACT_APP_CYCLOPS_CTRL_HOST + `/templates/initial?repo=` + repo + `&path=` + path + `&commit=` + commit).then(res => {
             form.setFieldsValue(mapsToArray(tmpConfig.fields, res.data))
 
             setError({
@@ -859,10 +857,10 @@ const NewModule = () => {
                             placeholder={"Repository"}
                             style={{width: '40%'}}
                             onChange={(value: any) => {
-                                setGitTemplate({
+                                setTemplate({
                                     repo: value.target.value,
-                                    path: gitTemplate.path,
-                                    commit: gitTemplate.commit,
+                                    path: template.path,
+                                    version: template.version,
                                 })
                             }}
                             defaultValue={window.__RUNTIME_CONFIG__.REACT_APP_DEFAULT_TEMPLATE_REPO}
@@ -872,10 +870,10 @@ const NewModule = () => {
                             placeholder={"Path"}
                             style={{width: '20%'}}
                             onChange={(value: any) => {
-                                setGitTemplate({
-                                    repo: gitTemplate.repo,
+                                setTemplate({
+                                    repo: template.repo,
                                     path: value.target.value,
-                                    commit: gitTemplate.commit,
+                                    version: template.version,
                                 })
                             }}
                             defaultValue={window.__RUNTIME_CONFIG__.REACT_APP_DEFAULT_TEMPLATE_PATH}
@@ -885,10 +883,10 @@ const NewModule = () => {
                             placeholder={"Version"}
                             style={{width: '10%'}}
                             onChange={(value: any) => {
-                                setGitTemplate({
-                                    repo: gitTemplate.repo,
-                                    path: gitTemplate.path,
-                                    commit: value.target.value
+                                setTemplate({
+                                    repo: template.repo,
+                                    path: template.path,
+                                    version: value.target.value
                                 })
                             }}
                             defaultValue={window.__RUNTIME_CONFIG__.REACT_APP_DEFAULT_TEMPLATE_VERSION}
@@ -898,9 +896,9 @@ const NewModule = () => {
                             type="primary"
                             htmlType="button"
                             onClick={async () => {await loadTemplate(
-                                gitTemplate.repo,
-                                gitTemplate.path,
-                                gitTemplate.commit,
+                                template.repo,
+                                template.path,
+                                template.version,
                             )}}
                             loading={loadingTemplate}
                         >
