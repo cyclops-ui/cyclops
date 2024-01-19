@@ -54,7 +54,7 @@ const StatefulSet = ({name, namespace}: Props) => {
 
     useEffect(() => {
         fetchStatefulSet()
-        const interval = setInterval(() => fetchStatefulSet(), 10000)
+        const interval = setInterval(() => fetchStatefulSet(), 15000)
         return () => {
             clearInterval(interval);
         }

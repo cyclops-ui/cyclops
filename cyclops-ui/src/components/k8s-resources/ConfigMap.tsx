@@ -41,7 +41,7 @@ const ConfigMap = ({name, namespace}: Props) => {
 
     useEffect(() => {
         fetchConfigMap()
-        const interval = setInterval(() => fetchConfigMap(), 10000)
+        const interval = setInterval(() => fetchConfigMap(), )
         return () => {
             clearInterval(interval);
         }

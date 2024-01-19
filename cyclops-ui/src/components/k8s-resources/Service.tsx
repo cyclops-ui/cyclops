@@ -53,7 +53,7 @@ const Service = ({name, namespace}: Props) => {
 
     useEffect(() => {
         fetchService()
-        const interval = setInterval(() => fetchService(), 10000)
+        const interval = setInterval(() => fetchService(), 15000)
         return () => {
             clearInterval(interval);
         }
