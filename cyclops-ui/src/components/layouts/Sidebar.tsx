@@ -1,9 +1,6 @@
 import React from 'react';
 import {Button, Menu, MenuProps} from 'antd';
-import {
-    AppstoreAddOutlined, BugFilled,
-    HddOutlined,
-} from '@ant-design/icons';
+import {AppstoreAddOutlined, HddOutlined, BugFilled} from '@ant-design/icons';
 import {useLocation} from 'react-router';
 import PathConstants from "../../routes/PathConstants";
 import { Link } from 'react-router-dom';
