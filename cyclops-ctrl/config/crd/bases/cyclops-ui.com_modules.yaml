@@ -33,26 +33,15 @@ spec:
                   type: integer
                 template:
                   properties:
-                    git:
-                      properties:
-                        commit:
-                          type: string
-                        path:
-                          type: string
-                        repo:
-                          type: string
-                      required:
-                      - commit
-                      - path
-                      - repo
-                      type: object
-                    name:
+                    path:
+                      type: string
+                    repo:
                       type: string
                     version:
                       type: string
                   required:
-                  - git
-                  - name
+                  - path
+                  - repo
                   - version
                   type: object
                 values:
@@ -75,26 +64,15 @@ spec:
             properties:
               template:
                 properties:
-                  git:
-                    properties:
-                      commit:
-                        type: string
-                      path:
-                        type: string
-                      repo:
-                        type: string
-                    required:
-                    - commit
-                    - path
-                    - repo
-                    type: object
-                  name:
+                  path:
+                    type: string
+                  repo:
                     type: string
                   version:
                     type: string
                 required:
-                - git
-                - name
+                - path
+                - repo
                 - version
                 type: object
               values:

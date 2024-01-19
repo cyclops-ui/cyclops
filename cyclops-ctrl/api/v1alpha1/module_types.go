@@ -39,9 +39,9 @@ type ModuleValue struct {
 }
 
 type TemplateRef struct {
-	Name           string         `json:"name"`
-	Version        string         `json:"version"`
-	TemplateGitRef TemplateGitRef `json:"git"`
+	URL     string `json:"repo"`
+	Path    string `json:"path"`
+	Version string `json:"version"`
 }
 
 type TemplateGitRef struct {
