@@ -2,7 +2,6 @@ package k8sclient
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 	"os"
 	"sort"
@@ -39,12 +38,7 @@ func (k *KubernetesClient) CreateModule(module cyclopsv1alpha1.Module) error {
 }
 
 func (k *KubernetesClient) UpdateModule(module cyclopsv1alpha1.Module) error {
-	m, err := k.moduleset.Modules(cyclopsNamespace).Update(&module)
-
-	b, err := json.Marshal(m)
-	fmt.Println(err)
-	fmt.Println(string(b))
-
+	_, err := k.moduleset.Modules(cyclopsNamespace).Update(&module)
 	return err
 }
 
