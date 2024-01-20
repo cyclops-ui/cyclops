@@ -77,7 +77,7 @@ const Pod = ({name, namespace}: Props) => {
 
     useEffect(() => {
         fetchPod()
-        const interval = setInterval(() => fetchPod(), 10000)
+        const interval = setInterval(() => fetchPod(), 15000)
         return () => {
             clearInterval(interval);
         }

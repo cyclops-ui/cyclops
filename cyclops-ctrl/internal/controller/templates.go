@@ -7,15 +7,14 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
-	json "github.com/json-iterator/go"
 
 	cyclopsv1alpha1 "github.com/cyclops-ui/cycops-ctrl/api/v1alpha1"
 	"github.com/cyclops-ui/cycops-ctrl/internal/cluster/k8sclient"
-	git "github.com/cyclops-ui/cycops-ctrl/internal/git/templates"
 	"github.com/cyclops-ui/cycops-ctrl/internal/mapper"
 	"github.com/cyclops-ui/cycops-ctrl/internal/models"
 	"github.com/cyclops-ui/cycops-ctrl/internal/models/dto"
 	"github.com/cyclops-ui/cycops-ctrl/internal/storage/templates"
+	"github.com/cyclops-ui/cycops-ctrl/internal/template"
 )
 
 type Templates struct {
@@ -74,18 +73,6 @@ func (c *Templates) GetConfiguration(ctx *gin.Context) {
 	name := ctx.Param("name")
 	version := ctx.Query("version")
 
-	// TODO delete this is for testing
-	if name == "git" {
-		template, err := git.LoadTemplate("https://github.com/cyclops-ui/templates", "application", "")
-		if err != nil {
-			panic(err)
-		}
-
-		ctx.Header("Access-Control-Allow-Origin", "*")
-		ctx.JSON(http.StatusOK, template)
-		return
-	}
-
 	configuration, err := c.templates.GetConfigByVersion(name, version)
 	if err != nil {
 		fmt.Println(err)
@@ -102,7 +89,7 @@ func (c *Templates) GetConfiguration(ctx *gin.Context) {
 
 	related := make([]cyclopsv1alpha1.Module, 0)
 	for _, module := range modules {
-		if name != module.Spec.TemplateRef.Name {
+		if name != module.Spec.TemplateRef.Path {
 			continue
 		}
 
@@ -142,7 +129,7 @@ func (c *Templates) GetConfigurationsVersions(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, versions)
 }
 
-func (c *Templates) GetTemplateFromGit(ctx *gin.Context) {
+func (c *Templates) GetTemplate(ctx *gin.Context) {
 	ctx.Header("Access-Control-Allow-Origin", "*")
 
 	repo := ctx.Query("repo")
@@ -154,17 +141,17 @@ func (c *Templates) GetTemplateFromGit(ctx *gin.Context) {
 		return
 	}
 
-	template, err := git.LoadTemplate(repo, path, commit)
+	t, err := template.GetTemplate(repo, path, commit)
 	if err != nil {
 		fmt.Println(err)
 		ctx.JSON(http.StatusBadRequest, dto.NewError("Error loading template", err.Error()))
 		return
 	}
 
-	ctx.JSON(http.StatusOK, template)
+	ctx.JSON(http.StatusOK, t)
 }
 
-func (c *Templates) GetTemplateInitialValuesFromGit(ctx *gin.Context) {
+func (c *Templates) GetTemplateInitialValues(ctx *gin.Context) {
 	ctx.Header("Access-Control-Allow-Origin", "*")
 
 	repo := ctx.Query("repo")
@@ -176,19 +163,12 @@ func (c *Templates) GetTemplateInitialValuesFromGit(ctx *gin.Context) {
 		return
 	}
 
-	initial, err := git.LoadInitialTemplateValues(repo, path, commit)
+	initial, err := template.GetTemplateInitialValues(repo, path, commit)
 	if err != nil {
 		fmt.Println(err)
-		ctx.JSON(http.StatusBadRequest, dto.NewError("Error loading template", err.Error()))
+		ctx.JSON(http.StatusBadRequest, dto.NewError("Error loading template initial values", err.Error()))
 		return
 	}
 
-	data, err := json.Marshal(initial)
-	if err != nil {
-		fmt.Println(err)
-		ctx.JSON(http.StatusInternalServerError, dto.NewError("Error marshaling data template", err.Error()))
-		return
-	}
-
-	ctx.Data(http.StatusOK, gin.MIMEJSON, data)
+	ctx.Data(http.StatusOK, gin.MIMEJSON, initial)
 }

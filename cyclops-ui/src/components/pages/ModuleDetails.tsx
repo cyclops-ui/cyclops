@@ -74,13 +74,9 @@ interface module {
     name: String,
     namespace: String,
     template: {
-        name: String,
+        repo: String,
+        path: String,
         version: String,
-        git: {
-            repo: String,
-            path: String,
-            commit: String,
-        }
     }
 }
 
@@ -98,13 +94,9 @@ const ModuleDetails = () => {
         name: "",
         namespace: "",
         template: {
-            name: "",
+            repo: "",
+            path: "",
             version: "",
-            git: {
-                repo: "",
-                path: "",
-                commit: "",
-            }
         }
     });
 
@@ -190,7 +182,7 @@ const ModuleDetails = () => {
     useEffect(() => {
         fetchModule()
         fetchModuleResources()
-        const interval = setInterval(() => fetchModuleResources(), 5000)
+        const interval = setInterval(() => fetchModuleResources(), 15000)
         return () => {
             clearInterval(interval);
         }
@@ -401,11 +393,11 @@ const ModuleDetails = () => {
     const moduleLoading = () => {
         if (loadModule) {
             let commit = "";
-            let commitLink = module.template.git.repo + `/tree/main/` + module.template.git.path;
+            let commitLink = module.template.repo + `/tree/main/` + module.template.path;
 
-            if (module.template.git.commit && module.template.git.commit !== "") {
-                commit = " @ " + module.template.git.commit
-                commitLink = module.template.git.repo + `/tree/` + module.template.git.commit + `/` + module.template.git.path;
+            if (module.template.version && module.template.version !== "") {
+                commit = " @ " + module.template.version
+                commitLink = module.template.repo + `/tree/` + module.template.version + `/` + module.template.path;
             }
 
             return <div>
@@ -425,17 +417,10 @@ const ModuleDetails = () => {
                 </Row>
                 <Row gutter={[40, 0]}>
                     <Col span={9}>
-                        { module.template.name.length !== 0 &&
-                            <Link aria-level={3} href={`/configurations/` + module.template}>
+                        { commitLink.startsWith("https://github.com") &&
+                            <Link aria-level={3} href={commitLink}>
                                 <LinkOutlined/>
-                                { module.template.name.length !== 0 && module.template.name + '@' + module.template.version }
-                            </Link>
-                        }
-
-                        { module.template.name.length === 0 &&
-                            <Link aria-level={3} href={ commitLink }>
-                                <LinkOutlined/>
-                                { module.template.name.length === 0 && ' Template ref' + commit}
+                                { module.template.path.length !== 0 && module.template.path + commit }
                             </Link>
                         }
                     </Col>

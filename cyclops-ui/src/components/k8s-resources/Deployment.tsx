@@ -54,7 +54,7 @@ const Deployment = ({name, namespace}: Props) => {
 
     useEffect(() => {
         fetchDeployment()
-        const interval = setInterval(() => fetchDeployment(), 10000)
+        const interval = setInterval(() => fetchDeployment(), 15000)
         return () => {
             clearInterval(interval);
         }

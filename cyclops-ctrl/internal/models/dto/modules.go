@@ -10,15 +10,9 @@ type Module struct {
 }
 
 type Template struct {
-	Name    string         `json:"name"`
-	Version string         `json:"version"`
-	GitRef  TemplateGitRef `json:"git"`
-}
-
-type TemplateGitRef struct {
-	Repo   string `json:"repo"`
-	Path   string `json:"path"`
-	Commit string `json:"commit"`
+	URL     string `json:"repo"`
+	Path    string `json:"path"`
+	Version string `json:"version"`
 }
 
 type TemplatesResponse struct {
