@@ -109,7 +109,11 @@ func (m *Modules) Manifest(ctx *gin.Context) {
 		return
 	}
 
-	targetTemplate, err := m.templates.GetConfig(request.TemplateRef)
+	targetTemplate, err := template.GetTemplate(
+		request.TemplateRef.URL,
+		request.TemplateRef.Path,
+		request.TemplateRef.Version,
+	)
 	if err != nil {
 		fmt.Println(err)
 		ctx.Status(http.StatusInternalServerError)
@@ -139,7 +143,11 @@ func (m *Modules) CurrentManifest(ctx *gin.Context) {
 		return
 	}
 
-	targetTemplate, err := m.templates.GetConfig(module.Spec.TemplateRef)
+	targetTemplate, err := template.GetTemplate(
+		module.Spec.TemplateRef.URL,
+		module.Spec.TemplateRef.Path,
+		module.Spec.TemplateRef.Version,
+	)
 	if err != nil {
 		fmt.Println(err)
 		ctx.Status(http.StatusInternalServerError)
@@ -267,7 +275,11 @@ func (m *Modules) ResourcesForModule(ctx *gin.Context) {
 		return
 	}
 
-	template, err := m.templates.GetConfig(module.Spec.TemplateRef)
+	t, err := template.GetTemplate(
+		module.Spec.TemplateRef.URL,
+		module.Spec.TemplateRef.Path,
+		module.Spec.TemplateRef.Version,
+	)
 	if err != nil {
 		fmt.Println(err)
 		ctx.JSON(http.StatusInternalServerError, dto.NewError("Error fetching template", err.Error()))
@@ -281,7 +293,7 @@ func (m *Modules) ResourcesForModule(ctx *gin.Context) {
 		return
 	}
 
-	resources, err = m.kubernetesClient.GetDeletedResources(resources, *module, template)
+	resources, err = m.kubernetesClient.GetDeletedResources(resources, *module, t)
 	if err != nil {
 		fmt.Println(err)
 		ctx.JSON(http.StatusInternalServerError, dto.NewError("Error fetching deleted module resources", err.Error()))
@@ -301,7 +313,11 @@ func (m *Modules) Template(ctx *gin.Context) {
 		return
 	}
 
-	currentTemplate, err := m.templates.GetConfig(module.Spec.TemplateRef)
+	currentTemplate, err := template.GetTemplate(
+		module.Spec.TemplateRef.URL,
+		module.Spec.TemplateRef.Path,
+		module.Spec.TemplateRef.Version,
+	)
 	if err != nil {
 		fmt.Println(err)
 		ctx.JSON(http.StatusInternalServerError, dto.NewError("Error fetching template", err.Error()))
@@ -315,7 +331,11 @@ func (m *Modules) Template(ctx *gin.Context) {
 		return
 	}
 
-	proposedTemplate, err := m.templates.GetConfig(module.Spec.TemplateRef)
+	proposedTemplate, err := template.GetTemplate(
+		module.Spec.TemplateRef.URL,
+		module.Spec.TemplateRef.Path,
+		module.Spec.TemplateRef.Version,
+	)
 	if err != nil {
 		fmt.Println(err)
 		ctx.JSON(http.StatusInternalServerError, dto.NewError("Error creating proposed template", err.Error()))
@@ -347,7 +367,11 @@ func (m *Modules) HelmTemplate(ctx *gin.Context) {
 		return
 	}
 
-	currentTemplate, err := m.templates.GetConfig(module.Spec.TemplateRef)
+	currentTemplate, err := template.GetTemplate(
+		module.Spec.TemplateRef.URL,
+		module.Spec.TemplateRef.Path,
+		module.Spec.TemplateRef.Version,
+	)
 	if err != nil {
 		fmt.Println(err)
 		ctx.JSON(http.StatusInternalServerError, dto.NewError("Error fetching template", err.Error()))

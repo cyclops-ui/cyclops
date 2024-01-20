@@ -1,4 +1,4 @@
-package git
+package template
 
 import (
 	"bufio"
@@ -10,10 +10,6 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/cyclops-ui/cycops-ctrl/internal/helmclient"
-	"github.com/cyclops-ui/cycops-ctrl/internal/mapper"
-	"github.com/cyclops-ui/cycops-ctrl/internal/models"
-	"github.com/cyclops-ui/cycops-ctrl/internal/models/helm"
 	"github.com/pkg/errors"
 	"gopkg.in/src-d/go-billy.v4"
 	"gopkg.in/src-d/go-billy.v4/memfs"
@@ -22,29 +18,33 @@ import (
 	"gopkg.in/src-d/go-git.v4/storage/memory"
 	"gopkg.in/yaml.v2"
 	"helm.sh/helm/v3/pkg/chart"
+
+	"github.com/cyclops-ui/cycops-ctrl/internal/mapper"
+	"github.com/cyclops-ui/cycops-ctrl/internal/models"
+	"github.com/cyclops-ui/cycops-ctrl/internal/models/helm"
 )
 
-func LoadTemplate(repoURL, path, commit string) (models.Template, error) {
+func LoadTemplate(repoURL, path, commit string) (*models.Template, error) {
 	fs, err := clone(repoURL, commit)
 	if err != nil {
-		return models.Template{}, err
+		return nil, err
 	}
 
 	// load helm chart metadata
 	chartMetadata, err := fs.Open(path2.Join(path, "Chart.yaml"))
 	if err != nil {
-		return models.Template{}, errors.Wrap(err, "could not read 'Chart.yaml' file; it should be placed in the repo/path you provided; make sure you provided the correct path")
+		return nil, errors.Wrap(err, "could not read 'Chart.yaml' file; it should be placed in the repo/path you provided; make sure you provided the correct path")
 	}
 
 	var chartMetadataBuffer bytes.Buffer
 	_, err = io.Copy(bufio.NewWriter(&chartMetadataBuffer), chartMetadata)
 	if err != nil {
-		return models.Template{}, err
+		return nil, err
 	}
 
 	var metadata chart.Metadata
 	if err := yaml.Unmarshal(chartMetadataBuffer.Bytes(), &metadata); err != nil {
-		return models.Template{}, err
+		return nil, err
 	}
 	// endregion
 
@@ -53,53 +53,53 @@ func LoadTemplate(repoURL, path, commit string) (models.Template, error) {
 
 	_, err = fs.ReadDir(templatesPath)
 	if err != nil {
-		return models.Template{}, errors.Wrap(err, "could not find 'templates' dir; it should be placed in the repo/path you provided; make sure 'templates' directory exists")
+		return nil, errors.Wrap(err, "could not find 'templates' dir; it should be placed in the repo/path you provided; make sure 'templates' directory exists")
 	}
 
 	manifests, err := concatenateTemplates(templatesPath, fs)
 	if err != nil {
-		return models.Template{}, errors.Wrap(err, "failed to load template files")
+		return nil, errors.Wrap(err, "failed to load template files")
 	}
 	// endregion
 
 	// region read files
 	filesFs, err := fs.Chroot(path)
 	if err != nil {
-		return models.Template{}, errors.Wrap(err, "could not find 'templates' dir; it should be placed in the repo/path you provided; make sure 'templates' directory exists")
+		return nil, errors.Wrap(err, "could not find 'templates' dir; it should be placed in the repo/path you provided; make sure 'templates' directory exists")
 	}
 
 	chartFiles, err := readFiles("", filesFs)
 	if err != nil {
-		return models.Template{}, errors.Wrap(err, "failed to read template files")
+		return nil, errors.Wrap(err, "failed to read template files")
 	}
 	// endregion
 
 	// region read schema
 	schemaFile, err := fs.Open(path2.Join(path, "values.schema.json"))
 	if err != nil {
-		return models.Template{}, errors.Wrap(err, "could not read 'values.schema.json' file; it should be placed in the repo/path you provided; make sure 'templates' directory exists")
+		return nil, errors.Wrap(err, "could not read 'values.schema.json' file; it should be placed in the repo/path you provided; make sure 'templates' directory exists")
 	}
 
 	var schemaChartBuffer bytes.Buffer
 	_, err = io.Copy(bufio.NewWriter(&schemaChartBuffer), schemaFile)
 	if err != nil {
-		return models.Template{}, err
+		return nil, err
 	}
 
 	var schema helm.Property
 	if err := json.Unmarshal(schemaChartBuffer.Bytes(), &schema); err != nil {
-		return models.Template{}, err
+		return nil, err
 	}
 	// endregion
 
 	// region load dependencies
-	dependencies, err := helmclient.LoadDependencies(metadata)
+	dependencies, err := loadDependencies(metadata)
 	if err != nil {
-		return models.Template{}, err
+		return nil, err
 	}
 	// endregion
 
-	return models.Template{
+	return &models.Template{
 		Name:         "",
 		Manifest:     strings.Join(manifests, "---\n"),
 		Fields:       mapper.HelmSchemaToFields(schema, dependencies),
@@ -152,7 +152,7 @@ func LoadInitialTemplateValues(repoURL, path, commit string) (map[interface{}]in
 		initialValues = make(map[interface{}]interface{})
 	}
 
-	depInitialValues, err := helmclient.LoadDependenciesInitialValues(metadata)
+	depInitialValues, err := loadDependenciesInitialValues(metadata)
 	if err != nil {
 		return nil, err
 	}

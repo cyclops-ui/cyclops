@@ -1,4 +1,4 @@
-package helmclient
+package template
 
 import (
 	"archive/tar"
@@ -27,7 +27,7 @@ func LoadHelmChart(repo, chart, version string) (*models.Template, error) {
 	var tgzData []byte
 	var err error
 	if registry.IsOCI(repo) {
-		tgzData, err = LoadOCIHelmChart(repo, chart, version)
+		tgzData, err = loadOCIHelmChartBytes(repo, chart, version)
 		if err != nil {
 			return nil, err
 		}
@@ -50,7 +50,7 @@ func LoadHelmChartInitialValues(repo, chart, version string) (map[interface{}]in
 	var tgzData []byte
 	var err error
 	if registry.IsOCI(repo) {
-		tgzData, err = LoadOCIHelmChart(repo, chart, version)
+		tgzData, err = loadOCIHelmChartBytes(repo, chart, version)
 		if err != nil {
 			return nil, err
 		}
@@ -85,32 +85,25 @@ func LoadHelmChartInitialValues(repo, chart, version string) (map[interface{}]in
 	return mapHelmChartInitialValues(extractedFiles)
 }
 
-func LoadDependencies(metadata helmchart.Metadata) ([]*models.Template, error) {
-	deps := make([]*models.Template, 0)
-	for _, dependency := range metadata.Dependencies {
-		dep, err := LoadHelmChart(dependency.Repository, dependency.Name, dependency.Version)
-		if err != nil {
-			return nil, err
-		}
-
-		deps = append(deps, dep)
+func IsHelmRepo(repo string) (bool, error) {
+	indexURL, err := url.JoinPath(repo, "index.yaml")
+	if err != nil {
+		return false, err
 	}
 
-	return deps, nil
-}
-
-func LoadDependenciesInitialValues(metadata helmchart.Metadata) (map[interface{}]interface{}, error) {
-	initialValues := make(map[interface{}]interface{})
-	for _, dependency := range metadata.Dependencies {
-		depInitialValues, err := LoadHelmChartInitialValues(dependency.Repository, dependency.Name, dependency.Version)
-		if err != nil {
-			return nil, err
-		}
-
-		initialValues[dependency.Name] = depInitialValues
+	req, err := http.NewRequest(http.MethodHead, indexURL, nil)
+	if err != nil {
+		return false, err
 	}
 
-	return initialValues, nil
+	client := &http.Client{}
+	resp, err := client.Do(req)
+	if err != nil {
+		return false, err
+	}
+	defer resp.Body.Close()
+
+	return resp.StatusCode == http.StatusOK, nil
 }
 
 func loadFromHelmChartRepo(repo, chart, version string) ([]byte, error) {
@@ -178,7 +171,7 @@ func mapHelmChart(chartName string, files map[string][]byte) (*models.Template, 
 	}
 
 	// region load dependencies
-	dependencies, err := LoadDependencies(metadata)
+	dependencies, err := loadDependencies(metadata)
 	if err != nil {
 		return &models.Template{}, err
 	}
@@ -258,7 +251,7 @@ func mapHelmChartInitialValues(files map[string][]byte) (map[interface{}]interfa
 		values[depName] = dep
 	}
 
-	dependenciesFromMeta, err := LoadDependenciesInitialValues(metadata)
+	dependenciesFromMeta, err := loadDependenciesInitialValues(metadata)
 	if err != nil {
 		return nil, err
 	}

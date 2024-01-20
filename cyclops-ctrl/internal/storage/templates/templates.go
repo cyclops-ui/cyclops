@@ -7,8 +7,6 @@ import (
 
 	"github.com/go-redis/redis/v8"
 
-	cyclopsv1alpha1 "github.com/cyclops-ui/cycops-ctrl/api/v1alpha1"
-	git "github.com/cyclops-ui/cycops-ctrl/internal/git/templates"
 	"github.com/cyclops-ui/cycops-ctrl/internal/models"
 )
 
@@ -68,13 +66,13 @@ func (s *Storage) GetConfigByVersion(name, version string) (models.Template, err
 	return config, nil
 }
 
-func (s *Storage) GetConfig(ref cyclopsv1alpha1.TemplateRef) (models.Template, error) {
-	if ref.TemplateGitRef.Repo != "" {
-		return git.LoadTemplate(ref.TemplateGitRef.Repo, ref.TemplateGitRef.Path, ref.TemplateGitRef.Commit)
-	}
-
-	return s.GetConfigByVersion(ref.Name, ref.Version)
-}
+//func (s *Storage) GetConfig(ref cyclopsv1alpha1.TemplateRef) (models.Template, error) {
+//	if ref.URL != "" {
+//		return git.LoadTemplate(ref.URL, ref.Path, ref.Version)
+//	}
+//
+//	return s.GetConfigByVersion(ref.Path, ref.Version)
+//}
 
 func (s *Storage) ListConfigLatest() (out []models.Template, err error) {
 	keys, err := s.client.Keys(context.TODO(), "config:*").Result()

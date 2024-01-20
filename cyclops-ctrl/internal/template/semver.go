@@ -1,4 +1,4 @@
-package helmclient
+package template
 
 import (
 	"fmt"

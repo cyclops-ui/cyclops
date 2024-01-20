@@ -1,16 +1,64 @@
-package helmclient
+package template
 
 import (
 	"fmt"
-	json "github.com/json-iterator/go"
-	"github.com/pkg/errors"
+	"gopkg.in/yaml.v2"
 	"io/ioutil"
 	"net/http"
 	"net/url"
 	"strings"
+
+	"github.com/cyclops-ui/cycops-ctrl/internal/models"
+	json "github.com/json-iterator/go"
+	"github.com/pkg/errors"
 )
 
-func LoadOCIHelmChart(repo, chart, version string) ([]byte, error) {
+func LoadOCIHelmChart(repo, chart, version string) (*models.Template, error) {
+	var tgzData []byte
+	tgzData, err := loadOCIHelmChartBytes(repo, chart, version)
+	if err != nil {
+		return nil, err
+	}
+
+	extractedFiles, err := unpackTgzInMemory(tgzData)
+	if err != nil {
+		return nil, err
+	}
+
+	return mapHelmChart(chart, extractedFiles)
+}
+
+func LoadOCIHelmChartInitialValues(repo, chart, version string) (map[interface{}]interface{}, error) {
+	tgzData, err := loadOCIHelmChartBytes(repo, chart, version)
+	if err != nil {
+		return nil, err
+	}
+
+	extractedFiles, err := unpackTgzInMemory(tgzData)
+	if err != nil {
+		return nil, err
+	}
+
+	valuesBytes := []byte{}
+
+	for name, content := range extractedFiles {
+		parts := strings.Split(name, "/")
+
+		if len(parts) == 2 && parts[1] == "values.yaml" {
+			valuesBytes = content
+			break
+		}
+	}
+
+	var values map[interface{}]interface{}
+	if err := yaml.Unmarshal(valuesBytes, &values); err != nil {
+		return nil, err
+	}
+
+	return mapHelmChartInitialValues(extractedFiles)
+}
+
+func loadOCIHelmChartBytes(repo, chart, version string) ([]byte, error) {
 	var err error
 	if !isValidVersion(version) {
 		version, err = getStrictVersion(repo, chart, version)
@@ -334,7 +382,6 @@ func parseAuthenticateHeader(header string) (realm, service, scope string) {
 	pairs := strings.Split(header, ",")
 
 	for _, pair := range pairs {
-		fmt.Println(pair)
 		keyValue := strings.SplitN(pair, "=", 2)
 		if len(keyValue) == 2 {
 			key := strings.TrimSpace(keyValue[0])

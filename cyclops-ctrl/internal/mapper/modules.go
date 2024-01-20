@@ -65,25 +65,17 @@ func ModuleListToDTO(modules []cyclopsv1alpha1.Module) []dto.Module {
 
 func DtoTemplateRefToK8s(dto dto.Template) cyclopsv1alpha1.TemplateRef {
 	return cyclopsv1alpha1.TemplateRef{
-		Name:    dto.Name,
+		URL:     dto.URL,
+		Path:    dto.Path,
 		Version: dto.Version,
-		TemplateGitRef: cyclopsv1alpha1.TemplateGitRef{
-			Repo:   dto.GitRef.Repo,
-			Path:   dto.GitRef.Path,
-			Commit: dto.GitRef.Commit,
-		},
 	}
 }
 
 func k8sTemplateRefToDTO(templateRef cyclopsv1alpha1.TemplateRef) dto.Template {
 	return dto.Template{
-		Name:    templateRef.Name,
+		URL:     templateRef.URL,
+		Path:    templateRef.Path,
 		Version: templateRef.Version,
-		GitRef: dto.TemplateGitRef{
-			Repo:   templateRef.TemplateGitRef.Repo,
-			Path:   templateRef.TemplateGitRef.Path,
-			Commit: templateRef.TemplateGitRef.Commit,
-		},
 	}
 }
 

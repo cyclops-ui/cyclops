@@ -126,7 +126,7 @@ func (k *KubernetesClient) GetResourcesForModule(name string) ([]dto.Resource, e
 func (k *KubernetesClient) GetDeletedResources(
 	resources []dto.Resource,
 	module cyclopsv1alpha1.Module,
-	template models.Template,
+	template *models.Template,
 ) ([]dto.Resource, error) {
 	manifest, err := template2.HelmTemplate(module, template)
 	if err != nil {

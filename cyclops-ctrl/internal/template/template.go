@@ -1,71 +1,95 @@
 package template
 
 import (
-	cyclopsv1alpha1 "github.com/cyclops-ui/cycops-ctrl/api/v1alpha1"
 	"github.com/cyclops-ui/cycops-ctrl/internal/models"
 	json "github.com/json-iterator/go"
-	"helm.sh/helm/v3/pkg/chart"
-	"helm.sh/helm/v3/pkg/chartutil"
-	"helm.sh/helm/v3/pkg/engine"
-	apiextensionsv1 "k8s.io/apiextensions-apiserver/pkg/apis/apiextensions/v1"
+	helmchart "helm.sh/helm/v3/pkg/chart"
+	"helm.sh/helm/v3/pkg/registry"
 )
 
-func HelmTemplate(module cyclopsv1alpha1.Module, moduleTemplate models.Template) (string, error) {
-	chart := &chart.Chart{
-		Raw:      []*chart.File{},
-		Metadata: &chart.Metadata{},
-		Lock:     &chart.Lock{},
-		Values:   map[string]interface{}{},
-		Schema:   []byte{},
-		Files:    moduleTemplate.Files,
-		Templates: []*chart.File{
-			{
-				Name: "all.yaml",
-				Data: []byte(moduleTemplate.Manifest),
-			},
-		},
+func GetTemplate(repo, path, version string) (*models.Template, error) {
+	// region load OCI chart
+	if registry.IsOCI(repo) {
+		return LoadOCIHelmChart(repo, path, version)
 	}
+	// endregion
 
-	values := make(chartutil.Values)
-	if err := json.Unmarshal(module.Spec.Values.Raw, &values); err != nil {
-		return "", err
-	}
-
-	top := make(chartutil.Values)
-	top["Values"] = values
-	top["Release"] = map[string]interface{}{
-		"Name":      "",
-		"Namespace": "",
-	}
-
-	out, err := engine.Render(chart, top)
+	// region load from Helm repo
+	isHelmRepo, err := IsHelmRepo(repo)
 	if err != nil {
-		//fmt.Println(moduleTemplate.Manifest)
-		return "", err
+		return nil, err
 	}
 
-	manifest := out["all.yaml"]
+	if isHelmRepo {
+		return LoadHelmChart(repo, path, version)
+	}
+	// endregion
 
-	for _, dependency := range moduleTemplate.Dependencies {
-		data, err := json.Marshal(values[dependency.Name])
+	// fallback to cloning from git
+	return LoadTemplate(repo, path, version)
+}
+
+func GetTemplateInitialValues(repo, path, version string) ([]byte, error) {
+	// region load OCI chart
+	if registry.IsOCI(repo) {
+		initial, err := LoadOCIHelmChartInitialValues(repo, path, version)
 		if err != nil {
-			return "", err
+			return nil, err
 		}
 
-		dependencyManifest, err := HelmTemplate(cyclopsv1alpha1.Module{
-			Spec: cyclopsv1alpha1.ModuleSpec{
-				Values: apiextensionsv1.JSON{
-					Raw: data,
-				},
-			},
-		}, *dependency)
-		if err != nil {
-			return "", err
-		}
+		return json.Marshal(initial)
+	}
+	// endregion
 
-		manifest += "\n---\n"
-		manifest += dependencyManifest
+	// region load from Helm repo
+	isHelmRepo, err := IsHelmRepo(repo)
+	if err != nil {
+		return nil, err
 	}
 
-	return manifest, err
+	if isHelmRepo {
+		initial, err := LoadHelmChartInitialValues(repo, path, version)
+		if err != nil {
+			return nil, err
+		}
+
+		return json.Marshal(initial)
+	}
+	// endregion
+
+	// fallback to cloning from git
+	initial, err := LoadInitialTemplateValues(repo, path, version)
+	if err != nil {
+		return nil, err
+	}
+
+	return json.Marshal(initial)
+}
+
+func loadDependencies(metadata helmchart.Metadata) ([]*models.Template, error) {
+	deps := make([]*models.Template, 0)
+	for _, dependency := range metadata.Dependencies {
+		dep, err := GetTemplate(dependency.Repository, dependency.Name, dependency.Version)
+		if err != nil {
+			return nil, err
+		}
+
+		deps = append(deps, dep)
+	}
+
+	return deps, nil
+}
+
+func loadDependenciesInitialValues(metadata helmchart.Metadata) (map[interface{}]interface{}, error) {
+	initialValues := make(map[interface{}]interface{})
+	for _, dependency := range metadata.Dependencies {
+		depInitialValues, err := GetTemplateInitialValues(dependency.Repository, dependency.Name, dependency.Version)
+		if err != nil {
+			return nil, err
+		}
+
+		initialValues[dependency.Name] = depInitialValues
+	}
+
+	return initialValues, nil
 }

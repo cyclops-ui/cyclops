@@ -41,8 +41,8 @@ func (h *Handler) Start() error {
 	h.router.GET("/create-config/:name", templatesController.GetConfiguration)
 	h.router.GET("/configuration-details", templatesController.GetConfigurationsDetails)
 	h.router.GET("/configuration/:name/versions", templatesController.GetConfigurationsVersions)
-	h.router.GET("/templates/git", templatesController.GetTemplateFromGit)
-	h.router.GET("/templates/git/initial", templatesController.GetTemplateInitialValuesFromGit)
+	h.router.GET("/templates", templatesController.GetTemplate)
+	h.router.GET("/templates/initial", templatesController.GetTemplateInitialValues)
 
 	// modules
 	h.router.GET("/modules/:name", modulesController.GetModule)
