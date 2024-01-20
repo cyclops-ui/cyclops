@@ -7,19 +7,13 @@ When you start up Cyclops, the first screen that will be shown to you is the _Mo
 empty at the moment. What we want to do next is click on the _Add module_ button in the top right corner.
 
 ## Define your module
-Now we want to define our new module. Under the _Module template_ we want to put the url that leads towards a GitHub
-repository where we saved our configuration files. For the sake of this tutorial we will be using our own 
-[template](https://github.com/cyclops-ui/templates) which holds a configuration template we made for testing purposes.
-Feel free to use our template repository! We will be using the _demo_ template from the repository. Also for any
-template you can specify the version which is the third field. If you are referncing a template stored in git you can 
-specify a version as a branch name, tag or a commit hash. If you don't specify anything, it would default to the latest
+Now, we want to define our new module. Under the _Module template_, we want to put the URL that leads to a GitHub
+repository where we saved our configuration files. For the sake of this tutorial, we will be using our own
+[template](https://github.com/cyclops-ui/templates), which holds a configuration template we made for testing purposes.
+Feel free to use our template repository! We will be using the _demo_ template from the repository. Also, for any
+template, you can specify the version, which is the third field. If you are referencing a template stored in git, you can
+specify a version as a branch name, tag, or commit hash. If you don't specify anything, it will default to the latest
 commit on the default branch.
-
-![Filled Module Template](../../../static/img/demo/module_template.png?raw=true "Filled Module Template")
-
-The left field should be the root folder of your repository, while the right field should be the path towards the
-template directory. After populating the fields, click load and if you filled the fields correctly, there will be a success 
-message at the top of the screen and you will receive new fields to fill.
 
 ![Successfully loaded template](../../../static/img/demo/template_load_success.png?raw=true "Successfully loaded template")
 
@@ -34,7 +28,7 @@ version: 1.14.2
 service: true
 ```
 
-Now click save and you should see your new module listed!
+Now click save and you should see your new module listed on the main page!
 
 ![Listed Module](../../../static/img/demo/module_listed.png?raw=true "Listed Module")
 
