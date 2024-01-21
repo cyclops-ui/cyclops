@@ -17,8 +17,6 @@ On top of the usual schema, we added some more fields to help our users get as m
 <br/>
 :::info
 
-**To be implemented**
-- [Templates can be referenced only from git, and cannot be fetched from a Helm repo](https://github.com/cyclops-ui/cyclops/issues/74)
-- [Helm chart dependencies are not yet supported](https://github.com/cyclops-ui/cyclops/issues/75)
+Version [ v0.0.1-alpha.9 ](https://github.com/cyclops-ui/cyclops/releases/tag/v0.0.1-alpha.9) supports templates fetched from a Helm chart repo and OCI based charts
 
 :::
