@@ -1,6 +1,6 @@
-FROM golang:1.19-alpine
+FROM golang:1.19-alpine as build
 
-WORKDIR /app
+WORKDIR /build
 
 COPY go.mod ./
 RUN go mod download
@@ -8,9 +8,15 @@ RUN go mod tidy
 
 COPY ./ ./
 
-RUN mkdir /app/bin
-RUN go build -o /app/bin ./...
-RUN ls
-RUN ls ..
+RUN mkdir /build/bin
+RUN go build -o /build/bin ./...
 
-CMD ["/app/bin/main"]
+FROM alpine:3.19.0
+
+WORKDIR /app
+
+RUN mkdir /app/bin
+
+COPY --from=build /build/bin/main /app/bin/ctrl
+
+CMD ["/app/bin/ctrl"]
