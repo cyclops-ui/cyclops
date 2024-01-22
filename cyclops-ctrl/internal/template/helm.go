@@ -25,14 +25,15 @@ import (
 
 func LoadHelmChart(repo, chart, version string) (*models.Template, error) {
 	var tgzData []byte
+	var versions []string
 	var err error
 	if registry.IsOCI(repo) {
-		tgzData, err = loadOCIHelmChartBytes(repo, chart, version)
+		tgzData, versions, err = loadOCIHelmChartBytes(repo, chart, version)
 		if err != nil {
 			return nil, err
 		}
 	} else {
-		tgzData, err = loadFromHelmChartRepo(repo, chart, version)
+		tgzData, versions, err = loadFromHelmChartRepo(repo, chart, version)
 		if err != nil {
 			return nil, err
 		}
@@ -43,19 +44,19 @@ func LoadHelmChart(repo, chart, version string) (*models.Template, error) {
 		return nil, err
 	}
 
-	return mapHelmChart(chart, extractedFiles)
+	return mapHelmChart(chart, versions, extractedFiles)
 }
 
 func LoadHelmChartInitialValues(repo, chart, version string) (map[interface{}]interface{}, error) {
 	var tgzData []byte
 	var err error
 	if registry.IsOCI(repo) {
-		tgzData, err = loadOCIHelmChartBytes(repo, chart, version)
+		tgzData, _, err = loadOCIHelmChartBytes(repo, chart, version)
 		if err != nil {
 			return nil, err
 		}
 	} else {
-		tgzData, err = loadFromHelmChartRepo(repo, chart, version)
+		tgzData, _, err = loadFromHelmChartRepo(repo, chart, version)
 		if err != nil {
 			return nil, err
 		}
@@ -106,16 +107,18 @@ func IsHelmRepo(repo string) (bool, error) {
 	return resp.StatusCode == http.StatusOK, nil
 }
 
-func loadFromHelmChartRepo(repo, chart, version string) ([]byte, error) {
-	tgzURL, err := getTarUrl(repo, chart, version)
+func loadFromHelmChartRepo(repo, chart, version string) ([]byte, []string, error) {
+	tgzURL, versions, err := getTarUrl(repo, chart, version)
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 
-	return downloadFile(tgzURL)
+	b, err := downloadFile(tgzURL)
+
+	return b, versions, err
 }
 
-func mapHelmChart(chartName string, files map[string][]byte) (*models.Template, error) {
+func mapHelmChart(chartName string, versions []string, files map[string][]byte) (*models.Template, error) {
 	metadataBytes := []byte{}
 	schemaBytes := []byte{}
 	manifestParts := make([]string, 0)
@@ -181,7 +184,7 @@ func mapHelmChart(chartName string, files map[string][]byte) (*models.Template, 
 			continue
 		}
 
-		dep, err := mapHelmChart(depName, files)
+		dep, err := mapHelmChart(depName, []string{}, files)
 		if err != nil {
 			return nil, err
 		}
@@ -199,6 +202,7 @@ func mapHelmChart(chartName string, files map[string][]byte) (*models.Template, 
 		Version:      "",
 		Files:        chartFiles,
 		Dependencies: dependencies,
+		Versions:     versions,
 	}, nil
 }
 
@@ -264,49 +268,56 @@ func mapHelmChartInitialValues(files map[string][]byte) (map[interface{}]interfa
 	return values, nil
 }
 
-func getTarUrl(repo, chart, version string) (string, error) {
+func getTarUrl(repo, chart, version string) (string, []string, error) {
 	indexURL, err := url.JoinPath(repo, "index.yaml")
 	if err != nil {
-		return "", err
+		return "", nil, err
 	}
 
 	response, err := http.Get(indexURL)
 	if err != nil {
-		return "", err
+		return "", nil, err
 	}
 	defer response.Body.Close()
 
 	body, err := ioutil.ReadAll(response.Body)
 	if err != nil {
-		return "", err
+		return "", nil, err
 	}
 
 	var data helm.Index
 	err = yaml.Unmarshal(body, &data)
 	if err != nil {
-		return "", err
+		return "", nil, err
 	}
 
 	if _, ok := data.Entries[chart]; !ok {
-		return "", errors.New(fmt.Sprintf("chart %v not found in repo %v", chart, repo))
+		return "", nil, errors.New(fmt.Sprintf("chart %v not found in repo %v", chart, repo))
 	}
 
 	v, err := resolveVersion(data.Entries[chart], version)
 	if err != nil {
-		return "", err
+		return "", nil, err
 	}
 
+	URL := ""
+	versions := make([]string, 0, len(data.Entries))
 	for _, entry := range data.Entries[chart] {
 		if entry.Version == v {
 			if len(entry.URLs) == 0 {
-				return "", errors.New(fmt.Sprintf("no URL on version %v of chart %v and repo %v", version, chart, repo))
+				return "", nil, errors.New(fmt.Sprintf("empty URL on version %v of chart %v and repo %v", version, chart, repo))
 			}
 
-			return entry.URLs[0], nil
+			URL = entry.URLs[0]
 		}
+		versions = append(versions, entry.Version)
 	}
 
-	return "", errors.New(fmt.Sprintf("version %v not found in chart %v and repo %v", version, chart, repo))
+	if URL == "" {
+		return "", nil, errors.New(fmt.Sprintf("version %v not found in chart %v and repo %v", version, chart, repo))
+	}
+
+	return URL, versions, nil
 }
 
 func resolveVersion(indexEntries []helm.IndexEntry, version string) (string, error) {

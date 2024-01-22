@@ -15,7 +15,7 @@ import (
 
 func LoadOCIHelmChart(repo, chart, version string) (*models.Template, error) {
 	var tgzData []byte
-	tgzData, err := loadOCIHelmChartBytes(repo, chart, version)
+	tgzData, _, err := loadOCIHelmChartBytes(repo, chart, version)
 	if err != nil {
 		return nil, err
 	}
@@ -25,11 +25,11 @@ func LoadOCIHelmChart(repo, chart, version string) (*models.Template, error) {
 		return nil, err
 	}
 
-	return mapHelmChart(chart, extractedFiles)
+	return mapHelmChart(chart, []string{}, extractedFiles)
 }
 
 func LoadOCIHelmChartInitialValues(repo, chart, version string) (map[interface{}]interface{}, error) {
-	tgzData, err := loadOCIHelmChartBytes(repo, chart, version)
+	tgzData, _, err := loadOCIHelmChartBytes(repo, chart, version)
 	if err != nil {
 		return nil, err
 	}
@@ -58,42 +58,42 @@ func LoadOCIHelmChartInitialValues(repo, chart, version string) (map[interface{}
 	return mapHelmChartInitialValues(extractedFiles)
 }
 
-func loadOCIHelmChartBytes(repo, chart, version string) ([]byte, error) {
+func loadOCIHelmChartBytes(repo, chart, version string) ([]byte, []string, error) {
 	var err error
 	if !isValidVersion(version) {
 		version, err = getStrictVersion(repo, chart, version)
 		if err != nil {
-			return nil, err
+			return nil, nil, err
 		}
 	}
 
 	token, err := authorizeOCI(repo, chart, version)
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 
 	digest, err := fetchDigest(repo, chart, version, token)
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 
 	contentDigest, err := fetchContentDigest(repo, chart, digest, token)
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 
 	return loadOCITar(repo, chart, contentDigest, token)
 }
 
-func loadOCITar(repo, chart, digest, token string) ([]byte, error) {
+func loadOCITar(repo, chart, digest, token string) ([]byte, []string, error) {
 	bURL, err := blobURL(repo, chart, digest)
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 
 	req, err := http.NewRequest(http.MethodGet, bURL.String(), nil)
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 
 	req.Header.Set("User-Agent", "Helm/3.13.3")
@@ -105,11 +105,16 @@ func loadOCITar(repo, chart, digest, token string) ([]byte, error) {
 	client := &http.Client{}
 	resp, err := client.Do(req)
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 	defer resp.Body.Close()
 
-	return ioutil.ReadAll(resp.Body)
+	bytes, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	return bytes, []string{}, nil
 }
 
 func fetchContentDigest(repo, chart, digest, token string) (string, error) {
