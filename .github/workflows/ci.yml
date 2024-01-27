@@ -82,6 +82,7 @@ jobs:
       - uses: actions/checkout@v2
       - name: Create release
         env:
+          GH_TOKEN: ${{ github.token }}
           CURRENT_TAG: ${{needs.update-install-manifest.outputs.current_tag}}
         run: |
           gh release create ${{ github.event.inputs.version }} \
