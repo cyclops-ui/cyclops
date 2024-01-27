@@ -81,9 +81,14 @@ jobs:
         uses: actions/create-release@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          CURRENT_LATEST_TAG: ${{ git describe --tags --abbrev=0 }}
         with:
           commitish: main
           tag_name: ${{ github.event.inputs.version }}
           release_name: ${{ github.event.inputs.version }}
           draft: false
           prerelease: false
+          body: |
+            changes:
+              ${{git log ${{ CURRENT_LATEST_TAG }}...${{ github.event.inputs.version }} --pretty=format:'- [`%h`](https://github.com/cyclops-ui/cyclops/commit/%H): %s by ([%an](https://github.com/%an))' -- .}}
+            full changelog: `[${{ CURRENT_LATEST_TAG }}...${{ github.event.inputs.version }}]`(https://github.com/cyclops-ui/cyclops/compare/${{ CURRENT_LATEST_TAG }}...${{ github.event.inputs.version }})
