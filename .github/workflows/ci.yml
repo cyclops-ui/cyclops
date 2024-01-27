@@ -50,8 +50,12 @@ jobs:
       - build-UI
       - build-controller
     runs-on: ubuntu-latest
+    outputs:
+      current_tag: ${{ steps.fetchtag.outputs.tag }}
     steps:
       - uses: actions/checkout@v2
+      - id: fetchtag
+        run: echo "tag=$(git describe --tags --abbrev=0)" >> "$GITHUB_OUTPUT"
       - name: update install manifest
         run: |
           TAG=${{ github.event.inputs.version }}
@@ -77,9 +81,9 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       - name: Create release
+        env:
+          CURRENT_TAG: ${{needs.update-install-manifest.outputs.current_tag}}
         run: |
-          CURRENT_TAG=$(git describe --tags --abbrev=0)
-
           gh release create ${{ github.event.inputs.version }} \
             --repo="https://github.com/cyclops-ui/cyclops" \
             --title="${{ github.event.inputs.version }}" \
