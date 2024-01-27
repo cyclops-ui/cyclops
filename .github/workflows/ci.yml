@@ -76,19 +76,12 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
-      - name: Create Release
-        id: create_release
-        uses: actions/create-release@v1
+      - name: Create release
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          commitish: main
-          tag_name: ${{ github.event.inputs.version }}
-          release_name: ${{ github.event.inputs.version }}
-          draft: false
-          prerelease: false
-          body: |
-            changes:
-              $(git log $(git describe --tags --abbrev=0)...${{ github.event.inputs.version }} --pretty=format:'- [`%h`](https://github.com/cyclops-ui/cyclops/commit/%H): %s by ([%an](https://github.com/%an))' -- .)
-            ---
-            full changelog: `[$(git describe --tags --abbrev=0)...${{ github.event.inputs.version }}]`(https://github.com/cyclops-ui/cyclops/compare/$(git describe --tags --abbrev=0)...${{ github.event.inputs.version }})
+          tag: ${{ github.ref_name }}
+        run: |
+          gh release create ${{ github.event.inputs.version }} \
+            --repo="https://github.com/cyclops-ui/cyclops" \
+            --title="${{ github.event.inputs.version }}" \
+            --notes "$(git log $(git describe --tags --abbrev=0)...${{ github.event.inputs.version }} --pretty=format:'- [`%h`](https://github.com/cyclops-ui/cyclops/commit/%H): %s by ([%an](https://github.com/%an))' -- .)\n---\nfull changelog: `[$(git describe --tags --abbrev=0)...${{ github.event.inputs.version }}]`(https://github.com/cyclops-ui/cyclops/compare/$(git describe --tags --abbrev=0)...${{ github.event.inputs.version }})"
