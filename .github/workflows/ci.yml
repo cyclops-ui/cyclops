@@ -85,6 +85,8 @@ jobs:
           GH_TOKEN: ${{ github.token }}
           CURRENT_TAG: ${{needs.update-install-manifest.outputs.current_tag}}
         run: |
+          git checkout main
+
           gh release create ${{ github.event.inputs.version }} \
             --repo="https://github.com/cyclops-ui/cyclops" \
             --title="${{ github.event.inputs.version }}" \
