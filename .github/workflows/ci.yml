@@ -77,9 +77,6 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       - name: Create release
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          tag: ${{ github.ref_name }}
         run: |
           CURRENT_TAG=$(git describe --tags --abbrev=0)
 
