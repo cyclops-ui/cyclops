@@ -50,12 +50,8 @@ jobs:
       - build-UI
       - build-controller
     runs-on: ubuntu-latest
-    outputs:
-      current_tag: ${{ steps.fetchtag.outputs.tag }}
     steps:
       - uses: actions/checkout@v2
-      - id: fetchtag
-        run: echo "tag=$(git describe --tags --abbrev=0)" >> "$GITHUB_OUTPUT"
       - name: update install manifest
         run: |
           TAG=${{ github.event.inputs.version }}
@@ -83,14 +79,8 @@ jobs:
       - name: Create release
         env:
           GH_TOKEN: ${{ github.token }}
-          CURRENT_TAG: ${{needs.update-install-manifest.outputs.current_tag}}
         run: |
-          git checkout main
-
           gh release create ${{ github.event.inputs.version }} \
             --repo="https://github.com/cyclops-ui/cyclops" \
             --title="${{ github.event.inputs.version }}" \
-            --notes "Changes 🚀:
-                $(git log $CURRENT_TAG...${{ github.event.inputs.version }} --pretty=format:'- [`%h`](https://github.com/cyclops-ui/cyclops/commit/%H): %s by ([%an](https://github.com/%an))' -- .)
-                ---
-                full changelog: `[$CURRENT_TAG...${{ github.event.inputs.version }}]`(https://github.com/cyclops-ui/cyclops/compare/$CURRENT_TAG...${{ github.event.inputs.version }})"
+            --generate-notes
