@@ -13,7 +13,7 @@ export default function AppLayout() {
             </Sider>
             <Layout>
                 <Header/>
-                <Content style={{margin: '24px 16px', padding: 24, minHeight: "calc(100vh - 112px)", background: "#fff"}}>
+                <Content style={{padding: 24, minHeight: "calc(100vh - 112px)", background: "#fff"}}>
                     <Suspense fallback={<h1 style={{textAlign: "center"}}>Loading...</h1>}>
                         <Outlet/>
                     </Suspense>
