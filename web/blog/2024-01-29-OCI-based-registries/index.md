@@ -11,7 +11,9 @@ First of all, we will briefly cover what OCI-based registries are and how they c
 
 ### Show us your support 🙏🏻
 
-![ProductHunt Launch](../../static/img/product-hunt.gif)
+<div style={{"text-align": "center"}}>
+  ![ProductHunt Launch](../../static/img/product-hunt.gif)
+</div>
 
 Before we start, we want to mention that we scheduled our[first release on Product Hunt](https://www.producthunt.com/products/cyclops)! Click the notify me button to be alerted when we are out and ready to receive your feedback 🔔
 
@@ -53,7 +55,7 @@ Firstly, we are going to create a Helm chart. To create a chart, create a new di
 mkdir oci-demo
 ```
 
-and add the files listed below to the created directory.  Feel free to customize the chart to fit your needs, but for the sake of this demo, we are going to create a basic one with the following structure:
+and add the files listed below to the created directory. Feel free to customize the chart to fit your needs, but for the sake of this demo, we are going to create a basic one with the following structure:
 
 ```
 .
@@ -82,7 +84,7 @@ version: 0.0.0
 
 Not to go into detail, I'm going to `302` you to the Helm docs.
 
-### templates folder
+### Templates folder
 
 The next step is defining what Kubernetes resources our packaged application need. We define those in the `/templates` folder. As seen in the chart structure from earlier, we are going to add only a `deployment` and a `service` to our application.
 
@@ -141,7 +143,7 @@ spec:
 
 ```
 
-### values definition
+### Values definition
 
 In the `/templates` folder we defined, obviously, just the templates. It would be a good idea to define default values for those. We are going to use `values.yaml` for that:
 
@@ -192,27 +194,17 @@ Now that we have those defined, our JSON schema will look like the following:
     "version": {
       "description": "Container image version",
       "type": "string",
-      "enum": [
-        "1.14.1",
-        "1.14.2",
-        "1.15.0"
-      ]
+      "enum": ["1.14.1", "1.14.2", "1.15.0"]
     },
     "service": {
       "description": "Expose your application",
       "type": "boolean"
     }
   },
-  "order": [
-    "name",
-    "replicas",
-    "image",
-    "version",
-    "service"
-  ],
+  "order": ["name", "replicas", "image", "version", "service"],
   "title": "Values",
   "type": "object"
-} 
+}
 ```
 
 You can find more on how to write a JSON schema for a Helm chart in the [Helm docs](https://helm.sh/docs/topics/charts/#schema-files).
@@ -288,7 +280,7 @@ We can use Cyclops to help us with that! It can help you deploy and visualize yo
 You can install Cyclops with a single command:
 
 ```bash
-kubectl apply -f https://raw.githubusercontent.com/cyclops-ui/cyclops/v0.0.1-alpha.12/install/cyclops-install.yaml 
+kubectl apply -f https://raw.githubusercontent.com/cyclops-ui/cyclops/v0.0.1-alpha.12/install/cyclops-install.yaml
 ```
 
 It will create a new namespace called `cyclops` and start a Cyclops deployment inside it.
