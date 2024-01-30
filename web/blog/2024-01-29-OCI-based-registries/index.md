@@ -74,7 +74,7 @@ You can find out more about each of those files/directories on Helm's [official 
 
 ### Chart.yaml
 
-Let's start with `[Chart.yaml](https://helm.sh/docs/topics/charts/#the-chartyaml-file)`:
+Let's start with [`Chart.yaml`](https://helm.sh/docs/topics/charts/#the-chartyaml-file):
 
 ```yaml
 # Chart.yaml
