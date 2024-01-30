@@ -5,6 +5,8 @@ authors: [jurajk]
 
 # OCI blog post
 
+![Docker Ship](../../static/img/2024-01-29-OCI-based-registries/oci_helm_docker.jpeg)
+
 If you are using Kubernetes, there's a fair chance you are using Helm or at least considered to. This article will guide you on how to publish your Helm charts in a less conventional way - using OCI-based registries.
 
 First of all, we will briefly cover what OCI-based registries are and how they can help us, and after some theory, we will create a Helm chart, push it to the OCI registry, and actually deploy something using it.
