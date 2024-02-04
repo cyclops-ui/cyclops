@@ -83,7 +83,7 @@ func (r *ModuleReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctr
 	err := r.Get(ctx, req.NamespacedName, &module)
 	if apierrors.IsNotFound(err) {
 		r.logger.Info("delete module", "namespaced name", req.NamespacedName)
-		resources, err := r.kubernetesClient.GetResourcesForModule(req.Name)
+		resources, err := r.kubernetesClient.GetResourcesForModule(req.Name, nil)
 		if err != nil {
 			r.logger.Error(err, "error on get module resources", "namespaced name", req.NamespacedName)
 			return ctrl.Result{}, err
