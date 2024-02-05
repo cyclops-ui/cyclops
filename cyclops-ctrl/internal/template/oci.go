@@ -13,7 +13,7 @@ import (
 	"github.com/pkg/errors"
 )
 
-func LoadOCIHelmChart(repo, chart, version string) (*models.Template, error) {
+func (r Repo) LoadOCIHelmChart(repo, chart, version string) (*models.Template, error) {
 	var tgzData []byte
 	tgzData, err := loadOCIHelmChartBytes(repo, chart, version)
 	if err != nil {
@@ -25,10 +25,10 @@ func LoadOCIHelmChart(repo, chart, version string) (*models.Template, error) {
 		return nil, err
 	}
 
-	return mapHelmChart(chart, extractedFiles)
+	return r.mapHelmChart(chart, extractedFiles)
 }
 
-func LoadOCIHelmChartInitialValues(repo, chart, version string) (map[interface{}]interface{}, error) {
+func (r Repo) LoadOCIHelmChartInitialValues(repo, chart, version string) (map[interface{}]interface{}, error) {
 	tgzData, err := loadOCIHelmChartBytes(repo, chart, version)
 	if err != nil {
 		return nil, err
@@ -55,7 +55,7 @@ func LoadOCIHelmChartInitialValues(repo, chart, version string) (map[interface{}
 		return nil, err
 	}
 
-	return mapHelmChartInitialValues(extractedFiles)
+	return r.mapHelmChartInitialValues(extractedFiles)
 }
 
 func loadOCIHelmChartBytes(repo, chart, version string) ([]byte, error) {

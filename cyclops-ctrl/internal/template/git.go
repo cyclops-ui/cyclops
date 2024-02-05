@@ -24,7 +24,7 @@ import (
 	"github.com/cyclops-ui/cycops-ctrl/internal/models/helm"
 )
 
-func LoadTemplate(repoURL, path, commit string) (*models.Template, error) {
+func (r Repo) LoadTemplate(repoURL, path, commit string) (*models.Template, error) {
 	fs, err := clone(repoURL, commit)
 	if err != nil {
 		return nil, err
@@ -93,7 +93,7 @@ func LoadTemplate(repoURL, path, commit string) (*models.Template, error) {
 	// endregion
 
 	// region load dependencies
-	dependencies, err := loadDependencies(metadata)
+	dependencies, err := r.loadDependencies(metadata)
 	if err != nil {
 		return nil, err
 	}
@@ -111,7 +111,7 @@ func LoadTemplate(repoURL, path, commit string) (*models.Template, error) {
 	}, nil
 }
 
-func LoadInitialTemplateValues(repoURL, path, commit string) (map[interface{}]interface{}, error) {
+func (r Repo) LoadInitialTemplateValues(repoURL, path, commit string) (map[interface{}]interface{}, error) {
 	fs, err := clone(repoURL, commit)
 	if err != nil {
 		return nil, err
@@ -152,7 +152,7 @@ func LoadInitialTemplateValues(repoURL, path, commit string) (map[interface{}]in
 		initialValues = make(map[interface{}]interface{})
 	}
 
-	depInitialValues, err := loadDependenciesInitialValues(metadata)
+	depInitialValues, err := r.loadDependenciesInitialValues(metadata)
 	if err != nil {
 		return nil, err
 	}

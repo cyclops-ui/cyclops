@@ -19,12 +19,18 @@ import (
 
 type Templates struct {
 	templates        *templates.Storage
+	templatesRepo    *template.Repo
 	kubernetesClient *k8sclient.KubernetesClient
 }
 
-func NewTemplatesController(templatesStorage *templates.Storage, kubernetes *k8sclient.KubernetesClient) *Templates {
+func NewTemplatesController(
+	templates *templates.Storage,
+	templatesRepo *template.Repo,
+	kubernetes *k8sclient.KubernetesClient,
+) *Templates {
 	return &Templates{
-		templates:        templatesStorage,
+		templatesRepo:    templatesRepo,
+		templates:        templates,
 		kubernetesClient: kubernetes,
 	}
 }
@@ -141,7 +147,7 @@ func (c *Templates) GetTemplate(ctx *gin.Context) {
 		return
 	}
 
-	t, err := template.GetTemplate(repo, path, commit)
+	t, err := c.templatesRepo.GetTemplate(repo, path, commit)
 	if err != nil {
 		fmt.Println(err)
 		ctx.JSON(http.StatusBadRequest, dto.NewError("Error loading template", err.Error()))
@@ -163,7 +169,7 @@ func (c *Templates) GetTemplateInitialValues(ctx *gin.Context) {
 		return
 	}
 
-	initial, err := template.GetTemplateInitialValues(repo, path, commit)
+	initial, err := c.templatesRepo.GetTemplateInitialValues(repo, path, commit)
 	if err != nil {
 		fmt.Println(err)
 		ctx.JSON(http.StatusBadRequest, dto.NewError("Error loading template initial values", err.Error()))

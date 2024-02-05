@@ -23,7 +23,7 @@ import (
 	"github.com/cyclops-ui/cycops-ctrl/internal/models/helm"
 )
 
-func LoadHelmChart(repo, chart, version string) (*models.Template, error) {
+func (r Repo) LoadHelmChart(repo, chart, version string) (*models.Template, error) {
 	var tgzData []byte
 	var err error
 	if registry.IsOCI(repo) {
@@ -32,7 +32,7 @@ func LoadHelmChart(repo, chart, version string) (*models.Template, error) {
 			return nil, err
 		}
 	} else {
-		tgzData, err = loadFromHelmChartRepo(repo, chart, version)
+		tgzData, err = r.loadFromHelmChartRepo(repo, chart, version)
 		if err != nil {
 			return nil, err
 		}
@@ -43,10 +43,10 @@ func LoadHelmChart(repo, chart, version string) (*models.Template, error) {
 		return nil, err
 	}
 
-	return mapHelmChart(chart, extractedFiles)
+	return r.mapHelmChart(chart, extractedFiles)
 }
 
-func LoadHelmChartInitialValues(repo, chart, version string) (map[interface{}]interface{}, error) {
+func (r Repo) LoadHelmChartInitialValues(repo, chart, version string) (map[interface{}]interface{}, error) {
 	var tgzData []byte
 	var err error
 	if registry.IsOCI(repo) {
@@ -55,7 +55,7 @@ func LoadHelmChartInitialValues(repo, chart, version string) (map[interface{}]in
 			return nil, err
 		}
 	} else {
-		tgzData, err = loadFromHelmChartRepo(repo, chart, version)
+		tgzData, err = r.loadFromHelmChartRepo(repo, chart, version)
 		if err != nil {
 			return nil, err
 		}
@@ -82,7 +82,7 @@ func LoadHelmChartInitialValues(repo, chart, version string) (map[interface{}]in
 		return nil, err
 	}
 
-	return mapHelmChartInitialValues(extractedFiles)
+	return r.mapHelmChartInitialValues(extractedFiles)
 }
 
 func IsHelmRepo(repo string) (bool, error) {
@@ -106,7 +106,7 @@ func IsHelmRepo(repo string) (bool, error) {
 	return resp.StatusCode == http.StatusOK, nil
 }
 
-func loadFromHelmChartRepo(repo, chart, version string) ([]byte, error) {
+func (r Repo) loadFromHelmChartRepo(repo, chart, version string) ([]byte, error) {
 	tgzURL, err := getTarUrl(repo, chart, version)
 	if err != nil {
 		return nil, err
@@ -115,7 +115,7 @@ func loadFromHelmChartRepo(repo, chart, version string) ([]byte, error) {
 	return downloadFile(tgzURL)
 }
 
-func mapHelmChart(chartName string, files map[string][]byte) (*models.Template, error) {
+func (r Repo) mapHelmChart(chartName string, files map[string][]byte) (*models.Template, error) {
 	metadataBytes := []byte{}
 	schemaBytes := []byte{}
 	manifestParts := make([]string, 0)
@@ -171,7 +171,7 @@ func mapHelmChart(chartName string, files map[string][]byte) (*models.Template, 
 	}
 
 	// region load dependencies
-	dependencies, err := loadDependencies(metadata)
+	dependencies, err := r.loadDependencies(metadata)
 	if err != nil {
 		return &models.Template{}, err
 	}
@@ -181,7 +181,7 @@ func mapHelmChart(chartName string, files map[string][]byte) (*models.Template, 
 			continue
 		}
 
-		dep, err := mapHelmChart(depName, files)
+		dep, err := r.mapHelmChart(depName, files)
 		if err != nil {
 			return nil, err
 		}
@@ -202,7 +202,7 @@ func mapHelmChart(chartName string, files map[string][]byte) (*models.Template, 
 	}, nil
 }
 
-func mapHelmChartInitialValues(files map[string][]byte) (map[interface{}]interface{}, error) {
+func (r Repo) mapHelmChartInitialValues(files map[string][]byte) (map[interface{}]interface{}, error) {
 	metadataBytes := []byte{}
 	valuesBytes := []byte{}
 	dependenciesFromChartsDir := make(map[string]map[string][]byte, 0)
@@ -243,7 +243,7 @@ func mapHelmChartInitialValues(files map[string][]byte) (map[interface{}]interfa
 
 	// region load dependencies
 	for depName, files := range dependenciesFromChartsDir {
-		dep, err := mapHelmChartInitialValues(files)
+		dep, err := r.mapHelmChartInitialValues(files)
 		if err != nil {
 			return nil, err
 		}
@@ -251,7 +251,7 @@ func mapHelmChartInitialValues(files map[string][]byte) (map[interface{}]interfa
 		values[depName] = dep
 	}
 
-	dependenciesFromMeta, err := loadDependenciesInitialValues(metadata)
+	dependenciesFromMeta, err := r.loadDependenciesInitialValues(metadata)
 	if err != nil {
 		return nil, err
 	}
