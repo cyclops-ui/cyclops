@@ -272,7 +272,8 @@ func (k *KubernetesClient) getResourceStatus(o unstructured.Unstructured) (strin
 		}
 
 		if deployment.Generation == deployment.Status.ObservedGeneration &&
-			*deployment.Spec.Replicas == deployment.Status.UpdatedReplicas {
+			deployment.Status.Replicas == deployment.Status.UpdatedReplicas &&
+			deployment.Status.UnavailableReplicas == 0 {
 			return statusHealthy, nil
 		}
 
@@ -286,7 +287,8 @@ func (k *KubernetesClient) getResourceStatus(o unstructured.Unstructured) (strin
 		}
 
 		if statefulset.Generation == statefulset.Status.ObservedGeneration &&
-			*statefulset.Spec.Replicas == statefulset.Status.UpdatedReplicas {
+			statefulset.Status.Replicas == statefulset.Status.UpdatedReplicas &&
+			statefulset.Status.Replicas == statefulset.Status.AvailableReplicas {
 			return statusHealthy, nil
 		}
 

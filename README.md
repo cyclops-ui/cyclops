@@ -5,6 +5,10 @@
 <p align="center">Developer friendly Kubernetes</p>
 
 <div align="center">
+    <a href="https://www.producthunt.com/posts/cyclops?utm_source=badge-featured&utm_medium=badge&utm_souce=badge-cyclops" target="_blank"><img src="https://api.producthunt.com/widgets/embed-image/v1/featured.svg?post_id=432719&theme=light" alt="Cyclops - Developer&#0032;friendly&#0032;Kubernetes | Product Hunt" style="width: 250px; height: 54px;" width="250" height="54" /></a>
+</div>
+
+<div align="center">
     <a href="https://github.com/cyclops-ui/cyclops/blob/main/LICENSE"><img height="20" src="https://img.shields.io/github/license/cyclops-ui/cyclops"></a>
     <a href="https://github.com/cyclops-ui/cyclops/actions/workflows/web.yaml"><img height="20" src="https://github.com/cyclops-ui/cyclops/actions/workflows/web.yaml/badge.svg"></a>
     <a href="https://github.com/cyclops-ui/cyclops/actions/workflows/ci.yml"><img height="20" src="https://github.com/cyclops-ui/cyclops/actions/workflows/ci.yml/badge.svg"></a>
@@ -23,14 +27,13 @@ the window for deployment mistakes. [Find out more!](https://cyclops-ui.com)
 Find out how to [install](https://cyclops-ui.com/docs/installation/prerequisites) it to your cluster on our landing page
 and give it a go! (~10 minute tutorial)
 
-[//]: # (## :star2: Supporters)
-[//]: # (<p>)
-[//]: # (    <a href="https://github.com/cyclops-ui/cyclops/stargazers">)
-[//]: # (        <img width="100%" src="https://reporoster.com/stars/cyclops-ui/cyclops" alt="Stargazers repo roster for @cyclops-ui/cyclops">)
-[//]: # (    </a>)
-[//]: # (</p>)
-
-[//]: # ([![Forkers repo roster for @cyclops-ui/cyclops]&#40;https://reporoster.com/forks/cyclops-ui/cyclops&#41;])
+[//]: # "## :star2: Supporters"
+[//]: # "<p>"
+[//]: # '    <a href="https://github.com/cyclops-ui/cyclops/stargazers">'
+[//]: # '        <img width="100%" src="https://reporoster.com/stars/cyclops-ui/cyclops" alt="Stargazers repo roster for @cyclops-ui/cyclops">'
+[//]: # "    </a>"
+[//]: # "</p>"
+[//]: # "[![Forkers repo roster for @cyclops-ui/cyclops](https://reporoster.com/forks/cyclops-ui/cyclops)]"
 
 ## :gear: Install
 
@@ -39,7 +42,7 @@ and give it a go! (~10 minute tutorial)
 To install Cyclops in your cluster, run commands below:
 
 ```bash
-kubectl apply -f https://raw.githubusercontent.com/cyclops-ui/cyclops/v0.0.1-alpha.10/install/cyclops-install.yaml
+kubectl apply -f https://raw.githubusercontent.com/cyclops-ui/cyclops/v0.0.1-alpha.12/install/cyclops-install.yaml
 ```
 
 It will create a new namespace called `cyclops` and deploy everything you need for your Cyclops instance to run.
@@ -61,9 +64,9 @@ You can now access Cyclops in your browser on [http://localhost:3000](http://loc
 
 ## :chart_with_upwards_trend: Future work
 
-* RBAC
-* Cluster nodes overview
-* Git as manifest destination
-* Customizable Module details page
+- RBAC
+- Cluster nodes overview
+- Git as manifest destination
+- Customizable Module details page
 
 Feel free to suggest features you would like to see!
