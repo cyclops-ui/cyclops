@@ -40,7 +40,7 @@ func (r Repo) LoadHelmChart(repo, chart, version string) (*models.Template, erro
 		}
 	}
 
-	cached, ok := r.cache.Get(repo, chart, strictVersion)
+	cached, ok := r.cache.GetTemplate(repo, chart, strictVersion)
 	if ok {
 		return cached, nil
 	}
@@ -68,14 +68,34 @@ func (r Repo) LoadHelmChart(repo, chart, version string) (*models.Template, erro
 		return nil, err
 	}
 
-	r.cache.Set(repo, chart, strictVersion, template)
+	r.cache.SetTemplate(repo, chart, strictVersion, template)
 
 	return template, nil
 }
 
 func (r Repo) LoadHelmChartInitialValues(repo, chart, version string) (map[interface{}]interface{}, error) {
-	var tgzData []byte
 	var err error
+	var strictVersion string
+	if !isValidVersion(version) {
+		if registry.IsOCI(repo) {
+			strictVersion, err = getOCIStrictVersion(repo, chart, version)
+			if err != nil {
+				return nil, err
+			}
+		} else {
+			strictVersion, err = getRepoStrictVersion(repo, chart, version)
+			if err != nil {
+				return nil, err
+			}
+		}
+	}
+
+	cached, ok := r.cache.GetTemplateInitialValues(repo, chart, strictVersion)
+	if ok {
+		return cached, nil
+	}
+
+	var tgzData []byte
 	if registry.IsOCI(repo) {
 		tgzData, err = loadOCIHelmChartBytes(repo, chart, version)
 		if err != nil {
@@ -93,23 +113,14 @@ func (r Repo) LoadHelmChartInitialValues(repo, chart, version string) (map[inter
 		return nil, err
 	}
 
-	valuesBytes := []byte{}
-
-	for name, content := range extractedFiles {
-		parts := strings.Split(name, "/")
-
-		if len(parts) == 2 && parts[1] == "values.yaml" {
-			valuesBytes = content
-			break
-		}
-	}
-
-	var values map[interface{}]interface{}
-	if err := yaml.Unmarshal(valuesBytes, &values); err != nil {
+	initial, err := r.mapHelmChartInitialValues(extractedFiles)
+	if err != nil {
 		return nil, err
 	}
 
-	return r.mapHelmChartInitialValues(extractedFiles)
+	r.cache.SetTemplateInitialValues(repo, chart, strictVersion, initial)
+
+	return initial, nil
 }
 
 func IsHelmRepo(repo string) (bool, error) {

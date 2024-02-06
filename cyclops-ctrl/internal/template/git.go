@@ -32,7 +32,7 @@ func (r Repo) LoadTemplate(repoURL, path, commit string) (*models.Template, erro
 		return nil, err
 	}
 
-	cached, ok := r.cache.Get(repoURL, path, commitSHA)
+	cached, ok := r.cache.GetTemplate(repoURL, path, commitSHA)
 	if ok {
 		return cached, nil
 	}
@@ -122,12 +122,22 @@ func (r Repo) LoadTemplate(repoURL, path, commit string) (*models.Template, erro
 		Dependencies: dependencies,
 	}
 
-	r.cache.Set(repoURL, path, commitSHA, template)
+	r.cache.SetTemplate(repoURL, path, commitSHA, template)
 
 	return template, err
 }
 
 func (r Repo) LoadInitialTemplateValues(repoURL, path, commit string) (map[interface{}]interface{}, error) {
+	commitSHA, err := resolveRef(repoURL, commit)
+	if err != nil {
+		return nil, err
+	}
+
+	cached, ok := r.cache.GetTemplateInitialValues(repoURL, path, commitSHA)
+	if ok {
+		return cached, nil
+	}
+
 	fs, err := clone(repoURL, commit)
 	if err != nil {
 		return nil, err
@@ -177,6 +187,8 @@ func (r Repo) LoadInitialTemplateValues(repoURL, path, commit string) (map[inter
 		initialValues[key] = values
 	}
 	// endregion
+
+	r.cache.SetTemplateInitialValues(repoURL, path, commitSHA, initialValues)
 
 	return initialValues, nil
 }

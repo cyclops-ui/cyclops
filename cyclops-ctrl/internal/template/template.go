@@ -12,8 +12,10 @@ type Repo struct {
 }
 
 type templateCache interface {
-	Get(repo, path, version string) (*models.Template, bool)
-	Set(repo, path, version string, template *models.Template)
+	GetTemplate(repo, path, version string) (*models.Template, bool)
+	SetTemplate(repo, path, version string, template *models.Template)
+	GetTemplateInitialValues(repo, path, version string) (map[interface{}]interface{}, bool)
+	SetTemplateInitialValues(repo, path, version string, values map[interface{}]interface{})
 }
 
 func NewRepo(tc templateCache) *Repo {
@@ -98,9 +100,14 @@ func (r Repo) loadDependencies(metadata helmchart.Metadata) ([]*models.Template,
 func (r Repo) loadDependenciesInitialValues(metadata helmchart.Metadata) (map[interface{}]interface{}, error) {
 	initialValues := make(map[interface{}]interface{})
 	for _, dependency := range metadata.Dependencies {
-		depInitialValues, err := r.GetTemplateInitialValues(dependency.Repository, dependency.Name, dependency.Version)
+		depInitialValuesData, err := r.GetTemplateInitialValues(dependency.Repository, dependency.Name, dependency.Version)
 		if err != nil {
 			return nil, err
+		}
+
+		var depInitialValues interface{}
+		if err := json.Unmarshal(depInitialValuesData, &depInitialValues); err != nil {
+			panic(err)
 		}
 
 		initialValues[dependency.Name] = depInitialValues

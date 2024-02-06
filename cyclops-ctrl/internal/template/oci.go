@@ -2,15 +2,15 @@ package template
 
 import (
 	"fmt"
-	"gopkg.in/yaml.v2"
 	"io/ioutil"
 	"net/http"
 	"net/url"
 	"strings"
 
-	"github.com/cyclops-ui/cycops-ctrl/internal/models"
 	json "github.com/json-iterator/go"
 	"github.com/pkg/errors"
+
+	"github.com/cyclops-ui/cycops-ctrl/internal/models"
 )
 
 func (r Repo) LoadOCIHelmChart(repo, chart, version string) (*models.Template, error) {
@@ -23,7 +23,7 @@ func (r Repo) LoadOCIHelmChart(repo, chart, version string) (*models.Template, e
 		}
 	}
 
-	cached, ok := r.cache.Get(repo, chart, strictVersion)
+	cached, ok := r.cache.GetTemplate(repo, chart, strictVersion)
 	if ok {
 		return cached, nil
 	}
@@ -44,12 +44,26 @@ func (r Repo) LoadOCIHelmChart(repo, chart, version string) (*models.Template, e
 		return nil, err
 	}
 
-	r.cache.Set(repo, chart, strictVersion, template)
+	r.cache.SetTemplate(repo, chart, strictVersion, template)
 
 	return template, nil
 }
 
 func (r Repo) LoadOCIHelmChartInitialValues(repo, chart, version string) (map[interface{}]interface{}, error) {
+	var err error
+	strictVersion := version
+	if !isValidVersion(version) {
+		strictVersion, err = getOCIStrictVersion(repo, chart, version)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	cached, ok := r.cache.GetTemplateInitialValues(repo, chart, strictVersion)
+	if ok {
+		return cached, nil
+	}
+
 	tgzData, err := loadOCIHelmChartBytes(repo, chart, version)
 	if err != nil {
 		return nil, err
@@ -60,23 +74,14 @@ func (r Repo) LoadOCIHelmChartInitialValues(repo, chart, version string) (map[in
 		return nil, err
 	}
 
-	valuesBytes := []byte{}
-
-	for name, content := range extractedFiles {
-		parts := strings.Split(name, "/")
-
-		if len(parts) == 2 && parts[1] == "values.yaml" {
-			valuesBytes = content
-			break
-		}
-	}
-
-	var values map[interface{}]interface{}
-	if err := yaml.Unmarshal(valuesBytes, &values); err != nil {
+	initial, err := r.mapHelmChartInitialValues(extractedFiles)
+	if err != nil {
 		return nil, err
 	}
 
-	return r.mapHelmChartInitialValues(extractedFiles)
+	r.cache.SetTemplateInitialValues(repo, chart, strictVersion, initial)
+
+	return initial, nil
 }
 
 func loadOCIHelmChartBytes(repo, chart, version string) ([]byte, error) {
