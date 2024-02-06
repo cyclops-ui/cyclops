@@ -6,13 +6,14 @@ import (
 	"os"
 	"strings"
 
+	"github.com/gin-gonic/gin"
+
 	"github.com/cyclops-ui/cycops-ctrl/api/v1alpha1"
 	"github.com/cyclops-ui/cycops-ctrl/internal/cluster/k8sclient"
 	"github.com/cyclops-ui/cycops-ctrl/internal/mapper"
 	"github.com/cyclops-ui/cycops-ctrl/internal/models/dto"
 	"github.com/cyclops-ui/cycops-ctrl/internal/storage/templates"
 	"github.com/cyclops-ui/cycops-ctrl/internal/template"
-	"github.com/gin-gonic/gin"
 )
 
 type Modules struct {

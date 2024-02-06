@@ -14,8 +14,22 @@ import (
 )
 
 func (r Repo) LoadOCIHelmChart(repo, chart, version string) (*models.Template, error) {
+	var err error
+	strictVersion := version
+	if !isValidVersion(version) {
+		strictVersion, err = getOCIStrictVersion(repo, chart, version)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	cached, ok := r.cache.Get(repo, chart, strictVersion)
+	if ok {
+		return cached, nil
+	}
+
 	var tgzData []byte
-	tgzData, err := loadOCIHelmChartBytes(repo, chart, version)
+	tgzData, err = loadOCIHelmChartBytes(repo, chart, version)
 	if err != nil {
 		return nil, err
 	}
@@ -25,7 +39,14 @@ func (r Repo) LoadOCIHelmChart(repo, chart, version string) (*models.Template, e
 		return nil, err
 	}
 
-	return r.mapHelmChart(chart, extractedFiles)
+	template, err := r.mapHelmChart(chart, extractedFiles)
+	if err != nil {
+		return nil, err
+	}
+
+	r.cache.Set(repo, chart, strictVersion, template)
+
+	return template, nil
 }
 
 func (r Repo) LoadOCIHelmChartInitialValues(repo, chart, version string) (map[interface{}]interface{}, error) {
@@ -61,7 +82,7 @@ func (r Repo) LoadOCIHelmChartInitialValues(repo, chart, version string) (map[in
 func loadOCIHelmChartBytes(repo, chart, version string) ([]byte, error) {
 	var err error
 	if !isValidVersion(version) {
-		version, err = getStrictVersion(repo, chart, version)
+		version, err = getOCIStrictVersion(repo, chart, version)
 		if err != nil {
 			return nil, err
 		}
@@ -185,7 +206,7 @@ func fetchDigest(repo, chart, version, token string) (string, error) {
 	return resp.Header.Get("docker-content-digest"), nil
 }
 
-func getStrictVersion(repo, chart, version string) (string, error) {
+func getOCIStrictVersion(repo, chart, version string) (string, error) {
 	token, err := authorizeOCITags(repo, chart)
 	if err != nil {
 		return "", err

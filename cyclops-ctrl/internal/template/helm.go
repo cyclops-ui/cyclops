@@ -24,8 +24,28 @@ import (
 )
 
 func (r Repo) LoadHelmChart(repo, chart, version string) (*models.Template, error) {
-	var tgzData []byte
 	var err error
+	var strictVersion string
+	if !isValidVersion(version) {
+		if registry.IsOCI(repo) {
+			strictVersion, err = getOCIStrictVersion(repo, chart, version)
+			if err != nil {
+				return nil, err
+			}
+		} else {
+			strictVersion, err = getRepoStrictVersion(repo, chart, version)
+			if err != nil {
+				return nil, err
+			}
+		}
+	}
+
+	cached, ok := r.cache.Get(repo, chart, strictVersion)
+	if ok {
+		return cached, nil
+	}
+
+	var tgzData []byte
 	if registry.IsOCI(repo) {
 		tgzData, err = loadOCIHelmChartBytes(repo, chart, version)
 		if err != nil {
@@ -43,7 +63,14 @@ func (r Repo) LoadHelmChart(repo, chart, version string) (*models.Template, erro
 		return nil, err
 	}
 
-	return r.mapHelmChart(chart, extractedFiles)
+	template, err := r.mapHelmChart(chart, extractedFiles)
+	if err != nil {
+		return nil, err
+	}
+
+	r.cache.Set(repo, chart, strictVersion, template)
+
+	return template, nil
 }
 
 func (r Repo) LoadHelmChartInitialValues(repo, chart, version string) (map[interface{}]interface{}, error) {
@@ -307,6 +334,36 @@ func getTarUrl(repo, chart, version string) (string, error) {
 	}
 
 	return "", errors.New(fmt.Sprintf("version %v not found in chart %v and repo %v", version, chart, repo))
+}
+
+func getRepoStrictVersion(repo, chart, version string) (string, error) {
+	indexURL, err := url.JoinPath(repo, "index.yaml")
+	if err != nil {
+		return "", err
+	}
+
+	response, err := http.Get(indexURL)
+	if err != nil {
+		return "", err
+	}
+	defer response.Body.Close()
+
+	body, err := ioutil.ReadAll(response.Body)
+	if err != nil {
+		return "", err
+	}
+
+	var data helm.Index
+	err = yaml.Unmarshal(body, &data)
+	if err != nil {
+		return "", err
+	}
+
+	if _, ok := data.Entries[chart]; !ok {
+		return "", errors.New(fmt.Sprintf("chart %v not found in repo %v", chart, repo))
+	}
+
+	return resolveVersion(data.Entries[chart], version)
 }
 
 func resolveVersion(indexEntries []helm.IndexEntry, version string) (string, error) {

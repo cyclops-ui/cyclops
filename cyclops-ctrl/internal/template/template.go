@@ -23,20 +23,9 @@ func NewRepo(tc templateCache) *Repo {
 }
 
 func (r Repo) GetTemplate(repo, path, version string) (*models.Template, error) {
-	cached, ok := r.cache.Get(repo, path, version)
-	if ok {
-		return cached, nil
-	}
-
 	// region load OCI chart
 	if registry.IsOCI(repo) {
-		template, err := r.LoadOCIHelmChart(repo, path, version)
-		if err != nil {
-			return nil, err
-		}
-
-		r.cache.Set(repo, path, version, template)
-		return template, nil
+		return r.LoadOCIHelmChart(repo, path, version)
 	}
 	// endregion
 
@@ -51,13 +40,8 @@ func (r Repo) GetTemplate(repo, path, version string) (*models.Template, error) 
 	}
 	// endregion
 
-	template, err := r.LoadTemplate(repo, path, version)
-	if err != nil {
-		return nil, err
-	}
-
-	r.cache.Set(repo, path, version, template)
-	return template, nil
+	// fallback to cloning from git
+	return r.LoadTemplate(repo, path, version)
 }
 
 func (r Repo) GetTemplateInitialValues(repo, path, version string) ([]byte, error) {
