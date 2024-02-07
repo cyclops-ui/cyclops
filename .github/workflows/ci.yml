@@ -11,44 +11,7 @@ permissions:
   contents: write
 
 jobs:
-  build-UI:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v2
-      - name: Login to DockerHub
-        uses: docker/login-action@v1
-        with:
-          username: ${{ secrets.DOCKERHUB_USERNAME }}
-          password: ${{ secrets.DOCKERHUB_TOKEN }}
-
-      - name: Build and push
-        run: |
-          TAG=${{ github.event.inputs.version }}
-
-          docker build cyclops-ui -t cyclopsui/cyclops-ui:$TAG
-          docker push cyclopsui/cyclops-ui:$TAG
-
-  build-controller:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v2
-      - name: Login to DockerHub
-        uses: docker/login-action@v1
-        with:
-          username: ${{ secrets.DOCKERHUB_USERNAME }}
-          password: ${{ secrets.DOCKERHUB_TOKEN }}
-
-      - name: Build and push
-        run: |
-          TAG=${{ github.event.inputs.version }}
-
-          docker build cyclops-ctrl -t cyclopsui/cyclops-ctrl:$TAG
-          docker push cyclopsui/cyclops-ctrl:$TAG
-
-  update-install-manifest:
-    needs:
-      - build-UI
-      - build-controller
+  first:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
@@ -59,36 +22,87 @@ jobs:
       - name: update install manifest
         run: |
           echo ${{ steps.extract_branch.outputs.branch }}
-          
+
           exit 1
-          
-          TAG=${{ github.event.inputs.version }}
-          INSTALL_YAML=$GITHUB_WORKSPACE/install/cyclops-install.yaml
-
-          sed -i 's/cyclopsui\/cyclops-ctrl\:.*/cyclopsui\/cyclops-ctrl\:'$TAG'/' $INSTALL_YAML
-          sed -i 's/cyclopsui\/cyclops-ui\:.*/cyclopsui\/cyclops-ui\:'$TAG'/' $INSTALL_YAML
-
-          # update file
-          git fetch origin main
-          git checkout main
-          git config --global user.email "petar.cvitanovic@gmail.com"
-          git config --global user.name "petar-cvit"
-          git status
-          git add $INSTALL_YAML
-          git commit -m '⚙️ update cyclops to '$TAG
-          git push origin HEAD:main
-
-  release:
-    needs:
-      - update-install-manifest
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v2
-      - name: Create release
-        env:
-          GH_TOKEN: ${{ github.token }}
-        run: |
-          gh release create ${{ github.event.inputs.version }} \
-            --repo="https://github.com/cyclops-ui/cyclops" \
-            --title="${{ github.event.inputs.version }}" \
-            --generate-notes
+#
+#  build-UI:
+#    runs-on: ubuntu-latest
+#    steps:
+#      - uses: actions/checkout@v2
+#      - name: Login to DockerHub
+#        uses: docker/login-action@v1
+#        with:
+#          username: ${{ secrets.DOCKERHUB_USERNAME }}
+#          password: ${{ secrets.DOCKERHUB_TOKEN }}
+#
+#      - name: Build and push
+#        run: |
+#          TAG=${{ github.event.inputs.version }}
+#
+#          docker build cyclops-ui -t cyclopsui/cyclops-ui:$TAG
+#          docker push cyclopsui/cyclops-ui:$TAG
+#
+#  build-controller:
+#    runs-on: ubuntu-latest
+#    steps:
+#      - uses: actions/checkout@v2
+#      - name: Login to DockerHub
+#        uses: docker/login-action@v1
+#        with:
+#          username: ${{ secrets.DOCKERHUB_USERNAME }}
+#          password: ${{ secrets.DOCKERHUB_TOKEN }}
+#
+#      - name: Build and push
+#        run: |
+#          TAG=${{ github.event.inputs.version }}
+#
+#          docker build cyclops-ctrl -t cyclopsui/cyclops-ctrl:$TAG
+#          docker push cyclopsui/cyclops-ctrl:$TAG
+#
+#  update-install-manifest:
+#    needs:
+#      - build-UI
+#      - build-controller
+#    runs-on: ubuntu-latest
+#    steps:
+#      - uses: actions/checkout@v2
+#      - name: Extract branch name
+#        shell: bash
+#        run: echo "branch=${GITHUB_HEAD_REF:-${GITHUB_REF#refs/heads/}}" >> $GITHUB_OUTPUT
+#        id: extract_branch
+#      - name: update install manifest
+#        run: |
+#          echo ${{ steps.extract_branch.outputs.branch }}
+#
+#          exit 1
+#
+#          TAG=${{ github.event.inputs.version }}
+#          INSTALL_YAML=$GITHUB_WORKSPACE/install/cyclops-install.yaml
+#
+#          sed -i 's/cyclopsui\/cyclops-ctrl\:.*/cyclopsui\/cyclops-ctrl\:'$TAG'/' $INSTALL_YAML
+#          sed -i 's/cyclopsui\/cyclops-ui\:.*/cyclopsui\/cyclops-ui\:'$TAG'/' $INSTALL_YAML
+#
+#          # update file
+#          git fetch origin main
+#          git checkout main
+#          git config --global user.email "petar.cvitanovic@gmail.com"
+#          git config --global user.name "petar-cvit"
+#          git status
+#          git add $INSTALL_YAML
+#          git commit -m '⚙️ update cyclops to '$TAG
+#          git push origin HEAD:main
+#
+#  release:
+#    needs:
+#      - update-install-manifest
+#    runs-on: ubuntu-latest
+#    steps:
+#      - uses: actions/checkout@v2
+#      - name: Create release
+#        env:
+#          GH_TOKEN: ${{ github.token }}
+#        run: |
+#          gh release create ${{ github.event.inputs.version }} \
+#            --repo="https://github.com/cyclops-ui/cyclops" \
+#            --title="${{ github.event.inputs.version }}" \
+#            --generate-notes
