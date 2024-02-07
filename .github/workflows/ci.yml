@@ -52,8 +52,16 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
+      - name: Extract branch name
+        shell: bash
+        run: echo "branch=${GITHUB_HEAD_REF:-${GITHUB_REF#refs/heads/}}" >> $GITHUB_OUTPUT
+        id: extract_branch
       - name: update install manifest
         run: |
+          echo ${{ steps.extract_branch.outputs.branch }}
+          
+          exit 1
+          
           TAG=${{ github.event.inputs.version }}
           INSTALL_YAML=$GITHUB_WORKSPACE/install/cyclops-install.yaml
 
