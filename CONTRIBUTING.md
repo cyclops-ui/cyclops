@@ -4,7 +4,7 @@ Welcome, glad to see you here.
 
 If you are up to the challenge of contributing to Cyclops, this document will help guide you on your journey. And if you want to talk to us directly, join our [Discord](https://discord.com/invite/8ErnK3qDb3) where we have a `looking-to-contribute` channel.
 
-Please note we have a [code of conduct](./CODE_OF_CONDUCT.md). Please follow it in all your interactions with the project.
+Please note we have a [code of conduct](./CODE_OF_CONDUCT.md), follow it in all your interactions with the project.
 
 ## The components that make Cyclops
 
@@ -31,7 +31,9 @@ Cyclops is a mono-repo which contains both the frontend (`UI`) and the backend(`
 
 ## Running services
 
-Before you start contributing, it is a good idea to get a feel of the project and try it out locally. The next chapter will go through how to run each mentioned component. But before you can start running the components, you need to set up your dev environment. If you already have a Kubernetes cluster you can use, you can skip this step. If not, don't worry, this won't take long.
+Before you start contributing, it is a good idea to get a feel of the project and try it out locally. The next chapter will go through how to run each mentioned component.
+
+But before you can start running the components, you need to set up your dev environment. If you already have a Kubernetes cluster you can use, you can skip this step. If not, don't worry, this won't take long.
 
 ### **Minikube**
 
@@ -52,7 +54,7 @@ You can install minikube and run it using `minikube start`. It will set up a Kub
 You can run the controller inside the cluster deployed as a Kubernetes deployment, described [here](https://github.com/cyclops-ui/cyclops/blob/a4d21a48648e79fe27e51600f5489ae0d36175a7/install/cyclops-install.yaml#L259),
 or you can run it outside of the cluster.
 
-Now that you have your cluster up and running and you have installed the CRD into it position yourself in `cyclops-ctrl` and run the command below from the terminal to start the controller.
+After you have your cluster up and running and you have installed the CRD into it, position yourself in `cyclops-ctrl` and run the command below from the terminal to start the controller.
 
 ```
 make start
@@ -81,7 +83,9 @@ Once dependencies are installed, you can run the UI
 npm start
 ```
 
-NOTE: To set the host of the Cyclops controller in the UI, you can change that here.
+> 📌 **_NOTE_** 📌
+>
+> If you changed the port of the REST API, you will need to update it in the UI as well.
 
 ### **Documentation** `/web`
 
@@ -109,7 +113,6 @@ npm start
 
 - [Fork the repository](https://github.com/cyclops-ui/cyclops/fork) and clone it locally
 - Create a new branch
-- Assign yourself to the issue, if you are working on it (if you are not a member of the organization, please leave a comment on the issue)
 - Make your changes
 - Create a pull request back to the upstream repository (_Please make sure that your PR is up-to-date with the latest changes in main_)
 - Wait for a review and address any comments
