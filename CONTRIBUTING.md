@@ -8,7 +8,7 @@ Please note we have a [code of conduct](./CODE_OF_CONDUCT.md); follow it in all 
 
 ## The components that make Cyclops
 
-Cyclops is a mono-repo that contains both the frontend (`UI`) and the backend(`controller`) of the platform, as well as the code for our website and documentation (`web`).
+Cyclops is a mono-repo that contains both the frontend (`UI`) and the backend (`controller`) of the platform, as well as the code for our website and documentation (`web`).
 
 - **controller**
 
