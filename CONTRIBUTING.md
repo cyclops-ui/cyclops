@@ -4,11 +4,11 @@ Welcome, glad to see you here!
 
 If you are up to the challenge of contributing to Cyclops, this document will help guide you on your journey. And if you want to talk to us directly, join our [Discord](https://discord.com/invite/8ErnK3qDb3) where we have a `looking-to-contribute` channel.
 
-Please note we have a [code of conduct](./CODE_OF_CONDUCT.md), follow it in all your interactions with the project.
+Please note we have a [code of conduct](./CODE_OF_CONDUCT.md); follow it in all your interactions with the project.
 
 ## The components that make Cyclops
 
-Cyclops is a mono-repo which contains both the frontend (`UI`) and the backend(`controller`) of the platform, as well as the code for our website and documentation (`web`).
+Cyclops is a mono-repo that contains both the frontend (`UI`) and the backend(`controller`) of the platform, as well as the code for our website and documentation (`web`).
 
 - **controller**
 
@@ -22,7 +22,7 @@ Cyclops is a mono-repo which contains both the frontend (`UI`) and the backend(`
   - `/cyclops-ui`
   - shows info about modules
   - renders form based on the module template
-  - Typescript, React, [Ant Design](https://ant.design/),
+  - Typescript, React, [Ant Design](https://ant.design/)
 
 - **docs**
 
@@ -40,7 +40,7 @@ Cyclops is a mono-repo which contains both the frontend (`UI`) and the backend(`
 
 ## Running services
 
-Before you start contributing, it is a good idea to get a feel of the project and try it out locally. The next chapter will go through how to run each mentioned component.
+Before you start contributing, getting a feel of the project and trying it out locally is a good idea. The next chapter will go through how to run each mentioned component.
 
 But before you can start running the components, you need to set up your dev environment. If you already have a Kubernetes cluster you can use, you can skip this step. If not, don't worry, this won't take long.
 
@@ -51,10 +51,10 @@ You can install minikube and run it using `minikube start`. It will set up a Kub
 
 > ❗ **_ATTENTION_** ❗
 >
-> Cyclops has it's own [custom resource](https://kubernetes.io/docs/concepts/extend-kubernetes/api-extension/custom-resources/) which you need to install into your cluster before trying to run Cyclops.
-> You can install it with using the command bellow:
+> Cyclops has its own [custom resource](https://kubernetes.io/docs/concepts/extend-kubernetes/api-extension/custom-resources/) which you need to install into your cluster before trying to run Cyclops.
+> You can install it using the command below:
 >
-> ```
+> ```zsh
 > kubectl apply -f https://raw.githubusercontent.com/cyclops-ui/cyclops/main/install/CRDs/cyclops-module.yaml
 > ```
 
@@ -65,7 +65,7 @@ or you can run it outside of the cluster.
 
 After you have your cluster up and running and you have installed the CRD into it, position yourself in `cyclops-ctrl` and run the command below from the terminal to start the controller.
 
-```
+```zsh
 make start
 ```
 
@@ -73,22 +73,22 @@ make start
 >
 > The default port of the REST API is 8080. If you would like to change the port of the REST API, you can do it by setting the env var:
 >
-> ```
+> ```zsh
 > export PORT=xxxx
 > ```
 
 ### **UI** `/cyclops-ui`
 
-UI depends on the controller API. Again you can run inside the cluster as well as outside. To run it, position yourself
-in `cyclops-ui`. After that you will need to install all the dependencies using
+UI depends on the controller API. Again, you can run inside the cluster as well as outside. To run it, position yourself
+in `cyclops-ui`. After that, you will need to install all the dependencies using
 
-```
+```zsh
 npm i -f
 ```
 
 Once dependencies are installed, you can run the UI
 
-```
+```zsh
 npm start
 ```
 
@@ -100,13 +100,13 @@ npm start
 
 You can run our page locally by installing the dependencies
 
-```
+```zsh
 npm i -f
 ```
 
 and running the app
 
-```
+```zsh
 npm start
 ```
 
