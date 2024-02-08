@@ -1,93 +1,119 @@
-# Contributing
+# Contributing to Cyclops
 
-When contributing to this repository, please first discuss the change you wish to make via issue, email, or any other method with the repository owners before making a change.
+Welcome, glad to see you here!
 
-Please note we have a code of conduct. Please follow it in all your interactions with the project.
+If you are up to the challenge of contributing to Cyclops, this document will help guide you on your journey. And if you want to talk to us directly, join our [Discord](https://discord.com/invite/8ErnK3qDb3) where we have a `looking-to-contribute` channel.
 
-## Components
+Please note we have a [code of conduct](./CODE_OF_CONDUCT.md); follow it in all your interactions with the project.
 
-You can contribute to Cyclops by contributing to a couple of different components. Those being:
+## The components that make Cyclops
 
-- controller
+Cyclops is a mono-repo that contains both the frontend (`UI`) and the backend (`controller`) of the platform, as well as the code for our website and documentation (`web`).
+
+- **controller**
+
   - `/cyclops-ctrl`
   - REST API serving data about Cyclops modules (modules CRUD)
   - listens for module changes and creates all needed resources from the template
   - Go, [kubebuilder](https://book.kubebuilder.io/)
-- UI
+
+- **UI**
+
   - `/cyclops-ui`
   - shows info about modules
   - renders form based on the module template
-  - Typescript, React, [antd](https://ant.design/)
-- docs
+  - Typescript, React, [Ant Design](https://ant.design/)
+
+- **docs**
+
   - `/web`
-  - website with Cyclops documentation
+  - website with the Cyclops documentation
   - [docusaurus](https://docusaurus.io/)
+
+## Where to start
+
+- If you are new to the project, please check out the [good first issue](https://github.com/cyclops-ui/cyclops/issues?q=is:open+is:issue+label:%22good+first+issue%22) label.
+- If you are looking for something to work on, check out our open issues.
+- If you have an idea for a new feature, please open an issue, and we can discuss it.
+- If you think the documentation on our website was unclear or you found a broken link, please feel free to fix it
+- We are also happy to help you find something to work on. Just reach out to us on [Discord](https://discord.com/invite/8ErnK3qDb3).
 
 ## Running services
 
-The next chapter will go through how to run each mentioned component.
+Before you start contributing, getting a feel of the project and trying it out locally is a good idea. The next chapter will go through how to run each mentioned component.
 
-### controller `/cyclops-ctrl`
+But before you can start running the components, you need to set up your dev environment. If you already have a Kubernetes cluster you can use, you can skip this step. If not, don't worry, this won't take long.
 
-To run the controller, you will need a Kubernetes cluster to connect it to. For the sake of development, you can
-use [minikube](https://minikube.sigs.k8s.io/docs/).
+### **Minikube**
 
-> **_NOTE:_**  Using minikube
+To run the controller, you will need a Kubernetes cluster to connect it to. For the sake of development, you can use [minikube](https://minikube.sigs.k8s.io/docs/).
+You can install minikube and run it using `minikube start`. It will set up a Kubernetes cluster locally and configure your kubeconfig file to point to the minikube cluster.
+
+> ❗ **_ATTENTION_** ❗
 >
-> You can install minikube and run it using `minikube start`. It will set up a Kubernetes cluster locally and configure your kubeconfig file to point to the minikube cluster.
+> Cyclops has its own [custom resource](https://kubernetes.io/docs/concepts/extend-kubernetes/api-extension/custom-resources/) which you need to install into your cluster before trying to run Cyclops.
+> You can install it using the command below:
+>
+> ```zsh
+> kubectl apply -f https://raw.githubusercontent.com/cyclops-ui/cyclops/main/install/CRDs/cyclops-module.yaml
+> ```
 
-You must install an additional CRD into the cluster to start the controller. You can do it using the
-command below.
-
-```
-kubectl apply -f https://raw.githubusercontent.com/cyclops-ui/cyclops/main/install/CRDs/cyclops-module.yaml
-```
+### **Controller** `/cyclops-ctrl`
 
 You can run the controller inside the cluster deployed as a Kubernetes deployment, described [here](https://github.com/cyclops-ui/cyclops/blob/a4d21a48648e79fe27e51600f5489ae0d36175a7/install/cyclops-install.yaml#L259),
 or you can run it outside of the cluster.
 
-Now that you have your cluster up and running and you have installed the CRD into it position yourself in
-`cyclops-ctrl` and run the command below from the terminal to start the controller.
-```
+After you have your cluster up and running and you have installed the CRD into it, position yourself in `cyclops-ctrl` and run the command below from the terminal to start the controller.
+
+```zsh
 make start
 ```
 
-NOTE: The default port of the REST API is 8080. If you would like to change the port of the REST API, you can do it by
-setting the env var:
-```
-export PORT=8888
-```
+> 📌 **_NOTE_** 📌
+>
+> The default port of the REST API is 8080. If you would like to change the port of the REST API, you can do it by setting the env var:
+>
+> ```zsh
+> export PORT=xxxx
+> ```
 
-### UI `/cyclops-ui`
+### **UI** `/cyclops-ui`
 
-UI depends on the controller API. Again you can run inside the cluster as well as outside. To run it, position yourself
-in `cyclops-ui`. After that you will need to install all the dependencies using
-```
+UI depends on the controller API. Again, you can run inside the cluster as well as outside. To run it, position yourself
+in `cyclops-ui`. After that, you will need to install all the dependencies using
+
+```zsh
 npm i -f
 ```
+
 Once dependencies are installed, you can run the UI
-```
+
+```zsh
 npm start
 ```
 
-NOTE: To set the host of the Cyclops controller in the UI, you can change that here.
+> 📌 **_NOTE_** 📌
+>
+> If you changed the port of the REST API, you will need to update it in the UI as well.
 
-### docs `/web`
+### **Documentation** `/web`
 
 You can run our page locally by installing the dependencies
-```
+
+```zsh
 npm i -f
 ```
+
 and running the app
-```
+
+```zsh
 npm start
 ```
 
-You can add `.md` files to the `/web/docs` folder to enhance our documentation.
+## How to contribute
 
-## Opening a pull request
-
-To contribute, you can [fork this repo](https://github.com/cyclops-ui/cyclops/fork) and create a PR to the main branch
-
-If you have any additional questions, you can reach out to us via om info@cyclops-ui.com or join our
-[Discord](https://discord.com/invite/M6tCEn5f5U)
+- [Fork the repository](https://github.com/cyclops-ui/cyclops/fork) and clone it locally
+- Create a new branch
+- Make your changes
+- Create a pull request back to the upstream repository (_Please make sure that your PR is up-to-date with the latest changes in main_)
+- Wait for a review and address any comments
