@@ -5,7 +5,7 @@ authors: [jurajk]
 
 # How Promoting Open-Source Can Become Problematic
 
-![OS-problematic](../../static/img/2024-02-08-OS-problematic/)
+![OS-problematic](../../static/img/2024-02-08-OS-problematic/OS-problematic.jpeg)
 
 If you have been in the open-source community lately, you know what I am talking about. The story goes something like this: There were loads of videos/blogs/events hyping up open-source contributions, mainly as a good gateway to land your dream software engineering job. And to some extent, it is true.
 
@@ -19,8 +19,9 @@ This article will show how bad it can get with the latest surge of unsavory PRs.
 
 ![GitHub stars](../../static/img/github-stars.gif)
 
-Before we start, we would love it if you starred our [open-source repository](https://github.com/cyclops-ui/cyclops) and helped us get our
-tool in front of other developers ⭐
+Before we start, we would love it if you starred our [open-source repository](https://github.com/cyclops-ui/cyclops) and help us get our
+tool in front of other developers ⭐ <br/>
+(The irony is not lost on us here... 😄)
 
 ## ExpressJS
 
@@ -59,4 +60,4 @@ It’s important to mention that when considering contributing to open-source, s
 
 Alternatively, focus on projects where you have domain expertise, as sharing that knowledge can be a valuable resource for the maintainers.
 
-Have you had any experience contributing to open-source? What was it like?
+Have you had any bad experiences contributing to open-source?
