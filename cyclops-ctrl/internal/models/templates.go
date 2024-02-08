@@ -14,6 +14,7 @@ type Template struct {
 	Edited   string       `json:"edited"`
 	Modules  []dto.Module `json:"modules"`
 	Version  string       `json:"version"`
+	Versions []string     `json:"versions"`
 
 	Files []*chart.File `json:"files"`
 
