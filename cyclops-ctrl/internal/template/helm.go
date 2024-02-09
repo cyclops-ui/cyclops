@@ -25,7 +25,7 @@ import (
 
 func (r Repo) LoadHelmChart(repo, chart, version string) (*models.Template, error) {
 	var err error
-	var strictVersion string
+	strictVersion := version
 	if !isValidVersion(version) {
 		if registry.IsOCI(repo) {
 			strictVersion, err = getOCIStrictVersion(repo, chart, version)
@@ -75,7 +75,7 @@ func (r Repo) LoadHelmChart(repo, chart, version string) (*models.Template, erro
 
 func (r Repo) LoadHelmChartInitialValues(repo, chart, version string) (map[interface{}]interface{}, error) {
 	var err error
-	var strictVersion string
+	strictVersion := version
 	if !isValidVersion(version) {
 		if registry.IsOCI(repo) {
 			strictVersion, err = getOCIStrictVersion(repo, chart, version)
