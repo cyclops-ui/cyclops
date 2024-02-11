@@ -7,32 +7,49 @@ import (
 	"helm.sh/helm/v3/pkg/registry"
 )
 
-func GetTemplate(repo, path, version string) (*models.Template, error) {
-	// region load OCI chart
-	if registry.IsOCI(repo) {
-		return LoadOCIHelmChart(repo, path, version)
-	}
-	// endregion
-
-	// region load from Helm repo
-	isHelmRepo, err := IsHelmRepo(repo)
-	if err != nil {
-		return nil, err
-	}
-
-	if isHelmRepo {
-		return LoadHelmChart(repo, path, version)
-	}
-	// endregion
-
-	// fallback to cloning from git
-	return LoadTemplate(repo, path, version)
+type Repo struct {
+	cache templateCache
 }
 
-func GetTemplateInitialValues(repo, path, version string) ([]byte, error) {
+type templateCache interface {
+	GetTemplate(repo, path, version string) (*models.Template, bool)
+	SetTemplate(repo, path, version string, template *models.Template)
+	GetTemplateInitialValues(repo, path, version string) (map[interface{}]interface{}, bool)
+	SetTemplateInitialValues(repo, path, version string, values map[interface{}]interface{})
+}
+
+func NewRepo(tc templateCache) *Repo {
+	return &Repo{
+		cache: tc,
+	}
+}
+
+func (r Repo) GetTemplate(repo, path, version string) (*models.Template, error) {
 	// region load OCI chart
 	if registry.IsOCI(repo) {
-		initial, err := LoadOCIHelmChartInitialValues(repo, path, version)
+		return r.LoadOCIHelmChart(repo, path, version)
+	}
+	// endregion
+
+	// region load from Helm repo
+	isHelmRepo, err := IsHelmRepo(repo)
+	if err != nil {
+		return nil, err
+	}
+
+	if isHelmRepo {
+		return r.LoadHelmChart(repo, path, version)
+	}
+	// endregion
+
+	// fallback to cloning from git
+	return r.LoadTemplate(repo, path, version)
+}
+
+func (r Repo) GetTemplateInitialValues(repo, path, version string) ([]byte, error) {
+	// region load OCI chart
+	if registry.IsOCI(repo) {
+		initial, err := r.LoadOCIHelmChartInitialValues(repo, path, version)
 		if err != nil {
 			return nil, err
 		}
@@ -48,7 +65,7 @@ func GetTemplateInitialValues(repo, path, version string) ([]byte, error) {
 	}
 
 	if isHelmRepo {
-		initial, err := LoadHelmChartInitialValues(repo, path, version)
+		initial, err := r.LoadHelmChartInitialValues(repo, path, version)
 		if err != nil {
 			return nil, err
 		}
@@ -58,7 +75,7 @@ func GetTemplateInitialValues(repo, path, version string) ([]byte, error) {
 	// endregion
 
 	// fallback to cloning from git
-	initial, err := LoadInitialTemplateValues(repo, path, version)
+	initial, err := r.LoadInitialTemplateValues(repo, path, version)
 	if err != nil {
 		return nil, err
 	}
@@ -66,10 +83,10 @@ func GetTemplateInitialValues(repo, path, version string) ([]byte, error) {
 	return json.Marshal(initial)
 }
 
-func loadDependencies(metadata helmchart.Metadata) ([]*models.Template, error) {
+func (r Repo) loadDependencies(metadata helmchart.Metadata) ([]*models.Template, error) {
 	deps := make([]*models.Template, 0)
 	for _, dependency := range metadata.Dependencies {
-		dep, err := GetTemplate(dependency.Repository, dependency.Name, dependency.Version)
+		dep, err := r.GetTemplate(dependency.Repository, dependency.Name, dependency.Version)
 		if err != nil {
 			return nil, err
 		}
@@ -80,12 +97,17 @@ func loadDependencies(metadata helmchart.Metadata) ([]*models.Template, error) {
 	return deps, nil
 }
 
-func loadDependenciesInitialValues(metadata helmchart.Metadata) (map[interface{}]interface{}, error) {
+func (r Repo) loadDependenciesInitialValues(metadata helmchart.Metadata) (map[interface{}]interface{}, error) {
 	initialValues := make(map[interface{}]interface{})
 	for _, dependency := range metadata.Dependencies {
-		depInitialValues, err := GetTemplateInitialValues(dependency.Repository, dependency.Name, dependency.Version)
+		depInitialValuesData, err := r.GetTemplateInitialValues(dependency.Repository, dependency.Name, dependency.Version)
 		if err != nil {
 			return nil, err
+		}
+
+		var depInitialValues interface{}
+		if err := json.Unmarshal(depInitialValuesData, &depInitialValues); err != nil {
+			panic(err)
 		}
 
 		initialValues[dependency.Name] = depInitialValues

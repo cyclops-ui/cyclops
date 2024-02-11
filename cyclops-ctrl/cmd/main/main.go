@@ -3,6 +3,8 @@ package main
 import (
 	"flag"
 	"fmt"
+	"github.com/cyclops-ui/cycops-ctrl/internal/template"
+	"github.com/cyclops-ui/cycops-ctrl/internal/template/cache"
 	"os"
 
 	"k8s.io/apimachinery/pkg/runtime"
@@ -63,7 +65,9 @@ func main() {
 		//panic(err)
 	}
 
-	handler, err := handler.New(templatesStorage, k8sClient)
+	templatesRepo := template.NewRepo(cache.NewInMemoryTemplatesCache())
+
+	handler, err := handler.New(templatesStorage, templatesRepo, k8sClient)
 	if err != nil {
 		panic(err)
 	}
@@ -86,6 +90,7 @@ func main() {
 	if err = (modulecontroller.NewModuleReconciler(
 		mgr.GetClient(),
 		mgr.GetScheme(),
+		templatesRepo,
 		templatesStorage,
 		k8sClient,
 	)).SetupWithManager(mgr); err != nil {

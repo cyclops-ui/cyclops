@@ -6,16 +6,18 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"log"
 	path2 "path"
 	"path/filepath"
 	"strings"
 
+	"github.com/go-git/go-billy/v5"
+	"github.com/go-git/go-billy/v5/memfs"
+	"github.com/go-git/go-git/v5"
+	"github.com/go-git/go-git/v5/config"
+	"github.com/go-git/go-git/v5/plumbing"
+	"github.com/go-git/go-git/v5/storage/memory"
 	"github.com/pkg/errors"
-	"gopkg.in/src-d/go-billy.v4"
-	"gopkg.in/src-d/go-billy.v4/memfs"
-	git "gopkg.in/src-d/go-git.v4"
-	"gopkg.in/src-d/go-git.v4/plumbing"
-	"gopkg.in/src-d/go-git.v4/storage/memory"
 	"gopkg.in/yaml.v2"
 	"helm.sh/helm/v3/pkg/chart"
 
@@ -24,7 +26,17 @@ import (
 	"github.com/cyclops-ui/cycops-ctrl/internal/models/helm"
 )
 
-func LoadTemplate(repoURL, path, commit string) (*models.Template, error) {
+func (r Repo) LoadTemplate(repoURL, path, commit string) (*models.Template, error) {
+	commitSHA, err := resolveRef(repoURL, commit)
+	if err != nil {
+		return nil, err
+	}
+
+	cached, ok := r.cache.GetTemplate(repoURL, path, commitSHA)
+	if ok {
+		return cached, nil
+	}
+
 	fs, err := clone(repoURL, commit)
 	if err != nil {
 		return nil, err
@@ -93,13 +105,13 @@ func LoadTemplate(repoURL, path, commit string) (*models.Template, error) {
 	// endregion
 
 	// region load dependencies
-	dependencies, err := loadDependencies(metadata)
+	dependencies, err := r.loadDependencies(metadata)
 	if err != nil {
 		return nil, err
 	}
 	// endregion
 
-	return &models.Template{
+	template := &models.Template{
 		Name:         "",
 		Manifest:     strings.Join(manifests, "---\n"),
 		Fields:       mapper.HelmSchemaToFields(schema, dependencies),
@@ -108,10 +120,24 @@ func LoadTemplate(repoURL, path, commit string) (*models.Template, error) {
 		Version:      "",
 		Files:        chartFiles,
 		Dependencies: dependencies,
-	}, nil
+	}
+
+	r.cache.SetTemplate(repoURL, path, commitSHA, template)
+
+	return template, err
 }
 
-func LoadInitialTemplateValues(repoURL, path, commit string) (map[interface{}]interface{}, error) {
+func (r Repo) LoadInitialTemplateValues(repoURL, path, commit string) (map[interface{}]interface{}, error) {
+	commitSHA, err := resolveRef(repoURL, commit)
+	if err != nil {
+		return nil, err
+	}
+
+	cached, ok := r.cache.GetTemplateInitialValues(repoURL, path, commitSHA)
+	if ok {
+		return cached, nil
+	}
+
 	fs, err := clone(repoURL, commit)
 	if err != nil {
 		return nil, err
@@ -152,7 +178,7 @@ func LoadInitialTemplateValues(repoURL, path, commit string) (map[interface{}]in
 		initialValues = make(map[interface{}]interface{})
 	}
 
-	depInitialValues, err := loadDependenciesInitialValues(metadata)
+	depInitialValues, err := r.loadDependenciesInitialValues(metadata)
 	if err != nil {
 		return nil, err
 	}
@@ -162,7 +188,33 @@ func LoadInitialTemplateValues(repoURL, path, commit string) (map[interface{}]in
 	}
 	// endregion
 
+	r.cache.SetTemplateInitialValues(repoURL, path, commitSHA, initialValues)
+
 	return initialValues, nil
+}
+
+func resolveRef(repo, version string) (string, error) {
+	rem := git.NewRemote(memory.NewStorage(), &config.RemoteConfig{
+		Name: "origin",
+		URLs: []string{repo},
+	})
+
+	// We can then use every Remote functions to retrieve wanted information
+	refs, err := rem.List(&git.ListOptions{
+		PeelingOption: git.AppendPeeled,
+	})
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	// Filters the references list and only keeps tags
+	for _, ref := range refs {
+		if ref.Name().Short() == version {
+			return ref.Hash().String(), nil
+		}
+	}
+
+	return version, nil
 }
 
 func readValuesFile(fs billy.Filesystem, path string) ([]byte, error) {

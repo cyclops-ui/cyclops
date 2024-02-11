@@ -2,66 +2,92 @@ package template
 
 import (
 	"fmt"
-	"gopkg.in/yaml.v2"
 	"io/ioutil"
 	"net/http"
 	"net/url"
 	"strings"
 
-	"github.com/cyclops-ui/cycops-ctrl/internal/models"
 	json "github.com/json-iterator/go"
 	"github.com/pkg/errors"
+
+	"github.com/cyclops-ui/cycops-ctrl/internal/models"
 )
 
-func LoadOCIHelmChart(repo, chart, version string) (*models.Template, error) {
-	var tgzData []byte
-	tgzData, err := loadOCIHelmChartBytes(repo, chart, version)
-	if err != nil {
-		return nil, err
-	}
-
-	extractedFiles, err := unpackTgzInMemory(tgzData)
-	if err != nil {
-		return nil, err
-	}
-
-	return mapHelmChart(chart, extractedFiles)
-}
-
-func LoadOCIHelmChartInitialValues(repo, chart, version string) (map[interface{}]interface{}, error) {
-	tgzData, err := loadOCIHelmChartBytes(repo, chart, version)
-	if err != nil {
-		return nil, err
-	}
-
-	extractedFiles, err := unpackTgzInMemory(tgzData)
-	if err != nil {
-		return nil, err
-	}
-
-	valuesBytes := []byte{}
-
-	for name, content := range extractedFiles {
-		parts := strings.Split(name, "/")
-
-		if len(parts) == 2 && parts[1] == "values.yaml" {
-			valuesBytes = content
-			break
+func (r Repo) LoadOCIHelmChart(repo, chart, version string) (*models.Template, error) {
+	var err error
+	strictVersion := version
+	if !isValidVersion(version) {
+		strictVersion, err = getOCIStrictVersion(repo, chart, version)
+		if err != nil {
+			return nil, err
 		}
 	}
 
-	var values map[interface{}]interface{}
-	if err := yaml.Unmarshal(valuesBytes, &values); err != nil {
+	cached, ok := r.cache.GetTemplate(repo, chart, strictVersion)
+	if ok {
+		return cached, nil
+	}
+
+	var tgzData []byte
+	tgzData, err = loadOCIHelmChartBytes(repo, chart, version)
+	if err != nil {
 		return nil, err
 	}
 
-	return mapHelmChartInitialValues(extractedFiles)
+	extractedFiles, err := unpackTgzInMemory(tgzData)
+	if err != nil {
+		return nil, err
+	}
+
+	template, err := r.mapHelmChart(chart, extractedFiles)
+	if err != nil {
+		return nil, err
+	}
+
+	r.cache.SetTemplate(repo, chart, strictVersion, template)
+
+	return template, nil
+}
+
+func (r Repo) LoadOCIHelmChartInitialValues(repo, chart, version string) (map[interface{}]interface{}, error) {
+	var err error
+	strictVersion := version
+	if !isValidVersion(version) {
+		strictVersion, err = getOCIStrictVersion(repo, chart, version)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	cached, ok := r.cache.GetTemplateInitialValues(repo, chart, strictVersion)
+	if ok {
+		return cached, nil
+	}
+
+	tgzData, err := loadOCIHelmChartBytes(repo, chart, version)
+	if err != nil {
+		return nil, err
+	}
+
+	extractedFiles, err := unpackTgzInMemory(tgzData)
+	if err != nil {
+		return nil, err
+	}
+
+	initial, err := r.mapHelmChartInitialValues(extractedFiles)
+	if err != nil {
+		return nil, err
+	}
+
+	r.cache.SetTemplateInitialValues(repo, chart, strictVersion, initial)
+
+	return initial, nil
 }
 
 func loadOCIHelmChartBytes(repo, chart, version string) ([]byte, error) {
 	var err error
 	if !isValidVersion(version) {
-		version, err = getStrictVersion(repo, chart, version)
+		version, err = getOCIStrictVersion(repo, chart, version)
 		if err != nil {
 			return nil, err
 		}
@@ -185,7 +211,7 @@ func fetchDigest(repo, chart, version, token string) (string, error) {
 	return resp.Header.Get("docker-content-digest"), nil
 }
 
-func getStrictVersion(repo, chart, version string) (string, error) {
+func getOCIStrictVersion(repo, chart, version string) (string, error) {
 	token, err := authorizeOCITags(repo, chart)
 	if err != nil {
 		return "", err

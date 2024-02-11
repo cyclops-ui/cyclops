@@ -23,16 +23,36 @@ import (
 	"github.com/cyclops-ui/cycops-ctrl/internal/models/helm"
 )
 
-func LoadHelmChart(repo, chart, version string) (*models.Template, error) {
-	var tgzData []byte
+func (r Repo) LoadHelmChart(repo, chart, version string) (*models.Template, error) {
 	var err error
+	strictVersion := version
+	if !isValidVersion(version) {
+		if registry.IsOCI(repo) {
+			strictVersion, err = getOCIStrictVersion(repo, chart, version)
+			if err != nil {
+				return nil, err
+			}
+		} else {
+			strictVersion, err = getRepoStrictVersion(repo, chart, version)
+			if err != nil {
+				return nil, err
+			}
+		}
+	}
+
+	cached, ok := r.cache.GetTemplate(repo, chart, strictVersion)
+	if ok {
+		return cached, nil
+	}
+
+	var tgzData []byte
 	if registry.IsOCI(repo) {
 		tgzData, err = loadOCIHelmChartBytes(repo, chart, version)
 		if err != nil {
 			return nil, err
 		}
 	} else {
-		tgzData, err = loadFromHelmChartRepo(repo, chart, version)
+		tgzData, err = r.loadFromHelmChartRepo(repo, chart, version)
 		if err != nil {
 			return nil, err
 		}
@@ -43,19 +63,46 @@ func LoadHelmChart(repo, chart, version string) (*models.Template, error) {
 		return nil, err
 	}
 
-	return mapHelmChart(chart, extractedFiles)
+	template, err := r.mapHelmChart(chart, extractedFiles)
+	if err != nil {
+		return nil, err
+	}
+
+	r.cache.SetTemplate(repo, chart, strictVersion, template)
+
+	return template, nil
 }
 
-func LoadHelmChartInitialValues(repo, chart, version string) (map[interface{}]interface{}, error) {
-	var tgzData []byte
+func (r Repo) LoadHelmChartInitialValues(repo, chart, version string) (map[interface{}]interface{}, error) {
 	var err error
+	strictVersion := version
+	if !isValidVersion(version) {
+		if registry.IsOCI(repo) {
+			strictVersion, err = getOCIStrictVersion(repo, chart, version)
+			if err != nil {
+				return nil, err
+			}
+		} else {
+			strictVersion, err = getRepoStrictVersion(repo, chart, version)
+			if err != nil {
+				return nil, err
+			}
+		}
+	}
+
+	cached, ok := r.cache.GetTemplateInitialValues(repo, chart, strictVersion)
+	if ok {
+		return cached, nil
+	}
+
+	var tgzData []byte
 	if registry.IsOCI(repo) {
 		tgzData, err = loadOCIHelmChartBytes(repo, chart, version)
 		if err != nil {
 			return nil, err
 		}
 	} else {
-		tgzData, err = loadFromHelmChartRepo(repo, chart, version)
+		tgzData, err = r.loadFromHelmChartRepo(repo, chart, version)
 		if err != nil {
 			return nil, err
 		}
@@ -66,23 +113,14 @@ func LoadHelmChartInitialValues(repo, chart, version string) (map[interface{}]in
 		return nil, err
 	}
 
-	valuesBytes := []byte{}
-
-	for name, content := range extractedFiles {
-		parts := strings.Split(name, "/")
-
-		if len(parts) == 2 && parts[1] == "values.yaml" {
-			valuesBytes = content
-			break
-		}
-	}
-
-	var values map[interface{}]interface{}
-	if err := yaml.Unmarshal(valuesBytes, &values); err != nil {
+	initial, err := r.mapHelmChartInitialValues(extractedFiles)
+	if err != nil {
 		return nil, err
 	}
 
-	return mapHelmChartInitialValues(extractedFiles)
+	r.cache.SetTemplateInitialValues(repo, chart, strictVersion, initial)
+
+	return initial, nil
 }
 
 func IsHelmRepo(repo string) (bool, error) {
@@ -106,7 +144,7 @@ func IsHelmRepo(repo string) (bool, error) {
 	return resp.StatusCode == http.StatusOK, nil
 }
 
-func loadFromHelmChartRepo(repo, chart, version string) ([]byte, error) {
+func (r Repo) loadFromHelmChartRepo(repo, chart, version string) ([]byte, error) {
 	tgzURL, err := getTarUrl(repo, chart, version)
 	if err != nil {
 		return nil, err
@@ -115,7 +153,7 @@ func loadFromHelmChartRepo(repo, chart, version string) ([]byte, error) {
 	return downloadFile(tgzURL)
 }
 
-func mapHelmChart(chartName string, files map[string][]byte) (*models.Template, error) {
+func (r Repo) mapHelmChart(chartName string, files map[string][]byte) (*models.Template, error) {
 	metadataBytes := []byte{}
 	schemaBytes := []byte{}
 	manifestParts := make([]string, 0)
@@ -171,7 +209,7 @@ func mapHelmChart(chartName string, files map[string][]byte) (*models.Template, 
 	}
 
 	// region load dependencies
-	dependencies, err := loadDependencies(metadata)
+	dependencies, err := r.loadDependencies(metadata)
 	if err != nil {
 		return &models.Template{}, err
 	}
@@ -181,7 +219,7 @@ func mapHelmChart(chartName string, files map[string][]byte) (*models.Template, 
 			continue
 		}
 
-		dep, err := mapHelmChart(depName, files)
+		dep, err := r.mapHelmChart(depName, files)
 		if err != nil {
 			return nil, err
 		}
@@ -202,7 +240,7 @@ func mapHelmChart(chartName string, files map[string][]byte) (*models.Template, 
 	}, nil
 }
 
-func mapHelmChartInitialValues(files map[string][]byte) (map[interface{}]interface{}, error) {
+func (r Repo) mapHelmChartInitialValues(files map[string][]byte) (map[interface{}]interface{}, error) {
 	metadataBytes := []byte{}
 	valuesBytes := []byte{}
 	dependenciesFromChartsDir := make(map[string]map[string][]byte, 0)
@@ -243,7 +281,7 @@ func mapHelmChartInitialValues(files map[string][]byte) (map[interface{}]interfa
 
 	// region load dependencies
 	for depName, files := range dependenciesFromChartsDir {
-		dep, err := mapHelmChartInitialValues(files)
+		dep, err := r.mapHelmChartInitialValues(files)
 		if err != nil {
 			return nil, err
 		}
@@ -251,7 +289,7 @@ func mapHelmChartInitialValues(files map[string][]byte) (map[interface{}]interfa
 		values[depName] = dep
 	}
 
-	dependenciesFromMeta, err := loadDependenciesInitialValues(metadata)
+	dependenciesFromMeta, err := r.loadDependenciesInitialValues(metadata)
 	if err != nil {
 		return nil, err
 	}
@@ -307,6 +345,36 @@ func getTarUrl(repo, chart, version string) (string, error) {
 	}
 
 	return "", errors.New(fmt.Sprintf("version %v not found in chart %v and repo %v", version, chart, repo))
+}
+
+func getRepoStrictVersion(repo, chart, version string) (string, error) {
+	indexURL, err := url.JoinPath(repo, "index.yaml")
+	if err != nil {
+		return "", err
+	}
+
+	response, err := http.Get(indexURL)
+	if err != nil {
+		return "", err
+	}
+	defer response.Body.Close()
+
+	body, err := ioutil.ReadAll(response.Body)
+	if err != nil {
+		return "", err
+	}
+
+	var data helm.Index
+	err = yaml.Unmarshal(body, &data)
+	if err != nil {
+		return "", err
+	}
+
+	if _, ok := data.Entries[chart]; !ok {
+		return "", errors.New(fmt.Sprintf("chart %v not found in repo %v", chart, repo))
+	}
+
+	return resolveVersion(data.Entries[chart], version)
 }
 
 func resolveVersion(indexEntries []helm.IndexEntry, version string) (string, error) {

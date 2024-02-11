@@ -8,17 +8,24 @@ import (
 	"github.com/cyclops-ui/cycops-ctrl/internal/cluster/k8sclient"
 	"github.com/cyclops-ui/cycops-ctrl/internal/controller"
 	"github.com/cyclops-ui/cycops-ctrl/internal/storage/templates"
+	templaterepo "github.com/cyclops-ui/cycops-ctrl/internal/template"
 )
 
 type Handler struct {
 	router *gin.Engine
 
+	templatesRepo    *templaterepo.Repo
 	templatesStorage *templates.Storage
 	k8sClient        *k8sclient.KubernetesClient
 }
 
-func New(templates *templates.Storage, kubernetesClient *k8sclient.KubernetesClient) (*Handler, error) {
+func New(
+	templates *templates.Storage,
+	templatesRepo *templaterepo.Repo,
+	kubernetesClient *k8sclient.KubernetesClient,
+) (*Handler, error) {
 	return &Handler{
+		templatesRepo:    templatesRepo,
 		templatesStorage: templates,
 		k8sClient:        kubernetesClient,
 		router:           gin.New(),
@@ -28,8 +35,8 @@ func New(templates *templates.Storage, kubernetesClient *k8sclient.KubernetesCli
 func (h *Handler) Start() error {
 	gin.SetMode(gin.DebugMode)
 
-	templatesController := controller.NewTemplatesController(h.templatesStorage, h.k8sClient)
-	modulesController := controller.NewModulesController(h.templatesStorage, h.k8sClient)
+	templatesController := controller.NewTemplatesController(h.templatesStorage, h.templatesRepo, h.k8sClient)
+	modulesController := controller.NewModulesController(h.templatesStorage, h.templatesRepo, h.k8sClient)
 	clusterController := controller.NewClusterController(h.k8sClient)
 
 	h.router = gin.New()

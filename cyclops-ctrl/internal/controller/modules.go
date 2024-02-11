@@ -6,23 +6,30 @@ import (
 	"os"
 	"strings"
 
+	"github.com/gin-gonic/gin"
+
 	"github.com/cyclops-ui/cycops-ctrl/api/v1alpha1"
 	"github.com/cyclops-ui/cycops-ctrl/internal/cluster/k8sclient"
 	"github.com/cyclops-ui/cycops-ctrl/internal/mapper"
 	"github.com/cyclops-ui/cycops-ctrl/internal/models/dto"
 	"github.com/cyclops-ui/cycops-ctrl/internal/storage/templates"
 	"github.com/cyclops-ui/cycops-ctrl/internal/template"
-	"github.com/gin-gonic/gin"
 )
 
 type Modules struct {
 	kubernetesClient *k8sclient.KubernetesClient
+	templatesRepo    *template.Repo
 	templates        *templates.Storage
 }
 
-func NewModulesController(templates *templates.Storage, kubernetes *k8sclient.KubernetesClient) *Modules {
+func NewModulesController(
+	templates *templates.Storage,
+	templatesRepo *template.Repo,
+	kubernetes *k8sclient.KubernetesClient,
+) *Modules {
 	return &Modules{
 		kubernetesClient: kubernetes,
+		templatesRepo:    templatesRepo,
 		templates:        templates,
 	}
 }
@@ -109,7 +116,7 @@ func (m *Modules) Manifest(ctx *gin.Context) {
 		return
 	}
 
-	targetTemplate, err := template.GetTemplate(
+	targetTemplate, err := m.templatesRepo.GetTemplate(
 		request.TemplateRef.URL,
 		request.TemplateRef.Path,
 		request.TemplateRef.Version,
@@ -143,7 +150,7 @@ func (m *Modules) CurrentManifest(ctx *gin.Context) {
 		return
 	}
 
-	targetTemplate, err := template.GetTemplate(
+	targetTemplate, err := m.templatesRepo.GetTemplate(
 		module.Spec.TemplateRef.URL,
 		module.Spec.TemplateRef.Path,
 		module.Spec.TemplateRef.Version,
@@ -275,7 +282,7 @@ func (m *Modules) ResourcesForModule(ctx *gin.Context) {
 		return
 	}
 
-	t, err := template.GetTemplate(
+	t, err := m.templatesRepo.GetTemplate(
 		module.Spec.TemplateRef.URL,
 		module.Spec.TemplateRef.Path,
 		module.Spec.TemplateRef.Version,
@@ -313,7 +320,7 @@ func (m *Modules) Template(ctx *gin.Context) {
 		return
 	}
 
-	currentTemplate, err := template.GetTemplate(
+	currentTemplate, err := m.templatesRepo.GetTemplate(
 		module.Spec.TemplateRef.URL,
 		module.Spec.TemplateRef.Path,
 		module.Spec.TemplateRef.Version,
@@ -331,7 +338,7 @@ func (m *Modules) Template(ctx *gin.Context) {
 		return
 	}
 
-	proposedTemplate, err := template.GetTemplate(
+	proposedTemplate, err := m.templatesRepo.GetTemplate(
 		module.Spec.TemplateRef.URL,
 		module.Spec.TemplateRef.Path,
 		module.Spec.TemplateRef.Version,
@@ -367,7 +374,7 @@ func (m *Modules) HelmTemplate(ctx *gin.Context) {
 		return
 	}
 
-	currentTemplate, err := template.GetTemplate(
+	currentTemplate, err := m.templatesRepo.GetTemplate(
 		module.Spec.TemplateRef.URL,
 		module.Spec.TemplateRef.Path,
 		module.Spec.TemplateRef.Version,

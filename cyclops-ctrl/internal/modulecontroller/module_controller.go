@@ -34,7 +34,7 @@ import (
 	"github.com/cyclops-ui/cycops-ctrl/internal/cluster/k8sclient"
 	"github.com/cyclops-ui/cycops-ctrl/internal/models"
 	"github.com/cyclops-ui/cycops-ctrl/internal/storage/templates"
-	"github.com/cyclops-ui/cycops-ctrl/internal/template"
+	templaterepo "github.com/cyclops-ui/cycops-ctrl/internal/template"
 )
 
 // ModuleReconciler reconciles a Module object
@@ -42,6 +42,7 @@ type ModuleReconciler struct {
 	client.Client
 	Scheme *runtime.Scheme
 
+	templatesRepo    *templaterepo.Repo
 	templates        *templates.Storage
 	kubernetesClient *k8sclient.KubernetesClient
 
@@ -51,12 +52,14 @@ type ModuleReconciler struct {
 func NewModuleReconciler(
 	client client.Client,
 	scheme *runtime.Scheme,
+	templatesRepo *templaterepo.Repo,
 	templates *templates.Storage,
 	kubernetesClient *k8sclient.KubernetesClient,
 ) *ModuleReconciler {
 	return &ModuleReconciler{
 		Client:           client,
 		Scheme:           scheme,
+		templatesRepo:    templatesRepo,
 		templates:        templates,
 		kubernetesClient: kubernetesClient,
 		logger:           ctrl.Log.WithName("reconciler"),
@@ -130,7 +133,7 @@ func (r *ModuleReconciler) moduleToResources(name string) error {
 		return err
 	}
 
-	template, err := template.GetTemplate(
+	template, err := r.templatesRepo.GetTemplate(
 		module.Spec.TemplateRef.URL,
 		module.Spec.TemplateRef.Path,
 		module.Spec.TemplateRef.Version,
@@ -147,7 +150,7 @@ func (r *ModuleReconciler) moduleToResources(name string) error {
 }
 
 func (r *ModuleReconciler) generateResources(kClient *k8sclient.KubernetesClient, module cyclopsv1alpha1.Module, moduleTemplate *models.Template) error {
-	out, err := template.HelmTemplate(module, moduleTemplate)
+	out, err := templaterepo.HelmTemplate(module, moduleTemplate)
 	if err != nil {
 		return err
 	}
