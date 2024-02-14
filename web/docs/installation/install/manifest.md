@@ -1,6 +1,8 @@
-# Install
+---
+sidebar_label: Using kubectl
+---
 
-⚠️ Before installing Cyclops, make sure you have all the [prerequisites](./prerequisites) ⚠️
+# Install
 
 To install Cyclops in your cluster, run commands below:
 
