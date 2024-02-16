@@ -39,7 +39,20 @@ const sidebars = {
       label: 'Installation',
       items: [
         'installation/prerequisites',
-        'installation/install',
+        {
+          type: 'category',
+          label: 'Install',
+          link: {
+            type: 'generated-index',
+            title: 'Installation methods',
+            description: '⚠️ Before installing Cyclops, make sure you have all the Prerequisites ⚠️',
+            slug: '/installation/install',
+          },
+          items: [
+            'installation/install/manifest',
+            'installation/install/glasskube',
+          ],
+        },
         'installation/configuration',
         {
           type: 'category',
