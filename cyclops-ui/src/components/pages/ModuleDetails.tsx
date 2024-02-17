@@ -110,7 +110,7 @@ const ModuleDetails = () => {
     let {moduleName} = useParams();
 
     function fetchManifest(group: string, version: string, kind: string, namespace: string, name: string) {
-        axios.get(window.__RUNTIME_CONFIG__.REACT_APP_CYCLOPS_CTRL_HOST + `/manifest`,{
+        axios.get(`/api/manifest`,{
             params: {
                 group: group,
                 version: version,
@@ -140,7 +140,7 @@ const ModuleDetails = () => {
     }
 
     function fetchModule() {
-        axios.get(window.__RUNTIME_CONFIG__.REACT_APP_CYCLOPS_CTRL_HOST + `/modules/` + moduleName).then(res => {
+        axios.get(`/api/modules/` + moduleName).then(res => {
             setModule(res.data);
             setLoadModule(true);
         }).catch(error => {
@@ -160,7 +160,7 @@ const ModuleDetails = () => {
     }
 
     function fetchModuleResources() {
-        axios.get(window.__RUNTIME_CONFIG__.REACT_APP_CYCLOPS_CTRL_HOST + `/modules/` + moduleName + `/resources`).then(res => {
+        axios.get(`/api/modules/` + moduleName + `/resources`).then(res => {
             setResources(res.data);
             setLoadResources(true);
         }).catch(error => {
@@ -212,7 +212,7 @@ const ModuleDetails = () => {
     };
 
     const deleteDeployment = () => {
-        axios.delete(window.__RUNTIME_CONFIG__.REACT_APP_CYCLOPS_CTRL_HOST + `/modules/` + moduleName).then(()  => {
+        axios.delete(`/api/modules/` + moduleName).then(()  => {
             window.location.href = "/modules"
         }).catch(error => {
             console.log(error)
@@ -308,7 +308,7 @@ const ModuleDetails = () => {
         if (resource.deleted) {
             deleteButton = (
                 <Button onClick={function () {
-                    axios.delete(window.__RUNTIME_CONFIG__.REACT_APP_CYCLOPS_CTRL_HOST + `/modules/` + moduleName + `/resources`, {
+                    axios.delete(`/api/modules/` + moduleName + `/resources`, {
                             data: {
                                 group: resource.group,
                                 version: resource.version,

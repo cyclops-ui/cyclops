@@ -17,7 +17,7 @@ const Modules = () => {
     });
 
     useEffect(() => {
-        axios.get(window.__RUNTIME_CONFIG__.REACT_APP_CYCLOPS_CTRL_HOST + `/modules/list`).then(res => {
+        axios.get(`/api/modules/list`).then(res => {
             setAllData(res.data);
             setFilteredData(res.data);
         }).catch(error => {
@@ -31,12 +31,6 @@ const Modules = () => {
             }
         })
     }, []);
-
-    async function handleChange(value: any) {
-        await axios.get(window.__RUNTIME_CONFIG__.REACT_APP_CYCLOPS_CTRL_HOST + `/modules/list`).then(res => {
-            setAllData(res.data);
-        });
-    }
 
     const namespaces: {} | any = [];
     namespacesState.map((namespace: any) => {

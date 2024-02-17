@@ -237,7 +237,7 @@ const NewModule = () => {
 
         values = findMaps(config.fields, values)
 
-        axios.post(window.__RUNTIME_CONFIG__.REACT_APP_CYCLOPS_CTRL_HOST + `/modules/new`,
+        axios.post(`/api/modules/new`,
             {
                 name: moduleName,
                 values: values,
@@ -326,7 +326,7 @@ const NewModule = () => {
 
         let tmpConfig: any = {}
 
-        await axios.get(window.__RUNTIME_CONFIG__.REACT_APP_CYCLOPS_CTRL_HOST + `/templates?repo=` + repo + `&path=` + path + `&commit=` + commit).then(templatesRes => {
+        await axios.get(`/api/templates?repo=` + repo + `&path=` + path + `&commit=` + commit).then(templatesRes => {
             setConfig(templatesRes.data);
             tmpConfig = templatesRes.data;
 
@@ -350,7 +350,7 @@ const NewModule = () => {
             }
         });
 
-        axios.get(window.__RUNTIME_CONFIG__.REACT_APP_CYCLOPS_CTRL_HOST + `/templates/initial?repo=` + repo + `&path=` + path + `&commit=` + commit).then(res => {
+        axios.get(`/api/templates/initial?repo=` + repo + `&path=` + path + `&commit=` + commit).then(res => {
             form.setFieldsValue(mapsToArray(tmpConfig.fields, res.data))
 
             setError({

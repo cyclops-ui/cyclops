@@ -16,7 +16,7 @@ const Nodes = () => {
     });
 
     useEffect(() => {
-        axios.get(window.__RUNTIME_CONFIG__.REACT_APP_CYCLOPS_CTRL_HOST + `/nodes`).then(res => {
+        axios.get(`/api/nodes`).then(res => {
             setNodes(res.data);
             setFilteredNodes(res.data);
         }).catch(error => {
