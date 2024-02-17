@@ -254,7 +254,7 @@ spec:
             - containerPort: 80
           env:
             - name: REACT_APP_CYCLOPS_CTRL_HOST
-              value: http://localhost:8080 # http://cyclops-ctrl.cyclops:8080
+              value: http://cyclops-ctrl.cyclops:8080
             - name: NODE_ENV
               value: production
             - name: NODE_OPTIONS
