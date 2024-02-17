@@ -52,7 +52,7 @@ const Pod = ({name, namespace}: Props) => {
     const [logs, setLogs] = useState('');
 
     function fetchPod() {
-        axios.get(window.__RUNTIME_CONFIG__.REACT_APP_CYCLOPS_CTRL_HOST + `/resources`,{
+        axios.get(`/api/resources`,{
             params: {
                 group: ``,
                 version: `v1`,
@@ -94,7 +94,7 @@ const Pod = ({name, namespace}: Props) => {
 
     const downloadLogs = (container: string) => {
         return function () {
-            window.location.href = window.__RUNTIME_CONFIG__.REACT_APP_CYCLOPS_CTRL_HOST + '/resources/pods/' + namespace + '/' + name + '/' + container + '/logs/download';
+            window.location.href = '/api/resources/pods/' + namespace + '/' + name + '/' + container + '/logs/download';
         }
     }
 
@@ -143,7 +143,7 @@ const Pod = ({name, namespace}: Props) => {
     }
 
     const onLogsTabsChange = (container: string) => {
-        axios.get(window.__RUNTIME_CONFIG__.REACT_APP_CYCLOPS_CTRL_HOST + '/resources/pods/' + namespace + '/' + pod + '/' + container + '/logs').then(res => {
+        axios.get('/api/resources/pods/' + namespace + '/' + pod + '/' + container + '/logs').then(res => {
             if (res.data) {
                 let log = "";
                 res.data.forEach((s :string) => {
@@ -210,7 +210,7 @@ const Pod = ({name, namespace}: Props) => {
             <Row style={{marginTop: "15px"}}>
                 <Col style={{ float: "right" }}>
                     <Button onClick={function () {
-                        axios.get(window.__RUNTIME_CONFIG__.REACT_APP_CYCLOPS_CTRL_HOST + '/resources/pods/' + namespace + '/' + name + '/' + pod.containers[0].name + '/logs').then(res => {
+                        axios.get('/api/resources/pods/' + namespace + '/' + name + '/' + pod.containers[0].name + '/logs').then(res => {
                             if (res.data) {
                                 let log = "";
                                 res.data.forEach((s :string) => {

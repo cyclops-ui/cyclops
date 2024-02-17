@@ -28,7 +28,7 @@ const Service = ({name, namespace}: Props) => {
     });
 
     function fetchService() {
-        axios.get(window.__RUNTIME_CONFIG__.REACT_APP_CYCLOPS_CTRL_HOST + `/resources`,{
+        axios.get(`/api/resources`,{
             params: {
                 group: ``,
                 version: `v1`,
