@@ -67,7 +67,7 @@ jobs:
           # update file
           git fetch origin ${{ steps.extract_branch.outputs.branch }}
           git checkout ${{ steps.extract_branch.outputs.branch }}
-          git config user.name 'github-actions[bot]
+          git config user.name 'github-actions[bot]'
           git config user.email 'github-actions[bot]@users.noreply.github.com'
           git status
           git add $INSTALL_YAML
