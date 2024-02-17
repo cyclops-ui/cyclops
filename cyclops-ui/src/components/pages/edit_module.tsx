@@ -159,10 +159,10 @@ const EditModule = () => {
     }
 
     useEffect(() => {
-        axios.get(window.__RUNTIME_CONFIG__.REACT_APP_CYCLOPS_CTRL_HOST + `/modules/` + moduleName).then(res => {
+        axios.get(`/api/modules/` + moduleName).then(res => {
             setLoadValues(true)
 
-            axios.get(window.__RUNTIME_CONFIG__.REACT_APP_CYCLOPS_CTRL_HOST + `/templates?repo=` + res.data.template.repo + `&path=` + res.data.template.path + `&commit=` + res.data.template.version).then(templatesRes => {
+            axios.get(`/api/templates?repo=` + res.data.template.repo + `&path=` + res.data.template.path + `&commit=` + res.data.template.version).then(templatesRes => {
                 setConfig(templatesRes.data);
                 setLoadTemplate(true);
 
@@ -225,7 +225,7 @@ const EditModule = () => {
     })
 
     const handleVersionChange = (value: any) => {
-        axios.get(window.__RUNTIME_CONFIG__.REACT_APP_CYCLOPS_CTRL_HOST + `/modules/` + module.name + `/template?version=` + value).then(res => {
+        axios.get(`/api/modules/` + module.name + `/template?version=` + value).then(res => {
             setMigrateDiff(res.data);
         }).catch(error => {
             setLoading(false);
@@ -239,35 +239,6 @@ const EditModule = () => {
             }
         });
         setTargetVersion(value)
-    }
-
-    const getVersions = () => {
-        axios.get(window.__RUNTIME_CONFIG__.REACT_APP_CYCLOPS_CTRL_HOST + `/configuration/` + module.template + `/versions`).then(res => {
-            let configVersions = res.data.sort(function(a: string, b: string){
-                if (a === "latest") {return -1}
-                if (b === "latest") {return 1}
-                if(a < b) { return 1; }
-                if(a > b) { return -1; }
-                return 0;
-            })
-
-            const versionOptions: {} | any = [];
-            configVersions.map((v: any) => {
-                versionOptions.push(<Select.Option key={v}>{v}</Select.Option>)
-            })
-
-            setVersions(versionOptions);
-        }).catch(error => {
-            setLoading(false);
-            if (error.response === undefined) {
-                setError({
-                    message: String(error),
-                    description: "Check if Cyclops backend is available on: " + window.__RUNTIME_CONFIG__.REACT_APP_CYCLOPS_CTRL_HOST
-                })
-            } else {
-                setError(error.response.data);
-            }
-        });
     }
 
     const findMaps = (fields: any[], values: any): any => {
@@ -333,7 +304,7 @@ const EditModule = () => {
     const handleSubmit = (values: any) => {
         values = findMaps(config.fields, values)
 
-        axios.post(window.__RUNTIME_CONFIG__.REACT_APP_CYCLOPS_CTRL_HOST + `/modules/update`,
+        axios.post(`/api/modules/update`,
             {
                 "values": values,
                 "name": module.name,
@@ -356,37 +327,6 @@ const EditModule = () => {
         setLoading(true);
     }
 
-    const handleMigrate = () => {
-        axios.post(window.__RUNTIME_CONFIG__.REACT_APP_CYCLOPS_CTRL_HOST + `/modules/update`,
-            {
-                "values": module.values,
-                "name": module.name,
-                "template": module.template,
-                "version": targetVersion,
-            })
-            .then(res => {
-                window.location.href = "/modules/" + moduleName
-            }).catch(error => {
-            setLoading(false);
-            if (error.response === undefined) {
-                setError({
-                    message: String(error),
-                    description: "Check if Cyclops backend is available on: " + window.__RUNTIME_CONFIG__.REACT_APP_CYCLOPS_CTRL_HOST
-                })
-            } else {
-                setError(error.response.data);
-            }
-        });
-    }
-
-    const handleCancel = () => {
-        setLoading(false)
-    };
-
-    const handleCancelMigrating = () => {
-        setMigrating(false);
-    };
-
     const getCollapseColor = (fieldName: string) => {
         let kk = new Array(fieldName);
         let key = kk.join('')
@@ -395,22 +335,6 @@ const EditModule = () => {
         } else {
             return "#fae8d4"
         }
-    }
-
-    const handleChange = (value: any) => {
-        axios.get(window.__RUNTIME_CONFIG__.REACT_APP_CYCLOPS_CTRL_HOST + `/create-config/` + value).then(res => {
-            setConfig(res.data);
-        }).catch(error => {
-            setLoading(false);
-            if (error.response === undefined) {
-                setError({
-                    message: String(error),
-                    description: "Check if Cyclops backend is available on: " + window.__RUNTIME_CONFIG__.REACT_APP_CYCLOPS_CTRL_HOST
-                })
-            } else {
-                setError(error.response.data);
-            }
-        });
     }
 
     // const arrayInnerField = (field: any, parentFieldID: string, parent: string, level: number, arrayField?: any) => {

@@ -29,7 +29,7 @@ const Deployment = ({name, namespace}: Props) => {
     });
 
     function fetchDeployment() {
-        axios.get(window.__RUNTIME_CONFIG__.REACT_APP_CYCLOPS_CTRL_HOST + `/resources`,{
+        axios.get(`/api/resources`,{
             params: {
                 group: `apps`,
                 version: `v1`,
@@ -73,7 +73,7 @@ const Deployment = ({name, namespace}: Props) => {
 
     const downloadLogs = (container: string) => {
         return function () {
-            window.location.href = window.__RUNTIME_CONFIG__.REACT_APP_CYCLOPS_CTRL_HOST + '/resources/pods/' + logsModal.namespace + '/' + logsModal.pod + '/' + container + '/logs/download';
+            window.location.href = '/api/resources/pods/' + logsModal.namespace + '/' + logsModal.pod + '/' + container + '/logs/download';
         }
     }
 
@@ -122,7 +122,7 @@ const Deployment = ({name, namespace}: Props) => {
     }
 
     const onLogsTabsChange = (container: string) => {
-        axios.get(window.__RUNTIME_CONFIG__.REACT_APP_CYCLOPS_CTRL_HOST + '/resources/pods/' + logsModal.namespace + '/' + logsModal.pod + '/' + container + '/logs').then(res => {
+        axios.get('/api/resources/pods/' + logsModal.namespace + '/' + logsModal.pod + '/' + container + '/logs').then(res => {
             if (res.data) {
                 let log = "";
                 res.data.forEach((s :string) => {
@@ -212,7 +212,7 @@ const Deployment = ({name, namespace}: Props) => {
                             render={ pod => (
                                 <>
                                     <Button onClick={function () {
-                                        axios.get(window.__RUNTIME_CONFIG__.REACT_APP_CYCLOPS_CTRL_HOST + '/resources/pods/' + namespace + '/' + pod.name + '/' + pod.containers[0].name + '/logs').then(res => {
+                                        axios.get('/api/resources/pods/' + namespace + '/' + pod.name + '/' + pod.containers[0].name + '/logs').then(res => {
                                             if (res.data) {
                                                 let log = "";
                                                 res.data.forEach((s :string) => {

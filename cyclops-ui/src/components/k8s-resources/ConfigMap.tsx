@@ -16,7 +16,7 @@ const ConfigMap = ({name, namespace}: Props) => {
     });
 
     function fetchConfigMap() {
-        axios.get(window.__RUNTIME_CONFIG__.REACT_APP_CYCLOPS_CTRL_HOST + `/resources`,{
+        axios.get(`/api/resources`,{
             params: {
                 group: ``,
                 version: `v1`,

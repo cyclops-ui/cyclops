@@ -249,12 +249,12 @@ spec:
     spec:
       containers:
         - name: cyclops-ui
-          image: cyclopsui/cyclops-ui:v0.0.1-alpha.13
+          image: cyclopsui/cyclops-ui:v0.0.1-alpha.14-rc.1
           ports:
             - containerPort: 80
           env:
             - name: REACT_APP_CYCLOPS_CTRL_HOST
-              value: http://localhost:8080 # http://cyclops-ctrl.cyclops:8080
+              value: http://cyclops-ctrl.cyclops:8080
             - name: NODE_ENV
               value: production
             - name: NODE_OPTIONS
@@ -295,7 +295,7 @@ spec:
       serviceAccountName: cyclops-ctrl
       containers:
         - name: cyclops-ctrl
-          image: cyclopsui/cyclops-ctrl:v0.0.1-alpha.13
+          image: cyclopsui/cyclops-ctrl:v0.0.1-alpha.14-rc.1
           ports:
             - containerPort: 8080
           env:

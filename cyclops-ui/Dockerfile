@@ -36,6 +36,6 @@ COPY env.js ./
 COPY --from=0 app/build/ ./
 
 # Copy reverse proxy configuration
-COPY ./nginx/default.conf /etc/nginx/conf.d/default.conf
+COPY ./nginx/default.conf /default-nginx.conf
 
 ENTRYPOINT [ "sh", "/nginx-entrypoint.sh" ]

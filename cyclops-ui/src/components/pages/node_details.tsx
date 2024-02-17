@@ -26,13 +26,6 @@ import Highlighter from 'react-highlight-words';
 
 const {Title, Text} = Typography;
 
-
-const green = "#D1FFBD"
-const greenSelected = "#BDFEAE"
-
-const red = "#FF8484"
-const redSelected = "#FF7276"
-
 interface DataSourceType {
     name: string;
     namespace: string;
@@ -180,7 +173,7 @@ const NodeDetails = () => {
     });
 
     const fetchNodeData = () => {
-        axios.get(window.__RUNTIME_CONFIG__.REACT_APP_CYCLOPS_CTRL_HOST + `/nodes/` + nodeName).then(res => {
+        axios.get(`/api/nodes/` + nodeName).then(res => {
             setNode(res.data)
             setResources({
                 cpu: +((res.data.requested.cpu / res.data.available.cpu).toFixed(4)),
