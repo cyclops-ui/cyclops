@@ -2,11 +2,7 @@
 <img width="40%" src="https://github.com/cyclops-ui/cyclops/assets/72022639/53009fdd-ff0a-45c8-a04e-cda495e8b34e">
 <p/>
 <h1 align="center">Cyclops</h1>
-<p align="center">Developer friendly Kubernetes</p>
-
-<div align="center">
-    <a href="https://www.producthunt.com/posts/cyclops?utm_source=badge-featured&utm_medium=badge&utm_souce=badge-cyclops" target="_blank"><img src="https://api.producthunt.com/widgets/embed-image/v1/featured.svg?post_id=432719&theme=light" alt="Cyclops - Developer&#0032;friendly&#0032;Kubernetes | Product Hunt" style="width: 250px; height: 54px;" width="250" height="54" /></a>
-</div>
+<p align="center">customizable UI for Kubernetes workloads 👁️</p>
 
 <div align="center">
     <a href="https://github.com/cyclops-ui/cyclops/blob/main/LICENSE"><img height="20" src="https://img.shields.io/github/license/cyclops-ui/cyclops"></a>
@@ -41,25 +37,18 @@ and give it a go! (~10 minute tutorial)
 
 Cyclops can either be installed manually by applying the latest manifest or with the [Glasskube Kubernetes Package Manager](https://github.com/glasskube/glasskube/).  
 
-To install Cyclops in manually in your cluster, run commands below:
+To install Cyclops using `kubectl` into your cluster, run commands below:
 
 ```bash
-kubectl apply -f https://raw.githubusercontent.com/cyclops-ui/cyclops/v0.0.1-alpha.12/install/cyclops-install.yaml
+kubectl apply -f https://raw.githubusercontent.com/cyclops-ui/cyclops/v0.0.1-alpha.14/install/cyclops-install.yaml
 ```
 
 It will create a new namespace called `cyclops` and deploy everything you need for your Cyclops instance to run.
 
-Now all that is left is to expose Cyclops server outside the cluster. You will still need to expose both backend and
-frontend with the commands below. Expose frontend through:
+Now all that is left is to expose Cyclops server outside the cluster:
 
 ```bash
 kubectl port-forward svc/cyclops-ui 3000:3000 -n cyclops
-```
-
-and backend through:
-
-```bash
-kubectl port-forward svc/cyclops-ctrl 8080:8080 -n cyclops
 ```
 
 You can now access Cyclops in your browser on [http://localhost:3000](http://localhost:3000).
