@@ -44,7 +44,7 @@ If you are new to the project, you can look for the “**_good first issue”_**
 
 If you know of a problem or bug that is not listed here or you want to see a new feature get introduced, open a new issue! Once you open the issue, the maintainers will decide what to do next, and you should **wait for their response before you start coding**.
 
-**ProTip**: If you are opening a bug issue, be sure to write down the steps on how to reproduce the bug!
+**Pro Tip**: If you are opening a bug issue, be sure to write down the steps on how to reproduce the bug!
 
 ## How to contribute?
 
