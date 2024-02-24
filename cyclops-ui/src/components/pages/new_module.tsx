@@ -67,8 +67,6 @@ const NewModule = () => {
         description: "",
     });
 
-    const [successLoad, setSuccessLoad] = useState(false);
-
     const [loadingTemplate, setLoadingTemplate] = useState(false);
     const [loadingTemplateInitialValues, setLoadingTemplateInitialValues] = useState(false);
 
@@ -256,10 +254,8 @@ const NewModule = () => {
                         message: String(error),
                         description: "Check if Cyclops backend is available on: " + window.__RUNTIME_CONFIG__.REACT_APP_CYCLOPS_CTRL_HOST
                     })
-                    setSuccessLoad(false);
                 } else {
                     setError(error.response.data);
-                    setSuccessLoad(false);
                 }
             })
     }
@@ -305,7 +301,6 @@ const NewModule = () => {
                 message: "",
                 description: "",
             });
-            setSuccessLoad(true);
             setLoadingTemplate(false);
         }).catch(function (error) {
             setLoadingTemplate(false);
@@ -314,10 +309,8 @@ const NewModule = () => {
                     message: String(error),
                     description: "Check if Cyclops backend is available on: " + window.__RUNTIME_CONFIG__.REACT_APP_CYCLOPS_CTRL_HOST
                 })
-                setSuccessLoad(false);
             } else {
                 setError(error.response.data);
-                setSuccessLoad(false);
             }
         });
 
@@ -800,17 +793,6 @@ const NewModule = () => {
                         message: "",
                         description: "",
                     })}}
-                    style={{marginBottom: '20px'}}
-                />
-            }
-            {
-                successLoad && <Alert
-                    message={"Loaded template successfully"}
-                    type="success"
-                    closable
-                    afterClose={() => {
-                        setSuccessLoad(false);
-                    }}
                     style={{marginBottom: '20px'}}
                 />
             }
