@@ -15,7 +15,8 @@ import {
     Typography,
     Tooltip,
     message,
-    Modal
+    Modal,
+    Spin
 } from 'antd';
 import axios from 'axios';
 import {useNavigate} from 'react-router';
@@ -25,7 +26,6 @@ import './custom.css';
 
 import YAML from 'yaml'
 
-import {useParams} from "react-router-dom";
 import AceEditor from "react-ace";
 
 import 'ace-builds/src-noconflict/theme-github';
@@ -60,14 +60,15 @@ const NewModule = () => {
         version: "",
     })
 
+    const [initialValues, setInitialValues] = useState({})
+
     const [error, setError] = useState({
         message: "",
         description: "",
     });
 
-    const [successLoad, setSuccessLoad] = useState(false);
-
     const [loadingTemplate, setLoadingTemplate] = useState(false);
+    const [loadingTemplateInitialValues, setLoadingTemplateInitialValues] = useState(false);
 
     const [activeCollapses, setActiveCollapses] = useState(new Map());
     const updateActiveCollapses = (k: string[] | string, v: any) => {
@@ -88,8 +89,6 @@ const NewModule = () => {
     const [form] = Form.useForm();
 
     useEffect(() => {
-        setLoading(true);
-
         if (window.__RUNTIME_CONFIG__.REACT_APP_DEFAULT_TEMPLATE_REPO &&
             window.__RUNTIME_CONFIG__.REACT_APP_DEFAULT_TEMPLATE_REPO.length > 0) {
             setTemplate({
@@ -104,8 +103,6 @@ const NewModule = () => {
                 window.__RUNTIME_CONFIG__.REACT_APP_DEFAULT_TEMPLATE_VERSION
             )
         }
-
-        setLoading(false);
     }, []);
 
     const mapsToArray = (fields: any[], values: any): any => {
@@ -257,58 +254,27 @@ const NewModule = () => {
                         message: String(error),
                         description: "Check if Cyclops backend is available on: " + window.__RUNTIME_CONFIG__.REACT_APP_CYCLOPS_CTRL_HOST
                     })
-                    setSuccessLoad(false);
                 } else {
                     setError(error.response.data);
-                    setSuccessLoad(false);
                 }
             })
     }
 
-    // TODO: will be used later for commit references
-    // const handleChange = (value: any) => {
-    //     setConfig({
-    //         name: value,
-    //         version: "",
-    //         manifest: "",
-    //         fields: [],
-    //         properties: [],
-    //     })
-    //
-    //     axios.get(window.__RUNTIME_CONFIG__.REACT_APP_CYCLOPS_CTRL_HOST + `/configuration/` + value + `/versions`).then(res => {
-    //         let configVersions = res.data.sort(function (a: string, b: string) {
-    //             if (a === "latest") {
-    //                 return -1
-    //             }
-    //             if (b === "latest") {
-    //                 return 1
-    //             }
-    //             if (a < b) {
-    //                 return 1;
-    //             }
-    //             if (a > b) {
-    //                 return -1;
-    //             }
-    //             return 0;
-    //         })
-    //
-    //         console.log(configVersions);
-    //
-    //         const versionOptions: {} | any = [];
-    //         configVersions.map((v: any) => {
-    //             versionOptions.push(<Select.Option key={v}>{v}</Select.Option>)
-    //         })
-    //     });
-    // }
-    //
-    // const handleVersionChange = (value: any) => {
-    //     axios.get(window.__RUNTIME_CONFIG__.REACT_APP_CYCLOPS_CTRL_HOST + `/create-config/` + config.name + `?version=` + value).then(res => {
-    //         setConfig(res.data);
-    //     });
-    // }
-
     const loadTemplate = async (repo: string, path: string, commit: string) => {
+        setConfig({
+            name: "",
+            version: "",
+            manifest: "",
+            fields: [],
+            properties: [],
+            dependencies: []
+        });
+        form.setFieldsValue({})
+        setInitialValues({})
+
+        setActiveCollapses(new Map());
         setLoadingTemplate(true);
+        setLoadingTemplateInitialValues(true);
 
         setError({
             message: "",
@@ -321,6 +287,7 @@ const NewModule = () => {
                 description: "Repository name must not be empty",
             })
             setLoadingTemplate(false);
+            setLoadingTemplateInitialValues(false);
             return
         }
 
@@ -334,7 +301,6 @@ const NewModule = () => {
                 message: "",
                 description: "",
             });
-            setSuccessLoad(true);
             setLoadingTemplate(false);
         }).catch(function (error) {
             setLoadingTemplate(false);
@@ -343,25 +309,25 @@ const NewModule = () => {
                     message: String(error),
                     description: "Check if Cyclops backend is available on: " + window.__RUNTIME_CONFIG__.REACT_APP_CYCLOPS_CTRL_HOST
                 })
-                setSuccessLoad(false);
             } else {
                 setError(error.response.data);
-                setSuccessLoad(false);
             }
         });
 
         axios.get(`/api/templates/initial?repo=` + repo + `&path=` + path + `&commit=` + commit).then(res => {
-            form.setFieldsValue(mapsToArray(tmpConfig.fields, res.data))
+            let initialValuesMapped = mapsToArray(tmpConfig.fields, res.data)
+
+            setInitialValues(initialValuesMapped)
+            form.setFieldsValue(initialValuesMapped)
 
             setError({
                 message: "",
                 description: "",
             });
-            // setSuccessLoad(true);
-            // setLoadingTemplate(false);
+
+            setLoadingTemplateInitialValues(false);
         }).catch(function (error) {
-            // setLoadingTemplate(false);
-            // setSuccessLoad(false);
+            setLoadingTemplateInitialValues(false);
             if (error.response === undefined) {
                 setError({
                     message: String(error),
@@ -579,7 +545,7 @@ const NewModule = () => {
                     }
                     k.push(fieldName)
 
-                    let checked = getValueFromNestedObject(moduleValues, k) === true ? "checked" : "unchecked"
+                    let checked = getValueFromNestedObject(initialValues, k) === true ? "checked" : "unchecked"
                     formFields.push(
                         <Form.Item initialValue={field.initialValue} name={fieldName} id={fieldName}
                             valuePropName={checked}
@@ -746,6 +712,14 @@ const NewModule = () => {
         return formFields
     }
 
+    function renderFormFields() {
+        if (!loadingTemplate && !loadingTemplateInitialValues) {
+            return mapFields(config.fields, [],  "" , 0, 0)
+        }
+
+        return <Spin size="large"/>
+    }
+
     const handleCancel = () => {
         setLoadingValuesModal(false);
     };
@@ -822,17 +796,6 @@ const NewModule = () => {
                     style={{marginBottom: '20px'}}
                 />
             }
-            {
-                successLoad && <Alert
-                    message={"Loaded template successfully"}
-                    type="success"
-                    closable
-                    afterClose={() => {
-                        setSuccessLoad(false);
-                    }}
-                    style={{marginBottom: '20px'}}
-                />
-            }
             <Row gutter={[40, 0]}>
                 <Col span={23}>
                     <Title style={{textAlign: 'center'}} level={2}>
@@ -900,7 +863,7 @@ const NewModule = () => {
                                 template.path,
                                 template.version,
                             )}}
-                            loading={loadingTemplate}
+                            loading={loadingTemplate || loadingTemplateInitialValues}
                         >
                             Load
                         </Button>
@@ -926,9 +889,9 @@ const NewModule = () => {
                         <Divider orientation="left" orientationMargin="0">
                             Define Module
                         </Divider>
-                        {mapFields(config.fields, "",  "" , 0, 0)}
+                        {renderFormFields()}
                         <div style={{textAlign: "right"}}>
-                            <Button loading={loading} onClick={function () {setLoadingValuesModal(true)}} name="Save">
+                            <Button onClick={function () {setLoadingValuesModal(true)}} name="Save">
                                 Load values from file
                             </Button>{' '}
                             <Button type="primary" loading={loading} htmlType="submit" name="Save">
