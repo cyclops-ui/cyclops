@@ -62,6 +62,8 @@ const NewModule = () => {
         version: "",
     })
 
+    const [initialValues, setInitialValues] = useState({})
+
     const [error, setError] = useState({
         message: "",
         description: "",
@@ -274,6 +276,7 @@ const NewModule = () => {
             dependencies: []
         });
         form.setFieldsValue({})
+        setInitialValues({})
 
         setActiveCollapses(new Map());
         setLoadingTemplate(true);
@@ -321,7 +324,10 @@ const NewModule = () => {
         });
 
         axios.get(`/api/templates/initial?repo=` + repo + `&path=` + path + `&commit=` + commit).then(res => {
-            form.setFieldsValue(mapsToArray(tmpConfig.fields, res.data))
+            let initialValuesMapped = mapsToArray(tmpConfig.fields, res.data)
+
+            setInitialValues(initialValuesMapped)
+            form.setFieldsValue(initialValuesMapped)
 
             setError({
                 message: "",
@@ -434,7 +440,7 @@ const NewModule = () => {
         </Form.Item>
     }
 
-    const arrayInnerField = (field: any, parentFieldID: string[], parent: string, level: number, arrayField: any, remove: Function) => {
+    const arrayInnerField = (field: any, parentFieldID: string, parent: string, level: number, arrayField: any, remove: Function) => {
         switch (field.items.type) {
             case "object":
                 return <div>
@@ -465,7 +471,7 @@ const NewModule = () => {
         return currentObj;
     }
 
-    function mapFields(fields: any[], parentFieldID: string[], parent: string, level: number, arrayIndexLifetime: number, arrayField?: any, required?: string[]) {
+    function mapFields(fields: any[], parentFieldID: string | string[], parent: string, level: number, arrayIndexLifetime: number, arrayField?: any, required?: string[]) {
         const formFields: {} | any = [];
 
         if (!fields) {
@@ -548,7 +554,7 @@ const NewModule = () => {
                     }
                     k.push(fieldName)
 
-                    let checked = getValueFromNestedObject(moduleValues, k) === true ? "checked" : "unchecked"
+                    let checked = getValueFromNestedObject(initialValues, k) === true ? "checked" : "unchecked"
                     formFields.push(
                         <Form.Item initialValue={field.initialValue} name={fieldName} id={fieldName}
                             valuePropName={checked}
@@ -580,10 +586,6 @@ const NewModule = () => {
                         </Row>
                     }
 
-                    let passParent: string[] = [];
-                    parentFieldID.forEach(val => passParent.push(val));
-                    passParent.push(fieldName)
-
                     formFields.push(
                         <Col span={level === 0 ? 16 : 24} offset={level === 0 ? 2 : 0} style={{
                             paddingBottom: "15px",
@@ -603,7 +605,7 @@ const NewModule = () => {
                                     <Form.List name={formItemName}>
                                         {(arrFields, { add, remove }) => (
                                             <>
-                                                {mapFields(field.properties, passParent, "", level + 1, arrayIndexLifetime, arrayIndexLifetime > 0 ? arrayField : undefined, field.required)}
+                                                {mapFields(field.properties, [fieldName], "", level + 1, arrayIndexLifetime, arrayIndexLifetime > 0 ? arrayField : undefined, field.required)}
                                             </>
                                         )}
                                     </Form.List>
