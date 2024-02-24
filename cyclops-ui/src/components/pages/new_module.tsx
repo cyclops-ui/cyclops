@@ -15,7 +15,8 @@ import {
     Typography,
     Tooltip,
     message,
-    Modal
+    Modal,
+    Spin
 } from 'antd';
 import axios from 'axios';
 import {useNavigate} from 'react-router';
@@ -37,6 +38,7 @@ import 'ace-builds/src-noconflict/mode-typescript';
 import 'ace-builds/src-noconflict/snippets/yaml'
 import {numberInputValidators} from "../../utils/validators/number";
 import {stringInputValidators} from "../../utils/validators/string";
+import {map} from "yaml/dist/schema/common/map";
 
 const {Title} = Typography;
 const layout = {
@@ -68,6 +70,7 @@ const NewModule = () => {
     const [successLoad, setSuccessLoad] = useState(false);
 
     const [loadingTemplate, setLoadingTemplate] = useState(false);
+    const [loadingTemplateInitialValues, setLoadingTemplateInitialValues] = useState(false);
 
     const [activeCollapses, setActiveCollapses] = useState(new Map());
     const updateActiveCollapses = (k: string[] | string, v: any) => {
@@ -88,8 +91,6 @@ const NewModule = () => {
     const [form] = Form.useForm();
 
     useEffect(() => {
-        setLoading(true);
-
         if (window.__RUNTIME_CONFIG__.REACT_APP_DEFAULT_TEMPLATE_REPO &&
             window.__RUNTIME_CONFIG__.REACT_APP_DEFAULT_TEMPLATE_REPO.length > 0) {
             setTemplate({
@@ -104,8 +105,6 @@ const NewModule = () => {
                 window.__RUNTIME_CONFIG__.REACT_APP_DEFAULT_TEMPLATE_VERSION
             )
         }
-
-        setLoading(false);
     }, []);
 
     const mapsToArray = (fields: any[], values: any): any => {
@@ -265,50 +264,20 @@ const NewModule = () => {
             })
     }
 
-    // TODO: will be used later for commit references
-    // const handleChange = (value: any) => {
-    //     setConfig({
-    //         name: value,
-    //         version: "",
-    //         manifest: "",
-    //         fields: [],
-    //         properties: [],
-    //     })
-    //
-    //     axios.get(window.__RUNTIME_CONFIG__.REACT_APP_CYCLOPS_CTRL_HOST + `/configuration/` + value + `/versions`).then(res => {
-    //         let configVersions = res.data.sort(function (a: string, b: string) {
-    //             if (a === "latest") {
-    //                 return -1
-    //             }
-    //             if (b === "latest") {
-    //                 return 1
-    //             }
-    //             if (a < b) {
-    //                 return 1;
-    //             }
-    //             if (a > b) {
-    //                 return -1;
-    //             }
-    //             return 0;
-    //         })
-    //
-    //         console.log(configVersions);
-    //
-    //         const versionOptions: {} | any = [];
-    //         configVersions.map((v: any) => {
-    //             versionOptions.push(<Select.Option key={v}>{v}</Select.Option>)
-    //         })
-    //     });
-    // }
-    //
-    // const handleVersionChange = (value: any) => {
-    //     axios.get(window.__RUNTIME_CONFIG__.REACT_APP_CYCLOPS_CTRL_HOST + `/create-config/` + config.name + `?version=` + value).then(res => {
-    //         setConfig(res.data);
-    //     });
-    // }
-
     const loadTemplate = async (repo: string, path: string, commit: string) => {
+        setConfig({
+            name: "",
+            version: "",
+            manifest: "",
+            fields: [],
+            properties: [],
+            dependencies: []
+        });
+        form.setFieldsValue({})
+
+        setActiveCollapses(new Map());
         setLoadingTemplate(true);
+        setLoadingTemplateInitialValues(true);
 
         setError({
             message: "",
@@ -321,6 +290,7 @@ const NewModule = () => {
                 description: "Repository name must not be empty",
             })
             setLoadingTemplate(false);
+            setLoadingTemplateInitialValues(false);
             return
         }
 
@@ -357,11 +327,10 @@ const NewModule = () => {
                 message: "",
                 description: "",
             });
-            // setSuccessLoad(true);
-            // setLoadingTemplate(false);
+
+            setLoadingTemplateInitialValues(false);
         }).catch(function (error) {
-            // setLoadingTemplate(false);
-            // setSuccessLoad(false);
+            setLoadingTemplateInitialValues(false);
             if (error.response === undefined) {
                 setError({
                     message: String(error),
@@ -465,7 +434,7 @@ const NewModule = () => {
         </Form.Item>
     }
 
-    const arrayInnerField = (field: any, parentFieldID: string, parent: string, level: number, arrayField: any, remove: Function) => {
+    const arrayInnerField = (field: any, parentFieldID: string[], parent: string, level: number, arrayField: any, remove: Function) => {
         switch (field.items.type) {
             case "object":
                 return <div>
@@ -496,7 +465,7 @@ const NewModule = () => {
         return currentObj;
     }
 
-    function mapFields(fields: any[], parentFieldID: string | string[], parent: string, level: number, arrayIndexLifetime: number, arrayField?: any, required?: string[]) {
+    function mapFields(fields: any[], parentFieldID: string[], parent: string, level: number, arrayIndexLifetime: number, arrayField?: any, required?: string[]) {
         const formFields: {} | any = [];
 
         if (!fields) {
@@ -611,6 +580,10 @@ const NewModule = () => {
                         </Row>
                     }
 
+                    let passParent: string[] = [];
+                    parentFieldID.forEach(val => passParent.push(val));
+                    passParent.push(fieldName)
+
                     formFields.push(
                         <Col span={level === 0 ? 16 : 24} offset={level === 0 ? 2 : 0} style={{
                             paddingBottom: "15px",
@@ -630,7 +603,7 @@ const NewModule = () => {
                                     <Form.List name={formItemName}>
                                         {(arrFields, { add, remove }) => (
                                             <>
-                                                {mapFields(field.properties, [fieldName], "", level + 1, arrayIndexLifetime, arrayIndexLifetime > 0 ? arrayField : undefined, field.required)}
+                                                {mapFields(field.properties, passParent, "", level + 1, arrayIndexLifetime, arrayIndexLifetime > 0 ? arrayField : undefined, field.required)}
                                             </>
                                         )}
                                     </Form.List>
@@ -744,6 +717,14 @@ const NewModule = () => {
         })
 
         return formFields
+    }
+
+    function renderFormFields() {
+        if (!loadingTemplate && !loadingTemplateInitialValues) {
+            return mapFields(config.fields, [],  "" , 0, 0)
+        }
+
+        return <Spin size="large"/>
     }
 
     const handleCancel = () => {
@@ -900,7 +881,7 @@ const NewModule = () => {
                                 template.path,
                                 template.version,
                             )}}
-                            loading={loadingTemplate}
+                            loading={loadingTemplate || loadingTemplateInitialValues}
                         >
                             Load
                         </Button>
@@ -926,7 +907,7 @@ const NewModule = () => {
                         <Divider orientation="left" orientationMargin="0">
                             Define Module
                         </Divider>
-                        {mapFields(config.fields, "",  "" , 0, 0)}
+                        {renderFormFields()}
                         <div style={{textAlign: "right"}}>
                             <Button loading={loading} onClick={function () {setLoadingValuesModal(true)}} name="Save">
                                 Load values from file
