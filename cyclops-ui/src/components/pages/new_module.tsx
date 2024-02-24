@@ -26,7 +26,6 @@ import './custom.css';
 
 import YAML from 'yaml'
 
-import {useParams} from "react-router-dom";
 import AceEditor from "react-ace";
 
 import 'ace-builds/src-noconflict/theme-github';
@@ -38,7 +37,6 @@ import 'ace-builds/src-noconflict/mode-typescript';
 import 'ace-builds/src-noconflict/snippets/yaml'
 import {numberInputValidators} from "../../utils/validators/number";
 import {stringInputValidators} from "../../utils/validators/string";
-import {map} from "yaml/dist/schema/common/map";
 
 const {Title} = Typography;
 const layout = {
@@ -911,7 +909,7 @@ const NewModule = () => {
                         </Divider>
                         {renderFormFields()}
                         <div style={{textAlign: "right"}}>
-                            <Button loading={loading} onClick={function () {setLoadingValuesModal(true)}} name="Save">
+                            <Button onClick={function () {setLoadingValuesModal(true)}} name="Save">
                                 Load values from file
                             </Button>{' '}
                             <Button type="primary" loading={loading} htmlType="submit" name="Save">
