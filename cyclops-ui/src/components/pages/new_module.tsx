@@ -21,7 +21,7 @@ import {
 import axios from 'axios';
 import {useNavigate} from 'react-router';
 import {MinusCircleOutlined, PlusOutlined, InfoCircleOutlined, StarFilled} from "@ant-design/icons";
-import {fileExtension} from "../../utils/form";
+import {fileExtension, flattenObjectKeys} from "../../utils/form";
 import './custom.css';
 
 import YAML from 'yaml'
@@ -104,6 +104,10 @@ const NewModule = () => {
             )
         }
     }, []);
+
+    useEffect(() => {
+        form.validateFields(flattenObjectKeys(initialValues))
+    },[initialValues])
 
     const mapsToArray = (fields: any[], values: any): any => {
         let out: any = {};
@@ -511,6 +515,8 @@ const NewModule = () => {
                                     <p style={{color: "#8b8e91", marginBottom: "0px"}}>{field.description}</p>
                                 </div>
                             }
+                            hasFeedback={true}
+                            validateDebounce={1000}
                             rules={stringInputValidators(field, isRequired)}
                         >
                             <Input/>
@@ -526,6 +532,8 @@ const NewModule = () => {
                                     <p style={{color: "#8b8e91", marginBottom: "0px"}}>{field.description}</p>
                                 </div>
                             }
+                            hasFeedback={true}
+                            validateDebounce={1000}
                             rules={numberInputValidators(field, isRequired)}
                         >
                             <InputNumber style={{width: '100%'}} />
