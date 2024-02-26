@@ -437,6 +437,8 @@ const EditModule = () => {
                         return;
                     }
 
+                    let stringValidationRules = stringInputValidators(field, isRequired)
+
                     formFields.push(
                         <Form.Item {...arrayField} name={formItemName}
                                    label={
@@ -445,15 +447,17 @@ const EditModule = () => {
                                            <p style={{color: "#8b8e91", marginBottom: "0px"}}>{field.description}</p>
                                        </div>
                                    }
-                                   hasFeedback={true}
+                                   hasFeedback={stringValidationRules.length > 0}
                                    validateDebounce={1000}
-                                   rules={stringInputValidators(field, isRequired)}
+                                   rules={stringValidationRules}
                         >
                             <Input/>
                         </Form.Item>
                     )
                     return;
                 case "number":
+                    let numberValidationRules = numberInputValidators(field, isRequired)
+
                     formFields.push(
                         <Form.Item {...arrayField} initialValue={field.initialValue} name={formItemName}
                            label={
@@ -462,9 +466,9 @@ const EditModule = () => {
                                    <p style={{color: "#8b8e91", marginBottom: "0px"}}>{field.description}</p>
                                </div>
                            }
-                           hasFeedback={true}
+                           hasFeedback={numberValidationRules.length > 0}
                            validateDebounce={1000}
-                           rules={numberInputValidators(field, isRequired)}
+                           rules={numberValidationRules}
                         >
                             <InputNumber style={{width: '100%'}} />
                         </Form.Item>

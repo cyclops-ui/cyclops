@@ -4,17 +4,31 @@ import {isFieldNullOrUndefined} from "./common";
 export function numberInputValidators(field: any, isRequired: boolean): Rule[] {
     let rules: Rule[] = [];
 
-    rules.push({ required: isRequired });
-    rules.push({ validator: validateMin(field) });
-    rules.push({ validator: validateMax(field) });
-    rules.push({ validator: validateMultiple(field) });
+    if (isRequired) {
+        rules.push({ required: isRequired });
+    }
+
+    let min = validateMin(field)
+    if (min !== null) {
+        rules.push({ validator: min });
+    }
+
+    let max = validateMax(field)
+    if (max !== null) {
+        rules.push({ validator: max });
+    }
+
+    let multiple = validateMultiple(field)
+    if (multiple != null) {
+        rules.push({ validator: multiple });
+    }
 
     return rules
 }
 
 function validateMin(field: any) {
     if (isFieldNullOrUndefined(field, "minimum")) {
-        return (_: RuleObject, value: any) => Promise.resolve();
+        return null;
     }
 
     return (_: RuleObject, value: any): Promise<any> => {
@@ -24,7 +38,7 @@ function validateMin(field: any) {
 
 function validateMax(field: any) {
     if (isFieldNullOrUndefined(field, "maximum")) {
-        return (_: RuleObject, value: any) => Promise.resolve();
+        return null;
     }
 
     return (_: RuleObject, value: any): Promise<any> => {
@@ -34,7 +48,7 @@ function validateMax(field: any) {
 
 function validateMultiple(field: any) {
     if (isFieldNullOrUndefined(field, "multipleOf")) {
-        return (_: RuleObject, value: any) => Promise.resolve();
+        return null;
     }
 
     return (_: RuleObject, value: any): Promise<any> => {
