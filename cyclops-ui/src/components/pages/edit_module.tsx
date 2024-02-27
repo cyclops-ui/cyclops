@@ -31,7 +31,7 @@ import 'ace-builds/src-noconflict/mode-toml';
 import 'ace-builds/src-noconflict/mode-javascript';
 import 'ace-builds/src-noconflict/mode-typescript';
 import 'ace-builds/src-noconflict/snippets/yaml'
-import {fileExtension} from "../../utils/form";
+import {fileExtension, flattenObjectKeys} from "../../utils/form";
 import './custom.css';
 import {numberInputValidators} from "../../utils/validators/number";
 import {stringInputValidators} from "../../utils/validators/string";
@@ -56,13 +56,7 @@ const EditModule = () => {
 
     const [form] = Form.useForm();
 
-    const [versions, setVersions] = useState([]);
-    const [targetVersion, setTargetVersion] = useState([]);
-
-    const [loading, setLoading] = useState(false);
-    const [dplName, setName] = useState("");
     const [allConfigs, setAllConfigs] = useState([]);
-    const [manifest, setManifest] = useState("");
     const [values, setValues] = useState({});
     const [config, setConfig] = useState({
         name: "",
@@ -74,12 +68,6 @@ const EditModule = () => {
         message: "",
         description: "",
     });
-
-    const [migrating, setMigrating] = useState(false);
-    const [migrateDiff, setMigrateDiff] = useState({
-        current: "",
-        new: ""
-    })
 
     const [loadValues, setLoadValues] = useState(false);
     const [loadTemplate, setLoadTemplate] = useState(false);
@@ -174,8 +162,8 @@ const EditModule = () => {
                     template: res.data.template,
                 });
                 form.setFieldsValue(values);
+                setValues(values);
             }).catch(error => {
-                setLoading(false);
                 setLoadTemplate(true);
                 if (error.response === undefined) {
                     setError({
@@ -207,7 +195,6 @@ const EditModule = () => {
             // ])
 
         }).catch(error => {
-            setLoading(false);
             if (error.response === undefined) {
                 setError({
                     message: String(error),
@@ -219,27 +206,14 @@ const EditModule = () => {
         });
     }, []);
 
+    useEffect(() => {
+        form.validateFields(flattenObjectKeys(values))
+    },[values])
+
     const configNames: {} | any = [];
     allConfigs.map((c: any) => {
         configNames.push(<Select.Option key={c.name}>{c.name}</Select.Option>)
     })
-
-    const handleVersionChange = (value: any) => {
-        axios.get(`/api/modules/` + module.name + `/template?version=` + value).then(res => {
-            setMigrateDiff(res.data);
-        }).catch(error => {
-            setLoading(false);
-            if (error.response === undefined) {
-                setError({
-                    message: String(error),
-                    description: "Check if Cyclops backend is available on: " + window.__RUNTIME_CONFIG__.REACT_APP_CYCLOPS_CTRL_HOST
-                })
-            } else {
-                setError(error.response.data);
-            }
-        });
-        setTargetVersion(value)
-    }
 
     const findMaps = (fields: any[], values: any): any => {
         let out: any = {};
@@ -312,19 +286,16 @@ const EditModule = () => {
             }).then(res => {
                 window.location.href = "/modules/" + moduleName
             }).catch(error => {
-            setLoading(false);
-            if (error.response === undefined) {
-                setError({
-                    message: String(error),
-                    description: "Check if Cyclops backend is available on: " + window.__RUNTIME_CONFIG__.REACT_APP_CYCLOPS_CTRL_HOST
-                })
-            } else {
-                setError(error.response.data);
+                if (error.response === undefined) {
+                    setError({
+                        message: String(error),
+                        description: "Check if Cyclops backend is available on: " + window.__RUNTIME_CONFIG__.REACT_APP_CYCLOPS_CTRL_HOST
+                    })
+                } else {
+                    setError(error.response.data);
+                }
             }
-        });
-
-        setName(values.app_name);
-        setLoading(true);
+        );
     }
 
     const getCollapseColor = (fieldName: string) => {
@@ -336,22 +307,6 @@ const EditModule = () => {
             return "#fae8d4"
         }
     }
-
-    // const arrayInnerField = (field: any, parentFieldID: string, parent: string, level: number, arrayField?: any) => {
-    //     // let formItemName = arrayField ? [arrayField.name, fieldName] : fieldName
-    //
-    //     switch (field.items.type) {
-    //         case "object":
-    //             return mapFields(field.items.properties, parentFieldID, "", level + 1, arrayField)
-    //         // return mapFields(field.items.properties, "", "", level + 1, arrayField);
-    //         case "string":
-    //             return <Form.Item {...arrayField} initialValue={field.initialValue} name={[arrayField.name]}>
-    //                 <Input addonAfter={addonAfter(field)} onChange={function (v :any) {
-    //                     // console.log(formItemName)
-    //                 }}/>
-    //             </Form.Item>
-    //     }
-    // }
 
     const selectInputField = (field: any, formItemName: string | string[], arrayField: any, isRequired: boolean) => {
         let options: {value: string, label: string}[] = []
@@ -482,6 +437,8 @@ const EditModule = () => {
                         return;
                     }
 
+                    let stringValidationRules = stringInputValidators(field, isRequired)
+
                     formFields.push(
                         <Form.Item {...arrayField} name={formItemName}
                                    label={
@@ -490,13 +447,17 @@ const EditModule = () => {
                                            <p style={{color: "#8b8e91", marginBottom: "0px"}}>{field.description}</p>
                                        </div>
                                    }
-                                   rules={stringInputValidators(field, isRequired)}
+                                   hasFeedback={stringValidationRules.length > 0}
+                                   validateDebounce={1000}
+                                   rules={stringValidationRules}
                         >
                             <Input/>
                         </Form.Item>
                     )
                     return;
                 case "number":
+                    let numberValidationRules = numberInputValidators(field, isRequired)
+
                     formFields.push(
                         <Form.Item {...arrayField} initialValue={field.initialValue} name={formItemName}
                            label={
@@ -505,7 +466,9 @@ const EditModule = () => {
                                    <p style={{color: "#8b8e91", marginBottom: "0px"}}>{field.description}</p>
                                </div>
                            }
-                           rules={numberInputValidators(field, isRequired)}
+                           hasFeedback={numberValidationRules.length > 0}
+                           validateDebounce={1000}
+                           rules={numberValidationRules}
                         >
                             <InputNumber style={{width: '100%'}} />
                         </Form.Item>

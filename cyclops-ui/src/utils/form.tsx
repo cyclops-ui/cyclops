@@ -16,3 +16,16 @@ export function fileExtension(fileExt: string): string {
             return "text"
     }
 }
+
+export function flattenObjectKeys(obj: any, parentKeys: string[] = []): (string | string[])[] {
+    return Object.keys(obj).reduce((acc: (string | string[])[], key: string) => {
+        if (obj[key] !== undefined) {
+            if (typeof obj[key] === 'object' && obj[key] !== null) {
+                acc.push(...flattenObjectKeys(obj[key], [...parentKeys, key]));
+            } else {
+                acc.push(parentKeys.length > 0 ? [...parentKeys, key] : key);
+            }
+        }
+        return acc;
+    }, []);
+}

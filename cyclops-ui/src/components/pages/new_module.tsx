@@ -21,7 +21,7 @@ import {
 import axios from 'axios';
 import {useNavigate} from 'react-router';
 import {MinusCircleOutlined, PlusOutlined, InfoCircleOutlined, StarFilled} from "@ant-design/icons";
-import {fileExtension} from "../../utils/form";
+import {fileExtension, flattenObjectKeys} from "../../utils/form";
 import './custom.css';
 
 import YAML from 'yaml'
@@ -104,6 +104,10 @@ const NewModule = () => {
             )
         }
     }, []);
+
+    useEffect(() => {
+        form.validateFields(flattenObjectKeys(initialValues))
+    },[initialValues])
 
     const mapsToArray = (fields: any[], values: any): any => {
         let out: any = {};
@@ -503,6 +507,8 @@ const NewModule = () => {
                         return;
                     }
 
+                    let stringValidationRules = stringInputValidators(field, isRequired)
+
                     formFields.push(
                         <Form.Item {...arrayField} name={formItemName}
                             label={
@@ -511,13 +517,17 @@ const NewModule = () => {
                                     <p style={{color: "#8b8e91", marginBottom: "0px"}}>{field.description}</p>
                                 </div>
                             }
-                            rules={stringInputValidators(field, isRequired)}
+                            hasFeedback={stringValidationRules.length > 0}
+                            validateDebounce={1000}
+                            rules={stringValidationRules}
                         >
                             <Input/>
                         </Form.Item>
                     )
                     return;
                 case "number":
+                    let numberValidationRules = numberInputValidators(field, isRequired)
+
                     formFields.push(
                         <Form.Item {...arrayField} initialValue={field.initialValue} name={formItemName}
                             label={
@@ -526,15 +536,15 @@ const NewModule = () => {
                                     <p style={{color: "#8b8e91", marginBottom: "0px"}}>{field.description}</p>
                                 </div>
                             }
-                            rules={numberInputValidators(field, isRequired)}
+                            hasFeedback={numberValidationRules.length > 0}
+                            validateDebounce={1000}
+                            rules={numberValidationRules}
                         >
                             <InputNumber style={{width: '100%'}} />
                         </Form.Item>
                     )
                     return;
                 case "boolean":
-                    let moduleValues: any = form.getFieldsValue()
-
                     let k = []
                     for (const item of parentFieldID) {
                         if (item === '') {
@@ -871,18 +881,20 @@ const NewModule = () => {
                             Module name
                         </Divider>
                         <Form.Item name="cyclops_module_name" id="cyclops_module_name"
-                                   label={
-                                       <div>
-                                           Module name
-                                           <p style={{color: "#8b8e91", marginBottom: "0px"}}>Enter a unique module name</p>
-                                       </div>
-                                   }
-                                   rules={[
-                                       {
-                                           required: true,
-                                           message: 'Module name is required',
-                                       }
-                                   ]}
+                           label={
+                               <div>
+                                   Module name
+                                   <p style={{color: "#8b8e91", marginBottom: "0px"}}>Enter a unique module name</p>
+                               </div>
+                           }
+                           rules={[
+                               {
+                                   required: true,
+                                   message: 'Module name is required',
+                               }
+                           ]}
+                           hasFeedback={true}
+                           validateDebounce={1000}
                         >
                             <Input/>
                         </Form.Item>

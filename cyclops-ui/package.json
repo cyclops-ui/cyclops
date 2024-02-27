@@ -17,7 +17,7 @@
     "@types/react-dom": "^18.0.0",
     "@types/react-router": "^5.1.18",
     "ace-builds": "^1.4.14",
-    "antd": "^5.2.0",
+    "antd": "^5.14.0",
     "axios": "^1.6.0",
     "babel-preset-react": "^6.24.1",
     "codeblock": "^0.4.0-pre.3",
