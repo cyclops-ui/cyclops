@@ -61,8 +61,10 @@ const EditModule = () => {
     const [config, setConfig] = useState({
         name: "",
         manifest: "",
-        fields: [],
-        properties: [],
+        root: {
+            properties: [],
+            required: []
+        }
     })
     const [error, setError] = useState({
         message: "",
@@ -154,7 +156,7 @@ const EditModule = () => {
                 setConfig(templatesRes.data);
                 setLoadTemplate(true);
 
-                let values = mapsToArray(templatesRes.data.fields, res.data.values);
+                let values = mapsToArray(templatesRes.data.root.properties, res.data.values);
 
                 setModule({
                     name: res.data.name,
@@ -174,26 +176,6 @@ const EditModule = () => {
                     setError(error.response.data);
                 }
             });
-
-            // form.setFieldsValue(res.data.values);
-            // form.setFieldValue('chains.0.name', "ja sam prvi name")
-            // form.setFieldValue('chains.1.name', "ja sam drugi name")
-            //
-            // form.setFieldValue("chains", [
-            //     {
-            //         name: "ja sam name",
-            //         type: "ja sam type",
-            //         numValidators: 1,
-            //         "ports.rest": 80,
-            //     },
-            //     {
-            //         name: "ja sam name 2",
-            //         type: "ja sam type 2",
-            //         numValidators: 2,
-            //         "ports.rest": 81,
-            //     },
-            // ])
-
         }).catch(error => {
             if (error.response === undefined) {
                 setError({
@@ -276,7 +258,7 @@ const EditModule = () => {
     }
 
     const handleSubmit = (values: any) => {
-        values = findMaps(config.fields, values)
+        values = findMaps(config.root.properties, values)
 
         axios.post(`/api/modules/update`,
             {
@@ -374,7 +356,7 @@ const EditModule = () => {
         switch (field.items.type) {
             case "object":
                 return <div>
-                    {mapFields(field.items.properties, parentFieldID, "", level + 1, 2, arrayField)}
+                    {mapFields(field.items.properties, parentFieldID, "", level + 1, 2, arrayField, field.items.required)}
                     <MinusCircleOutlined style={{ fontSize: '16px' }} onClick={() => remove(arrayField.name)} />
                 </div>
             case "string":
@@ -697,7 +679,7 @@ const EditModule = () => {
                             Edit Module
                         </Divider>
                         {formLoading()}
-                        {mapFields(config.fields, "",  "" , 0, 0)}
+                        {mapFields(config.root.properties, "",  "" , 0, 0, undefined, config.root.required)}
                         <div style={{textAlign: "right"}}>
                             <Button type="primary" htmlType="submit" name="Save">
                                 Save
