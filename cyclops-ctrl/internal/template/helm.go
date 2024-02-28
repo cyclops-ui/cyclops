@@ -231,7 +231,7 @@ func (r Repo) mapHelmChart(chartName string, files map[string][]byte) (*models.T
 	return &models.Template{
 		Name:         chartName,
 		Manifest:     strings.Join(manifestParts, "---\n"),
-		Fields:       mapper.HelmSchemaToFields(schema, dependencies),
+		RootField:    mapper.HelmSchemaToFields("", schema, dependencies),
 		Created:      "",
 		Edited:       "",
 		Version:      "",
