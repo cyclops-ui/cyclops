@@ -2,8 +2,6 @@ package k8sclient
 
 import (
 	"context"
-	"fmt"
-	"os"
 	"sort"
 	"strings"
 
@@ -55,8 +53,7 @@ func (k *KubernetesClient) GetResourcesForModule(name string) ([]dto.Resource, e
 
 	apiResources, err := k.clientset.Discovery().ServerPreferredResources()
 	if err != nil {
-		fmt.Printf("Error getting API resources: %s\n", err)
-		os.Exit(1)
+		return nil, err
 	}
 
 	other := make([]unstructured.Unstructured, 0)

@@ -7,13 +7,13 @@ import (
 )
 
 type Template struct {
-	Name     string       `json:"name"`
-	Manifest string       `json:"manifest"`
-	Fields   []Field      `json:"fields"`
-	Created  string       `json:"created"`
-	Edited   string       `json:"edited"`
-	Modules  []dto.Module `json:"modules"`
-	Version  string       `json:"version"`
+	Name      string       `json:"name"`
+	Manifest  string       `json:"manifest"`
+	RootField Field        `json:"root"`
+	Created   string       `json:"created"`
+	Edited    string       `json:"edited"`
+	Modules   []dto.Module `json:"modules"`
+	Version   string       `json:"version"`
 
 	Files []*chart.File `json:"files"`
 

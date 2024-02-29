@@ -7,60 +7,61 @@ import (
 	"github.com/cyclops-ui/cycops-ctrl/internal/models/helm"
 )
 
-func HelmSchemaToFields(schema helm.Property, dependencies []*models.Template) []models.Field {
-	fields := make([]models.Field, 0, len(schema.Properties))
-
-	for name, property := range schema.Properties {
-		if property.Type == "array" {
-			fields = append(fields, models.Field{
-				Name:          name,
-				Description:   property.Description,
-				Type:          mapHelmPropertyTypeToFieldType(property),
-				DisplayName:   mapTitle(name, property),
-				ManifestKey:   name,
-				Items:         arrayItem(property.Items),
-				Enum:          property.Enum,
-				Required:      property.Required,
-				FileExtension: property.FileExtension,
-				Minimum:       property.Minimum,
-				Maximum:       property.Maximum,
-				MultipleOf:    property.MultipleOf,
-				MinLength:     property.MinLength,
-				MaxLength:     property.MaxLength,
-			})
-			continue
+func HelmSchemaToFields(name string, schema helm.Property, dependencies []*models.Template) models.Field {
+	if schema.Type == "array" {
+		return models.Field{
+			Name:        name,
+			Description: schema.Description,
+			Type:        mapHelmPropertyTypeToFieldType(schema),
+			DisplayName: mapTitle(name, schema),
+			Items:       arrayItem(schema.Items),
 		}
+	}
 
-		fields = append(fields, models.Field{
-			Name:          name,
-			Description:   property.Description,
-			Type:          mapHelmPropertyTypeToFieldType(property),
-			DisplayName:   mapTitle(name, property),
-			ManifestKey:   name,
-			Properties:    HelmSchemaToFields(property, nil),
-			Enum:          property.Enum,
-			Required:      property.Required,
-			FileExtension: property.FileExtension,
-			Minimum:       property.Minimum,
-			Maximum:       property.Maximum,
-			MultipleOf:    property.MultipleOf,
-			MinLength:     property.MinLength,
-			MaxLength:     property.MaxLength,
-		})
+	fields := make([]models.Field, 0, len(schema.Properties))
+	for propertyName, property := range schema.Properties {
+		fields = append(fields, HelmSchemaToFields(propertyName, property, nil))
 	}
 
 	fields = sortFields(fields, schema.Order)
 
 	for _, dependency := range dependencies {
 		fields = append(fields, models.Field{
-			Name:        dependency.Name,
-			Type:        "object",
-			DisplayName: dependency.Name,
-			Properties:  dependency.Fields,
+			Name:          dependency.Name,
+			Description:   dependency.RootField.Description,
+			Type:          dependency.RootField.Type,
+			DisplayName:   dependency.RootField.DisplayName,
+			ManifestKey:   dependency.RootField.ManifestKey,
+			Value:         dependency.RootField.Value,
+			Properties:    dependency.RootField.Properties,
+			Items:         dependency.RootField.Items,
+			Enum:          dependency.RootField.Enum,
+			Required:      dependency.RootField.Required,
+			FileExtension: dependency.RootField.FileExtension,
+			Minimum:       dependency.RootField.Minimum,
+			Maximum:       dependency.RootField.Maximum,
+			MultipleOf:    dependency.RootField.MultipleOf,
+			MinLength:     dependency.RootField.MinLength,
+			MaxLength:     dependency.RootField.MaxLength,
 		})
 	}
 
-	return fields
+	return models.Field{
+		Name:          name,
+		Description:   schema.Description,
+		Type:          mapHelmPropertyTypeToFieldType(schema),
+		DisplayName:   mapTitle(name, schema),
+		ManifestKey:   name,
+		Properties:    fields,
+		Enum:          schema.Enum,
+		Required:      schema.Required,
+		FileExtension: schema.FileExtension,
+		Minimum:       schema.Minimum,
+		Maximum:       schema.Maximum,
+		MultipleOf:    schema.MultipleOf,
+		MinLength:     schema.MinLength,
+		MaxLength:     schema.MaxLength,
+	}
 }
 
 func sortFields(fields []models.Field, order []string) []models.Field {
@@ -103,10 +104,16 @@ func arrayItem(item *helm.Property) *models.Field {
 		return nil
 	}
 
-	return &models.Field{
-		Type:       item.Type,
-		Properties: HelmSchemaToFields(*item, nil),
+	field := HelmSchemaToFields("", *item, nil)
+	return &field
+}
+
+func arrayRequired(item *helm.Property) []string {
+	if item == nil {
+		return nil
 	}
+
+	return item.Required
 }
 
 func mapTitle(name string, field helm.Property) string {

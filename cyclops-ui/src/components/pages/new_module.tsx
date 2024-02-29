@@ -20,7 +20,7 @@ import {
 } from 'antd';
 import axios from 'axios';
 import {useNavigate} from 'react-router';
-import {MinusCircleOutlined, PlusOutlined, InfoCircleOutlined, StarFilled} from "@ant-design/icons";
+import {MinusCircleOutlined, PlusOutlined, InfoCircleOutlined} from "@ant-design/icons";
 import {fileExtension, flattenObjectKeys} from "../../utils/form";
 import './custom.css';
 
@@ -49,8 +49,10 @@ const NewModule = () => {
         name: "",
         version: "",
         manifest: "",
-        fields: [],
-        properties: [],
+        root: {
+            properties: [],
+            required: []
+        },
         dependencies: []
     })
 
@@ -236,7 +238,7 @@ const NewModule = () => {
     const handleSubmit = (values: any) => {
         const moduleName = values["cyclops_module_name"]
 
-        values = findMaps(config.fields, values)
+        values = findMaps(config.root.properties, values)
 
         axios.post(`/api/modules/new`,
             {
@@ -269,8 +271,10 @@ const NewModule = () => {
             name: "",
             version: "",
             manifest: "",
-            fields: [],
-            properties: [],
+            root: {
+                properties: [],
+                required: []
+            },
             dependencies: []
         });
         form.setFieldsValue({})
@@ -319,7 +323,7 @@ const NewModule = () => {
         });
 
         axios.get(`/api/templates/initial?repo=` + repo + `&path=` + path + `&commit=` + commit).then(res => {
-            let initialValuesMapped = mapsToArray(tmpConfig.fields, res.data)
+            let initialValuesMapped = mapsToArray(tmpConfig.root.properties, res.data)
 
             setInitialValues(initialValuesMapped)
             form.setFieldsValue(initialValuesMapped)
@@ -439,7 +443,7 @@ const NewModule = () => {
         switch (field.items.type) {
             case "object":
                 return <div>
-                    {mapFields(field.items.properties, parentFieldID, "", level + 1, 2, arrayField)}
+                    {mapFields(field.items.properties, parentFieldID, "", level + 1, 2, arrayField, field.items.required)}
                     <MinusCircleOutlined style={{ fontSize: '16px' }} onClick={() => remove(arrayField.name)} />
                 </div>
             case "string":
@@ -724,7 +728,7 @@ const NewModule = () => {
 
     function renderFormFields() {
         if (!loadingTemplate && !loadingTemplateInitialValues) {
-            return mapFields(config.fields, [],  "" , 0, 0)
+            return mapFields(config.root.properties, [],  "" , 0, 0, undefined, config.root.required)
         }
 
         return <Spin size="large"/>
