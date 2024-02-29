@@ -194,6 +194,10 @@ func (r Repo) LoadInitialTemplateValues(repoURL, path, commit string) (map[inter
 }
 
 func resolveRef(repo, version string) (string, error) {
+	if len(version) == 0 {
+		return resolveDefaultBranchRef(repo)
+	}
+
 	rem := git.NewRemote(memory.NewStorage(), &config.RemoteConfig{
 		Name: "origin",
 		URLs: []string{repo},
@@ -215,6 +219,34 @@ func resolveRef(repo, version string) (string, error) {
 	}
 
 	return version, nil
+}
+
+func resolveDefaultBranchRef(repo string) (string, error) {
+	rem := git.NewRemote(memory.NewStorage(), &config.RemoteConfig{
+		Name: "origin",
+		URLs: []string{repo},
+	})
+
+	// We can then use every Remote functions to retrieve wanted information
+	refs, err := rem.List(&git.ListOptions{
+		PeelingOption: git.AppendPeeled,
+	})
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	// Filters the references list and only keeps tags
+	for _, r := range refs {
+		if r.Name().Short() == plumbing.HEAD.Short() {
+			for _, rr := range refs {
+				if rr.Name().String() == r.Target().String() {
+					return rr.Hash().String(), nil
+				}
+			}
+		}
+	}
+
+	return "", errors.New("failed resolving HEAD ref")
 }
 
 func readValuesFile(fs billy.Filesystem, path string) ([]byte, error) {
