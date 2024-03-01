@@ -1,12 +1,15 @@
 # New Module
+
 Now that you have your Cyclops instance deployed locally, you can try to deploy an application into the cluster through
 Cyclops
 
 ## Add a new module
+
 When you start up Cyclops, the first screen that will be shown to you is the _Modules_ screen. This screen should be
 empty at the moment. What we want to do next is click on the _Add module_ button in the top right corner.
 
 ## Define your module
+
 Now, we want to define our new module. Under the _Module template_, we want to put the URL that leads to a GitHub
 repository where we saved our configuration files. For the sake of this tutorial, we will be using our own
 [template](https://github.com/cyclops-ui/templates), which holds a configuration template we made for testing purposes.
@@ -19,6 +22,7 @@ commit on the default branch.
 
 Now all that's left to do is fill the form with values!
 Here is an example of values you could use:
+
 ```yaml
 Module name: demo
 name: demo-1
@@ -35,7 +39,7 @@ Now click save and you should see your new module listed on the main page!
 ## Try it out
 
 Once you have deployed your application, you can check its resources and information on the Module details page. If you
-have tried out Cyclops with the suggested template and values, you can open your application by exposing it to the 
+have tried out Cyclops with the suggested template and values, you can open your application by exposing it to the
 outside world and visiting it.  
 You can expose it with the following command
 
@@ -52,23 +56,27 @@ application in a few clicks without having to get into the details of Kubernetes
 application.
 
 ## Potential problems
+
 ### Error loading template
-This usually means that you didn't input the right `url + path + version`. When loading the template to Cyclops, you 
+
+This usually means that you didn't input the right `url + path + version`. When loading the template to Cyclops, you
 need to copy the URL from the GitHub repository that leads to the template. The URL must lead towards a directory that
 holds a `template` folder.
 
 In our example we filled the form with the values bellow:
+
 ```yaml
 repository: https://github.com/cyclops-ui/templates
-path: demo    
+path: demo
 version: main
 ```
 
 ### Naming
+
 If Cyclops seemingly freezes when trying to save the module, it probably means you didn't follow [the Kubernetes naming
 convention](https://kubernetes.io/docs/concepts/overview/working-with-objects/names/).
 
-1. [x] contain no more than 253 characters
+1. [x] contain no more than 63 characters
 2. [x] contain only **lowercase** alphanumeric characters, '-' or '. '
 3. [x] start with an alphanumeric character
 4. [x] end with an alphanumeric character

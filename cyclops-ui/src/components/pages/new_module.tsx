@@ -1142,9 +1142,9 @@ const NewModule = () => {
                   message: "Module name is required",
                 },
                 {
-                  max: 253,
+                  max: 63,
                   message:
-                    "Module name must contain no more than 253 characters",
+                    "Module name must contain no more than 63 characters",
                 },
                 {
                   pattern: /^[a-z0-9](?:[a-z0-9-]*[a-z0-9])?$/, // only alphanumeric characters and hyphens, cannot start or end with a hyphen and the alpha characters can only be lowercase
