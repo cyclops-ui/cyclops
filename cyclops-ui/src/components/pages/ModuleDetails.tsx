@@ -699,7 +699,8 @@ const ModuleDetails = () => {
       <Modal
         title="Manifest"
         open={manifestModal.on}
-        onCancel={handleCancelManifest}
+        onOk={handleCancelManifest}
+        cancelButtonProps={{ style: { display: 'none' } }}
         width={"40%"}
       >
         <ReactAce
