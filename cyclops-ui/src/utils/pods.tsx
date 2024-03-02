@@ -1,10 +1,10 @@
-import {formatDistanceToNow} from "date-fns";
+import { formatDistanceToNow } from "date-fns";
 
 export function formatPodAge(podAge: string): string {
-    if (podAge === "") {
-        return ""
-    }
+  if (podAge === "") {
+    return "";
+  }
 
-    const parsedDate = new Date(podAge);
-    return formatDistanceToNow(parsedDate, { addSuffix: true });
+  const parsedDate = new Date(podAge);
+  return formatDistanceToNow(parsedDate, { addSuffix: true });
 }
