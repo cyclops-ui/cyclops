@@ -6,7 +6,7 @@ variables directly on the `cyclops-ui` Kubernetes deployment.
 ### Cyclops UI
 
 | Name                               | Description                                                               | Default value         |
-|:-----------------------------------|:--------------------------------------------------------------------------|:----------------------|
+| :--------------------------------- | :------------------------------------------------------------------------ | :-------------------- |
 | REACT_APP_CYCLOPS_CTRL_HOST        | Content                                                                   | http://localhost:8080 |
 | REACT_APP_DEFAULT_TEMPLATE_REPO    | Default template repo (E.g. https://github.com/cyclops-ui/templates)      | -                     |
 | REACT_APP_DEFAULT_TEMPLATE_PATH    | Default template path (E.g. `demo`)                                       | -                     |

@@ -9,6 +9,7 @@ Another thing you will need is [kubectl](https://kubernetes.io/docs/tasks/tools/
 running commands against your cluster.
 
 Once you have installed minikube and kubectl, run your local cluster with:
+
 ```bash
 minikube start
 ```
