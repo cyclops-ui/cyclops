@@ -77,6 +77,6 @@ If Cyclops seemingly freezes when trying to save the module, it probably means y
 convention](https://kubernetes.io/docs/concepts/overview/working-with-objects/names/).
 
 1. [x] contain no more than 63 characters
-2. [x] contain only **lowercase** alphanumeric characters, '-' or '. '
+2. [x] contain only **lowercase** alphanumeric characters or '-'
 3. [x] start with an alphanumeric character
 4. [x] end with an alphanumeric character
