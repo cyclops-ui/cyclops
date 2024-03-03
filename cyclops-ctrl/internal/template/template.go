@@ -1,6 +1,7 @@
 package template
 
 import (
+	"github.com/cyclops-ui/cycops-ctrl/internal/auth"
 	"github.com/cyclops-ui/cycops-ctrl/internal/models"
 	json "github.com/json-iterator/go"
 	helmchart "helm.sh/helm/v3/pkg/chart"
@@ -8,7 +9,8 @@ import (
 )
 
 type Repo struct {
-	cache templateCache
+	credResolver auth.TemplatesResolver
+	cache        templateCache
 }
 
 type templateCache interface {
@@ -18,9 +20,10 @@ type templateCache interface {
 	SetTemplateInitialValues(repo, path, version string, values map[interface{}]interface{})
 }
 
-func NewRepo(tc templateCache) *Repo {
+func NewRepo(credResolver auth.TemplatesResolver, tc templateCache) *Repo {
 	return &Repo{
-		cache: tc,
+		credResolver: credResolver,
+		cache:        tc,
 	}
 }
 

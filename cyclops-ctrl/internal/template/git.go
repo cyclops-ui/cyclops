@@ -5,8 +5,9 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"github.com/cyclops-ui/cycops-ctrl/internal/auth"
+	"github.com/go-git/go-git/v5/plumbing/transport/http"
 	"io"
-	"log"
 	path2 "path"
 	"path/filepath"
 	"strings"
@@ -27,7 +28,12 @@ import (
 )
 
 func (r Repo) LoadTemplate(repoURL, path, commit string) (*models.Template, error) {
-	commitSHA, err := resolveRef(repoURL, commit)
+	creds, err := r.credResolver.RepoAuthCredentials(repoURL)
+	if err != nil {
+		return nil, err
+	}
+
+	commitSHA, err := r.resolveRef(repoURL, commit, creds)
 	if err != nil {
 		return nil, err
 	}
@@ -37,7 +43,7 @@ func (r Repo) LoadTemplate(repoURL, path, commit string) (*models.Template, erro
 		return cached, nil
 	}
 
-	fs, err := clone(repoURL, commit)
+	fs, err := clone(repoURL, commit, creds)
 	if err != nil {
 		return nil, err
 	}
@@ -128,7 +134,12 @@ func (r Repo) LoadTemplate(repoURL, path, commit string) (*models.Template, erro
 }
 
 func (r Repo) LoadInitialTemplateValues(repoURL, path, commit string) (map[interface{}]interface{}, error) {
-	commitSHA, err := resolveRef(repoURL, commit)
+	creds, err := r.credResolver.RepoAuthCredentials(repoURL)
+	if err != nil {
+		return nil, err
+	}
+
+	commitSHA, err := r.resolveRef(repoURL, commit, creds)
 	if err != nil {
 		return nil, err
 	}
@@ -138,7 +149,7 @@ func (r Repo) LoadInitialTemplateValues(repoURL, path, commit string) (map[inter
 		return cached, nil
 	}
 
-	fs, err := clone(repoURL, commit)
+	fs, err := clone(repoURL, commit, creds)
 	if err != nil {
 		return nil, err
 	}
@@ -193,9 +204,9 @@ func (r Repo) LoadInitialTemplateValues(repoURL, path, commit string) (map[inter
 	return initialValues, nil
 }
 
-func resolveRef(repo, version string) (string, error) {
+func (r Repo) resolveRef(repo, version string, creds *auth.Credentials) (string, error) {
 	if len(version) == 0 {
-		return resolveDefaultBranchRef(repo)
+		return r.resolveDefaultBranchRef(repo, creds)
 	}
 
 	rem := git.NewRemote(memory.NewStorage(), &config.RemoteConfig{
@@ -206,9 +217,10 @@ func resolveRef(repo, version string) (string, error) {
 	// We can then use every Remote functions to retrieve wanted information
 	refs, err := rem.List(&git.ListOptions{
 		PeelingOption: git.AppendPeeled,
+		Auth:          httpBasicAuthCredentials(creds),
 	})
 	if err != nil {
-		log.Fatal(err)
+		return "", errors.Wrap(err, fmt.Sprintf("repo %s was not cloned sucessfully; authentication might be required; check if repository exists and you referenced it correctly", repo))
 	}
 
 	// Filters the references list and only keeps tags
@@ -221,7 +233,7 @@ func resolveRef(repo, version string) (string, error) {
 	return version, nil
 }
 
-func resolveDefaultBranchRef(repo string) (string, error) {
+func (r Repo) resolveDefaultBranchRef(repo string, creds *auth.Credentials) (string, error) {
 	rem := git.NewRemote(memory.NewStorage(), &config.RemoteConfig{
 		Name: "origin",
 		URLs: []string{repo},
@@ -230,9 +242,10 @@ func resolveDefaultBranchRef(repo string) (string, error) {
 	// We can then use every Remote functions to retrieve wanted information
 	refs, err := rem.List(&git.ListOptions{
 		PeelingOption: git.AppendPeeled,
+		Auth:          httpBasicAuthCredentials(creds),
 	})
 	if err != nil {
-		log.Fatal(err)
+		return "", errors.Wrap(err, fmt.Sprintf("repo %s was not cloned sucessfully; authentication might be required; check if repository exists and you referenced it correctly", repo))
 	}
 
 	// Filters the references list and only keeps tags
@@ -268,11 +281,12 @@ func readValuesFile(fs billy.Filesystem, path string) ([]byte, error) {
 	return c.Bytes(), nil
 }
 
-func clone(repoURL, commit string) (billy.Filesystem, error) {
+func clone(repoURL, commit string, creds *auth.Credentials) (billy.Filesystem, error) {
 	// region clone from git
 	repo, err := git.Clone(memory.NewStorage(), memfs.New(), &git.CloneOptions{
 		URL:  repoURL,
 		Tags: git.AllTags,
+		Auth: httpBasicAuthCredentials(creds),
 	})
 	if err != nil {
 		return nil, errors.Wrap(err, fmt.Sprintf("repo %s was not cloned sucessfully; authentication might be required; check if repository exists and you referenced it correctly", repoURL))
@@ -417,4 +431,15 @@ func readFiles(path string, fs billy.Filesystem) ([]*chart.File, error) {
 	}
 
 	return chartFiles, nil
+}
+
+func httpBasicAuthCredentials(creds *auth.Credentials) *http.BasicAuth {
+	if creds == nil {
+		return nil
+	}
+
+	return &http.BasicAuth{
+		Username: creds.Username,
+		Password: creds.Password,
+	}
 }
