@@ -700,6 +700,7 @@ const ModuleDetails = () => {
         title="Manifest"
         open={manifestModal.on}
         onOk={handleCancelManifest}
+        onCancel={handleCancelManifest}
         cancelButtonProps={{ style: { display: 'none' } }}
         width={"40%"}
       >
