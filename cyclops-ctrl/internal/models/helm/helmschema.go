@@ -17,6 +17,7 @@ type Property struct {
 	MultipleOf *float64 `json:"multipleOf"`
 
 	// string validation
-	MinLength *int `json:"minLength"`
-	MaxLength *int `json:"maxLength"`
+	MinLength *int   `json:"minLength"`
+	MaxLength *int   `json:"maxLength"`
+	Pattern   string `json:"pattern"`
 }

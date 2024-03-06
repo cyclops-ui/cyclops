@@ -1,50 +1,43 @@
-import type { Rule, RuleObject } from "rc-field-form/lib/interface";
 import { isFieldNullOrUndefined } from "./common";
 
-export function stringInputValidators(field: any, isRequired: boolean): Rule[] {
-  let rules: Rule[] = [];
+interface Validator {
+  required?: Boolean;
+  min?: Number;
+  max?: Number;
+  pattern?: RegExp;
+  message?: String;
+}
+
+export function stringInputValidators(
+  field: any,
+  isRequired: boolean
+): Validator[] {
+  let rules: Validator[] = [];
 
   if (isRequired) {
     rules.push({ required: isRequired });
   }
 
-  let minLength = validateMinLength(field);
-  if (minLength !== null) {
-    rules.push({ validator: minLength });
+  if (!isFieldNullOrUndefined(field, "minLength")) {
+    rules.push({
+      min: field.minLength,
+      message: `Input must be longer than ${field.minLength} characters`,
+    });
   }
 
-  let maxLength = validateMaxLength(field);
-  if (maxLength !== null) {
-    rules.push({ validator: maxLength });
+  if (!isFieldNullOrUndefined(field, "maxLength")) {
+    rules.push({
+      max: field.maxLength,
+      message: `Input must be shorter than ${field.maxLength} characters`,
+    });
+  }
+
+  if (field["pattern"] !== "") {
+    rules.push({
+      pattern: new RegExp(field["pattern"]),
+      message: "Input doesn't match requested pattern",
+    });
   }
 
   return rules;
-}
-
-function validateMinLength(field: any) {
-  if (isFieldNullOrUndefined(field, "minLength")) {
-    return null;
-  }
-
-  return (_: RuleObject, value: any): Promise<any> => {
-    return value.toString().length >= field.minLength
-      ? Promise.resolve()
-      : Promise.reject(
-          `Input must be longer than ${field.minLength} characters`
-        );
-  };
-}
-
-function validateMaxLength(field: any) {
-  if (isFieldNullOrUndefined(field, "maxLength")) {
-    return null;
-  }
-
-  return (_: RuleObject, value: any): Promise<any> => {
-    return value.toString().length <= field.maxLength
-      ? Promise.resolve()
-      : Promise.reject(
-          `Input must be shorter than ${field.maxLength} characters`
-        );
-  };
 }
