@@ -19,17 +19,11 @@ export function stringInputValidators(
   }
 
   if (!isFieldNullOrUndefined(field, "minLength")) {
-    rules.push({
-      min: field.minLength,
-      message: `Input must be longer than ${field.minLength} characters`,
-    });
+    rules.push({ min: field.minLength });
   }
 
   if (!isFieldNullOrUndefined(field, "maxLength")) {
-    rules.push({
-      max: field.maxLength,
-      message: `Input must be shorter than ${field.maxLength} characters`,
-    });
+    rules.push({ max: field.maxLength });
   }
 
   if (field["pattern"] !== "") {
