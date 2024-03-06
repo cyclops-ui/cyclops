@@ -25,7 +25,7 @@ jobs:
         run: |
           TAG=${{ github.event.inputs.version }}
 
-          docker build cyclops-ui -t cyclopsui/cyclops-ui:$TAG
+          docker build cyclops-ui --build-arg VERSION=$TAG -t cyclopsui/cyclops-ui:$TAG
           docker push cyclopsui/cyclops-ui:$TAG
 
   build-controller:
