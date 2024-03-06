@@ -38,4 +38,7 @@ COPY --from=0 app/build/ ./
 # Copy reverse proxy configuration
 COPY ./nginx/default.conf /default-nginx.conf
 
+ARG VERSION
+ENV REACT_APP_VERSION=$VERSION
+
 ENTRYPOINT [ "sh", "/nginx-entrypoint.sh" ]
