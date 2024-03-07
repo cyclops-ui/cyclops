@@ -5,8 +5,6 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	"github.com/cyclops-ui/cycops-ctrl/internal/auth"
-	"github.com/go-git/go-git/v5/plumbing/transport/http"
 	"io"
 	path2 "path"
 	"path/filepath"
@@ -17,11 +15,13 @@ import (
 	"github.com/go-git/go-git/v5"
 	"github.com/go-git/go-git/v5/config"
 	"github.com/go-git/go-git/v5/plumbing"
+	"github.com/go-git/go-git/v5/plumbing/transport/http"
 	"github.com/go-git/go-git/v5/storage/memory"
 	"github.com/pkg/errors"
 	"gopkg.in/yaml.v2"
 	"helm.sh/helm/v3/pkg/chart"
 
+	"github.com/cyclops-ui/cycops-ctrl/internal/auth"
 	"github.com/cyclops-ui/cycops-ctrl/internal/mapper"
 	"github.com/cyclops-ui/cycops-ctrl/internal/models"
 	"github.com/cyclops-ui/cycops-ctrl/internal/models/helm"
@@ -33,7 +33,7 @@ func (r Repo) LoadTemplate(repoURL, path, commit string) (*models.Template, erro
 		return nil, err
 	}
 
-	commitSHA, err := r.resolveRef(repoURL, commit, creds)
+	commitSHA, err := resolveRef(repoURL, commit, creds)
 	if err != nil {
 		return nil, err
 	}
@@ -139,7 +139,7 @@ func (r Repo) LoadInitialTemplateValues(repoURL, path, commit string) (map[inter
 		return nil, err
 	}
 
-	commitSHA, err := r.resolveRef(repoURL, commit, creds)
+	commitSHA, err := resolveRef(repoURL, commit, creds)
 	if err != nil {
 		return nil, err
 	}
@@ -204,9 +204,9 @@ func (r Repo) LoadInitialTemplateValues(repoURL, path, commit string) (map[inter
 	return initialValues, nil
 }
 
-func (r Repo) resolveRef(repo, version string, creds *auth.Credentials) (string, error) {
+func resolveRef(repo, version string, creds *auth.Credentials) (string, error) {
 	if len(version) == 0 {
-		return r.resolveDefaultBranchRef(repo, creds)
+		return resolveDefaultBranchRef(repo, creds)
 	}
 
 	rem := git.NewRemote(memory.NewStorage(), &config.RemoteConfig{
@@ -233,7 +233,7 @@ func (r Repo) resolveRef(repo, version string, creds *auth.Credentials) (string,
 	return version, nil
 }
 
-func (r Repo) resolveDefaultBranchRef(repo string, creds *auth.Credentials) (string, error) {
+func resolveDefaultBranchRef(repo string, creds *auth.Credentials) (string, error) {
 	rem := git.NewRemote(memory.NewStorage(), &config.RemoteConfig{
 		Name: "origin",
 		URLs: []string{repo},
