@@ -26,7 +26,7 @@ export function stringInputValidators(
     rules.push({ max: field.maxLength });
   }
 
-  if (field["pattern"] !== "") {
+  if (!isFieldNullOrUndefined(field, "pattern")) {
     rules.push({
       pattern: new RegExp(field["pattern"]),
       message: "Input doesn't match requested pattern",
