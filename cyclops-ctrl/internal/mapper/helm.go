@@ -43,7 +43,7 @@ func HelmSchemaToFields(name string, schema helm.Property, dependencies []*model
 			MultipleOf:    dependency.RootField.MultipleOf,
 			MinLength:     dependency.RootField.MinLength,
 			MaxLength:     dependency.RootField.MaxLength,
-			Pattern: 	   dependency.RootField.Pattern,
+			Pattern:       dependency.RootField.Pattern,
 		})
 	}
 
@@ -62,7 +62,7 @@ func HelmSchemaToFields(name string, schema helm.Property, dependencies []*model
 		MultipleOf:    schema.MultipleOf,
 		MinLength:     schema.MinLength,
 		MaxLength:     schema.MaxLength,
-		Pattern: 	   schema.Pattern,
+		Pattern:       schema.Pattern,
 	}
 }
 
