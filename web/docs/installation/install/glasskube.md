@@ -66,4 +66,3 @@ After the Installation of Cyclops you can open Cyclops with the "Open" button.
 ![Open Cyclops with Glasskube](../../../static/img/install/open-cyclops-with-glasskube.png?raw=true "Open Cyclops with Glasskube")
 
 Glasskube will automatically create all needed port forwarding connections and open Cyclops on [http://localhost:3000](http://localhost:3000).
-

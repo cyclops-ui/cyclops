@@ -1,9 +1,6 @@
-import {
-  createBrowserRouter,
-  RouterProvider,
-} from "react-router-dom"
-import routes from "./routes"
-import Page404 from "./components/pages/Page404"
+import { createBrowserRouter, RouterProvider } from "react-router-dom";
+import routes from "./routes";
+import Page404 from "./components/pages/Page404";
 import AppLayout from "./components/layouts/AppLayout";
 
 export default function App() {
@@ -11,11 +8,9 @@ export default function App() {
     {
       element: <AppLayout />,
       errorElement: <Page404 />,
-      children: routes
+      children: routes,
     },
-  ])
+  ]);
 
-  return (
-      <RouterProvider router={router} />
-  )
+  return <RouterProvider router={router} />;
 }
