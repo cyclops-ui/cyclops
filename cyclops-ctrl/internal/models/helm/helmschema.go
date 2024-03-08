@@ -12,9 +12,11 @@ type Property struct {
 	FileExtension string              `json:"fileExtension"`
 
 	// number validation
-	Minimum    *float64 `json:"minimum"`
-	Maximum    *float64 `json:"maximum"`
-	MultipleOf *float64 `json:"multipleOf"`
+	Minimum          *float64 `json:"minimum"`
+	Maximum          *float64 `json:"maximum"`
+	ExclusiveMinimum *bool    `json:"exclusiveMinimum"`
+	ExclusiveMaximum *bool    `json:"exclusiveMaximum"`
+	MultipleOf       *float64 `json:"multipleOf"`
 
 	// string validation
 	MinLength *int    `json:"minLength"`

@@ -1,12 +1,4 @@
-import { isFieldNullOrUndefined } from "./common";
-
-interface Validator {
-  required?: Boolean;
-  min?: Number;
-  max?: Number;
-  pattern?: RegExp;
-  message?: String;
-}
+import { Validator, isFieldNullOrUndefined } from "./common";
 
 export function stringInputValidators(
   field: any,
