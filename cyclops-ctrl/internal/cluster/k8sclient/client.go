@@ -38,7 +38,7 @@ type KubernetesClient struct {
 
 	discovery *discovery.DiscoveryClient
 
-	moduleset *v1alpha1.ExampleV1Alpha1Client
+	moduleset *v1alpha1.CyclopsV1Alpha1Client
 }
 
 func New() (*KubernetesClient, error) {

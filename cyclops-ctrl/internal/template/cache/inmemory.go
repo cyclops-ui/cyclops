@@ -3,6 +3,7 @@ package cache
 import (
 	"encoding/json"
 	"fmt"
+	"time"
 
 	"github.com/dgraph-io/ristretto"
 
@@ -48,7 +49,7 @@ func (t Templates) SetTemplate(repo, path, version string, template *models.Temp
 		return
 	}
 
-	t.cache.Set(templateKey(repo, path, version), *template, int64(len(data)))
+	t.cache.SetWithTTL(templateKey(repo, path, version), *template, int64(len(data)), time.Minute*15)
 	t.cache.Wait()
 }
 
@@ -67,7 +68,7 @@ func (t Templates) GetTemplateInitialValues(repo, path, version string) (map[int
 }
 
 func (t Templates) SetTemplateInitialValues(repo, path, version string, values map[interface{}]interface{}) {
-	t.cache.Set(initialValuesKey(repo, path, version), values, int64(len(values)))
+	t.cache.SetWithTTL(initialValuesKey(repo, path, version), values, int64(len(values)), time.Minute*15)
 	t.cache.Wait()
 }
 
