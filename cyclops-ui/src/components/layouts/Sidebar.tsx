@@ -23,7 +23,7 @@ const SideNav = () => {
 
   return (
     <div
-        style={{display: "flex", flexDirection: "column", minHeight: "100vh"}}
+      style={{ display: "flex", flexDirection: "column", minHeight: "100vh" }}
     >
       <a href={PathConstants.MODULES}>
         <div
@@ -34,11 +34,11 @@ const SideNav = () => {
             display: "inline-flex",
           }}
         >
-          <h2 style={{color: "white", marginTop: "5px"}}>
+          <h2 style={{ color: "white", marginTop: "5px" }}>
             <b>Cyclops</b>
           </h2>
           <img
-            style={{height: "120%", marginLeft: "6px"}}
+            style={{ height: "120%", marginLeft: "6px" }}
             src={require("./KIKLOPcic.png")}
             alt="Cyclops"
           />
@@ -52,8 +52,8 @@ const SideNav = () => {
       />
       <Button
         ghost
-        style={{margin: "auto 25px 25px 25px"}}
-        icon={<BugFilled/>}
+        style={{ margin: "auto 25px 25px 25px" }}
+        icon={<BugFilled />}
         href={
           "https://github.com/cyclops-ui/cyclops/issues/new?assignees=&labels=&projects=&template=bug_report.md&title="
         }
