@@ -3,6 +3,7 @@ package main
 import (
 	"flag"
 	"fmt"
+	"github.com/cyclops-ui/cycops-ctrl/internal/auth"
 	"github.com/cyclops-ui/cycops-ctrl/internal/template"
 	"github.com/cyclops-ui/cycops-ctrl/internal/template/cache"
 	"os"
@@ -65,7 +66,10 @@ func main() {
 		//panic(err)
 	}
 
-	templatesRepo := template.NewRepo(cache.NewInMemoryTemplatesCache())
+	templatesRepo := template.NewRepo(
+		auth.NewTemplatesResolver(k8sClient),
+		cache.NewInMemoryTemplatesCache(),
+	)
 
 	handler, err := handler.New(templatesStorage, templatesRepo, k8sClient)
 	if err != nil {
