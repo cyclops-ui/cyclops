@@ -60,6 +60,13 @@ const SideNav = () => {
       >
         <b>Report a Bug</b>
       </Button>
+      <center style={{
+        color: "#FFF",
+        margin: "25px",
+        marginTop: "0",
+      }}>
+        {window.__RUNTIME_CONFIG__.REACT_APP_VERSION}
+      </center>
     </div>
   );
 };
