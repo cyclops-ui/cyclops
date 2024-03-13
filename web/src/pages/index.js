@@ -80,15 +80,6 @@ function HomepageHeader() {
                         Join the community
                     </Link>
                 </div>
-                <div>
-                    <a href="https://www.producthunt.com/products/cyclops">
-                        <img
-                        src="https://api.producthunt.com/widgets/embed-image/v1/featured.svg?post_id=432719&theme=light"
-                        alt="Cyclops - Developer&#0032;Friendly&#0032;Kubernetes | Product Hunt"
-                        style={{ marginTop: "10px" }}
-                        />
-                    </a>
-                </div>
             </div>
         </header>
     );

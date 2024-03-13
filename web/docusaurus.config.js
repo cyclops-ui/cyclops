@@ -58,10 +58,9 @@ const config = {
       // Replace with your project's social card
       image: "img/which-would-you-prefer.png",
       announcementBar: {
-        backgroundColor: "#222222",
+        backgroundColor: "#68b6ac",
         textColor: "#ffffff",
         isCloseable: false,
-
         content:
           '<b>⭐ We are <a href="https://github.com/cyclops-ui/cyclops">open-source on GitHub</a> - show us your support by giving us a star ⭐</b>',
       },
