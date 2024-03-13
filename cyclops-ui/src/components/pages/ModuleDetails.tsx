@@ -22,6 +22,7 @@ import {
   WarningTwoTone,
 } from "@ant-design/icons";
 import Link from "antd/lib/typography/Link";
+import "./custom.css";
 
 import "ace-builds/src-noconflict/mode-jsx";
 import ReactAce from "react-ace";
@@ -80,6 +81,14 @@ interface module {
   };
 }
 
+interface resourceRef {
+  group: String,
+  version: String,
+  kind: String,
+  name: String,
+  namespace: String,
+}
+
 const ModuleDetails = () => {
   const [manifestModal, setManifestModal] = useState({
     on: false,
@@ -89,6 +98,7 @@ const ModuleDetails = () => {
   const [loadModule, setLoadModule] = useState(false);
   const [loadResources, setLoadResources] = useState(false);
   const [deleteName, setDeleteName] = useState("");
+  const [deleteResourceVerify, setDeleteResourceVerify] = useState("");
   const [resources, setResources] = useState([]);
   const [module, setModule] = useState<module>({
     name: "",
@@ -98,6 +108,15 @@ const ModuleDetails = () => {
       path: "",
       version: "",
     },
+  });
+
+  const [deleteResourceModal, setDeleteResourceModal] = useState(false);
+  const [deleteResourceRef, setDeleteResourceRef] = useState<resourceRef>({
+    group: "",
+    version: "",
+    kind: "",
+    name: "",
+    namespace: "",
   });
 
   const [activeCollapses, setActiveCollapses] = useState(new Map());
@@ -224,11 +243,26 @@ const ModuleDetails = () => {
     setDeleteName(e.target.value);
   };
 
+  const changeDeleteResourceVerify = (e: any) => {
+    setDeleteResourceVerify(e.target.value);
+  };
+
   const handleCancelManifest = () => {
     setManifestModal({
       on: false,
       manifest: "",
     });
+  };
+
+  const handleCancelDeleteResource = () => {
+    setDeleteResourceModal(false);
+    setDeleteResourceRef({
+      group: "",
+      version: "",
+      kind: "",
+      name: "",
+      namespace: "",
+    })
   };
 
   const handleCancel = () => {
@@ -387,32 +421,14 @@ const ModuleDetails = () => {
       deleteButton = (
         <Button
           onClick={function () {
-            axios
-              .delete(`/api/modules/` + moduleName + `/resources`, {
-                data: {
-                  group: resource.group,
-                  version: resource.version,
-                  kind: resource.kind,
-                  name: resource.name,
-                  namespace: resource.namespace,
-                },
-              })
-              .then(() => {})
-              .catch((error) => {
-                console.log(error);
-                console.log(error.response);
-                setLoading(false);
-                if (error.response === undefined) {
-                  setError({
-                    message: String(error),
-                    description:
-                      "Check if Cyclops backend is available on: " +
-                      window.__RUNTIME_CONFIG__.REACT_APP_CYCLOPS_CTRL_HOST,
-                  });
-                } else {
-                  setError(error.response.data);
-                }
-              });
+            setDeleteResourceModal(true);
+            setDeleteResourceRef({
+              group: resource.group,
+              version: resource.version,
+              kind: resource.kind,
+              name: resource.name,
+              namespace: resource.namespace,
+            })
           }}
           danger
           block
@@ -597,6 +613,39 @@ const ModuleDetails = () => {
     return statusIcon;
   };
 
+  const deleteResource = () => {
+    axios
+      .delete(`/api/modules/` + moduleName + `/resources`, {
+        data: {
+          group: deleteResourceRef.group,
+          version: deleteResourceRef.version,
+          kind: deleteResourceRef.kind,
+          name: deleteResourceRef.name,
+          namespace: deleteResourceRef.namespace,
+        },
+      })
+      .then(() => {
+        setLoadResources(false);
+        setDeleteResourceModal(false);
+        fetchModuleResources();
+      })
+      .catch((error) => {
+        console.log(error);
+        console.log(error.response);
+        setLoading(false);
+        if (error.response === undefined) {
+          setError({
+            message: String(error),
+            description:
+                "Check if Cyclops backend is available on: " +
+                window.__RUNTIME_CONFIG__.REACT_APP_CYCLOPS_CTRL_HOST,
+          });
+        } else {
+          setError(error.response.data);
+        }
+      });
+  }
+
   return (
     <div>
       {error.message.length !== 0 && (
@@ -709,6 +758,31 @@ const ModuleDetails = () => {
           mode={"sass"}
           value={manifestModal.manifest}
           readOnly={true}
+        />
+      </Modal>
+      <Modal
+        title={"Delete " + deleteResourceRef.kind + "/" + deleteResourceRef.name + " from namespace " + deleteResourceRef.namespace}
+        open={deleteResourceModal}
+        onCancel={handleCancelDeleteResource}
+        footer={
+          <Button
+            danger
+            block
+            disabled={deleteResourceVerify !== deleteResourceRef.kind + " " + deleteResourceRef.name}
+            onClick={deleteResource}
+          >
+            Delete
+          </Button>
+        }
+        width={"40%"}
+      >
+        <p>
+          In order to confirm deleting this resource, type: <code>{deleteResourceRef.kind + " " + deleteResourceRef.name}</code>
+        </p>
+        <Input
+          placeholder={deleteResourceRef.kind + " " + deleteResourceRef.name}
+          onChange={changeDeleteResourceVerify}
+          required
         />
       </Modal>
     </div>
