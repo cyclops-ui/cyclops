@@ -325,7 +325,9 @@ const StatefulSet = ({ name, namespace }: Props) => {
       <Modal
         title="Logs"
         open={logsModal.on}
+        onOk={handleCancelLogs}
         onCancel={handleCancelLogs}
+        cancelButtonProps={{ style: { display: 'none' } }}
         width={"60%"}
       >
         <Tabs items={getTabItems()} onChange={onLogsTabsChange} />
