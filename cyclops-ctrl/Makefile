@@ -163,3 +163,6 @@ local-redis:
 
 group-imports:
 	goimports-reviser -recursive -file-path .
+
+unit-test:
+	go test -v -tags musl,dynamic ./...
