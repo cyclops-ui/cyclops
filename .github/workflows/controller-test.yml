@@ -3,7 +3,7 @@ name: Controller tests
 on:
   push:
     paths:
-      - 'cyclops-ctrl/**' # Define the folder path here
+      - 'cyclops-ctrl/**'
 
 jobs:
   build:
@@ -13,7 +13,7 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v2
 
-      - name: Run go test on folder change
+      - name: Unit tests
         run: |
           cd ${{ github.workspace }}/cyclops-ctrl
           make unit-test
