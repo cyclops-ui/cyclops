@@ -1,4 +1,4 @@
-name: Controller tests
+name: controller tests
 
 on:
   push:
