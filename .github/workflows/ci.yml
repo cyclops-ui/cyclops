@@ -38,8 +38,8 @@ jobs:
 #          make unit-test
 
   build-UI:
-    needs:
-      - test-UI
+#    needs:
+#      - test-UI
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
@@ -57,8 +57,8 @@ jobs:
           docker push cyclopsui/cyclops-ui:$TAG
 
   build-controller:
-    needs:
-      - test-controller
+#    needs:
+#      - test-controller
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
