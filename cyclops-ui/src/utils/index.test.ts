@@ -32,7 +32,7 @@ describe("fileExtension", () => {
         },
     ]
 
-    it("maps correct code highlight to text type", () => {
+    it("returns correct code highlight to text type", () => {
         for (let i = 0; i < testCases.length; i++) {
             expect(testCases[i].out).toBe(fileExtension(testCases[i].in))
         }
