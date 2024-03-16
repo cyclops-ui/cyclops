@@ -19,7 +19,7 @@ jobs:
       - name: Install dependencies
         run: |
           cd ${{ github.workspace }}/cyclops-ui
-          npm install
+          npm install --force
 
       - name: Run tests
         run: |
