@@ -1,4 +1,3 @@
-#==================== Building Stage ===================
 FROM node:20.10.0-alpine as builder
 WORKDIR /app
 
@@ -20,7 +19,6 @@ ENV VITE_APP_VERSION=$version
 ENV NODE_OPTIONS=--max-old-space-size=1536
 RUN yarn build
 
-#==================== Nginx stage ======================
 FROM nginx:stable-alpine as app
 
 WORKDIR /usr/share/nginx/html
