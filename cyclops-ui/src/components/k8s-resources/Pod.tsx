@@ -12,7 +12,7 @@ import {
   TabsProps,
 } from "antd";
 import axios from "axios";
-import { DownloadOutlined } from "@ant-design/icons";
+// import { DownloadOutlined } from "@ant-design/icons";
 import ReactAce from "react-ace";
 import { formatPodAge } from "../../utils/pods";
 const { Title } = Typography;
@@ -135,7 +135,7 @@ const Pod = ({ name, namespace }: Props) => {
             <Col>
               <Button
                 type="primary"
-                icon={<DownloadOutlined />}
+                // icon={<DownloadOutlined />}
                 onClick={downloadLogs(container.name)}
               >
                 Download
@@ -162,7 +162,7 @@ const Pod = ({ name, namespace }: Props) => {
             <Col>
               <Button
                 type="primary"
-                icon={<DownloadOutlined />}
+                // icon={<DownloadOutlined />}
                 onClick={downloadLogs(container.name)}
               >
                 Download
