@@ -13,7 +13,7 @@ import {
 } from "antd";
 import axios from "axios";
 import { formatPodAge } from "../../utils/pods";
-import { DownloadOutlined } from "@ant-design/icons";
+// import { DownloadOutlined } from "@ant-design/icons";
 import ReactAce from "react-ace";
 
 interface Props {
@@ -114,7 +114,7 @@ const Deployment = ({ name, namespace }: Props) => {
             <Col>
               <Button
                 type="primary"
-                icon={<DownloadOutlined />}
+                // icon={<DownloadOutlined />}
                 onClick={downloadLogs(container.name)}
               >
                 Download
@@ -141,7 +141,7 @@ const Deployment = ({ name, namespace }: Props) => {
             <Col>
               <Button
                 type="primary"
-                icon={<DownloadOutlined />}
+                // icon={<DownloadOutlined />}
                 onClick={downloadLogs(container.name)}
               >
                 Download
