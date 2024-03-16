@@ -1,12 +1,12 @@
 #==================== Building Stage ===================
-FROM node:18.0-alpine as builder
+FROM node:20.10.0-alpine as builder
 WORKDIR /app
 
 # Install dependencies
 
 COPY package.json ./
 
-RUN npm config set scripts-prepend-node-path true
+RUN #npm config set scripts-prepend-node-path true
 
 RUN yarn install
 
