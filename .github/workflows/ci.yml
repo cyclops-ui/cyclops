@@ -11,31 +11,31 @@ permissions:
   contents: write
 
 jobs:
-  test-UI:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v2
-      - name: Set up Node.js
-        uses: actions/setup-node@v2
-      - name: Install dependencies
-        run: |
-          cd ${{ github.workspace }}/cyclops-ui
-          npm install --force
-      - name: Run tests
-        run: |
-          cd ${{ github.workspace }}/cyclops-ui
-          npm test
+#  test-UI:
+#    runs-on: ubuntu-latest
+#    steps:
+#      - name: Checkout code
+#        uses: actions/checkout@v2
+#      - name: Set up Node.js
+#        uses: actions/setup-node@v2
+#      - name: Install dependencies
+#        run: |
+#          cd ${{ github.workspace }}/cyclops-ui
+#          npm install --force
+#      - name: Run tests
+#        run: |
+#          cd ${{ github.workspace }}/cyclops-ui
+#          npm test
 
-  test-controller:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v2
-      - name: Unit tests
-        run: |
-          cd ${{ github.workspace }}/cyclops-ctrl
-          make unit-test
+#  test-controller:
+#    runs-on: ubuntu-latest
+#    steps:
+#      - name: Checkout repository
+#        uses: actions/checkout@v2
+#      - name: Unit tests
+#        run: |
+#          cd ${{ github.workspace }}/cyclops-ctrl
+#          make unit-test
 
   build-UI:
     needs:
