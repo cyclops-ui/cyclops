@@ -57,13 +57,6 @@ const config = {
     ({
       // Replace with your project's social card
       image: "img/which-would-you-prefer.png",
-      announcementBar: {
-        backgroundColor: "#68b6ac",
-        textColor: "#ffffff",
-        isCloseable: false,
-        content:
-          '<b>⭐ We are <a href="https://github.com/cyclops-ui/cyclops">open-source on GitHub</a> - show us your support by giving us a star ⭐</b>',
-      },
       navbar: {
         title: "Cyclops",
         logo: {
@@ -79,14 +72,14 @@ const config = {
           },
           { to: "blog", label: "Blog", position: "left" },
           {
-            href: "https://www.linkedin.com/company/cyclops-ui",
-            position: "right",
-            className: "header-linkedin-link",
-          },
-          {
             href: "https://github.com/cyclops-ui/cyclops",
             position: "right",
             className: "header-github-link",
+          },
+          {
+            href: "https://www.linkedin.com/company/cyclops-ui",
+            position: "right",
+            className: "header-linkedin-link",
           },
           {
             href: "https://discord.com/invite/8ErnK3qDb3",
@@ -160,7 +153,7 @@ const config = {
         ],
       },
       colorMode: {
-        defaultMode: "light",
+        defaultMode: "dark",
         disableSwitch: true,
       },
     }),

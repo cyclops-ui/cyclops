@@ -1,7 +1,7 @@
 import React from 'react';
 import styles from './styles.module.css';
 import CodeBlock from '@theme/CodeBlock'
-import {Form, Input, InputNumber, Switch} from "antd";
+import {ConfigProvider, Form, Input, InputNumber, Switch} from "antd";
 
 class Comparison extends React.Component {
     constructor(props) {
@@ -119,38 +119,46 @@ class Comparison extends React.Component {
                     <p className="hero__subtitle">Cyclops gives you a UI containing fields you define yourself to manage your
                         K8s workloads.</p>
                     <p className="hero__subtitle">Give it a go!</p>
-                    <Form labelCol={{span: '6'}}>
-                        <Form.Item
-                            label="Name"
-                            style={{ flexDirection: 'row' }}
-                        >
-                            <Input defaultValue={'nginx'} onChange={onNameChange}/>
-                        </Form.Item>
-                        <Form.Item
-                            label="Replicas"
-                            style={{display: 'block'}}
-                        >
-                            <InputNumber style={{width: '100%'}} defaultValue={'3'} onChange={onReplicasChange}/>
-                        </Form.Item>
-                        <Form.Item
-                            label="Version"
-                            style={{display: 'block'}}
-                        >
-                            <Input defaultValue={'1.14.2'} onChange={onVersionChange}/>
-                        </Form.Item>
-                        <Form.Item
-                            label="Port"
-                            style={{display: 'block'}}
-                        >
-                            <InputNumber style={{width: '100%'}} defaultValue={'80'} onChange={onPortChange}/>
-                        </Form.Item>
-                        <Form.Item
-                            label="Need service"
-                            style={{display: 'block', textAlign: 'left'}}
-                        >
-                            <Switch defaultValue={'false'} onChange={onNeedService}/>
-                        </Form.Item>
-                    </Form>
+                    <ConfigProvider
+                        theme={{
+                            token: {
+                                colorPrimary: '#fe8801',
+                            },
+                        }}
+                    >
+                        <Form labelCol={{span: '6'}}>
+                            <Form.Item
+                                label="Name"
+                                style={{ flexDirection: 'row' }}
+                            >
+                                <Input defaultValue={'nginx'} onChange={onNameChange}/>
+                            </Form.Item>
+                            <Form.Item
+                                label="Replicas"
+                                style={{display: 'block'}}
+                            >
+                                <InputNumber style={{width: '100%'}} defaultValue={'3'} onChange={onReplicasChange}/>
+                            </Form.Item>
+                            <Form.Item
+                                label="Version"
+                                style={{display: 'block'}}
+                            >
+                                <Input defaultValue={'1.14.2'} onChange={onVersionChange}/>
+                            </Form.Item>
+                            <Form.Item
+                                label="Port"
+                                style={{display: 'block'}}
+                            >
+                                <InputNumber style={{width: '100%'}} defaultValue={'80'} onChange={onPortChange}/>
+                            </Form.Item>
+                            <Form.Item
+                                label="Need service"
+                                style={{display: 'block', textAlign: 'left'}}
+                            >
+                                <Switch defaultValue={'false'} onChange={onNeedService}/>
+                            </Form.Item>
+                        </Form>
+                    </ConfigProvider>
                 </div>
                 <div className={styles.yaml}>
                     <CodeBlock
