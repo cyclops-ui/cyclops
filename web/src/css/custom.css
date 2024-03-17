@@ -91,5 +91,7 @@ html[data-theme='light'] footer {
 }
 
 .navbar {
-  background-color: #000830;
+  background-color: rgba(0, 8, 48, 0.3);
+  backdrop-filter: blur(3px);
+  display: flex;
 }
