@@ -114,10 +114,10 @@ const Comparison = () => {
         'metadata:\n' +
         '  name: ' + name + '\n' +
         'spec:\n' +
-        '  selector:\n' +
-        '    app: ' + name + '\n' +
-        '  ports:\n' +
-        '  - protocol: TCP\nkekd'
+        '  selector:\n'
+        // '    app: ' + name + '\n' +
+        // '  ports:\n' +
+        // '  - protocol: TCP\nkekd'
         // '    port: ' + mapPort(port) + '\n'
         // '      targetPort: 9376'
 
@@ -225,7 +225,6 @@ const Comparison = () => {
             </div>
             <div className={styles.yaml}>
                 <SyntaxHighlighter
-                    language="yaml"
                     style={{
                         "hljs-attr": {
                             color: "#FFF"
@@ -239,7 +238,7 @@ const Comparison = () => {
                     customStyle={{
                         backgroundColor: "#000830",
                         color: "#fe8801",
-                        height: "780px",
+                        height: "500px",
                     }}
                 >
                     {getManifest()}

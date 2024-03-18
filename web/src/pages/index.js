@@ -13,6 +13,7 @@ import landingCyclops from '/static/img/landing_cyclops.png';
 import title from '/static/img/cyclops-title.png';
 
 import Comparison from "../components/Comparison";
+import Install from "../components/Install";
 
 export default function Home() {
     return (
@@ -21,10 +22,12 @@ export default function Home() {
             description="Deploy your K8s workloads through a UI">
             <main>
                 <div className={styles.landing}>
-                    <img className={styles.landingCyclops} src={landingCyclops}/>
                     <img className={styles.cyclopsTitle} src={title}/>
+                    <a className={styles.cyclopsDesc}>Developer friendly Kubernetes</a>
+                    <img className={styles.landingCyclops} src={landingCyclops}/>
                 </div>
                 <Comparison/>
+                <Install/>
             </main>
         </Layout>
     );
