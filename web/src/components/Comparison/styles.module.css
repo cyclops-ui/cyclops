@@ -5,6 +5,13 @@
   }
 }
 
+.title {
+  display: inline-block;
+  color: #000;
+  width: 100%;
+  text-align: justify;
+}
+
 .all {
   display: flex;
   justify-content: center;

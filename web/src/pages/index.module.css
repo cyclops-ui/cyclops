@@ -1,101 +1,28 @@
-/**
- * CSS files with the .module.css suffix will be treated as CSS modules
- * and scoped locally.
- */
-
-@media screen and (max-width: 950px) {
-  .heroBanner {
-    flex-direction: column;
-    width: 100%;
-  }
-}
-
-ul {
-  padding-left: 0;
-}
-
-li {
-  list-style-type: none;
-}
-
-.heroBanner {
-  left: 50%;
-  align-content: center;
-  align-items: center;
-  alignment: center;
-  background: white;
+.landing {
   display: flex;
-  justify-content: center;
-}
-
-.image {
-  float: right;
-  width: 35%;
-}
-
-.letters {
-  text-align: left;
+  flex-direction: column;
+  align-items: center;
+  background-color: #000830;
+  height: 100vh;
   position: relative;
-  overflow: hidden;
-  background: white;
-  color: #00152A;
-  float: right;
-  width: 30%;
-  margin: 5px;
-  padding: 15px;
+  top: 0;
+  margin-top: -60px;
 }
 
-.buttons {
-  display: flex;
-  align-items: center;
-  width: 100%;
-  justify-content: left;
-  padding-right: 0;
-  margin-right: 0;
+.landingCyclops {
+  align-self: center;
+  position: absolute;
+  bottom: 0;
+  object-fit: cover;
+  width: 80vh;
 }
 
-.support {
-  padding: 10px 10px 0;
+.cyclopsTitle {
+  padding-top: 110px;
+  width: 40%;
 }
 
-.supporters {
-  padding: 10px;
-  justify-content: center;
-  align-items: center;
-}
-
-@media screen and (max-width: 996px) {
-  .heroBanner {
-    /*padding: 2rem;*/
-    width: 100%;
-  }
-}
-
-@media screen and (max-width: 600px) {
-  .image {
-    float: right;
-    width: 90%;
-  }
-
-  .letters {
-    text-align: center;
-    position: relative;
-    overflow: hidden;
-    background: white;
-    color: #00152A;
-    width: 100%;
-    margin: 0;
-  }
-
-  .buttons {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 100%;
-  }
-}
-
-.right {
-  float: right;
-  width: 60%;
+.cyclopsDesc {
+  color: #FFF;
+  padding-top: 20px;
 }
