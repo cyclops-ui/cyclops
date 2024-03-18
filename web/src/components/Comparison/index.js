@@ -2,7 +2,7 @@ import React, {useEffect, useState} from 'react';
 import styles from './styles.module.css';
 import SyntaxHighlighter from 'react-syntax-highlighter';
 
-import {ConfigProvider, Form, Input, InputNumber, Switch} from "antd";
+import {ConfigProvider, Form, Input, InputNumber, Select, Switch} from "antd";
 
 const Comparison = () => {
     const [name, setName] = useState("nginx");
@@ -10,6 +10,7 @@ const Comparison = () => {
     const [version, setVersion] = useState("1.14.2");
     const [port, setPort] = useState(80);
     const [expose, setExpose] = useState(false);
+    const [intervalId, setIntervalId] = useState(null);
 
     const [form] = Form.useForm();
 
@@ -19,40 +20,47 @@ const Comparison = () => {
     }
 
     useEffect(() => {
-        const intervalId = setInterval(() => {
-            console.log(name)
+        if (intervalId === null) {
+            console.log("jaja")
+            const iId = setInterval(() => {
+                console.log(form.getFieldValue("Name"));
+                if (form.getFieldValue("Name") === "my-app") {
+                    setTimeout(() => typeName("my-ap"), 0)
+                    setTimeout(() => typeName("my-a"), 50)
+                    setTimeout(() => typeName("my-"), 100)
+                    setTimeout(() => typeName("my"), 150)
+                    setTimeout(() => typeName("m"), 200)
+                    setTimeout(() => typeName(""), 250)
 
-            if (name === "nginx") {
-                setTimeout(() => typeName("ngin"), 0)
-                setTimeout(() => typeName("ngi"), 50)
-                setTimeout(() => typeName("ng"), 100)
-                setTimeout(() => typeName("n"), 150)
-                setTimeout(() => typeName(""), 200)
+                    setTimeout(() => typeName("n"), 500)
+                    setTimeout(() => typeName("ng"), 600)
+                    setTimeout(() => typeName("ngi"), 700)
+                    setTimeout(() => typeName("ngin"), 800)
+                    setTimeout(() => typeName("nginx"), 900)
+                } else {
+                    setTimeout(() => typeName("ngin"), 0)
+                    setTimeout(() => typeName("ngi"), 50)
+                    setTimeout(() => typeName("ng"), 100)
+                    setTimeout(() => typeName("n"), 150)
+                    setTimeout(() => typeName(""), 200)
 
-                setTimeout(() => typeName("m"), 500)
-                setTimeout(() => typeName("my"), 600)
-                setTimeout(() => typeName("my-"), 700)
-                setTimeout(() => typeName("my-a"), 800)
-                setTimeout(() => typeName("my-ap"), 900)
-                setTimeout(() => typeName("my-app"), 1000)
-            } else {
-                setTimeout(() => typeName("my-ap"), 0)
-                setTimeout(() => typeName("my-a"), 50)
-                setTimeout(() => typeName("my-"), 100)
-                setTimeout(() => typeName("my"), 150)
-                setTimeout(() => typeName("m"), 200)
-                setTimeout(() => typeName(""), 250)
+                    setTimeout(() => typeName("m"), 500)
+                    setTimeout(() => typeName("my"), 600)
+                    setTimeout(() => typeName("my-"), 700)
+                    setTimeout(() => typeName("my-a"), 800)
+                    setTimeout(() => typeName("my-ap"), 900)
+                    setTimeout(() => typeName("my-app"), 1000)
+                }
+            }, 2000);
 
-                setTimeout(() => typeName("n"), 500)
-                setTimeout(() => typeName("ng"), 600)
-                setTimeout(() => typeName("ngi"), 700)
-                setTimeout(() => typeName("ngin"), 800)
-                setTimeout(() => typeName("nginx"), 900)
-            }
-        }, 2000);
+            console.log(iId)
+            setIntervalId(iId)
+        }
 
-        return () => clearInterval(intervalId);
-    }, [name])
+        return () => {
+            if (intervalId) clearInterval(intervalId);
+        };
+    }, [])
 
     const mapReplicas = (n) => {
         if (n === null || n === undefined) {
@@ -109,11 +117,14 @@ const Comparison = () => {
         '  selector:\n' +
         '    app: ' + name + '\n' +
         '  ports:\n' +
-        '    - protocol: TCP\n' +
-        '      port: ' + mapPort(port) + '\n' +
-        '      targetPort: 9376'
+        '  - protocol: TCP\nkekd'
+        // '    port: ' + mapPort(port) + '\n'
+        // '      targetPort: 9376'
 
     const onNameChange = (event) => {
+        setIntervalId(null);
+        console.log(intervalId)
+        clearInterval(intervalId)
         setName(event.target.value)
     }
 
@@ -121,8 +132,8 @@ const Comparison = () => {
         setReplicas(replicas)
     }
 
-    const onVersionChange = (event) => {
-        setVersion(event.target.value)
+    const onVersionChange = (version) => {
+        setVersion(version)
     }
 
     const onPortChange = (port) => {
@@ -187,7 +198,15 @@ const Comparison = () => {
                             label="Version"
                             style={{display: 'block'}}
                         >
-                            <Input defaultValue={version} onChange={onVersionChange}/>
+                            <Select
+                                defaultValue={version}
+                                options={[
+                                    { value: '1.14.1', label: "1.14.1" },
+                                    { value: '1.14.2', label: "1.14.2" },
+                                    { value: '1.15.0', label: "1.15.0" }
+                                ]}
+                                onChange={onVersionChange}
+                            />
                         </Form.Item>
                         <Form.Item
                             label="Port"
@@ -212,13 +231,15 @@ const Comparison = () => {
                             color: "#FFF"
                         },
                         "react-syntax-highlighter-line-number": {
-                            color: "#a7a7a7"
+                            color: "#a7a7a7",
+                            margin: "0"
                         }
                     }}
                     showLineNumbers={true}
                     customStyle={{
                         backgroundColor: "#000830",
-                        color: "#fe8801"
+                        color: "#fe8801",
+                        height: "780px",
                     }}
                 >
                     {getManifest()}

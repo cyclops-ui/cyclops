@@ -10,6 +10,7 @@ import styles from './index.module.css'
 // import EIT from '/static/img/EIT.png';
 
 import landingCyclops from '/static/img/landing_cyclops.png';
+import title from '/static/img/cyclops-title.png';
 
 import Comparison from "../components/Comparison";
 
@@ -21,6 +22,7 @@ export default function Home() {
             <main>
                 <div className={styles.landing}>
                     <img className={styles.landingCyclops} src={landingCyclops}/>
+                    <img className={styles.cyclopsTitle} src={title}/>
                 </div>
                 <Comparison/>
             </main>
