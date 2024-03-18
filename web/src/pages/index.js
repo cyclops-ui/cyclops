@@ -14,6 +14,7 @@ import title from '/static/img/cyclops-title.png';
 
 import Comparison from "../components/Comparison";
 import Install from "../components/Install";
+import Features from "../components/Features";
 
 export default function Home() {
     return (
@@ -27,6 +28,7 @@ export default function Home() {
                     <img className={styles.landingCyclops} src={landingCyclops}/>
                 </div>
                 <Comparison/>
+                <Features/>
                 <Install/>
             </main>
         </Layout>

@@ -5,12 +5,6 @@ import InstallCmd from "./Install";
 import FwdCmd from "./PortFwd";
 
 const Install = () => {
-    const [name, setName] = useState("nginx");
-
-    useEffect(() => {
-
-    }, [])
-
     return (
         <div className={styles.install}>
             <InstallTitle/>
