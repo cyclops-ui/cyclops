@@ -4,13 +4,7 @@ import (
 	"github.com/cyclops-ui/cycops-ctrl/internal/models/helm"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
-	"testing"
 )
-
-func TestMapper(t *testing.T) {
-	RegisterFailHandler(Fail)
-	RunSpecs(t, "test mapper")
-}
 
 var _ = Describe("Helm mapper test", func() {
 	Describe("mapHelmPropertyTypeToFieldType test", func() {
