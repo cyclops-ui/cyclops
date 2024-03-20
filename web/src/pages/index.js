@@ -39,7 +39,7 @@ function HomepageHeader() {
                 <div className={styles.buttons} style={{paddingTop: '10px', color: 'red!important'}}>
                     <Link
                         className="button button--secondary button--lg button--demo"
-                        to="/docs/about">
+                        to="/docs/installation/install/manifest">
                         Get started
                     </Link>
                 </div>
