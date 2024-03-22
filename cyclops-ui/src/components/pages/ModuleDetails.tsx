@@ -82,11 +82,11 @@ interface module {
 }
 
 interface resourceRef {
-  group: String,
-  version: String,
-  kind: String,
-  name: String,
-  namespace: String,
+  group: String;
+  version: String;
+  kind: String;
+  name: String;
+  namespace: String;
 }
 
 const ModuleDetails = () => {
@@ -164,7 +164,10 @@ const ModuleDetails = () => {
               window.__RUNTIME_CONFIG__.REACT_APP_CYCLOPS_CTRL_HOST,
           });
         } else {
-          setError(error.response.data);
+          setError({
+            message: error.message,
+            description: error.response.data,
+          });
         }
       });
   }
@@ -189,7 +192,10 @@ const ModuleDetails = () => {
               window.__RUNTIME_CONFIG__.REACT_APP_CYCLOPS_CTRL_HOST,
           });
         } else {
-          setError(error.response.data);
+          setError({
+            message: error.message,
+            description: error.response.data,
+          });
         }
       });
   }
@@ -214,7 +220,10 @@ const ModuleDetails = () => {
               window.__RUNTIME_CONFIG__.REACT_APP_CYCLOPS_CTRL_HOST,
           });
         } else {
-          setError(error.response.data);
+          setError({
+            message: error.message,
+            description: error.response.data,
+          });
         }
       });
   }
@@ -262,7 +271,7 @@ const ModuleDetails = () => {
       kind: "",
       name: "",
       namespace: "",
-    })
+    });
   };
 
   const handleCancel = () => {
@@ -287,7 +296,10 @@ const ModuleDetails = () => {
               window.__RUNTIME_CONFIG__.REACT_APP_CYCLOPS_CTRL_HOST,
           });
         } else {
-          setError(error.response.data);
+          setError({
+            message: error.message,
+            description: error.response.data,
+          });
         }
       });
   };
@@ -428,7 +440,7 @@ const ModuleDetails = () => {
               kind: resource.kind,
               name: resource.name,
               namespace: resource.namespace,
-            })
+            });
           }}
           danger
           block
@@ -637,14 +649,17 @@ const ModuleDetails = () => {
           setError({
             message: String(error),
             description:
-                "Check if Cyclops backend is available on: " +
-                window.__RUNTIME_CONFIG__.REACT_APP_CYCLOPS_CTRL_HOST,
+              "Check if Cyclops backend is available on: " +
+              window.__RUNTIME_CONFIG__.REACT_APP_CYCLOPS_CTRL_HOST,
           });
         } else {
-          setError(error.response.data);
+          setError({
+            message: error.message,
+            description: error.response.data,
+          });
         }
       });
-  }
+  };
 
   return (
     <div>
@@ -750,7 +765,7 @@ const ModuleDetails = () => {
         open={manifestModal.on}
         onOk={handleCancelManifest}
         onCancel={handleCancelManifest}
-        cancelButtonProps={{ style: { display: 'none' } }}
+        cancelButtonProps={{ style: { display: "none" } }}
         width={"40%"}
       >
         <ReactAce
@@ -761,14 +776,24 @@ const ModuleDetails = () => {
         />
       </Modal>
       <Modal
-        title={"Delete " + deleteResourceRef.kind + "/" + deleteResourceRef.name + " from namespace " + deleteResourceRef.namespace}
+        title={
+          "Delete " +
+          deleteResourceRef.kind +
+          "/" +
+          deleteResourceRef.name +
+          " from namespace " +
+          deleteResourceRef.namespace
+        }
         open={deleteResourceModal}
         onCancel={handleCancelDeleteResource}
         footer={
           <Button
             danger
             block
-            disabled={deleteResourceVerify !== deleteResourceRef.kind + " " + deleteResourceRef.name}
+            disabled={
+              deleteResourceVerify !==
+              deleteResourceRef.kind + " " + deleteResourceRef.name
+            }
             onClick={deleteResource}
           >
             Delete
@@ -777,7 +802,8 @@ const ModuleDetails = () => {
         width={"40%"}
       >
         <p>
-          In order to confirm deleting this resource, type: <code>{deleteResourceRef.kind + " " + deleteResourceRef.name}</code>
+          In order to confirm deleting this resource, type:{" "}
+          <code>{deleteResourceRef.kind + " " + deleteResourceRef.name}</code>
         </p>
         <Input
           placeholder={deleteResourceRef.kind + " " + deleteResourceRef.name}

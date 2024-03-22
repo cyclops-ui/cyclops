@@ -201,7 +201,10 @@ const EditModule = () => {
                   window.__RUNTIME_CONFIG__.REACT_APP_CYCLOPS_CTRL_HOST,
               });
             } else {
-              setError(error.response.data);
+              setError({
+                message: error.message,
+                description: error.response.data,
+              });
             }
           });
       })
@@ -214,7 +217,10 @@ const EditModule = () => {
               window.__RUNTIME_CONFIG__.REACT_APP_CYCLOPS_CTRL_HOST,
           });
         } else {
-          setError(error.response.data);
+          setError({
+            message: error.message,
+            description: error.response.data,
+          });
         }
       });
   }, []);
@@ -309,7 +315,10 @@ const EditModule = () => {
               window.__RUNTIME_CONFIG__.REACT_APP_CYCLOPS_CTRL_HOST,
           });
         } else {
-          setError(error.response.data);
+          setError({
+            message: error.message,
+            description: error.response.data,
+          });
         }
       });
   };
