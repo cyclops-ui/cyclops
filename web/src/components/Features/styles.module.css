@@ -2,3 +2,11 @@
     background-color: #000830;
     height: 1000px;
 }
+
+.line {
+    top: 10px;
+    height: 1px;
+    background-color: red;
+    transform: rotate(10deg);
+    z-index: -1;
+}

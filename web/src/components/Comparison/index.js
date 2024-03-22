@@ -9,7 +9,7 @@ const Comparison = () => {
     const [replicas, setReplicas] = useState(3);
     const [version, setVersion] = useState("1.14.2");
     const [port, setPort] = useState(80);
-    const [expose, setExpose] = useState(false);
+    // const [expose, setExpose] = useState(false);
     const [intervalId, setIntervalId] = useState(null);
 
     const [form] = Form.useForm();
@@ -21,16 +21,13 @@ const Comparison = () => {
 
     useEffect(() => {
         if (intervalId === null) {
-            console.log("jaja")
             const iId = setInterval(() => {
-                console.log(form.getFieldValue("Name"));
                 if (form.getFieldValue("Name") === "my-app") {
                     setTimeout(() => typeName("my-ap"), 0)
                     setTimeout(() => typeName("my-a"), 50)
                     setTimeout(() => typeName("my-"), 100)
                     setTimeout(() => typeName("my"), 150)
                     setTimeout(() => typeName("m"), 200)
-                    setTimeout(() => typeName(""), 250)
 
                     setTimeout(() => typeName("n"), 500)
                     setTimeout(() => typeName("ng"), 600)
@@ -42,7 +39,6 @@ const Comparison = () => {
                     setTimeout(() => typeName("ngi"), 50)
                     setTimeout(() => typeName("ng"), 100)
                     setTimeout(() => typeName("n"), 150)
-                    setTimeout(() => typeName(""), 200)
 
                     setTimeout(() => typeName("m"), 500)
                     setTimeout(() => typeName("my"), 600)
@@ -108,19 +104,6 @@ const Comparison = () => {
         '        ports:\n' +
         '        - containerPort: ' + mapPort(port)
 
-    const k8sSvcString = '---\n' +
-        'apiVersion: v1\n' +
-        'kind: Service\n' +
-        'metadata:\n' +
-        '  name: ' + name + '\n' +
-        'spec:\n' +
-        '  selector:\n'
-        // '    app: ' + name + '\n' +
-        // '  ports:\n' +
-        // '  - protocol: TCP\nkekd'
-        // '    port: ' + mapPort(port) + '\n'
-        // '      targetPort: 9376'
-
     const onNameChange = (event) => {
         setIntervalId(null);
         console.log(intervalId)
@@ -140,19 +123,9 @@ const Comparison = () => {
         setPort(port)
     }
 
-    const onNeedService = (service) => {
-        setExpose(service)
-    }
-
-    const getManifest = () => {
-        var manifest = k8sDplString;
-
-        if (expose) {
-            manifest += '\n' + k8sSvcString;
-        }
-
-        return manifest
-    }
+    // const onNeedService = (service) => {
+    //     setExpose(service)
+    // }
 
     return (
         <div className={styles.all}>
@@ -214,12 +187,12 @@ const Comparison = () => {
                         >
                             <InputNumber style={{width: '100%'}} defaultValue={port} onChange={onPortChange}/>
                         </Form.Item>
-                        <Form.Item
-                            label="Expose"
-                            style={{display: 'block', textAlign: 'left'}}
-                        >
-                            <Switch defaultValue={expose} onChange={onNeedService}/>
-                        </Form.Item>
+                        {/*<Form.Item*/}
+                        {/*    label="Expose"*/}
+                        {/*    style={{display: 'block', textAlign: 'left'}}*/}
+                        {/*>*/}
+                        {/*    <Switch defaultValue={expose} onChange={onNeedService}/>*/}
+                        {/*</Form.Item>*/}
                     </Form>
                 </ConfigProvider>
             </div>
@@ -238,10 +211,9 @@ const Comparison = () => {
                     customStyle={{
                         backgroundColor: "#000830",
                         color: "#fe8801",
-                        height: "500px",
                     }}
                 >
-                    {getManifest()}
+                    {k8sDplString}
                 </SyntaxHighlighter>
             </div>
         </div>

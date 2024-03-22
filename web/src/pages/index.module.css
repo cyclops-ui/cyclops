@@ -26,3 +26,50 @@
   color: #FFF;
   padding-top: 20px;
 }
+
+.readTheDocs {
+  margin-left: 5px;
+  backdrop-filter: blur(3px);
+  background-color: rgba(255, 255, 255, 0.3);
+  border: none;
+}
+
+.readTheDocs:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
+.backgroundYaml {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  opacity: 0.25;
+  animation: fallAndFade 18s infinite linear;
+}
+
+@keyframes fallAndFade {
+  0% {
+    top: -100%;
+    opacity: 0.4;
+  }
+  100% {
+    top: 60%;
+    opacity: 0;
+  }
+}
+
+@media screen and (max-width: 950px) {
+  .landing {
+    padding-top: 140px;
+  }
+
+  .cyclopsTitle {
+    width: 80%;
+  }
+
+  .cyclopsDesc {
+    font-size: 18px;
+  }
+}

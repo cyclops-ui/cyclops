@@ -37,3 +37,7 @@
         transform: scale(1); /* End with scale(1) */
     }
 }
+
+.changingReplicas {
+    border-color: #fe8801;
+}
