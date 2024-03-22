@@ -3,11 +3,10 @@ package main
 import (
 	"flag"
 	"fmt"
-	"github.com/cyclops-ui/cycops-ctrl/internal/auth"
-	"github.com/cyclops-ui/cycops-ctrl/internal/template"
-	"github.com/cyclops-ui/cycops-ctrl/internal/template/cache"
 	"os"
+	"strconv"
 
+	_ "github.com/joho/godotenv/autoload"
 	"k8s.io/apimachinery/pkg/runtime"
 	utilruntime "k8s.io/apimachinery/pkg/util/runtime"
 	clientgoscheme "k8s.io/client-go/kubernetes/scheme"
@@ -17,10 +16,14 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/log/zap"
 
 	cyclopsv1alpha1 "github.com/cyclops-ui/cycops-ctrl/api/v1alpha1"
+	"github.com/cyclops-ui/cycops-ctrl/internal/auth"
 	"github.com/cyclops-ui/cycops-ctrl/internal/cluster/k8sclient"
 	"github.com/cyclops-ui/cycops-ctrl/internal/handler"
 	"github.com/cyclops-ui/cycops-ctrl/internal/modulecontroller"
 	"github.com/cyclops-ui/cycops-ctrl/internal/storage/templates"
+	"github.com/cyclops-ui/cycops-ctrl/internal/telemetry"
+	"github.com/cyclops-ui/cycops-ctrl/internal/template"
+	"github.com/cyclops-ui/cycops-ctrl/internal/template/cache"
 )
 
 var (
@@ -54,6 +57,9 @@ func main() {
 
 	setupLog.Info("starting handler")
 
+	telemetryClient, _ := telemetry.NewClient(getEnvBool("DISABLE_TELEMETRY"))
+	telemetryClient.InstanceStart()
+
 	k8sClient, err := k8sclient.New()
 	if err != nil {
 		fmt.Println("error bootstrapping Kubernetes client", err)
@@ -71,7 +77,7 @@ func main() {
 		cache.NewInMemoryTemplatesCache(),
 	)
 
-	handler, err := handler.New(templatesStorage, templatesRepo, k8sClient)
+	handler, err := handler.New(templatesStorage, templatesRepo, k8sClient, telemetryClient)
 	if err != nil {
 		panic(err)
 	}
@@ -97,6 +103,7 @@ func main() {
 		templatesRepo,
 		templatesStorage,
 		k8sClient,
+		telemetryClient,
 	)).SetupWithManager(mgr); err != nil {
 		setupLog.Error(err, "unable to create controller", "controller", "Module")
 		os.Exit(1)
@@ -117,4 +124,16 @@ func main() {
 		setupLog.Error(err, "problem running manager")
 		os.Exit(1)
 	}
+}
+
+func getEnvBool(key string) bool {
+	value := os.Getenv(key)
+	if value == "" {
+		return false
+	}
+	b, err := strconv.ParseBool(value)
+	if err != nil {
+		return false
+	}
+	return b
 }

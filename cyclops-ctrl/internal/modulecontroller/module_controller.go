@@ -34,6 +34,7 @@ import (
 	"github.com/cyclops-ui/cycops-ctrl/internal/cluster/k8sclient"
 	"github.com/cyclops-ui/cycops-ctrl/internal/models"
 	"github.com/cyclops-ui/cycops-ctrl/internal/storage/templates"
+	"github.com/cyclops-ui/cycops-ctrl/internal/telemetry"
 	templaterepo "github.com/cyclops-ui/cycops-ctrl/internal/template"
 )
 
@@ -46,7 +47,8 @@ type ModuleReconciler struct {
 	templates        *templates.Storage
 	kubernetesClient *k8sclient.KubernetesClient
 
-	logger logr.Logger
+	telemetryClient telemetry.Client
+	logger          logr.Logger
 }
 
 func NewModuleReconciler(
@@ -55,6 +57,7 @@ func NewModuleReconciler(
 	templatesRepo *templaterepo.Repo,
 	templates *templates.Storage,
 	kubernetesClient *k8sclient.KubernetesClient,
+	telemetryClient telemetry.Client,
 ) *ModuleReconciler {
 	return &ModuleReconciler{
 		Client:           client,
@@ -62,6 +65,7 @@ func NewModuleReconciler(
 		templatesRepo:    templatesRepo,
 		templates:        templates,
 		kubernetesClient: kubernetesClient,
+		telemetryClient:  telemetryClient,
 		logger:           ctrl.Log.WithName("reconciler"),
 	}
 }
@@ -81,6 +85,7 @@ func NewModuleReconciler(
 // - https://pkg.go.dev/sigs.k8s.io/controller-runtime@v0.14.4/pkg/reconcile
 func (r *ModuleReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
 	_ = log.FromContext(ctx)
+	r.telemetryClient.ModuleReconciliation()
 
 	var module cyclopsv1alpha1.Module
 	err := r.Get(ctx, req.NamespacedName, &module)
