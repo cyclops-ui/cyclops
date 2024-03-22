@@ -663,25 +663,21 @@ const ModuleDetails = () => {
 
   return (
     <div>
-      {error.message.length !== 0 &&
-        (() => {
-          console.log(error);
-          return true;
-        }) && (
-          <Alert
-            message={error.message}
-            description={error.description}
-            type="error"
-            closable
-            afterClose={() => {
-              setError({
-                message: "",
-                description: "",
-              });
-            }}
-            style={{ marginBottom: "20px" }}
-          />
-        )}
+      {error.message.length !== 0 && (
+        <Alert
+          message={error.message}
+          description={error.description}
+          type="error"
+          closable
+          afterClose={() => {
+            setError({
+              message: "",
+              description: "",
+            });
+          }}
+          style={{ marginBottom: "20px" }}
+        />
+      )}
       {moduleLoading()}
       <Row>
         <Title></Title>
