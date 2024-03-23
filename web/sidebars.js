@@ -81,6 +81,11 @@ const sidebars = {
       id: 'roadmap/roadmap',
       type: 'doc',
     },
+    {
+      label: 'Usage metrics',
+      id: 'usage_metrics/usage_metrics',
+      type: 'doc',
+    },
   ],
 };
 
