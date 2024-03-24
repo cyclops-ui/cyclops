@@ -63,8 +63,8 @@ functionality outside the cluster.
 Once you have your Kubernetes cluster ready (check the _Before We Start_ section), installing Cyclops is a
 straightforward process. Using `kubectl`, run the following command in your terminal:
 
-```
-kubectl apply -f https://raw.githubusercontent.com/cyclops-ui/cyclops/v0.1.0/install/cyclops-install.yaml
+```bash
+kubectl apply -f https://raw.githubusercontent.com/cyclops-ui/cyclops/v0.2.0/install/cyclops-install.yaml
 ```
 
 It will create a new namespace called `cyclops` and deploy everything you need for your Cyclops instance to run.
