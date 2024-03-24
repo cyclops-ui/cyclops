@@ -282,7 +282,7 @@ We can use Cyclops to help us with that! It can help you deploy and visualize yo
 You can install Cyclops with a single command:
 
 ```bash
-kubectl apply -f https://raw.githubusercontent.com/cyclops-ui/cyclops/v0.0.1-alpha.12/install/cyclops-install.yaml
+kubectl apply -f https://raw.githubusercontent.com/cyclops-ui/cyclops/v0.2.0/install/cyclops-install.yaml
 ```
 
 It will create a new namespace called `cyclops` and start a Cyclops deployment inside it.
