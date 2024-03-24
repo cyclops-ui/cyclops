@@ -1,12 +1,32 @@
-.install {
+.features {
     background-color: #000830;
-    height: 1000px;
 }
 
-.line {
-    top: 10px;
-    height: 1px;
-    background-color: red;
-    transform: rotate(10deg);
-    z-index: -1;
+.verticalline {
+    left: calc((100% - 1500px) / 2 + (1500px / 4) - 30px);
+    width: 8px;
+    background-color: #fe8801;
+    height: 100%;
+    position: absolute;
+    z-index: 0;
+}
+
+@media screen and (min-width: 1500px) {
+    .features {
+        width: 1500px; /* Set a maximum width for larger screens */
+        margin-left: auto; /* Center the container horizontally */
+        margin-right: auto;
+        background-color: #000830;
+    }
+}
+
+@media screen and (max-width: 1500px) {
+    .verticalline {
+        left: calc(25% - 30px);
+        width: 8px;
+        background-color: #fe8801;
+        height: 100%;
+        position: absolute;
+        z-index: 0;
+    }
 }

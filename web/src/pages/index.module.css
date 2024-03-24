@@ -18,7 +18,7 @@
 }
 
 .cyclopsTitle {
-  padding-top: 110px;
+  padding-top: calc(60px + 5%);
   width: 40%;
 }
 

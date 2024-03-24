@@ -1,12 +1,7 @@
-.command {
-    width: 80%;
+.wrapper {
+    animation: fadeIn 1s ease forwards;
     padding-top: 30px;
     margin: 0 auto;
-    animation: fadeIn 1s ease forwards;
-}
-
-.commandDesc {
-    color: #FFF;
 }
 
 @keyframes fadeIn {
@@ -20,3 +15,6 @@
     }
 }
 
+.changingReplicas {
+    border-color: #fe8801;
+}

@@ -1,6 +1,6 @@
 import React, {useEffect, useRef, useState} from 'react';
 import styles from './styles.module.css';
-import {Card, ConfigProvider, Form, Input, InputNumber, Select, Switch} from "antd";
+import {Card, Col, ConfigProvider, Form, Input, InputNumber, Row, Select, Switch} from "antd";
 import {CheckOutlined, SmileOutlined} from "@ant-design/icons";
 
 const Validations = () => {
@@ -76,52 +76,68 @@ const Validations = () => {
     }, [isVisible])
 
     return (
-        <center ref={elementRef} style={{opacity: "0"}} className={isVisible ? styles.wrapper : ''}>
-            <Card
-                title="Configuration validation"
-                style={{
-                    zIndex: "100",
-                    width: "80%",
-                }}
-            >
-                <ConfigProvider
-                    theme={{
-                        token: {
-                            colorPrimary: '#fe8801',
-                        },
-                    }}
+        <Row style={{paddingTop: "50px", opacity: "0" }} ref={elementRef} className={isVisible ? styles.wrapper : ''}>
+            <Col xs={{ span: 24, order: 2 }} lg={{ span: 11, offset: 2 }}>
+                <Card
+                    title="Configuration validation"
+                    className={styles.animationcard}
                 >
-                    <Form labelCol={{span: '6'}} form={form}>
-                        <Form.Item
-                            label="Replicas"
-                            style={{display: 'block'}}
-                            name="Replicas"
-                            hasFeedback
-                            rules={[
-                                {
-                                    type: 'number',
-                                    min: 1,
-                                    message: 'Number of replicas must not be below 0'
-                                },
-                                {
-                                    type: 'number',
-                                    max: 10,
-                                    message: 'Number of replicas must not exceed 10'
-                                }
-                            ]}
-                        >
-                            <InputNumber
-                                readOnly={true}
-                                className={changingReplicas ? styles.changingReplicas : ''}
-                                style={{width: '100%'}}
-                                defaultValue={8}
-                                controls={false}
-                            />
-                        </Form.Item>
-                    </Form>
-                </ConfigProvider>
-            </Card>
-        </center>
+                    <ConfigProvider
+                        theme={{
+                            token: {
+                                colorPrimary: '#fe8801',
+                            },
+                        }}
+                    >
+                        <Form labelCol={{span: '6'}} form={form}>
+                            <Form.Item
+                                label="Replicas"
+                                style={{display: 'block'}}
+                                name="Replicas"
+                                hasFeedback
+                                rules={[
+                                    {
+                                        type: 'number',
+                                        min: 1,
+                                        message: 'Number of replicas must not be below 0'
+                                    },
+                                    {
+                                        type: 'number',
+                                        max: 10,
+                                        message: 'Number of replicas must not exceed 10'
+                                    }
+                                ]}
+                            >
+                                <InputNumber
+                                    readOnly={true}
+                                    className={changingReplicas ? styles.changingReplicas : ''}
+                                    style={{width: '100%'}}
+                                    defaultValue={8}
+                                    controls={false}
+                                />
+                            </Form.Item>
+                        </Form>
+                    </ConfigProvider>
+                </Card>
+            </Col>
+            <Col xs={{ span: 15, offset: 6 }} lg={{ span: 8, offset: 0, order: 2 }} style={{
+                display: "flex",
+                flexDirection: "column",
+                justifyContent: "center",
+            }}>
+                <h3 style={{color: "#FFF", marginBottom: "10px"}}>
+                    Get configuration validation out of the box.
+                </h3>
+                <ul style={{color: "#FFF"}}>
+                    <li>
+                        nesto
+                    </li>
+                    <li>
+                        jos nesto
+                    </li>
+                </ul>
+            </Col>
+        </Row>
     );
 }
 

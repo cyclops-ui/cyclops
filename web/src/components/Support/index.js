@@ -26,7 +26,7 @@ function Feature({svg, title, description}) {
 }
 
 export default function Support() {
-  return (
+    return (
         <div>
             <Divider orientation={"center"}>
                 <Title level={3}>

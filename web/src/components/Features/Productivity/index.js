@@ -1,7 +1,8 @@
 import React, {useEffect, useRef, useState} from 'react';
 import styles from './styles.module.css';
+import {Card, Col, ConfigProvider, Form, InputNumber} from "antd";
 
-const FeaturesTitle = () => {
+const Productivity = () => {
     const elementRef = useRef(null);
     const [isVisible, setIsVisible] = useState(false);
 
@@ -27,14 +28,20 @@ const FeaturesTitle = () => {
     }, []);
 
     return (
-        <div ref={elementRef} style={{opacity: "0"}} className={isVisible ? styles.wrapper : ''}>
-            <div className={styles.installTitle}>
-                <h1 className={styles.titleText}>
-                    Why Cyclops
-                </h1>
-            </div>
-        </div>
+        <Col xs={{ span: 24 }} lg={{ span: 10, offset: 2 }}>
+            <center ref={elementRef} style={{opacity: "0"}} className={isVisible ? styles.wrapper : ''}>
+                <Card
+                    title="Configuration validation"
+                    style={{
+                        zIndex: "100",
+                        width: "80%",
+                    }}
+                >
+                    nekaj
+                </Card>
+            </center>
+        </Col>
     );
 }
 
-export default FeaturesTitle;
+export default Productivity;

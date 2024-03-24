@@ -6,8 +6,8 @@
 
 @keyframes fadeIn {
     from {
-        opacity: 0;
-        transform: translateY(100px);
+        opacity: 1;
+        transform: translateY(200px);
     }
     to {
         opacity: 1;
@@ -15,29 +15,18 @@
     }
 }
 
-.checkIcon {
-    font-size: 56px;
-    color: #408021;
-    stroke-width: -20;
-    stroke: white;
-    animation: scale-up 0.3s forwards;
-}
-
-@keyframes scale-up {
-    0% {
-        transform: scale(0); /* Start with scale(0) */
-        opacity: 1;
-    }
-    80% {
-        opacity: 1;
-        transform: scale(1.2); /* End with scale(1) */
-    }
-    100% {
-        opacity: 1;
-        transform: scale(1); /* End with scale(1) */
-    }
-}
-
 .changingReplicas {
     border-color: #fe8801;
+}
+
+.animationcard {
+    z-index: 100;
+    width: 80%;
+    margin: 0 auto;
+}
+
+@media screen and (min-width: 950px) {
+    .animationcard {
+        left: 0;
+    }
 }

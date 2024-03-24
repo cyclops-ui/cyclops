@@ -67,11 +67,32 @@ export default function Home() {
                     />
 
                     <img className={styles.backgroundYaml} src={yaml}/>
-                    <img style={{left: "10%", animationDelay: "4s", opacity: 0}} className={styles.backgroundYaml}
-                         src={yaml}/>
-                    <img style={{animationDelay: "8s", opacity: 0}} className={styles.backgroundYaml} src={yaml}/>
-                    <img style={{left: "-10%", animationDelay: "12s", opacity: 0}} className={styles.backgroundYaml}
-                         src={yaml}/>
+                    <img
+                        style={{
+                            left: "10%",
+                            animationDelay: "4s",
+                            opacity: 0
+                        }}
+                         className={styles.backgroundYaml}
+                         src={yaml}
+                    />
+                    <img
+                        style={{
+                            animationDelay: "8s",
+                            opacity: 0
+                        }}
+                        className={styles.backgroundYaml}
+                        src={yaml}
+                    />
+                    <img
+                        style={{
+                            left: "-10%",
+                            animationDelay: "12s",
+                            opacity: 0
+                        }}
+                        className={styles.backgroundYaml}
+                        src={yaml}
+                    />
 
                     <img className={styles.cyclopsTitle} src={title}/>
                     <h2 className={styles.cyclopsDesc}>Developer friendly Kubernetes</h2>
