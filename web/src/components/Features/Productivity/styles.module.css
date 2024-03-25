@@ -18,3 +18,15 @@
 .changingReplicas {
     border-color: #fe8801;
 }
+
+.animationcard {
+    z-index: 100;
+    width: 80%;
+    margin: 0 auto;
+}
+
+@media screen and (min-width: 950px) {
+    .animationcard {
+        left: 0;
+    }
+}

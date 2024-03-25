@@ -1,12 +1,17 @@
+.featuresroot {
+    background-image: linear-gradient(to bottom right, #000830, #111d5c);
+    padding-bottom: 50px;
+}
+
 .features {
-    background-color: #000830;
+    /*background-color: #000830;*/
+    /*background-image: linear-gradient(to bottom right, red, yellow);*/
 }
 
 .verticalline {
     left: calc((100% - 1500px) / 2 + (1500px / 4) - 30px);
     width: 8px;
     background-color: #fe8801;
-    height: 100%;
     position: absolute;
     z-index: 0;
 }
@@ -16,7 +21,7 @@
         width: 1500px; /* Set a maximum width for larger screens */
         margin-left: auto; /* Center the container horizontally */
         margin-right: auto;
-        background-color: #000830;
+        /*background-color: #000830;*/
     }
 }
 
@@ -25,7 +30,6 @@
         left: calc(25% - 30px);
         width: 8px;
         background-color: #fe8801;
-        height: 100%;
         position: absolute;
         z-index: 0;
     }

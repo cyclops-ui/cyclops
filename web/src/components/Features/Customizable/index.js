@@ -3,13 +3,13 @@ import styles from './styles.module.css';
 import {Card, Col, ConfigProvider, Form, Input, InputNumber, Row, Select, Switch} from "antd";
 import {CheckOutlined, SmileOutlined} from "@ant-design/icons";
 
-const Validations = () => {
+const Customizable = () => {
     const elementRef = useRef(null);
     const [isVisible, setIsVisible] = useState(false);
-    const [changed, setChanged] = useState(false)
-    const [changingReplicas, setChangingReplicas] = useState(false)
+    const [slideFirst, setSlideFirst] = useState(false);
+    const [slideRight, setSlideRight] = useState(false);
+    const [slideLeft, setSlideLeft] = useState(false);
 
-    const [form] = Form.useForm();
 
     useEffect(() => {
         const handleScroll = () => {
@@ -33,21 +33,10 @@ const Validations = () => {
     }, []);
 
     useEffect(() => {
-        if (isVisible && !changed) {
-            setChanged(true)
-            setTimeout(() => setChangingReplicas(true), 1900)
-            setTimeout(() => form.setFieldValue("Replicas", 2), 2000)
-            setTimeout(() => form.setFieldValue("Replicas", 1), 2300)
-            setTimeout(() => form.setFieldValue("Replicas", 0), 2600)
-            setTimeout(() => setChangingReplicas(false), 2700)
-            setTimeout(() => form.validateFields(["Replicas"]), 2700)
-
-            setTimeout(() => setChangingReplicas(true), 3700)
-            setTimeout(() => form.setFieldValue("Replicas", 1), 3800)
-            setTimeout(() => form.setFieldValue("Replicas", 2), 4100)
-            setTimeout(() => form.setFieldValue("Replicas", 3), 4400)
-            setTimeout(() => setChangingReplicas(false), 4500)
-            setTimeout(() => form.validateFields(["Replicas"]), 4500)
+        if (isVisible && !slideLeft && !slideRight) {
+            setTimeout(() => setSlideFirst(true), 0)
+            setTimeout(() => setSlideRight(true), 1000)
+            setTimeout(() => setSlideLeft(true), 2000)
         }
     }, [isVisible])
 
@@ -64,11 +53,12 @@ const Validations = () => {
                             },
                         }}
                     >
-                        <Form labelCol={{span: '4'}} form={form}>
+                        <Form labelCol={{span: '4'}}>
                             <Form.Item
                                 label="Image"
-                                style={{display: 'block', opacity: "0.5", marginTop: "10px"}}
+                                style={{display: 'block', opacity: "0", marginTop: "10px"}}
                                 name="Image"
+                                className={slideFirst ? styles.inLeft : ''}
                             >
                                 <Input
                                     readOnly={true}
@@ -79,20 +69,12 @@ const Validations = () => {
                             </Form.Item>
                             <Form.Item
                                 label="Replicas"
-                                style={{display: 'block'}}
+                                style={{display: 'block', opacity: "0"}}
                                 name="Replicas"
-                                hasFeedback
-                                rules={[
-                                    {
-                                        type: 'number',
-                                        min: 1,
-                                        message: 'Number of replicas must not be below 0'
-                                    },
-                                ]}
+                                className={slideRight ? styles.inRight : ''}
                             >
                                 <InputNumber
                                     readOnly={true}
-                                    className={changingReplicas ? styles.changingReplicas : ''}
                                     style={{width: '100%'}}
                                     defaultValue={3}
                                     controls={false}
@@ -100,8 +82,9 @@ const Validations = () => {
                             </Form.Item>
                             <Form.Item
                                 label="Port"
-                                style={{display: 'block', opacity: "0.5", marginBottom: "10px"}}
+                                style={{display: 'block', marginBottom: "10px", opacity: "0"}}
                                 name="Port"
+                                className={slideLeft ? styles.inLeft : ''}
                             >
                                 <InputNumber
                                     readOnly={true}
@@ -120,17 +103,16 @@ const Validations = () => {
                 justifyContent: "center",
             }}>
                 <h2 style={{color: "#FFF", marginBottom: "10px"}}>
-                    <span style={{color: "#fe8801"}}>Validate your configuration</span>
+                    <span style={{color: "#fe8801"}}>Customizable UI</span>
                 </h2>
                 <ul style={{color: "#FFF"}}>
                     <h4>
-
-                    <li>
-                        <span style={{color: "#fe8801"}}>catch misconfiguration</span> before it hits production
-                    </li>
-                    <li>
-                        move faster and be more <span style={{color: "#fe8801"}}>confident</span> in your changes
-                    </li>
+                        <li>
+                            Build a <span style={{color: "#fe8801"}}>UI tailored to your needs</span> in minutes
+                        </li>
+                        <li>
+                            Give developers the <span style={{color: "#fe8801"}}>right abstraction</span> of your infrastructure
+                        </li>
                     </h4>
                 </ul>
             </Col>
@@ -138,4 +120,4 @@ const Validations = () => {
     );
 }
 
-export default Validations;
+export default Customizable;

@@ -58,10 +58,9 @@ const config = {
       // Replace with your project's social card
       image: "img/which-would-you-prefer.png",
       navbar: {
-        title: "Cyclops",
         logo: {
           alt: "Cyclops logo",
-          src: "img/logo.png",
+          src: "img/cyclops-logo.png",
         },
         items: [
           {

@@ -1,4 +1,5 @@
 .install {
-    background-color: #000830;
+    /*background-color: #000830;*/
+    background-image: linear-gradient(to bottom left, #111d5c, #000830);
     height: 1000px;
 }
