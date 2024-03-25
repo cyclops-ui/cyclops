@@ -26,16 +26,7 @@ const ProductivityGraph = () => {
     }, []);
 
     return (
-        <LineChart
-            series={[
-                {
-                    data: data,
-                },
-            ]}
-            width={500}
-            height={300}
-
-        />
+        <div/>
     )
 }
 

@@ -58,6 +58,7 @@ const config = {
       // Replace with your project's social card
       image: "img/which-would-you-prefer.png",
       navbar: {
+        style: 'dark',
         logo: {
           alt: "Cyclops logo",
           src: "img/cyclops-logo.png",
@@ -150,6 +151,7 @@ const config = {
             ],
           },
         ],
+        copyright: `Copyright © ${new Date().getFullYear()} Cyclops UI`,
       },
       colorMode: {
         defaultMode: "light",

@@ -73,3 +73,8 @@
     font-size: 18px;
   }
 }
+
+.featuresinstall {
+  width: 100%;
+  background-image: linear-gradient(to bottom left, #111d5c, #000830);
+}

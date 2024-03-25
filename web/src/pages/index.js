@@ -142,8 +142,10 @@ export default function Home() {
                     </Row>
                 </div>
                 <Comparison/>
-                <Features/>
-                <Install/>
+                <div className={styles.featuresinstall}>
+                    <Features/>
+                    <Install/>
+                </div>
             </main>
         </Layout>
     );
