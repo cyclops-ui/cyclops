@@ -12,4 +12,4 @@ ctrl:
 
 ui:
   replicas: 1
-  ctrlHost: http://cyclops-ctrl.cyclops:jajaj
+  ctrlHost: http://cyclops-ctrl.cyclops:8080
