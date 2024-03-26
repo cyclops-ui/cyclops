@@ -18,6 +18,7 @@ const Features = () => {
         <div
             className={styles.featuresroot}
             ref={featRoot}
+            style={{overflow: "hidden"}}
         >
             <div
                 className={styles.verticalline}

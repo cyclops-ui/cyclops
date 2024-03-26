@@ -111,11 +111,16 @@ export default function Home() {
                                 shape="round"
                                 size={"large"}
                                 style={{
-                                    marginRight: "5px",
                                     textDecoration: "none",
+                                    display: "inline-flex",
+                                    alignItems: "center",
+                                    marginLeft: "10px",
+                                    marginRight: "5px",
                                 }}
                             >
-                                <h3>Get started</h3>
+                                <h3 style={{margin: 0}}>
+                                    Get started
+                                </h3>
                             </Button>
                         </ConfigProvider>
                         <ConfigProvider
@@ -126,21 +131,24 @@ export default function Home() {
                             }}
                         >
                             <Button
+                                href={"/docs/about"}
                                 shape="round"
                                 size={"large"}
                                 className={styles.readTheDocs}
+                                style={{
+                                    textDecoration: "none",
+                                    display: "inline-flex",
+                                    alignItems: "center",
+                                    color: "white",
+                                }}
                             >
-                                <h3
-                                    style={{
-                                        color: "white",
-                                    }}
-                                >
-                                    Read the docs
-                                </h3>
-                            </Button>
-                        </ConfigProvider>
-                    </Row>
-                </div>
+                            <h3 style={{margin: 0}}>
+                                Read the docs
+                            </h3>
+                        </Button>
+                    </ConfigProvider>
+                </Row>
+            </div>
                 <Comparison/>
                 <div className={styles.featuresinstall}>
                     <Features/>
