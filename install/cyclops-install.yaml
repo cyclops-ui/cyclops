@@ -343,6 +343,12 @@ spec:
               value: production
             - name: NODE_OPTIONS
               value: --openssl-legacy-provider
+            - name: REACT_APP_DEFAULT_TEMPLATE_REPO
+              value: https://github.com/cyclops-ui/templates
+            - name: REACT_APP_DEFAULT_TEMPLATE_PATH
+              value: demo
+            - name: REACT_APP_DEFAULT_TEMPLATE_VERSION
+              value: main
       restartPolicy: Always
 ---
 kind: Service
