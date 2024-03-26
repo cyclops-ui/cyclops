@@ -1,0 +1,42 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: cyclops-ui
+  namespace: cyclops
+  labels:
+    app: cyclops-ui
+spec:
+  replicas: {{ ((.Values.ui).replicas) | default 1 }}
+  selector:
+    matchLabels:
+      app: cyclops-ui
+  template:
+    metadata:
+      labels:
+        app: cyclops-ui
+    spec:
+      containers:
+        - name: cyclops-ui
+          image: cyclopsui/cyclops-ui:v0.2.0
+          ports:
+            - containerPort: 80
+          env:
+            - name: REACT_APP_CYCLOPS_CTRL_HOST
+              value: {{ ((.Values.ui).ctrlHost) | default "http://cyclops-ctrl.cyclops:8080" | quote }}
+            - name: NODE_ENV
+              value: production
+            - name: NODE_OPTIONS
+              value: --openssl-legacy-provider
+            {{- if ((.Values.global).defaultTemplateRepo) }}
+            - name: REACT_APP_DEFAULT_TEMPLATE_REPO
+              value: {{ ((.Values.global).defaultTemplateRepo) | quote }}
+            {{- end }}
+            {{- if ((.Values.global).defaultTemplatePath) }}
+            - name: REACT_APP_DEFAULT_TEMPLATE_PATH
+              value: {{ ((.Values.global).defaultTemplatePath) | quote }}
+            {{- end }}
+            {{- if ((.Values.global).defaultTemplateVersion) }}
+            - name: REACT_APP_DEFAULT_TEMPLATE_VERSION
+              value: {{ ((.Values.global).defaultTemplateVersion) | quote }}
+            {{- end }}
+      restartPolicy: Always
