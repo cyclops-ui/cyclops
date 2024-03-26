@@ -345,8 +345,8 @@ spec:
               value: --openssl-legacy-provider
       restartPolicy: Always
 ---
-kind: Service
 apiVersion: v1
+kind: Service
 metadata:
   name: cyclops-ui
   namespace: cyclops

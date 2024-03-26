@@ -1,0 +1,15 @@
+global:
+  createNamespace: true
+
+  disableTelemetry: false
+
+  defaultTemplateRepo: https://github.com/cyclops-ui/templates
+  defaultTemplatePath: demo
+  defaultTemplateVersion: main
+
+ctrl:
+  replicas: 1
+
+ui:
+  replicas: 1
+  ctrlHost: http://cyclops-ctrl.cyclops:8080

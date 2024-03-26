@@ -1,0 +1,42 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: cyclops-ctrl
+  namespace: cyclops
+  labels:
+    app: cyclops-ctrl
+spec:
+  replicas: {{ ((.Values.ctrl).replicas) | default 1 }}
+  selector:
+    matchLabels:
+      app: cyclops-ctrl
+  template:
+    metadata:
+      labels:
+        app: cyclops-ctrl
+    spec:
+      serviceAccountName: cyclops-ctrl
+      containers:
+        - name: cyclops-ctrl
+          image: cyclopsui/cyclops-ctrl:v0.2.0
+          ports:
+            - containerPort: 8080
+          env:
+            - name: PORT
+              value: "8080"
+            {{- if ((.Values.global).disableTelemetry) }}
+            - name: DISABLE_TELEMETRY
+              value: {{ ((.Values.global).disableTelemetry) | quote }}
+            {{- end }}
+          livenessProbe:
+            httpGet:
+              path: /healthz
+              port: 8082
+            initialDelaySeconds: 15
+            periodSeconds: 20
+          readinessProbe:
+            httpGet:
+              path: /readyz
+              port: 8082
+            initialDelaySeconds: 5
+            periodSeconds: 10
