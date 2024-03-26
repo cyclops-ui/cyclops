@@ -69,9 +69,9 @@ This is why we are seeing the rise of developer platforms, which reduce friction
 
 So, how does Cyclops solve the issues mentioned above?
 
-1. With Cyclops, your developers never directly interact with configuration files. You create a template, which is then rendered for the developers as a form. This avoids the need to learn languages like YAML and has the added benefit of allowing you to add validations to their input, making it harder for developers to make mistakes.
-2. Once the developers have specified what they need with Cyclops' help, deploying their application is as simple as clicking a button.
-3. Now that they have deployed their app, Cyclops makes it easy to monitor its state via its user interface. The application's details are easily accessible and include all the resources (and logs) it uses.
+1. **1.** With Cyclops, your developers never directly interact with configuration files. You create a template, which is then rendered for the developers as a form. This avoids the need to learn languages like YAML and has the added benefit of allowing you to add validations to their input, making it harder for developers to make mistakes.
+2. **2.** Once the developers have specified what they need with Cyclops' help, deploying their application is as simple as clicking a button.
+3. **3.** Now that they have deployed their app, Cyclops makes it easy to monitor its state via its user interface. The application's details are easily accessible and include all the resources (and logs) it uses.
 
 Let's see it in action!
 
