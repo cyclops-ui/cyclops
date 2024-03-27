@@ -19,6 +19,10 @@
     border-color: #fe8801;
 }
 
+.noneprodgif {
+    display: block;
+}
+
 .animationcard {
     z-index: 100;
     width: 80%;

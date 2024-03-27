@@ -7,6 +7,7 @@
   position: relative;
   top: 0;
   margin-top: -60px;
+  overflow: hidden;
 }
 
 .landingCyclops {

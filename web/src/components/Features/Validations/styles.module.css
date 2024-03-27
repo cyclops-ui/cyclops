@@ -19,6 +19,10 @@
     border-color: #fe8801;
 }
 
+.success {
+    border-color: #6cc41c;
+}
+
 .animationcard {
     z-index: 100;
     width: 80%;

@@ -35,7 +35,7 @@ const Customizable = () => {
     useEffect(() => {
         if (isVisible && !slideLeft && !slideRight) {
             setTimeout(() => setSlideFirst(true), 0)
-            setTimeout(() => setSlideRight(true), 1000)
+            setTimeout(() => setSlideRight(true), 1500)
             setTimeout(() => setSlideLeft(true), 2000)
         }
     }, [isVisible])

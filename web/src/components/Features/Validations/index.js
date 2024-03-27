@@ -7,7 +7,7 @@ const Validations = () => {
     const elementRef = useRef(null);
     const [isVisible, setIsVisible] = useState(false);
     const [changed, setChanged] = useState(false)
-    const [changingReplicas, setChangingReplicas] = useState(false)
+    const [replicasStyle, setReplicasStyle] = useState("")
 
     const [form] = Form.useForm();
 
@@ -35,19 +35,21 @@ const Validations = () => {
     useEffect(() => {
         if (isVisible && !changed) {
             setChanged(true)
-            setTimeout(() => setChangingReplicas(true), 1900)
-            setTimeout(() => form.setFieldValue("Replicas", 2), 2000)
-            setTimeout(() => form.setFieldValue("Replicas", 1), 2300)
-            setTimeout(() => form.setFieldValue("Replicas", 0), 2600)
-            setTimeout(() => setChangingReplicas(false), 2700)
-            setTimeout(() => form.validateFields(["Replicas"]), 2700)
+            setTimeout(() => setReplicasStyle(styles.changingReplicas), 2900)
+            setTimeout(() => form.setFieldValue("Replicas", 2), 3000)
+            setTimeout(() => form.setFieldValue("Replicas", 1), 3300)
+            setTimeout(() => form.setFieldValue("Replicas", 0), 3600)
+            setTimeout(() => setReplicasStyle(''), 3700)
+            setTimeout(() => form.validateFields(["Replicas"]), 3700)
 
-            setTimeout(() => setChangingReplicas(true), 3700)
-            setTimeout(() => form.setFieldValue("Replicas", 1), 3800)
-            setTimeout(() => form.setFieldValue("Replicas", 2), 4100)
-            setTimeout(() => form.setFieldValue("Replicas", 3), 4400)
-            setTimeout(() => setChangingReplicas(false), 4500)
-            setTimeout(() => form.validateFields(["Replicas"]), 4500)
+            setTimeout(() => setReplicasStyle(styles.changingReplicas), 4700)
+            setTimeout(() => form.setFieldValue("Replicas", 1), 4800)
+            setTimeout(() => form.setFieldValue("Replicas", 2), 5100)
+            setTimeout(() => form.setFieldValue("Replicas", 3), 5400)
+            setTimeout(() => setReplicasStyle(''), 5500)
+            setTimeout(() => form.validateFields(["Replicas"]), 5500)
+
+            setTimeout(() => setReplicasStyle(styles.success), 6000)
         }
     }, [isVisible])
 
@@ -65,20 +67,24 @@ const Validations = () => {
                         }}
                     >
                         <Form labelCol={{span: '4'}} form={form}>
+                            <Row>
+                                <Col span={20} offset={2}>
+                                    <Form.Item
+                                        label="Image"
+                                        style={{display: 'block', opacity: "0.5", marginTop: "10px"}}
+                                        name="Image"
+                                    >
+                                        <Input
+                                            readOnly={true}
+                                            style={{width: '100%'}}
+                                            defaultValue={"nginx"}
+                                            controls={false}
+                                        />
+                                    </Form.Item>
+                                </Col>
+                            </Row>
                             <Form.Item
-                                label="Image"
-                                style={{display: 'block', opacity: "0.5", marginTop: "10px"}}
-                                name="Image"
-                            >
-                                <Input
-                                    readOnly={true}
-                                    style={{width: '100%'}}
-                                    defaultValue={"nginx"}
-                                    controls={false}
-                                />
-                            </Form.Item>
-                            <Form.Item
-                                label="Replicas"
+                                label={<span style={{fontSize: "16px"}}>Replicas</span>}
                                 style={{display: 'block'}}
                                 name="Replicas"
                                 hasFeedback
@@ -92,24 +98,28 @@ const Validations = () => {
                             >
                                 <InputNumber
                                     readOnly={true}
-                                    className={changingReplicas ? styles.changingReplicas : ''}
+                                    className={replicasStyle}
                                     style={{width: '100%'}}
                                     defaultValue={3}
                                     controls={false}
                                 />
                             </Form.Item>
-                            <Form.Item
-                                label="Port"
-                                style={{display: 'block', opacity: "0.5", marginBottom: "10px"}}
-                                name="Port"
-                            >
-                                <InputNumber
-                                    readOnly={true}
-                                    style={{width: '100%'}}
-                                    defaultValue={80}
-                                    controls={false}
-                                />
-                            </Form.Item>
+                            <Row>
+                                <Col span={20} offset={2}>
+                                    <Form.Item
+                                        label="Port"
+                                        style={{display: 'block', opacity: "0.5", marginBottom: "10px"}}
+                                        name="Port"
+                                    >
+                                        <InputNumber
+                                            readOnly={true}
+                                            style={{width: '100%'}}
+                                            defaultValue={80}
+                                            controls={false}
+                                        />
+                                    </Form.Item>
+                                </Col>
+                            </Row>
                         </Form>
                     </ConfigProvider>
                 </Card>
