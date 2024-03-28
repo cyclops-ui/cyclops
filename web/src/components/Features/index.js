@@ -1,4 +1,4 @@
-import React, {useEffect, useRef, useState} from 'react';
+import React, {useEffect, useRef} from 'react';
 import styles from './styles.module.css';
 import FeaturesTitle from "./Title";
 import Validations from "./Validations";
@@ -25,7 +25,7 @@ const Features = () => {
                 ref={vertLine}
             />
             <div className={styles.features}>
-                <Row>
+                <Row style={{paddingBottom: "32px"}}>
                     <Col xs={{span: 24, offset: 6}} lg={{span: 10, offset: 6}}>
                         <FeaturesTitle/>
                     </Col>

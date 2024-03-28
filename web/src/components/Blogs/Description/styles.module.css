@@ -1,7 +1,9 @@
 .wrapper {
     animation: fadeIn 1s ease forwards;
     padding-top: 30px;
-    /*margin: 0 auto;*/
+    margin: 0 auto;
+    width: 60%;
+    text-align: center;
 }
 
 .installTitle {
@@ -9,10 +11,11 @@
     height: 80px;
 }
 
-.titleText {
-    color: #f38803;
+.descText {
+    color: #FFFFFF;
     font-size-adjust: inherit;
     margin: 0;
+    font-weight: normal;
     /*display: flex;*/
     /*align-items: center;*/
 }
@@ -25,7 +28,7 @@
 @keyframes fadeIn {
     from {
         opacity: 0;
-        transform: translateY(100px);
+        transform: translateY(200px);
     }
     to {
         opacity: 1;

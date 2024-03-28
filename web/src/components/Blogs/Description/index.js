@@ -1,10 +1,7 @@
 import React, {useEffect, useRef, useState} from 'react';
 import styles from './styles.module.css';
-import {Row} from "antd";
 
-import cyclopsTitle from '/static/img/cyclops-title.png';
-
-const FeaturesTitle = () => {
+const BlogsDescription = () => {
     const elementRef = useRef(null);
     const [isVisible, setIsVisible] = useState(false);
 
@@ -30,19 +27,14 @@ const FeaturesTitle = () => {
     }, []);
 
     return (
-        <div ref={elementRef} style={{opacity: "0"}} className={isVisible ? styles.wrapper : ''}>
+        <div ref={elementRef} style={{opacity: "0", paddingTop: 0}} className={isVisible ? styles.wrapper : ''}>
             <div className={styles.installTitle}>
-                <Row>
-                    <h1 className={styles.titleText}>
-                        Why
-                    </h1>
-                </Row>
-                <Row>
-                    <img style={{height: "64px"}} src={cyclopsTitle}/>
-                </Row>
+                <h3 className={styles.descText}>
+                    We are working on a blog post series covering topics from general open source challenges to specific Kubernetes related topics. <span style={{color: "#fe8803"}}>Check it out!</span>
+                </h3>
             </div>
         </div>
     );
 }
 
-export default FeaturesTitle;
+export default BlogsDescription;

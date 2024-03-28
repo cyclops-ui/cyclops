@@ -1,10 +1,7 @@
 import React, {useEffect, useRef, useState} from 'react';
 import styles from './styles.module.css';
-import {Row} from "antd";
 
-import cyclopsTitle from '/static/img/cyclops-title.png';
-
-const FeaturesTitle = () => {
+const BlogsTitle = () => {
     const elementRef = useRef(null);
     const [isVisible, setIsVisible] = useState(false);
 
@@ -32,17 +29,12 @@ const FeaturesTitle = () => {
     return (
         <div ref={elementRef} style={{opacity: "0"}} className={isVisible ? styles.wrapper : ''}>
             <div className={styles.installTitle}>
-                <Row>
-                    <h1 className={styles.titleText}>
-                        Why
-                    </h1>
-                </Row>
-                <Row>
-                    <img style={{height: "64px"}} src={cyclopsTitle}/>
-                </Row>
+                <h1 className={styles.titleText}>
+                    Check our blog
+                </h1>
             </div>
         </div>
     );
 }
 
-export default FeaturesTitle;
+export default BlogsTitle;

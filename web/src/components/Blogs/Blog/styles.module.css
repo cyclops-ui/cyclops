@@ -1,0 +1,22 @@
+.blogwrapper {
+    animation: fadeIn 1s ease forwards;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 1;
+        transform: translateY(200px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.blogcard {
+    transition: transform .2s;
+}
+
+.blogcard:hover {
+    transform: scale(1.05);
+}

@@ -1,7 +1,6 @@
 import React from 'react';
 import clsx from 'clsx';
 import Link from '@docusaurus/Link';
-import useDocusaurusContext from '@docusaurus/useDocusaurusContext';
 import Layout from '@theme/Layout';
 import HomepageFeatures from '@site/src/components/HomepageFeatures';
 import styles from './index.module.css'
@@ -17,6 +16,7 @@ import yaml from '/static/img/yaml_background.png';
 import Comparison from "../components/Comparison";
 import Install from "../components/Install";
 import Features from "../components/Features";
+import Blogs from "../components/Blogs";
 import {Button, Col, ConfigProvider, Row} from "antd";
 
 export default function Home() {
@@ -153,6 +153,7 @@ export default function Home() {
                 <div className={styles.featuresinstall}>
                     <Features/>
                     <Install/>
+                    <Blogs/>
                 </div>
             </main>
         </Layout>
