@@ -106,14 +106,14 @@ const Customizable = () => {
                     <span style={{color: "#fe8801"}}>Customizable UI</span>
                 </h2>
                 <ul style={{color: "#FFF"}}>
-                    <h4>
+                    <h3>
                         <li>
                             Build a <span style={{color: "#fe8801"}}>UI tailored to your needs</span> in minutes
                         </li>
                         <li>
                             Give developers the <span style={{color: "#fe8801"}}>right abstraction</span> of your infrastructure
                         </li>
-                    </h4>
+                    </h3>
                 </ul>
             </Col>
         </Row>

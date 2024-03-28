@@ -133,15 +133,14 @@ const Validations = () => {
                     <span style={{color: "#fe8801"}}>Validate your configuration</span>
                 </h2>
                 <ul style={{color: "#FFF"}}>
-                    <h4>
-
-                    <li>
-                        <span style={{color: "#fe8801"}}>catch misconfiguration</span> before it hits production
-                    </li>
-                    <li>
-                        move faster and be more <span style={{color: "#fe8801"}}>confident</span> in your changes
-                    </li>
-                    </h4>
+                    <h3>
+                        <li>
+                            <span style={{color: "#fe8801"}}>catch misconfiguration</span> before it hits production
+                        </li>
+                        <li>
+                            move faster and be more <span style={{color: "#fe8801"}}>confident</span> in your changes
+                        </li>
+                    </h3>
                 </ul>
             </Col>
         </Row>
