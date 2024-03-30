@@ -11,6 +11,11 @@ type Client interface {
 	InstanceStart()
 }
 
+type logger interface {
+	Info(string, ...any)
+	Error(error, string, ...any)
+}
+
 type EnqueueClient struct {
 	client     posthog.Client
 	distinctID string
@@ -18,8 +23,9 @@ type EnqueueClient struct {
 
 type MockClient struct{}
 
-func NewClient(disable bool) (Client, error) {
+func NewClient(disable bool, logger logger) (Client, error) {
 	if disable {
+		logger.Info("telemetry disabled")
 		return MockClient{}, nil
 	}
 
@@ -30,17 +36,23 @@ func NewClient(disable bool) (Client, error) {
 		},
 	)
 	if err != nil {
+		logger.Error(err, "error starting telemetry")
 		return nil, err
 	}
 
 	id, err := uuid.NewUUID()
 	if err != nil {
+		logger.Error(err, "error creating UUID")
 		return nil, err
 	}
 
+	idStr := id.String()
+
+	logger.Info("starting instance with UUID", "UUID", idStr)
+
 	return EnqueueClient{
 		client:     client,
-		distinctID: id.String(),
+		distinctID: idStr,
 	}, nil
 }
 
