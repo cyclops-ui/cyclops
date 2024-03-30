@@ -1,5 +1,6 @@
 import React, {useEffect, useRef, useState} from 'react';
 import styles from './styles.module.css';
+import { Row, Col } from 'antd';
 
 const BlogsDescription = () => {
     const elementRef = useRef(null);

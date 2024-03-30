@@ -16,8 +16,10 @@ const Blogs = () => {
                 <Row align="middle">
                     <BlogsTitle/>
                 </Row>
-                <Row align="middle">
-                    <BlogsDescription/>
+                <Row>
+                    <Col span={18} offset={3}>
+                        <BlogsDescription/>
+                    </Col>
                 </Row>
                 <Row gutter={[16, 16]}>
                     <Col xs={{ span: 20, offset: 2 }} md={{ span: 6, offset: 3 }}>

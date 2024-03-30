@@ -2,13 +2,12 @@
     animation: fadeIn 1s ease forwards;
     padding-top: 30px;
     margin: 0 auto;
-    width: 60%;
     text-align: center;
 }
 
 .installTitle {
     /*display: inline-flex;*/
-    height: 80px;
+    padding-bottom: 30px;
 }
 
 .descText {
