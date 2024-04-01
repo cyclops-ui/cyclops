@@ -47,9 +47,8 @@ const Comparison = () => {
                     setTimeout(() => typeName("my-ap"), 900)
                     setTimeout(() => typeName("my-app"), 1000)
                 }
-            }, 2000);
+            }, 3000);
 
-            console.log(iId)
             setIntervalId(iId)
         }
 
@@ -140,7 +139,15 @@ const Comparison = () => {
                         },
                     }}
                 >
-                    <Form labelCol={{span: '6'}} form={form}>
+                    <Form
+                        labelCol={{
+                            xs: { offset: 4, span: 6 }
+                        }}
+                        wrapperCol={{
+                            xs: { span: 12 }
+                        }}
+                        form={form}
+                    >
                         <Form.Item
                             label="Name"
                             name="Name"
@@ -174,9 +181,9 @@ const Comparison = () => {
                             <Select
                                 defaultValue={version}
                                 options={[
-                                    { value: '1.14.1', label: "1.14.1" },
-                                    { value: '1.14.2', label: "1.14.2" },
-                                    { value: '1.15.0', label: "1.15.0" }
+                                    {value: '1.14.1', label: "1.14.1"},
+                                    {value: '1.14.2', label: "1.14.2"},
+                                    {value: '1.15.0', label: "1.15.0"}
                                 ]}
                                 onChange={onVersionChange}
                             />
@@ -196,7 +203,20 @@ const Comparison = () => {
                     </Form>
                 </ConfigProvider>
             </div>
+
             <div className={styles.yaml}>
+                <div
+                    style={{
+                        backgroundColor: "#000830",
+                        borderBottom: "1px solid #a7a7a7",
+                        borderRadius: "10px 10px 0px 0px",
+                        height: "30px"
+                    }}
+                >
+                        <span className={styles.dot} style={{backgroundColor: "#fe5f58", marginLeft: "10px"}}></span>
+                        <span className={styles.dot} style={{backgroundColor: "#febc2e"}}></span>
+                        <span className={styles.dot} style={{backgroundColor: "#26c940"}}></span>
+                </div>
                 <SyntaxHighlighter
                     style={{
                         "hljs-attr": {
@@ -209,6 +229,7 @@ const Comparison = () => {
                     }}
                     showLineNumbers={true}
                     customStyle={{
+                        "borderRadius": "0px 0px 10px 10px",
                         backgroundColor: "#000830",
                         color: "#fe8801",
                     }}
