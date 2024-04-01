@@ -141,10 +141,12 @@ const Comparison = () => {
                 >
                     <Form
                         labelCol={{
-                            xs: { offset: 4, span: 6 }
+                            span: 6,
+                            xs: 6
                         }}
                         wrapperCol={{
-                            xs: { span: 12 }
+                            span: 18,
+                            xs: 18
                         }}
                         form={form}
                     >
