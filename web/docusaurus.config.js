@@ -1,6 +1,8 @@
 // @ts-check
 // Note: type annotations allow type checking and IDEs autocompletion
 
+import {Button} from "antd";
+
 /** @type {import('@docusaurus/types').Config} */
 const config = {
   title: "Cyclops",
@@ -71,6 +73,11 @@ const config = {
             label: "Docs",
           },
           { to: "blog", label: "Blog", position: "left" },
+          {
+            type: 'html',
+            position: 'right',
+            value: '<a href="/docs/installation/install/manifest" class="ant-btn css-dev-only-do-not-override-b2u3vl ant-btn-round ant-btn-primary ant-btn-lg" style="background-color: white; color: black; height: 30px; text-decoration: none; display: inline-flex; align-items: center;"><h3 style="margin: 0px;">Get started</h3></a>',
+          },
           {
             href: "https://github.com/cyclops-ui/cyclops",
             position: "right",

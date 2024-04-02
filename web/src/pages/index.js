@@ -123,30 +123,30 @@ export default function Home() {
                                 </h3>
                             </Button>
                         </ConfigProvider>
-                        <ConfigProvider
-                            theme={{
-                                token: {
-                                    colorPrimary: '#FFF',
-                                },
-                            }}
-                        >
-                            <Button
-                                href={"/docs/about"}
-                                shape="round"
-                                size={"large"}
-                                className={styles.readTheDocs}
-                                style={{
-                                    textDecoration: "none",
-                                    display: "inline-flex",
-                                    alignItems: "center",
-                                    color: "white",
-                                }}
-                            >
-                            <h3 style={{margin: 0}}>
-                                Read the docs
-                            </h3>
-                        </Button>
-                    </ConfigProvider>
+                    {/*    <ConfigProvider*/}
+                    {/*        theme={{*/}
+                    {/*            token: {*/}
+                    {/*                colorPrimary: '#FFF',*/}
+                    {/*            },*/}
+                    {/*        }}*/}
+                    {/*    >*/}
+                    {/*        <Button*/}
+                    {/*            href={"/docs/about"}*/}
+                    {/*            shape="round"*/}
+                    {/*            size={"large"}*/}
+                    {/*            className={styles.readTheDocs}*/}
+                    {/*            style={{*/}
+                    {/*                textDecoration: "none",*/}
+                    {/*                display: "inline-flex",*/}
+                    {/*                alignItems: "center",*/}
+                    {/*                color: "white",*/}
+                    {/*            }}*/}
+                    {/*        >*/}
+                    {/*        <h3 style={{margin: 0}}>*/}
+                    {/*            Read the docs*/}
+                    {/*        </h3>*/}
+                    {/*    </Button>*/}
+                    {/*</ConfigProvider>*/}
                 </Row>
             </div>
                 <Comparison/>

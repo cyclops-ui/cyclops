@@ -58,10 +58,10 @@ const Productivity = () => {
                 <ul style={{color: "#FFF"}}>
                     <h3>
                         <li>
-                            Reduce developer onboarding time
+                            <span style={{color: "#FF8803"}}>Reduce</span> developer onboarding <span style={{color: "#FF8803"}}>time</span>
                         </li>
                         <li>
-                            Supercharge productivity
+                            <span style={{color: "#FF8803"}}>Supercharge</span> developer <span style={{color: "#FF8803"}}>productivity</span> and iterate faster
                         </li>
                     </h3>
                 </ul>

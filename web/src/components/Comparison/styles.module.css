@@ -35,7 +35,8 @@
 
 @media screen and (max-width: 600px) {
   .yaml {
-    width: 100%;
+    left: 50%;
+    width: 80%;
     padding-right: 5px;
     padding-left: 5px;
   }
