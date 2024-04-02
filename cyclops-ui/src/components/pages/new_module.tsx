@@ -41,11 +41,21 @@ import "ace-builds/src-noconflict/mode-typescript";
 import "ace-builds/src-noconflict/snippets/yaml";
 import { numberInputValidators } from "../../utils/validators/number";
 import { stringInputValidators } from "../../utils/validators/string";
+import {Option} from "antd/es/mentions";
 
 const { Title } = Typography;
 const layout = {
   wrapperCol: { span: 16 },
 };
+
+interface templateStoreOption {
+  name: string,
+  ref: {
+    repo: string,
+    path: string,
+    version: string,
+  }
+}
 
 const NewModule = () => {
   const [loading, setLoading] = useState(false);
@@ -91,6 +101,8 @@ const NewModule = () => {
   const [loadingValuesFile, setLoadingValuesFile] = useState(false);
   const [loadingValuesModal, setLoadingValuesModal] = useState(false);
 
+  const [templateStore, setTemplateStore] = useState<templateStoreOption[]>([]);
+
   const history = useNavigate();
 
   const [form] = Form.useForm();
@@ -112,6 +124,8 @@ const NewModule = () => {
         window.__RUNTIME_CONFIG__.REACT_APP_DEFAULT_TEMPLATE_VERSION
       );
     }
+
+    loadTemplateStore()
   }, []);
 
   useEffect(() => {
@@ -390,6 +404,61 @@ const NewModule = () => {
 
     setActiveCollapses(new Map());
   };
+
+  const loadTemplateStore = async () => {
+    await axios
+        .get(
+            `/api/templates/store`
+        )
+        .then((res) => {
+          setTemplateStore(res.data);
+        })
+        .catch(function (error) {
+          setLoadingTemplate(false);
+          if (error.response === undefined) {
+            setError({
+              message: String(error),
+              description:
+                  "Check if Cyclops backend is available on: " +
+                  window.__RUNTIME_CONFIG__.REACT_APP_CYCLOPS_CTRL_HOST,
+            });
+          } else {
+            setError({
+              message: error.message,
+              description: error.response.data,
+            });
+          }
+        });
+  };
+
+  const findTemplateStoreSelected = (name: string) => {
+    for (let ts of templateStore) {
+      if (ts.name === name) {
+        return ts
+      }
+    }
+
+    return null
+  }
+
+  const onTemplateStoreSelected = (v: string) => {
+    const ts = findTemplateStoreSelected(v)
+    if (ts === null) {
+      return
+    }
+
+    setTemplate({
+      repo: ts.ref.repo,
+      path: ts.ref.path,
+      version: ts.ref.version,
+    });
+
+    loadTemplate(
+        ts.ref.repo,
+        ts.ref.path,
+        ts.ref.version,
+    );
+  }
 
   const onLoadFromFile = () => {
     setLoadingValuesFile(true);
@@ -1082,9 +1151,7 @@ const NewModule = () => {
                   version: template.version,
                 });
               }}
-              defaultValue={
-                window.__RUNTIME_CONFIG__.REACT_APP_DEFAULT_TEMPLATE_REPO
-              }
+              value={template.repo}
             />
             {" / "}
             <Input
@@ -1097,9 +1164,7 @@ const NewModule = () => {
                   version: template.version,
                 });
               }}
-              defaultValue={
-                window.__RUNTIME_CONFIG__.REACT_APP_DEFAULT_TEMPLATE_PATH
-              }
+              value={template.path}
             />
             {" @ "}
             <Input
@@ -1112,9 +1177,7 @@ const NewModule = () => {
                   version: value.target.value,
                 });
               }}
-              defaultValue={
-                window.__RUNTIME_CONFIG__.REACT_APP_DEFAULT_TEMPLATE_VERSION
-              }
+              value={template.version}
             />
             {"  "}
             <Button
@@ -1131,6 +1194,19 @@ const NewModule = () => {
             >
               Load
             </Button>
+            <Row>
+              <Select
+                  onChange={onTemplateStoreSelected}
+                  style={{width: "80%"}}
+                  placeholder="Select an option"
+              >
+                {templateStore.map((option: any, index) => (
+                    <Option key={option.name} value={option.name}>
+                      {option.name}
+                    </Option>
+                ))}
+              </Select>
+            </Row>
             <Divider orientation="left" orientationMargin="0">
               Module name
             </Divider>

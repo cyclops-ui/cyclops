@@ -178,3 +178,17 @@ func (c *Templates) GetTemplateInitialValues(ctx *gin.Context) {
 
 	ctx.Data(http.StatusOK, gin.MIMEJSON, initial)
 }
+
+func (c *Templates) ListTemplatesStore(ctx *gin.Context) {
+	ctx.Header("Access-Control-Allow-Origin", "*")
+
+	store, err := c.kubernetesClient.ListTemplateStore()
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, dto.NewError("Error fetching templates store", err.Error()))
+		return
+	}
+
+	storeDTO := mapper.TemplateStoreListToDTO(store)
+
+	ctx.JSON(http.StatusOK, storeDTO)
+}

@@ -40,3 +40,10 @@ func (c *CyclopsV1Alpha1Client) TemplateAuthRules(namespace string) TemplateAuth
 		ns:         namespace,
 	}
 }
+
+func (c *CyclopsV1Alpha1Client) TemplateStore(namespace string) TemplateStoreInterface {
+	return &templateStoreClient{
+		restClient: c.restClient,
+		ns:         namespace,
+	}
+}
