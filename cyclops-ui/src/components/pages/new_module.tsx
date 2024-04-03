@@ -339,10 +339,17 @@ const NewModule = () => {
               window.__RUNTIME_CONFIG__.REACT_APP_CYCLOPS_CTRL_HOST,
           });
         } else {
-          setError({
-            message: error.response.data.message,
-            description: error.response.data.description,
-          });
+          if (error.response.data) {
+            setError({
+              message: error.response.data.message || "Error calling Cyclops backend",
+              description: error.response.data.description || "Error calling Cyclops backend",
+            });
+          } else {
+            setError({
+              message: "Error calling Cyclops backend",
+              description: "Error calling Cyclops backend",
+            });
+          }
         }
       });
 
@@ -381,10 +388,17 @@ const NewModule = () => {
               window.__RUNTIME_CONFIG__.REACT_APP_CYCLOPS_CTRL_HOST,
           });
         } else {
-          setError({
-            message: error.response.data.message,
-            description: error.response.data.description,
-          });
+          if (error.response.data) {
+            setError({
+              message: error.response.data.message || "Error calling Cyclops backend",
+              description: error.response.data.description || "Error calling Cyclops backend",
+            });
+          } else {
+            setError({
+              message: "Error calling Cyclops backend",
+              description: "Error calling Cyclops backend",
+            });
+          }
         }
       });
 
