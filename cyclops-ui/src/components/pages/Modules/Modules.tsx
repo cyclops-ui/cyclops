@@ -142,7 +142,7 @@ const Modules = () => {
         {filteredData.map((module: any, index) => (
           <Col key={index} span={8}>
             <a
-                href={"https://cyclops-ui.com"}
+                href={"/modules/" + module.name}
             >
               <Card
                   title={module.name}
