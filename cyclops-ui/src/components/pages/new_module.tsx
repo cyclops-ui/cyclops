@@ -381,7 +381,6 @@ const NewModule = () => {
               window.__RUNTIME_CONFIG__.REACT_APP_CYCLOPS_CTRL_HOST,
           });
         } else {
-          console.log("error za initial", error)
           setError({
             message: error.response.data.message,
             description: error.response.data.description,
