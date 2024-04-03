@@ -17,6 +17,8 @@ import { useNavigate } from "react-router";
 import axios from "axios";
 import Link from "antd/lib/typography/Link";
 
+import styles from "./styles.module.css";
+
 const { Title } = Typography;
 
 const Modules = () => {
@@ -142,85 +144,77 @@ const Modules = () => {
       <Row gutter={[16, 16]}>
         {filteredData.map((module: any, index) => (
           <Col key={index} span={8}>
-            <Card
-              title={module.name}
-              style={{
-                borderLeft: "solid " + getStatusColor(module) + " 5px",
-              }}
+            <a
+                href={"/modules/" + module.name}
             >
-              <Row gutter={[16, 16]}>
-                <Col
-                  span={24}
+              <Card
+                  title={module.name}
                   style={{
-                    whiteSpace: "nowrap",
-                    overflow: "hidden",
-                    textOverflow: "ellipsis",
-                    display: "block",
+                    borderLeft: "solid " + getStatusColor(module) + " 5px",
                   }}
-                >
-                  Repo:
-                  <Link aria-level={3} href={module.template.repo}>
-                    {" " + module.template.repo}
-                  </Link>
-                </Col>
-              </Row>
-              <Row gutter={[16, 16]}>
-                <Col
-                  span={24}
-                  style={{
-                    whiteSpace: "nowrap",
-                    overflow: "hidden",
-                    textOverflow: "ellipsis",
-                    display: "block",
-                  }}
-                >
-                  Path:
-                  <Link
-                    aria-level={3}
-                    href={
-                      module.template.repo +
-                      `/tree/` +
-                      getTemplateVersion(module.template.version) +
-                      `/` +
-                      module.template.path
-                    }
+                  className={styles.modulecard}
+              >
+                <Row gutter={[16, 16]}>
+                  <Col
+                      span={24}
+                      style={{
+                        whiteSpace: "nowrap",
+                        overflow: "hidden",
+                        textOverflow: "ellipsis",
+                        display: "block",
+                      }}
                   >
-                    {" " + module.template.path}
-                  </Link>
-                </Col>
-              </Row>
-              <Row gutter={[16, 16]}>
-                <Col
-                  span={24}
-                  style={{
-                    whiteSpace: "nowrap",
-                    overflow: "hidden",
-                    textOverflow: "ellipsis",
-                    display: "block",
-                  }}
-                >
-                  Version: {getTemplateVersion(module.template.version)}
-                </Col>
-              </Row>
-              <Row style={{ paddingTop: "15px" }}>
-                <Col>
-                  <Button
-                    type={"primary"}
-                    onClick={function () {
-                      window.location.href = "/modules/" + module.name;
-                    }}
-                    block
+                    Repo:
+                    <Link aria-level={3} href={module.template.repo}>
+                      {" " + module.template.repo}
+                    </Link>
+                  </Col>
+                </Row>
+                <Row gutter={[16, 16]}>
+                  <Col
+                      span={24}
+                      style={{
+                        whiteSpace: "nowrap",
+                        overflow: "hidden",
+                        textOverflow: "ellipsis",
+                        display: "block",
+                      }}
                   >
-                    Details
-                  </Button>
-                </Col>
-              </Row>
-            </Card>
+                    Path:
+                    <Link
+                        aria-level={3}
+                        href={
+                            module.template.repo +
+                            `/tree/` +
+                            getTemplateVersion(module.template.version) +
+                            `/` +
+                            module.template.path
+                        }
+                    >
+                      {" " + module.template.path}
+                    </Link>
+                  </Col>
+                </Row>
+                <Row gutter={[16, 16]}>
+                  <Col
+                      span={24}
+                      style={{
+                        whiteSpace: "nowrap",
+                        overflow: "hidden",
+                        textOverflow: "ellipsis",
+                        display: "block",
+                      }}
+                  >
+                    Version: {getTemplateVersion(module.template.version)}
+                  </Col>
+                </Row>
+              </Card>
+            </a>
           </Col>
         ))}
       </Row>
     </div>
-  );
+);
 };
 
 export default Modules;
