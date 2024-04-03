@@ -1,6 +1,6 @@
 import React from "react";
 import { Button, Menu, MenuProps } from "antd";
-import { AppstoreAddOutlined, HddOutlined, BugFilled } from "@ant-design/icons";
+import {AppstoreAddOutlined, HddOutlined, BugFilled, SnippetsOutlined} from "@ant-design/icons";
 import { useLocation } from "react-router";
 import PathConstants from "../../routes/PathConstants";
 import { Link } from "react-router-dom";
@@ -18,6 +18,11 @@ const SideNav = () => {
       label: <Link to={PathConstants.NODES}> Nodes</Link>,
       icon: <HddOutlined />,
       key: "nodes",
+    },
+    {
+      label: <Link to={PathConstants.TEMPLATES}> Templates</Link>,
+      icon: <SnippetsOutlined />,
+      key: "templates",
     },
   ];
 

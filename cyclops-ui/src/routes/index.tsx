@@ -13,6 +13,7 @@ const Nodes = React.lazy(() => import("../components/pages/nodes"));
 const NodeDetails = React.lazy(
   () => import("../components/pages/node_details")
 );
+const Templates = React.lazy(() => import("../components/pages/TemplateStore"));
 
 const routes = [
   { path: PathConstants.HOME, element: <Home /> },
@@ -23,6 +24,7 @@ const routes = [
   { path: PathConstants.MODULE_ROLLBACK, element: <ModuleHistory /> },
   { path: PathConstants.NODES, element: <Nodes /> },
   { path: PathConstants.NODE_GET, element: <NodeDetails /> },
+  { path: PathConstants.TEMPLATES, element: <Templates /> },
 ];
 
 export default routes;
