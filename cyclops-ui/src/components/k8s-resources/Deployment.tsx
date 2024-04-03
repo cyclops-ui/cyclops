@@ -54,16 +54,21 @@ const Deployment = ({ name, namespace }: Props) => {
         setDeployment(res.data);
       })
       .catch((error) => {
-        console.log(error);
-        if (error.response === undefined) {
+        if (error?.response?.data) {
+          setError({
+            message: error.response.data.message || String(error),
+            description:
+              error.response.data.description ||
+              "Check if Cyclops backend is available on: " +
+                window.__RUNTIME_CONFIG__.REACT_APP_CYCLOPS_CTRL_HOST,
+          });
+        } else {
           setError({
             message: String(error),
             description:
               "Check if Cyclops backend is available on: " +
               window.__RUNTIME_CONFIG__.REACT_APP_CYCLOPS_CTRL_HOST,
           });
-        } else {
-          setError(error.response.data);
         }
       });
   }
@@ -185,16 +190,21 @@ const Deployment = ({ name, namespace }: Props) => {
         }
       })
       .catch((error) => {
-        console.log(error);
-        if (error.response === undefined) {
+        if (error?.response?.data) {
+          setError({
+            message: error.response.data.message || String(error),
+            description:
+              error.response.data.description ||
+              "Check if Cyclops backend is available on: " +
+                window.__RUNTIME_CONFIG__.REACT_APP_CYCLOPS_CTRL_HOST,
+          });
+        } else {
           setError({
             message: String(error),
             description:
               "Check if Cyclops backend is available on: " +
               window.__RUNTIME_CONFIG__.REACT_APP_CYCLOPS_CTRL_HOST,
           });
-        } else {
-          setError(error.response.data);
         }
       });
   };
@@ -291,8 +301,17 @@ const Deployment = ({ name, namespace }: Props) => {
                           }
                         })
                         .catch((error) => {
-                          console.log(error);
-                          if (error.response === undefined) {
+                          if (error?.response?.data) {
+                            setError({
+                              message:
+                                error.response.data.message || String(error),
+                              description:
+                                error.response.data.description ||
+                                "Check if Cyclops backend is available on: " +
+                                  window.__RUNTIME_CONFIG__
+                                    .REACT_APP_CYCLOPS_CTRL_HOST,
+                            });
+                          } else {
                             setError({
                               message: String(error),
                               description:
@@ -300,8 +319,6 @@ const Deployment = ({ name, namespace }: Props) => {
                                 window.__RUNTIME_CONFIG__
                                   .REACT_APP_CYCLOPS_CTRL_HOST,
                             });
-                          } else {
-                            setError(error.response.data);
                           }
                         });
                       setLogsModal({
@@ -327,7 +344,7 @@ const Deployment = ({ name, namespace }: Props) => {
         open={logsModal.on}
         onOk={handleCancelLogs}
         onCancel={handleCancelLogs}
-        cancelButtonProps={{ style: { display: 'none' } }}
+        cancelButtonProps={{ style: { display: "none" } }}
         width={"60%"}
       >
         <Tabs items={getTabItems()} onChange={onLogsTabsChange} />

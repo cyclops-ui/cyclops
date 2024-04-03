@@ -267,14 +267,17 @@ const NewModule = () => {
         if (error?.response?.data) {
           setError({
             message: error.response.data.message || String(error),
-            description: error.response.data.description || "Check if Cyclops backend is available on: " + window.__RUNTIME_CONFIG__.REACT_APP_CYCLOPS_CTRL_HOST,
+            description:
+              error.response.data.description ||
+              "Check if Cyclops backend is available on: " +
+                window.__RUNTIME_CONFIG__.REACT_APP_CYCLOPS_CTRL_HOST,
           });
         } else {
           setError({
             message: String(error),
             description:
-                "Check if Cyclops backend is available on: " +
-                window.__RUNTIME_CONFIG__.REACT_APP_CYCLOPS_CTRL_HOST,
+              "Check if Cyclops backend is available on: " +
+              window.__RUNTIME_CONFIG__.REACT_APP_CYCLOPS_CTRL_HOST,
           });
         }
       });
@@ -334,14 +337,17 @@ const NewModule = () => {
         if (error?.response?.data) {
           setError({
             message: error.response.data.message || String(error),
-            description: error.response.data.description || "Check if Cyclops backend is available on: " + window.__RUNTIME_CONFIG__.REACT_APP_CYCLOPS_CTRL_HOST,
+            description:
+              error.response.data.description ||
+              "Check if Cyclops backend is available on: " +
+                window.__RUNTIME_CONFIG__.REACT_APP_CYCLOPS_CTRL_HOST,
           });
         } else {
           setError({
             message: String(error),
             description:
-                "Check if Cyclops backend is available on: " +
-                window.__RUNTIME_CONFIG__.REACT_APP_CYCLOPS_CTRL_HOST,
+              "Check if Cyclops backend is available on: " +
+              window.__RUNTIME_CONFIG__.REACT_APP_CYCLOPS_CTRL_HOST,
           });
         }
       });
@@ -376,14 +382,17 @@ const NewModule = () => {
         if (error?.response?.data) {
           setError({
             message: error.response.data.message || String(error),
-            description: error.response.data.description || "Check if Cyclops backend is available on: " + window.__RUNTIME_CONFIG__.REACT_APP_CYCLOPS_CTRL_HOST,
+            description:
+              error.response.data.description ||
+              "Check if Cyclops backend is available on: " +
+                window.__RUNTIME_CONFIG__.REACT_APP_CYCLOPS_CTRL_HOST,
           });
         } else {
           setError({
             message: String(error),
             description:
-                "Check if Cyclops backend is available on: " +
-                window.__RUNTIME_CONFIG__.REACT_APP_CYCLOPS_CTRL_HOST,
+              "Check if Cyclops backend is available on: " +
+              window.__RUNTIME_CONFIG__.REACT_APP_CYCLOPS_CTRL_HOST,
           });
         }
       });
@@ -1019,7 +1028,7 @@ const NewModule = () => {
           setError({
             message: error.response.data.message,
             description:
-                "Unable to fetch values file; Check if the file path is correct",
+              "Unable to fetch values file; Check if the file path is correct",
           });
         } else {
           setError({
