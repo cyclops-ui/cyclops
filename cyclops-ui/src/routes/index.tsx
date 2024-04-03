@@ -1,8 +1,8 @@
 import React from "react";
 import PathConstants from "./PathConstants";
 
-const Home = React.lazy(() => import("../components/pages/modules"));
-const Modules = React.lazy(() => import("../components/pages/modules"));
+const Home = React.lazy(() => import("../components/pages/Modules/Modules"));
+const Modules = React.lazy(() => import("../components/pages/Modules/Modules"));
 const NewModule = React.lazy(() => import("../components/pages/new_module"));
 const ModuleDetails = React.lazy(
   () => import("../components/pages/ModuleDetails")

@@ -1,0 +1,7 @@
+.modulecard {
+  transition: transform .2s;
+}
+
+.modulecard:hover {
+  transform: scale(1.05);
+}
