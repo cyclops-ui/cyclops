@@ -17,6 +17,7 @@ import Comparison from "../components/Comparison";
 import Install from "../components/Install";
 import Features from "../components/Features";
 import Blogs from "../components/Blogs";
+import Testimonials from "../components/Testimonials";
 import {Button, Col, ConfigProvider, Row} from "antd";
 
 export default function Home() {
@@ -73,8 +74,8 @@ export default function Home() {
                             animationDelay: "4s",
                             opacity: 0
                         }}
-                         className={styles.backgroundYaml}
-                         src={yaml}
+                        className={styles.backgroundYaml}
+                        src={yaml}
                     />
                     <img
                         style={{
@@ -123,38 +124,41 @@ export default function Home() {
                                 </h3>
                             </Button>
                         </ConfigProvider>
-                    {/*    <ConfigProvider*/}
-                    {/*        theme={{*/}
-                    {/*            token: {*/}
-                    {/*                colorPrimary: '#FFF',*/}
-                    {/*            },*/}
-                    {/*        }}*/}
-                    {/*    >*/}
-                    {/*        <Button*/}
-                    {/*            href={"/docs/about"}*/}
-                    {/*            shape="round"*/}
-                    {/*            size={"large"}*/}
-                    {/*            className={styles.readTheDocs}*/}
-                    {/*            style={{*/}
-                    {/*                textDecoration: "none",*/}
-                    {/*                display: "inline-flex",*/}
-                    {/*                alignItems: "center",*/}
-                    {/*                color: "white",*/}
-                    {/*            }}*/}
-                    {/*        >*/}
-                    {/*        <h3 style={{margin: 0}}>*/}
-                    {/*            Read the docs*/}
-                    {/*        </h3>*/}
-                    {/*    </Button>*/}
-                    {/*</ConfigProvider>*/}
-                </Row>
-            </div>
+                        {/*    <ConfigProvider*/}
+                        {/*        theme={{*/}
+                        {/*            token: {*/}
+                        {/*                colorPrimary: '#FFF',*/}
+                        {/*            },*/}
+                        {/*        }}*/}
+                        {/*    >*/}
+                        {/*        <Button*/}
+                        {/*            href={"/docs/about"}*/}
+                        {/*            shape="round"*/}
+                        {/*            size={"large"}*/}
+                        {/*            className={styles.readTheDocs}*/}
+                        {/*            style={{*/}
+                        {/*                textDecoration: "none",*/}
+                        {/*                display: "inline-flex",*/}
+                        {/*                alignItems: "center",*/}
+                        {/*                color: "white",*/}
+                        {/*            }}*/}
+                        {/*        >*/}
+                        {/*        <h3 style={{margin: 0}}>*/}
+                        {/*            Read the docs*/}
+                        {/*        </h3>*/}
+                        {/*    </Button>*/}
+                        {/*</ConfigProvider>*/}
+                    </Row>
+                </div>
                 <Comparison/>
-                <div className={styles.featuresinstall}>
+                <div className={styles.backgroundcolor}>
                     <Features/>
+                    <Testimonials/>
                     <Install/>
                     <Blogs/>
                 </div>
+                {/*<div className={styles.backgroundcolor}>*/}
+                {/*</div>*/}
             </main>
         </Layout>
     );
