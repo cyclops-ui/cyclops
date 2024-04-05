@@ -152,21 +152,22 @@ const ModuleDetails = () => {
         });
       })
       .catch((error) => {
-        console.log(error);
-        console.log(error.response);
         setLoading(false);
         setLoadModule(true);
-        if (error.response === undefined) {
+        if (error?.response?.data) {
+          setError({
+            message: error.response.data.message || String(error),
+            description:
+              error.response.data.description ||
+              "Check if Cyclops backend is available on: " +
+                window.__RUNTIME_CONFIG__.REACT_APP_CYCLOPS_CTRL_HOST,
+          });
+        } else {
           setError({
             message: String(error),
             description:
               "Check if Cyclops backend is available on: " +
               window.__RUNTIME_CONFIG__.REACT_APP_CYCLOPS_CTRL_HOST,
-          });
-        } else {
-          setError({
-            message: error.message,
-            description: error.response.data,
           });
         }
       });
@@ -180,21 +181,22 @@ const ModuleDetails = () => {
         setLoadModule(true);
       })
       .catch((error) => {
-        console.log(error);
-        console.log(error.response);
         setLoading(false);
         setLoadModule(true);
-        if (error.response === undefined) {
+        if (error?.response?.data) {
+          setError({
+            message: error.response.data.message || String(error),
+            description:
+              error.response.data.description ||
+              "Check if Cyclops backend is available on: " +
+                window.__RUNTIME_CONFIG__.REACT_APP_CYCLOPS_CTRL_HOST,
+          });
+        } else {
           setError({
             message: String(error),
             description:
               "Check if Cyclops backend is available on: " +
               window.__RUNTIME_CONFIG__.REACT_APP_CYCLOPS_CTRL_HOST,
-          });
-        } else {
-          setError({
-            message: error.message,
-            description: error.response.data,
           });
         }
       });
@@ -208,21 +210,22 @@ const ModuleDetails = () => {
         setLoadResources(true);
       })
       .catch((error) => {
-        console.log(error);
-        console.log(error.response);
         setLoading(false);
         setLoadResources(true);
-        if (error.response === undefined) {
+        if (error?.response?.data) {
+          setError({
+            message: error.response.data.message || String(error),
+            description:
+              error.response.data.description ||
+              "Check if Cyclops backend is available on: " +
+                window.__RUNTIME_CONFIG__.REACT_APP_CYCLOPS_CTRL_HOST,
+          });
+        } else {
           setError({
             message: String(error),
             description:
               "Check if Cyclops backend is available on: " +
               window.__RUNTIME_CONFIG__.REACT_APP_CYCLOPS_CTRL_HOST,
-          });
-        } else {
-          setError({
-            message: error.message,
-            description: error.response.data,
           });
         }
       });
@@ -285,20 +288,21 @@ const ModuleDetails = () => {
         window.location.href = "/modules";
       })
       .catch((error) => {
-        console.log(error);
-        console.log(error.response);
         setLoading(false);
-        if (error.response === undefined) {
+        if (error?.response?.data) {
+          setError({
+            message: error.response.data.message || String(error),
+            description:
+              error.response.data.description ||
+              "Check if Cyclops backend is available on: " +
+                window.__RUNTIME_CONFIG__.REACT_APP_CYCLOPS_CTRL_HOST,
+          });
+        } else {
           setError({
             message: String(error),
             description:
               "Check if Cyclops backend is available on: " +
               window.__RUNTIME_CONFIG__.REACT_APP_CYCLOPS_CTRL_HOST,
-          });
-        } else {
-          setError({
-            message: error.message,
-            description: error.response.data,
           });
         }
       });
@@ -642,20 +646,21 @@ const ModuleDetails = () => {
         fetchModuleResources();
       })
       .catch((error) => {
-        console.log(error);
-        console.log(error.response);
         setLoading(false);
-        if (error.response === undefined) {
+        if (error?.response?.data) {
+          setError({
+            message: error.response.data.message || String(error),
+            description:
+              error.response.data.description ||
+              "Check if Cyclops backend is available on: " +
+                window.__RUNTIME_CONFIG__.REACT_APP_CYCLOPS_CTRL_HOST,
+          });
+        } else {
           setError({
             message: String(error),
             description:
               "Check if Cyclops backend is available on: " +
               window.__RUNTIME_CONFIG__.REACT_APP_CYCLOPS_CTRL_HOST,
-          });
-        } else {
-          setError({
-            message: error.message,
-            description: error.response.data,
           });
         }
       });

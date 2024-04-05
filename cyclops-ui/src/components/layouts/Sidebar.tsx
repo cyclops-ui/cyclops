@@ -39,12 +39,8 @@ const SideNav = () => {
             display: "inline-flex",
           }}
         >
-          <h2 style={{ color: "white", marginTop: "5px" }}>
-            <b>Cyclops</b>
-          </h2>
           <img
-            style={{ height: "120%", marginLeft: "6px" }}
-            src={require("./KIKLOPcic.png")}
+            src={require("./cyclops_logo.png")}
             alt="Cyclops"
           />
         </div>
