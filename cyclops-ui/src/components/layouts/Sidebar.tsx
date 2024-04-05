@@ -1,9 +1,16 @@
 import React from "react";
 import { Button, Menu, MenuProps } from "antd";
-import {AppstoreAddOutlined, HddOutlined, BugFilled, SnippetsOutlined} from "@ant-design/icons";
+import {
+  AppstoreAddOutlined,
+  HddOutlined,
+  BugFilled,
+  SnippetsOutlined,
+  GithubFilled
+} from "@ant-design/icons";
 import { useLocation } from "react-router";
 import PathConstants from "../../routes/PathConstants";
 import { Link } from "react-router-dom";
+import styles from "./styles.module.css"
 
 const SideNav = () => {
   const location = useLocation().pathname.split("/")[1];
@@ -25,6 +32,14 @@ const SideNav = () => {
       key: "templates",
     },
   ];
+
+  const tagChangelogLink = (tag: string) => {
+    if (tag === "v0.0.0") {
+      return "https://github.com/cyclops-ui/cyclops/releases"
+    }
+
+    return "https://github.com/cyclops-ui/cyclops/releases/tag/" + tag
+  }
 
   return (
     <div
@@ -66,7 +81,9 @@ const SideNav = () => {
         margin: "25px",
         marginTop: "0",
       }}>
-        {window.__RUNTIME_CONFIG__.REACT_APP_VERSION}
+        <Link className={styles.taglink} to={tagChangelogLink(window.__RUNTIME_CONFIG__.REACT_APP_VERSION)}>
+          <GithubFilled/> {window.__RUNTIME_CONFIG__.REACT_APP_VERSION}
+        </Link>
       </center>
     </div>
   );

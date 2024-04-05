@@ -8,3 +8,12 @@ import (
 func (k *KubernetesClient) ListTemplateStore() ([]cyclopsv1alpha1.TemplateStore, error) {
 	return k.moduleset.TemplateStore(cyclopsNamespace).List(metav1.ListOptions{})
 }
+
+func (k *KubernetesClient) CreateTemplateStore(ts *cyclopsv1alpha1.TemplateStore) error {
+	_, err := k.moduleset.TemplateStore(cyclopsNamespace).Create(ts)
+	return err
+}
+
+func (k *KubernetesClient) DeleteTemplateStore(name string) error {
+	return k.moduleset.TemplateStore(cyclopsNamespace).Delete(name)
+}

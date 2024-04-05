@@ -192,3 +192,23 @@ func (c *Templates) ListTemplatesStore(ctx *gin.Context) {
 
 	ctx.JSON(http.StatusOK, storeDTO)
 }
+
+func (c *Templates) CreateTemplatesStore(ctx *gin.Context) {
+	ctx.Header("Access-Control-Allow-Origin", "*")
+
+	var templateStore *dto.TemplateStore
+	if err := ctx.ShouldBind(&templateStore); err != nil {
+		fmt.Println("error binding request", templateStore)
+		ctx.JSON(http.StatusBadRequest, dto.NewError("Error binding request", err.Error()))
+		return
+	}
+
+	k8sTemplateStore := mapper.DTOToTemplateStoreList(*templateStore)
+
+	if err := c.kubernetesClient.CreateTemplateStore(k8sTemplateStore); err != nil {
+		ctx.JSON(http.StatusInternalServerError, dto.NewError("Error creating module", err.Error()))
+		return
+	}
+
+	ctx.Status(http.StatusCreated)
+}

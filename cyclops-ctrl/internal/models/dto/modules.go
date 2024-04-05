@@ -10,9 +10,9 @@ type Module struct {
 }
 
 type Template struct {
-	URL     string `json:"repo"`
-	Path    string `json:"path"`
-	Version string `json:"version"`
+	URL     string `json:"repo" binding:"required"`
+	Path    string `json:"path" binding:"required"`
+	Version string `json:"version" binding:"required"`
 }
 
 type TemplatesResponse struct {
