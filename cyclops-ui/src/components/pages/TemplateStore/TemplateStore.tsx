@@ -190,7 +190,22 @@ const TemplateStore = () => {
                   style={{paddingTop: "20px"}}
                   label="Name"
                   name={"name"}
-                  rules={[{ required: true, message: 'Template ref is required' }]}
+                  rules={[
+                      {
+                          required: true,
+                          message: "Template ref name is required",
+                      },
+                      {
+                          max: 63,
+                          message:
+                              "Template ref name must contain no more than 63 characters",
+                      },
+                      {
+                          pattern: /^[a-z0-9](?:[a-z0-9-]*[a-z0-9])?$/, // only alphanumeric characters and hyphens, cannot start or end with a hyphen and the alpha characters can only be lowercase
+                          message:
+                              "Template ref name must follow the Kubernetes naming convention",
+                      },
+                  ]}
               >
                   <Input />
               </Form.Item>
