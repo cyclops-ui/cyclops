@@ -1,0 +1,29 @@
+apiVersion: cyclops-ui.com/v1alpha1
+kind: TemplateStore
+metadata:
+  name: demo-template
+  namespace: cyclops
+spec:
+  path: demo
+  repo: https://github.com/cyclops-ui/templates
+  version: main
+---
+apiVersion: cyclops-ui.com/v1alpha1
+kind: TemplateStore
+metadata:
+  name: demo-template-test
+  namespace: cyclops
+spec:
+  path: test
+  repo: https://github.com/cyclops-ui/templates
+  version: ""
+---
+apiVersion: cyclops-ui.com/v1alpha1
+kind: TemplateStore
+metadata:
+  name: demo-template-with-deps
+  namespace: cyclops
+spec:
+  path: demo
+  repo: https://github.com/cyclops-ui/templates
+  version: chart-deps
