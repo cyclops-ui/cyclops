@@ -212,3 +212,16 @@ func (c *Templates) CreateTemplatesStore(ctx *gin.Context) {
 
 	ctx.Status(http.StatusCreated)
 }
+
+func (c *Templates) DeleteTemplatesStore(ctx *gin.Context) {
+	ctx.Header("Access-Control-Allow-Origin", "*")
+
+	templateRefName := ctx.Param("name")
+
+	if err := c.kubernetesClient.DeleteTemplateStore(templateRefName); err != nil {
+		ctx.JSON(http.StatusInternalServerError, dto.NewError("Error deleting module", err.Error()))
+		return
+	}
+
+	ctx.Status(http.StatusOK)
+}

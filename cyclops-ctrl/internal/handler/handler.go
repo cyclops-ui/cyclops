@@ -59,6 +59,7 @@ func (h *Handler) Start() error {
 	// templates store
 	h.router.GET("/templates/store", templatesController.ListTemplatesStore)
 	h.router.PUT("/templates/store", templatesController.CreateTemplatesStore)
+	h.router.DELETE("/templates/store/:name", templatesController.DeleteTemplatesStore)
 
 	// modules
 	h.router.GET("/modules/:name", modulesController.GetModule)

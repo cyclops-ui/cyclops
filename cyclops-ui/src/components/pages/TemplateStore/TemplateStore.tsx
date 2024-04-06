@@ -1,13 +1,17 @@
 import React, { useEffect, useState } from "react";
-import {Col, Table, Typography, Alert, Row, Button, Tabs, Modal, Form, Input} from "antd";
+import {Col, Table, Typography, Alert, Row, Button, Tabs, Modal, Form, Input, Divider} from "antd";
 import axios from "axios";
 import Title from "antd/es/typography/Title";
+import {DeleteOutlined} from "@ant-design/icons";
+import styles from "./styles.module.css"
 
 const TemplateStore = () => {
   const [templates, setTemplates] = useState([]);
+  const [confirmDelete, setConfirmDelete] = useState("")
+  const [confirmDeleteInput, setConfirmDeleteInput] = useState("")
   const [newTemplateModal, setNewTemplateModal] = useState(false)
-    const [confirmLoading, setConfirmLoading] = useState(false);
-    const [error, setError] = useState({
+  const [confirmLoading, setConfirmLoading] = useState(false);
+  const [error, setError] = useState({
     message: "",
     description: "",
   });
@@ -47,7 +51,32 @@ const TemplateStore = () => {
           .put(`/api/templates/store`, values)
           .then((res) => {
               setNewTemplateModal(false);
-              setConfirmLoading(true);
+              setConfirmLoading(false);
+              window.location.href = "/templates";
+          })
+          .catch((error) => {
+              if (error.response === undefined) {
+                  setError({
+                      message: String(error),
+                      description:
+                          "Check if Cyclops backend is available on: " +
+                          window.__RUNTIME_CONFIG__.REACT_APP_CYCLOPS_CTRL_HOST,
+                  });
+              } else {
+                  setError({
+                      message: error.message,
+                      description: error.response.data,
+                  });
+              }
+          });
+  }
+
+  const deleteTemplateRef = () => {
+      axios
+          .delete(`/api/templates/store/` + confirmDelete)
+          .then((res) => {
+              setNewTemplateModal(false);
+              setConfirmLoading(false);
               window.location.href = "/templates";
           })
           .catch((error) => {
@@ -109,7 +138,7 @@ const TemplateStore = () => {
           <Table.Column
               title="Path"
               dataIndex={["ref", "path"]}
-              width={"20%"}
+              width={"10%"}
               render={function (value: any, record: any, index: number) {
                 if (!value.startsWith('/')) {
                   return '/' + value;
@@ -118,10 +147,23 @@ const TemplateStore = () => {
               }}
           />
           <Table.Column title="Version" dataIndex={["ref", "version"]} width={"10%"} />
+            <Table.Column
+                width="5%"
+                render={(template) => (
+                    <>
+                        <DeleteOutlined
+                            className={styles.deletetemplate}
+                            onClick={function () {
+                                setConfirmDelete(template.name)
+                            }}
+                        />
+                    </>
+                )}
+            />
         </Table>
       </Col>
       <Modal
-        title="Add template ref"
+        title="Add new"
         open={newTemplateModal}
         onOk={handleOK}
         onCancel={handleCancelModal}
@@ -135,12 +177,15 @@ const TemplateStore = () => {
               labelCol={{span: 6}}
           >
               <Form.Item
-                  label="Template ref name"
+                  style={{paddingTop: "20px"}}
+                  label="Name"
                   name={"name"}
                   rules={[{ required: true, message: 'Template ref is required' }]}
               >
                   <Input />
               </Form.Item>
+
+              <Divider/>
 
               <Form.Item
                   label="Repository URL"
@@ -166,6 +211,28 @@ const TemplateStore = () => {
               </Form.Item>
           </Form>
       </Modal>
+        <Modal
+            title="Delete module"
+            open={confirmDelete.length > 0}
+            onCancel={handleCancelModal}
+            width={"40%"}
+            footer={
+                <Button
+                    danger
+                    block
+                    disabled={confirmDelete !== confirmDeleteInput}
+                    onClick={deleteTemplateRef}
+                >
+                    Delete
+                </Button>
+            }
+        >
+            <Divider style={{ fontSize: "120%" }} orientationMargin="0" />
+            In order to delete this template ref, type the template ref name in the box below
+            <Input placeholder={confirmDelete} required onChange={(e: any) => {
+                setConfirmDeleteInput(e.target.value)
+            }} />
+        </Modal>
     </div>
   );
 };
