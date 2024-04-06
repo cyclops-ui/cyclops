@@ -146,7 +146,17 @@ const TemplateStore = () => {
                 return value;
               }}
           />
-          <Table.Column title="Version" dataIndex={["ref", "version"]} width={"10%"} />
+          <Table.Column
+              title="Version"
+              dataIndex={["ref", "version"]}
+              width={"10%"}
+              render={function (value: any, record: any, index: number) {
+                  if (String(value).length === 0) {
+                      return <span style={{color: "#A0A0A0"}}>{'<default>'}</span>
+                  }
+                  return value;
+              }}
+          />
             <Table.Column
                 width="5%"
                 render={(template) => (

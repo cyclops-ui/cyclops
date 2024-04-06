@@ -1150,71 +1150,20 @@ const NewModule = () => {
             <Divider orientation="left" orientationMargin="0">
               Module template
             </Divider>
-            <Input
-              placeholder={"Repository"}
-              style={{ width: "40%" }}
-              onChange={(value: any) => {
-                setTemplate({
-                  repo: value.target.value,
-                  path: template.path,
-                  version: template.version,
-                });
-              }}
-              value={template.repo}
-            />
-            {" / "}
-            <Input
-              placeholder={"Path"}
-              style={{ width: "20%" }}
-              onChange={(value: any) => {
-                setTemplate({
-                  repo: template.repo,
-                  path: value.target.value,
-                  version: template.version,
-                });
-              }}
-              value={template.path}
-            />
-            {" @ "}
-            <Input
-              placeholder={"Version"}
-              style={{ width: "10%" }}
-              onChange={(value: any) => {
-                setTemplate({
-                  repo: template.repo,
-                  path: template.path,
-                  version: value.target.value,
-                });
-              }}
-              value={template.version}
-            />
-            {"  "}
-            <Button
-              type="primary"
-              htmlType="button"
-              onClick={async () => {
-                await loadTemplate(
-                  template.repo,
-                  template.path,
-                  template.version
-                );
-              }}
-              loading={loadingTemplate || loadingTemplateInitialValues}
-            >
-              Load
-            </Button>
             <Row>
-              <Select
-                  onChange={onTemplateStoreSelected}
-                  style={{width: "80%"}}
-                  placeholder="Select an option"
-              >
-                {templateStore.map((option: any, index) => (
-                    <Option key={option.name} value={option.name}>
-                      {option.name}
-                    </Option>
-                ))}
-              </Select>
+              <Col span={16}>
+                <Select
+                    onChange={onTemplateStoreSelected}
+                    style={{width: "100%"}}
+                    placeholder="Select an option"
+                >
+                  {templateStore.map((option: any, index) => (
+                      <Option key={option.name} value={option.name}>
+                        {option.name}
+                      </Option>
+                  ))}
+                </Select>
+              </Col>
             </Row>
             <Divider orientation="left" orientationMargin="0">
               Module name
