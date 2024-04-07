@@ -55,17 +55,21 @@ const TemplateStore = () => {
               window.location.href = "/templates";
           })
           .catch((error) => {
-              if (error.response === undefined) {
+              setConfirmLoading(false);
+              if (error?.response?.data) {
                   setError({
-                      message: String(error),
+                      message: error.response.data.message || String(error),
                       description:
+                          error.response.data.description ||
                           "Check if Cyclops backend is available on: " +
                           window.__RUNTIME_CONFIG__.REACT_APP_CYCLOPS_CTRL_HOST,
                   });
               } else {
                   setError({
-                      message: error.message,
-                      description: error.response.data,
+                      message: String(error),
+                      description:
+                          "Check if Cyclops backend is available on: " +
+                          window.__RUNTIME_CONFIG__.REACT_APP_CYCLOPS_CTRL_HOST,
                   });
               }
           });
@@ -80,17 +84,20 @@ const TemplateStore = () => {
               window.location.href = "/templates";
           })
           .catch((error) => {
-              if (error.response === undefined) {
+              if (error?.response?.data) {
                   setError({
-                      message: String(error),
+                      message: error.response.data.message || String(error),
                       description:
+                          error.response.data.description ||
                           "Check if Cyclops backend is available on: " +
                           window.__RUNTIME_CONFIG__.REACT_APP_CYCLOPS_CTRL_HOST,
                   });
               } else {
                   setError({
-                      message: error.message,
-                      description: error.response.data,
+                      message: String(error),
+                      description:
+                          "Check if Cyclops backend is available on: " +
+                          window.__RUNTIME_CONFIG__.REACT_APP_CYCLOPS_CTRL_HOST,
                   });
               }
           });
@@ -180,6 +187,21 @@ const TemplateStore = () => {
         confirmLoading={confirmLoading}
         width={"60%"}
       >
+          {error.message.length !== 0 && (
+              <Alert
+                  message={error.message}
+                  description={error.description}
+                  type="error"
+                  closable
+                  afterClose={() => {
+                      setError({
+                          message: "",
+                          description: "",
+                      });
+                  }}
+                  style={{ marginBottom: "20px" }}
+              />
+          )}
           <Form
               onFinish={handleSubmit}
               form={form}
@@ -252,6 +274,21 @@ const TemplateStore = () => {
                 </Button>
             }
         >
+            {error.message.length !== 0 && (
+                <Alert
+                    message={error.message}
+                    description={error.description}
+                    type="error"
+                    closable
+                    afterClose={() => {
+                        setError({
+                            message: "",
+                            description: "",
+                        });
+                    }}
+                    style={{ marginBottom: "20px" }}
+                />
+            )}
             <Divider style={{ fontSize: "120%" }} orientationMargin="0" />
             In order to delete this template ref, type the template ref name in the box below
             <Input placeholder={confirmDelete} required onChange={(e: any) => {

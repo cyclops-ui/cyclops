@@ -12,7 +12,7 @@ type Module struct {
 type Template struct {
 	URL     string `json:"repo" binding:"required"`
 	Path    string `json:"path" binding:"required"`
-	Version string `json:"version" binding:"required"`
+	Version string `json:"version"`
 }
 
 type TemplatesResponse struct {
