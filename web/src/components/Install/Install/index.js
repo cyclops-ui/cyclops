@@ -2,7 +2,7 @@ import React, {useEffect, useRef, useState} from 'react';
 import styles from './styles.module.css';
 
 import CodeBlockString from "@docusaurus/theme-classic/lib/theme/CodeBlock/Content/String";
-
+import CodeBlockJSX from "@docusaurus/theme-classic/lib/theme/CodeBlock/Content/Element";
 
 const InstallCmd = () => {
     const elementRef = useRef(null);
@@ -34,8 +34,9 @@ const InstallCmd = () => {
             <h2 className={styles.commandDesc}>
                 Install it with a single command
             </h2>
-            <CodeBlockString>
-                kubectl apply -f https://raw.githubusercontent.com/cyclops-ui/cyclops/v0.1.0/install/cyclops-install.yaml
+            <CodeBlockString language={"sh"}>
+                {"kubectl apply -f https://raw.githubusercontent.com/cyclops-ui/cyclops/template-ref-crd/install/cyclops-install.yaml && \\\n" +
+                "kubectl apply -f https://raw.githubusercontent.com/cyclops-ui/cyclops/template-ref-crd/install/demo-templates.yaml"}
             </CodeBlockString>
         </center>
     );
