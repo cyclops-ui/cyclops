@@ -108,23 +108,6 @@ const NewModule = () => {
   const [form] = Form.useForm();
 
   useEffect(() => {
-    if (
-      window.__RUNTIME_CONFIG__.REACT_APP_DEFAULT_TEMPLATE_REPO &&
-      window.__RUNTIME_CONFIG__.REACT_APP_DEFAULT_TEMPLATE_REPO.length > 0
-    ) {
-      setTemplate({
-        repo: window.__RUNTIME_CONFIG__.REACT_APP_DEFAULT_TEMPLATE_REPO,
-        path: window.__RUNTIME_CONFIG__.REACT_APP_DEFAULT_TEMPLATE_PATH,
-        version: window.__RUNTIME_CONFIG__.REACT_APP_DEFAULT_TEMPLATE_VERSION,
-      });
-
-      loadTemplate(
-        window.__RUNTIME_CONFIG__.REACT_APP_DEFAULT_TEMPLATE_REPO,
-        window.__RUNTIME_CONFIG__.REACT_APP_DEFAULT_TEMPLATE_PATH,
-        window.__RUNTIME_CONFIG__.REACT_APP_DEFAULT_TEMPLATE_VERSION
-      );
-    }
-
     loadTemplateStore()
   }, []);
 
