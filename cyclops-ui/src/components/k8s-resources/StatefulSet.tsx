@@ -256,8 +256,12 @@ const StatefulSet = ({ name, namespace }: Props) => {
               width="15%"
               render={(containers) => (
                 <>
-                  {containers.map((container: any) => {
+                  {containers.map((container: any, record: any) => {
                     let color = container.status.running ? "green" : "red";
+
+                    if (record.podPhase === "Pending") {
+                      color = "yellow"
+                    }
 
                     return (
                       <Tag
