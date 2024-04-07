@@ -5,8 +5,6 @@ import Layout from '@theme/Layout';
 import HomepageFeatures from '@site/src/components/HomepageFeatures';
 import styles from './index.module.css'
 
-// import EITDigital from '/static/img/EIT_digital.png';
-// import EIT from '/static/img/EIT.png';
 
 import landingCyclops from '/static/img/landing_cyclops.png';
 import title from '/static/img/cyclops-title.png';

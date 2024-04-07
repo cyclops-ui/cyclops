@@ -76,7 +76,7 @@ const config = {
           {
             type: 'html',
             position: 'right',
-            value: '<a href="/docs/installation/install/manifest" class="ant-btn css-dev-only-do-not-override-b2u3vl ant-btn-round ant-btn-primary ant-btn-lg" style="background-color: white; color: black; height: 30px; text-decoration: none; display: inline-flex; align-items: center;"><h3 style="margin: 0px;">Get started</h3></a>',
+            value: '<a href="/docs/installation/install/manifest" style="background-color: white; color: black; height: 30px; text-decoration: none; display: inline-flex; align-items: center; border-radius: 50%"><h3 style="margin: 0px;">Get started</h3></a>',
           },
           {
             href: "https://github.com/cyclops-ui/cyclops",
@@ -98,6 +98,36 @@ const config = {
       footer: {
         style: "dark",
         links: [
+          {
+            items: [
+              {
+                html: `
+                <a href="https://landscape.cncf.io/">
+                  <img src="img/cncf-white.png"/>
+                </a>
+              `,
+              },
+              {
+                html: `
+                <div style="width: 100%; padding-top: 20px">
+                  <a href="https://filrougecapital.com/">
+                    <img style="width: 50%" src="img/frc-white.png"/>
+                  </a>
+                  <a href="https://www.zicer.hr/?lang=en">
+                    <img style="width: 45%; right: 0; position: relative" src="img/zicer.png"/>
+                  </a>
+                </div>
+              `,
+              },
+              {
+                html: `
+                <a>
+                  <img style="width: 100%; padding-top: 20px" src="img/esif.png"/>
+                </a>
+              `,
+              },
+            ],
+          },
           {
             title: "Docs",
             items: [
