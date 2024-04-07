@@ -1,7 +1,7 @@
 import { formatDistanceToNow } from "date-fns";
 
 export function formatPodAge(podAge: string): string {
-  if (podAge === "") {
+  if (podAge === null || podAge === "") {
     return "";
   }
 
