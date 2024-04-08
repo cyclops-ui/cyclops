@@ -2,6 +2,8 @@
 
 Now that your Cyclops instance is deployed locally, you can deploy an application into the cluster through Cyclops.
 
+![Modules](../../../static/img/demo/new-module/modules-list.png)
+
 ## Add a New Module
 
 When you start up Cyclops, the first screen shown to you is the _Modules_ screen. This screen should be empty at the moment. What we want to do next is click on the _Add module_ button in the top right corner.
