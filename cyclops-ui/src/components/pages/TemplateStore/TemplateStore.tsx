@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import {Col, Table, Typography, Alert, Row, Button, Tabs, Modal, Form, Input, Divider} from "antd";
 import axios from "axios";
 import Title from "antd/es/typography/Title";
-import {DeleteOutlined} from "@ant-design/icons";
+import {DeleteOutlined, EditOutlined} from "@ant-design/icons";
 import styles from "./styles.module.css"
 
 const TemplateStore = () => {
@@ -11,6 +11,13 @@ const TemplateStore = () => {
   const [confirmDeleteInput, setConfirmDeleteInput] = useState("")
   const [newTemplateModal, setNewTemplateModal] = useState(false)
   const [confirmLoading, setConfirmLoading] = useState(false);
+  const [editModal, setEditModal] = useState({
+      on: false,
+      name: "",
+      repo: "",
+      path: "",
+      version: "",
+  })
   const [error, setError] = useState({
     message: "",
     description: "",
@@ -75,6 +82,39 @@ const TemplateStore = () => {
           });
   }
 
+    const handleUpdateSubmit = (values: any) => {
+        setConfirmLoading(true);
+
+        values.name = editModal.name;
+
+        axios
+            .post(`/api/templates/store/` + editModal.name, values)
+            .then((res) => {
+                setNewTemplateModal(false);
+                setConfirmLoading(false);
+                window.location.href = "/templates";
+            })
+            .catch((error) => {
+                setConfirmLoading(false);
+                if (error?.response?.data) {
+                    setError({
+                        message: error.response.data.message || String(error),
+                        description:
+                            error.response.data.description ||
+                            "Check if Cyclops backend is available on: " +
+                            window.__RUNTIME_CONFIG__.REACT_APP_CYCLOPS_CTRL_HOST,
+                    });
+                } else {
+                    setError({
+                        message: String(error),
+                        description:
+                            "Check if Cyclops backend is available on: " +
+                            window.__RUNTIME_CONFIG__.REACT_APP_CYCLOPS_CTRL_HOST,
+                    });
+                }
+            });
+    }
+
   const deleteTemplateRef = () => {
       axios
           .delete(`/api/templates/store/` + confirmDelete)
@@ -105,6 +145,20 @@ const TemplateStore = () => {
 
   const handleCancelModal = () => {
     setNewTemplateModal(false);
+  }
+
+    const handleCancelEditModal = () => {
+        setEditModal({
+            on: false,
+            name: "",
+            repo: "",
+            path: "",
+            version: "",
+        });
+    }
+
+  const handleCancelDeleteModal = () => {
+    setConfirmDelete("");
   }
 
   return (
@@ -164,6 +218,25 @@ const TemplateStore = () => {
                   return value;
               }}
           />
+            <Table.Column
+                width="5%"
+                render={(template) => (
+                    <>
+                        <EditOutlined
+                            className={styles.edittemplate}
+                            onClick={function () {
+                                setEditModal({
+                                    on: true,
+                                    name: template.name,
+                                    repo: template.ref.repo,
+                                    path: template.ref.path,
+                                    version: template.ref.version,
+                                })
+                            }}
+                        />
+                    </>
+                )}
+            />
             <Table.Column
                 width="5%"
                 render={(template) => (
@@ -259,9 +332,66 @@ const TemplateStore = () => {
           </Form>
       </Modal>
         <Modal
-            title="Delete module"
+            title={<div>Edit template ref <span style={{color: "#ff8803"}}>{editModal.name}</span></div>}
+            open={editModal.on}
+            onOk={handleOK}
+            onCancel={handleCancelEditModal}
+            confirmLoading={confirmLoading}
+            width={"60%"}
+        >
+            {error.message.length !== 0 && (
+                <Alert
+                    message={error.message}
+                    description={error.description}
+                    type="error"
+                    closable
+                    afterClose={() => {
+                        setError({
+                            message: "",
+                            description: "",
+                        });
+                    }}
+                    style={{ marginBottom: "20px" }}
+                />
+            )}
+            <Form
+                style={{paddingTop: "50px"}}
+                onFinish={handleUpdateSubmit}
+                form={form}
+                initialValues={{ remember: true }}
+                labelCol={{span: 6}}
+            >
+                <Form.Item
+                    label="Repository URL"
+                    name={["ref", "repo"]}
+                    rules={[{ required: true, message: 'Repo URL is required' }]}
+                    initialValue={editModal.repo}
+                >
+                    <Input />
+                </Form.Item>
+
+                <Form.Item
+                    label="Path"
+                    name={["ref", "path"]}
+                    rules={[{ required: true, message: 'Path is required' }]}
+                    initialValue={editModal.path}
+                >
+                    <Input />
+                </Form.Item>
+
+                <Form.Item
+                    label="Version"
+                    name={["ref", "version"]}
+                    initialValue={editModal.version}
+                >
+                    <Input />
+                </Form.Item>
+            </Form>
+        </Modal>
+        <Modal
+            title="Delete template ref"
             open={confirmDelete.length > 0}
-            onCancel={handleCancelModal}
+            onCancel={handleCancelDeleteModal}
             width={"40%"}
             footer={
                 <Button

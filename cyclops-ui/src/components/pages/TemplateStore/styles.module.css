@@ -7,3 +7,13 @@
 .deletetemplate:hover {
   transform: scale(1.4);
 }
+
+.edittemplate {
+  color: #4096ff;
+  transform: scale(1.2);
+  transition: transform .2s;
+}
+
+.edittemplate:hover {
+  transform: scale(1.4);
+}

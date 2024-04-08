@@ -23,7 +23,7 @@ func TemplateStoreListToDTO(store []cyclopsv1alpha1.TemplateStore) []dto.Templat
 	return out
 }
 
-func DTOToTemplateStoreList(store dto.TemplateStore) *cyclopsv1alpha1.TemplateStore {
+func DTOToTemplateStore(store dto.TemplateStore) *cyclopsv1alpha1.TemplateStore {
 	return &cyclopsv1alpha1.TemplateStore{
 		TypeMeta: metav1.TypeMeta{
 			Kind:       "TemplateStore",

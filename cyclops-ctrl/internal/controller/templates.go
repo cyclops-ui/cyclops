@@ -203,9 +203,31 @@ func (c *Templates) CreateTemplatesStore(ctx *gin.Context) {
 		return
 	}
 
-	k8sTemplateStore := mapper.DTOToTemplateStoreList(*templateStore)
+	k8sTemplateStore := mapper.DTOToTemplateStore(*templateStore)
 
 	if err := c.kubernetesClient.CreateTemplateStore(k8sTemplateStore); err != nil {
+		ctx.JSON(http.StatusInternalServerError, dto.NewError("Error creating module", err.Error()))
+		return
+	}
+
+	ctx.Status(http.StatusCreated)
+}
+
+func (c *Templates) EditTemplatesStore(ctx *gin.Context) {
+	ctx.Header("Access-Control-Allow-Origin", "*")
+
+	var templateStore *dto.TemplateStore
+	if err := ctx.ShouldBind(&templateStore); err != nil {
+		fmt.Println("error binding request", templateStore)
+		ctx.JSON(http.StatusBadRequest, dto.NewError("Error binding request", err.Error()))
+		return
+	}
+
+	templateStore.Name = ctx.Param("name")
+
+	k8sTemplateStore := mapper.DTOToTemplateStore(*templateStore)
+
+	if err := c.kubernetesClient.UpdateTemplateStore(k8sTemplateStore); err != nil {
 		ctx.JSON(http.StatusInternalServerError, dto.NewError("Error creating module", err.Error()))
 		return
 	}

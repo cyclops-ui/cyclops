@@ -14,6 +14,18 @@ func (k *KubernetesClient) CreateTemplateStore(ts *cyclopsv1alpha1.TemplateStore
 	return err
 }
 
+func (k *KubernetesClient) UpdateTemplateStore(ts *cyclopsv1alpha1.TemplateStore) error {
+	curr, err := k.moduleset.TemplateStore(cyclopsNamespace).Get(ts.Name)
+	if err != nil {
+		return err
+	}
+
+	ts.SetResourceVersion(curr.GetResourceVersion())
+
+	_, err = k.moduleset.TemplateStore(cyclopsNamespace).Update(ts)
+	return err
+}
+
 func (k *KubernetesClient) DeleteTemplateStore(name string) error {
 	return k.moduleset.TemplateStore(cyclopsNamespace).Delete(name)
 }
