@@ -8,7 +8,9 @@ Although we have a **GitHub repository** to store our charts, there are other wa
 2. **2. Helm Chart Repository**
 3. **3. OCI Repository**
 
-It is important to remember that Cyclops renders the form based on the `values.schema.json` file. That file is used to define values structure in Helm. You can learn more about it and how to create one by following [Helm docs](https://helm.sh/docs/topics/charts/#schema-files). The schema is represented as a [JSON Schema](https://json-schema.org/)
+The **`values.schema.json` is a necessary component** in your templates. This file is usually used to impose a structure on the `values.yaml` file, but it is also crucial for rendering the GUI in Cyclops.
+
+You can learn more about it and how to create one by following [Helm docs](https://helm.sh/docs/topics/charts/#schema-files). The schema is represented as a [JSON Schema](https://json-schema.org/)
 
 You can find a list of all the fields you can set below for each field type.
 
