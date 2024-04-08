@@ -72,6 +72,7 @@ const sidebars = {
       label: "Templates",
       items: [
         "templates/templates",
+        "templates/adding_templates",
         "templates/validations",
         "templates/dependencies",
       ],
