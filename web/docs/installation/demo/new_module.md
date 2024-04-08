@@ -1,26 +1,23 @@
 # New Module
 
-Now that you have your Cyclops instance deployed locally, you can try to deploy an application into the cluster through
-Cyclops
+Now that your Cyclops instance is deployed locally, you can deploy an application into the cluster through Cyclops.
 
-## Add a new module
+## Add a New Module
 
-When you start up Cyclops, the first screen that will be shown to you is the _Modules_ screen. This screen should be
-empty at the moment. What we want to do next is click on the _Add module_ button in the top right corner.
+When you start up Cyclops, the first screen shown to you is the _Modules_ screen. This screen should be empty at the moment. What we want to do next is click on the _Add module_ button in the top right corner.
 
-## Define your module
+## Define Your Module
 
-Now, we want to define our new module. Under the _Module template_, we want to put the URL that leads to a GitHub
-repository where we saved our configuration files. For the sake of this tutorial, we will be using our own
-[template](https://github.com/cyclops-ui/templates), which holds a configuration template we made for testing purposes.
-Feel free to use our template repository! We will be using the _demo_ template from the repository. Also, for any
-template, you can specify the version, which is the third field. If you are referencing a template stored in git, you can
-specify a version as a branch name, tag, or commit hash. If you don't specify anything, it will default to the latest
-commit on the default branch.
+Now, we want to define our new module. Every Cyclops instance comes with a couple of predefined templates, which we included. From the dropdown under _Module template_, you can choose which predefined templates you want to use. For the sake of this tutorial, we will use `cyclops-deployment-and-service`.
 
-![Successfully loaded template](../../../static/img/demo/template_load_success.png?raw=true "Successfully loaded template")
+If you want to learn more about templates and how to create your own, check out the [Templates section](../../templates/templates.md)!
 
-Now all that's left to do is fill the form with values!
+![Loaded Template](../../../static/img/demo/new-module/loaded-template.png)
+
+If you play around with different templates, you will find that Cyclops is highly customizable. Depending on the template used, this screen will be different.
+
+Now, all left to do is fill the form with values and click _Save_!
+
 Here is an example of values you could use:
 
 ```yaml
@@ -32,16 +29,14 @@ version: 1.14.2
 service: true
 ```
 
-Now click save and you should see your new module listed on the main page!
+## Module Overview
 
-![Listed Module](../../../static/img/demo/module_listed.png?raw=true "Listed Module")
+Once you have deployed your application, you will be taken to a new page to find the overview of all the resources your new module uses.
 
-## Try it out
+![Module Details](../../../static/img/demo/new-module/module-details.png)
 
-Once you have deployed your application, you can check its resources and information on the Module details page. If you
-have tried out Cyclops with the suggested template and values, you can open your application by exposing it to the
-outside world and visiting it.  
-You can expose it with the following command
+If you have tried out Cyclops with the suggested template and values, you can open your deployed application by exposing it to the outside world and visiting it.
+Expose it with the following command:
 
 ```bash
 kubectl port-forward svc/demo-1 8888:80
@@ -49,21 +44,29 @@ kubectl port-forward svc/demo-1 8888:80
 
 If this step was successful, you could try visiting [http://localhost:8888](http://localhost:8888), and you should see the Nginx hello message.
 
-![Welcome to Nginx](../../../static/img/demo/nginx_hello.png?raw=true "Listed Module")
+![Welcome to Nginx](../../../static/img/demo/new-module/nginx-hello.png)
 
-Of course, this is just a simple example, but using Cyclops and a predefined template, you could deploy and expose your
-application in a few clicks without having to get into the details of Kubernetes figuring out how to deploy your
-application.
+This was just a simple example. There are more templates for you to explore, and you could try creating your own.
 
 ## Potential problems
 
+### Naming
+
+If an error pops up referencing [the Kubernetes naming
+convention](https://kubernetes.io/docs/concepts/overview/working-with-objects/names/), try conforming to the following rules:
+
+1. [x] contain no more than 63 characters
+2. [x] contain only **lowercase** alphanumeric characters or '-'
+3. [x] start with an alphanumeric character
+4. [x] end with an alphanumeric character
+
 ### Error loading template
 
-This usually means that you didn't input the right `url + path + version`. When loading the template to Cyclops, you
-need to copy the URL from the GitHub repository that leads to the template. The URL must lead towards a directory that
-holds a `template` folder.
+If you are using your own template, be sure that you connected it correctly.
 
-In our example we filled the form with the values bellow:
+This usually means that you didn't input the right `url + path + version`. When connecting the template to Cyclops, you need to copy the URL from the GitHub repository that leads to the template. The URL must lead to a directory that holds a `template` folder.
+
+In our example, we filled the form with the values below:
 
 ```yaml
 repository: https://github.com/cyclops-ui/templates
@@ -71,12 +74,10 @@ path: demo
 version: main
 ```
 
-### Naming
+Try connecting it again in the `Templates` tab.
 
-If Cyclops seemingly freezes when trying to save the module, it probably means you didn't follow [the Kubernetes naming
-convention](https://kubernetes.io/docs/concepts/overview/working-with-objects/names/).
+:::warning
+**Private repositories are not yet supported!**
 
-1. [x] contain no more than 63 characters
-2. [x] contain only **lowercase** alphanumeric characters or '-'
-3. [x] start with an alphanumeric character
-4. [x] end with an alphanumeric character
+This is currently a high priority on our roadmap, and you should expect support for private repositories sooner rather than later.
+:::
