@@ -76,7 +76,13 @@ const config = {
           {
             type: 'html',
             position: 'right',
-            value: '<a href="/docs/installation/install/manifest" style="background-color: white; color: black; height: 30px; width: 150px; text-decoration: none; display: inline-flex; align-items: center; border-radius: 30px 30px 30px 30px"><h3 style="margin: 0px auto;">Get started</h3></a>',
+            value: '<a href="/docs/installation/install/manifest" style="background-color: white; color: black; height: 30px; width: 150px; text-decoration: none; display: inline-flex; align-items: center; border-radius: 30px 30px 30px 30px"' +
+                'onmouseover="this.style.backgroundColor=\'lightgrey\';"' +
+                'onmouseout="this.style.backgroundColor=\'white\';">' +
+                '<h3 style="margin: 0px auto;">' +
+                  'Get started' +
+                '</h3>' +
+                '</a>',
           },
           {
             href: "https://github.com/cyclops-ui/cyclops",

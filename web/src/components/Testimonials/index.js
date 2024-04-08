@@ -21,7 +21,7 @@ const Testimonials = () => {
                             name={"Rossana Suarez"}
                             icon={<LinkedinFilled style={{color: "#0072b1"}} />}
                             position={"AWS Container Hero"}
-                            avatar={"https://github.com/KaradzaJuraj.png"}
+                            avatar={"/img/rossana_suarez.jpeg"}
                             testimonial={<p>Deploying has never been easier: A single interface to manage your workloads on Kubernetes. 🔥 <br/> An easy way to get started on kubernetes👌</p>}
                         />
                     </Col>
@@ -30,7 +30,7 @@ const Testimonials = () => {
                             name={"Ken Godoy"}
                             icon={<LinkedinFilled style={{color: "#0072b1"}}/>}
                             position={"VP, DevOps"}
-                            avatar={"https://github.com/KaradzaJuraj.png"}
+                            avatar={"/img/ken_godoy.jpeg"}
                             testimonial={"Cyclops utilizes Helm charts for application deployment, making Kubernetes more accessible to users with different levels of expertise."}
                         />
                     </Col>
