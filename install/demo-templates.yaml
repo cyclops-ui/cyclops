@@ -11,10 +11,10 @@ spec:
 apiVersion: cyclops-ui.com/v1alpha1
 kind: TemplateStore
 metadata:
-  name: demo-template-test
+  name: demo-template-extended
   namespace: cyclops
 spec:
-  path: test
+  path: demo-extended
   repo: https://github.com/cyclops-ui/templates
   version: ""
 ---
