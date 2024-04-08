@@ -54,6 +54,12 @@ kubectl port-forward svc/cyclops-ui 3000:3000 -n cyclops
 
 You can now access Cyclops in your browser on [http://localhost:3000](http://localhost:3000).
 
+## :floppy_disk: Templates
+
+Every Cyclops instance comes with a couple of predefined templates, feel free to use and abuse them!
+
+Helm charts used for these templates can be found [here](https://github.com/cyclops-ui/templates). You can use this repo as a guide if you want to create your own templates. More information on creating your own can be found on our [web](https://cyclops-ui.com/docs/templates/).
+
 ## :chart_with_upwards_trend: Future work
 
 - RBAC
