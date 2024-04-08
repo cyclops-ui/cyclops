@@ -57,7 +57,7 @@ You can now access Cyclops in your browser on [http://localhost:3000](http://loc
 ## :chart_with_upwards_trend: Future work
 
 - RBAC
-- Cluster nodes overview
+- support for accessing charts stored on private GitHub repositories
 - Git as manifest destination
 - Customizable Module details page
 
