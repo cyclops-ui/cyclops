@@ -62,7 +62,6 @@ const sidebars = {
             "installation/demo/new_module",
             "installation/demo/module",
             "installation/demo/edit_module",
-            "installation/demo/logs",
             "installation/demo/feedback",
           ],
         },
