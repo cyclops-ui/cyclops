@@ -84,13 +84,13 @@ UI depends on the controller API. Again, you can run inside the cluster as well 
 in `cyclops-ui`. After that, you will need to install all the dependencies using
 
 ```zsh
-npm i -f
+yarn install
 ```
 
 Once dependencies are installed, you can run the UI
 
 ```zsh
-npm start
+yarn start
 ```
 
 > 📌 **_NOTE_** 📌
