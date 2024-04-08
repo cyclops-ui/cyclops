@@ -10,7 +10,7 @@ Try changing the number of replicas or the version of the image (`1.14.2` -> `1.
 
 In the image above, we can see that we have some pods running on version `1.14.2` that are waiting to be replaced by pods of version `1.14.1`. In the end, only the `1.14.1` pods will be up and running.
 
-## Service toggled off
+## Service Toggled Off
 
 When toggling off a module's service, the service won't be automatically deleted. Instead, there will be a warning sign that indicates that the template no longer supports the service, and you can delete it manually if necessary.
 
@@ -18,7 +18,7 @@ When toggling off a module's service, the service won't be automatically deleted
 
 Now, you can delete the service by clicking the _Delete_ button.
 
-## Potential problems
+## Potential Problems
 
 ### Naming
 

@@ -50,7 +50,7 @@ If this step was successful, you could try visiting [http://localhost:8888](http
 
 This was just a simple example. There are more templates for you to explore, and you could try creating your own.
 
-## Potential problems
+## Potential Problems
 
 ### Naming
 
@@ -62,7 +62,7 @@ convention](https://kubernetes.io/docs/concepts/overview/working-with-objects/na
 3. [x] start with an alphanumeric character
 4. [x] end with an alphanumeric character
 
-### Error loading template
+### Error Loading Template
 
 If you are using your own template, be sure that you connected it correctly.
 
