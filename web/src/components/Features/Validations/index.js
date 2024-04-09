@@ -92,7 +92,7 @@ const Validations = () => {
                                     {
                                         type: 'number',
                                         min: 1,
-                                        message: 'Number of replicas must not be below 0'
+                                        message: 'Number of replicas must be greater than 0'
                                     },
                                 ]}
                             >
