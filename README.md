@@ -1,8 +1,8 @@
 <p align="center" width="100%">
-<img width="60%" src="./web/static/img/cyc_bijela slova@600x.png">
+<img width="60%" src="./web/static/img/cyclops-simplistic.png">
 <p/>
 <h1></h1>
-<p align="center">customizable UI for Kubernetes workloads 👁️</p>
+<p align="center">Customizable UI for Kubernetes Workloads 👁️</p>
 
 <div align="center">
     <a href="https://github.com/cyclops-ui/cyclops/blob/main/LICENSE"><img height="20" src="https://img.shields.io/github/license/cyclops-ui/cyclops"></a>
