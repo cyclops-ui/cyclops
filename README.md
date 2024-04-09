@@ -1,8 +1,8 @@
 <p align="center" width="100%">
-<img width="40%" src="https://github.com/cyclops-ui/cyclops/assets/72022639/53009fdd-ff0a-45c8-a04e-cda495e8b34e">
+<img width="60%" src="./web/static/img/cyclops-simplistic.png">
 <p/>
-<h1 align="center">Cyclops</h1>
-<p align="center">customizable UI for Kubernetes workloads 👁️</p>
+<h1></h1>
+<p align="center">Customizable UI for Kubernetes Workloads 👁️</p>
 
 <div align="center">
     <a href="https://github.com/cyclops-ui/cyclops/blob/main/LICENSE"><img height="20" src="https://img.shields.io/github/license/cyclops-ui/cyclops"></a>
