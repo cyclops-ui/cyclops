@@ -16,14 +16,14 @@ metadata:
 spec:
   path: demo-extended
   repo: https://github.com/cyclops-ui/templates
-  version: ""
+  version: main
 ---
 apiVersion: cyclops-ui.com/v1alpha1
 kind: TemplateStore
 metadata:
-  name: demo-template-with-deps
+  name: redis-demo
   namespace: cyclops
 spec:
-  path: demo
+  path: redis
   repo: https://github.com/cyclops-ui/templates
-  version: chart-deps
+  version: main
