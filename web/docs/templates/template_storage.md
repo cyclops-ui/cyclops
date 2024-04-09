@@ -1,8 +1,12 @@
-# Adding Templates
+# Template Storage
 
 Version `v0.3.0` introduced a new tab to the sidebar: _Templates_. Here, you can find your "storage" of templates. Each entry references a Helm chart located in either a GitHub, Helm, or Oci repository.
 
 Each instance of Cyclops has a couple of templates to get you started. You can see how these charts look in our open [templates repository](https://github.com/cyclops-ui/templates).
+
+![Template Storage](../../static/img/templates/template-storage/templates-tab.png)
+
+## Adding New Templates
 
 If you want to add your own templates, click the _Add template reference_. A modal will appear asking you for a pointer to your template.
 
@@ -36,3 +40,11 @@ Follow these rules when naming your templates:
 2. [x] contain only **lowercase** alphanumeric characters or '-'
 3. [x] start with an alphanumeric character
 4. [x] end with an alphanumeric character
+
+## Editing Template References
+
+You can edit yout template references by clicking on the blue pencil icon on your template. Everything except the name of the template is editable.
+
+## Deleting Template References
+
+If you find yourself with unwanted templates, you can easily delete them by clicking on the red trash can icon. A modal will open asking you to input the name of the template. Once written, the _delete_ button will be enabled.
