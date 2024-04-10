@@ -22,17 +22,17 @@ Cyclops will render a new object in your UI for each dependency you specify. Thi
 
 ## Demo time ⚒️
 
-In our templates repository you can find the [demo-dependencies template](https://github.com/cyclops-ui/templates/tree/main/dependencies-demo). This template will give you an idea of how to create dependencies of your own and we will use this template for this demo.
+In our templates repository you can find the [dependencies-demo template](https://github.com/cyclops-ui/templates/tree/main/dependencies-demo). This template will give you an idea of how to create dependencies of your own and we will use this template for this demo.
 
 First, go to the _Templates_ tab and add this template to your templates store.
 
 ```yaml
-Name: demo-dependencies
+Name: dependencies-demo
 Repository URL: https://github.com/cyclops-ui/templates
 Path: dependencies-demo
 ```
 
-Once you added this template to your collection, go to the _Modules_ tab and click _Add Module_. Choose your new template `demo-dependencies`. You should get a screen similar to the one in the picture below. All the fields from the template have been rendered as expected and alongside them on an additional object -- `application`.
+Once you added this template to your collection, go to the _Modules_ tab and click _Add Module_. Choose your new template `dependencies-demo`. You should get a screen similar to the one in the picture below. All the fields from the template have been rendered as expected and alongside them on an additional object -- `application`.
 
 ![Dependencies rendering](../../static/img/templates/dependencies/dependencies-form.png)
 

@@ -10,7 +10,7 @@ When you start up Cyclops, the first screen shown to you is the _Modules_ screen
 
 ## Define Your Module
 
-Now, we want to define our new module. Every Cyclops instance comes with a couple of predefined templates, which we included. From the dropdown under _Module template_, you can choose which predefined templates you want to use. For the sake of this tutorial, we will use `cyclops-deployment-and-service`.
+Now, we want to define our new module. Every Cyclops instance comes with a couple of predefined templates, which we included. From the dropdown under _Module template_, you can choose which predefined templates you want to use. For the sake of this tutorial, we will use `demo-template`.
 
 If you want to learn more about templates and how to create your own, check out the [Templates section](../../templates/templates.md)!
 
