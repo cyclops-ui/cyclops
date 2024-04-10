@@ -1,6 +1,7 @@
 import React, {useEffect, useRef, useState} from 'react';
 import styles from './styles.module.css';
 import {Row, Col, Button, ConfigProvider} from 'antd'
+import { Helmet } from 'react-helmet';
 
 const InstallDemo = () => {
     const elementRef = useRef(null);
@@ -29,6 +30,10 @@ const InstallDemo = () => {
 
     return (
         <center ref={elementRef} style={{opacity: 0}} className={isVisible ? styles.command : ''}>
+            <Helmet>
+                <script src="https://assets.calendly.com/assets/external/widget.js" type="text/javascript"
+                        async></script>
+            </Helmet>
             <h2 className={styles.commandDesc}>
                 Or <ConfigProvider
                 theme={{
@@ -38,7 +43,8 @@ const InstallDemo = () => {
                 }}
             >
                 <Button
-                    href={"/docs/installation/install/manifest"}
+                    // href={"/docs/installation/install/manifest"}
+                    onClick={() => Calendly.initPopupWidget({url: 'https://calendly.com/cyclops-ui/cyclops'}) }
                     type="primary"
                     shape="round"
                     size={"large"}
@@ -56,6 +62,9 @@ const InstallDemo = () => {
                 </Button>
             </ConfigProvider>, we will gladly show you around
             </h2>
+
+            <script src="https://assets.calendly.com/assets/external/widget.js" type="text/javascript" async></script>
+            <link href="https://assets.calendly.com/assets/external/widget.css" rel="stylesheet"/>
         </center>
     );
 }

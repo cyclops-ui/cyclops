@@ -33,6 +33,7 @@ const Features = () => {
                 <Customizable/>
                 <Validations/>
                 <Productivity/>
+                <Validations/>
             </div>
         </div>
     );

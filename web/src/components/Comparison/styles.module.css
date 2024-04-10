@@ -6,10 +6,10 @@
 }
 
 .title {
+  text-align: left;
   display: inline-block;
   color: #000;
   width: 100%;
-  text-align: justify;
 }
 
 .all {
@@ -33,20 +33,28 @@
   width: 30%;
 }
 
+.descriptionitem {
+  color: #000
+}
+
 @media screen and (max-width: 600px) {
+  .title {
+    text-align: center;
+    margin: 0 auto;
+    padding-bottom: 30px;
+  }
+
   .yaml {
-    left: 50%;
-    width: 80%;
-    padding-right: 5px;
-    padding-left: 5px;
+    width: 95%;
+    margin: 0 auto;
+    padding: 0 0 30px;
   }
 
   .ui {
     text-align: center;
-    width: 100%;
-    padding-right: 5px;
-    padding-left: 5px;
-    padding-bottom: 0;
+    width: 80%;
+    margin: 0 auto;
+    padding-bottom: 30px;
   }
 }
 

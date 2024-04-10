@@ -106,15 +106,15 @@ export default function Home() {
                         >
                             <Button
                                 href={"/docs/installation/install/manifest"}
-                                type="primary"
+                                // type="primary"
                                 shape="round"
                                 size={"large"}
+                                className={styles.readTheDocs}
                                 style={{
                                     textDecoration: "none",
                                     display: "inline-flex",
                                     alignItems: "center",
-                                    marginLeft: "10px",
-                                    marginRight: "5px",
+                                    color: "white",
                                 }}
                             >
                                 <h3 style={{margin: 0}}>

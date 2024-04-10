@@ -122,15 +122,27 @@ const Comparison = () => {
         setPort(port)
     }
 
-    // const onNeedService = (service) => {
-    //     setExpose(service)
-    // }
-
     return (
         <div className={styles.all}>
             <div className={styles.ui}>
                 <div>
                     <h1 className={styles.title}>Deploying made <span style={{color: "orange"}}>easy</span></h1>
+                </div>
+                <div style={{paddingTop: "10px"}}>
+                    <ul style={{color: "#FFF"}}>
+                        <h3 className={styles.descriptionitem}>
+                            <li>
+                                <span style={{color: "#fe8801"}}>catch misconfiguration</span> before it hits production
+                            </li>
+                            <li>
+                                move faster and be more <span style={{color: "#fe8801"}}>confident</span> in your
+                                changes
+                            </li>
+                        </h3>
+                    </ul>
+                    <h2 style={{paddingBottom: 0, marginBottom: 0}} className={styles.title}>A truly <span
+                        style={{color: "orange"}}>developer-oriented</span></h2>
+                    <h2 style={{paddingBottom: 0, marginBottom: 0}} className={styles.title}>Kubernetes platform</h2>
                 </div>
                 <ConfigProvider
                     theme={{
@@ -196,12 +208,6 @@ const Comparison = () => {
                         >
                             <InputNumber style={{width: '100%'}} defaultValue={port} onChange={onPortChange}/>
                         </Form.Item>
-                        {/*<Form.Item*/}
-                        {/*    label="Expose"*/}
-                        {/*    style={{display: 'block', textAlign: 'left'}}*/}
-                        {/*>*/}
-                        {/*    <Switch defaultValue={expose} onChange={onNeedService}/>*/}
-                        {/*</Form.Item>*/}
                     </Form>
                 </ConfigProvider>
             </div>
@@ -215,9 +221,9 @@ const Comparison = () => {
                         height: "30px"
                     }}
                 >
-                        <span className={styles.dot} style={{backgroundColor: "#fe5f58", marginLeft: "10px"}}></span>
-                        <span className={styles.dot} style={{backgroundColor: "#febc2e"}}></span>
-                        <span className={styles.dot} style={{backgroundColor: "#26c940"}}></span>
+                    <span className={styles.dot} style={{backgroundColor: "#fe5f58", marginLeft: "10px"}}></span>
+                    <span className={styles.dot} style={{backgroundColor: "#febc2e"}}></span>
+                    <span className={styles.dot} style={{backgroundColor: "#26c940"}}></span>
                 </div>
                 <SyntaxHighlighter
                     style={{
