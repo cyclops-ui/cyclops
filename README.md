@@ -1,8 +1,8 @@
 <p align="center" width="100%">
-<img width="40%" src="https://github.com/cyclops-ui/cyclops/assets/72022639/53009fdd-ff0a-45c8-a04e-cda495e8b34e">
+<img width="60%" src="./web/static/img/cyclops-simplistic.png">
 <p/>
-<h1 align="center">Cyclops</h1>
-<p align="center">customizable UI for Kubernetes workloads 👁️</p>
+<h1></h1>
+<p align="center">Customizable UI for Kubernetes Workloads 👁️</p>
 
 <div align="center">
     <a href="https://github.com/cyclops-ui/cyclops/blob/main/LICENSE"><img height="20" src="https://img.shields.io/github/license/cyclops-ui/cyclops"></a>
@@ -19,7 +19,7 @@ experience for developers, system administrators, and DevOps professionals. Divi
 infrastructure and your developer teams so everyone can play to their strengths. Automate your processes and shrink
 the window for deployment mistakes. [Find out more!](https://cyclops-ui.com)
 
-![Screenshot 2022-04-06 at 20 26 17](https://user-images.githubusercontent.com/72022639/162033638-845b5f2c-f1df-4e17-b2fc-ba4ab318f887.png)
+![Module Overview](./web/static/img/readme-demo.png)
 
 Find out how to [install](https://cyclops-ui.com/docs/installation/prerequisites) it to your cluster on our landing page
 and give it a go! (~10 minute tutorial)
@@ -41,7 +41,7 @@ Cyclops can either be installed manually by applying the latest manifest or with
 To install Cyclops using `kubectl` into your cluster, run commands below:
 
 ```bash
-kubectl apply -f https://raw.githubusercontent.com/cyclops-ui/cyclops/v0.2.0/install/cyclops-install.yaml
+kubectl apply -f https://raw.githubusercontent.com/cyclops-ui/cyclops/v0.3.0/install/cyclops-install.yaml
 ```
 
 It will create a new namespace called `cyclops` and deploy everything you need for your Cyclops instance to run.
@@ -54,10 +54,16 @@ kubectl port-forward svc/cyclops-ui 3000:3000 -n cyclops
 
 You can now access Cyclops in your browser on [http://localhost:3000](http://localhost:3000).
 
+## :floppy_disk: Templates
+
+Every Cyclops instance comes with a couple of predefined templates, feel free to use and abuse them!
+
+Helm charts used for these templates can be found [here](https://github.com/cyclops-ui/templates). You can use this repo as a guide if you want to create your own templates. More information on creating your own can be found on our [web](https://cyclops-ui.com/docs/templates/).
+
 ## :chart_with_upwards_trend: Future work
 
 - RBAC
-- Cluster nodes overview
+- support for accessing charts stored on private GitHub repositories
 - Git as manifest destination
 - Customizable Module details page
 

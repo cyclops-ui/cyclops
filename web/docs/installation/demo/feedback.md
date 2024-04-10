@@ -10,18 +10,14 @@ Please take a few minutes to fill out the [Feedback Form](https://forms.gle/jrwc
 
 ## Installation Tutorial
 
-If you encountered any issues during the installation process, please let us know. Your feedback will help us address any potential challenges that users may face.
-
-[Installation Tutorial](../install)
+If you encountered any issues during the [installation process](../install)), please let us know. Your feedback will help us address any potential challenges that users may face.
 
 ## Demo Tutorial
 
-We hope the demo tutorial provided a clear understanding of how to use our product. If you have any suggestions for improvement or if there's anything you'd like to see in future tutorials, please share your thoughts.
-
-[Demo Tutorial](./new_module)
+We hope the [demo tutorial](./new_module) clearly explains how to use our product. If you have any suggestions for improvement or anything you'd like to see in future tutorials, please share your thoughts.
 
 ### Thank you for your feedback!
 
-We appreciate your time and effort in providing feedback. If you have any additional comments or questions, feel free to reach out to us directly at [info@cyclops-ui.com](mailto:info@cyclops-ui.com).
+We appreciate your time and effort in providing feedback. If you have any additional comments or questions, don't hesitate to contact us directly at [info@cyclops-ui.com](mailto:info@cyclops-ui.com).
 
 Happy deploying!

@@ -1,14 +1,4 @@
----
-title: Helm chart dependencies
----
-
 # Helm chart dependencies
-
-:::info
-
-Supported from [ v0.0.1-alpha.8 ](https://github.com/cyclops-ui/cyclops/releases/tag/v0.0.1-alpha.8)
-
-:::
 
 This part will go over how Cyclops implements Helm chart dependencies. You can find out more about chart dependencies on [Helm docs](https://helm.sh/docs/helm/helm_dependency/).
 
@@ -16,11 +6,9 @@ Dependencies allow us to reference another Helm chart and use it in the context 
 
 For instance, you might want to deploy an application that uses Redis as its cache storage, but you don't want to add all of those resources for a Redis deployment into your template. You can simply add an existing Redis Helm chart as a dependency to your chart and get your Redis up and running without the hassle of copy-pasting resources.
 
-Since Helm supports dependencies, it makes sense that Cyclops also supports them. You can reference dependencies in the `Chart.yaml` of your root template if you want to use dependencies. Refer to Helm docs for more info on how to do it, but here is an [example](https://github.com/cyclops-ui/templates/blob/c3ade79f4d0a7d7147650e1fcc393da082d1b753/demo/Chart.yaml) of how to do it.
+Since Helm supports dependencies, it makes sense that Cyclops also supports them. You can reference dependencies in the `Chart.yaml` of your root template if you want to use dependencies. Refer to Helm docs for more info on how to do it, but here is an [example](https://github.com/cyclops-ui/templates/blob/main/dependencies-demo/Chart.yaml) of how to do it.
 
 ```yaml
-# Chart.yaml from the earlier example
-
 apiVersion: v1
 name: application
 version: 0.0.0
@@ -34,16 +22,19 @@ Cyclops will render a new object in your UI for each dependency you specify. Thi
 
 ## Demo time ⚒️
 
-You can try out dependencies by loading the module with the following values:
+In our templates repository you can find the [dependencies-demo template](https://github.com/cyclops-ui/templates/tree/main/dependencies-demo). This template will give you an idea of how to create dependencies of your own and we will use this template for this demo.
+
+First, go to the _Templates_ tab and add this template to your templates store.
 
 ```yaml
-repository: https://github.com/cyclops-ui/templates
-path: dependencies-demo
+Name: dependencies-demo
+Repository URL: https://github.com/cyclops-ui/templates
+Path: dependencies-demo
 ```
 
-You should get a screen similar to the one in the picture below. All the fields from the template have been rendered as expected and alongside them on an additional object --  `application`.
+Once you added this template to your collection, go to the _Modules_ tab and click _Add Module_. Choose your new template `dependencies-demo`. You should get a screen similar to the one in the picture below. All the fields from the template have been rendered as expected and alongside them on an additional object -- `application`.
 
-![Dependencies rendering](../../static/img/writing-templates/dependencies.png?raw=true "Dependencies rendering")
+![Dependencies rendering](../../static/img/templates/dependencies/dependencies-form.png)
 
 It is called `application` since it is the name of the dependency we pulled. All the nested fields inside it are rendered based on dependency schema, so be aware that your dependencies must also have a schema defined. It is also automatically populated with default fields from the dependent charts `values.yaml`.
 
@@ -51,7 +42,7 @@ Here is the link to the GitHub repo where the dependency chart is stored [https:
 
 Once you input all the fields and hit the `save` button, all resources from your root template and all its dependencies get deployed and shown on your Module detail page.
 
-![](../../static/img/writing-templates/dependencies-resources.png?raw=true)
+![Dependencies Module Overview](../../static/img/templates/dependencies/dependencies-resources.png)
 
 :::info
 
@@ -60,4 +51,3 @@ Version `v0.0.8-alpha` does not support `alias` and `import-values`.
 At the moment, when you reference a dependency, it is automatically included in your chart. `condition` and `tags` properties are not yet supported.
 
 :::
-
