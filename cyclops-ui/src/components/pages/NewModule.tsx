@@ -41,11 +41,21 @@ import "ace-builds/src-noconflict/mode-typescript";
 import "ace-builds/src-noconflict/snippets/yaml";
 import { numberInputValidators } from "../../utils/validators/number";
 import { stringInputValidators } from "../../utils/validators/string";
+import {Option} from "antd/es/mentions";
 
 const { Title } = Typography;
 const layout = {
   wrapperCol: { span: 16 },
 };
+
+interface templateStoreOption {
+  name: string,
+  ref: {
+    repo: string,
+    path: string,
+    version: string,
+  }
+}
 
 const NewModule = () => {
   const [loading, setLoading] = useState(false);
@@ -91,27 +101,14 @@ const NewModule = () => {
   const [loadingValuesFile, setLoadingValuesFile] = useState(false);
   const [loadingValuesModal, setLoadingValuesModal] = useState(false);
 
+  const [templateStore, setTemplateStore] = useState<templateStoreOption[]>([]);
+
   const history = useNavigate();
 
   const [form] = Form.useForm();
 
   useEffect(() => {
-    if (
-      window.__RUNTIME_CONFIG__.REACT_APP_DEFAULT_TEMPLATE_REPO &&
-      window.__RUNTIME_CONFIG__.REACT_APP_DEFAULT_TEMPLATE_REPO.length > 0
-    ) {
-      setTemplate({
-        repo: window.__RUNTIME_CONFIG__.REACT_APP_DEFAULT_TEMPLATE_REPO,
-        path: window.__RUNTIME_CONFIG__.REACT_APP_DEFAULT_TEMPLATE_PATH,
-        version: window.__RUNTIME_CONFIG__.REACT_APP_DEFAULT_TEMPLATE_VERSION,
-      });
-
-      loadTemplate(
-        window.__RUNTIME_CONFIG__.REACT_APP_DEFAULT_TEMPLATE_REPO,
-        window.__RUNTIME_CONFIG__.REACT_APP_DEFAULT_TEMPLATE_PATH,
-        window.__RUNTIME_CONFIG__.REACT_APP_DEFAULT_TEMPLATE_VERSION
-      );
-    }
+    loadTemplateStore()
   }, []);
 
   useEffect(() => {
@@ -399,6 +396,61 @@ const NewModule = () => {
 
     setActiveCollapses(new Map());
   };
+
+  const loadTemplateStore = async () => {
+    await axios
+        .get(
+            `/api/templates/store`
+        )
+        .then((res) => {
+          setTemplateStore(res.data);
+        })
+        .catch(function (error) {
+          setLoadingTemplate(false);
+          if (error.response === undefined) {
+            setError({
+              message: String(error),
+              description:
+                  "Check if Cyclops backend is available on: " +
+                  window.__RUNTIME_CONFIG__.REACT_APP_CYCLOPS_CTRL_HOST,
+            });
+          } else {
+            setError({
+              message: error.message,
+              description: error.response.data,
+            });
+          }
+        });
+  };
+
+  const findTemplateStoreSelected = (name: string) => {
+    for (let ts of templateStore) {
+      if (ts.name === name) {
+        return ts
+      }
+    }
+
+    return null
+  }
+
+  const onTemplateStoreSelected = (v: string) => {
+    const ts = findTemplateStoreSelected(v)
+    if (ts === null) {
+      return
+    }
+
+    setTemplate({
+      repo: ts.ref.repo,
+      path: ts.ref.path,
+      version: ts.ref.version,
+    });
+
+    loadTemplate(
+        ts.ref.repo,
+        ts.ref.path,
+        ts.ref.version,
+    );
+  }
 
   const onLoadFromFile = () => {
     setLoadingValuesFile(true);
@@ -1081,65 +1133,21 @@ const NewModule = () => {
             <Divider orientation="left" orientationMargin="0">
               Module template
             </Divider>
-            <Input
-              placeholder={"Repository"}
-              style={{ width: "40%" }}
-              onChange={(value: any) => {
-                setTemplate({
-                  repo: value.target.value,
-                  path: template.path,
-                  version: template.version,
-                });
-              }}
-              defaultValue={
-                window.__RUNTIME_CONFIG__.REACT_APP_DEFAULT_TEMPLATE_REPO
-              }
-            />
-            {" / "}
-            <Input
-              placeholder={"Path"}
-              style={{ width: "20%" }}
-              onChange={(value: any) => {
-                setTemplate({
-                  repo: template.repo,
-                  path: value.target.value,
-                  version: template.version,
-                });
-              }}
-              defaultValue={
-                window.__RUNTIME_CONFIG__.REACT_APP_DEFAULT_TEMPLATE_PATH
-              }
-            />
-            {" @ "}
-            <Input
-              placeholder={"Version"}
-              style={{ width: "10%" }}
-              onChange={(value: any) => {
-                setTemplate({
-                  repo: template.repo,
-                  path: template.path,
-                  version: value.target.value,
-                });
-              }}
-              defaultValue={
-                window.__RUNTIME_CONFIG__.REACT_APP_DEFAULT_TEMPLATE_VERSION
-              }
-            />
-            {"  "}
-            <Button
-              type="primary"
-              htmlType="button"
-              onClick={async () => {
-                await loadTemplate(
-                  template.repo,
-                  template.path,
-                  template.version
-                );
-              }}
-              loading={loadingTemplate || loadingTemplateInitialValues}
-            >
-              Load
-            </Button>
+            <Row>
+              <Col span={16}>
+                <Select
+                    onChange={onTemplateStoreSelected}
+                    style={{width: "100%"}}
+                    placeholder="Select an option"
+                >
+                  {templateStore.map((option: any, index) => (
+                      <Option key={option.name} value={option.name}>
+                        {option.name}
+                      </Option>
+                  ))}
+                </Select>
+              </Col>
+            </Row>
             <Divider orientation="left" orientationMargin="0">
               Module name
             </Divider>

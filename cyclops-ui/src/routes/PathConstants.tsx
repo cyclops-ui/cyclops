@@ -7,6 +7,7 @@ const PathConstants = {
   MODULE_ROLLBACK: "/modules/:moduleName/rollback",
   NODES: "/nodes",
   NODE_GET: "/nodes/:nodeName",
+  TEMPLATES: "/templates",
 };
 
 export default PathConstants;
