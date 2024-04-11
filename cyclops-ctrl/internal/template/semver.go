@@ -39,7 +39,7 @@ func filterVersions(versions []string, constraint *semver.Constraints) ([]*semve
 	for _, v := range versions {
 		parsedVersion, err := semver.NewVersion(v)
 		if err != nil {
-			return nil, err
+			continue
 		}
 
 		if constraint.Check(parsedVersion) {

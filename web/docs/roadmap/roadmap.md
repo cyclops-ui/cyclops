@@ -11,6 +11,3 @@ We intend to finish developing a stable version by the start of the next year.
 
 ### Contact us
 If you have the knowledge or resources to help in contributing to Cyclops, contact us at info@cyclops-ui.com
-
-
-

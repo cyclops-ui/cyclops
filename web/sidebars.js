@@ -21,65 +21,71 @@ const sidebars = {
   // But you can create a sidebar manually
   tutorialSidebar: [
     {
-      type: 'category',
-      label: 'About',
+      type: "category",
+      label: "About",
       items: [
-        'about/about',
+        "about/about",
         // 'about/comparison',
         // 'about/implementation'
       ],
     },
     {
-      label: 'Concepts',
-      id: 'concepts/concepts',
-      type: 'doc',
+      label: "Concepts",
+      id: "concepts/concepts",
+      type: "doc",
     },
     {
-      type: 'category',
-      label: 'Installation',
+      type: "category",
+      label: "Installation",
       items: [
-        'installation/prerequisites',
+        "installation/prerequisites",
         {
-          type: 'category',
-          label: 'Install',
+          type: "category",
+          label: "Install",
           link: {
-            type: 'generated-index',
-            title: 'Installation methods',
-            description: '⚠️ Before installing Cyclops, make sure you have all the Prerequisites ⚠️',
-            slug: '/installation/install',
+            type: "generated-index",
+            title: "Installation methods",
+            description:
+              "⚠️ Before installing Cyclops, make sure you have all the Prerequisites ⚠️",
+            slug: "/installation/install",
           },
           items: [
-            'installation/install/manifest',
-            'installation/install/glasskube',
+            "installation/install/manifest",
+            "installation/install/glasskube",
           ],
         },
-        'installation/configuration',
+        "installation/configuration",
         {
-          type: 'category',
-          label: 'Demo',
+          type: "category",
+          label: "Demo",
           items: [
-            'installation/demo/new_module',
-            'installation/demo/module',
-            'installation/demo/edit_module',
-            'installation/demo/logs',
-            'installation/demo/feedback'
+            "installation/demo/new_module",
+            "installation/demo/module",
+            "installation/demo/edit_module",
+            "installation/demo/feedback",
           ],
-        }
+        },
       ],
     },
     {
-      type: 'category',
-      label: 'Writing Templates',
+      type: "category",
+      label: "Templates",
       items: [
-        'templates/templates',
-        'templates/validations',
-        'templates/dependencies',
+        "templates/templates",
+        "templates/template_storage",
+        "templates/validations",
+        "templates/dependencies",
       ],
     },
     {
-      label: 'Roadmap',
-      id: 'roadmap/roadmap',
-      type: 'doc',
+      label: "Roadmap",
+      id: "roadmap/roadmap",
+      type: "doc",
+    },
+    {
+      label: "Usage metrics",
+      id: "usage_metrics/usage_metrics",
+      type: "doc",
     },
   ],
 };

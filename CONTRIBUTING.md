@@ -55,7 +55,8 @@ You can install minikube and run it using `minikube start`. It will set up a Kub
 > You can install it using the command below:
 >
 > ```zsh
-> kubectl apply -f https://raw.githubusercontent.com/cyclops-ui/cyclops/main/install/CRDs/cyclops-module.yaml
+> kubectl apply -f https://raw.githubusercontent.com/cyclops-ui/cyclops/main/install/chart/crds/cyclops-module.yaml \
+>   -f https://raw.githubusercontent.com/cyclops-ui/cyclops/main/install/chart/crds/template-auth-rule.yaml
 > ```
 
 ### **Controller** `/cyclops-ctrl`
@@ -83,13 +84,13 @@ UI depends on the controller API. Again, you can run inside the cluster as well 
 in `cyclops-ui`. After that, you will need to install all the dependencies using
 
 ```zsh
-npm i -f
+yarn install
 ```
 
 Once dependencies are installed, you can run the UI
 
 ```zsh
-npm start
+yarn start
 ```
 
 > 📌 **_NOTE_** 📌

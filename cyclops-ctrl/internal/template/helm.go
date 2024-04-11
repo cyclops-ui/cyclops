@@ -189,7 +189,7 @@ func (r Repo) mapHelmChart(chartName string, files map[string][]byte) (*models.T
 		}
 
 		chartFiles = append(chartFiles, &helmchart.File{
-			Name: path.Join(name[1:]),
+			Name: name,
 			Data: content,
 		})
 
