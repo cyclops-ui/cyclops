@@ -19,6 +19,7 @@ package modulecontroller
 import (
 	"context"
 	"fmt"
+	"k8s.io/apimachinery/pkg/types"
 	"strings"
 
 	"github.com/go-logr/logr"
@@ -94,6 +95,11 @@ func (r *ModuleReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctr
 		resources, err := r.kubernetesClient.GetResourcesForModule(req.Name)
 		if err != nil {
 			r.logger.Error(err, "error on get module resources", "namespaced name", req.NamespacedName)
+
+			if err = r.setStatus(ctx, module, req.NamespacedName, cyclopsv1alpha1.Failed, err.Error()); err != nil {
+				return ctrl.Result{}, err
+			}
+
 			return ctrl.Result{}, err
 		}
 
@@ -107,6 +113,10 @@ func (r *ModuleReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctr
 					"resource namespaced name",
 					fmt.Sprintf("%s/%s", resource.GetNamespace(), resource.GetName()),
 				)
+
+				if err = r.setStatus(ctx, module, req.NamespacedName, cyclopsv1alpha1.Failed, err.Error()); err != nil {
+					return ctrl.Result{}, err
+				}
 			}
 		}
 
@@ -119,6 +129,15 @@ func (r *ModuleReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctr
 	r.logger.Info("upsert module", "namespaced name", req.NamespacedName)
 	if err := r.moduleToResources(req.Name); err != nil {
 		r.logger.Error(err, "error on upsert module", "namespaced name", req.NamespacedName)
+
+		if err = r.setStatus(ctx, module, req.NamespacedName, cyclopsv1alpha1.Failed, err.Error()); err != nil {
+			return ctrl.Result{}, err
+		}
+
+		return ctrl.Result{}, err
+	}
+
+	if err = r.setStatus(ctx, module, req.NamespacedName, cyclopsv1alpha1.Succeeded, ""); err != nil {
 		return ctrl.Result{}, err
 	}
 
@@ -205,6 +224,26 @@ func (r *ModuleReconciler) generateResources(kClient *k8sclient.KubernetesClient
 			)
 			continue
 		}
+	}
+
+	return nil
+}
+
+func (r *ModuleReconciler) setStatus(
+	ctx context.Context,
+	module cyclopsv1alpha1.Module,
+	namespacedName types.NamespacedName,
+	status cyclopsv1alpha1.ReconciliationStatusState,
+	reason string,
+) error {
+	module.Status = cyclopsv1alpha1.ModuleStatus{ReconciliationStatus: cyclopsv1alpha1.ReconciliationStatus{
+		Status: status,
+		Reason: reason,
+	}}
+
+	if err := r.Status().Update(ctx, &module); err != nil {
+		r.logger.Error(err, "error updating module status", "namespaced name", namespacedName)
+		return err
 	}
 
 	return nil
