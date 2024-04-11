@@ -128,21 +128,14 @@ const Comparison = () => {
                 <div>
                     <h1 className={styles.title}>Deploying made <span style={{color: "orange"}}>easy</span></h1>
                 </div>
-                <div style={{paddingTop: "10px"}}>
-                    <ul style={{color: "#FFF"}}>
-                        <h3 className={styles.descriptionitem}>
-                            <li>
-                                <span style={{color: "#fe8801"}}>catch misconfiguration</span> before it hits production
-                            </li>
-                            <li>
-                                move faster and be more <span style={{color: "#fe8801"}}>confident</span> in your
-                                changes
-                            </li>
-                        </h3>
-                    </ul>
-                    <h2 style={{paddingBottom: 0, marginBottom: 0}} className={styles.title}>A truly <span
-                        style={{color: "orange"}}>developer-oriented</span></h2>
-                    <h2 style={{paddingBottom: 0, marginBottom: 0}} className={styles.title}>Kubernetes platform</h2>
+                <div style={{paddingTop: "10px", paddingBottom: "20px"}}>
+                    <h3 className={styles.descriptionitem}>
+                        Cyclops enables you to build custom UIs on top of Kubernetes tailored to your needs in minutes.
+                    </h3>
+
+                    <h3 className={styles.descriptionitem}>
+                        You can easily plug in your already existing Helm charts into UIs, thus making custom Internal developer platforms and making your developers lives easier.
+                    </h3>
                 </div>
                 <ConfigProvider
                     theme={{
