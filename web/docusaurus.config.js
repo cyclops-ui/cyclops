@@ -168,12 +168,17 @@ const config = {
             title: "More",
             items: [
               {
-                label: "GitHub",
-                href: "https://github.com/cyclops-ui/cyclops",
+                html: `
+                    <div>
+                        <link href="https://assets.calendly.com/assets/external/widget.css" rel="stylesheet">
+                            <a style="color: #FFF" href="" onclick="Calendly.initPopupWidget({url: 'https://calendly.com/cyclops-ui/cyclops'});return false;">Schedule a demo</a>
+                        </link>
+                    </div>
+                `,
               },
               {
-                label: "Schedule a demo",
-                href: "https://docs.google.com/forms/d/e/1FAIpQLSfm9sSsmqJYsofteSrGigWMW9eOgSjoinHwjsvtjX6wOcAv9w/viewform",
+                label: "GitHub",
+                href: "https://github.com/cyclops-ui/cyclops",
               },
               {
                 label: "Leave your feedback",

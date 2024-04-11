@@ -43,7 +43,6 @@ const InstallDemo = () => {
                 }}
             >
                 <Button
-                    // href={"/docs/installation/install/manifest"}
                     onClick={() => Calendly.initPopupWidget({url: 'https://calendly.com/cyclops-ui/cyclops'}) }
                     type="primary"
                     shape="round"
@@ -63,7 +62,6 @@ const InstallDemo = () => {
             </ConfigProvider>, we will gladly show you around
             </h2>
 
-            <script src="https://assets.calendly.com/assets/external/widget.js" type="text/javascript" async></script>
             <link href="https://assets.calendly.com/assets/external/widget.css" rel="stylesheet"/>
         </center>
     );
