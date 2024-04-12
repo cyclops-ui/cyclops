@@ -303,11 +303,13 @@ func clone(repoURL, commit string, creds *auth.Credentials) (billy.Filesystem, e
 		tagPrefix := "refs/tags/"
 		remote, err := repo.Remote(remoteName)
 		if err != nil {
-			panic(err)
+			return nil, err
 		}
-		refList, err := remote.List(&git.ListOptions{})
+		refList, err := remote.List(&git.ListOptions{
+			Auth: httpBasicAuthCredentials(creds),
+		})
 		if err != nil {
-			panic(err)
+			return nil, err
 		}
 
 		var reference *plumbing.Reference
