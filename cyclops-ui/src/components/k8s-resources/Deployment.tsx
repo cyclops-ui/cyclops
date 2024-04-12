@@ -254,10 +254,14 @@ const Deployment = ({ name, namespace }: Props) => {
               dataIndex="containers"
               key="containers"
               width="15%"
-              render={(containers) => (
+              render={(containers, record: any) => (
                 <>
                   {containers.map((container: any) => {
                     let color = container.status.running ? "green" : "red";
+
+                    if (record.podPhase === "Pending") {
+                      color = "yellow"
+                    }
 
                     return (
                       <Tag
