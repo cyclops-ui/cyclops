@@ -9,6 +9,7 @@ import (
 	path2 "path"
 	"path/filepath"
 	"strings"
+	"unsafe"
 
 	"github.com/go-git/go-billy/v5"
 	"github.com/go-git/go-billy/v5/memfs"
@@ -43,10 +44,16 @@ func (r Repo) LoadTemplate(repoURL, path, commit string) (*models.Template, erro
 		return cached, nil
 	}
 
-	fs, err := clone(repoURL, commit, creds)
+	fs, st, err := clone(repoURL, commit, creds)
+	defer wipeMemory(st)
 	if err != nil {
 		return nil, err
 	}
+
+	fmt.Println("st", unsafe.Sizeof(st))
+	fmt.Println("*st", unsafe.Sizeof(*st))
+
+	fmt.Println("fs", unsafe.Sizeof(fs))
 
 	// load helm chart metadata
 	chartMetadata, err := fs.Open(path2.Join(path, "Chart.yaml"))
@@ -149,7 +156,8 @@ func (r Repo) LoadInitialTemplateValues(repoURL, path, commit string) (map[inter
 		return cached, nil
 	}
 
-	fs, err := clone(repoURL, commit, creds)
+	fs, st, err := clone(repoURL, commit, creds)
+	defer wipeMemory(st)
 	if err != nil {
 		return nil, err
 	}
@@ -281,20 +289,24 @@ func readValuesFile(fs billy.Filesystem, path string) ([]byte, error) {
 	return c.Bytes(), nil
 }
 
-func clone(repoURL, commit string, creds *auth.Credentials) (billy.Filesystem, error) {
+func clone(repoURL, commit string, creds *auth.Credentials) (billy.Filesystem, *memory.Storage, error) {
+	st := memory.NewStorage()
+
 	// region clone from git
-	repo, err := git.Clone(memory.NewStorage(), memfs.New(), &git.CloneOptions{
+	repo, err := git.Clone(st, memfs.New(), &git.CloneOptions{
 		URL:  repoURL,
 		Tags: git.AllTags,
 		Auth: httpBasicAuthCredentials(creds),
 	})
 	if err != nil {
-		return nil, errors.Wrap(err, fmt.Sprintf("repo %s was not cloned sucessfully; authentication might be required; check if repository exists and you referenced it correctly", repoURL))
+		st = memory.NewStorage()
+		return nil, nil, errors.Wrap(err, fmt.Sprintf("repo %s was not cloned sucessfully; authentication might be required; check if repository exists and you referenced it correctly", repoURL))
 	}
 
 	wt, err := repo.Worktree()
 	if err != nil {
-		return nil, err
+		st = memory.NewStorage()
+		return nil, nil, err
 	}
 
 	if len(commit) != 0 {
@@ -303,13 +315,15 @@ func clone(repoURL, commit string, creds *auth.Credentials) (billy.Filesystem, e
 		tagPrefix := "refs/tags/"
 		remote, err := repo.Remote(remoteName)
 		if err != nil {
-			return nil, err
+			st = memory.NewStorage()
+			return nil, nil, err
 		}
 		refList, err := remote.List(&git.ListOptions{
 			Auth: httpBasicAuthCredentials(creds),
 		})
 		if err != nil {
-			return nil, err
+			st = memory.NewStorage()
+			return nil, nil, err
 		}
 
 		var reference *plumbing.Reference
@@ -325,7 +339,8 @@ func clone(repoURL, commit string, creds *auth.Credentials) (billy.Filesystem, e
 				refName := plumbing.NewRemoteReferenceName(remoteName, branchName)
 				reference, err = repo.Reference(refName, true)
 				if err != nil {
-					return nil, err
+					st = memory.NewStorage()
+					return nil, nil, err
 				}
 			} else if strings.HasPrefix(refName, tagPrefix) {
 				tagName := refName[len(tagPrefix):]
@@ -335,7 +350,8 @@ func clone(repoURL, commit string, creds *auth.Credentials) (billy.Filesystem, e
 
 				reference, err = repo.Tag(tagName)
 				if err != nil {
-					return nil, err
+					st = memory.NewStorage()
+					return nil, nil, err
 				}
 			}
 		}
@@ -348,11 +364,15 @@ func clone(repoURL, commit string, creds *auth.Credentials) (billy.Filesystem, e
 			Hash: reference.Hash(),
 		})
 		if err != nil {
-			return nil, err
+			st = memory.NewStorage()
+			return nil, nil, err
 		}
 	}
 
-	return wt.Filesystem, nil
+	fmt.Println("wt", unsafe.Sizeof(wt.Filesystem))
+	fmt.Println("*wt", unsafe.Sizeof(*wt))
+
+	return wt.Filesystem, st, nil
 }
 
 func concatenateTemplates(path string, fs billy.Filesystem) ([]string, error) {
@@ -444,4 +464,8 @@ func httpBasicAuthCredentials(creds *auth.Credentials) *http.BasicAuth {
 		Username: creds.Username,
 		Password: creds.Password,
 	}
+}
+
+func wipeMemory(st *memory.Storage) {
+	st = memory.NewStorage()
 }
