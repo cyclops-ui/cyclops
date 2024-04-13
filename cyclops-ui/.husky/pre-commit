@@ -1,2 +1,2 @@
-cd frontend
+cd cyclops-ui
 npx lint-staged
