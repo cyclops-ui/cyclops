@@ -70,6 +70,7 @@
   },
   "devDependencies": {
     "@types/react-gauge-chart": "^0.4.3",
-    "@types/react-highlight-words": "^0.16.7"
+    "@types/react-highlight-words": "^0.16.7",
+    "prettier": "3.2.5"
   }
 }
