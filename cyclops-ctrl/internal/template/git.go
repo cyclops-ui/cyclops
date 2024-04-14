@@ -5,11 +5,12 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"github.com/pkg/errors"
+	"gopkg.in/yaml.v2"
 	"io"
 	path2 "path"
 	"path/filepath"
 	"strings"
-	"unsafe"
 
 	"github.com/go-git/go-billy/v5"
 	"github.com/go-git/go-billy/v5/memfs"
@@ -18,8 +19,6 @@ import (
 	"github.com/go-git/go-git/v5/plumbing"
 	"github.com/go-git/go-git/v5/plumbing/transport/http"
 	"github.com/go-git/go-git/v5/storage/memory"
-	"github.com/pkg/errors"
-	"gopkg.in/yaml.v2"
 	"helm.sh/helm/v3/pkg/chart"
 
 	"github.com/cyclops-ui/cycops-ctrl/internal/auth"
@@ -49,11 +48,6 @@ func (r Repo) LoadTemplate(repoURL, path, commit string) (*models.Template, erro
 	if err != nil {
 		return nil, err
 	}
-
-	fmt.Println("st", unsafe.Sizeof(st))
-	fmt.Println("*st", unsafe.Sizeof(*st))
-
-	fmt.Println("fs", unsafe.Sizeof(fs))
 
 	// load helm chart metadata
 	chartMetadata, err := fs.Open(path2.Join(path, "Chart.yaml"))
@@ -368,9 +362,6 @@ func clone(repoURL, commit string, creds *auth.Credentials) (billy.Filesystem, *
 			return nil, nil, err
 		}
 	}
-
-	fmt.Println("wt", unsafe.Sizeof(wt.Filesystem))
-	fmt.Println("*wt", unsafe.Sizeof(*wt))
 
 	return wt.Filesystem, st, nil
 }

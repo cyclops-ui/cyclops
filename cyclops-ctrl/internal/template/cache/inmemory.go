@@ -20,7 +20,6 @@ func NewInMemoryTemplatesCache() Templates {
 		NumCounters: 1e7,     // number of keys to track frequency of (10M).
 		MaxCost:     1 << 30, // maximum cost of cache (1GB).
 		BufferItems: 64,      // number of keys per Get buffer.
-		Metrics:     true,
 	})
 	if err != nil {
 		panic(err)
@@ -51,8 +50,6 @@ func (t Templates) SetTemplate(repo, path, version string, template *models.Temp
 		return
 	}
 
-	fmt.Println("saving template", int64(len(data)))
-
 	t.cache.SetWithTTL(templateKey(repo, path, version), *template, int64(len(data)), time.Minute*15)
 	t.cache.Wait()
 }
@@ -74,16 +71,11 @@ func (t Templates) GetTemplateInitialValues(repo, path, version string) (map[int
 func (t Templates) SetTemplateInitialValues(repo, path, version string, values map[interface{}]interface{}) {
 	data, err := jsoniterator.Marshal(values)
 	if err != nil {
-		fmt.Println(err)
 		return
 	}
 
-	fmt.Println("saving initial", int64(len(data)))
-
 	t.cache.SetWithTTL(initialValuesKey(repo, path, version), values, int64(len(data)), time.Minute*15)
 	t.cache.Wait()
-
-	fmt.Println(t.cache.Metrics.String())
 }
 
 func templateKey(repo, path, version string) string {
