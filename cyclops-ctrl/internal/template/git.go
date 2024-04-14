@@ -5,13 +5,6 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	"github.com/pkg/errors"
-	"gopkg.in/yaml.v2"
-	"io"
-	path2 "path"
-	"path/filepath"
-	"strings"
-
 	"github.com/go-git/go-billy/v5"
 	"github.com/go-git/go-billy/v5/memfs"
 	"github.com/go-git/go-git/v5"
@@ -19,7 +12,13 @@ import (
 	"github.com/go-git/go-git/v5/plumbing"
 	"github.com/go-git/go-git/v5/plumbing/transport/http"
 	"github.com/go-git/go-git/v5/storage/memory"
+	"github.com/pkg/errors"
+	"gopkg.in/yaml.v2"
 	"helm.sh/helm/v3/pkg/chart"
+	"io"
+	path2 "path"
+	"path/filepath"
+	"strings"
 
 	"github.com/cyclops-ui/cycops-ctrl/internal/auth"
 	"github.com/cyclops-ui/cycops-ctrl/internal/mapper"
@@ -43,7 +42,7 @@ func (r Repo) LoadTemplate(repoURL, path, commit string) (*models.Template, erro
 		return cached, nil
 	}
 
-	fs, st, err := clone(repoURL, commit, creds)
+	fs, st, err := clone(repoURL, commitSHA, creds)
 	defer wipeMemory(st)
 	if err != nil {
 		return nil, err
@@ -150,7 +149,7 @@ func (r Repo) LoadInitialTemplateValues(repoURL, path, commit string) (map[inter
 		return cached, nil
 	}
 
-	fs, st, err := clone(repoURL, commit, creds)
+	fs, st, err := clone(repoURL, commitSHA, creds)
 	defer wipeMemory(st)
 	if err != nil {
 		return nil, err
@@ -283,14 +282,105 @@ func readValuesFile(fs billy.Filesystem, path string) ([]byte, error) {
 	return c.Bytes(), nil
 }
 
-func clone(repoURL, commit string, creds *auth.Credentials) (billy.Filesystem, *memory.Storage, error) {
+//func clone(repoURL, commit string, creds *auth.Credentials) (billy.Filesystem, *memory.Storage, error) {
+//	st := memory.NewStorage()
+//
+//	// region clone from git
+//	repo, err := git.Clone(st, memfs.New(), &git.CloneOptions{
+//		URL:  repoURL,
+//		Tags: git.AllTags,
+//		Auth: httpBasicAuthCredentials(creds),
+//	})
+//	if err != nil {
+//		st = memory.NewStorage()
+//		return nil, nil, errors.Wrap(err, fmt.Sprintf("repo %s was not cloned sucessfully; authentication might be required; check if repository exists and you referenced it correctly", repoURL))
+//	}
+//
+//	wt, err := repo.Worktree()
+//	if err != nil {
+//		st = memory.NewStorage()
+//		return nil, nil, err
+//	}
+//
+//	if len(commit) != 0 {
+//		remoteName := "origin"
+//		branchPrefix := "refs/heads/"
+//		tagPrefix := "refs/tags/"
+//		remote, err := repo.Remote(remoteName)
+//		if err != nil {
+//			st = memory.NewStorage()
+//			return nil, nil, err
+//		}
+//		refList, err := remote.List(&git.ListOptions{
+//			Auth: httpBasicAuthCredentials(creds),
+//		})
+//		if err != nil {
+//			st = memory.NewStorage()
+//			return nil, nil, err
+//		}
+//
+//		var reference *plumbing.Reference
+//
+//		for _, ref := range refList {
+//			refName := ref.Name().String()
+//			if strings.HasPrefix(refName, branchPrefix) {
+//				branchName := refName[len(branchPrefix):]
+//				if branchName != commit {
+//					continue
+//				}
+//
+//				refName := plumbing.NewRemoteReferenceName(remoteName, branchName)
+//				reference, err = repo.Reference(refName, true)
+//				if err != nil {
+//					st = memory.NewStorage()
+//					return nil, nil, err
+//				}
+//			} else if strings.HasPrefix(refName, tagPrefix) {
+//				tagName := refName[len(tagPrefix):]
+//				if tagName != commit {
+//					continue
+//				}
+//
+//				fmt.Println("ja sam tag", commit)
+//
+//				reference, err = repo.Tag(tagName)
+//				if err != nil {
+//					st = memory.NewStorage()
+//					return nil, nil, err
+//				}
+//			}
+//		}
+//
+//		fmt.Println("goitov sam")
+//
+//		if reference == nil {
+//			reference = plumbing.NewHashReference(plumbing.HEAD, plumbing.NewHash(commit))
+//		}
+//
+//		err = wt.Checkout(&git.CheckoutOptions{
+//			Hash: reference.Hash(),
+//		})
+//		if err != nil {
+//			st = memory.NewStorage()
+//			return nil, nil, err
+//		}
+//	}
+//
+//	return wt.Filesystem, st, nil
+//}
+
+func clone(repoURL, commitSHA string, creds *auth.Credentials) (billy.Filesystem, *memory.Storage, error) {
+	mfs := memfs.New()
 	st := memory.NewStorage()
 
-	// region clone from git
-	repo, err := git.Clone(st, memfs.New(), &git.CloneOptions{
-		URL:  repoURL,
-		Tags: git.AllTags,
-		Auth: httpBasicAuthCredentials(creds),
+	// region git clone
+	repo, err := git.Clone(st, mfs, &git.CloneOptions{
+		URL:           repoURL,
+		Tags:          git.NoTags,
+		SingleBranch:  true,
+		Auth:          httpBasicAuthCredentials(creds),
+		Depth:         1,
+		ReferenceName: plumbing.NewHashReference(plumbing.HEAD, plumbing.NewHash(commitSHA)).Name(),
 	})
 	if err != nil {
 		st = memory.NewStorage()
@@ -301,66 +391,6 @@ func clone(repoURL, commit string, creds *auth.Credentials) (billy.Filesystem, *
 	if err != nil {
 		st = memory.NewStorage()
 		return nil, nil, err
-	}
-
-	if len(commit) != 0 {
-		remoteName := "origin"
-		branchPrefix := "refs/heads/"
-		tagPrefix := "refs/tags/"
-		remote, err := repo.Remote(remoteName)
-		if err != nil {
-			st = memory.NewStorage()
-			return nil, nil, err
-		}
-		refList, err := remote.List(&git.ListOptions{
-			Auth: httpBasicAuthCredentials(creds),
-		})
-		if err != nil {
-			st = memory.NewStorage()
-			return nil, nil, err
-		}
-
-		var reference *plumbing.Reference
-
-		for _, ref := range refList {
-			refName := ref.Name().String()
-			if strings.HasPrefix(refName, branchPrefix) {
-				branchName := refName[len(branchPrefix):]
-				if branchName != commit {
-					continue
-				}
-
-				refName := plumbing.NewRemoteReferenceName(remoteName, branchName)
-				reference, err = repo.Reference(refName, true)
-				if err != nil {
-					st = memory.NewStorage()
-					return nil, nil, err
-				}
-			} else if strings.HasPrefix(refName, tagPrefix) {
-				tagName := refName[len(tagPrefix):]
-				if tagName != commit {
-					continue
-				}
-
-				reference, err = repo.Tag(tagName)
-				if err != nil {
-					st = memory.NewStorage()
-					return nil, nil, err
-				}
-			}
-		}
-
-		if reference == nil {
-			reference = plumbing.NewHashReference(plumbing.HEAD, plumbing.NewHash(commit))
-		}
-
-		err = wt.Checkout(&git.CheckoutOptions{
-			Hash: reference.Hash(),
-		})
-		if err != nil {
-			st = memory.NewStorage()
-			return nil, nil, err
-		}
 	}
 
 	return wt.Filesystem, st, nil
