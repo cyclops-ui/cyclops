@@ -306,6 +306,12 @@ func (m *Modules) ResourcesForModule(ctx *gin.Context) {
 		return
 	}
 
+	//fmt.Println(t.Files)
+	//
+	//for _, file := range t.Files {
+	//	fmt.Println(file.Name, string(file.Data))
+	//}
+
 	resources, err = m.kubernetesClient.GetDeletedResources(resources, *module, t)
 	if err != nil {
 		fmt.Println(err)
