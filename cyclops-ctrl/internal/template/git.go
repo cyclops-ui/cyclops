@@ -43,7 +43,7 @@ func (r Repo) LoadTemplate(repoURL, path, commit string) (*models.Template, erro
 		return cached, nil
 	}
 
-	fs, err := clone(repoURL, commit, creds)
+	fs, err := clone(repoURL, path, commit, creds)
 	if err != nil {
 		return nil, err
 	}
@@ -149,7 +149,7 @@ func (r Repo) LoadInitialTemplateValues(repoURL, path, commit string) (map[inter
 		return cached, nil
 	}
 
-	fs, err := clone(repoURL, commit, creds)
+	fs, err := clone(repoURL, path, commit, creds)
 	if err != nil {
 		return nil, err
 	}
@@ -281,7 +281,7 @@ func readValuesFile(fs billy.Filesystem, path string) ([]byte, error) {
 	return c.Bytes(), nil
 }
 
-func clone(repoURL, commit string, creds *auth.Credentials) (billy.Filesystem, error) {
+func clone(repoURL, path, commit string, creds *auth.Credentials) (billy.Filesystem, error) {
 	// region clone from git
 	repo, err := git.Clone(memory.NewStorage(), memfs.New(), &git.CloneOptions{
 		URL:  repoURL,
@@ -350,6 +350,13 @@ func clone(repoURL, commit string, creds *auth.Credentials) (billy.Filesystem, e
 		if err != nil {
 			return nil, err
 		}
+	}
+
+	err = wt.Checkout(&git.CheckoutOptions{
+		SparseCheckoutDirectories: []string{path},
+	})
+	if err != nil {
+		return nil, err
 	}
 
 	return wt.Filesystem, nil
