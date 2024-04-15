@@ -517,6 +517,8 @@ func httpBasicAuthCredentials(creds *auth.Credentials) *http.BasicAuth {
 }
 
 func wipeMemory(st *memory.Storage, mfs billy.Filesystem) {
+	fmt.Println("wiping memory")
+
 	st = nil
 	mfs = nil
 }
