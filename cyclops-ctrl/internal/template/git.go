@@ -45,23 +45,7 @@ func (r Repo) LoadTemplate(repoURL, path, commit string) (*models.Template, erro
 	}
 
 	if gitproviders.IsGitHubSource(repoURL) {
-		tgzData, err := gitproviders.GitHubClone(repoURL, commitSHA, creds)
-		if err != nil {
-			return nil, err
-		}
-
-		ghRepoFiles, err := unpackTgzInMemory(tgzData)
-		if err != nil {
-			return nil, err
-		}
-
-		ghRepoFiles = gitproviders.SanitizeGHFiles(ghRepoFiles)
-
-		//for s, _ := range ghRepoFiles {
-		//	fmt.Println("prije", s)
-		//}
-
-		ghTemplate, err := r.mapHelmChart(path, ghRepoFiles)
+		ghTemplate, err := r.mapGitHubRepoTemplate(repoURL, path, commitSHA, creds)
 		if err != nil {
 			return nil, err
 		}
@@ -175,6 +159,17 @@ func (r Repo) LoadInitialTemplateValues(repoURL, path, commit string) (map[inter
 	cached, ok := r.cache.GetTemplateInitialValues(repoURL, path, commitSHA)
 	if ok {
 		return cached, nil
+	}
+
+	if gitproviders.IsGitHubSource(repoURL) {
+		ghInitialValues, err := r.mapGitHubRepoInitialValues(repoURL, path, commitSHA, creds)
+		if err != nil {
+			return nil, err
+		}
+
+		r.cache.SetTemplateInitialValues(repoURL, path, commitSHA, ghInitialValues)
+
+		return ghInitialValues, nil
 	}
 
 	fs, err := clone(repoURL, commit, creds)
@@ -461,6 +456,48 @@ func readFiles(path string, fs billy.Filesystem) ([]*chart.File, error) {
 	}
 
 	return chartFiles, nil
+}
+
+func (r Repo) mapGitHubRepoTemplate(repoURL, path, commitSHA string, creds *auth.Credentials) (*models.Template, error) {
+	tgzData, err := gitproviders.GitHubClone(repoURL, commitSHA, creds)
+	if err != nil {
+		return nil, err
+	}
+
+	ghRepoFiles, err := unpackTgzInMemory(tgzData)
+	if err != nil {
+		return nil, err
+	}
+
+	ghRepoFiles = gitproviders.SanitizeGHFiles(ghRepoFiles, path)
+
+	template, err := r.mapHelmChart(path, ghRepoFiles)
+	if err != nil {
+		return nil, err
+	}
+
+	return template, nil
+}
+
+func (r Repo) mapGitHubRepoInitialValues(repoURL, path, commitSHA string, creds *auth.Credentials) (map[interface{}]interface{}, error) {
+	tgzData, err := gitproviders.GitHubClone(repoURL, commitSHA, creds)
+	if err != nil {
+		return nil, err
+	}
+
+	ghRepoFiles, err := unpackTgzInMemory(tgzData)
+	if err != nil {
+		return nil, err
+	}
+
+	ghRepoFiles = gitproviders.SanitizeGHFiles(ghRepoFiles, path)
+
+	initial, err := r.mapHelmChartInitialValues(ghRepoFiles)
+	if err != nil {
+		return nil, err
+	}
+
+	return initial, nil
 }
 
 func httpBasicAuthCredentials(creds *auth.Credentials) *http.BasicAuth {

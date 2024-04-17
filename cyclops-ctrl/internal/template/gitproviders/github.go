@@ -76,29 +76,25 @@ func SanitizeGHFiles(files map[string][]byte, path string) map[string][]byte {
 	out := make(map[string][]byte, len(files))
 
 	for key, value := range files {
-		fmt.Println("key", key)
 		repoFileName := removeFirstSegment(key)
 		if len(repoFileName) == 0 {
 			continue
 		}
 
-		if !strings.HasPrefix(repoFileName, path) {
+		if !strings.HasPrefix(repoFileName, fmt.Sprintf("%v/", path)) {
 			continue
 		}
 
 		trimmed := strings.TrimPrefix(repoFileName, path)
-
-		path2.Split(trimmed)
-		path2.Join(path2.Split())
-
-		out[repoFileName] = value
+		_, folder := path2.Split(path)
+		out[path2.Join(folder, trimmed)] = value
 	}
 
 	return out
 }
 
 func removeFirstSegment(path string) string {
-	segments := strings.Split(path, "/")
+	segments := strings.Split(path, `/`)
 
 	if len(segments) <= 1 {
 		return ""
