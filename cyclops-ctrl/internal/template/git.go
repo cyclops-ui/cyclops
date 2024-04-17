@@ -43,8 +43,7 @@ func (r Repo) LoadTemplate(repoURL, path, commit string) (*models.Template, erro
 		return cached, nil
 	}
 
-	fs, st, mfs, err := clone(repoURL, commitSHA, creds)
-	defer wipeMemory(st, mfs)
+	fs, err := clone(repoURL, commit, creds)
 	if err != nil {
 		return nil, err
 	}
@@ -129,11 +128,6 @@ func (r Repo) LoadTemplate(repoURL, path, commit string) (*models.Template, erro
 		Dependencies: dependencies,
 	}
 
-	fmt.Println("caching...", repoURL, path, commitSHA)
-	for _, file := range template.Files {
-		fmt.Println(file.Name)
-	}
-
 	r.cache.SetTemplate(repoURL, path, commitSHA, template)
 
 	return template, err
@@ -155,8 +149,7 @@ func (r Repo) LoadInitialTemplateValues(repoURL, path, commit string) (map[inter
 		return cached, nil
 	}
 
-	fs, st, mfs, err := clone(repoURL, commitSHA, creds)
-	defer wipeMemory(st, mfs)
+	fs, err := clone(repoURL, commit, creds)
 	if err != nil {
 		return nil, err
 	}
@@ -216,8 +209,7 @@ func resolveRef(repo, version string, creds *auth.Credentials) (string, error) {
 		return resolveDefaultBranchRef(repo, creds)
 	}
 
-	st := memory.NewStorage()
-	rem := git.NewRemote(st, &config.RemoteConfig{
+	rem := git.NewRemote(memory.NewStorage(), &config.RemoteConfig{
 		Name: "origin",
 		URLs: []string{repo},
 	})
@@ -228,25 +220,21 @@ func resolveRef(repo, version string, creds *auth.Credentials) (string, error) {
 		Auth:          httpBasicAuthCredentials(creds),
 	})
 	if err != nil {
-		st = nil
 		return "", errors.Wrap(err, fmt.Sprintf("repo %s was not cloned sucessfully; authentication might be required; check if repository exists and you referenced it correctly", repo))
 	}
 
 	// Filters the references list and only keeps tags
 	for _, ref := range refs {
 		if ref.Name().Short() == version {
-			st = nil
 			return ref.Hash().String(), nil
 		}
 	}
 
-	st = nil
 	return version, nil
 }
 
 func resolveDefaultBranchRef(repo string, creds *auth.Credentials) (string, error) {
-	st := memory.NewStorage()
-	rem := git.NewRemote(st, &config.RemoteConfig{
+	rem := git.NewRemote(memory.NewStorage(), &config.RemoteConfig{
 		Name: "origin",
 		URLs: []string{repo},
 	})
@@ -257,7 +245,6 @@ func resolveDefaultBranchRef(repo string, creds *auth.Credentials) (string, erro
 		Auth:          httpBasicAuthCredentials(creds),
 	})
 	if err != nil {
-		st = nil
 		return "", errors.Wrap(err, fmt.Sprintf("repo %s was not cloned sucessfully; authentication might be required; check if repository exists and you referenced it correctly", repo))
 	}
 
@@ -266,14 +253,12 @@ func resolveDefaultBranchRef(repo string, creds *auth.Credentials) (string, erro
 		if r.Name().Short() == plumbing.HEAD.Short() {
 			for _, rr := range refs {
 				if rr.Name().String() == r.Target().String() {
-					st = nil
 					return rr.Hash().String(), nil
 				}
 			}
 		}
 	}
 
-	st = nil
 	return "", errors.New("failed resolving HEAD ref")
 }
 
@@ -296,27 +281,20 @@ func readValuesFile(fs billy.Filesystem, path string) ([]byte, error) {
 	return c.Bytes(), nil
 }
 
-func clone(repoURL, commit string, creds *auth.Credentials) (billy.Filesystem, *memory.Storage, billy.Filesystem, error) {
-	st := memory.NewStorage()
-	mfs := memfs.New()
-
+func clone(repoURL, commit string, creds *auth.Credentials) (billy.Filesystem, error) {
 	// region clone from git
-	repo, err := git.Clone(st, mfs, &git.CloneOptions{
+	repo, err := git.Clone(memory.NewStorage(), memfs.New(), &git.CloneOptions{
 		URL:  repoURL,
 		Tags: git.AllTags,
 		Auth: httpBasicAuthCredentials(creds),
 	})
 	if err != nil {
-		st = nil
-		mfs = nil
-		return nil, nil, nil, errors.Wrap(err, fmt.Sprintf("repo %s was not cloned sucessfully; authentication might be required; check if repository exists and you referenced it correctly", repoURL))
+		return nil, errors.Wrap(err, fmt.Sprintf("repo %s was not cloned sucessfully; authentication might be required; check if repository exists and you referenced it correctly", repoURL))
 	}
 
 	wt, err := repo.Worktree()
 	if err != nil {
-		st = nil
-		mfs = nil
-		return nil, nil, nil, err
+		return nil, err
 	}
 
 	if len(commit) != 0 {
@@ -325,17 +303,13 @@ func clone(repoURL, commit string, creds *auth.Credentials) (billy.Filesystem, *
 		tagPrefix := "refs/tags/"
 		remote, err := repo.Remote(remoteName)
 		if err != nil {
-			st = nil
-			mfs = nil
-			return nil, nil, nil, err
+			return nil, err
 		}
 		refList, err := remote.List(&git.ListOptions{
 			Auth: httpBasicAuthCredentials(creds),
 		})
 		if err != nil {
-			st = nil
-			mfs = nil
-			return nil, nil, nil, err
+			return nil, err
 		}
 
 		var reference *plumbing.Reference
@@ -351,9 +325,7 @@ func clone(repoURL, commit string, creds *auth.Credentials) (billy.Filesystem, *
 				refName := plumbing.NewRemoteReferenceName(remoteName, branchName)
 				reference, err = repo.Reference(refName, true)
 				if err != nil {
-					st = nil
-					mfs = nil
-					return nil, nil, nil, err
+					return nil, err
 				}
 			} else if strings.HasPrefix(refName, tagPrefix) {
 				tagName := refName[len(tagPrefix):]
@@ -361,13 +333,9 @@ func clone(repoURL, commit string, creds *auth.Credentials) (billy.Filesystem, *
 					continue
 				}
 
-				fmt.Println("ja sam tag", commit)
-
 				reference, err = repo.Tag(tagName)
 				if err != nil {
-					st = nil
-					mfs = nil
-					return nil, nil, nil, err
+					return nil, err
 				}
 			}
 		}
@@ -380,50 +348,12 @@ func clone(repoURL, commit string, creds *auth.Credentials) (billy.Filesystem, *
 			Hash: reference.Hash(),
 		})
 		if err != nil {
-			st = nil
-			mfs = nil
-			return nil, nil, nil, err
+			return nil, err
 		}
 	}
 
-	return wt.Filesystem, st, mfs, nil
+	return wt.Filesystem, nil
 }
-
-//func clone(repoURL, commitSHA string, creds *auth.Credentials) (billy.Filesystem, *memory.Storage, billy.Filesystem, error) {
-//	mfs := memfs.New()
-//	st := memory.NewStorage()
-//
-//	// region git clone
-//	repo, err := git.Clone(st, mfs, &git.CloneOptions{
-//		URL:           repoURL,
-//		Tags:          git.NoTags,
-//		SingleBranch:  true,
-//		Auth:          httpBasicAuthCredentials(creds),
-//		ReferenceName: plumbing.ReferenceName(fmt.Sprintf("refs/heads/svc-acc")),
-//	})
-//	if err != nil {
-//		st = nil
-//		mfs = nil
-//		return nil, nil, nil, errors.Wrap(err, fmt.Sprintf("repo %s was not cloned sucessfully; authentication might be required; check if repository exists and you referenced it correctly", repoURL))
-//	}
-//
-//	wt, err := repo.Worktree()
-//	if err != nil {
-//		st = nil
-//		mfs = nil
-//		return nil, nil, nil, err
-//	}
-//
-//	err = wt.Checkout(&git.CheckoutOptions{
-//		Hash: plumbing.NewHash(commitSHA),
-//	})
-//	if err != nil {
-//		fmt.Println("Error:", err)
-//		return nil, nil, nil, err
-//	}
-//
-//	return wt.Filesystem, st, mfs, nil
-//}
 
 func concatenateTemplates(path string, fs billy.Filesystem) ([]string, error) {
 	files, err := fs.ReadDir(path)
@@ -514,11 +444,4 @@ func httpBasicAuthCredentials(creds *auth.Credentials) *http.BasicAuth {
 		Username: creds.Username,
 		Password: creds.Password,
 	}
-}
-
-func wipeMemory(st *memory.Storage, mfs billy.Filesystem) {
-	fmt.Println("wiping memory")
-
-	st = nil
-	mfs = nil
 }
