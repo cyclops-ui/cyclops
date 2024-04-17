@@ -13,12 +13,12 @@ import (
 	"path"
 	"strings"
 
-	"github.com/cyclops-ui/cycops-ctrl/internal/mapper"
 	json "github.com/json-iterator/go"
 	"gopkg.in/yaml.v2"
 	helmchart "helm.sh/helm/v3/pkg/chart"
 	"helm.sh/helm/v3/pkg/registry"
 
+	"github.com/cyclops-ui/cycops-ctrl/internal/mapper"
 	"github.com/cyclops-ui/cycops-ctrl/internal/models"
 	"github.com/cyclops-ui/cycops-ctrl/internal/models/helm"
 )

@@ -5,7 +5,6 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	"github.com/cyclops-ui/cycops-ctrl/internal/template/gitproviders"
 	"github.com/pkg/errors"
 	"gopkg.in/yaml.v2"
 	"io"
@@ -26,6 +25,7 @@ import (
 	"github.com/cyclops-ui/cycops-ctrl/internal/mapper"
 	"github.com/cyclops-ui/cycops-ctrl/internal/models"
 	"github.com/cyclops-ui/cycops-ctrl/internal/models/helm"
+	"github.com/cyclops-ui/cycops-ctrl/internal/template/gitproviders"
 )
 
 func (r Repo) LoadTemplate(repoURL, path, commit string) (*models.Template, error) {
