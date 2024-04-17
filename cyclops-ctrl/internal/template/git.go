@@ -5,6 +5,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"github.com/cyclops-ui/cycops-ctrl/internal/template/gitproviders"
 	"github.com/pkg/errors"
 	"gopkg.in/yaml.v2"
 	"io"
@@ -41,6 +42,33 @@ func (r Repo) LoadTemplate(repoURL, path, commit string) (*models.Template, erro
 	cached, ok := r.cache.GetTemplate(repoURL, path, commitSHA)
 	if ok {
 		return cached, nil
+	}
+
+	if gitproviders.IsGitHubSource(repoURL) {
+		tgzData, err := gitproviders.GitHubClone(repoURL, commitSHA, creds)
+		if err != nil {
+			return nil, err
+		}
+
+		ghRepoFiles, err := unpackTgzInMemory(tgzData)
+		if err != nil {
+			return nil, err
+		}
+
+		ghRepoFiles = gitproviders.SanitizeGHFiles(ghRepoFiles)
+
+		//for s, _ := range ghRepoFiles {
+		//	fmt.Println("prije", s)
+		//}
+
+		ghTemplate, err := r.mapHelmChart(path, ghRepoFiles)
+		if err != nil {
+			return nil, err
+		}
+
+		r.cache.SetTemplate(repoURL, path, commitSHA, ghTemplate)
+
+		return ghTemplate, nil
 	}
 
 	fs, err := clone(repoURL, commit, creds)
