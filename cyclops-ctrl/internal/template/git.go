@@ -5,6 +5,8 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"github.com/pkg/errors"
+	"gopkg.in/yaml.v2"
 	"io"
 	path2 "path"
 	"path/filepath"
@@ -17,8 +19,6 @@ import (
 	"github.com/go-git/go-git/v5/plumbing"
 	"github.com/go-git/go-git/v5/plumbing/transport/http"
 	"github.com/go-git/go-git/v5/storage/memory"
-	"github.com/pkg/errors"
-	"gopkg.in/yaml.v2"
 	"helm.sh/helm/v3/pkg/chart"
 
 	"github.com/cyclops-ui/cycops-ctrl/internal/auth"
