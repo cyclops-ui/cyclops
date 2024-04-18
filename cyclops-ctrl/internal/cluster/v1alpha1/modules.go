@@ -2,7 +2,6 @@ package v1alpha1
 
 import (
 	"context"
-	"fmt"
 	"time"
 
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -54,8 +53,6 @@ func (c *moduleClient) Get(name string) (*cyclopsv1alpha1.Module, error) {
 func (c *moduleClient) Create(project *cyclopsv1alpha1.Module) (*cyclopsv1alpha1.Module, error) {
 	result := cyclopsv1alpha1.Module{}
 
-	fmt.Println("kaj je ovo")
-
 	err := c.restClient.
 		Post().
 		Namespace(c.ns).
@@ -63,8 +60,6 @@ func (c *moduleClient) Create(project *cyclopsv1alpha1.Module) (*cyclopsv1alpha1
 		Body(project).
 		Do(context.Background()).
 		Into(&result)
-
-	fmt.Println(err)
 
 	return &result, err
 }
