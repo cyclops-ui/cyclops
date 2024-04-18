@@ -13,12 +13,12 @@ import (
 	"path"
 	"strings"
 
-	"github.com/cyclops-ui/cycops-ctrl/internal/mapper"
 	json "github.com/json-iterator/go"
 	"gopkg.in/yaml.v2"
 	helmchart "helm.sh/helm/v3/pkg/chart"
 	"helm.sh/helm/v3/pkg/registry"
 
+	"github.com/cyclops-ui/cycops-ctrl/internal/mapper"
 	"github.com/cyclops-ui/cycops-ctrl/internal/models"
 	"github.com/cyclops-ui/cycops-ctrl/internal/models/helm"
 )
@@ -195,12 +195,14 @@ func (r Repo) mapHelmChart(chartName string, files map[string][]byte) (*models.T
 
 	}
 
+	if len(schemaBytes) == 0 {
+		return nil, errors.New("could not read 'values.schema.json' file; it should be placed in the repo/path you provided; make sure you provided the correct path")
+	}
+
 	var schema helm.Property
 	// unmarshal values schema only if present
-	if len(schemaBytes) != 0 {
-		if err := json.Unmarshal(schemaBytes, &schema); err != nil {
-			return &models.Template{}, err
-		}
+	if err := json.Unmarshal(schemaBytes, &schema); err != nil {
+		return &models.Template{}, err
 	}
 
 	var metadata helmchart.Metadata
