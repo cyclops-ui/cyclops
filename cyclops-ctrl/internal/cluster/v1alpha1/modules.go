@@ -52,6 +52,7 @@ func (c *moduleClient) Get(name string) (*cyclopsv1alpha1.Module, error) {
 
 func (c *moduleClient) Create(project *cyclopsv1alpha1.Module) (*cyclopsv1alpha1.Module, error) {
 	result := cyclopsv1alpha1.Module{}
+
 	err := c.restClient.
 		Post().
 		Namespace(c.ns).
