@@ -126,15 +126,12 @@ const Comparison = () => {
         <div className={styles.all}>
             <div className={styles.ui}>
                 <div>
-                    <h1 className={styles.title}>Deploying made <span style={{color: "orange"}}>easy</span></h1>
+                    <h1 className={styles.title}>Deploying made easy</h1>
                 </div>
-                <div style={{paddingTop: "10px", paddingBottom: "20px"}}>
+                <div style={{paddingTop: "0", paddingBottom: "20px"}}>
                     <h3 className={styles.descriptionitem}>
-                        Cyclops enables you to build custom UIs on top of Kubernetes tailored to your needs in minutes.
-                    </h3>
-
-                    <h3 className={styles.descriptionitem}>
-                        You can easily plug in your already existing Helm charts into UIs, thus making custom Internal developer platforms and making your developers lives easier.
+                        <span style={{color: "#ff8803", fontWeight: "bold"}}>Hide the complexity</span> of Kubernetes under a UI
+                        tailored to your needs. Ideal <span style={{color: "#ff8803", fontWeight: "bold"}}>for development teams</span> that interact with Kubernetes regularly.
                     </h3>
                 </div>
                 <ConfigProvider
@@ -151,19 +148,19 @@ const Comparison = () => {
                         }}
                         wrapperCol={{
                             span: 18,
-                            xs: 18
+                            xs: 15
                         }}
                         form={form}
                     >
                         <Form.Item
-                            label="Name"
+                            label={<span style={{fontSize: "18px"}}>Name</span>}
                             name="Name"
                             style={{flexDirection: 'row'}}
                         >
                             <Input defaultValue={name} onChange={onNameChange}/>
                         </Form.Item>
                         <Form.Item
-                            label="Replicas"
+                            label={<span style={{fontSize: "18px"}}>Replicas</span>}
                             style={{display: 'block'}}
                             name="Replicas"
                             rules={[
@@ -182,7 +179,7 @@ const Comparison = () => {
                             <InputNumber style={{width: '100%'}} defaultValue={replicas} onChange={onReplicasChange}/>
                         </Form.Item>
                         <Form.Item
-                            label="Version"
+                            label={<span style={{fontSize: "18px"}}>Version</span>}
                             style={{display: 'block'}}
                         >
                             <Select
@@ -196,7 +193,7 @@ const Comparison = () => {
                             />
                         </Form.Item>
                         <Form.Item
-                            label="Port"
+                            label={<span style={{fontSize: "18px"}}>Port</span>}
                             style={{display: 'block'}}
                         >
                             <InputNumber style={{width: '100%'}} defaultValue={port} onChange={onPortChange}/>

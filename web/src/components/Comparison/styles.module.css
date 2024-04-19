@@ -8,8 +8,9 @@
 .title {
   text-align: left;
   display: inline-block;
-  color: #000;
+  color: #000830;
   width: 100%;
+  font-size: 36px;
 }
 
 .all {
@@ -31,10 +32,15 @@
   padding-bottom: 30px;
   float: left;
   width: 30%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
 }
 
 .descriptionitem {
-  color: #000
+  font-weight: 550;
+  color: #000830;
+  margin-bottom: 10px;
 }
 
 @media screen and (max-width: 600px) {
@@ -55,6 +61,12 @@
     width: 80%;
     margin: 0 auto;
     padding-bottom: 30px;
+  }
+
+  .descriptionitem {
+    font-weight: normal;
+    color: #000;
+    margin-left: 0;
   }
 }
 

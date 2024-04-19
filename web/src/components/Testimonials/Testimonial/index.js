@@ -6,32 +6,8 @@ import useBaseUrl from '@docusaurus/useBaseUrl';
 const { Meta } = Card;
 
 const Testimonial = (props) => {
-    const elementRef = useRef(null);
-    const [isVisible, setIsVisible] = useState(false);
-
-    useEffect(() => {
-        const handleScroll = () => {
-            if (elementRef.current) {
-                const top = elementRef.current.getBoundingClientRect().top;
-                const windowHeight = window.innerHeight;
-                setIsVisible(top < windowHeight);
-            }
-        };
-
-        // Initial check when component mounts
-        handleScroll();
-
-        // Event listener for scroll
-        window.addEventListener('scroll', handleScroll);
-
-        // Cleanup
-        return () => {
-            window.removeEventListener('scroll', handleScroll);
-        };
-    }, []);
-
     return (
-        <div style={{opacity: 0, height: '100%'}} ref={elementRef} className={isVisible ? styles.testimonialwrapper : ''}>
+        <div style={{height: '100%'}}>
             <Card className={styles.cardtestimonialwrapper}>
                 <Meta
                     avatar={<Avatar style={{width: "100px", height: "auto"}} src={props.avatar}/>}

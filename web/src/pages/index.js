@@ -106,7 +106,6 @@ export default function Home() {
                         >
                             <Button
                                 href={"/docs/installation/install/manifest"}
-                                // type="primary"
                                 shape="round"
                                 size={"large"}
                                 className={styles.readTheDocs}
@@ -122,30 +121,6 @@ export default function Home() {
                                 </h3>
                             </Button>
                         </ConfigProvider>
-                        {/*    <ConfigProvider*/}
-                        {/*        theme={{*/}
-                        {/*            token: {*/}
-                        {/*                colorPrimary: '#FFF',*/}
-                        {/*            },*/}
-                        {/*        }}*/}
-                        {/*    >*/}
-                        {/*        <Button*/}
-                        {/*            href={"/docs/about"}*/}
-                        {/*            shape="round"*/}
-                        {/*            size={"large"}*/}
-                        {/*            className={styles.readTheDocs}*/}
-                        {/*            style={{*/}
-                        {/*                textDecoration: "none",*/}
-                        {/*                display: "inline-flex",*/}
-                        {/*                alignItems: "center",*/}
-                        {/*                color: "white",*/}
-                        {/*            }}*/}
-                        {/*        >*/}
-                        {/*        <h3 style={{margin: 0}}>*/}
-                        {/*            Read the docs*/}
-                        {/*        </h3>*/}
-                        {/*    </Button>*/}
-                        {/*</ConfigProvider>*/}
                     </Row>
                 </div>
                 <Comparison/>
@@ -155,8 +130,6 @@ export default function Home() {
                     <Install/>
                     <Blogs/>
                 </div>
-                {/*<div className={styles.backgroundcolor}>*/}
-                {/*</div>*/}
             </main>
         </Layout>
     );
