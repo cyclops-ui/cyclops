@@ -19,28 +19,26 @@ const Testimonials = () => {
                     <Col xs={{ span: 20, offset: 2 }} md={{ span: 6, offset: 3 }}>
                         <Testimonial
                             name={"Rossana Suarez"}
-                            icon={<LinkedinFilled style={{color: "#0072b1"}} />}
                             position={"AWS Container Hero"}
                             avatar={"/img/rossana_suarez.jpeg"}
-                            testimonial={<p>Deploying has never been easier: A single interface to manage your workloads on Kubernetes. 🔥 <br/> An easy way to get started on kubernetes👌</p>}
+                            testimonial={<p>Deploying has never been easier: A single interface to manage your workloads
+                                on Kubernetes. 🔥 <br/> An easy way to get started on <br/> Kubernetes👌</p>}
+                        />
+                    </Col>
+                    <Col xs={{span: 20, offset: 2}} md={{span: 6, offset: 0}}>
+                        <Testimonial
+                            name={"Kunal Kushwaha"}
+                            position={"DevRel manager at Civo"}
+                            avatar={"/img/kunal_kushwaha.jpeg"}
+                            testimonial={"Cyclops has transformed my Kubernetes management experience. Its intuitive form-based UI and Helm integration make deploying and monitoring applications straightforward and error-free. A must-try tool for anyone looking to simplify their Kubernetes operations!"}
                         />
                     </Col>
                     <Col xs={{span: 20, offset: 2}} md={{span: 6, offset: 0}}>
                         <Testimonial
                             name={"Ken Godoy"}
-                            icon={<LinkedinFilled style={{color: "#0072b1"}}/>}
                             position={"VP, DevOps"}
                             avatar={"/img/ken_godoy.jpeg"}
                             testimonial={"Cyclops utilizes Helm charts for application deployment, making Kubernetes more accessible to users with different levels of expertise."}
-                        />
-                    </Col>
-                    <Col xs={{span: 20, offset: 2}} md={{span: 6, offset: 0}}>
-                        <Testimonial
-                            name={"Juraj Karadza"}
-                            icon={<LinkedinFilled style={{color: "#0072b1"}}/>}
-                            position={"CEO of Cyclops"}
-                            avatar={"https://github.com/KaradzaJuraj.png"}
-                            testimonial={"super je ovo sve, odlicnosuper je ovo sve, odlicnosuper je ovo sve, odlicnosuper je ovo sve, odlicnosuper je ovo sve, odlicnosuper je ovo sve, odlicnosuper je ovo sve, odlicnosuper je ovo sve, odlicno"}
                         />
                     </Col>
                 </Row>

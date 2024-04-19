@@ -107,3 +107,7 @@
 .navbar__title:hover {
   color: #fe8801;
 }
+
+.ant-card-meta-title {
+  margin-bottom: 0;
+}

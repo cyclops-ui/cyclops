@@ -33,26 +33,33 @@ const Testimonial = (props) => {
     return (
         <div style={{opacity: 0, height: '100%'}} ref={elementRef} className={isVisible ? styles.testimonialwrapper : ''}>
             <Card className={styles.cardtestimonialwrapper}>
-                    <Meta
-                        avatar={<Avatar style={{width: "100px", height: "auto"}} src={props.avatar}/>}
-                        title={<div>{props.name} {props.icon}</div>}
-                        description={
-                            <div
-                                style={{
-                                    textOverflow: "ellipsis",
-                                    whiteSpace: "nowrap",
-                                    overflow: "hidden",
-                                    "-webkit-line-clamp": 3,
-                                    "-webkit-box-orient": "vertical",
-                                }}
-                            >
-                                {props.position}
-                            </div>
-                        }
-                    />
-                    <div style={{height: '100%', display: 'flex', flexDirection: 'column', justifyContent: 'center', paddingTop: "24px"}}>
-                        {props.testimonial}
-                    </div>
+                <Meta
+                    avatar={<Avatar style={{width: "100px", height: "auto"}} src={props.avatar}/>}
+                    title={<h3 style={{marginBottom: 0}}>{props.name}</h3>}
+                    description={
+                        <div
+                            style={{
+                                textOverflow: "ellipsis",
+                                whiteSpace: "nowrap",
+                                overflow: "hidden",
+                                "-webkit-line-clamp": 3,
+                                "-webkit-box-orient": "vertical",
+                            }}
+                        >
+                            {props.position}
+                        </div>
+                    }
+                />
+                <div style={{
+                    height: '100%',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    justifyContent: 'center',
+                    paddingTop: "24px",
+                    fontSize: "16px"
+                }}>
+                    {props.testimonial}
+                </div>
             </Card>
         </div>
     );
