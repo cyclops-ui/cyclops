@@ -63,7 +63,7 @@ const config = {
         style: 'dark',
         logo: {
           alt: "Cyclops logo",
-          src: "img/cyclops-logo.png",
+          src: "img/cyclops-simplistic.png",
         },
         items: [
           {
