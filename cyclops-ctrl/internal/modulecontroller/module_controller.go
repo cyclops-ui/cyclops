@@ -145,7 +145,7 @@ func (r *ModuleReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctr
 			module,
 			req.NamespacedName,
 			cyclopsv1alpha1.Failed,
-			"one or more resources failed to apply",
+			"error decoding/applying resources",
 			installErrors,
 		)
 	}
