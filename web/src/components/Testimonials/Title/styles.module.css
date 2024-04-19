@@ -1,0 +1,33 @@
+.wrapper {
+    padding-top: 30px;
+    margin: 0 auto;
+}
+
+.installTitle {
+    /*display: inline-flex;*/
+    padding-bottom: 30px;
+}
+
+.titleText {
+    color: #FFF;
+    font-size-adjust: inherit;
+    margin: 0;
+    /*display: flex;*/
+    /*align-items: center;*/
+}
+
+.k8sImg {
+    padding-left: 10px;
+    height: auto;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(100px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}

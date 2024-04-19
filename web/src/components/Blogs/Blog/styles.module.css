@@ -1,0 +1,7 @@
+.blogcard {
+    transition: transform .2s;
+}
+
+.blogcard:hover {
+    transform: scale(1.05);
+}

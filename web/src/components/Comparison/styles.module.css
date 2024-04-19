@@ -5,6 +5,14 @@
   }
 }
 
+.title {
+  text-align: left;
+  display: inline-block;
+  color: #000830;
+  width: 100%;
+  font-size: 36px;
+}
+
 .all {
   display: flex;
   justify-content: center;
@@ -24,21 +32,49 @@
   padding-bottom: 30px;
   float: left;
   width: 30%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.descriptionitem {
+  font-weight: 550;
+  color: #000830;
+  margin-bottom: 10px;
 }
 
 @media screen and (max-width: 600px) {
+  .title {
+    text-align: center;
+    margin: 0 auto;
+    padding-bottom: 30px;
+  }
+
   .yaml {
-    width: 100%;
-    padding-right: 5px;
-    padding-left: 5px;
+    width: 95%;
+    margin: 0 auto;
+    padding: 0 0 30px;
   }
 
   .ui {
     text-align: center;
-    width: 100%;
-    padding-right: 5px;
-    padding-left: 5px;
-    padding-bottom: 0;
+    width: 80%;
+    margin: 0 auto;
+    padding-bottom: 30px;
+  }
+
+  .descriptionitem {
+    font-weight: normal;
+    color: #000;
+    margin-left: 0;
   }
 }
 
+.dot {
+  top: 1px;
+  height: 14px;
+  width: 14px;
+  border-radius: 50%;
+  display: inline-block;
+  margin: 8px 4px;
+}

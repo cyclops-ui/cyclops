@@ -3,7 +3,7 @@ title: How Telemetry Saved my Open-Source Platform
 authors: [jurajk]
 ---
 
-![telescope-cover-image](../../static/img/2024-04-12-telemetry/‎telemetry-cover.png)
+![telescope-cover-image](../../static/img/2024-04-12-telemetry/telemetry-cover.png)
 
 What started as a frustration with not being able to get in touch with our users, quickly developed into a redesign of the flow of our platform.
 

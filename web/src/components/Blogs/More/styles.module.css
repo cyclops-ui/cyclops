@@ -1,0 +1,21 @@
+.command {
+    width: 80%;
+    padding-top: 30px;
+    margin: 0 auto;
+}
+
+.commandDesc {
+    color: #FFF;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 1;
+        transform: translateY(100px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
