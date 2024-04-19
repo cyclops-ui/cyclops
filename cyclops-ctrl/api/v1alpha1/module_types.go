@@ -63,6 +63,7 @@ type ReconciliationStatus struct {
 	// +kubebuilder:default:=unknown
 	Status ReconciliationStatusState `json:"status"`
 	Reason string                    `json:"reason"`
+	Errors []string                  `json:"errors"`
 }
 
 // ModuleStatus defines the observed state of Module
