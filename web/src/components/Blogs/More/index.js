@@ -13,7 +13,7 @@ const More = () => {
                 }}
             >
                 <Button
-                    href={"/docs/installation/install/manifest"}
+                    href={"/blog"}
                     type="primary"
                     shape="round"
                     size={"large"}
