@@ -1,25 +1,17 @@
 package get
 
 import (
-	"context"
 	"fmt"
 	"time"
 
+	"github.com/cyclops-ui/cyclops/cyclops-ctrl/api/v1alpha1/client"
+	"github.com/ryanuber/columnize"
 	"k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/client-go/kubernetes"
 )
 
-func ListModules(clientset *kubernetes.Clientset) {
-	labelSelector := metav1.LabelSelector{
-		MatchLabels: map[string]string{
-			"app.kubernetes.io/managed-by": "cyclops",
-		},
-	}
-
-	modules, err := clientset.AppsV1().Deployments("").List(context.TODO(), metav1.ListOptions{
-		LabelSelector: metav1.FormatLabelSelector(&labelSelector),
-	})
+func ListModules(clientset *client.CyclopsV1Alpha1Client) {
+	modules, err := clientset.Modules("cyclops").List(metav1.ListOptions{})
 	if err != nil {
 		if errors.IsNotFound(err) {
 			fmt.Println("No modules found.")
@@ -29,9 +21,13 @@ func ListModules(clientset *kubernetes.Clientset) {
 		return
 	}
 
-	fmt.Println("NAME       AGE")
-	for _, module := range modules.Items {
+	moduleOutput := []string{"NAME | AGE"}
+	for _, module := range modules {
 		age := time.Since(module.CreationTimestamp.Time).Round(time.Second)
-		fmt.Printf("%-10s %s\n", module.Name, age.String())
+		moduleOutput = append(moduleOutput, fmt.Sprintf("%s | %s", module.Name, age.String()))
 	}
+
+	moduleResult := columnize.SimpleFormat(moduleOutput)
+	fmt.Println(moduleResult)
+
 }

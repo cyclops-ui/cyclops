@@ -17,7 +17,7 @@ var getCMD = &cobra.Command{
 		getCommand := args[0]
 		switch getCommand {
 		case "modules":
-			get.ListModules(kubeconfig.Clientset)
+			get.ListModules(kubeconfig.Moduleset)
 		default:
 			fmt.Println("Give the correct resource name")
 		}
