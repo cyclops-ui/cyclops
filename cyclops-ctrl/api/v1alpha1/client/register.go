@@ -1,7 +1,7 @@
-package v1alpha1
+package client
 
 import (
-	"github.com/cyclops-ui/cyclops/cyclops-ctrl/api/v1alpha1/types"
+	"github.com/cyclops-ui/cyclops/cyclops-ctrl/api/v1alpha1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/runtime/schema"
@@ -20,7 +20,7 @@ var (
 
 func addKnownTypes(scheme *runtime.Scheme) error {
 	scheme.AddKnownTypes(SchemeGroupVersion,
-		&types.Module{},
+		&v1alpha1.Module{},
 	)
 
 	metav1.AddToGroupVersion(scheme, SchemeGroupVersion)

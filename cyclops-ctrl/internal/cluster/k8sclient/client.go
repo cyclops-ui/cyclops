@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"context"
 	"fmt"
-	"github.com/cyclops-ui/cyclops/cyclops-ctrl/api/v1alpha1/client"
 	"gopkg.in/yaml.v2"
 	"io"
 	"os"
@@ -23,6 +22,7 @@ import (
 	"k8s.io/client-go/kubernetes"
 	ctrl "sigs.k8s.io/controller-runtime"
 
+	"github.com/cyclops-ui/cyclops/cyclops-ctrl/api/v1alpha1/client"
 	"github.com/cyclops-ui/cyclops/cyclops-ctrl/internal/models/dto"
 )
 

@@ -4,8 +4,6 @@ import (
 	"k8s.io/apimachinery/pkg/runtime/schema"
 	"k8s.io/client-go/kubernetes/scheme"
 	"k8s.io/client-go/rest"
-
-	"github.com/cyclops-ui/cyclops/cyclops-ctrl/internal/models/crd/v1alpha1"
 )
 
 type CyclopsV1Alpha1Client struct {
@@ -14,7 +12,7 @@ type CyclopsV1Alpha1Client struct {
 
 func NewForConfig(c *rest.Config) (*CyclopsV1Alpha1Client, error) {
 	config := *c
-	config.ContentConfig.GroupVersion = &schema.GroupVersion{Group: v1alpha1.GroupName, Version: v1alpha1.GroupVersion}
+	config.ContentConfig.GroupVersion = &schema.GroupVersion{Group: GroupName, Version: GroupVersion}
 	config.APIPath = "/apis"
 	config.NegotiatedSerializer = scheme.Codecs.WithoutConversion()
 	config.UserAgent = rest.DefaultKubernetesUserAgent()

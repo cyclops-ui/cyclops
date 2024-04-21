@@ -15,7 +15,7 @@ spec:
     singular: templatestore
   scope: Namespaced
   versions:
-  - name: types
+  - name: v1alpha1
     schema:
       openAPIV3Schema:
         description: TemplateStore holds reference to a template that can be offered

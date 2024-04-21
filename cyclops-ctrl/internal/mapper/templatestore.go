@@ -1,12 +1,13 @@
 package mapper
 
 import (
-	"github.com/cyclops-ui/cyclops/cyclops-ctrl/api/v1alpha1/types"
-	"github.com/cyclops-ui/cyclops/cyclops-ctrl/internal/models/dto"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+
+	"github.com/cyclops-ui/cyclops/cyclops-ctrl/api/v1alpha1"
+	"github.com/cyclops-ui/cyclops/cyclops-ctrl/internal/models/dto"
 )
 
-func TemplateStoreListToDTO(store []types.TemplateStore) []dto.TemplateStore {
+func TemplateStoreListToDTO(store []v1alpha1.TemplateStore) []dto.TemplateStore {
 	out := make([]dto.TemplateStore, 0, len(store))
 
 	for _, templateStore := range store {
@@ -23,8 +24,8 @@ func TemplateStoreListToDTO(store []types.TemplateStore) []dto.TemplateStore {
 	return out
 }
 
-func DTOToTemplateStore(store dto.TemplateStore) *types.TemplateStore {
-	return &types.TemplateStore{
+func DTOToTemplateStore(store dto.TemplateStore) *v1alpha1.TemplateStore {
+	return &v1alpha1.TemplateStore{
 		TypeMeta: metav1.TypeMeta{
 			Kind:       "TemplateStore",
 			APIVersion: "cyclops-ui.com/v1alpha1",
@@ -32,7 +33,7 @@ func DTOToTemplateStore(store dto.TemplateStore) *types.TemplateStore {
 		ObjectMeta: metav1.ObjectMeta{
 			Name: store.Name,
 		},
-		Spec: types.TemplateRef{
+		Spec: v1alpha1.TemplateRef{
 			URL:     store.TemplateRef.URL,
 			Path:    store.TemplateRef.Path,
 			Version: store.TemplateRef.Version,
