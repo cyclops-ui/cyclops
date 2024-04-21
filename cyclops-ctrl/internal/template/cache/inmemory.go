@@ -7,7 +7,7 @@ import (
 	"github.com/dgraph-io/ristretto"
 	json "github.com/json-iterator/go"
 
-	"github.com/cyclops-ui/cycops/cycops-ctrl/internal/models"
+	"github.com/cyclops-ui/cyclops/cyclops-ctrl/internal/models"
 )
 
 type Templates struct {

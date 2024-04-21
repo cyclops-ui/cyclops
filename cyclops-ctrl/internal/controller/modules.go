@@ -8,13 +8,13 @@ import (
 
 	"github.com/gin-gonic/gin"
 
-	"github.com/cyclops-ui/cycops/cycops-ctrl/api/v1alpha1"
-	"github.com/cyclops-ui/cycops/cycops-ctrl/internal/cluster/k8sclient"
-	"github.com/cyclops-ui/cycops/cycops-ctrl/internal/mapper"
-	"github.com/cyclops-ui/cycops/cycops-ctrl/internal/models/dto"
-	"github.com/cyclops-ui/cycops/cycops-ctrl/internal/storage/templates"
-	"github.com/cyclops-ui/cycops/cycops-ctrl/internal/telemetry"
-	"github.com/cyclops-ui/cycops/cycops-ctrl/internal/template"
+	"github.com/cyclops-ui/cyclops/cyclops-ctrl/api/v1alpha1"
+	"github.com/cyclops-ui/cyclops/cyclops-ctrl/internal/cluster/k8sclient"
+	"github.com/cyclops-ui/cyclops/cyclops-ctrl/internal/mapper"
+	"github.com/cyclops-ui/cyclops/cyclops-ctrl/internal/models/dto"
+	"github.com/cyclops-ui/cyclops/cyclops-ctrl/internal/storage/templates"
+	"github.com/cyclops-ui/cyclops/cyclops-ctrl/internal/telemetry"
+	"github.com/cyclops-ui/cyclops/cyclops-ctrl/internal/template"
 )
 
 type Modules struct {

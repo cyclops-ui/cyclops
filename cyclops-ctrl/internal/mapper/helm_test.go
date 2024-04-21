@@ -1,7 +1,7 @@
 package mapper
 
 import (
-	"github.com/cyclops-ui/cycops/cycops-ctrl/internal/models/helm"
+	"github.com/cyclops-ui/cyclops/cyclops-ctrl/internal/models/helm"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 )

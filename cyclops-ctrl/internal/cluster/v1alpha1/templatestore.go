@@ -7,7 +7,7 @@ import (
 	"k8s.io/client-go/rest"
 	"time"
 
-	cyclopsv1alpha1 "github.com/cyclops-ui/cycops/cycops-ctrl/api/v1alpha1"
+	cyclopsv1alpha1 "github.com/cyclops-ui/cyclops/cyclops-ctrl/api/v1alpha1"
 )
 
 type TemplateStoreInterface interface {

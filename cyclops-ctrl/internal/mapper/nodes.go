@@ -1,7 +1,7 @@
 package mapper
 
 import (
-	"github.com/cyclops-ui/cycops/cycops-ctrl/internal/models/dto"
+	"github.com/cyclops-ui/cyclops/cyclops-ctrl/internal/models/dto"
 	apiv1 "k8s.io/api/core/v1"
 )
 

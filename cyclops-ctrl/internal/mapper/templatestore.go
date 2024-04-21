@@ -1,8 +1,8 @@
 package mapper
 
 import (
-	cyclopsv1alpha1 "github.com/cyclops-ui/cycops/cycops-ctrl/api/v1alpha1"
-	"github.com/cyclops-ui/cycops/cycops-ctrl/internal/models/dto"
+	cyclopsv1alpha1 "github.com/cyclops-ui/cyclops/cyclops-ctrl/api/v1alpha1"
+	"github.com/cyclops-ui/cyclops/cyclops-ctrl/internal/models/dto"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
