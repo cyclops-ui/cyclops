@@ -22,8 +22,8 @@ import (
 	"k8s.io/client-go/kubernetes"
 	ctrl "sigs.k8s.io/controller-runtime"
 
-	"github.com/cyclops-ui/cycops-ctrl/internal/cluster/v1alpha1"
-	"github.com/cyclops-ui/cycops-ctrl/internal/models/dto"
+	"github.com/cyclops-ui/cycops/cycops-ctrl/internal/cluster/v1alpha1"
+	"github.com/cyclops-ui/cycops/cycops-ctrl/internal/models/dto"
 )
 
 const (

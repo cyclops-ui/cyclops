@@ -5,11 +5,11 @@ import (
 
 	"github.com/gin-gonic/gin"
 
-	"github.com/cyclops-ui/cycops-ctrl/internal/cluster/k8sclient"
-	"github.com/cyclops-ui/cycops-ctrl/internal/controller"
-	"github.com/cyclops-ui/cycops-ctrl/internal/storage/templates"
-	"github.com/cyclops-ui/cycops-ctrl/internal/telemetry"
-	templaterepo "github.com/cyclops-ui/cycops-ctrl/internal/template"
+	"github.com/cyclops-ui/cycops/cycops-ctrl/internal/cluster/k8sclient"
+	"github.com/cyclops-ui/cycops/cycops-ctrl/internal/controller"
+	"github.com/cyclops-ui/cycops/cycops-ctrl/internal/storage/templates"
+	"github.com/cyclops-ui/cycops/cycops-ctrl/internal/telemetry"
+	templaterepo "github.com/cyclops-ui/cycops/cycops-ctrl/internal/template"
 )
 
 type Handler struct {

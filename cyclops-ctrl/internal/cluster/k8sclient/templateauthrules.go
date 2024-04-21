@@ -2,7 +2,7 @@ package k8sclient
 
 import (
 	"context"
-	cyclopsv1alpha1 "github.com/cyclops-ui/cycops-ctrl/api/v1alpha1"
+	cyclopsv1alpha1 "github.com/cyclops-ui/cycops/cycops-ctrl/api/v1alpha1"
 	"github.com/pkg/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )

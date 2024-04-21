@@ -5,7 +5,7 @@ import (
 	"k8s.io/client-go/kubernetes/scheme"
 	"k8s.io/client-go/rest"
 
-	"github.com/cyclops-ui/cycops-ctrl/internal/models/crd/v1alpha1"
+	"github.com/cyclops-ui/cycops/cycops-ctrl/internal/models/crd/v1alpha1"
 )
 
 type CyclopsV1Alpha1Client struct {

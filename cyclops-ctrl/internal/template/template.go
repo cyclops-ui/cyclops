@@ -1,8 +1,8 @@
 package template
 
 import (
-	"github.com/cyclops-ui/cycops-ctrl/internal/auth"
-	"github.com/cyclops-ui/cycops-ctrl/internal/models"
+	"github.com/cyclops-ui/cycops/cycops-ctrl/internal/auth"
+	"github.com/cyclops-ui/cycops/cycops-ctrl/internal/models"
 	json "github.com/json-iterator/go"
 	helmchart "helm.sh/helm/v3/pkg/chart"
 	"helm.sh/helm/v3/pkg/registry"

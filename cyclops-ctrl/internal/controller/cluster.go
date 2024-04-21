@@ -4,9 +4,9 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/cyclops-ui/cycops-ctrl/internal/cluster/k8sclient"
-	"github.com/cyclops-ui/cycops-ctrl/internal/mapper"
-	"github.com/cyclops-ui/cycops-ctrl/internal/models/dto"
+	"github.com/cyclops-ui/cycops/cycops-ctrl/internal/cluster/k8sclient"
+	"github.com/cyclops-ui/cycops/cycops-ctrl/internal/mapper"
+	"github.com/cyclops-ui/cycops/cycops-ctrl/internal/models/dto"
 	"github.com/gin-gonic/gin"
 	"k8s.io/apimachinery/pkg/api/errors"
 )

@@ -21,11 +21,11 @@ import (
 	"github.com/go-git/go-git/v5/storage/memory"
 	"helm.sh/helm/v3/pkg/chart"
 
-	"github.com/cyclops-ui/cycops-ctrl/internal/auth"
-	"github.com/cyclops-ui/cycops-ctrl/internal/mapper"
-	"github.com/cyclops-ui/cycops-ctrl/internal/models"
-	"github.com/cyclops-ui/cycops-ctrl/internal/models/helm"
-	"github.com/cyclops-ui/cycops-ctrl/internal/template/gitproviders"
+	"github.com/cyclops-ui/cycops/cycops-ctrl/internal/auth"
+	"github.com/cyclops-ui/cycops/cycops-ctrl/internal/mapper"
+	"github.com/cyclops-ui/cycops/cycops-ctrl/internal/models"
+	"github.com/cyclops-ui/cycops/cycops-ctrl/internal/models/helm"
+	"github.com/cyclops-ui/cycops/cycops-ctrl/internal/template/gitproviders"
 )
 
 func (r Repo) LoadTemplate(repoURL, path, commit string) (*models.Template, error) {

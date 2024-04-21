@@ -31,12 +31,12 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/log"
 
-	cyclopsv1alpha1 "github.com/cyclops-ui/cycops-ctrl/api/v1alpha1"
-	"github.com/cyclops-ui/cycops-ctrl/internal/cluster/k8sclient"
-	"github.com/cyclops-ui/cycops-ctrl/internal/models"
-	"github.com/cyclops-ui/cycops-ctrl/internal/storage/templates"
-	"github.com/cyclops-ui/cycops-ctrl/internal/telemetry"
-	templaterepo "github.com/cyclops-ui/cycops-ctrl/internal/template"
+	cyclopsv1alpha1 "github.com/cyclops-ui/cycops/cycops-ctrl/api/v1alpha1"
+	"github.com/cyclops-ui/cycops/cycops-ctrl/internal/cluster/k8sclient"
+	"github.com/cyclops-ui/cycops/cycops-ctrl/internal/models"
+	"github.com/cyclops-ui/cycops/cycops-ctrl/internal/storage/templates"
+	"github.com/cyclops-ui/cycops/cycops-ctrl/internal/telemetry"
+	templaterepo "github.com/cyclops-ui/cycops/cycops-ctrl/internal/template"
 )
 
 // ModuleReconciler reconciles a Module object

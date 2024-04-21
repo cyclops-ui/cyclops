@@ -18,9 +18,9 @@ import (
 	helmchart "helm.sh/helm/v3/pkg/chart"
 	"helm.sh/helm/v3/pkg/registry"
 
-	"github.com/cyclops-ui/cycops-ctrl/internal/mapper"
-	"github.com/cyclops-ui/cycops-ctrl/internal/models"
-	"github.com/cyclops-ui/cycops-ctrl/internal/models/helm"
+	"github.com/cyclops-ui/cycops/cycops-ctrl/internal/mapper"
+	"github.com/cyclops-ui/cycops/cycops-ctrl/internal/models"
+	"github.com/cyclops-ui/cycops/cycops-ctrl/internal/models/helm"
 )
 
 func (r Repo) LoadHelmChart(repo, chart, version string) (*models.Template, error) {

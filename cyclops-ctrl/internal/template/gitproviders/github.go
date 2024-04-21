@@ -2,7 +2,7 @@ package gitproviders
 
 import (
 	"fmt"
-	"github.com/cyclops-ui/cycops-ctrl/internal/auth"
+	"github.com/cyclops-ui/cycops/cycops-ctrl/internal/auth"
 	"github.com/pkg/errors"
 	"io/ioutil"
 	"net/http"
