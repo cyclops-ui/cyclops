@@ -2,13 +2,13 @@ package controller
 
 import (
 	"fmt"
+	"github.com/cyclops-ui/cyclops/cyclops-ctrl/api/v1alpha1/types"
 	"net/http"
 	"os"
 	"strings"
 
 	"github.com/gin-gonic/gin"
 
-	"github.com/cyclops-ui/cyclops/cyclops-ctrl/api/v1alpha1"
 	"github.com/cyclops-ui/cyclops/cyclops-ctrl/internal/cluster/k8sclient"
 	"github.com/cyclops-ui/cyclops/cyclops-ctrl/internal/mapper"
 	"github.com/cyclops-ui/cyclops/cyclops-ctrl/internal/models/dto"
@@ -113,7 +113,7 @@ func (m *Modules) GetModuleHistory(ctx *gin.Context) {
 func (m *Modules) Manifest(ctx *gin.Context) {
 	ctx.Header("Access-Control-Allow-Origin", "*")
 
-	var request v1alpha1.ModuleSpec
+	var request types.ModuleSpec
 	if err := ctx.BindJSON(&request); err != nil {
 		fmt.Println("error binding request", request)
 		ctx.JSON(http.StatusBadRequest, dto.NewError("Error loading template", err.Error()))
@@ -131,7 +131,7 @@ func (m *Modules) Manifest(ctx *gin.Context) {
 		return
 	}
 
-	manifest, err := template.HelmTemplate(v1alpha1.Module{Spec: request}, targetTemplate)
+	manifest, err := template.HelmTemplate(types.Module{Spec: request}, targetTemplate)
 	if err != nil {
 		fmt.Println(err)
 		ctx.Status(http.StatusInternalServerError)
@@ -253,10 +253,10 @@ func (m *Modules) UpdateModule(ctx *gin.Context) {
 
 	history := curr.History
 	if curr.History == nil {
-		history = make([]v1alpha1.HistoryEntry, 0)
+		history = make([]types.HistoryEntry, 0)
 	}
 
-	module.History = append([]v1alpha1.HistoryEntry{{
+	module.History = append([]types.HistoryEntry{{
 		Generation:  curr.Generation,
 		TemplateRef: curr.Spec.TemplateRef,
 		Values:      curr.Spec.Values,
@@ -523,13 +523,13 @@ func (m *Modules) GetResource(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, resource)
 }
 
-func getTargetGeneration(generation string, module *v1alpha1.Module) (*v1alpha1.Module, bool) {
+func getTargetGeneration(generation string, module *types.Module) (*types.Module, bool) {
 	// no generation specified means current generation
 	if len(generation) == 0 {
 		return module, true
 	}
 
-	var target *v1alpha1.HistoryEntry
+	var target *types.HistoryEntry
 	for _, entry := range module.History {
 		if fmt.Sprintf("%v", entry.Generation) == generation {
 			target = &entry
@@ -540,7 +540,7 @@ func getTargetGeneration(generation string, module *v1alpha1.Module) (*v1alpha1.
 		return nil, false
 	}
 
-	return &v1alpha1.Module{
+	return &types.Module{
 		TypeMeta:   module.TypeMeta,
 		ObjectMeta: module.ObjectMeta,
 		Spec:       module.Spec,

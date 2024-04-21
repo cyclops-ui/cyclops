@@ -2,6 +2,7 @@ package k8sclient
 
 import (
 	"context"
+	cyclopsv1alpha1 "github.com/cyclops-ui/cyclops/cyclops-ctrl/api/v1alpha1/types"
 	"sort"
 	"strings"
 
@@ -13,7 +14,6 @@ import (
 	"k8s.io/apimachinery/pkg/runtime/schema"
 	yaml2 "k8s.io/apimachinery/pkg/util/yaml"
 
-	cyclopsv1alpha1 "github.com/cyclops-ui/cyclops/cyclops-ctrl/api/v1alpha1"
 	"github.com/cyclops-ui/cyclops/cyclops-ctrl/internal/models"
 	"github.com/cyclops-ui/cyclops/cyclops-ctrl/internal/models/dto"
 	template2 "github.com/cyclops-ui/cyclops/cyclops-ctrl/internal/template"

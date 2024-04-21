@@ -1,7 +1,7 @@
 package auth
 
 import (
-	"github.com/cyclops-ui/cyclops/cyclops-ctrl/api/v1alpha1"
+	"github.com/cyclops-ui/cyclops/cyclops-ctrl/api/v1alpha1/types"
 	"regexp"
 )
 
@@ -55,5 +55,5 @@ func (t TemplatesResolver) RepoAuthCredentials(repo string) (*Credentials, error
 
 type k8sClient interface {
 	GetTemplateAuthRuleSecret(string, string) (string, error)
-	ListTemplateAuthRules() ([]v1alpha1.TemplateAuthRule, error)
+	ListTemplateAuthRules() ([]types.TemplateAuthRule, error)
 }

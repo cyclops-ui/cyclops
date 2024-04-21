@@ -17,7 +17,7 @@ limitations under the License.
 // Package v1alpha1 contains API Schema definitions for the cyclops v1alpha1 API group
 // +kubebuilder:object:generate=true
 // +groupName=cyclops-ui.com
-package v1alpha1
+package types
 
 import (
 	"k8s.io/apimachinery/pkg/runtime/schema"

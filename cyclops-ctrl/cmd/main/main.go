@@ -3,6 +3,7 @@ package main
 import (
 	"flag"
 	"fmt"
+	cyclopsv1alpha1 "github.com/cyclops-ui/cyclops/cyclops-ctrl/api/v1alpha1/types"
 	"os"
 	"strconv"
 
@@ -15,7 +16,6 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/healthz"
 	"sigs.k8s.io/controller-runtime/pkg/log/zap"
 
-	cyclopsv1alpha1 "github.com/cyclops-ui/cyclops/cyclops-ctrl/api/v1alpha1"
 	"github.com/cyclops-ui/cyclops/cyclops-ctrl/internal/auth"
 	"github.com/cyclops-ui/cyclops/cyclops-ctrl/internal/cluster/k8sclient"
 	"github.com/cyclops-ui/cyclops/cyclops-ctrl/internal/handler"

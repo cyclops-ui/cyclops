@@ -15,7 +15,7 @@ spec:
     singular: templateauthrule
   scope: Namespaced
   versions:
-  - name: v1alpha1
+  - name: types
     schema:
       openAPIV3Schema:
         description: TemplateAuthRule is the Schema for the modules API

@@ -1,7 +1,7 @@
 package template
 
 import (
-	cyclopsv1alpha1 "github.com/cyclops-ui/cyclops/cyclops-ctrl/api/v1alpha1"
+	cyclopsv1alpha1 "github.com/cyclops-ui/cyclops/cyclops-ctrl/api/v1alpha1/types"
 	"github.com/cyclops-ui/cyclops/cyclops-ctrl/internal/models"
 	json "github.com/json-iterator/go"
 	"helm.sh/helm/v3/pkg/chart"
