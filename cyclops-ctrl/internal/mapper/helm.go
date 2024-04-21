@@ -3,8 +3,8 @@ package mapper
 import (
 	"sort"
 
-	"github.com/cyclops-ui/cycops-ctrl/internal/models"
-	"github.com/cyclops-ui/cycops-ctrl/internal/models/helm"
+	"github.com/cyclops-ui/cyclops/cyclops-ctrl/internal/models"
+	"github.com/cyclops-ui/cyclops/cyclops-ctrl/internal/models/helm"
 )
 
 func HelmSchemaToFields(name string, schema helm.Property, dependencies []*models.Template) models.Field {

@@ -1,6 +1,6 @@
 package mapper
 
-import "github.com/cyclops-ui/cycops-ctrl/internal/models"
+import "github.com/cyclops-ui/cyclops/cyclops-ctrl/internal/models"
 
 func MapConfigDetails(in []models.Template) (out []models.Template) {
 	for _, c := range in {

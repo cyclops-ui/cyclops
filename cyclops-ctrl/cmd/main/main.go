@@ -15,15 +15,16 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/healthz"
 	"sigs.k8s.io/controller-runtime/pkg/log/zap"
 
-	cyclopsv1alpha1 "github.com/cyclops-ui/cycops-ctrl/api/v1alpha1"
-	"github.com/cyclops-ui/cycops-ctrl/internal/auth"
-	"github.com/cyclops-ui/cycops-ctrl/internal/cluster/k8sclient"
-	"github.com/cyclops-ui/cycops-ctrl/internal/handler"
-	"github.com/cyclops-ui/cycops-ctrl/internal/modulecontroller"
-	"github.com/cyclops-ui/cycops-ctrl/internal/storage/templates"
-	"github.com/cyclops-ui/cycops-ctrl/internal/telemetry"
-	"github.com/cyclops-ui/cycops-ctrl/internal/template"
-	"github.com/cyclops-ui/cycops-ctrl/internal/template/cache"
+	"github.com/cyclops-ui/cyclops/cyclops-ctrl/internal/auth"
+	"github.com/cyclops-ui/cyclops/cyclops-ctrl/internal/cluster/k8sclient"
+	"github.com/cyclops-ui/cyclops/cyclops-ctrl/internal/handler"
+	"github.com/cyclops-ui/cyclops/cyclops-ctrl/internal/modulecontroller"
+	"github.com/cyclops-ui/cyclops/cyclops-ctrl/internal/storage/templates"
+	"github.com/cyclops-ui/cyclops/cyclops-ctrl/internal/telemetry"
+	"github.com/cyclops-ui/cyclops/cyclops-ctrl/internal/template"
+	"github.com/cyclops-ui/cyclops/cyclops-ctrl/internal/template/cache"
+
+	cyclopsv1alpha1 "github.com/cyclops-ui/cyclops/cyclops-ctrl/api/v1alpha1"
 )
 
 var (

@@ -2,7 +2,6 @@ package gitproviders
 
 import (
 	"fmt"
-	"github.com/cyclops-ui/cycops-ctrl/internal/auth"
 	"github.com/pkg/errors"
 	"io/ioutil"
 	"net/http"
@@ -10,6 +9,8 @@ import (
 	path2 "path"
 	"path/filepath"
 	"strings"
+
+	"github.com/cyclops-ui/cyclops/cyclops-ctrl/internal/auth"
 )
 
 func IsGitHubSource(repoURL string) bool {

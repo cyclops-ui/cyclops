@@ -22,8 +22,8 @@ import (
 	"k8s.io/client-go/kubernetes"
 	ctrl "sigs.k8s.io/controller-runtime"
 
-	"github.com/cyclops-ui/cycops-ctrl/internal/cluster/v1alpha1"
-	"github.com/cyclops-ui/cycops-ctrl/internal/models/dto"
+	"github.com/cyclops-ui/cyclops/cyclops-ctrl/api/v1alpha1/client"
+	"github.com/cyclops-ui/cyclops/cyclops-ctrl/internal/models/dto"
 )
 
 const (
@@ -38,7 +38,7 @@ type KubernetesClient struct {
 
 	discovery *discovery.DiscoveryClient
 
-	moduleset *v1alpha1.CyclopsV1Alpha1Client
+	moduleset *client.CyclopsV1Alpha1Client
 }
 
 func New() (*KubernetesClient, error) {
@@ -52,7 +52,7 @@ func createLocalClient() (*KubernetesClient, error) {
 		return nil, err
 	}
 
-	moduleSet, err := v1alpha1.NewForConfig(config)
+	moduleSet, err := client.NewForConfig(config)
 	if err != nil {
 		panic(err)
 	}
