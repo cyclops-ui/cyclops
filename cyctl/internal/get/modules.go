@@ -2,6 +2,7 @@ package get
 
 import (
 	"fmt"
+	"strings"
 	"time"
 
 	"github.com/cyclops-ui/cyclops/cyclops-ctrl/api/v1alpha1/client"
@@ -21,10 +22,17 @@ func ListModules(clientset *client.CyclopsV1Alpha1Client) {
 		return
 	}
 
-	moduleOutput := []string{"NAME | AGE"}
+	longestName := 0
+	for _, module := range modules {
+		if len(module.Name) > longestName {
+			longestName = len(module.Name)
+		}
+	}
+
+	moduleOutput := []string{"NAME" + strings.Repeat(" ", longestName-4) + " | AGE"}
 	for _, module := range modules {
 		age := time.Since(module.CreationTimestamp.Time).Round(time.Second)
-		moduleOutput = append(moduleOutput, fmt.Sprintf("%s | %s", module.Name, age.String()))
+		moduleOutput = append(moduleOutput, fmt.Sprintf("%s"+strings.Repeat(" ", longestName-len(module.Name))+" | %s", module.Name, age.String()))
 	}
 
 	moduleResult := columnize.SimpleFormat(moduleOutput)
