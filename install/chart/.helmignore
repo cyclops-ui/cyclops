@@ -21,3 +21,5 @@
 .idea/
 *.tmproj
 .vscode/
+# Ignore Notes.txt file
+Notes.txt
