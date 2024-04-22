@@ -53,10 +53,14 @@
 @keyframes fallAndFade {
   0% {
     top: -100%;
-    opacity: 0.4;
+    opacity: 0.6;
+  }
+  95% {
+    top: 60%;
+    opacity: 0;
   }
   100% {
-    top: 60%;
+    top: -100%;
     opacity: 0;
   }
 }
