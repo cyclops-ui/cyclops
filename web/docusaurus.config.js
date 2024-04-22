@@ -58,7 +58,7 @@ const config = {
     /** @type {import('@docusaurus/preset-classic').ThemeConfig} */
     ({
       // Replace with your project's social card
-      image: "img/which-would-you-prefer.png",
+      image: "img/cyclops-social-card.png",
       navbar: {
         style: 'dark',
         logo: {
