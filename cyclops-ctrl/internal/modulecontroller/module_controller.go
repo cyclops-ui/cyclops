@@ -96,7 +96,7 @@ func (r *ModuleReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctr
 		if err != nil {
 			r.logger.Error(err, "error on get module resources", "namespaced name", req.NamespacedName)
 
-			if err = r.setStatus(ctx, module, req.NamespacedName, cyclopsv1alpha1.Failed, err.Error()); err != nil {
+			if err = r.setStatus(ctx, module, req.NamespacedName, cyclopsv1alpha1.Failed, err.Error(), nil); err != nil {
 				return ctrl.Result{}, err
 			}
 
@@ -114,7 +114,7 @@ func (r *ModuleReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctr
 					fmt.Sprintf("%s/%s", resource.GetNamespace(), resource.GetName()),
 				)
 
-				if err = r.setStatus(ctx, module, req.NamespacedName, cyclopsv1alpha1.Failed, err.Error()); err != nil {
+				if err = r.setStatus(ctx, module, req.NamespacedName, cyclopsv1alpha1.Failed, err.Error(), nil); err != nil {
 					return ctrl.Result{}, err
 				}
 			}
@@ -127,21 +127,30 @@ func (r *ModuleReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctr
 	}
 
 	r.logger.Info("upsert module", "namespaced name", req.NamespacedName)
-	if err := r.moduleToResources(req.Name); err != nil {
+
+	installErrors, err := r.moduleToResources(req.Name)
+	if err != nil {
 		r.logger.Error(err, "error on upsert module", "namespaced name", req.NamespacedName)
 
-		if err = r.setStatus(ctx, module, req.NamespacedName, cyclopsv1alpha1.Failed, err.Error()); err != nil {
+		if err = r.setStatus(ctx, module, req.NamespacedName, cyclopsv1alpha1.Failed, err.Error(), nil); err != nil {
 			return ctrl.Result{}, err
 		}
 
 		return ctrl.Result{}, err
 	}
 
-	if err = r.setStatus(ctx, module, req.NamespacedName, cyclopsv1alpha1.Succeeded, ""); err != nil {
-		return ctrl.Result{}, err
+	if len(installErrors) != 0 {
+		return ctrl.Result{}, r.setStatus(
+			ctx,
+			module,
+			req.NamespacedName,
+			cyclopsv1alpha1.Failed,
+			"error decoding/applying resources",
+			installErrors,
+		)
 	}
 
-	return ctrl.Result{}, nil
+	return ctrl.Result{}, r.setStatus(ctx, module, req.NamespacedName, cyclopsv1alpha1.Succeeded, "", nil)
 }
 
 // SetupWithManager sets up the controller with the Manager.
@@ -151,10 +160,10 @@ func (r *ModuleReconciler) SetupWithManager(mgr ctrl.Manager) error {
 		Complete(r)
 }
 
-func (r *ModuleReconciler) moduleToResources(name string) error {
+func (r *ModuleReconciler) moduleToResources(name string) ([]string, error) {
 	module, err := r.kubernetesClient.GetModule(name)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	template, err := r.templatesRepo.GetTemplate(
@@ -163,21 +172,24 @@ func (r *ModuleReconciler) moduleToResources(name string) error {
 		module.Spec.TemplateRef.Version,
 	)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
-	if err := r.generateResources(r.kubernetesClient, *module, template); err != nil {
-		return err
+	installErrors, err := r.generateResources(r.kubernetesClient, *module, template)
+	if err != nil {
+		return nil, err
 	}
 
-	return nil
+	return installErrors, nil
 }
 
-func (r *ModuleReconciler) generateResources(kClient *k8sclient.KubernetesClient, module cyclopsv1alpha1.Module, moduleTemplate *models.Template) error {
+func (r *ModuleReconciler) generateResources(kClient *k8sclient.KubernetesClient, module cyclopsv1alpha1.Module, moduleTemplate *models.Template) ([]string, error) {
 	out, err := templaterepo.HelmTemplate(module, moduleTemplate)
 	if err != nil {
-		return err
+		return nil, err
 	}
+
+	installErrors := make([]string, 0)
 
 	for _, s := range strings.Split(out, "---") {
 		s := strings.TrimSpace(s)
@@ -197,6 +209,17 @@ func (r *ModuleReconciler) generateResources(kClient *k8sclient.KubernetesClient
 				"resource namespaced name",
 				fmt.Sprintf("%s/%s", obj.GetNamespace(), obj.GetName()),
 			)
+
+			installErrors = append(installErrors, fmt.Sprintf(
+				"%v%v/%v %v/%v failed to decode: %v",
+				obj.GroupVersionKind().Group,
+				obj.GroupVersionKind().Version,
+				obj.GroupVersionKind().Kind,
+				obj.GetNamespace(),
+				obj.GetName(),
+				err.Error(),
+			))
+
 			continue
 		}
 
@@ -222,11 +245,22 @@ func (r *ModuleReconciler) generateResources(kClient *k8sclient.KubernetesClient
 				"resource namespaced name",
 				fmt.Sprintf("%s/%s", obj.GetNamespace(), obj.GetName()),
 			)
+
+			installErrors = append(installErrors, fmt.Sprintf(
+				"%v%v/%v %v/%v failed to apply: %v",
+				obj.GroupVersionKind().Group,
+				obj.GroupVersionKind().Version,
+				obj.GroupVersionKind().Kind,
+				obj.GetNamespace(),
+				obj.GetName(),
+				err.Error(),
+			))
+
 			continue
 		}
 	}
 
-	return nil
+	return installErrors, nil
 }
 
 func (r *ModuleReconciler) setStatus(
@@ -235,10 +269,12 @@ func (r *ModuleReconciler) setStatus(
 	namespacedName types.NamespacedName,
 	status cyclopsv1alpha1.ReconciliationStatusState,
 	reason string,
+	installErrors []string,
 ) error {
 	module.Status = cyclopsv1alpha1.ModuleStatus{ReconciliationStatus: cyclopsv1alpha1.ReconciliationStatus{
 		Status: status,
 		Reason: reason,
+		Errors: installErrors,
 	}}
 
 	if err := r.Status().Update(ctx, &module); err != nil {
