@@ -23,17 +23,15 @@ type Handler struct {
 }
 
 func New(
-	templates *templates.Storage,
 	templatesRepo *templaterepo.Repo,
 	kubernetesClient *k8sclient.KubernetesClient,
 	telemetryClient telemetry.Client,
 ) (*Handler, error) {
 	return &Handler{
-		templatesRepo:    templatesRepo,
-		templatesStorage: templates,
-		k8sClient:        kubernetesClient,
-		telemetryClient:  telemetryClient,
-		router:           gin.New(),
+		templatesRepo:   templatesRepo,
+		k8sClient:       kubernetesClient,
+		telemetryClient: telemetryClient,
+		router:          gin.New(),
 	}, nil
 }
 

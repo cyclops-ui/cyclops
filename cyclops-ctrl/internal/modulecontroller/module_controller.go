@@ -56,7 +56,6 @@ func NewModuleReconciler(
 	client client.Client,
 	scheme *runtime.Scheme,
 	templatesRepo *templaterepo.Repo,
-	templates *templates.Storage,
 	kubernetesClient *k8sclient.KubernetesClient,
 	telemetryClient telemetry.Client,
 ) *ModuleReconciler {
@@ -64,7 +63,6 @@ func NewModuleReconciler(
 		Client:           client,
 		Scheme:           scheme,
 		templatesRepo:    templatesRepo,
-		templates:        templates,
 		kubernetesClient: kubernetesClient,
 		telemetryClient:  telemetryClient,
 		logger:           ctrl.Log.WithName("reconciler"),

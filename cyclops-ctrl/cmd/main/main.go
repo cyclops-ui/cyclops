@@ -19,7 +19,6 @@ import (
 	"github.com/cyclops-ui/cyclops/cyclops-ctrl/internal/cluster/k8sclient"
 	"github.com/cyclops-ui/cyclops/cyclops-ctrl/internal/handler"
 	"github.com/cyclops-ui/cyclops/cyclops-ctrl/internal/modulecontroller"
-	"github.com/cyclops-ui/cyclops/cyclops-ctrl/internal/storage/templates"
 	"github.com/cyclops-ui/cyclops/cyclops-ctrl/internal/telemetry"
 	"github.com/cyclops-ui/cyclops/cyclops-ctrl/internal/template"
 	"github.com/cyclops-ui/cyclops/cyclops-ctrl/internal/template/cache"
@@ -67,18 +66,12 @@ func main() {
 		panic(err)
 	}
 
-	templatesStorage, err := templates.NewStorage()
-	if err != nil {
-		fmt.Println("error bootstrapping redis", err)
-		//panic(err)
-	}
-
 	templatesRepo := template.NewRepo(
 		auth.NewTemplatesResolver(k8sClient),
 		cache.NewInMemoryTemplatesCache(),
 	)
 
-	handler, err := handler.New(templatesStorage, templatesRepo, k8sClient, telemetryClient)
+	handler, err := handler.New(templatesRepo, k8sClient, telemetryClient)
 	if err != nil {
 		panic(err)
 	}
@@ -102,7 +95,6 @@ func main() {
 		mgr.GetClient(),
 		mgr.GetScheme(),
 		templatesRepo,
-		templatesStorage,
 		k8sClient,
 		telemetryClient,
 	)).SetupWithManager(mgr); err != nil {
