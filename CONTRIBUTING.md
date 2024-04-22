@@ -82,11 +82,8 @@ make start
 
 > 📌 **_NOTE_** 📌
 >
-> The default port of the REST API is 8080. If you would like to change the port of the REST API, you can do it by setting the env var:
->
-> ```zsh
-> export PORT=xxxx
-> ```
+> The default port of the REST API is 8080. If you would like to change the port of the REST API, you can do it by setting the env var in the [.env](https://github.com/cyclops-ui/cyclops/blob/main/cyclops-ctrl/.env) file in the `/cyclops-ctrl`
+
 
 ## **UI** `/cyclops-ui`
 
