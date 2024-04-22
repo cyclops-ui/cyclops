@@ -56,7 +56,8 @@ You can install minikube and run it using `minikube start`. It will set up a Kub
 >
 > ```zsh
 > kubectl apply -f https://raw.githubusercontent.com/cyclops-ui/cyclops/main/install/chart/crds/cyclops-module.yaml \
->   -f https://raw.githubusercontent.com/cyclops-ui/cyclops/main/install/chart/crds/template-auth-rule.yaml
+>   -f https://raw.githubusercontent.com/cyclops-ui/cyclops/main/install/chart/crds/template-auth-rule.yaml \
+>   -f https://raw.githubusercontent.com/cyclops-ui/cyclops/main/install/chart/crds/template-store.yaml
 > ```
 
 ### **Controller** `/cyclops-ctrl`
