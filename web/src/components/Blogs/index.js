@@ -28,7 +28,7 @@ const Blogs = () => {
                             description={"What started as a frustration with not being able to get in touch with our users, quickly developed into a redesign of the flow of our platform"}
                             blogLink={"https://cyclops-ui.com/blog/2024/04/12/telemetry"}
                             avatar={"https://github.com/KaradzaJuraj.png"}
-                            banner={'/img/2024-04-12-telemetry/telemetry-cover.png'}
+                            banner={'/img/2024-04-12-telemetry/telemetry-cover-preview.png'}
                         />
                     </Col>
                     <Col xs={{ span: 20, offset: 2 }} md={{ span: 6, offset: 0 }}>
@@ -37,7 +37,7 @@ const Blogs = () => {
                             description={"We perceive things by the way we interact with and understand them"}
                             blogLink={"https://cyclops-ui.com/blog/2024/03/26/devs-perspective"}
                             avatar={"https://github.com/KaradzaJuraj.png"}
-                            banner={'/img/2024-03-26-devs-perspective/devs-perspective.webp'}
+                            banner={'/img/2024-03-26-devs-perspective/devs-perspective-preview.png'}
                         />
                     </Col>
                     <Col xs={{ span: 20, offset: 2 }} md={{ span: 6, offset: 0 }}>
@@ -46,7 +46,7 @@ const Blogs = () => {
                             description={"Have you ever thought of contributing to open source?"}
                             blogLink={"https://cyclops-ui.com/blog/2024/02/23/contributing-to-OS"}
                             avatar={"https://github.com/KaradzaJuraj.png"}
-                            banner={'/img/2024-02-23-contributing-to-OS/contributing-to-OS.jpeg'}
+                            banner={'/img/2024-02-23-contributing-to-OS/contributing-to-OS-preview.jpeg'}
                         />
                     </Col>
                 </Row>
