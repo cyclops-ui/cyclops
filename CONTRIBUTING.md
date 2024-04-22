@@ -44,23 +44,32 @@ Before you start contributing, getting a feel of the project and trying it out l
 
 But before you can start running the components, you need to set up your dev environment. If you already have a Kubernetes cluster you can use, you can skip this step. If not, don't worry, this won't take long.
 
+## Cluster setup
+
 ### **Minikube**
 
 To run the controller, you will need a Kubernetes cluster to connect it to. For the sake of development, you can use [minikube](https://minikube.sigs.k8s.io/docs/).
 You can install minikube and run it using `minikube start`. It will set up a Kubernetes cluster locally and configure your kubeconfig file to point to the minikube cluster.
 
-> ❗ **_ATTENTION_** ❗
->
-> Cyclops has its own [custom resource](https://kubernetes.io/docs/concepts/extend-kubernetes/api-extension/custom-resources/) which you need to install into your cluster before trying to run Cyclops.
-> You can install it using the command below:
->
-> ```zsh
-> kubectl apply -f https://raw.githubusercontent.com/cyclops-ui/cyclops/main/install/chart/crds/cyclops-module.yaml \
->   -f https://raw.githubusercontent.com/cyclops-ui/cyclops/main/install/chart/crds/template-auth-rule.yaml \
->   -f https://raw.githubusercontent.com/cyclops-ui/cyclops/main/install/chart/crds/template-store.yaml
-> ```
+### `cyclops` namespace
 
-### **Controller** `/cyclops-ctrl`
+You will need to create a new namespace for Cyclops resources
+```zsh
+kubectl create namespace cyclops
+```
+
+### Cyclops CRDs
+
+Cyclops has its own [custom resource](https://kubernetes.io/docs/concepts/extend-kubernetes/api-extension/custom-resources/) which you need to install into your cluster before trying to run Cyclops.
+You can install it using the command below:
+
+```zsh
+kubectl apply -f https://raw.githubusercontent.com/cyclops-ui/cyclops/main/install/chart/crds/cyclops-module.yaml \
+  -f https://raw.githubusercontent.com/cyclops-ui/cyclops/main/install/chart/crds/template-auth-rule.yaml \
+  -f https://raw.githubusercontent.com/cyclops-ui/cyclops/main/install/chart/crds/template-store.yaml
+```
+
+## **Controller** `/cyclops-ctrl`
 
 You can run the controller inside the cluster deployed as a Kubernetes deployment, described [here](https://github.com/cyclops-ui/cyclops/blob/a4d21a48648e79fe27e51600f5489ae0d36175a7/install/cyclops-install.yaml#L259),
 or you can run it outside of the cluster.
@@ -79,7 +88,7 @@ make start
 > export PORT=xxxx
 > ```
 
-### **UI** `/cyclops-ui`
+## **UI** `/cyclops-ui`
 
 UI depends on the controller API. Again, you can run inside the cluster as well as outside. To run it, position yourself
 in `cyclops-ui`. After that, you will need to install all the dependencies using
@@ -98,7 +107,7 @@ yarn start
 >
 > If you changed the port of the REST API, you will need to update it in the UI as well.
 
-### **Documentation** `/web`
+## **Documentation** `/web`
 
 You can run our page locally by installing the dependencies
 
