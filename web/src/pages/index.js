@@ -65,7 +65,13 @@ export default function Home() {
                         src={yaml}
                     />
 
-                    <img className={styles.backgroundYaml} src={yaml}/>
+                    <img
+                        className={styles.backgroundYaml}
+                        src={yaml}
+                        style={{
+                            opacity: 0
+                        }}
+                    />
                     <img
                         style={{
                             left: "10%",
