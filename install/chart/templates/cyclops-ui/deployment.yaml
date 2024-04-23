@@ -17,7 +17,7 @@ spec:
     spec:
       containers:
         - name: cyclops-ui
-          image: cyclopsui/cyclops-ui:v0.3.1
+          image: cyclopsui/cyclops-ui:v0.3.3
           ports:
             - containerPort: 80
           env:
