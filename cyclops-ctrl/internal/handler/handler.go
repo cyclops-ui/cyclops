@@ -38,7 +38,7 @@ func New(
 func (h *Handler) Start() error {
 	gin.SetMode(gin.DebugMode)
 
-	templatesController := controller.NewTemplatesController(h.templatesStorage, h.templatesRepo, h.k8sClient)
+	templatesController := controller.NewTemplatesController(h.templatesRepo, h.k8sClient)
 	modulesController := controller.NewModulesController(h.templatesStorage, h.templatesRepo, h.k8sClient, h.telemetryClient)
 	clusterController := controller.NewClusterController(h.k8sClient)
 

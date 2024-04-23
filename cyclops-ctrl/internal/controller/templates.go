@@ -24,13 +24,11 @@ type Templates struct {
 }
 
 func NewTemplatesController(
-	templates *templates.Storage,
 	templatesRepo *template.Repo,
 	kubernetes *k8sclient.KubernetesClient,
 ) *Templates {
 	return &Templates{
 		templatesRepo:    templatesRepo,
-		templates:        templates,
 		kubernetesClient: kubernetes,
 	}
 }
