@@ -14,3 +14,4 @@ jobs:
       - name: Helm
         run: |
           helm help
+          yq .version install/chart/Chart.yaml
