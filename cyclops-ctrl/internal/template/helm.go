@@ -173,7 +173,7 @@ func (r Repo) mapHelmChart(chartName string, files map[string][]byte) (*models.T
 			continue
 		}
 
-		if len(parts) > 2 && parts[1] == "templates" {
+		if len(parts) > 2 && parts[1] == "templates" && (parts[2] != "Notes.txt" && parts[2] != "NOTES.txt") {
 			manifestParts = append(manifestParts, string(content))
 			continue
 		}
