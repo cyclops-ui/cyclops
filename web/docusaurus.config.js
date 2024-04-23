@@ -115,7 +115,16 @@ const config = {
               },
               {
                 html: `
-                <div style="width: 100%; padding-top: 20px">
+                <div style="padding-top: 20px">
+                  <a href="https://nuqleus.io/">
+                    <img src="/img/nuqleus_landscape.png"/>
+                  </a>
+                </div>
+              `,
+              },
+              {
+                html: `
+                <div style="width: 100%; padding-top: 10px">
                   <a href="https://filrougecapital.com/">
                     <img style="width: 50%" src="/img/frc-white.png"/>
                   </a>
