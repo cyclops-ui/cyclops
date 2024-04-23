@@ -1,0 +1,17 @@
+name: helm chart update
+
+on:
+  push:
+    paths:
+      - 'install/chart/**'
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+      - name: Push Helm chart to Cyclops OCI
+        run: |
+          helm package install/chart
+          helm push cyclops-chart-$(yq .version install/chart/Chart.yaml).tgz oci://registry-1.docker.io/cyclopsui
