@@ -37,7 +37,7 @@ func (h *Handler) Start() error {
 	gin.SetMode(gin.DebugMode)
 
 	templatesController := controller.NewTemplatesController(h.templatesRepo, h.k8sClient)
-	modulesController := controller.NewModulesController(h.templatesStorage, h.templatesRepo, h.k8sClient, h.telemetryClient)
+	modulesController := controller.NewModulesController(h.templatesRepo, h.k8sClient, h.telemetryClient)
 	clusterController := controller.NewClusterController(h.k8sClient)
 
 	h.router = gin.New()
@@ -45,10 +45,6 @@ func (h *Handler) Start() error {
 	h.router.GET("/ping", h.pong())
 
 	// templates
-	h.router.POST("/create-config", templatesController.StoreConfiguration)
-	h.router.GET("/create-config/:name", templatesController.GetConfiguration)
-	h.router.GET("/configuration-details", templatesController.GetConfigurationsDetails)
-	h.router.GET("/configuration/:name/versions", templatesController.GetConfigurationsVersions)
 	h.router.GET("/templates", templatesController.GetTemplate)
 	h.router.GET("/templates/initial", templatesController.GetTemplateInitialValues)
 
