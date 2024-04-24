@@ -41,7 +41,7 @@ import "ace-builds/src-noconflict/mode-typescript";
 import "ace-builds/src-noconflict/snippets/yaml";
 import { numberInputValidators } from "../../utils/validators/number";
 import { stringInputValidators } from "../../utils/validators/string";
-import {Option} from "antd/es/mentions";
+import { Option } from "antd/es/mentions";
 
 const { Title } = Typography;
 const layout = {
@@ -49,12 +49,12 @@ const layout = {
 };
 
 interface templateStoreOption {
-  name: string,
+  name: string;
   ref: {
-    repo: string,
-    path: string,
-    version: string,
-  }
+    repo: string;
+    path: string;
+    version: string;
+  };
 }
 
 const NewModule = () => {
@@ -77,6 +77,7 @@ const NewModule = () => {
   });
 
   const [initialValues, setInitialValues] = useState({});
+  const [initialValuesRaw, setInitialValuesRaw] = useState({});
 
   const [error, setError] = useState({
     message: "",
@@ -108,7 +109,7 @@ const NewModule = () => {
   const [form] = Form.useForm();
 
   useEffect(() => {
-    loadTemplateStore()
+    loadTemplateStore();
   }, []);
 
   useEffect(() => {
@@ -145,7 +146,7 @@ const NewModule = () => {
                 break;
               case "object":
                 objectArr.push(
-                  mapsToArray(field.items.properties, valueFromList)
+                  mapsToArray(field.items.properties, valueFromList),
                 );
                 break;
             }
@@ -241,10 +242,102 @@ const NewModule = () => {
     return out;
   };
 
+  const findMapsWithInitial = (
+    fields: any[],
+    values: any,
+    initialValues: any,
+  ): any => {
+    let out: any = initialValues;
+    fields.forEach((field) => {
+      let valuesList: any[] = [];
+      switch (field.type) {
+        case "string":
+          out[field.name] = values[field.name];
+          break;
+        case "number":
+          out[field.name] = values[field.name];
+          break;
+        case "boolean":
+          out[field.name] = values[field.name];
+          break;
+        case "object":
+          if (values[field.name]) {
+            out[field.name] = findMapsWithInitial(
+              field.properties,
+              values[field.name],
+              initialValues[field.name],
+            );
+          }
+          break;
+        case "array":
+          valuesList = values[field.name] as any[];
+
+          if (!valuesList) {
+            out[field.name] = [];
+            break;
+          }
+
+          let objectArr: any[] = [];
+          valuesList.forEach((valueFromList) => {
+            switch (field.items.type) {
+              case "string":
+                objectArr.push(valueFromList);
+                break;
+              case "object":
+                objectArr.push(
+                  findMapsWithInitial(
+                    field.items.properties,
+                    valueFromList,
+                    initialValues[field.name],
+                  ),
+                );
+                break;
+            }
+          });
+          out[field.name] = objectArr;
+          break;
+        case "map":
+          valuesList = values[field.name] as any[];
+
+          if (!valuesList) {
+            out[field.name] = {};
+            break;
+          }
+
+          let object: any = {};
+          valuesList.forEach((valueFromList) => {
+            object[valueFromList.key] = valueFromList.value;
+          });
+          out[field.name] = object;
+          break;
+      }
+    });
+
+    return out;
+  };
+
   const handleSubmit = (values: any) => {
     const moduleName = values["cyclops_module_name"];
 
-    values = findMaps(config.root.properties, values);
+    // console.log(initialValuesRaw)
+    // console.log()
+    // console.log(values)
+    //
+    // console.log("prije")
+    // console.log(findMaps(config.root.properties, values));
+    //
+    // console.log("novo")
+    // console.log(findMapsWithInitial(config.root.properties, values, initialValuesRaw));
+    //
+    // return
+
+    // values = findMaps(config.root.properties, values);
+
+    values = findMapsWithInitial(
+      config.root.properties,
+      values,
+      initialValuesRaw,
+    );
 
     axios
       .post(`/api/modules/new`, {
@@ -292,6 +385,7 @@ const NewModule = () => {
       dependencies: [],
     });
     form.setFieldsValue({});
+    setInitialValuesRaw({});
     setInitialValues({});
 
     setActiveCollapses(new Map());
@@ -317,7 +411,7 @@ const NewModule = () => {
 
     await axios
       .get(
-        `/api/templates?repo=` + repo + `&path=` + path + `&commit=` + commit
+        `/api/templates?repo=` + repo + `&path=` + path + `&commit=` + commit,
       )
       .then((templatesRes) => {
         setConfig(templatesRes.data);
@@ -356,14 +450,15 @@ const NewModule = () => {
           `&path=` +
           path +
           `&commit=` +
-          commit
+          commit,
       )
       .then((res) => {
         let initialValuesMapped = mapsToArray(
           tmpConfig.root.properties,
-          res.data
+          res.data,
         );
 
+        setInitialValuesRaw(res.data);
         setInitialValues(initialValuesMapped);
         form.setFieldsValue(initialValuesMapped);
 
@@ -399,44 +494,42 @@ const NewModule = () => {
 
   const loadTemplateStore = async () => {
     await axios
-        .get(
-            `/api/templates/store`
-        )
-        .then((res) => {
-          setTemplateStore(res.data);
-        })
-        .catch(function (error) {
-          setLoadingTemplate(false);
-          if (error.response === undefined) {
-            setError({
-              message: String(error),
-              description:
-                  "Check if Cyclops backend is available on: " +
-                  window.__RUNTIME_CONFIG__.REACT_APP_CYCLOPS_CTRL_HOST,
-            });
-          } else {
-            setError({
-              message: error.message,
-              description: error.response.data,
-            });
-          }
-        });
+      .get(`/api/templates/store`)
+      .then((res) => {
+        setTemplateStore(res.data);
+      })
+      .catch(function (error) {
+        setLoadingTemplate(false);
+        if (error.response === undefined) {
+          setError({
+            message: String(error),
+            description:
+              "Check if Cyclops backend is available on: " +
+              window.__RUNTIME_CONFIG__.REACT_APP_CYCLOPS_CTRL_HOST,
+          });
+        } else {
+          setError({
+            message: error.message,
+            description: error.response.data,
+          });
+        }
+      });
   };
 
   const findTemplateStoreSelected = (name: string) => {
     for (let ts of templateStore) {
       if (ts.name === name) {
-        return ts
+        return ts;
       }
     }
 
-    return null
-  }
+    return null;
+  };
 
   const onTemplateStoreSelected = (v: string) => {
-    const ts = findTemplateStoreSelected(v)
+    const ts = findTemplateStoreSelected(v);
     if (ts === null) {
-      return
+      return;
     }
 
     setTemplate({
@@ -445,12 +538,8 @@ const NewModule = () => {
       version: ts.ref.version,
     });
 
-    loadTemplate(
-        ts.ref.repo,
-        ts.ref.path,
-        ts.ref.version,
-    );
-  }
+    loadTemplate(ts.ref.repo, ts.ref.path, ts.ref.version);
+  };
 
   const onLoadFromFile = () => {
     setLoadingValuesFile(true);
@@ -484,7 +573,7 @@ const NewModule = () => {
     field: any,
     formItemName: string | string[],
     arrayField: any,
-    isRequired: boolean
+    isRequired: boolean,
   ) => {
     let options: { value: string; label: string }[] = [];
     field.enum.forEach((option: any) => {
@@ -525,7 +614,7 @@ const NewModule = () => {
     field: any,
     formItemName: string | string[],
     arrayField: any,
-    isRequired: boolean
+    isRequired: boolean,
   ) => {
     return (
       <Form.Item
@@ -571,7 +660,7 @@ const NewModule = () => {
     parent: string,
     level: number,
     arrayField: any,
-    remove: Function
+    remove: Function,
   ) => {
     switch (field.items.type) {
       case "object":
@@ -584,7 +673,7 @@ const NewModule = () => {
               level + 1,
               2,
               arrayField,
-              field.items.required
+              field.items.required,
             )}
             <MinusCircleOutlined
               style={{ fontSize: "16px" }}
@@ -638,7 +727,7 @@ const NewModule = () => {
     level: number,
     arrayIndexLifetime: number,
     arrayField?: any,
-    required?: string[]
+    required?: string[],
   ) {
     const formFields: {} | any = [];
 
@@ -675,14 +764,14 @@ const NewModule = () => {
         case "string":
           if (field.enum) {
             formFields.push(
-              selectInputField(field, formItemName, arrayField, isRequired)
+              selectInputField(field, formItemName, arrayField, isRequired),
             );
             return;
           }
 
           if (field.fileExtension && field.fileExtension.length > 0) {
             formFields.push(
-              fileField(field, formItemName, arrayField, isRequired)
+              fileField(field, formItemName, arrayField, isRequired),
             );
             return;
           }
@@ -706,7 +795,7 @@ const NewModule = () => {
               rules={stringValidationRules}
             >
               <Input />
-            </Form.Item>
+            </Form.Item>,
           );
           return;
         case "number":
@@ -730,7 +819,7 @@ const NewModule = () => {
               rules={numberValidationRules}
             >
               <InputNumber style={{ width: "100%" }} />
-            </Form.Item>
+            </Form.Item>,
           );
           return;
         case "boolean":
@@ -764,7 +853,7 @@ const NewModule = () => {
               }
             >
               <Switch />
-            </Form.Item>
+            </Form.Item>,
           );
           return;
         case "object":
@@ -838,14 +927,14 @@ const NewModule = () => {
                           level + 1,
                           arrayIndexLifetime,
                           arrayIndexLifetime > 0 ? arrayField : undefined,
-                          field.required
+                          field.required,
                         )}
                       </>
                     )}
                   </Form.List>
                 </Collapse.Panel>
               </Collapse>
-            </Col>
+            </Col>,
           );
           return;
         case "array":
@@ -920,7 +1009,7 @@ const NewModule = () => {
                               "",
                               level + 1,
                               arrField,
-                              remove
+                              remove,
                             )}
                             <Divider />
                           </Col>
@@ -941,7 +1030,7 @@ const NewModule = () => {
                   </Form.List>
                 </Collapse.Panel>
               </Collapse>
-            </Col>
+            </Col>,
           );
           return;
         case "map":
@@ -1001,7 +1090,7 @@ const NewModule = () => {
                   </>
                 )}
               </Form.List>
-            </Form.Item>
+            </Form.Item>,
           );
       }
     });
@@ -1018,7 +1107,7 @@ const NewModule = () => {
         0,
         0,
         undefined,
-        config.root.required
+        config.root.required,
       );
     }
 
@@ -1136,14 +1225,14 @@ const NewModule = () => {
             <Row>
               <Col span={16}>
                 <Select
-                    onChange={onTemplateStoreSelected}
-                    style={{width: "100%"}}
-                    placeholder="Select an option"
+                  onChange={onTemplateStoreSelected}
+                  style={{ width: "100%" }}
+                  placeholder="Select an option"
                 >
                   {templateStore.map((option: any, index) => (
-                      <Option key={option.name} value={option.name}>
-                        {option.name}
-                      </Option>
+                    <Option key={option.name} value={option.name}>
+                      {option.name}
+                    </Option>
                   ))}
                 </Select>
               </Col>

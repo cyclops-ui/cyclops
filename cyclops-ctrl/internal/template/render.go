@@ -45,7 +45,11 @@ func HelmTemplate(module cyclopsv1alpha1.Module, moduleTemplate *models.Template
 
 	out, err := engine.Render(chart, top)
 	if err != nil {
+		//fmt.Println("pocetak")
 		//fmt.Println(moduleTemplate.Manifest)
+		//fmt.Println("kraj")
+		//fmt.Println(err)
+		//panic("akak")
 		return "", err
 	}
 

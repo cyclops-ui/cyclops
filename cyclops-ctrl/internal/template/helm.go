@@ -195,14 +195,12 @@ func (r Repo) mapHelmChart(chartName string, files map[string][]byte) (*models.T
 
 	}
 
-	if len(schemaBytes) == 0 {
-		return nil, errors.New("could not read 'values.schema.json' file; it should be placed in the repo/path you provided; make sure you provided the correct path")
-	}
-
 	var schema helm.Property
 	// unmarshal values schema only if present
-	if err := json.Unmarshal(schemaBytes, &schema); err != nil {
-		return &models.Template{}, err
+	if len(schemaBytes) > 0 {
+		if err := json.Unmarshal(schemaBytes, &schema); err != nil {
+			return &models.Template{}, err
+		}
 	}
 
 	var metadata helmchart.Metadata
