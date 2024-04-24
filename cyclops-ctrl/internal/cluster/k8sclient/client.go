@@ -7,6 +7,10 @@ import (
 	"fmt"
 	"gopkg.in/yaml.v2"
 	"io"
+	"os"
+	"os/exec"
+	"strings"
+
 	v12 "k8s.io/api/apps/v1"
 	"k8s.io/api/autoscaling/v1"
 	apiv1 "k8s.io/api/core/v1"
@@ -17,10 +21,7 @@ import (
 	"k8s.io/client-go/discovery"
 	"k8s.io/client-go/dynamic"
 	"k8s.io/client-go/kubernetes"
-	"os"
-	"os/exec"
 	ctrl "sigs.k8s.io/controller-runtime"
-	"strings"
 
 	"github.com/cyclops-ui/cyclops/cyclops-ctrl/api/v1alpha1/client"
 	"github.com/cyclops-ui/cyclops/cyclops-ctrl/internal/models/dto"
