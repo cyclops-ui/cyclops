@@ -7,7 +7,6 @@ import (
 
 	"github.com/cyclops-ui/cyclops/cyclops-ctrl/internal/cluster/k8sclient"
 	"github.com/cyclops-ui/cyclops/cyclops-ctrl/internal/controller"
-	"github.com/cyclops-ui/cyclops/cyclops-ctrl/internal/storage/templates"
 	"github.com/cyclops-ui/cyclops/cyclops-ctrl/internal/telemetry"
 	templaterepo "github.com/cyclops-ui/cyclops/cyclops-ctrl/internal/template"
 )
@@ -15,9 +14,8 @@ import (
 type Handler struct {
 	router *gin.Engine
 
-	templatesRepo    *templaterepo.Repo
-	templatesStorage *templates.Storage
-	k8sClient        *k8sclient.KubernetesClient
+	templatesRepo *templaterepo.Repo
+	k8sClient     *k8sclient.KubernetesClient
 
 	telemetryClient telemetry.Client
 }
@@ -39,7 +37,7 @@ func (h *Handler) Start() error {
 	gin.SetMode(gin.DebugMode)
 
 	templatesController := controller.NewTemplatesController(h.templatesRepo, h.k8sClient)
-	modulesController := controller.NewModulesController(h.templatesStorage, h.templatesRepo, h.k8sClient, h.telemetryClient)
+	modulesController := controller.NewModulesController(h.templatesRepo, h.k8sClient, h.telemetryClient)
 	clusterController := controller.NewClusterController(h.k8sClient)
 
 	h.router = gin.New()
@@ -47,10 +45,6 @@ func (h *Handler) Start() error {
 	h.router.GET("/ping", h.pong())
 
 	// templates
-	h.router.POST("/create-config", templatesController.StoreConfiguration)
-	h.router.GET("/create-config/:name", templatesController.GetConfiguration)
-	h.router.GET("/configuration-details", templatesController.GetConfigurationsDetails)
-	h.router.GET("/configuration/:name/versions", templatesController.GetConfigurationsVersions)
 	h.router.GET("/templates", templatesController.GetTemplate)
 	h.router.GET("/templates/initial", templatesController.GetTemplateInitialValues)
 
