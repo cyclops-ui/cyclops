@@ -34,7 +34,6 @@ import (
 	cyclopsv1alpha1 "github.com/cyclops-ui/cyclops/cyclops-ctrl/api/v1alpha1"
 	"github.com/cyclops-ui/cyclops/cyclops-ctrl/internal/cluster/k8sclient"
 	"github.com/cyclops-ui/cyclops/cyclops-ctrl/internal/models"
-	"github.com/cyclops-ui/cyclops/cyclops-ctrl/internal/storage/templates"
 	"github.com/cyclops-ui/cyclops/cyclops-ctrl/internal/telemetry"
 	templaterepo "github.com/cyclops-ui/cyclops/cyclops-ctrl/internal/template"
 )
@@ -45,7 +44,6 @@ type ModuleReconciler struct {
 	Scheme *runtime.Scheme
 
 	templatesRepo    *templaterepo.Repo
-	templates        *templates.Storage
 	kubernetesClient *k8sclient.KubernetesClient
 
 	telemetryClient telemetry.Client
@@ -56,7 +54,6 @@ func NewModuleReconciler(
 	client client.Client,
 	scheme *runtime.Scheme,
 	templatesRepo *templaterepo.Repo,
-	templates *templates.Storage,
 	kubernetesClient *k8sclient.KubernetesClient,
 	telemetryClient telemetry.Client,
 ) *ModuleReconciler {
@@ -64,7 +61,6 @@ func NewModuleReconciler(
 		Client:           client,
 		Scheme:           scheme,
 		templatesRepo:    templatesRepo,
-		templates:        templates,
 		kubernetesClient: kubernetesClient,
 		telemetryClient:  telemetryClient,
 		logger:           ctrl.Log.WithName("reconciler"),
