@@ -19,5 +19,4 @@ RUN mkdir /app/bin
 
 COPY --from=build /build/bin/main /app/bin/ctrl
 
-
 CMD ["/app/bin/ctrl"]
