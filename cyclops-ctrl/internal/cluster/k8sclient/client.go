@@ -3,6 +3,7 @@ package k8sclient
 import (
 	"bytes"
 	"context"
+	"errors"
 	"fmt"
 	"gopkg.in/yaml.v2"
 	"io"
@@ -13,7 +14,7 @@ import (
 	v12 "k8s.io/api/apps/v1"
 	"k8s.io/api/autoscaling/v1"
 	apiv1 "k8s.io/api/core/v1"
-	"k8s.io/apimachinery/pkg/api/errors"
+	k8serrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/runtime/schema"
@@ -22,8 +23,8 @@ import (
 	"k8s.io/client-go/kubernetes"
 	ctrl "sigs.k8s.io/controller-runtime"
 
-	"github.com/cyclops-ui/cycops-ctrl/internal/cluster/v1alpha1"
-	"github.com/cyclops-ui/cycops-ctrl/internal/models/dto"
+	"github.com/cyclops-ui/cyclops/cyclops-ctrl/api/v1alpha1/client"
+	"github.com/cyclops-ui/cyclops/cyclops-ctrl/internal/models/dto"
 )
 
 const (
@@ -38,7 +39,7 @@ type KubernetesClient struct {
 
 	discovery *discovery.DiscoveryClient
 
-	moduleset *v1alpha1.CyclopsV1Alpha1Client
+	moduleset *client.CyclopsV1Alpha1Client
 }
 
 func New() (*KubernetesClient, error) {
@@ -52,7 +53,7 @@ func createLocalClient() (*KubernetesClient, error) {
 		return nil, err
 	}
 
-	moduleSet, err := v1alpha1.NewForConfig(config)
+	moduleSet, err := client.NewForConfig(config)
 	if err != nil {
 		panic(err)
 	}
@@ -107,7 +108,7 @@ func (k *KubernetesClient) Deploy(deploymentSpec *v12.Deployment) error {
 
 	_, err := deploymentClient.Get(context.TODO(), deploymentSpec.Name, metav1.GetOptions{})
 	if err != nil {
-		if errors.IsNotFound(err) {
+		if k8serrors.IsNotFound(err) {
 			_, err := deploymentClient.Create(context.TODO(), deploymentSpec, metav1.CreateOptions{})
 			return err
 		} else {
@@ -128,7 +129,7 @@ func (k *KubernetesClient) DeployService(service *apiv1.Service) error {
 
 	_, err := serviceClient.Get(context.TODO(), service.Name, metav1.GetOptions{})
 	if err != nil {
-		if errors.IsNotFound(err) {
+		if k8serrors.IsNotFound(err) {
 			_, err := serviceClient.Create(context.TODO(), service, metav1.CreateOptions{})
 			return err
 		} else {
@@ -279,10 +280,27 @@ func (k *KubernetesClient) CreateDynamic(obj *unstructured.Unstructured) error {
 		objNamespace = apiv1.NamespaceDefault
 	}
 
-	_, err := k.Dynamic.Resource(gvr).Namespace(objNamespace).Get(context.TODO(), obj.GetName(), metav1.GetOptions{})
+	isNamespaced, err := k.isResourceNamespaced(obj.GroupVersionKind())
 	if err != nil {
-		if errors.IsNotFound(err) {
-			_, err := k.Dynamic.Resource(gvr).Namespace(objNamespace).Create(
+		return err
+	}
+
+	if !isNamespaced {
+		return k.createDynamicNonNamespaced(gvr, obj)
+	}
+
+	return k.createDynamicNamespaced(gvr, objNamespace, obj)
+}
+
+func (k *KubernetesClient) createDynamicNamespaced(
+	gvr schema.GroupVersionResource,
+	namespace string,
+	obj *unstructured.Unstructured,
+) error {
+	_, err := k.Dynamic.Resource(gvr).Namespace(namespace).Get(context.TODO(), obj.GetName(), metav1.GetOptions{})
+	if err != nil {
+		if k8serrors.IsNotFound(err) {
+			_, err := k.Dynamic.Resource(gvr).Namespace(namespace).Create(
 				context.Background(),
 				obj,
 				metav1.CreateOptions{},
@@ -293,7 +311,34 @@ func (k *KubernetesClient) CreateDynamic(obj *unstructured.Unstructured) error {
 		return err
 	}
 
-	_, err = k.Dynamic.Resource(gvr).Namespace(objNamespace).Update(
+	_, err = k.Dynamic.Resource(gvr).Namespace(namespace).Update(
+		context.Background(),
+		obj,
+		metav1.UpdateOptions{},
+	)
+
+	return err
+}
+
+func (k *KubernetesClient) createDynamicNonNamespaced(
+	gvr schema.GroupVersionResource,
+	obj *unstructured.Unstructured,
+) error {
+	_, err := k.Dynamic.Resource(gvr).Get(context.TODO(), obj.GetName(), metav1.GetOptions{})
+	if err != nil {
+		if k8serrors.IsNotFound(err) {
+			_, err := k.Dynamic.Resource(gvr).Create(
+				context.Background(),
+				obj,
+				metav1.CreateOptions{},
+			)
+
+			return err
+		}
+		return err
+	}
+
+	_, err = k.Dynamic.Resource(gvr).Update(
 		context.Background(),
 		obj,
 		metav1.UpdateOptions{},
@@ -463,6 +508,30 @@ func (k *KubernetesClient) mapConfigMap(group, version, kind, name, namespace st
 		Namespace: namespace,
 		Data:      configmap.Data,
 	}, nil
+}
+
+func (k *KubernetesClient) isResourceNamespaced(gvk schema.GroupVersionKind) (bool, error) {
+	resourcesList, err := k.discovery.ServerPreferredResources()
+	if err != nil {
+		return false, err
+	}
+
+	for _, resource := range resourcesList {
+		gv, err := schema.ParseGroupVersion(resource.GroupVersion)
+		if err != nil {
+			return false, err
+		}
+
+		for _, apiResource := range resource.APIResources {
+			if apiResource.Kind == gvk.Kind &&
+				gv.Group == gvk.Group &&
+				gv.Version == gvk.Version {
+				return apiResource.Namespaced, nil
+			}
+		}
+	}
+
+	return false, errors.New(fmt.Sprintf("group version kind not found: %v", gvk.String()))
 }
 
 func isDeployment(group, version, kind string) bool {

@@ -1,11 +1,6 @@
 global:
   createNamespace: true
-
   disableTelemetry: false
-
-  defaultTemplateRepo: https://github.com/cyclops-ui/templates
-  defaultTemplatePath: demo
-  defaultTemplateVersion: main
 
 ctrl:
   replicas: 1
@@ -13,3 +8,17 @@ ctrl:
 ui:
   replicas: 1
   ctrlHost: http://cyclops-ctrl.cyclops:8080
+
+templateStore:
+  - name: demo-template
+    repo: https://github.com/cyclops-ui/templates
+    path: demo
+    version: main
+  - name: demo-template-extended
+    repo: https://github.com/cyclops-ui/templates
+    path: demo-extended
+    version: main
+  - name: redis-demo
+    path: redis
+    repo: https://github.com/cyclops-ui/templates
+    version: main

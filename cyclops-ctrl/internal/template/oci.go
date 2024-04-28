@@ -10,7 +10,7 @@ import (
 	json "github.com/json-iterator/go"
 	"github.com/pkg/errors"
 
-	"github.com/cyclops-ui/cycops-ctrl/internal/models"
+	"github.com/cyclops-ui/cyclops/cyclops-ctrl/internal/models"
 )
 
 func (r Repo) LoadOCIHelmChart(repo, chart, version string) (*models.Template, error) {

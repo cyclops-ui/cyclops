@@ -1,0 +1,29 @@
+apiVersion: cyclops-ui.com/v1alpha1
+kind: TemplateStore
+metadata:
+  name: demo-template
+  namespace: cyclops
+spec:
+  path: demo
+  repo: https://github.com/cyclops-ui/templates
+  version: main
+---
+apiVersion: cyclops-ui.com/v1alpha1
+kind: TemplateStore
+metadata:
+  name: demo-template-extended
+  namespace: cyclops
+spec:
+  path: demo-extended
+  repo: https://github.com/cyclops-ui/templates
+  version: main
+---
+apiVersion: cyclops-ui.com/v1alpha1
+kind: TemplateStore
+metadata:
+  name: redis-demo
+  namespace: cyclops
+spec:
+  path: redis
+  repo: https://github.com/cyclops-ui/templates
+  version: main

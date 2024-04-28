@@ -1,11 +1,13 @@
 package mapper
 
 import (
-	cyclopsv1alpha1 "github.com/cyclops-ui/cycops-ctrl/api/v1alpha1"
-	"github.com/cyclops-ui/cycops-ctrl/internal/models/dto"
+	"testing"
+
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
-	"testing"
+
+	cyclopsv1alpha1 "github.com/cyclops-ui/cyclops/cyclops-ctrl/api/v1alpha1"
+	"github.com/cyclops-ui/cyclops/cyclops-ctrl/internal/models/dto"
 )
 
 func TestMapper(t *testing.T) {

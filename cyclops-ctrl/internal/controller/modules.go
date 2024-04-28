@@ -8,24 +8,21 @@ import (
 
 	"github.com/gin-gonic/gin"
 
-	"github.com/cyclops-ui/cycops-ctrl/api/v1alpha1"
-	"github.com/cyclops-ui/cycops-ctrl/internal/cluster/k8sclient"
-	"github.com/cyclops-ui/cycops-ctrl/internal/mapper"
-	"github.com/cyclops-ui/cycops-ctrl/internal/models/dto"
-	"github.com/cyclops-ui/cycops-ctrl/internal/storage/templates"
-	"github.com/cyclops-ui/cycops-ctrl/internal/telemetry"
-	"github.com/cyclops-ui/cycops-ctrl/internal/template"
+	"github.com/cyclops-ui/cyclops/cyclops-ctrl/api/v1alpha1"
+	"github.com/cyclops-ui/cyclops/cyclops-ctrl/internal/cluster/k8sclient"
+	"github.com/cyclops-ui/cyclops/cyclops-ctrl/internal/mapper"
+	"github.com/cyclops-ui/cyclops/cyclops-ctrl/internal/models/dto"
+	"github.com/cyclops-ui/cyclops/cyclops-ctrl/internal/telemetry"
+	"github.com/cyclops-ui/cyclops/cyclops-ctrl/internal/template"
 )
 
 type Modules struct {
 	kubernetesClient *k8sclient.KubernetesClient
 	templatesRepo    *template.Repo
-	templates        *templates.Storage
 	telemetryClient  telemetry.Client
 }
 
 func NewModulesController(
-	templates *templates.Storage,
 	templatesRepo *template.Repo,
 	kubernetes *k8sclient.KubernetesClient,
 	telemetryClient telemetry.Client,
@@ -33,7 +30,6 @@ func NewModulesController(
 	return &Modules{
 		kubernetesClient: kubernetes,
 		templatesRepo:    templatesRepo,
-		templates:        templates,
 		telemetryClient:  telemetryClient,
 	}
 }

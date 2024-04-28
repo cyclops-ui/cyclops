@@ -50,20 +50,25 @@ type TemplateGitRef struct {
 	Commit string `json:"commit"`
 }
 
-// ModuleStatus defines the observed state of Module
-type ModuleStatus struct {
-	Resources  []Resource         `json:"resources,omitempty"`
-	Conditions []metav1.Condition `json:"conditions,omitempty" patchStrategy:"merge" patchMergeKey:"type" protobuf:"bytes,1,rep,name=conditions"`
+type ReconciliationStatusState string
+
+const (
+	Unknown   ReconciliationStatusState = "unknown"
+	Succeeded ReconciliationStatusState = "succeeded"
+	Failed    ReconciliationStatusState = "failed"
+)
+
+type ReconciliationStatus struct {
+	// +kubebuilder:validation:Enum=unknown;succeeded;failed
+	// +kubebuilder:default:=unknown
+	Status ReconciliationStatusState `json:"status"`
+	Reason string                    `json:"reason"`
+	Errors []string                  `json:"errors"`
 }
 
-type Resource struct {
-	Group     string `json:"group,omitempty" protobuf:"bytes,1,opt,name=group"`
-	Version   string `json:"version,omitempty" protobuf:"bytes,2,opt,name=version"`
-	Kind      string `json:"kind,omitempty" protobuf:"bytes,3,opt,name=kind"`
-	Namespace string `json:"namespace,omitempty" protobuf:"bytes,4,opt,name=namespace"`
-	Name      string `json:"name,omitempty" protobuf:"bytes,5,opt,name=name"`
-	Status    string `json:"status,omitempty" protobuf:"bytes,6,opt,name=status"`
-	Health    string `json:"health,omitempty" protobuf:"bytes,7,opt,name=health"`
+// ModuleStatus defines the observed state of Module
+type ModuleStatus struct {
+	ReconciliationStatus ReconciliationStatus `json:"reconciliationStatus"`
 }
 
 type HistoryEntry struct {

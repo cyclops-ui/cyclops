@@ -1,0 +1,16 @@
+.cardtestimonialwrapper {
+    border: none;
+    background-color: rgba(256, 256, 256, 1);
+    height: 100%;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 1;
+        transform: translateY(100px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}

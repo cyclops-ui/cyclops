@@ -1,13 +1,13 @@
 package cache
 
 import (
-	"encoding/json"
 	"fmt"
 	"time"
 
 	"github.com/dgraph-io/ristretto"
+	json "github.com/json-iterator/go"
 
-	"github.com/cyclops-ui/cycops-ctrl/internal/models"
+	"github.com/cyclops-ui/cyclops/cyclops-ctrl/internal/models"
 )
 
 type Templates struct {
@@ -35,12 +35,17 @@ func (t Templates) GetTemplate(repo, path, version string) (*models.Template, bo
 		return nil, false
 	}
 
-	template, ok := value.(models.Template)
+	data, ok := value.([]byte)
 	if !ok {
 		return nil, false
 	}
 
-	return &template, ok
+	var template *models.Template
+	if err := json.Unmarshal(data, &template); err != nil {
+		return nil, false
+	}
+
+	return template, ok
 }
 
 func (t Templates) SetTemplate(repo, path, version string, template *models.Template) {
@@ -49,7 +54,7 @@ func (t Templates) SetTemplate(repo, path, version string, template *models.Temp
 		return
 	}
 
-	t.cache.SetWithTTL(templateKey(repo, path, version), *template, int64(len(data)), time.Minute*15)
+	t.cache.SetWithTTL(templateKey(repo, path, version), data, int64(len(data)), time.Minute*15)
 	t.cache.Wait()
 }
 
@@ -68,7 +73,12 @@ func (t Templates) GetTemplateInitialValues(repo, path, version string) (map[int
 }
 
 func (t Templates) SetTemplateInitialValues(repo, path, version string, values map[interface{}]interface{}) {
-	t.cache.SetWithTTL(initialValuesKey(repo, path, version), values, int64(len(values)), time.Minute*15)
+	data, err := json.Marshal(values)
+	if err != nil {
+		return
+	}
+
+	t.cache.SetWithTTL(initialValuesKey(repo, path, version), values, int64(len(data)), time.Minute*15)
 	t.cache.Wait()
 }
 

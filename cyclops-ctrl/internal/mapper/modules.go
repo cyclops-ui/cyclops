@@ -3,13 +3,13 @@ package mapper
 import (
 	"fmt"
 
-	"github.com/cyclops-ui/cycops-ctrl/internal/models"
 	json "github.com/json-iterator/go"
 	apiextensionsv1 "k8s.io/apiextensions-apiserver/pkg/apis/apiextensions/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
-	cyclopsv1alpha1 "github.com/cyclops-ui/cycops-ctrl/api/v1alpha1"
-	"github.com/cyclops-ui/cycops-ctrl/internal/models/dto"
+	cyclopsv1alpha1 "github.com/cyclops-ui/cyclops/cyclops-ctrl/api/v1alpha1"
+	"github.com/cyclops-ui/cyclops/cyclops-ctrl/internal/models"
+	"github.com/cyclops-ui/cyclops/cyclops-ctrl/internal/models/dto"
 )
 
 func RequestToModule(req dto.Module) (cyclopsv1alpha1.Module, error) {

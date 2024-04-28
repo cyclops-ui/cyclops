@@ -1,8 +1,9 @@
 package auth
 
 import (
-	"github.com/cyclops-ui/cycops-ctrl/api/v1alpha1"
 	"regexp"
+
+	"github.com/cyclops-ui/cyclops/cyclops-ctrl/api/v1alpha1"
 )
 
 type TemplatesResolver struct {

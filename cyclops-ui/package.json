@@ -48,7 +48,8 @@
     "start": "REACT_APP_CYCLOPS_CTRL_HOST=http://localhost:8888 node_modules/.bin/react-scripts start",
     "build": "node_modules/.bin/react-scripts build",
     "test": "node_modules/.bin/react-scripts test",
-    "eject": "node_modules/.bin/react-scripts eject"
+    "eject": "node_modules/.bin/react-scripts eject",
+    "prepare": "cd .. && husky cyclops-ui/.husky"
   },
   "eslintConfig": {
     "extends": [
@@ -70,6 +71,12 @@
   },
   "devDependencies": {
     "@types/react-gauge-chart": "^0.4.3",
-    "@types/react-highlight-words": "^0.16.7"
+    "@types/react-highlight-words": "^0.16.7",
+    "husky": "^9.0.11",
+    "lint-staged": "^15.2.2",
+    "prettier": "3.2.5"
+  },
+  "lint-staged": {
+    "**/*": "prettier --write --ignore-unknown"
   }
 }

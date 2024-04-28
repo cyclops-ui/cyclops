@@ -17,7 +17,7 @@ spec:
     spec:
       containers:
         - name: cyclops-ui
-          image: cyclopsui/cyclops-ui:v0.2.0
+          image: cyclopsui/cyclops-ui:v0.3.3
           ports:
             - containerPort: 80
           env:
@@ -27,16 +27,4 @@ spec:
               value: production
             - name: NODE_OPTIONS
               value: --openssl-legacy-provider
-            {{- if ((.Values.global).defaultTemplateRepo) }}
-            - name: REACT_APP_DEFAULT_TEMPLATE_REPO
-              value: {{ ((.Values.global).defaultTemplateRepo) | quote }}
-            {{- end }}
-            {{- if ((.Values.global).defaultTemplatePath) }}
-            - name: REACT_APP_DEFAULT_TEMPLATE_PATH
-              value: {{ ((.Values.global).defaultTemplatePath) | quote }}
-            {{- end }}
-            {{- if ((.Values.global).defaultTemplateVersion) }}
-            - name: REACT_APP_DEFAULT_TEMPLATE_VERSION
-              value: {{ ((.Values.global).defaultTemplateVersion) | quote }}
-            {{- end }}
       restartPolicy: Always

@@ -5,6 +5,8 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"github.com/pkg/errors"
+	"gopkg.in/yaml.v2"
 	"io"
 	path2 "path"
 	"path/filepath"
@@ -17,14 +19,13 @@ import (
 	"github.com/go-git/go-git/v5/plumbing"
 	"github.com/go-git/go-git/v5/plumbing/transport/http"
 	"github.com/go-git/go-git/v5/storage/memory"
-	"github.com/pkg/errors"
-	"gopkg.in/yaml.v2"
 	"helm.sh/helm/v3/pkg/chart"
 
-	"github.com/cyclops-ui/cycops-ctrl/internal/auth"
-	"github.com/cyclops-ui/cycops-ctrl/internal/mapper"
-	"github.com/cyclops-ui/cycops-ctrl/internal/models"
-	"github.com/cyclops-ui/cycops-ctrl/internal/models/helm"
+	"github.com/cyclops-ui/cyclops/cyclops-ctrl/internal/auth"
+	"github.com/cyclops-ui/cyclops/cyclops-ctrl/internal/mapper"
+	"github.com/cyclops-ui/cyclops/cyclops-ctrl/internal/models"
+	"github.com/cyclops-ui/cyclops/cyclops-ctrl/internal/models/helm"
+	"github.com/cyclops-ui/cyclops/cyclops-ctrl/internal/template/gitproviders"
 )
 
 func (r Repo) LoadTemplate(repoURL, path, commit string) (*models.Template, error) {
@@ -41,6 +42,17 @@ func (r Repo) LoadTemplate(repoURL, path, commit string) (*models.Template, erro
 	cached, ok := r.cache.GetTemplate(repoURL, path, commitSHA)
 	if ok {
 		return cached, nil
+	}
+
+	if gitproviders.IsGitHubSource(repoURL) {
+		ghTemplate, err := r.mapGitHubRepoTemplate(repoURL, path, commitSHA, creds)
+		if err != nil {
+			return nil, err
+		}
+
+		r.cache.SetTemplate(repoURL, path, commitSHA, ghTemplate)
+
+		return ghTemplate, nil
 	}
 
 	fs, err := clone(repoURL, commit, creds)
@@ -147,6 +159,17 @@ func (r Repo) LoadInitialTemplateValues(repoURL, path, commit string) (map[inter
 	cached, ok := r.cache.GetTemplateInitialValues(repoURL, path, commitSHA)
 	if ok {
 		return cached, nil
+	}
+
+	if gitproviders.IsGitHubSource(repoURL) {
+		ghInitialValues, err := r.mapGitHubRepoInitialValues(repoURL, path, commitSHA, creds)
+		if err != nil {
+			return nil, err
+		}
+
+		r.cache.SetTemplateInitialValues(repoURL, path, commitSHA, ghInitialValues)
+
+		return ghInitialValues, nil
 	}
 
 	fs, err := clone(repoURL, commit, creds)
@@ -303,11 +326,13 @@ func clone(repoURL, commit string, creds *auth.Credentials) (billy.Filesystem, e
 		tagPrefix := "refs/tags/"
 		remote, err := repo.Remote(remoteName)
 		if err != nil {
-			panic(err)
+			return nil, err
 		}
-		refList, err := remote.List(&git.ListOptions{})
+		refList, err := remote.List(&git.ListOptions{
+			Auth: httpBasicAuthCredentials(creds),
+		})
 		if err != nil {
-			panic(err)
+			return nil, err
 		}
 
 		var reference *plumbing.Reference
@@ -431,6 +456,48 @@ func readFiles(path string, fs billy.Filesystem) ([]*chart.File, error) {
 	}
 
 	return chartFiles, nil
+}
+
+func (r Repo) mapGitHubRepoTemplate(repoURL, path, commitSHA string, creds *auth.Credentials) (*models.Template, error) {
+	tgzData, err := gitproviders.GitHubClone(repoURL, commitSHA, creds)
+	if err != nil {
+		return nil, err
+	}
+
+	ghRepoFiles, err := unpackTgzInMemory(tgzData)
+	if err != nil {
+		return nil, err
+	}
+
+	ghRepoFiles = gitproviders.SanitizeGHFiles(ghRepoFiles, path)
+
+	template, err := r.mapHelmChart(path, ghRepoFiles)
+	if err != nil {
+		return nil, err
+	}
+
+	return template, nil
+}
+
+func (r Repo) mapGitHubRepoInitialValues(repoURL, path, commitSHA string, creds *auth.Credentials) (map[interface{}]interface{}, error) {
+	tgzData, err := gitproviders.GitHubClone(repoURL, commitSHA, creds)
+	if err != nil {
+		return nil, err
+	}
+
+	ghRepoFiles, err := unpackTgzInMemory(tgzData)
+	if err != nil {
+		return nil, err
+	}
+
+	ghRepoFiles = gitproviders.SanitizeGHFiles(ghRepoFiles, path)
+
+	initial, err := r.mapHelmChartInitialValues(ghRepoFiles)
+	if err != nil {
+		return nil, err
+	}
+
+	return initial, nil
 }
 
 func httpBasicAuthCredentials(creds *auth.Credentials) *http.BasicAuth {

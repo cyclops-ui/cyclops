@@ -3,7 +3,7 @@ package models
 import (
 	"helm.sh/helm/v3/pkg/chart"
 
-	"github.com/cyclops-ui/cycops-ctrl/internal/models/dto"
+	"github.com/cyclops-ui/cyclops/cyclops-ctrl/internal/models/dto"
 )
 
 type Template struct {

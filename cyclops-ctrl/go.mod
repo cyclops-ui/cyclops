@@ -1,4 +1,4 @@
-module github.com/cyclops-ui/cycops-ctrl
+module github.com/cyclops-ui/cyclops/cyclops-ctrl
 
 go 1.21
 

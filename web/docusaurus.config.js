@@ -1,6 +1,8 @@
 // @ts-check
 // Note: type annotations allow type checking and IDEs autocompletion
 
+import {Button} from "antd";
+
 /** @type {import('@docusaurus/types').Config} */
 const config = {
   title: "Cyclops",
@@ -56,19 +58,12 @@ const config = {
     /** @type {import('@docusaurus/preset-classic').ThemeConfig} */
     ({
       // Replace with your project's social card
-      image: "img/which-would-you-prefer.png",
-      announcementBar: {
-        backgroundColor: "#68b6ac",
-        textColor: "#ffffff",
-        isCloseable: false,
-        content:
-          '<b>⭐ We are <a href="https://github.com/cyclops-ui/cyclops">open-source on GitHub</a> - show us your support by giving us a star ⭐</b>',
-      },
+      image: "img/cyclops-social-card.png",
       navbar: {
-        title: "Cyclops",
+        style: 'dark',
         logo: {
           alt: "Cyclops logo",
-          src: "img/logo.png",
+          src: "img/cyclops-simplistic.png",
         },
         items: [
           {
@@ -79,14 +74,25 @@ const config = {
           },
           { to: "blog", label: "Blog", position: "left" },
           {
-            href: "https://www.linkedin.com/company/cyclops-ui",
-            position: "right",
-            className: "header-linkedin-link",
+            type: 'html',
+            position: 'right',
+            value: '<a href="/docs/installation/install/manifest" style="background-color: #FF8803; color: #FFF; height: 30px; width: 150px; text-decoration: none; display: inline-flex; align-items: center; border-radius: 30px 30px 30px 30px"' +
+                'onmouseover="this.style.backgroundColor=\'#FFA229\';"' +
+                'onmouseout="this.style.backgroundColor=\'#FF8803\';">' +
+                '<h3 style="margin: 0px auto;">' +
+                  'Get started' +
+                '</h3>' +
+                '</a>',
           },
           {
             href: "https://github.com/cyclops-ui/cyclops",
             position: "right",
             className: "header-github-link",
+          },
+          {
+            href: "https://www.linkedin.com/company/cyclops-ui",
+            position: "right",
+            className: "header-linkedin-link",
           },
           {
             href: "https://discord.com/invite/8ErnK3qDb3",
@@ -98,6 +104,45 @@ const config = {
       footer: {
         style: "dark",
         links: [
+          {
+            items: [
+              {
+                html: `
+                <a href="https://landscape.cncf.io/">
+                  <img src="/img/cncf-white.png"/>
+                </a>
+              `,
+              },
+              {
+                html: `
+                <div style="padding-top: 20px">
+                  <a href="https://nuqleus.io/">
+                    <img src="/img/nuqleus_landscape.png"/>
+                  </a>
+                </div>
+              `,
+              },
+              {
+                html: `
+                <div style="width: 100%; padding-top: 10px">
+                  <a href="https://filrougecapital.com/">
+                    <img style="width: 50%" src="/img/frc-white.png"/>
+                  </a>
+                  <a href="https://www.zicer.hr/?lang=en">
+                    <img style="width: 45%; right: 0; position: relative" src="/img/zicer.png"/>
+                  </a>
+                </div>
+              `,
+              },
+              {
+                html: `
+                <a>
+                  <img style="width: 100%; padding-top: 20px" src="/img/esif.png"/>
+                </a>
+              `,
+              },
+            ],
+          },
           {
             title: "Docs",
             items: [
@@ -132,12 +177,17 @@ const config = {
             title: "More",
             items: [
               {
-                label: "GitHub",
-                href: "https://github.com/cyclops-ui/cyclops",
+                html: `
+                    <div>
+                        <link href="https://assets.calendly.com/assets/external/widget.css" rel="stylesheet">
+                            <a style="color: #FFF" href="" onclick="Calendly.initPopupWidget({url: 'https://calendly.com/cyclops-ui/cyclops'});return false;">Schedule a demo</a>
+                        </link>
+                    </div>
+                `,
               },
               {
-                label: "Schedule a demo",
-                href: "https://docs.google.com/forms/d/e/1FAIpQLSfm9sSsmqJYsofteSrGigWMW9eOgSjoinHwjsvtjX6wOcAv9w/viewform",
+                label: "GitHub",
+                href: "https://github.com/cyclops-ui/cyclops",
               },
               {
                 label: "Leave your feedback",
@@ -158,6 +208,7 @@ const config = {
             ],
           },
         ],
+        copyright: `Copyright © ${new Date().getFullYear()} Cyclops UI`,
       },
       colorMode: {
         defaultMode: "light",

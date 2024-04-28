@@ -1,8 +1,9 @@
 package mapper
 
 import (
-	"github.com/cyclops-ui/cycops-ctrl/internal/models/dto"
 	apiv1 "k8s.io/api/core/v1"
+
+	"github.com/cyclops-ui/cyclops/cyclops-ctrl/internal/models/dto"
 )
 
 func MapNodes(nodes []apiv1.Node) []dto.Node {

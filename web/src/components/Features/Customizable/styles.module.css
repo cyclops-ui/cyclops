@@ -1,0 +1,59 @@
+.wrapper {
+    animation: fadeIn 1s ease forwards;
+    padding-top: 30px;
+    margin: 0 auto;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 1;
+        transform: translateY(100px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.inLeft {
+    animation: inLeft 1s ease forwards;
+}
+
+.inRight {
+    animation: inRight 1s ease forwards;
+}
+
+@keyframes inRight {
+    from {
+        opacity: 1;
+        transform: translateX(200px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+@keyframes inLeft {
+    from {
+        opacity: 1;
+        transform: translateX(-200px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+.animationcard {
+    overflow: hidden;
+    z-index: 100;
+    width: 80%;
+    margin: 0 auto;
+}
+
+@media screen and (min-width: 950px) {
+    .animationcard {
+        left: 0;
+    }
+}

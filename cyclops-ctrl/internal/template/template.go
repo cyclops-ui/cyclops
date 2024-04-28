@@ -1,11 +1,12 @@
 package template
 
 import (
-	"github.com/cyclops-ui/cycops-ctrl/internal/auth"
-	"github.com/cyclops-ui/cycops-ctrl/internal/models"
 	json "github.com/json-iterator/go"
 	helmchart "helm.sh/helm/v3/pkg/chart"
 	"helm.sh/helm/v3/pkg/registry"
+
+	"github.com/cyclops-ui/cyclops/cyclops-ctrl/internal/auth"
+	"github.com/cyclops-ui/cyclops/cyclops-ctrl/internal/models"
 )
 
 type Repo struct {
