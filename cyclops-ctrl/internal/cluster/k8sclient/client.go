@@ -1,6 +1,7 @@
 package k8sclient
 
 import (
+	"bufio"
 	"bytes"
 	"context"
 	"errors"
@@ -170,24 +171,17 @@ func (k *KubernetesClient) GetPodLogs(namespace, container, name string, numLogs
 	defer func(stream io.ReadCloser) {
 		err := stream.Close()
 		if err != nil {
-
+			return
 		}
 	}(stream)
 
 	var logs []string
-	for {
-		buf := make([]byte, 2000)
-		numBytes, err := stream.Read(buf)
-		if err == io.EOF {
-			break
-		}
-		if err != nil {
-			return nil, err
-		}
-		if numBytes == 0 {
-			continue
-		}
-		logs = append(logs, string(buf[:numBytes]))
+	scanner := bufio.NewScanner(stream)
+	for scanner.Scan() {
+		logs = append(logs, scanner.Text())
+	}
+	if err := scanner.Err(); err != nil {
+		return nil, err
 	}
 
 	return logs, nil
