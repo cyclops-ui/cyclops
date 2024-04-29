@@ -5,18 +5,20 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"gopkg.in/yaml.v2"
 	"io"
 	"os"
 	"os/exec"
 	"strings"
 
+	"gopkg.in/yaml.v2"
+
 	v12 "k8s.io/api/apps/v1"
-	"k8s.io/api/autoscaling/v1"
+	v1 "k8s.io/api/autoscaling/v1"
 	apiv1 "k8s.io/api/core/v1"
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
+	"k8s.io/apimachinery/pkg/labels"
 	"k8s.io/apimachinery/pkg/runtime/schema"
 	"k8s.io/client-go/discovery"
 	"k8s.io/client-go/dynamic"
@@ -186,6 +188,33 @@ func (k *KubernetesClient) GetPodLogs(namespace, container, name string, numLogs
 			continue
 		}
 		logs = append(logs, string(buf[:numBytes]))
+	}
+
+	return logs, nil
+}
+
+func (k *KubernetesClient) GetDeploymentLogs(namespace, deployment string, numLogs *int64) ([]string, error) {
+	deploymentClient := k.clientset.AppsV1().Deployments(namespace)
+	deploymentObj, err := deploymentClient.Get(context.Background(), deployment, metav1.GetOptions{})
+	if err != nil {
+		return nil, err
+	}
+
+	var logs []string
+	for key, value := range deploymentObj.Spec.Selector.MatchLabels {
+		labelSelector := labels.Set{key: value}.AsSelector().String()
+		podList, err := k.clientset.CoreV1().Pods(namespace).List(context.Background(), metav1.ListOptions{LabelSelector: labelSelector})
+		if err != nil {
+			return nil, err
+		}
+
+		for _, pod := range podList.Items {
+			podLogs, err := k.GetPodLogs(namespace, pod.Spec.Containers[0].Name, pod.Name, numLogs)
+			if err != nil {
+				return nil, err
+			}
+			logs = append(logs, podLogs...)
+		}
 	}
 
 	return logs, nil
