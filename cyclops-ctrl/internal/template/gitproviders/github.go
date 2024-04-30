@@ -2,13 +2,13 @@ package gitproviders
 
 import (
 	"fmt"
-	"github.com/pkg/errors"
 	"io/ioutil"
 	"net/http"
 	"net/url"
 	path2 "path"
-	"path/filepath"
 	"strings"
+
+	"github.com/pkg/errors"
 
 	"github.com/cyclops-ui/cyclops/cyclops-ctrl/internal/auth"
 )
@@ -101,5 +101,5 @@ func removeFirstSegment(path string) string {
 		return ""
 	}
 
-	return filepath.Join(segments[1:]...)
+	return strings.Join(segments[1:], `/`)
 }
