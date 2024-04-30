@@ -442,6 +442,7 @@ func (m *Modules) GetDeploymentLogs(ctx *gin.Context) {
 	logCount := int64(100)
 	logs, err := m.kubernetesClient.GetDeploymentLogs(
 		ctx.Param("namespace"),
+		ctx.Param("container"),
 		ctx.Param("deployment"),
 		&logCount,
 	)
