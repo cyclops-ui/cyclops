@@ -3,6 +3,8 @@ package controller
 import (
 	"fmt"
 	"net/http"
+	"os"
+	"path/filepath"
 	"strconv"
 
 	"github.com/gin-gonic/gin"
@@ -109,6 +111,11 @@ func (c *Templates) CreateTemplatesStore(ctx *gin.Context) {
 		return
 	}
 
+	if !isChartYAMLValid(templateStore.TemplateRef.URL, templateStore.TemplateRef.Path, templateStore.TemplateRef.Version) {
+		ctx.JSON(http.StatusBadRequest, dto.NewError("Invalid reference", "Chart.yaml not found"))
+		return
+	}
+
 	k8sTemplateStore := mapper.DTOToTemplateStore(*templateStore)
 
 	if err := c.kubernetesClient.CreateTemplateStore(k8sTemplateStore); err != nil {
@@ -131,6 +138,11 @@ func (c *Templates) EditTemplatesStore(ctx *gin.Context) {
 
 	templateStore.Name = ctx.Param("name")
 
+	if !isChartYAMLValid(templateStore.TemplateRef.URL, templateStore.TemplateRef.Path, templateStore.TemplateRef.Version) {
+		ctx.JSON(http.StatusBadRequest, dto.NewError("Invalid reference", "Chart.yaml not found"))
+		return
+	}
+
 	k8sTemplateStore := mapper.DTOToTemplateStore(*templateStore)
 
 	if err := c.kubernetesClient.UpdateTemplateStore(k8sTemplateStore); err != nil {
@@ -139,6 +151,16 @@ func (c *Templates) EditTemplatesStore(ctx *gin.Context) {
 	}
 
 	ctx.Status(http.StatusCreated)
+}
+
+func isChartYAMLValid(repo, path, version string) bool {
+	chartPath := filepath.Join(repo, path, version, "Chart.yaml")
+	_, err := os.Stat(chartPath)
+
+	if err != nil {
+		return false
+	}
+	return true
 }
 
 func (c *Templates) DeleteTemplatesStore(ctx *gin.Context) {
