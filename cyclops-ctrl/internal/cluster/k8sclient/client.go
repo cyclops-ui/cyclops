@@ -9,6 +9,7 @@ import (
 	"io"
 	"os"
 	"os/exec"
+	"sort"
 	"strings"
 
 	"gopkg.in/yaml.v2"
@@ -159,8 +160,9 @@ func (k *KubernetesClient) GetPods(namespace, name string) ([]apiv1.Pod, error) 
 
 func (k *KubernetesClient) GetPodLogs(namespace, container, name string, numLogs *int64) ([]string, error) {
 	podLogOptions := apiv1.PodLogOptions{
-		Container: container,
-		TailLines: numLogs,
+		Container:  container,
+		TailLines:  numLogs,
+		Timestamps: true,
 	}
 	podClient := k.clientset.CoreV1().Pods(namespace).GetLogs(name, &podLogOptions)
 	stream, err := podClient.Stream(context.Background())
@@ -187,30 +189,29 @@ func (k *KubernetesClient) GetPodLogs(namespace, container, name string, numLogs
 	return logs, nil
 }
 
-func (k *KubernetesClient) GetDeploymentLogs(namespace, deployment string, numLogs *int64) ([]string, error) {
+func (k *KubernetesClient) GetDeploymentLogs(namespace, container, deployment string, numLogs *int64) ([]string, error) {
 	deploymentClient := k.clientset.AppsV1().Deployments(namespace)
 	deploymentObj, err := deploymentClient.Get(context.Background(), deployment, metav1.GetOptions{})
 	if err != nil {
 		return nil, err
 	}
 
+	pods, err := k.clientset.CoreV1().Pods(namespace).List(context.Background(), metav1.ListOptions{
+		LabelSelector: labels.Set(deploymentObj.Spec.Selector.MatchLabels).String(),
+	})
+	if err != nil {
+		return nil, err
+	}
+
 	var logs []string
-	for key, value := range deploymentObj.Spec.Selector.MatchLabels {
-		labelSelector := labels.Set{key: value}.AsSelector().String()
-		podList, err := k.clientset.CoreV1().Pods(namespace).List(context.Background(), metav1.ListOptions{LabelSelector: labelSelector})
+	for _, pod := range pods.Items {
+		podLogs, err := k.GetPodLogs(namespace, container, pod.Name, numLogs)
 		if err != nil {
 			return nil, err
 		}
-
-		for _, pod := range podList.Items {
-			podLogs, err := k.GetPodLogs(namespace, pod.Spec.Containers[0].Name, pod.Name, numLogs)
-			if err != nil {
-				return nil, err
-			}
-			logs = append(logs, podLogs...)
-		}
+		logs = append(logs, podLogs...)
 	}
-
+	sort.Strings(logs)
 	return logs, nil
 }
 
