@@ -156,8 +156,8 @@ func (r Repo) loadFromHelmChartRepo(repo, chart, version string) ([]byte, error)
 func (r Repo) mapHelmChart(chartName string, files map[string][]byte) (*models.Template, error) {
 	metadataBytes := []byte{}
 	schemaBytes := []byte{}
-	manifestParts := make([]string, 0)
 	chartFiles := make([]*helmchart.File, 0)
+	templateFiles := make([]*helmchart.File, 0)
 	dependenciesFromChartsDir := make(map[string]map[string][]byte, 0)
 
 	for name, content := range files {
@@ -174,7 +174,10 @@ func (r Repo) mapHelmChart(chartName string, files map[string][]byte) (*models.T
 		}
 
 		if len(parts) > 2 && parts[1] == "templates" && (parts[2] != "Notes.txt" && parts[2] != "NOTES.txt") {
-			manifestParts = append(manifestParts, string(content))
+			templateFiles = append(templateFiles, &helmchart.File{
+				Name: path.Join(parts[1:]...),
+				Data: content,
+			})
 			continue
 		}
 
@@ -230,12 +233,12 @@ func (r Repo) mapHelmChart(chartName string, files map[string][]byte) (*models.T
 
 	return &models.Template{
 		Name:         chartName,
-		Manifest:     strings.Join(manifestParts, "---\n"),
 		RootField:    mapper.HelmSchemaToFields("", schema, dependencies),
 		Created:      "",
 		Edited:       "",
 		Version:      "",
 		Files:        chartFiles,
+		Templates:    templateFiles,
 		Dependencies: dependencies,
 	}, nil
 }

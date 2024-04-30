@@ -194,7 +194,6 @@ func (r *ModuleReconciler) generateResources(kClient *k8sclient.KubernetesClient
 		}
 
 		var obj unstructured.Unstructured
-
 		decoder := yaml.NewYAMLOrJSONDecoder(strings.NewReader(s), len(s))
 		if err := decoder.Decode(&obj); err != nil {
 			r.logger.Error(err, "could not decode resource",
