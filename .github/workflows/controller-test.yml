@@ -1,6 +1,9 @@
 name: controller tests
 
 on:
+  pull_request:
+    paths:
+      - 'cyclops-ctrl/**'
   push:
     paths:
       - 'cyclops-ctrl/**'

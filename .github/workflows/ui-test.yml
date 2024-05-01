@@ -1,6 +1,9 @@
 name: ui tests
 
 on:
+  pull_request:
+    paths:
+      - 'cyclops-ui/**'
   push:
     paths:
       - 'cyclops-ui/**'
