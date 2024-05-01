@@ -215,6 +215,31 @@ func (k *KubernetesClient) GetDeploymentLogs(namespace, container, deployment st
 	return logs, nil
 }
 
+func (k *KubernetesClient) GetStatefulSetsLogs(namespace, container, name string, numLogs *int64) ([]string, error) {
+	statefulsetClient := k.clientset.AppsV1().StatefulSets(namespace)
+	statefulsetObj, err := statefulsetClient.Get(context.Background(), name, metav1.GetOptions{})
+	if err != nil {
+		return nil, err
+	}
+	pods, err := k.clientset.CoreV1().Pods(namespace).List(context.Background(), metav1.ListOptions{
+		LabelSelector: labels.Set(statefulsetObj.Spec.Selector.MatchLabels).String(),
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	var logs []string
+	for _, pod := range pods.Items {
+		podLogs, err := k.GetPodLogs(namespace, container, pod.Name, numLogs)
+		if err != nil {
+			return nil, err
+		}
+		logs = append(logs, podLogs...)
+	}
+	sort.Strings(logs)
+	return logs, nil
+}
+
 func (k *KubernetesClient) GetManifest(group, version, kind, name, namespace string) (string, error) {
 	resource, err := k.Dynamic.Resource(schema.GroupVersionResource{
 		Group:    group,

@@ -454,6 +454,25 @@ func (m *Modules) GetDeploymentLogs(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, logs)
 }
 
+func (m *Modules) GetStatefulSetsLogs(ctx *gin.Context) {
+	ctx.Header("Access-Control-Allow-Origin", "*")
+
+	logCount := int64(100)
+	logs, err := m.kubernetesClient.GetStatefulSetsLogs(
+		ctx.Param("namespace"),
+		ctx.Param("container"),
+		ctx.Param("name"),
+		&logCount,
+	)
+	if err != nil {
+		fmt.Println(err)
+		ctx.JSON(http.StatusInternalServerError, dto.NewError("Error fetching logs", err.Error()))
+		return
+	}
+
+	ctx.JSON(http.StatusOK, logs)
+}
+
 func (m *Modules) DownloadLogs(ctx *gin.Context) {
 	ctx.Header("Access-Control-Allow-Origin", "*")
 
