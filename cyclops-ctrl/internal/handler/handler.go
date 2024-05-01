@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"github.com/cyclops-ui/cyclops/cyclops-ctrl/internal/template/render"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -16,6 +17,7 @@ type Handler struct {
 
 	templatesRepo *templaterepo.Repo
 	k8sClient     *k8sclient.KubernetesClient
+	renderer      *render.Renderer
 
 	telemetryClient telemetry.Client
 }
@@ -23,11 +25,13 @@ type Handler struct {
 func New(
 	templatesRepo *templaterepo.Repo,
 	kubernetesClient *k8sclient.KubernetesClient,
+	renderer *render.Renderer,
 	telemetryClient telemetry.Client,
 ) (*Handler, error) {
 	return &Handler{
 		templatesRepo:   templatesRepo,
 		k8sClient:       kubernetesClient,
+		renderer:        renderer,
 		telemetryClient: telemetryClient,
 		router:          gin.New(),
 	}, nil
@@ -37,7 +41,7 @@ func (h *Handler) Start() error {
 	gin.SetMode(gin.DebugMode)
 
 	templatesController := controller.NewTemplatesController(h.templatesRepo, h.k8sClient)
-	modulesController := controller.NewModulesController(h.templatesRepo, h.k8sClient, h.telemetryClient)
+	modulesController := controller.NewModulesController(h.templatesRepo, h.k8sClient, h.renderer, h.telemetryClient)
 	clusterController := controller.NewClusterController(h.k8sClient)
 
 	h.router = gin.New()

@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"gopkg.in/yaml.v2"
 	"io"
+	"k8s.io/apimachinery/pkg/version"
 	"os"
 	"os/exec"
 	"strings"
@@ -65,12 +66,21 @@ func createLocalClient() (*KubernetesClient, error) {
 		panic(err.Error())
 	}
 
+	v, err := discovery.ServerVersion()
+
+	fmt.Println("verzija", v.String())
+	fmt.Println("verzija", v.GitVersion)
+
 	return &KubernetesClient{
 		Dynamic:   dynamic,
 		discovery: discovery,
 		clientset: clientset,
 		moduleset: moduleSet,
 	}, nil
+}
+
+func (k *KubernetesClient) VersionInfo() (*version.Info, error) {
+	return k.discovery.ServerVersion()
 }
 
 func (k *KubernetesClient) GetDeployment(namespace, name string) (*v12.Deployment, error) {

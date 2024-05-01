@@ -1,16 +1,26 @@
-package template
+package render
 
 import (
+	cyclopsv1alpha1 "github.com/cyclops-ui/cyclops/cyclops-ctrl/api/v1alpha1"
+	"github.com/cyclops-ui/cyclops/cyclops-ctrl/internal/cluster/k8sclient"
+	"github.com/cyclops-ui/cyclops/cyclops-ctrl/internal/models"
 	json "github.com/json-iterator/go"
 	helmchart "helm.sh/helm/v3/pkg/chart"
 	"helm.sh/helm/v3/pkg/chartutil"
 	"helm.sh/helm/v3/pkg/engine"
-
-	cyclopsv1alpha1 "github.com/cyclops-ui/cyclops/cyclops-ctrl/api/v1alpha1"
-	"github.com/cyclops-ui/cyclops/cyclops-ctrl/internal/models"
 )
 
-func HelmTemplate(module cyclopsv1alpha1.Module, moduleTemplate *models.Template) (string, error) {
+type Renderer struct {
+	k8sClient *k8sclient.KubernetesClient
+}
+
+func NewRenderer(kubernetesClient *k8sclient.KubernetesClient) *Renderer {
+	return &Renderer{
+		k8sClient: kubernetesClient,
+	}
+}
+
+func (r *Renderer) HelmTemplate(module cyclopsv1alpha1.Module, moduleTemplate *models.Template) (string, error) {
 	if moduleTemplate == nil {
 		return "", nil
 	}
@@ -61,10 +71,15 @@ func HelmTemplate(module cyclopsv1alpha1.Module, moduleTemplate *models.Template
 		KubeVersion CapabilitiesKubeVersion
 	}
 
+	versionInfo, err := r.k8sClient.VersionInfo()
+	if err != nil {
+		return "", err
+	}
+
 	top["Capabilities"] = Capabilities{
 		KubeVersion: CapabilitiesKubeVersion{
-			Version:    "v1.29.0",
-			GitVersion: "2.39.3",
+			Version:    versionInfo.String(),
+			GitVersion: versionInfo.GitVersion,
 		},
 	}
 

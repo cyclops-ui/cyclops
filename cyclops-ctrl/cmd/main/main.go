@@ -3,6 +3,7 @@ package main
 import (
 	"flag"
 	"fmt"
+	"github.com/cyclops-ui/cyclops/cyclops-ctrl/internal/template/render"
 	"os"
 	"strconv"
 
@@ -71,7 +72,9 @@ func main() {
 		cache.NewInMemoryTemplatesCache(),
 	)
 
-	handler, err := handler.New(templatesRepo, k8sClient, telemetryClient)
+	renderer := render.NewRenderer(k8sClient)
+
+	handler, err := handler.New(templatesRepo, k8sClient, renderer, telemetryClient)
 	if err != nil {
 		panic(err)
 	}
@@ -96,6 +99,7 @@ func main() {
 		mgr.GetScheme(),
 		templatesRepo,
 		k8sClient,
+		renderer,
 		telemetryClient,
 	)).SetupWithManager(mgr); err != nil {
 		setupLog.Error(err, "unable to create controller", "controller", "Module")

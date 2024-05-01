@@ -14,9 +14,7 @@ import (
 	yaml2 "k8s.io/apimachinery/pkg/util/yaml"
 
 	cyclopsv1alpha1 "github.com/cyclops-ui/cyclops/cyclops-ctrl/api/v1alpha1"
-	"github.com/cyclops-ui/cyclops/cyclops-ctrl/internal/models"
 	"github.com/cyclops-ui/cyclops/cyclops-ctrl/internal/models/dto"
-	template2 "github.com/cyclops-ui/cyclops/cyclops-ctrl/internal/template"
 )
 
 const (
@@ -116,14 +114,8 @@ func (k *KubernetesClient) GetResourcesForModule(name string) ([]dto.Resource, e
 
 func (k *KubernetesClient) GetDeletedResources(
 	resources []dto.Resource,
-	module cyclopsv1alpha1.Module,
-	template *models.Template,
+	manifest string,
 ) ([]dto.Resource, error) {
-	manifest, err := template2.HelmTemplate(module, template)
-	if err != nil {
-		return nil, err
-	}
-
 	resourcesFromTemplate := make(map[string][]dto.Resource, 0)
 
 	for _, s := range strings.Split(manifest, "---") {

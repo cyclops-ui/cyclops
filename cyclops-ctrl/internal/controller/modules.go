@@ -2,6 +2,7 @@ package controller
 
 import (
 	"fmt"
+	"github.com/cyclops-ui/cyclops/cyclops-ctrl/internal/template/render"
 	"net/http"
 	"os"
 	"strings"
@@ -20,16 +21,19 @@ type Modules struct {
 	kubernetesClient *k8sclient.KubernetesClient
 	templatesRepo    *template.Repo
 	telemetryClient  telemetry.Client
+	renderer         *render.Renderer
 }
 
 func NewModulesController(
 	templatesRepo *template.Repo,
 	kubernetes *k8sclient.KubernetesClient,
+	renderer *render.Renderer,
 	telemetryClient telemetry.Client,
 ) *Modules {
 	return &Modules{
 		kubernetesClient: kubernetes,
 		templatesRepo:    templatesRepo,
+		renderer:         renderer,
 		telemetryClient:  telemetryClient,
 	}
 }
@@ -127,7 +131,7 @@ func (m *Modules) Manifest(ctx *gin.Context) {
 		return
 	}
 
-	manifest, err := template.HelmTemplate(v1alpha1.Module{Spec: request}, targetTemplate)
+	manifest, err := m.renderer.HelmTemplate(v1alpha1.Module{Spec: request}, targetTemplate)
 	if err != nil {
 		fmt.Println(err)
 		ctx.Status(http.StatusInternalServerError)
@@ -161,7 +165,7 @@ func (m *Modules) CurrentManifest(ctx *gin.Context) {
 		return
 	}
 
-	manifest, err := template.HelmTemplate(*module, targetTemplate)
+	manifest, err := m.renderer.HelmTemplate(*module, targetTemplate)
 	if err != nil {
 		fmt.Println(err)
 		ctx.Status(http.StatusInternalServerError)
@@ -302,7 +306,14 @@ func (m *Modules) ResourcesForModule(ctx *gin.Context) {
 		return
 	}
 
-	resources, err = m.kubernetesClient.GetDeletedResources(resources, *module, t)
+	manifest, err := m.renderer.HelmTemplate(*module, t)
+	if err != nil {
+		fmt.Println(err)
+		ctx.JSON(http.StatusInternalServerError, dto.NewError("Error rendering Module manifest", err.Error()))
+		return
+	}
+
+	resources, err = m.kubernetesClient.GetDeletedResources(resources, manifest)
 	if err != nil {
 		fmt.Println(err)
 		ctx.JSON(http.StatusInternalServerError, dto.NewError("Error fetching deleted module resources", err.Error()))
@@ -333,7 +344,7 @@ func (m *Modules) Template(ctx *gin.Context) {
 		return
 	}
 
-	currentManifest, err := template.HelmTemplate(*module, currentTemplate)
+	currentManifest, err := m.renderer.HelmTemplate(*module, currentTemplate)
 	if err != nil {
 		fmt.Println(err)
 		ctx.JSON(http.StatusInternalServerError, dto.NewError("Error templating current", err.Error()))
@@ -351,7 +362,7 @@ func (m *Modules) Template(ctx *gin.Context) {
 		return
 	}
 
-	proposedManifest, err := template.HelmTemplate(*module, proposedTemplate)
+	proposedManifest, err := m.renderer.HelmTemplate(*module, proposedTemplate)
 	if err != nil {
 		fmt.Println(err)
 		ctx.JSON(http.StatusInternalServerError, dto.NewError("Error templating proposed", err.Error()))
@@ -387,7 +398,7 @@ func (m *Modules) HelmTemplate(ctx *gin.Context) {
 		return
 	}
 
-	_, err = template.HelmTemplate(*module, currentTemplate)
+	_, err = m.renderer.HelmTemplate(*module, currentTemplate)
 	if err != nil {
 		fmt.Println(err)
 		ctx.JSON(http.StatusInternalServerError, dto.NewError("Error templating", err.Error()))
