@@ -1,2 +1,1 @@
 cd cyclops-ui
-npx lint-staged
