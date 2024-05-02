@@ -287,7 +287,7 @@ func (m *Modules) ResourcesForModule(ctx *gin.Context) {
 	t, err := m.templatesRepo.GetTemplate(
 		module.Spec.TemplateRef.URL,
 		module.Spec.TemplateRef.Path,
-		module.Spec.TemplateRef.Version,
+		module.Status.TemplateResolvedVersion,
 	)
 	if err != nil {
 		fmt.Println(err)

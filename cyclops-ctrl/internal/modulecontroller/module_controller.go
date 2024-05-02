@@ -115,10 +115,15 @@ func (r *ModuleReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctr
 
 	r.logger.Info("upsert module", "namespaced name", req.NamespacedName)
 
+	templateVersion := module.Status.TemplateResolvedVersion
+	if len(templateVersion) == 0 {
+		templateVersion = module.Spec.TemplateRef.Version
+	}
+
 	template, err := r.templatesRepo.GetTemplate(
 		module.Spec.TemplateRef.URL,
 		module.Spec.TemplateRef.Path,
-		module.Spec.TemplateRef.Version,
+		templateVersion,
 	)
 	if err != nil {
 		r.logger.Error(err, "error fetching module template", "namespaced name", req.NamespacedName)
