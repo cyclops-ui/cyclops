@@ -44,6 +44,9 @@ func (r Repo) LoadOCIHelmChart(repo, chart, version string) (*models.Template, e
 		return nil, err
 	}
 
+	template.Version = version
+	template.ResolvedVersion = strictVersion
+
 	r.cache.SetTemplate(repo, chart, strictVersion, template)
 
 	return template, nil

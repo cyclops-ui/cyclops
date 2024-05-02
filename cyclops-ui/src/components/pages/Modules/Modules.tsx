@@ -61,7 +61,7 @@ const Modules = () => {
   const namespaces: {} | any = [];
   namespacesState.map((namespace: any) => {
     namespaces.push(
-      <Select.Option key={namespace.name}>{namespace.name}</Select.Option>
+      <Select.Option key={namespace.name}>{namespace.name}</Select.Option>,
     );
   });
 
@@ -98,7 +98,7 @@ const Modules = () => {
 
   const getTemplateVersion = (version: string) => {
     if (version === "") {
-      return "main";
+      return <span style={{ color: "#A0A0A0" }}>{"<default>"}</span>;
     }
 
     return version;
@@ -144,25 +144,23 @@ const Modules = () => {
       <Row gutter={[16, 16]}>
         {filteredData.map((module: any, index) => (
           <Col key={index} span={8}>
-            <a
-                href={"/modules/" + module.name}
-            >
+            <a href={"/modules/" + module.name}>
               <Card
-                  title={module.name}
-                  style={{
-                    borderLeft: "solid " + getStatusColor(module) + " 5px",
-                  }}
-                  className={styles.modulecard}
+                title={module.name}
+                style={{
+                  borderLeft: "solid " + getStatusColor(module) + " 5px",
+                }}
+                className={styles.modulecard}
               >
                 <Row gutter={[16, 16]}>
                   <Col
-                      span={24}
-                      style={{
-                        whiteSpace: "nowrap",
-                        overflow: "hidden",
-                        textOverflow: "ellipsis",
-                        display: "block",
-                      }}
+                    span={24}
+                    style={{
+                      whiteSpace: "nowrap",
+                      overflow: "hidden",
+                      textOverflow: "ellipsis",
+                      display: "block",
+                    }}
                   >
                     Repo:
                     <Link aria-level={3} href={module.template.repo}>
@@ -172,40 +170,63 @@ const Modules = () => {
                 </Row>
                 <Row gutter={[16, 16]}>
                   <Col
-                      span={24}
-                      style={{
-                        whiteSpace: "nowrap",
-                        overflow: "hidden",
-                        textOverflow: "ellipsis",
-                        display: "block",
-                      }}
+                    span={24}
+                    style={{
+                      whiteSpace: "nowrap",
+                      overflow: "hidden",
+                      textOverflow: "ellipsis",
+                      display: "block",
+                    }}
                   >
                     Path:
                     <Link
-                        aria-level={3}
-                        href={
-                            module.template.repo +
-                            `/tree/` +
-                            getTemplateVersion(module.template.version) +
-                            `/` +
-                            module.template.path
-                        }
+                      aria-level={3}
+                      href={
+                        module.template.repo +
+                        `/tree/` +
+                        getTemplateVersion(module.template.version) +
+                        `/` +
+                        module.template.path
+                      }
                     >
                       {" " + module.template.path}
                     </Link>
                   </Col>
                 </Row>
-                <Row gutter={[16, 16]}>
+                <Row>
                   <Col
-                      span={24}
-                      style={{
-                        whiteSpace: "nowrap",
-                        overflow: "hidden",
-                        textOverflow: "ellipsis",
-                        display: "block",
-                      }}
+                    span={6}
+                    style={{
+                      whiteSpace: "nowrap",
+                      overflow: "hidden",
+                      textOverflow: "ellipsis",
+                      display: "block",
+                    }}
                   >
-                    Version: {getTemplateVersion(module.template.version)}
+                    Version:
+                  </Col>
+                  <Col
+                    style={{
+                      whiteSpace: "nowrap",
+                      overflow: "hidden",
+                      textOverflow: "ellipsis",
+                      display: "block",
+                    }}
+                  >
+                    {getTemplateVersion(module.template.version)}
+                  </Col>
+                </Row>
+                <Row>
+                  <Col
+                    offset={6}
+                    style={{
+                      whiteSpace: "nowrap",
+                      overflow: "hidden",
+                      textOverflow: "ellipsis",
+                      display: "block",
+                    }}
+                  >
+                    {module.template.resolvedVersion}
                   </Col>
                 </Row>
               </Card>
@@ -214,7 +235,7 @@ const Modules = () => {
         ))}
       </Row>
     </div>
-);
+  );
 };
 
 export default Modules;

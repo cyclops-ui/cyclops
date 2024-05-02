@@ -100,12 +100,14 @@ spec:
                     - failed
                     type: string
                 required:
-                - errors
                 - reason
                 - status
                 type: object
+              templateResolvedVersion:
+                type: string
             required:
             - reconciliationStatus
+            - templateResolvedVersion
             type: object
         type: object
     served: true
