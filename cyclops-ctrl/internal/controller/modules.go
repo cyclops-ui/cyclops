@@ -253,9 +253,13 @@ func (m *Modules) UpdateModule(ctx *gin.Context) {
 	}
 
 	module.History = append([]v1alpha1.HistoryEntry{{
-		Generation:  curr.Generation,
-		TemplateRef: curr.Spec.TemplateRef,
-		Values:      curr.Spec.Values,
+		Generation: curr.Generation,
+		TemplateRef: v1alpha1.HistoryTemplateRef{
+			URL:             curr.Spec.TemplateRef.URL,
+			Path:            curr.Spec.TemplateRef.Path,
+			ResolvedVersion: curr.Status.TemplateResolvedVersion,
+		},
+		Values: curr.Spec.Values,
 	}}, history...)
 
 	if len(module.History) > 10 {

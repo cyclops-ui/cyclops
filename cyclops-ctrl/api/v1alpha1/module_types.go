@@ -73,9 +73,15 @@ type ModuleStatus struct {
 	TemplateResolvedVersion string               `json:"templateResolvedVersion"`
 }
 
+type HistoryTemplateRef struct {
+	URL             string `json:"repo"`
+	Path            string `json:"path"`
+	ResolvedVersion string `json:"resolvedVersion"`
+}
+
 type HistoryEntry struct {
 	Generation  int64                `json:"generation"`
-	TemplateRef TemplateRef          `json:"template"`
+	TemplateRef HistoryTemplateRef   `json:"template"`
 	Values      apiextensionsv1.JSON `json:"values"`
 }
 
