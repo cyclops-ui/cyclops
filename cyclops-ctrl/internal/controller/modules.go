@@ -109,7 +109,7 @@ func (m *Modules) GetModuleHistory(ctx *gin.Context) {
 func (m *Modules) Manifest(ctx *gin.Context) {
 	ctx.Header("Access-Control-Allow-Origin", "*")
 
-	var request v1alpha1.ModuleSpec
+	var request v1alpha1.HistoryEntry
 	if err := ctx.BindJSON(&request); err != nil {
 		fmt.Println("error binding request", request)
 		ctx.JSON(http.StatusBadRequest, dto.NewError("Error loading template", err.Error()))
@@ -119,7 +119,7 @@ func (m *Modules) Manifest(ctx *gin.Context) {
 	targetTemplate, err := m.templatesRepo.GetTemplate(
 		request.TemplateRef.URL,
 		request.TemplateRef.Path,
-		request.TemplateRef.Version,
+		request.TemplateRef.ResolvedVersion,
 	)
 	if err != nil {
 		fmt.Println(err)
@@ -127,7 +127,16 @@ func (m *Modules) Manifest(ctx *gin.Context) {
 		return
 	}
 
-	manifest, err := template.HelmTemplate(v1alpha1.Module{Spec: request}, targetTemplate)
+	manifest, err := template.HelmTemplate(v1alpha1.Module{
+		Spec: v1alpha1.ModuleSpec{
+			TemplateRef: v1alpha1.TemplateRef{
+				URL:     request.TemplateRef.URL,
+				Path:    request.TemplateRef.Path,
+				Version: request.TemplateRef.ResolvedVersion,
+			},
+			Values: request.Values,
+		},
+	}, targetTemplate)
 	if err != nil {
 		fmt.Println(err)
 		ctx.Status(http.StatusInternalServerError)
