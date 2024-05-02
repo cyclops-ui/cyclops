@@ -72,21 +72,22 @@ themes.forEach((theme) => require(`ace-builds/src-noconflict/theme-${theme}`));
 const { Title } = Typography;
 
 interface module {
-  name: String;
-  namespace: String;
+  name: string;
+  namespace: string;
   template: {
-    repo: String;
-    path: String;
-    version: String;
+    repo: string;
+    path: string;
+    version: string;
+    resolvedVersion: string;
   };
 }
 
 interface resourceRef {
-  group: String;
-  version: String;
-  kind: String;
-  name: String;
-  namespace: String;
+  group: string;
+  version: string;
+  kind: string;
+  name: string;
+  namespace: string;
 }
 
 const ModuleDetails = () => {
@@ -107,6 +108,7 @@ const ModuleDetails = () => {
       repo: "",
       path: "",
       version: "",
+      resolvedVersion: "",
     },
   });
 
@@ -133,7 +135,7 @@ const ModuleDetails = () => {
     version: string,
     kind: string,
     namespace: string,
-    name: string
+    name: string,
   ) {
     axios
       .get(`/api/manifest`, {
@@ -315,7 +317,7 @@ const ModuleDetails = () => {
       resourcesToDelete.push(
         <Row>
           {resource.kind}: {resource.namespace} / {resource.name}
-        </Row>
+        </Row>,
       );
     });
 
@@ -504,7 +506,7 @@ const ModuleDetails = () => {
                   resource.version,
                   resource.kind,
                   resource.namespace,
-                  resource.name
+                  resource.name,
                 );
               }}
               block
@@ -514,7 +516,7 @@ const ModuleDetails = () => {
           </Col>
         </Row>
         {resourceDetails}
-      </Collapse.Panel>
+      </Collapse.Panel>,
     );
   });
 
@@ -539,22 +541,67 @@ const ModuleDetails = () => {
     }
   };
 
+  const githubTemplateReferenceView = () => {
+    let refView = module.template.repo;
+    let commitLink =
+      module.template.repo +
+      `/tree/` +
+      module.template.resolvedVersion +
+      `/` +
+      module.template.path;
+
+    if (module.template.path && module.template.path !== "") {
+      refView += "/" + module.template.path;
+    }
+
+    if (module.template.version && module.template.version !== "") {
+      refView += " @ " + module.template.version;
+    }
+
+    refView += " - " + module.template.resolvedVersion.substring(0, 7);
+
+    return (
+      <Row>
+        <Link aria-level={3} href={commitLink}>
+          <LinkOutlined />
+          {" " + refView}
+        </Link>
+      </Row>
+    );
+  };
+
+  const defaultTemplateReferenceView = () => {
+    let refView = module.template.repo;
+
+    if (module.template.path && module.template.path !== "") {
+      refView += "/" + module.template.path;
+    }
+
+    if (module.template.version && module.template.version !== "") {
+      refView += " @ " + module.template.version;
+    }
+
+    refView += " - " + module.template.resolvedVersion.substring(0, 7);
+
+    return (
+      <Row>
+        <span aria-level={3} style={{ color: "#1677ff", height: "22px" }}>
+          {refView}
+        </span>
+      </Row>
+    );
+  };
+
+  const moduleTemplateReferenceView = () => {
+    if (module.template.repo.startsWith("https://github.com")) {
+      return githubTemplateReferenceView();
+    }
+
+    return defaultTemplateReferenceView();
+  };
+
   const moduleLoading = () => {
     if (loadModule) {
-      let commit = "";
-      let commitLink =
-        module.template.repo + `/tree/main/` + module.template.path;
-
-      if (module.template.version && module.template.version !== "") {
-        commit = " @ " + module.template.version;
-        commitLink =
-          module.template.repo +
-          `/tree/` +
-          module.template.version +
-          `/` +
-          module.template.path;
-      }
-
       return (
         <div>
           <Row gutter={[40, 0]}>
@@ -570,15 +617,7 @@ const ModuleDetails = () => {
             </Col>
           </Row>
           <Row gutter={[40, 0]}>
-            <Col span={9}>
-              {commitLink.startsWith("https://github.com") && (
-                <Link aria-level={3} href={commitLink}>
-                  <LinkOutlined />
-                  {module.template.path.length !== 0 &&
-                    module.template.path + commit}
-                </Link>
-              )}
-            </Col>
+            <Col span={24}>{moduleTemplateReferenceView()}</Col>
           </Row>
         </div>
       );

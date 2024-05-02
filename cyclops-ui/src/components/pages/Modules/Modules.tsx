@@ -96,12 +96,17 @@ const Modules = () => {
     return "#FF0000";
   };
 
-  const getTemplateVersion = (version: string) => {
+  const getTemplateVersion = (version: string, resolvedVersion: string) => {
     if (version === "") {
-      return <span style={{ color: "#A0A0A0" }}>{"<default>"}</span>;
+      return (
+        <span>
+          <span style={{ color: "#A0A0A0" }}>{"<default>"}</span>
+          {" - " + resolvedVersion.substring(0, 7)}
+        </span>
+      );
     }
 
-    return version;
+    return version + " - " + resolvedVersion.substring(0, 7);
   };
 
   return (
@@ -184,7 +189,7 @@ const Modules = () => {
                       href={
                         module.template.repo +
                         `/tree/` +
-                        getTemplateVersion(module.template.version) +
+                        module.template.resolvedVersion +
                         `/` +
                         module.template.path
                       }
@@ -195,7 +200,7 @@ const Modules = () => {
                 </Row>
                 <Row>
                   <Col
-                    span={6}
+                    span={24}
                     style={{
                       whiteSpace: "nowrap",
                       overflow: "hidden",
@@ -204,29 +209,13 @@ const Modules = () => {
                     }}
                   >
                     Version:
-                  </Col>
-                  <Col
-                    style={{
-                      whiteSpace: "nowrap",
-                      overflow: "hidden",
-                      textOverflow: "ellipsis",
-                      display: "block",
-                    }}
-                  >
-                    {getTemplateVersion(module.template.version)}
-                  </Col>
-                </Row>
-                <Row>
-                  <Col
-                    offset={6}
-                    style={{
-                      whiteSpace: "nowrap",
-                      overflow: "hidden",
-                      textOverflow: "ellipsis",
-                      display: "block",
-                    }}
-                  >
-                    {module.template.resolvedVersion}
+                    <span style={{ color: "#1677ff" }}>
+                      {" "}
+                      {getTemplateVersion(
+                        module.template.version,
+                        module.template.resolvedVersion,
+                      )}
+                    </span>
                   </Col>
                 </Row>
               </Card>
