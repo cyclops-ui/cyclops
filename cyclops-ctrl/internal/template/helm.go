@@ -199,6 +199,10 @@ func (r Repo) mapHelmChart(chartName string, files map[string][]byte) (*models.T
 		return nil, errors.New("could not read 'values.schema.json' file; it should be placed in the repo/path you provided; make sure you provided the correct path")
 	}
 
+	if len(metadataBytes) == 0 {
+		return nil, errors.New("could not read 'Chart.yaml' file; it should be placed in the repo/path you provided; make sure you provided the correct path")
+	}
+
 	var schema helm.Property
 	// unmarshal values schema only if present
 	if err := json.Unmarshal(schemaBytes, &schema); err != nil {

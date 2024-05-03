@@ -3,8 +3,6 @@ package controller
 import (
 	"fmt"
 	"net/http"
-	"os"
-	"path/filepath"
 	"strconv"
 
 	"github.com/gin-gonic/gin"
@@ -111,8 +109,19 @@ func (c *Templates) CreateTemplatesStore(ctx *gin.Context) {
 		return
 	}
 
-	if !isChartYAMLValid(templateStore.TemplateRef.URL, templateStore.TemplateRef.Path, templateStore.TemplateRef.Version) {
-		ctx.JSON(http.StatusBadRequest, dto.NewError("Invalid reference", "Chart.yaml not found"))
+	repo := templateStore.TemplateRef.URL
+	path := templateStore.TemplateRef.Path
+	version := templateStore.TemplateRef.Version
+
+	if repo == "" {
+		ctx.String(http.StatusBadRequest, "set repo field")
+		return
+	}
+
+	_, err := c.templatesRepo.GetTemplate(repo, path, version)
+	if err != nil {
+		fmt.Println(err)
+		ctx.JSON(http.StatusBadRequest, dto.NewError("Error loading template", err.Error()))
 		return
 	}
 
@@ -136,12 +145,23 @@ func (c *Templates) EditTemplatesStore(ctx *gin.Context) {
 		return
 	}
 
-	templateStore.Name = ctx.Param("name")
+	repo := templateStore.TemplateRef.URL
+	path := templateStore.TemplateRef.Path
+	version := templateStore.TemplateRef.Version
 
-	if !isChartYAMLValid(templateStore.TemplateRef.URL, templateStore.TemplateRef.Path, templateStore.TemplateRef.Version) {
-		ctx.JSON(http.StatusBadRequest, dto.NewError("Invalid reference", "Chart.yaml not found"))
+	if repo == "" {
+		ctx.String(http.StatusBadRequest, "set repo field")
 		return
 	}
+
+	_, err := c.templatesRepo.GetTemplate(repo, path, version)
+	if err != nil {
+		fmt.Println(err)
+		ctx.JSON(http.StatusBadRequest, dto.NewError("Error loading template", err.Error()))
+		return
+	}
+
+	templateStore.Name = ctx.Param("name")
 
 	k8sTemplateStore := mapper.DTOToTemplateStore(*templateStore)
 
@@ -151,16 +171,6 @@ func (c *Templates) EditTemplatesStore(ctx *gin.Context) {
 	}
 
 	ctx.Status(http.StatusCreated)
-}
-
-func isChartYAMLValid(repo, path, version string) bool {
-	chartPath := filepath.Join(repo, path, version, "Chart.yaml")
-	_, err := os.Stat(chartPath)
-
-	if err != nil {
-		return false
-	}
-	return true
 }
 
 func (c *Templates) DeleteTemplatesStore(ctx *gin.Context) {
