@@ -100,7 +100,6 @@ spec:
                     - failed
                     type: string
                 required:
-                - errors
                 - reason
                 - status
                 type: object

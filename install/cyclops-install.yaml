@@ -84,6 +84,10 @@ spec:
               properties:
                 reconciliationStatus:
                   properties:
+                    errors:
+                      items:
+                        type: string
+                      type: array
                     reason:
                       type: string
                     status:
@@ -314,7 +318,7 @@ spec:
     spec:
       containers:
         - name: cyclops-ui
-          image: cyclopsui/cyclops-ui:v0.3.3
+          image: cyclopsui/cyclops-ui:v0.4.1
           ports:
             - containerPort: 80
           env:
@@ -360,7 +364,7 @@ spec:
       serviceAccountName: cyclops-ctrl
       containers:
         - name: cyclops-ctrl
-          image: cyclopsui/cyclops-ctrl:v0.3.3
+          image: cyclopsui/cyclops-ctrl:v0.4.1
           ports:
             - containerPort: 8080
           env:
