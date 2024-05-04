@@ -114,7 +114,7 @@ func (c *Templates) CreateTemplatesStore(ctx *gin.Context) {
 	version := templateStore.TemplateRef.Version
 
 	if repo == "" {
-		ctx.String(http.StatusBadRequest, "set repo field")
+		ctx.JSON(http.StatusBadRequest, dto.NewError("Invalid template reference", "Template repo not set"))
 		return
 	}
 
@@ -150,7 +150,7 @@ func (c *Templates) EditTemplatesStore(ctx *gin.Context) {
 	version := templateStore.TemplateRef.Version
 
 	if repo == "" {
-		ctx.String(http.StatusBadRequest, "set repo field")
+		ctx.JSON(http.StatusBadRequest, dto.NewError("Invalid template reference", "Template repo not set"))
 		return
 	}
 
