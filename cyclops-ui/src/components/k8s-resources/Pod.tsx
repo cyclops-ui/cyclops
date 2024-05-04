@@ -204,6 +204,7 @@ const Pod = ({ name, namespace }: Props) => {
           let log = "";
           res.data.forEach((s: string) => {
             log += s;
+            log += '\n';
           });
           setLogs(log);
         } else {
@@ -295,6 +296,7 @@ const Pod = ({ name, namespace }: Props) => {
                     let log = "";
                     res.data.forEach((s: string) => {
                       log += s;
+                      log += '\n';
                     });
                     setLogs(log);
                   } else {

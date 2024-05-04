@@ -183,6 +183,7 @@ const StatefulSet = ({ name, namespace }: Props) => {
           let log = "";
           res.data.forEach((s: string) => {
             log += s;
+            log += '\n';
           });
           setLogs(log);
         } else {
@@ -298,6 +299,7 @@ const StatefulSet = ({ name, namespace }: Props) => {
                             let log = "";
                             res.data.forEach((s: string) => {
                               log += s;
+                              log += '\n';
                             });
                             setLogs(log);
                           } else {
