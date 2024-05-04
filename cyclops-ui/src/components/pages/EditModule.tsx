@@ -6,11 +6,9 @@ import {
   Collapse,
   Divider,
   Form,
-  FormListFieldData,
   Input,
   InputNumber,
   message,
-  Modal,
   Row,
   Select,
   Space,
@@ -23,10 +21,10 @@ import axios from "axios";
 import { useNavigate } from "react-router";
 import {
   InfoCircleOutlined,
-  LinkOutlined,
+  LockFilled,
   MinusCircleOutlined,
   PlusOutlined,
-  WarningFilled,
+  UnlockFilled,
 } from "@ant-design/icons";
 
 import AceEditor from "react-ace";
@@ -44,6 +42,10 @@ import { fileExtension, flattenObjectKeys } from "../../utils/form";
 import "./custom.css";
 import { numberInputValidators } from "../../utils/validators/number";
 import { stringInputValidators } from "../../utils/validators/string";
+import {
+  moduleTemplateReferenceView,
+  templateRef,
+} from "../../utils/templateRef";
 
 const { TextArea } = Input;
 
@@ -52,18 +54,26 @@ const layout = {
   wrapperCol: { span: 16 },
 };
 
+interface module {
+  name: string;
+  values: any;
+  template: templateRef;
+}
+
 const EditModule = () => {
-  const [module, setModule] = useState({
+  const [module, setModule] = useState<module>({
     name: "",
     values: {},
     template: {
       repo: "",
       path: "",
       version: "",
+      resolvedVersion: "",
     },
   });
 
   const [form] = Form.useForm();
+  const [editTemplateForm] = Form.useForm();
 
   const [allConfigs, setAllConfigs] = useState([]);
   const [values, setValues] = useState({});
@@ -75,6 +85,15 @@ const EditModule = () => {
       required: [],
     },
   });
+
+  const [templateRef, setTemplateRef] = useState<templateRef>({
+    repo: "",
+    path: "",
+    version: "",
+    resolvedVersion: "",
+  });
+  const [templateRefLock, setTemplateRefLock] = useState(true);
+
   const [error, setError] = useState({
     message: "",
     description: "",
@@ -123,7 +142,7 @@ const EditModule = () => {
                 break;
               case "object":
                 objectArr.push(
-                  mapsToArray(field.items.properties, valueFromList)
+                  mapsToArray(field.items.properties, valueFromList),
                 );
                 break;
             }
@@ -165,6 +184,19 @@ const EditModule = () => {
       .then((res) => {
         setLoadValues(true);
 
+        editTemplateForm.setFieldsValue({
+          repo: res.data.template.repo,
+          path: res.data.template.path,
+          version: res.data.template.version,
+        });
+
+        setTemplateRef({
+          repo: res.data.template.repo,
+          path: res.data.template.path,
+          version: res.data.template.version,
+          resolvedVersion: res.data.template.resolvedVersion,
+        });
+
         axios
           .get(
             `/api/templates?repo=` +
@@ -172,7 +204,7 @@ const EditModule = () => {
               `&path=` +
               res.data.template.path +
               `&commit=` +
-              res.data.template.version
+              res.data.template.resolvedVersion,
           )
           .then((templatesRes) => {
             setConfig(templatesRes.data);
@@ -180,7 +212,7 @@ const EditModule = () => {
 
             let values = mapsToArray(
               templatesRes.data.root.properties,
-              res.data.values
+              res.data.values,
             );
 
             setModule({
@@ -300,6 +332,48 @@ const EditModule = () => {
     return out;
   };
 
+  const handleSubmitTemplateEdit = (values: any) => {
+    setLoadTemplate(false);
+    axios
+      .get(
+        `/api/templates?repo=` +
+          values.repo +
+          `&path=` +
+          values.path +
+          `&commit=` +
+          values.version,
+      )
+      .then((res) => {
+        setConfig(res.data);
+        setLoadTemplate(true);
+        setTemplateRef({
+          repo: values.repo,
+          path: values.path,
+          version: values.version,
+          resolvedVersion: res.data.resolvedVersion,
+        });
+      })
+      .catch((error) => {
+        setLoadTemplate(true);
+        if (error?.response?.data) {
+          setError({
+            message: error.response.data.message || String(error),
+            description:
+              error.response.data.description ||
+              "Check if Cyclops backend is available on: " +
+                window.__RUNTIME_CONFIG__.REACT_APP_CYCLOPS_CTRL_HOST,
+          });
+        } else {
+          setError({
+            message: String(error),
+            description:
+              "Check if Cyclops backend is available on: " +
+              window.__RUNTIME_CONFIG__.REACT_APP_CYCLOPS_CTRL_HOST,
+          });
+        }
+      });
+  };
+
   const handleSubmit = (values: any) => {
     values = findMaps(config.root.properties, values);
 
@@ -307,7 +381,7 @@ const EditModule = () => {
       .post(`/api/modules/update`, {
         values: values,
         name: module.name,
-        template: module.template,
+        template: templateRef,
       })
       .then((res) => {
         window.location.href = "/modules/" + moduleName;
@@ -346,7 +420,7 @@ const EditModule = () => {
     field: any,
     formItemName: string | string[],
     arrayField: any,
-    isRequired: boolean
+    isRequired: boolean,
   ) => {
     let options: { value: string; label: string }[] = [];
     field.enum.forEach((option: any) => {
@@ -387,7 +461,7 @@ const EditModule = () => {
     field: any,
     formItemName: string | string[],
     arrayField: any,
-    isRequired: boolean
+    isRequired: boolean,
   ) => {
     return (
       <Form.Item
@@ -433,7 +507,7 @@ const EditModule = () => {
     parent: string,
     level: number,
     arrayField: any,
-    remove: Function
+    remove: Function,
   ) => {
     switch (field.items.type) {
       case "object":
@@ -446,7 +520,7 @@ const EditModule = () => {
               level + 1,
               2,
               arrayField,
-              field.items.required
+              field.items.required,
             )}
             <MinusCircleOutlined
               style={{ fontSize: "16px" }}
@@ -500,7 +574,7 @@ const EditModule = () => {
     level: number,
     arrayIndexLifetime: number,
     arrayField?: any,
-    required?: string[]
+    required?: string[],
   ) {
     const formFields: {} | any = [];
     fields.forEach((field: any) => {
@@ -532,14 +606,14 @@ const EditModule = () => {
         case "string":
           if (field.enum) {
             formFields.push(
-              selectInputField(field, formItemName, arrayField, isRequired)
+              selectInputField(field, formItemName, arrayField, isRequired),
             );
             return;
           }
 
           if (field.fileExtension && field.fileExtension.length > 0) {
             formFields.push(
-              fileField(field, formItemName, arrayField, isRequired)
+              fileField(field, formItemName, arrayField, isRequired),
             );
             return;
           }
@@ -563,7 +637,7 @@ const EditModule = () => {
               rules={stringValidationRules}
             >
               <Input />
-            </Form.Item>
+            </Form.Item>,
           );
           return;
         case "number":
@@ -587,7 +661,7 @@ const EditModule = () => {
               rules={numberValidationRules}
             >
               <InputNumber style={{ width: "100%" }} />
-            </Form.Item>
+            </Form.Item>,
           );
           return;
         case "boolean":
@@ -623,7 +697,7 @@ const EditModule = () => {
               valuePropName={checked}
             >
               <Switch />
-            </Form.Item>
+            </Form.Item>,
           );
           return;
         case "object":
@@ -697,14 +771,14 @@ const EditModule = () => {
                           level + 1,
                           arrayIndexLifetime,
                           arrayIndexLifetime > 0 ? arrayField : undefined,
-                          field.required
+                          field.required,
                         )}
                       </>
                     )}
                   </Form.List>
                 </Collapse.Panel>
               </Collapse>
-            </Col>
+            </Col>,
           );
           return;
         case "array":
@@ -779,7 +853,7 @@ const EditModule = () => {
                               "",
                               level + 1,
                               arrField,
-                              remove
+                              remove,
                             )}
                             <Divider />
                           </Col>
@@ -800,7 +874,7 @@ const EditModule = () => {
                   </Form.List>
                 </Collapse.Panel>
               </Collapse>
-            </Col>
+            </Col>,
           );
           return;
         case "map":
@@ -858,7 +932,7 @@ const EditModule = () => {
                   </>
                 )}
               </Form.List>
-            </Form.Item>
+            </Form.Item>,
           );
       }
     });
@@ -872,10 +946,61 @@ const EditModule = () => {
         <Spin tip="Loading" size="large" style={{ alignContent: "center" }} />
       );
     }
+
+    return (
+      <div>
+        {mapFields(
+          config.root.properties,
+          "",
+          "",
+          0,
+          0,
+          undefined,
+          config.root.required,
+        )}
+        <div style={{ textAlign: "right" }}>
+          <Button type="primary" htmlType="submit" name="Save">
+            Save
+          </Button>{" "}
+          <Button
+            htmlType="button"
+            onClick={() => history("/modules/" + moduleName)}
+          >
+            Back
+          </Button>
+        </div>
+      </div>
+    );
   };
 
   const onFinishFailed = () => {
     message.error("Submit failed!");
+  };
+
+  const lockButton = () => {
+    if (templateRefLock) {
+      return (
+        <Button
+          type="primary"
+          icon={<LockFilled />}
+          style={{ marginRight: "10px" }}
+          onClick={function () {
+            setTemplateRefLock(false);
+          }}
+        />
+      );
+    }
+
+    return (
+      <Button
+        type="primary"
+        icon={<UnlockFilled />}
+        style={{ marginRight: "10px" }}
+        onClick={function () {
+          setTemplateRefLock(true);
+        }}
+      />
+    );
   };
 
   return (
@@ -896,10 +1021,79 @@ const EditModule = () => {
         />
       )}
       <Row gutter={[40, 0]}>
-        <Col span={23}>
-          <Title style={{ textAlign: "center" }} level={2}>
-            {module.name}
-          </Title>
+        <Col span={24}>
+          <Title level={2}>{module.name}</Title>
+        </Col>
+      </Row>
+      <Row gutter={[40, 0]}>
+        <Col span={24}>
+          <Divider orientation="left" orientationMargin="0">
+            Template
+          </Divider>
+          <Row>
+            <Form
+              form={editTemplateForm}
+              layout="inline"
+              autoComplete={"off"}
+              onFinish={handleSubmitTemplateEdit}
+              onFinishFailed={onFinishFailed}
+              style={{ width: "100%" }}
+            >
+              {lockButton()}
+              <Form.Item
+                name={"repo"}
+                style={{ width: "40%", marginRight: "0" }}
+              >
+                <Input placeholder={"Repository"} disabled={templateRefLock} />
+              </Form.Item>
+              <div
+                style={{
+                  width: "15px",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                }}
+              >
+                /
+              </div>
+              <Form.Item
+                name={"path"}
+                style={{ width: "20%", marginRight: "0" }}
+              >
+                <Input placeholder={"Path"} disabled={templateRefLock} />
+              </Form.Item>
+              <div
+                style={{
+                  width: "15px",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                }}
+              >
+                @
+              </div>
+              <Form.Item
+                name={"version"}
+                style={{ width: "20%", marginRight: "0" }}
+              >
+                <Input
+                  placeholder={"Version"}
+                  addonAfter={templateRef.resolvedVersion.substring(0, 7)}
+                  disabled={templateRefLock}
+                />
+              </Form.Item>
+              <Form.Item style={{ paddingLeft: "10px", width: "5%" }}>
+                <Button
+                  type="primary"
+                  htmlType="submit"
+                  loading={!loadTemplate}
+                  disabled={templateRefLock}
+                >
+                  Load
+                </Button>
+              </Form.Item>
+            </Form>
+          </Row>
         </Col>
       </Row>
       <Row gutter={[40, 0]}>
@@ -916,26 +1110,6 @@ const EditModule = () => {
               Edit Module
             </Divider>
             {formLoading()}
-            {mapFields(
-              config.root.properties,
-              "",
-              "",
-              0,
-              0,
-              undefined,
-              config.root.required
-            )}
-            <div style={{ textAlign: "right" }}>
-              <Button type="primary" htmlType="submit" name="Save">
-                Save
-              </Button>{" "}
-              <Button
-                htmlType="button"
-                onClick={() => history("/modules/" + moduleName)}
-              >
-                Back
-              </Button>
-            </div>
           </Form>
         </Col>
       </Row>

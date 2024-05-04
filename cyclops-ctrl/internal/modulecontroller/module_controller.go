@@ -128,7 +128,7 @@ func (r *ModuleReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctr
 	if err != nil {
 		r.logger.Error(err, "error fetching module template", "namespaced name", req.NamespacedName)
 
-		if err = r.setStatus(ctx, module, req.NamespacedName, cyclopsv1alpha1.Failed, template.ResolvedVersion, err.Error(), nil); err != nil {
+		if err = r.setStatus(ctx, module, req.NamespacedName, cyclopsv1alpha1.Failed, templateVersion, err.Error(), nil); err != nil {
 			return ctrl.Result{}, err
 		}
 
@@ -187,6 +187,9 @@ func (r *ModuleReconciler) generateResources(kClient *k8sclient.KubernetesClient
 	if err != nil {
 		return nil, err
 	}
+
+	fmt.Println(module.Name)
+	fmt.Println(out)
 
 	installErrors := make([]string, 0)
 
@@ -282,7 +285,6 @@ func (r *ModuleReconciler) setStatus(
 			Reason: reason,
 			Errors: installErrors,
 		},
-		TemplateResolvedVersion: trv,
 	}
 
 	if err := r.Status().Update(ctx, &module); err != nil {

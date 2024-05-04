@@ -31,6 +31,10 @@ import StatefulSet from "../k8s-resources/StatefulSet";
 import Pod from "../k8s-resources/Pod";
 import Service from "../k8s-resources/Service";
 import ConfigMap from "../k8s-resources/ConfigMap";
+import {
+  moduleTemplateReferenceView,
+  templateRef,
+} from "../../utils/templateRef";
 const languages = [
   "javascript",
   "java",
@@ -74,12 +78,7 @@ const { Title } = Typography;
 interface module {
   name: string;
   namespace: string;
-  template: {
-    repo: string;
-    path: string;
-    version: string;
-    resolvedVersion: string;
-  };
+  template: templateRef;
 }
 
 interface resourceRef {
@@ -541,65 +540,6 @@ const ModuleDetails = () => {
     }
   };
 
-  const githubTemplateReferenceView = () => {
-    let refView = module.template.repo;
-    let commitLink =
-      module.template.repo +
-      `/tree/` +
-      module.template.resolvedVersion +
-      `/` +
-      module.template.path;
-
-    if (module.template.path && module.template.path !== "") {
-      refView += "/" + module.template.path;
-    }
-
-    if (module.template.version && module.template.version !== "") {
-      refView += " @ " + module.template.version;
-    }
-
-    refView += " - " + module.template.resolvedVersion.substring(0, 7);
-
-    return (
-      <Row>
-        <Link aria-level={3} href={commitLink}>
-          <LinkOutlined />
-          {" " + refView}
-        </Link>
-      </Row>
-    );
-  };
-
-  const defaultTemplateReferenceView = () => {
-    let refView = module.template.repo;
-
-    if (module.template.path && module.template.path !== "") {
-      refView += "/" + module.template.path;
-    }
-
-    if (module.template.version && module.template.version !== "") {
-      refView += " @ " + module.template.version;
-    }
-
-    refView += " - " + module.template.resolvedVersion.substring(0, 7);
-
-    return (
-      <Row>
-        <span aria-level={3} style={{ color: "#1677ff", height: "22px" }}>
-          {refView}
-        </span>
-      </Row>
-    );
-  };
-
-  const moduleTemplateReferenceView = () => {
-    if (module.template.repo.startsWith("https://github.com")) {
-      return githubTemplateReferenceView();
-    }
-
-    return defaultTemplateReferenceView();
-  };
-
   const moduleLoading = () => {
     if (loadModule) {
       return (
@@ -617,7 +557,7 @@ const ModuleDetails = () => {
             </Col>
           </Row>
           <Row gutter={[40, 0]}>
-            <Col span={24}>{moduleTemplateReferenceView()}</Col>
+            <Col span={24}>{moduleTemplateReferenceView(module.template)}</Col>
           </Row>
         </div>
       );

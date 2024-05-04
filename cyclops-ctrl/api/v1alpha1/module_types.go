@@ -26,9 +26,6 @@ import (
 
 // ModuleSpec defines the desired state of Module
 type ModuleSpec struct {
-	// INSERT ADDITIONAL SPEC FIELDS - desired state of cluster
-	// Important: Run "make" to regenerate code after modifying this file
-
 	TemplateRef TemplateRef          `json:"template"`
 	Values      apiextensionsv1.JSON `json:"values"`
 }

@@ -256,6 +256,8 @@ func (m *Modules) UpdateModule(ctx *gin.Context) {
 		return
 	}
 
+	fmt.Println(module.Status)
+
 	history := curr.History
 	if curr.History == nil {
 		history = make([]v1alpha1.HistoryEntry, 0)

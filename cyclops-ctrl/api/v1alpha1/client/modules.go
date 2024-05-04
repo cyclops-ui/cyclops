@@ -2,6 +2,7 @@ package client
 
 import (
 	"context"
+	"fmt"
 	"time"
 
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -66,6 +67,8 @@ func (c *moduleClient) Create(project *cyclopsv1alpha1.Module) (*cyclopsv1alpha1
 
 // Update takes the representation of a service and updates it. Returns the server's representation of the service, and an error, if there is any.
 func (c *moduleClient) Update(module *cyclopsv1alpha1.Module) (project *cyclopsv1alpha1.Module, err error) {
+	fmt.Println("raw", module.Status)
+
 	result := &cyclopsv1alpha1.Module{}
 	err = c.restClient.Put().
 		Namespace(c.ns).
@@ -74,6 +77,8 @@ func (c *moduleClient) Update(module *cyclopsv1alpha1.Module) (project *cyclopsv
 		Body(module).
 		Do(context.TODO()).
 		Into(result)
+
+	fmt.Println("raw after", result.Status)
 	return
 }
 
