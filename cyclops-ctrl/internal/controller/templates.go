@@ -109,6 +109,22 @@ func (c *Templates) CreateTemplatesStore(ctx *gin.Context) {
 		return
 	}
 
+	repo := templateStore.TemplateRef.URL
+	path := templateStore.TemplateRef.Path
+	version := templateStore.TemplateRef.Version
+
+	if repo == "" {
+		ctx.JSON(http.StatusBadRequest, dto.NewError("Invalid template reference", "Template repo not set"))
+		return
+	}
+
+	_, err := c.templatesRepo.GetTemplate(repo, path, version)
+	if err != nil {
+		fmt.Println(err)
+		ctx.JSON(http.StatusBadRequest, dto.NewError("Error loading template", err.Error()))
+		return
+	}
+
 	k8sTemplateStore := mapper.DTOToTemplateStore(*templateStore)
 
 	if err := c.kubernetesClient.CreateTemplateStore(k8sTemplateStore); err != nil {
@@ -126,6 +142,22 @@ func (c *Templates) EditTemplatesStore(ctx *gin.Context) {
 	if err := ctx.ShouldBind(&templateStore); err != nil {
 		fmt.Println("error binding request", templateStore)
 		ctx.JSON(http.StatusBadRequest, dto.NewError("Error binding request", err.Error()))
+		return
+	}
+
+	repo := templateStore.TemplateRef.URL
+	path := templateStore.TemplateRef.Path
+	version := templateStore.TemplateRef.Version
+
+	if repo == "" {
+		ctx.JSON(http.StatusBadRequest, dto.NewError("Invalid template reference", "Template repo not set"))
+		return
+	}
+
+	_, err := c.templatesRepo.GetTemplate(repo, path, version)
+	if err != nil {
+		fmt.Println(err)
+		ctx.JSON(http.StatusBadRequest, dto.NewError("Error loading template", err.Error()))
 		return
 	}
 
