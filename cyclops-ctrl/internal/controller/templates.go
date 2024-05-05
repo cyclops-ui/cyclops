@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"net/http"
 	"strconv"
+	"strings"
 
 	"github.com/gin-gonic/gin"
 
@@ -109,9 +110,9 @@ func (c *Templates) CreateTemplatesStore(ctx *gin.Context) {
 		return
 	}
 
-	repo := templateStore.TemplateRef.URL
-	path := templateStore.TemplateRef.Path
-	version := templateStore.TemplateRef.Version
+	repo := strings.Trim(templateStore.TemplateRef.URL, "/")
+	path := strings.Trim(templateStore.TemplateRef.Path, "/")
+	version := strings.Trim(templateStore.TemplateRef.Version, "/")
 
 	if repo == "" {
 		ctx.JSON(http.StatusBadRequest, dto.NewError("Invalid template reference", "Template repo not set"))
@@ -145,9 +146,9 @@ func (c *Templates) EditTemplatesStore(ctx *gin.Context) {
 		return
 	}
 
-	repo := templateStore.TemplateRef.URL
-	path := templateStore.TemplateRef.Path
-	version := templateStore.TemplateRef.Version
+	repo := strings.Trim(templateStore.TemplateRef.URL, "/")
+	path := strings.Trim(templateStore.TemplateRef.Path, "/")
+	version := strings.Trim(templateStore.TemplateRef.Version, "/")
 
 	if repo == "" {
 		ctx.JSON(http.StatusBadRequest, dto.NewError("Invalid template reference", "Template repo not set"))
