@@ -16,7 +16,7 @@ require (
 	github.com/onsi/gomega v1.29.0
 	github.com/pkg/errors v0.9.1
 	github.com/posthog/posthog-go v0.0.0-20240315130956-036dfa9f3555
-	golang.org/x/net v0.19.0
+	github.com/prometheus/client_golang v1.16.0
 	gopkg.in/yaml.v2 v2.4.0
 	helm.sh/helm/v3 v3.14.2
 	k8s.io/api v0.29.0

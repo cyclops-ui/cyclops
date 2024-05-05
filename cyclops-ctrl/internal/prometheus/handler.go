@@ -18,7 +18,7 @@ var moduleQueued = prometheus.NewGauge(prometheus.GaugeOpts{
 })
 
 func init() {
-	if err := prometheus.MustRegister(moduleQueued); err != nil {
+	if err := prometheus.Register(moduleQueued); err != nil {
 		setupLog.Error(err, "unable to connect prometheus")
 		os.Exit(1)
 	}
