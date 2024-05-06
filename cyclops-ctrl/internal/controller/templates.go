@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"net/http"
 	"strconv"
+	"strings"
 
 	"github.com/gin-gonic/gin"
 
@@ -109,16 +110,16 @@ func (c *Templates) CreateTemplatesStore(ctx *gin.Context) {
 		return
 	}
 
-	repo := templateStore.TemplateRef.URL
-	path := templateStore.TemplateRef.Path
-	version := templateStore.TemplateRef.Version
+	templateStore.TemplateRef.URL = strings.Trim(templateStore.TemplateRef.URL, "/")
+	templateStore.TemplateRef.Path = strings.Trim(templateStore.TemplateRef.Path, "/")
+	templateStore.TemplateRef.Version = strings.Trim(templateStore.TemplateRef.Version, "/")
 
-	if repo == "" {
+	if templateStore.TemplateRef.URL == "" {
 		ctx.JSON(http.StatusBadRequest, dto.NewError("Invalid template reference", "Template repo not set"))
 		return
 	}
 
-	_, err := c.templatesRepo.GetTemplate(repo, path, version)
+	_, err := c.templatesRepo.GetTemplate(templateStore.TemplateRef.URL, templateStore.TemplateRef.Path, templateStore.TemplateRef.Version)
 	if err != nil {
 		fmt.Println(err)
 		ctx.JSON(http.StatusBadRequest, dto.NewError("Error loading template", err.Error()))
@@ -145,16 +146,16 @@ func (c *Templates) EditTemplatesStore(ctx *gin.Context) {
 		return
 	}
 
-	repo := templateStore.TemplateRef.URL
-	path := templateStore.TemplateRef.Path
-	version := templateStore.TemplateRef.Version
+	templateStore.TemplateRef.URL = strings.Trim(templateStore.TemplateRef.URL, "/")
+	templateStore.TemplateRef.Path = strings.Trim(templateStore.TemplateRef.Path, "/")
+	templateStore.TemplateRef.Version = strings.Trim(templateStore.TemplateRef.Version, "/")
 
-	if repo == "" {
+	if templateStore.TemplateRef.URL == "" {
 		ctx.JSON(http.StatusBadRequest, dto.NewError("Invalid template reference", "Template repo not set"))
 		return
 	}
 
-	_, err := c.templatesRepo.GetTemplate(repo, path, version)
+	_, err := c.templatesRepo.GetTemplate(templateStore.TemplateRef.URL, templateStore.TemplateRef.Path, templateStore.TemplateRef.Version)
 	if err != nil {
 		fmt.Println(err)
 		ctx.JSON(http.StatusBadRequest, dto.NewError("Error loading template", err.Error()))
