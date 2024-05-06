@@ -12,7 +12,6 @@ import (
 	"github.com/cyclops-ui/cyclops/cyclops-ctrl/internal/cluster/k8sclient"
 	"github.com/cyclops-ui/cyclops/cyclops-ctrl/internal/mapper"
 	"github.com/cyclops-ui/cyclops/cyclops-ctrl/internal/models/dto"
-	prometheusHandler "github.com/cyclops-ui/cyclops/cyclops-ctrl/internal/prometheus"
 	"github.com/cyclops-ui/cyclops/cyclops-ctrl/internal/telemetry"
 	"github.com/cyclops-ui/cyclops/cyclops-ctrl/internal/template"
 )
@@ -90,7 +89,6 @@ func (m *Modules) DeleteModule(ctx *gin.Context) {
 		ctx.JSON(http.StatusInternalServerError, dto.NewError("Error deleting module", err.Error()))
 		return
 	}
-	prometheusHandler.DecModule()
 	ctx.Status(http.StatusOK)
 }
 
@@ -221,7 +219,6 @@ func (m *Modules) CreateModule(ctx *gin.Context) {
 		return
 	}
 
-	prometheusHandler.IncModule()
 	ctx.Status(http.StatusOK)
 }
 

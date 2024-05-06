@@ -1,8 +1,6 @@
 package prometheusHandler
 
 import (
-	"os"
-
 	"github.com/gin-gonic/gin"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
@@ -11,25 +9,32 @@ import (
 
 var setupLog = ctrl.Log.WithName("setup")
 
-var moduleQueued = prometheus.NewGauge(prometheus.GaugeOpts{
-	Name:      "modules_deployed",
-	Help:      "No of modules Inc or Dec",
-	Namespace: "cyclops",
-})
+type Monitor struct {
+	ModulesDeployed prometheus.Gauge
+}
 
-func init() {
-	if err := prometheus.Register(moduleQueued); err != nil {
-		setupLog.Error(err, "unable to connect prometheus")
-		os.Exit(1)
+func NewMonitor() (Monitor, error) {
+	m := Monitor{
+		ModulesDeployed: prometheus.NewGauge(prometheus.GaugeOpts{
+			Name:      "modules_deployed",
+			Help:      "No of modules Inc or Dec",
+			Namespace: "cyclops",
+		}),
 	}
+	if err := prometheus.Register(m.ModulesDeployed); err != nil {
+		setupLog.Error(err, "unable to connect prometheus")
+		return Monitor{}, err
+	}
+
+	return m, nil
 }
 
-func IncModule() {
-	moduleQueued.Inc()
+func (m *Monitor) IncModule() {
+	m.ModulesDeployed.Inc()
 }
 
-func DecModule() {
-	moduleQueued.Dec()
+func (m *Monitor) DecModule() {
+	m.ModulesDeployed.Dec()
 }
 
 func PromHandler() gin.HandlerFunc {
