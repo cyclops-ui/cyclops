@@ -19,6 +19,7 @@ type Handler struct {
 	k8sClient     *k8sclient.KubernetesClient
 
 	telemetryClient telemetry.Client
+	monitor         prometheusHandler.Monitor
 }
 
 func New(
@@ -36,9 +37,8 @@ func New(
 
 func (h *Handler) Start() error {
 	gin.SetMode(gin.DebugMode)
-
 	templatesController := controller.NewTemplatesController(h.templatesRepo, h.k8sClient)
-	modulesController := controller.NewModulesController(h.templatesRepo, h.k8sClient, h.telemetryClient)
+	modulesController := controller.NewModulesController(h.templatesRepo, h.k8sClient, h.telemetryClient, h.monitor)
 	clusterController := controller.NewClusterController(h.k8sClient)
 
 	h.router = gin.New()
@@ -79,7 +79,7 @@ func (h *Handler) Start() error {
 	h.router.GET("/nodes", clusterController.ListNodes)
 	h.router.GET("/nodes/:name", clusterController.GetNode)
 
-	h.router.GET("/metrics", prometheusHandler.PromHandler())
+	h.router.GET("/metrics", prometheusHandler.PromHandler(h.monitor))
 
 	h.router.Use(h.options)
 

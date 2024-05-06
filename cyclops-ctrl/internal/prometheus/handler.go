@@ -2,18 +2,16 @@ package prometheusHandler
 
 import (
 	"github.com/gin-gonic/gin"
+	"github.com/go-logr/logr"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
-	ctrl "sigs.k8s.io/controller-runtime"
 )
-
-var setupLog = ctrl.Log.WithName("setup")
 
 type Monitor struct {
 	ModulesDeployed prometheus.Gauge
 }
 
-func NewMonitor() (Monitor, error) {
+func NewMonitor(logger logr.Logger) (Monitor, error) {
 	m := Monitor{
 		ModulesDeployed: prometheus.NewGauge(prometheus.GaugeOpts{
 			Name:      "modules_deployed",
@@ -22,7 +20,7 @@ func NewMonitor() (Monitor, error) {
 		}),
 	}
 	if err := prometheus.Register(m.ModulesDeployed); err != nil {
-		setupLog.Error(err, "unable to connect prometheus")
+		logger.Error(err, "unable to connect prometheus")
 		return Monitor{}, err
 	}
 
@@ -37,6 +35,6 @@ func (m *Monitor) DecModule() {
 	m.ModulesDeployed.Dec()
 }
 
-func PromHandler() gin.HandlerFunc {
+func PromHandler(monitor Monitor) gin.HandlerFunc {
 	return gin.WrapH(promhttp.Handler())
 }
