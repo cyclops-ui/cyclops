@@ -56,10 +56,12 @@ const (
 )
 
 type ReconciliationStatus struct {
+	// +kubebuilder:validation:Optional
 	// +kubebuilder:validation:Enum=unknown;succeeded;failed
 	// +kubebuilder:default:=unknown
-	Status ReconciliationStatusState `json:"status"`
-	Reason string                    `json:"reason"`
+	Status ReconciliationStatusState `json:"status,omitempty"`
+	// +kubebuilder:validation:Optional
+	Reason string `json:"reason,omitempty"`
 	// +kubebuilder:validation:Optional
 	Errors []string `json:"errors"`
 }

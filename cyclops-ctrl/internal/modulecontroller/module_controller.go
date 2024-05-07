@@ -188,9 +188,6 @@ func (r *ModuleReconciler) generateResources(kClient *k8sclient.KubernetesClient
 		return nil, err
 	}
 
-	fmt.Println(module.Name)
-	fmt.Println(out)
-
 	installErrors := make([]string, 0)
 
 	for _, s := range strings.Split(out, "---") {
@@ -285,6 +282,7 @@ func (r *ModuleReconciler) setStatus(
 			Reason: reason,
 			Errors: installErrors,
 		},
+		TemplateResolvedVersion: templateResolvedVersion,
 	}
 
 	if err := r.Status().Update(ctx, &module); err != nil {

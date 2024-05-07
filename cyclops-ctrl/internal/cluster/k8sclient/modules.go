@@ -35,9 +35,13 @@ func (k *KubernetesClient) CreateModule(module cyclopsv1alpha1.Module) error {
 	return err
 }
 
-func (k *KubernetesClient) UpdateModule(module cyclopsv1alpha1.Module) error {
-	_, err := k.moduleset.Modules(cyclopsNamespace).Update(&module)
+func (k *KubernetesClient) UpdateModule(module *cyclopsv1alpha1.Module) error {
+	_, err := k.moduleset.Modules(cyclopsNamespace).Update(module)
 	return err
+}
+
+func (k *KubernetesClient) UpdateModuleStatus(module *cyclopsv1alpha1.Module) (*cyclopsv1alpha1.Module, error) {
+	return k.moduleset.Modules(cyclopsNamespace).UpdateSubresource(module, "status")
 }
 
 func (k *KubernetesClient) DeleteModule(name string) error {

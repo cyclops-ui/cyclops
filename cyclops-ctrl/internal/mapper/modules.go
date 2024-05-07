@@ -71,12 +71,12 @@ func DtoTemplateRefToK8s(dto dto.Template) cyclopsv1alpha1.TemplateRef {
 	}
 }
 
-func k8sTemplateRefToDTO(templateRef cyclopsv1alpha1.TemplateRef, resolvedVersion string) dto.Template {
+func k8sTemplateRefToDTO(templateRef cyclopsv1alpha1.TemplateRef, templateResolvedVersion string) dto.Template {
 	return dto.Template{
 		URL:             templateRef.URL,
 		Path:            templateRef.Path,
 		Version:         templateRef.Version,
-		ResolvedVersion: resolvedVersion,
+		ResolvedVersion: templateResolvedVersion,
 	}
 }
 

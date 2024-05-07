@@ -35,12 +35,12 @@ spec:
                         type: string
                       repo:
                         type: string
-                      version:
+                      resolvedVersion:
                         type: string
                     required:
                       - path
                       - repo
-                      - version
+                      - resolvedVersion
                     type: object
                   values:
                     x-kubernetes-preserve-unknown-fields: true
@@ -97,12 +97,12 @@ spec:
                         - succeeded
                         - failed
                       type: string
-                  required:
-                    - reason
-                    - status
                   type: object
+                templateResolvedVersion:
+                  type: string
               required:
                 - reconciliationStatus
+                - templateResolvedVersion
               type: object
           type: object
       served: true
