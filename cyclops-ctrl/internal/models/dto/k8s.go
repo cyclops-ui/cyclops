@@ -256,6 +256,7 @@ type PersistentVolumeClaim struct {
 	Namespace   string 							`json:"namespace"`
 	AccessModes []v1.PersistentVolumeAccessMode `json:"accessmodes"`
 	Size        string							`json:"size"`
+	Deleted   	bool   							`json:"deleted"`
 }
 
 func (p *PersistentVolumeClaim) GetGroupVersionKind() string {
