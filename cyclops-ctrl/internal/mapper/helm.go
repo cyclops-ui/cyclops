@@ -71,10 +71,25 @@ func HelmSchemaToFields(name string, schema helm.Property, dependencies []*model
 }
 
 func sortFields(fields []models.Field, order []string) []models.Field {
+	sort.Slice(fields, func(i, j int) bool {
+		return fields[i].Name < fields[j].Name
+	})
+
 	ordersMap := make(map[string]int)
+	consideredField := make(map[string]bool)
 
 	for i, s := range order {
 		ordersMap[s] = i
+		consideredField[s] = true
+	}
+
+	orderSize := len(order)
+
+	for i, v := range fields {
+		if !consideredField[v.Name] {
+			ordersMap[v.Name] = i + orderSize
+			consideredField[v.Name] = true
+		}
 	}
 
 	sort.Slice(fields, func(i, j int) bool {
