@@ -248,6 +248,48 @@ func (s *StatefulSet) SetDeleted(deleted bool) {
 	s.Deleted = deleted
 }
 
+type PersistentVolumeClaim struct {
+	Group       string 							`json:"group"`
+	Version     string 							`json:"version"`
+	Kind        string 							`json:"kind"`
+	Name        string 							`json:"name"`
+	Namespace   string 							`json:"namespace"`
+	AccessModes []v1.PersistentVolumeAccessMode `json:"accessmodes"`
+	Size        string							`json:"size"`
+}
+
+func (p *PersistentVolumeClaim) GetGroupVersionKind() string {
+	return p.Group + "/" + p.Version + ", Kind=" + p.Kind
+}
+
+func (p *PersistentVolumeClaim) GetGroup() string {
+	return p.Group
+}
+
+func (p *PersistentVolumeClaim) GetVersion() string {
+	return p.Version
+}
+
+func (p *PersistentVolumeClaim) GetKind() string {
+	return p.Kind
+}
+
+func (p *PersistentVolumeClaim) GetName() string {
+	return p.Name
+}
+
+func (p *PersistentVolumeClaim) GetNamespace() string {
+	return p.Namespace
+}
+
+func (p *PersistentVolumeClaim) GetDeleted() bool {
+	return p.Deleted
+}
+
+func (p *PersistentVolumeClaim) SetDeleted(deleted bool) {
+	p.Deleted = deleted
+}
+
 type Other struct {
 	Group     string `json:"group"`
 	Version   string `json:"version"`
