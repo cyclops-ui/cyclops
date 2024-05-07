@@ -567,6 +567,11 @@ func (k *KubernetesClient) mapPersistentVolumeClaims(group, version, kind, name,
 		return nil, err
 	}
 
+	storage = 0
+	if persistentvolumeclaim.Spec.Resources != nil && persistentvolumeclaim.Spec.Resources.Requests != nil {
+		storage = persistentvolumeclaim.Spec.Resources.Requests.Storage
+	}
+
 	return &dto.PersistentVolumeClaim{
 		Group:     	 group,
 		Version:   	 version,
@@ -574,7 +579,7 @@ func (k *KubernetesClient) mapPersistentVolumeClaims(group, version, kind, name,
 		Name:      	 name,
 		Namespace: 	 namespace,
 		AccessModes: persistentvolumeclaim.Spec.AccessModes,
-		Size: 		 persistentvolumeclaim.Spec.Resources.Requests.Storage,
+		Size: 		 storage,
 	}, nil
 }
 
