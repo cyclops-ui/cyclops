@@ -270,6 +270,8 @@ func (k *KubernetesClient) GetResource(group, version, kind, name, namespace str
 		return k.mapPod(group, version, kind, name, namespace)
 	case isConfigMap(group, version, kind):
 		return k.mapConfigMap(group, version, kind, name, namespace)
+	case isPersistentVolumeClaims(group, version, kind):
+		return k.mapPersistentVolumeClaims(group, version, kind, name, namespace)
 	}
 
 	return nil, nil
@@ -559,6 +561,23 @@ func (k *KubernetesClient) mapConfigMap(group, version, kind, name, namespace st
 	}, nil
 }
 
+func (k *KubernetesClient) mapPersistentVolumeClaims(group, version, kind, name, namespace string) (*dto.PersistentVolumeClaim, error) {
+	persistentvolumeclaim, err := k.clientset.CoreV1().PersistentVolumeClaims(namespace).Get(context.Background(), name, metav1.GetOptions{})
+	if err != nil {
+		return nil, err
+	}
+
+	return &dto.PersistentVolumeClaim{
+		Group:     	 group,
+		Version:   	 version,
+		Kind:      	 kind,
+		Name:      	 name,
+		Namespace: 	 namespace,
+		AccessModes: persistentvolumeclaim.spec.accessModes,
+		Size: 		 persistentvolumeclaim.spec.resources.requests.storage,
+	}, nil
+}
+
 func (k *KubernetesClient) isResourceNamespaced(gvk schema.GroupVersionKind) (bool, error) {
 	resourcesList, err := k.discovery.ServerPreferredResources()
 	if err != nil {
@@ -601,4 +620,8 @@ func isService(group, version, kind string) bool {
 
 func isConfigMap(group, version, kind string) bool {
 	return group == "" && version == "v1" && kind == "ConfigMap"
+}
+
+func isPersistentVolumeClaims(group, version, kind string) bool {
+	return group == "" && version == "v1" && kind == "PersistentVolumeClaim"
 }
