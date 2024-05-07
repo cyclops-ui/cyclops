@@ -347,13 +347,23 @@ const Deployment = ({ name, namespace }: Props) => {
       </Row>
       <Modal
         title="Logs"
-        open={logsModal.on}
+        visible={logsModal.on}
         onOk={handleCancelLogs}
         onCancel={handleCancelLogs}
-        cancelButtonProps={{ style: { display: "none" } }}
         width={"60%"}
+        footer={[
+          <Button key="cancel" onClick={handleCancelLogs}>
+            Cancel
+          </Button>,
+        ]}
       >
-        <Tabs items={getTabItems()} onChange={onLogsTabsChange} />
+        <Tabs defaultActiveKey="0" onChange={onLogsTabsChange}>
+          {getTabItems().map((tab, index) => (
+            <Tabs.TabPane tab={tab.label} key={index}>
+              {tab.children}
+            </Tabs.TabPane>
+          ))}
+        </Tabs>
       </Modal>
     </div>
   );
