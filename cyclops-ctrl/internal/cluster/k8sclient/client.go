@@ -573,8 +573,8 @@ func (k *KubernetesClient) mapPersistentVolumeClaims(group, version, kind, name,
 		Kind:      	 kind,
 		Name:      	 name,
 		Namespace: 	 namespace,
-		AccessModes: persistentvolumeclaim.spec.accessModes,
-		Size: 		 persistentvolumeclaim.spec.resources.requests.storage,
+		AccessModes: persistentvolumeclaim.Spec.AccessModes,
+		Size: 		 persistentvolumeclaim.Spec.Resources.Requests.Storage,
 	}, nil
 }
 
