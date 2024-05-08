@@ -7,6 +7,7 @@ import (
 
 	"github.com/cyclops-ui/cyclops/cyclops-ctrl/internal/cluster/k8sclient"
 	"github.com/cyclops-ui/cyclops/cyclops-ctrl/internal/controller"
+	prometheusHandler "github.com/cyclops-ui/cyclops/cyclops-ctrl/internal/prometheus"
 	"github.com/cyclops-ui/cyclops/cyclops-ctrl/internal/telemetry"
 	templaterepo "github.com/cyclops-ui/cyclops/cyclops-ctrl/internal/template"
 )
@@ -18,6 +19,7 @@ type Handler struct {
 	k8sClient     *k8sclient.KubernetesClient
 
 	telemetryClient telemetry.Client
+	monitor         prometheusHandler.Monitor
 }
 
 func New(
@@ -35,9 +37,8 @@ func New(
 
 func (h *Handler) Start() error {
 	gin.SetMode(gin.DebugMode)
-
 	templatesController := controller.NewTemplatesController(h.templatesRepo, h.k8sClient)
-	modulesController := controller.NewModulesController(h.templatesRepo, h.k8sClient, h.telemetryClient)
+	modulesController := controller.NewModulesController(h.templatesRepo, h.k8sClient, h.telemetryClient, h.monitor)
 	clusterController := controller.NewClusterController(h.k8sClient)
 
 	h.router = gin.New()
@@ -71,14 +72,14 @@ func (h *Handler) Start() error {
 
 	h.router.GET("/resources/pods/:namespace/:name/:container/logs", modulesController.GetLogs)
 	h.router.GET("/resources/pods/:namespace/:name/:container/logs/download", modulesController.DownloadLogs)
-	h.router.GET("/resources/deployments/:namespace/:deployment/:container/logs", modulesController.GetDeploymentLogs)
-	h.router.GET("/resources/statefulsets/:namespace/:name/:container/logs", modulesController.GetStatefulSetsLogs)
 
 	h.router.GET("/manifest", modulesController.GetManifest)
 	h.router.GET("/resources", modulesController.GetResource)
 
 	h.router.GET("/nodes", clusterController.ListNodes)
 	h.router.GET("/nodes/:name", clusterController.GetNode)
+
+	h.router.GET("/metrics", prometheusHandler.PromHandler(h.monitor))
 
 	h.router.Use(h.options)
 
