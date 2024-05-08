@@ -7,6 +7,7 @@ import (
 	"strings"
 
 	"github.com/gin-gonic/gin"
+	v1 "k8s.io/api/apps/v1"
 
 	"github.com/cyclops-ui/cyclops/cyclops-ctrl/api/v1alpha1"
 	"github.com/cyclops-ui/cyclops/cyclops-ctrl/internal/cluster/k8sclient"
@@ -216,9 +217,14 @@ func (m *Modules) CreateModule(ctx *gin.Context) {
 		return
 	}
 
+	if !m.CheckModule(&module) {
+		ctx.JSON(http.StatusBadRequest, dto.NewError("Error same module exists", "Same module found"))
+		return
+	}
 	m.telemetryClient.ModuleCreation()
 
 	err = m.kubernetesClient.CreateModule(module)
+
 	if err != nil {
 		fmt.Println(err)
 		ctx.JSON(http.StatusInternalServerError, dto.NewError("Error creating module", err.Error()))
@@ -227,6 +233,30 @@ func (m *Modules) CreateModule(ctx *gin.Context) {
 
 	m.monitor.IncModule()
 	ctx.Status(http.StatusOK)
+}
+
+func (m *Modules) CheckModule(module *v1alpha1.Module) bool {
+	deployments, err := m.kubernetesClient.GetDeployments(module.Namespace)
+	if err != nil {
+		fmt.Printf("error : %v\n", err)
+		return false
+	}
+
+	for _, deployment := range deployments {
+		if isSharedDeployment(&deployment) {
+			fmt.Printf("Deployment %s is shared\n", deployment.Name)
+			return false
+		}
+	}
+	return true
+}
+
+func isSharedDeployment(deployment *v1.Deployment) bool {
+	labels := deployment.GetLabels()
+	deploymentName := deployment.Name
+	cyclopsName := labels["cyclops.name"]
+
+	return deploymentName != cyclopsName
 }
 
 func (m *Modules) UpdateModule(ctx *gin.Context) {
