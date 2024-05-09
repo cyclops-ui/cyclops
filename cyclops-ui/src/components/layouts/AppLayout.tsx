@@ -3,7 +3,7 @@ import SideNav from "./Sidebar";
 import { Suspense } from "react";
 import Sider from "antd/es/layout/Sider";
 import { Content, Header } from "antd/es/layout/layout";
-import {ConfigProvider, Layout} from "antd";
+import { ConfigProvider, Layout } from "antd";
 
 export default function AppLayout() {
   return (
@@ -11,7 +11,7 @@ export default function AppLayout() {
       <ConfigProvider
         theme={{
           token: {
-            colorPrimary: '#fe8801',
+            colorPrimary: "#fe8801",
           },
         }}
       >
@@ -29,7 +29,7 @@ export default function AppLayout() {
             style={{
               position: "fixed",
               width: "100%",
-              zIndex: 1,
+              zIndex: 1000,
             }}
           />
           <Content

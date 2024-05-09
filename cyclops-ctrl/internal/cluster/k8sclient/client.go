@@ -1,23 +1,27 @@
 package k8sclient
 
 import (
+	"bufio"
 	"bytes"
 	"context"
 	"errors"
 	"fmt"
-	"gopkg.in/yaml.v2"
 	"io"
 	"k8s.io/apimachinery/pkg/version"
 	"os"
 	"os/exec"
+	"sort"
 	"strings"
 
+	"gopkg.in/yaml.v2"
+
 	v12 "k8s.io/api/apps/v1"
-	"k8s.io/api/autoscaling/v1"
+	v1 "k8s.io/api/autoscaling/v1"
 	apiv1 "k8s.io/api/core/v1"
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
+	"k8s.io/apimachinery/pkg/labels"
 	"k8s.io/apimachinery/pkg/runtime/schema"
 	"k8s.io/client-go/discovery"
 	"k8s.io/client-go/dynamic"
@@ -166,8 +170,9 @@ func (k *KubernetesClient) GetPods(namespace, name string) ([]apiv1.Pod, error) 
 
 func (k *KubernetesClient) GetPodLogs(namespace, container, name string, numLogs *int64) ([]string, error) {
 	podLogOptions := apiv1.PodLogOptions{
-		Container: container,
-		TailLines: numLogs,
+		Container:  container,
+		TailLines:  numLogs,
+		Timestamps: true,
 	}
 	podClient := k.clientset.CoreV1().Pods(namespace).GetLogs(name, &podLogOptions)
 	stream, err := podClient.Stream(context.Background())
@@ -178,26 +183,70 @@ func (k *KubernetesClient) GetPodLogs(namespace, container, name string, numLogs
 	defer func(stream io.ReadCloser) {
 		err := stream.Close()
 		if err != nil {
-
+			return
 		}
 	}(stream)
 
 	var logs []string
-	for {
-		buf := make([]byte, 2000)
-		numBytes, err := stream.Read(buf)
-		if err == io.EOF {
-			break
-		}
+	scanner := bufio.NewScanner(stream)
+	for scanner.Scan() {
+		logs = append(logs, scanner.Text())
+	}
+	if err := scanner.Err(); err != nil {
+		return nil, err
+	}
+
+	return logs, nil
+}
+
+func (k *KubernetesClient) GetDeploymentLogs(namespace, container, deployment string, numLogs *int64) ([]string, error) {
+	deploymentClient := k.clientset.AppsV1().Deployments(namespace)
+	deploymentObj, err := deploymentClient.Get(context.Background(), deployment, metav1.GetOptions{})
+	if err != nil {
+		return nil, err
+	}
+
+	pods, err := k.clientset.CoreV1().Pods(namespace).List(context.Background(), metav1.ListOptions{
+		LabelSelector: labels.Set(deploymentObj.Spec.Selector.MatchLabels).String(),
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	var logs []string
+	for _, pod := range pods.Items {
+		podLogs, err := k.GetPodLogs(namespace, container, pod.Name, numLogs)
 		if err != nil {
 			return nil, err
 		}
-		if numBytes == 0 {
-			continue
-		}
-		logs = append(logs, string(buf[:numBytes]))
+		logs = append(logs, podLogs...)
+	}
+	sort.Strings(logs)
+	return logs, nil
+}
+
+func (k *KubernetesClient) GetStatefulSetsLogs(namespace, container, name string, numLogs *int64) ([]string, error) {
+	statefulsetClient := k.clientset.AppsV1().StatefulSets(namespace)
+	statefulsetObj, err := statefulsetClient.Get(context.Background(), name, metav1.GetOptions{})
+	if err != nil {
+		return nil, err
+	}
+	pods, err := k.clientset.CoreV1().Pods(namespace).List(context.Background(), metav1.ListOptions{
+		LabelSelector: labels.Set(statefulsetObj.Spec.Selector.MatchLabels).String(),
+	})
+	if err != nil {
+		return nil, err
 	}
 
+	var logs []string
+	for _, pod := range pods.Items {
+		podLogs, err := k.GetPodLogs(namespace, container, pod.Name, numLogs)
+		if err != nil {
+			return nil, err
+		}
+		logs = append(logs, podLogs...)
+	}
+	sort.Strings(logs)
 	return logs, nil
 }
 
@@ -231,6 +280,8 @@ func (k *KubernetesClient) GetResource(group, version, kind, name, namespace str
 		return k.mapPod(group, version, kind, name, namespace)
 	case isConfigMap(group, version, kind):
 		return k.mapConfigMap(group, version, kind, name, namespace)
+	case isPersistentVolumeClaims(group, version, kind):
+		return k.mapPersistentVolumeClaims(group, version, kind, name, namespace)
 	}
 
 	return nil, nil
@@ -520,6 +571,28 @@ func (k *KubernetesClient) mapConfigMap(group, version, kind, name, namespace st
 	}, nil
 }
 
+func (k *KubernetesClient) mapPersistentVolumeClaims(group, version, kind, name, namespace string) (*dto.PersistentVolumeClaim, error) {
+	persistentvolumeclaim, err := k.clientset.CoreV1().PersistentVolumeClaims(namespace).Get(context.Background(), name, metav1.GetOptions{})
+	if err != nil {
+		return nil, err
+	}
+
+	storage := ""
+	if persistentvolumeclaim.Spec.Resources.Requests != nil && persistentvolumeclaim.Spec.Resources.Requests.Storage() != nil {
+		storage = persistentvolumeclaim.Spec.Resources.Requests.Storage().String()
+	}
+
+	return &dto.PersistentVolumeClaim{
+		Group:     	 group,
+		Version:   	 version,
+		Kind:      	 kind,
+		Name:      	 name,
+		Namespace: 	 namespace,
+		AccessModes: persistentvolumeclaim.Spec.AccessModes,
+		Size: 		 storage,
+	}, nil
+}
+
 func (k *KubernetesClient) isResourceNamespaced(gvk schema.GroupVersionKind) (bool, error) {
 	resourcesList, err := k.discovery.ServerPreferredResources()
 	if err != nil {
@@ -562,4 +635,8 @@ func isService(group, version, kind string) bool {
 
 func isConfigMap(group, version, kind string) bool {
 	return group == "" && version == "v1" && kind == "ConfigMap"
+}
+
+func isPersistentVolumeClaims(group, version, kind string) bool {
+	return group == "" && version == "v1" && kind == "PersistentVolumeClaim"
 }

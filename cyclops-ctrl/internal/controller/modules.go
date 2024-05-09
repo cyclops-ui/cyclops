@@ -13,6 +13,7 @@ import (
 	"github.com/cyclops-ui/cyclops/cyclops-ctrl/internal/cluster/k8sclient"
 	"github.com/cyclops-ui/cyclops/cyclops-ctrl/internal/mapper"
 	"github.com/cyclops-ui/cyclops/cyclops-ctrl/internal/models/dto"
+	prometheusHandler "github.com/cyclops-ui/cyclops/cyclops-ctrl/internal/prometheus"
 	"github.com/cyclops-ui/cyclops/cyclops-ctrl/internal/telemetry"
 	"github.com/cyclops-ui/cyclops/cyclops-ctrl/internal/template"
 )
@@ -20,8 +21,9 @@ import (
 type Modules struct {
 	kubernetesClient *k8sclient.KubernetesClient
 	templatesRepo    *template.Repo
-	telemetryClient  telemetry.Client
 	renderer         *render.Renderer
+	telemetryClient  telemetry.Client
+	monitor          prometheusHandler.Monitor
 }
 
 func NewModulesController(
@@ -29,12 +31,14 @@ func NewModulesController(
 	kubernetes *k8sclient.KubernetesClient,
 	renderer *render.Renderer,
 	telemetryClient telemetry.Client,
+	monitor prometheusHandler.Monitor,
 ) *Modules {
 	return &Modules{
 		kubernetesClient: kubernetes,
 		templatesRepo:    templatesRepo,
 		renderer:         renderer,
 		telemetryClient:  telemetryClient,
+		monitor:          monitor,
 	}
 }
 
@@ -94,6 +98,7 @@ func (m *Modules) DeleteModule(ctx *gin.Context) {
 		return
 	}
 
+	m.monitor.DecModule()
 	ctx.Status(http.StatusOK)
 }
 
@@ -224,6 +229,7 @@ func (m *Modules) CreateModule(ctx *gin.Context) {
 		return
 	}
 
+	m.monitor.IncModule()
 	ctx.Status(http.StatusOK)
 }
 
@@ -433,6 +439,43 @@ func (m *Modules) GetLogs(ctx *gin.Context) {
 
 	logCount := int64(100)
 	logs, err := m.kubernetesClient.GetPodLogs(
+		ctx.Param("namespace"),
+		ctx.Param("container"),
+		ctx.Param("name"),
+		&logCount,
+	)
+	if err != nil {
+		fmt.Println(err)
+		ctx.JSON(http.StatusInternalServerError, dto.NewError("Error fetching logs", err.Error()))
+		return
+	}
+
+	ctx.JSON(http.StatusOK, logs)
+}
+
+func (m *Modules) GetDeploymentLogs(ctx *gin.Context) {
+	ctx.Header("Access-Control-Allow-Origin", "*")
+
+	logCount := int64(100)
+	logs, err := m.kubernetesClient.GetDeploymentLogs(
+		ctx.Param("namespace"),
+		ctx.Param("container"),
+		ctx.Param("deployment"),
+		&logCount,
+	)
+	if err != nil {
+		fmt.Println(err)
+		ctx.JSON(http.StatusInternalServerError, dto.NewError("Error fetching logs", err.Error()))
+		return
+	}
+	ctx.JSON(http.StatusOK, logs)
+}
+
+func (m *Modules) GetStatefulSetsLogs(ctx *gin.Context) {
+	ctx.Header("Access-Control-Allow-Origin", "*")
+
+	logCount := int64(100)
+	logs, err := m.kubernetesClient.GetStatefulSetsLogs(
 		ctx.Param("namespace"),
 		ctx.Param("container"),
 		ctx.Param("name"),
