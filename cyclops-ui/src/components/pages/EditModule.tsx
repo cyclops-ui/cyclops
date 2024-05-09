@@ -40,7 +40,7 @@ import "ace-builds/src-noconflict/mode-toml";
 import "ace-builds/src-noconflict/mode-javascript";
 import "ace-builds/src-noconflict/mode-typescript";
 import "ace-builds/src-noconflict/snippets/yaml";
-import { fileExtension, flattenObjectKeys } from "../../utils/form";
+import { fileExtension, findMaps, flattenObjectKeys } from "../../utils/form";
 import "./custom.css";
 import { numberInputValidators } from "../../utils/validators/number";
 import { stringInputValidators } from "../../utils/validators/string";
@@ -62,6 +62,8 @@ const EditModule = () => {
       version: "",
     },
   });
+
+  const [previousValues, setPreviousValues] = useState();
 
   const [form] = Form.useForm();
 
@@ -123,7 +125,7 @@ const EditModule = () => {
                 break;
               case "object":
                 objectArr.push(
-                  mapsToArray(field.items.properties, valueFromList)
+                  mapsToArray(field.items.properties, valueFromList),
                 );
                 break;
             }
@@ -172,7 +174,7 @@ const EditModule = () => {
               `&path=` +
               res.data.template.path +
               `&commit=` +
-              res.data.template.version
+              res.data.template.version,
           )
           .then((templatesRes) => {
             setConfig(templatesRes.data);
@@ -180,7 +182,7 @@ const EditModule = () => {
 
             let values = mapsToArray(
               templatesRes.data.root.properties,
-              res.data.values
+              res.data.values,
             );
 
             setModule({
@@ -190,6 +192,7 @@ const EditModule = () => {
             });
             form.setFieldsValue(values);
             setValues(values);
+            setPreviousValues(res.data.values);
           })
           .catch((error) => {
             setLoadTemplate(true);
@@ -240,68 +243,8 @@ const EditModule = () => {
     configNames.push(<Select.Option key={c.name}>{c.name}</Select.Option>);
   });
 
-  const findMaps = (fields: any[], values: any): any => {
-    let out: any = {};
-    fields.forEach((field) => {
-      let valuesList: any[] = [];
-      switch (field.type) {
-        case "string":
-          out[field.name] = values[field.name];
-          break;
-        case "number":
-          out[field.name] = values[field.name];
-          break;
-        case "boolean":
-          out[field.name] = values[field.name];
-          break;
-        case "object":
-          if (values[field.name]) {
-            out[field.name] = findMaps(field.properties, values[field.name]);
-          }
-          break;
-        case "array":
-          valuesList = values[field.name] as any[];
-
-          if (!valuesList) {
-            out[field.name] = [];
-            break;
-          }
-
-          let objectArr: any[] = [];
-          valuesList.forEach((valueFromList) => {
-            switch (field.items.type) {
-              case "string":
-                objectArr.push(valueFromList);
-                break;
-              case "object":
-                objectArr.push(findMaps(field.items.properties, valueFromList));
-                break;
-            }
-          });
-          out[field.name] = objectArr;
-          break;
-        case "map":
-          valuesList = values[field.name] as any[];
-
-          if (!valuesList) {
-            out[field.name] = {};
-            break;
-          }
-
-          let object: any = {};
-          valuesList.forEach((valueFromList) => {
-            object[valueFromList.key] = valueFromList.value;
-          });
-          out[field.name] = object;
-          break;
-      }
-    });
-
-    return out;
-  };
-
   const handleSubmit = (values: any) => {
-    values = findMaps(config.root.properties, values);
+    values = findMaps(config.root.properties, values, previousValues);
 
     axios
       .post(`/api/modules/update`, {
@@ -346,7 +289,7 @@ const EditModule = () => {
     field: any,
     formItemName: string | string[],
     arrayField: any,
-    isRequired: boolean
+    isRequired: boolean,
   ) => {
     let options: { value: string; label: string }[] = [];
     field.enum.forEach((option: any) => {
@@ -387,7 +330,7 @@ const EditModule = () => {
     field: any,
     formItemName: string | string[],
     arrayField: any,
-    isRequired: boolean
+    isRequired: boolean,
   ) => {
     return (
       <Form.Item
@@ -433,7 +376,7 @@ const EditModule = () => {
     parent: string,
     level: number,
     arrayField: any,
-    remove: Function
+    remove: Function,
   ) => {
     switch (field.items.type) {
       case "object":
@@ -446,7 +389,7 @@ const EditModule = () => {
               level + 1,
               2,
               arrayField,
-              field.items.required
+              field.items.required,
             )}
             <MinusCircleOutlined
               style={{ fontSize: "16px" }}
@@ -500,7 +443,7 @@ const EditModule = () => {
     level: number,
     arrayIndexLifetime: number,
     arrayField?: any,
-    required?: string[]
+    required?: string[],
   ) {
     const formFields: {} | any = [];
     fields.forEach((field: any) => {
@@ -532,14 +475,14 @@ const EditModule = () => {
         case "string":
           if (field.enum) {
             formFields.push(
-              selectInputField(field, formItemName, arrayField, isRequired)
+              selectInputField(field, formItemName, arrayField, isRequired),
             );
             return;
           }
 
           if (field.fileExtension && field.fileExtension.length > 0) {
             formFields.push(
-              fileField(field, formItemName, arrayField, isRequired)
+              fileField(field, formItemName, arrayField, isRequired),
             );
             return;
           }
@@ -563,7 +506,7 @@ const EditModule = () => {
               rules={stringValidationRules}
             >
               <Input />
-            </Form.Item>
+            </Form.Item>,
           );
           return;
         case "number":
@@ -587,7 +530,7 @@ const EditModule = () => {
               rules={numberValidationRules}
             >
               <InputNumber style={{ width: "100%" }} />
-            </Form.Item>
+            </Form.Item>,
           );
           return;
         case "boolean":
@@ -623,7 +566,7 @@ const EditModule = () => {
               valuePropName={checked}
             >
               <Switch />
-            </Form.Item>
+            </Form.Item>,
           );
           return;
         case "object":
@@ -697,14 +640,14 @@ const EditModule = () => {
                           level + 1,
                           arrayIndexLifetime,
                           arrayIndexLifetime > 0 ? arrayField : undefined,
-                          field.required
+                          field.required,
                         )}
                       </>
                     )}
                   </Form.List>
                 </Collapse.Panel>
               </Collapse>
-            </Col>
+            </Col>,
           );
           return;
         case "array":
@@ -779,7 +722,7 @@ const EditModule = () => {
                               "",
                               level + 1,
                               arrField,
-                              remove
+                              remove,
                             )}
                             <Divider />
                           </Col>
@@ -800,7 +743,7 @@ const EditModule = () => {
                   </Form.List>
                 </Collapse.Panel>
               </Collapse>
-            </Col>
+            </Col>,
           );
           return;
         case "map":
@@ -858,7 +801,7 @@ const EditModule = () => {
                   </>
                 )}
               </Form.List>
-            </Form.Item>
+            </Form.Item>,
           );
       }
     });
@@ -923,7 +866,7 @@ const EditModule = () => {
               0,
               0,
               undefined,
-              config.root.required
+              config.root.required,
             )}
             <div style={{ textAlign: "right" }}>
               <Button type="primary" htmlType="submit" name="Save">
