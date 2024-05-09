@@ -67,6 +67,7 @@ const EditModule = () => {
 
   const [allConfigs, setAllConfigs] = useState([]);
   const [values, setValues] = useState({});
+  const [isChanged, setIsChanged] = useState(false);
   const [config, setConfig] = useState({
     name: "",
     manifest: "",
@@ -123,7 +124,7 @@ const EditModule = () => {
                 break;
               case "object":
                 objectArr.push(
-                  mapsToArray(field.items.properties, valueFromList)
+                  mapsToArray(field.items.properties, valueFromList),
                 );
                 break;
             }
@@ -172,7 +173,7 @@ const EditModule = () => {
               `&path=` +
               res.data.template.path +
               `&commit=` +
-              res.data.template.version
+              res.data.template.version,
           )
           .then((templatesRes) => {
             setConfig(templatesRes.data);
@@ -180,7 +181,7 @@ const EditModule = () => {
 
             let values = mapsToArray(
               templatesRes.data.root.properties,
-              res.data.values
+              res.data.values,
             );
 
             setModule({
@@ -299,7 +300,13 @@ const EditModule = () => {
 
     return out;
   };
-
+  const handleValuesChange = (changedValues: any, allValues: any) => {
+    if (JSON.stringify(allValues) === JSON.stringify(values)) {
+      setIsChanged(false);
+    } else {
+      setIsChanged(true);
+    }
+  };
   const handleSubmit = (values: any) => {
     values = findMaps(config.root.properties, values);
 
@@ -346,7 +353,7 @@ const EditModule = () => {
     field: any,
     formItemName: string | string[],
     arrayField: any,
-    isRequired: boolean
+    isRequired: boolean,
   ) => {
     let options: { value: string; label: string }[] = [];
     field.enum.forEach((option: any) => {
@@ -387,7 +394,7 @@ const EditModule = () => {
     field: any,
     formItemName: string | string[],
     arrayField: any,
-    isRequired: boolean
+    isRequired: boolean,
   ) => {
     return (
       <Form.Item
@@ -433,7 +440,7 @@ const EditModule = () => {
     parent: string,
     level: number,
     arrayField: any,
-    remove: Function
+    remove: Function,
   ) => {
     switch (field.items.type) {
       case "object":
@@ -446,7 +453,7 @@ const EditModule = () => {
               level + 1,
               2,
               arrayField,
-              field.items.required
+              field.items.required,
             )}
             <MinusCircleOutlined
               style={{ fontSize: "16px" }}
@@ -500,7 +507,7 @@ const EditModule = () => {
     level: number,
     arrayIndexLifetime: number,
     arrayField?: any,
-    required?: string[]
+    required?: string[],
   ) {
     const formFields: {} | any = [];
     fields.forEach((field: any) => {
@@ -532,14 +539,14 @@ const EditModule = () => {
         case "string":
           if (field.enum) {
             formFields.push(
-              selectInputField(field, formItemName, arrayField, isRequired)
+              selectInputField(field, formItemName, arrayField, isRequired),
             );
             return;
           }
 
           if (field.fileExtension && field.fileExtension.length > 0) {
             formFields.push(
-              fileField(field, formItemName, arrayField, isRequired)
+              fileField(field, formItemName, arrayField, isRequired),
             );
             return;
           }
@@ -563,7 +570,7 @@ const EditModule = () => {
               rules={stringValidationRules}
             >
               <Input />
-            </Form.Item>
+            </Form.Item>,
           );
           return;
         case "number":
@@ -587,7 +594,7 @@ const EditModule = () => {
               rules={numberValidationRules}
             >
               <InputNumber style={{ width: "100%" }} />
-            </Form.Item>
+            </Form.Item>,
           );
           return;
         case "boolean":
@@ -623,7 +630,7 @@ const EditModule = () => {
               valuePropName={checked}
             >
               <Switch />
-            </Form.Item>
+            </Form.Item>,
           );
           return;
         case "object":
@@ -697,14 +704,14 @@ const EditModule = () => {
                           level + 1,
                           arrayIndexLifetime,
                           arrayIndexLifetime > 0 ? arrayField : undefined,
-                          field.required
+                          field.required,
                         )}
                       </>
                     )}
                   </Form.List>
                 </Collapse.Panel>
               </Collapse>
-            </Col>
+            </Col>,
           );
           return;
         case "array":
@@ -779,7 +786,7 @@ const EditModule = () => {
                               "",
                               level + 1,
                               arrField,
-                              remove
+                              remove,
                             )}
                             <Divider />
                           </Col>
@@ -800,7 +807,7 @@ const EditModule = () => {
                   </Form.List>
                 </Collapse.Panel>
               </Collapse>
-            </Col>
+            </Col>,
           );
           return;
         case "map":
@@ -858,7 +865,7 @@ const EditModule = () => {
                   </>
                 )}
               </Form.List>
-            </Form.Item>
+            </Form.Item>,
           );
       }
     });
@@ -911,6 +918,7 @@ const EditModule = () => {
             autoComplete={"off"}
             onFinish={handleSubmit}
             onFinishFailed={onFinishFailed}
+            onValuesChange={handleValuesChange}
           >
             <Divider orientation="left" orientationMargin="0">
               Edit Module
@@ -923,10 +931,15 @@ const EditModule = () => {
               0,
               0,
               undefined,
-              config.root.required
+              config.root.required,
             )}
             <div style={{ textAlign: "right" }}>
-              <Button type="primary" htmlType="submit" name="Save">
+              <Button
+                type="primary"
+                htmlType="submit"
+                name="Save"
+                disabled={!isChanged}
+              >
                 Save
               </Button>{" "}
               <Button
