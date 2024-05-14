@@ -101,16 +101,36 @@ func sortFields(fields []models.Field, order []string) []models.Field {
             ordersMap[s] = i
         }
 
-        // Sort fields based on their indices in the custom order
-        sort.Slice(fields, func(i, j int) bool {
-            return ordersMap[fields[i].Name] < ordersMap[fields[j].Name]
+        // Separate fields with order and without order
+        var orderedFields []models.Field
+        var unorderedFields []models.Field
+
+        for _, field := range fields {
+            if idx, ok := ordersMap[field.Name]; ok {
+                orderedFields = append(orderedFields, models.FieldWithOrder{Field: field, OrderIndex: idx})
+            } else {
+                unorderedFields = append(unorderedFields, field)
+            }
+        }
+
+        // Sort fields with order based on the order index
+        sort.Slice(orderedFields, func(i, j int) bool {
+            return orderedFields[i].OrderIndex < orderedFields[j].OrderIndex
         })
+
+        // Reconstruct the sorted fields slice
+        sortedFields := make([]models.Field, 0, len(fields))
+        for _, field := range orderedFields {
+            sortedFields = append(sortedFields, field.Field)
+        }
+        sortedFields = append(sortedFields, unorderedFields...)
+
+        fields = sortedFields
     }
 
     return fields
 }
 
-}
 
 func mapHelmPropertyTypeToFieldType(property helm.Property) string {
 	switch property.Type {
