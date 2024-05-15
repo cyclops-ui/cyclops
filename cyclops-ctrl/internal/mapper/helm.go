@@ -71,43 +71,40 @@ func HelmSchemaToFields(name string, schema helm.Property, dependencies []*model
 }
 
 func sortFields(fields []models.Field, order []string) []models.Field {
-        // Custom order provided, sort fields based on the order
-        ordersMap := make(map[string]int)
-
-        // Map field names to their indices in the custom order
-        for i, s := range order {
-            ordersMap[s] = i
-        }
-
-        // Separate fields with order and without order
-        var orderedFields []models.Field
-        var unorderedFields []models.Field
-
-        for _, field := range fields {
-            if idx, ok := ordersMap[field.Name]; ok {
-                orderedFields = append(orderedFields, models.FieldWithOrder{Field: field, OrderIndex: idx})
-            } else {
-                unorderedFields = append(unorderedFields, field)
-            }
-        }
-
-        // Sort fields with order based on the order index
-        sort.Slice(orderedFields, func(i, j int) bool {
-            return orderedFields[i].OrderIndex < orderedFields[j].OrderIndex
-        })
-
-        // Reconstruct the sorted fields slice
-        sortedFields := make([]models.Field, 0, len(fields))
-        for _, field := range orderedFields {
-            sortedFields = append(sortedFields, field.Field)
-        }
-        sortedFields = append(sortedFields, unorderedFields...)
-
-        fields = sortedFields
+    // Create a map to store the custom order indices
+    ordersMap := make(map[string]int)
+    for i, name := range order {
+        ordersMap[name] = i
     }
 
-    return fields
+    // Separate fields with order and without order
+    var orderedFields []models.Field
+    var unorderedFields []models.Field
+
+    for _, field := range fields {
+        if _, ok := ordersMap[field.Name]; ok {
+            orderedFields = append(orderedFields, field)
+        } else {
+            unorderedFields = append(unorderedFields, field)
+        }
+    }
+
+    // Sort fields with order based on the order index
+    sort.Slice(orderedFields, func(i, j int) bool {
+        return ordersMap[orderedFields[i].Name] < ordersMap[orderedFields[j].Name]
+    })
+
+    // Sort fields without order alphabetically by name
+    sort.Slice(unorderedFields, func(i, j int) bool {
+        return unorderedFields[i].Name < unorderedFields[j].Name
+    })
+
+    // Combine the ordered and unordered fields
+    sortedFields := append(orderedFields, unorderedFields...)
+
+    return sortedFields
 }
+
 
 
 func mapHelmPropertyTypeToFieldType(property helm.Property) string {
