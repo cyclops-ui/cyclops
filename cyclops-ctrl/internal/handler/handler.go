@@ -7,7 +7,7 @@ import (
 
 	"github.com/cyclops-ui/cyclops/cyclops-ctrl/internal/cluster/k8sclient"
 	"github.com/cyclops-ui/cyclops/cyclops-ctrl/internal/controller"
-	prometheusHandler "github.com/cyclops-ui/cyclops/cyclops-ctrl/internal/prometheus"
+	"github.com/cyclops-ui/cyclops/cyclops-ctrl/internal/prometheus"
 	"github.com/cyclops-ui/cyclops/cyclops-ctrl/internal/telemetry"
 	templaterepo "github.com/cyclops-ui/cyclops/cyclops-ctrl/internal/template"
 )
@@ -19,14 +19,14 @@ type Handler struct {
 	k8sClient     *k8sclient.KubernetesClient
 
 	telemetryClient telemetry.Client
-	monitor         prometheusHandler.Monitor
+	monitor         prometheus.Monitor
 }
 
 func New(
 	templatesRepo *templaterepo.Repo,
 	kubernetesClient *k8sclient.KubernetesClient,
 	telemetryClient telemetry.Client,
-	monitor prometheusHandler.Monitor,
+	monitor prometheus.Monitor,
 ) (*Handler, error) {
 	return &Handler{
 		templatesRepo:   templatesRepo,
@@ -81,7 +81,7 @@ func (h *Handler) Start() error {
 	h.router.GET("/nodes", clusterController.ListNodes)
 	h.router.GET("/nodes/:name", clusterController.GetNode)
 
-	h.router.GET("/metrics", prometheusHandler.PromHandler())
+	h.router.GET("/metrics", prometheus.PromHandler())
 
 	h.router.Use(h.options)
 
