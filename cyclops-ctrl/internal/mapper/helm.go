@@ -71,28 +71,6 @@ func HelmSchemaToFields(name string, schema helm.Property, dependencies []*model
 }
 
 func sortFields(fields []models.Field, order []string) []models.Field {
-    // If no custom order is provided, sort fields alphabetically by name
-    if len(order) == 0 {
-        // Extract names of fields for sorting
-        fieldNames := make([]string, len(fields))
-        for i, field := range fields {
-            fieldNames[i] = field.Name
-        }
-
-        // Sort field names alphabetically
-        sort.Strings(fieldNames)
-
-        // Map field names to their indices in the sorted array
-        fieldIndices := make(map[string]int)
-        for i, name := range fieldNames {
-            fieldIndices[name] = i
-        }
-
-        // Use the sorted indices to sort the fields
-        sort.Slice(fields, func(i, j int) bool {
-            return fieldIndices[fields[i].Name] < fieldIndices[fields[j].Name]
-        })
-    } else {
         // Custom order provided, sort fields based on the order
         ordersMap := make(map[string]int)
 
