@@ -3,7 +3,6 @@ package main
 import (
 	"flag"
 	"fmt"
-	prometheusHandler "github.com/cyclops-ui/cyclops/cyclops-ctrl/internal/prometheus"
 	"os"
 	"strconv"
 
@@ -20,6 +19,7 @@ import (
 	"github.com/cyclops-ui/cyclops/cyclops-ctrl/internal/cluster/k8sclient"
 	"github.com/cyclops-ui/cyclops/cyclops-ctrl/internal/handler"
 	"github.com/cyclops-ui/cyclops/cyclops-ctrl/internal/modulecontroller"
+	"github.com/cyclops-ui/cyclops/cyclops-ctrl/internal/prometheus"
 	"github.com/cyclops-ui/cyclops/cyclops-ctrl/internal/telemetry"
 	"github.com/cyclops-ui/cyclops/cyclops-ctrl/internal/template"
 	"github.com/cyclops-ui/cyclops/cyclops-ctrl/internal/template/cache"
@@ -72,7 +72,7 @@ func main() {
 		cache.NewInMemoryTemplatesCache(),
 	)
 
-	monitor, err := prometheusHandler.NewMonitor(setupLog)
+	monitor, err := prometheus.NewMonitor(setupLog)
 	if err != nil {
 		setupLog.Error(err, "failed to set up prom monitor")
 	}

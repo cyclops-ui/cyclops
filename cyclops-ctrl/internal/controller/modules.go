@@ -12,7 +12,7 @@ import (
 	"github.com/cyclops-ui/cyclops/cyclops-ctrl/internal/cluster/k8sclient"
 	"github.com/cyclops-ui/cyclops/cyclops-ctrl/internal/mapper"
 	"github.com/cyclops-ui/cyclops/cyclops-ctrl/internal/models/dto"
-	prometheusHandler "github.com/cyclops-ui/cyclops/cyclops-ctrl/internal/prometheus"
+	"github.com/cyclops-ui/cyclops/cyclops-ctrl/internal/prometheus"
 	"github.com/cyclops-ui/cyclops/cyclops-ctrl/internal/telemetry"
 	"github.com/cyclops-ui/cyclops/cyclops-ctrl/internal/template"
 )
@@ -21,14 +21,14 @@ type Modules struct {
 	kubernetesClient *k8sclient.KubernetesClient
 	templatesRepo    *template.Repo
 	telemetryClient  telemetry.Client
-	monitor          prometheusHandler.Monitor
+	monitor          prometheus.Monitor
 }
 
 func NewModulesController(
 	templatesRepo *template.Repo,
 	kubernetes *k8sclient.KubernetesClient,
 	telemetryClient telemetry.Client,
-	monitor prometheusHandler.Monitor,
+	monitor prometheus.Monitor,
 ) *Modules {
 	return &Modules{
 		kubernetesClient: kubernetes,
