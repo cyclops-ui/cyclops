@@ -143,7 +143,7 @@ const Modules = () => {
       <Divider orientationMargin="0" />
       <Row gutter={[16, 16]}>
         {filteredData.map((module: any, index) => (
-          <Col key={index} xs={24} sm={12} md={8} lg={6} xl={4}>
+          <Col key={index} xs={24} sm={12} md={8} lg={8} xl={6}>
             <a href={"/modules/" + module.name}>
               <Card
                 title={module.name}
