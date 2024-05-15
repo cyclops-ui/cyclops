@@ -3,6 +3,7 @@ package main
 import (
 	"flag"
 	"fmt"
+	prometheusHandler "github.com/cyclops-ui/cyclops/cyclops-ctrl/internal/prometheus"
 	"os"
 	"strconv"
 
@@ -71,7 +72,12 @@ func main() {
 		cache.NewInMemoryTemplatesCache(),
 	)
 
-	handler, err := handler.New(templatesRepo, k8sClient, telemetryClient)
+	monitor, err := prometheusHandler.NewMonitor(setupLog)
+	if err != nil {
+		setupLog.Error(err, "failed to set up prom monitor")
+	}
+
+	handler, err := handler.New(templatesRepo, k8sClient, telemetryClient, monitor)
 	if err != nil {
 		panic(err)
 	}

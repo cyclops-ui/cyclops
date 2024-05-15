@@ -35,6 +35,6 @@ func (m *Monitor) DecModule() {
 	m.ModulesDeployed.Dec()
 }
 
-func PromHandler(monitor Monitor) gin.HandlerFunc {
+func PromHandler() gin.HandlerFunc {
 	return gin.WrapH(promhttp.Handler())
 }
