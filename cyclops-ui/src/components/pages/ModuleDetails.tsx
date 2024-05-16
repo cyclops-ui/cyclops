@@ -471,12 +471,17 @@ const ModuleDetails = () => {
         />
       );
     }
-
     resourceCollapses.push(
       <Collapse.Panel
         header={genExtra(resource, resource.status)}
         key={collapseKey}
-        style={{ backgroundColor: getCollapseColor(collapseKey) }}
+        style={{
+          backgroundColor: getCollapseColor(collapseKey),
+          borderTopLeftRadius:
+            resourceCollapses.length - 1 == 0 ? "0px" : "7px",
+          borderTopRightRadius:
+            resourceCollapses.length - 1 == 0 ? "0px" : "7px",
+        }}
       >
         <Row>
           <Col>{deletedWarning}</Col>
