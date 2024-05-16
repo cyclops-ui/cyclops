@@ -380,7 +380,7 @@ const ModuleDetails = () => {
     );
   };
 
-  resources.forEach((resource: any) => {
+  resources.forEach((resource: any, index) => {
     let collapseKey =
       resource.kind + "/" + resource.namespace + "/" + resource.name;
     let statusIcon = <p />;
@@ -477,8 +477,8 @@ const ModuleDetails = () => {
         key={collapseKey}
         style={{
           backgroundColor: getCollapseColor(collapseKey),
-          borderTopLeftRadius: resourceCollapses.length == 0 ? "7px" : "0px",
-          borderTopRightRadius: resourceCollapses.length == 0 ? "7px" : "0px",
+          borderTopLeftRadius: index == 0 ? "7px" : "0px",
+          borderTopRightRadius: index == 0 ? "7px" : "7px",
         }}
       >
         <Row>
