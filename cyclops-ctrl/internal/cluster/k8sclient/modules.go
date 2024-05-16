@@ -2,6 +2,7 @@ package k8sclient
 
 import (
 	"context"
+	"github.com/pkg/errors"
 	"sort"
 	"strings"
 
@@ -70,7 +71,7 @@ func (k *KubernetesClient) GetResourcesForModule(name string) ([]dto.Resource, e
 			rs, err := k.Dynamic.Resource(schema.GroupVersionResource{
 				Group:    gvk.Group,
 				Version:  gvk.Version,
-				Resource: strings.ToLower(apiResource.Kind) + "s",
+				Resource: apiResource.Name,
 			}).List(context.Background(), metav1.ListOptions{
 				LabelSelector: "cyclops.module=" + name,
 			})
@@ -228,6 +229,21 @@ func (k *KubernetesClient) GetModuleResourcesHealth(name string) (string, error)
 	}
 
 	return statusHealthy, nil
+}
+
+func (k *KubernetesClient) GVKtoAPIResourceName(gv schema.GroupVersion, kind string) (string, error) {
+	apiResources, err := k.clientset.Discovery().ServerResourcesForGroupVersion(gv.String())
+	if err != nil {
+		return "", err
+	}
+
+	for _, resource := range apiResources.APIResources {
+		if resource.Kind == kind && len(resource.Name) != 0 {
+			return resource.Name, nil
+		}
+	}
+
+	return "", errors.Errorf("could not find api-resource for groupVersion: %v and kind: %v", gv.String(), kind)
 }
 
 func (k *KubernetesClient) getResourceStatus(o unstructured.Unstructured) (string, error) {
