@@ -71,18 +71,41 @@ func HelmSchemaToFields(name string, schema helm.Property, dependencies []*model
 }
 
 func sortFields(fields []models.Field, order []string) []models.Field {
-	ordersMap := make(map[string]int)
+    // Create a map to store the custom order indices
+    ordersMap := make(map[string]int)
+    for i, name := range order {
+        ordersMap[name] = i
+    }
 
-	for i, s := range order {
-		ordersMap[s] = i
-	}
+    // Separate fields with order and without order
+    var orderedFields []models.Field
+    var unorderedFields []models.Field
 
-	sort.Slice(fields, func(i, j int) bool {
-		return ordersMap[fields[i].Name] < ordersMap[fields[j].Name]
-	})
+    for _, field := range fields {
+        if _, ok := ordersMap[field.Name]; ok {
+            orderedFields = append(orderedFields, field)
+        } else {
+            unorderedFields = append(unorderedFields, field)
+        }
+    }
 
-	return fields
+    // Sort fields with order based on the order index
+    sort.Slice(orderedFields, func(i, j int) bool {
+        return ordersMap[orderedFields[i].Name] < ordersMap[orderedFields[j].Name]
+    })
+
+    // Sort fields without order alphabetically by name
+    sort.Slice(unorderedFields, func(i, j int) bool {
+        return unorderedFields[i].Name < unorderedFields[j].Name
+    })
+
+    // Combine the ordered and unordered fields
+    sortedFields := append(orderedFields, unorderedFields...)
+
+    return sortedFields
 }
+
+
 
 func mapHelmPropertyTypeToFieldType(property helm.Property) string {
 	switch property.Type {

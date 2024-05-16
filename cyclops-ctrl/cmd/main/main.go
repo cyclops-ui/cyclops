@@ -20,6 +20,7 @@ import (
 	"github.com/cyclops-ui/cyclops/cyclops-ctrl/internal/cluster/k8sclient"
 	"github.com/cyclops-ui/cyclops/cyclops-ctrl/internal/handler"
 	"github.com/cyclops-ui/cyclops/cyclops-ctrl/internal/modulecontroller"
+	"github.com/cyclops-ui/cyclops/cyclops-ctrl/internal/prometheus"
 	"github.com/cyclops-ui/cyclops/cyclops-ctrl/internal/telemetry"
 	"github.com/cyclops-ui/cyclops/cyclops-ctrl/internal/template"
 	"github.com/cyclops-ui/cyclops/cyclops-ctrl/internal/template/cache"
@@ -72,9 +73,15 @@ func main() {
 		cache.NewInMemoryTemplatesCache(),
 	)
 
+	handler, err := handler.New(templatesRepo, k8sClient, renderer, telemetryClient)
+	monitor, err := prometheus.NewMonitor(setupLog)
+	if err != nil {
+		setupLog.Error(err, "failed to set up prom monitor")
+	}
+
 	renderer := render.NewRenderer(k8sClient)
 
-	handler, err := handler.New(templatesRepo, k8sClient, renderer, telemetryClient)
+	handler, err := handler.New(templatesRepo, k8sClient, telemetryClient, monitor)
 	if err != nil {
 		panic(err)
 	}

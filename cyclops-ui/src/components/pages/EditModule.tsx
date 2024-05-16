@@ -69,6 +69,7 @@ const EditModule = () => {
 
   const [allConfigs, setAllConfigs] = useState([]);
   const [values, setValues] = useState({});
+  const [isChanged, setIsChanged] = useState(false);
   const [config, setConfig] = useState({
     name: "",
     manifest: "",
@@ -242,6 +243,14 @@ const EditModule = () => {
   allConfigs.map((c: any) => {
     configNames.push(<Select.Option key={c.name}>{c.name}</Select.Option>);
   });
+
+  const handleValuesChange = (changedValues: any, allValues: any) => {
+    if (JSON.stringify(allValues) === JSON.stringify(values)) {
+      setIsChanged(false);
+    } else {
+      setIsChanged(true);
+    }
+  };
 
   const handleSubmit = (values: any) => {
     values = findMaps(config.root.properties, values, previousValues);
@@ -854,6 +863,7 @@ const EditModule = () => {
             autoComplete={"off"}
             onFinish={handleSubmit}
             onFinishFailed={onFinishFailed}
+            onValuesChange={handleValuesChange}
           >
             <Divider orientation="left" orientationMargin="0">
               Edit Module
@@ -869,7 +879,12 @@ const EditModule = () => {
               config.root.required,
             )}
             <div style={{ textAlign: "right" }}>
-              <Button type="primary" htmlType="submit" name="Save">
+              <Button
+                type="primary"
+                htmlType="submit"
+                name="Save"
+                disabled={!isChanged}
+              >
                 Save
               </Button>{" "}
               <Button

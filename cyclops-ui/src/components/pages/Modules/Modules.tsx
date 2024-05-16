@@ -61,7 +61,7 @@ const Modules = () => {
   const namespaces: {} | any = [];
   namespacesState.map((namespace: any) => {
     namespaces.push(
-      <Select.Option key={namespace.name}>{namespace.name}</Select.Option>
+      <Select.Option key={namespace.name}>{namespace.name}</Select.Option>,
     );
   });
 
@@ -143,26 +143,26 @@ const Modules = () => {
       <Divider orientationMargin="0" />
       <Row gutter={[16, 16]}>
         {filteredData.map((module: any, index) => (
-          <Col key={index} span={8}>
-            <a
-                href={"/modules/" + module.name}
-            >
+          <Col key={index} xs={24} sm={12} md={8} lg={8} xl={6}>
+            <a href={"/modules/" + module.name}>
               <Card
-                  title={module.name}
-                  style={{
-                    borderLeft: "solid " + getStatusColor(module) + " 5px",
-                  }}
-                  className={styles.modulecard}
+                title={module.name}
+                style={{
+                  borderLeft: "solid " + getStatusColor(module) + " 5px",
+                  width: "100%",
+                  maxWidth: "500px",
+                }}
+                className={styles.modulecard}
               >
                 <Row gutter={[16, 16]}>
                   <Col
-                      span={24}
-                      style={{
-                        whiteSpace: "nowrap",
-                        overflow: "hidden",
-                        textOverflow: "ellipsis",
-                        display: "block",
-                      }}
+                    span={24}
+                    style={{
+                      whiteSpace: "nowrap",
+                      overflow: "hidden",
+                      textOverflow: "ellipsis",
+                      display: "block",
+                    }}
                   >
                     Repo:
                     <Link aria-level={3} href={module.template.repo}>
@@ -172,24 +172,24 @@ const Modules = () => {
                 </Row>
                 <Row gutter={[16, 16]}>
                   <Col
-                      span={24}
-                      style={{
-                        whiteSpace: "nowrap",
-                        overflow: "hidden",
-                        textOverflow: "ellipsis",
-                        display: "block",
-                      }}
+                    span={24}
+                    style={{
+                      whiteSpace: "nowrap",
+                      overflow: "hidden",
+                      textOverflow: "ellipsis",
+                      display: "block",
+                    }}
                   >
                     Path:
                     <Link
-                        aria-level={3}
-                        href={
-                            module.template.repo +
-                            `/tree/` +
-                            getTemplateVersion(module.template.version) +
-                            `/` +
-                            module.template.path
-                        }
+                      aria-level={3}
+                      href={
+                        module.template.repo +
+                        `/tree/` +
+                        getTemplateVersion(module.template.version) +
+                        `/` +
+                        module.template.path
+                      }
                     >
                       {" " + module.template.path}
                     </Link>
@@ -197,13 +197,13 @@ const Modules = () => {
                 </Row>
                 <Row gutter={[16, 16]}>
                   <Col
-                      span={24}
-                      style={{
-                        whiteSpace: "nowrap",
-                        overflow: "hidden",
-                        textOverflow: "ellipsis",
-                        display: "block",
-                      }}
+                    span={24}
+                    style={{
+                      whiteSpace: "nowrap",
+                      overflow: "hidden",
+                      textOverflow: "ellipsis",
+                      display: "block",
+                    }}
                   >
                     Version: {getTemplateVersion(module.template.version)}
                   </Col>
@@ -214,7 +214,7 @@ const Modules = () => {
         ))}
       </Row>
     </div>
-);
+  );
 };
 
 export default Modules;
