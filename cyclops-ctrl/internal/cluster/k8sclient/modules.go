@@ -64,7 +64,8 @@ func (k *KubernetesClient) GetResourcesForModule(name string) ([]dto.Resource, e
 		}
 
 		for _, apiResource := range resource.APIResources {
-			if gvk.Group == "discovery.k8s.io" && gvk.Version == "v1" && apiResource.Kind == "EndpointSlice" {
+			if gvk.Group == "discovery.k8s.io" && gvk.Version == "v1" && apiResource.Kind == "EndpointSlice" ||
+				gvk.Group == "" && gvk.Version == "v1" && apiResource.Kind == "Endpoints" {
 				continue
 			}
 

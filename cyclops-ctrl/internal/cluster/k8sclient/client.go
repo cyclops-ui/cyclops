@@ -321,10 +321,19 @@ func (k *KubernetesClient) GetDeploymentsYaml(name string, namespace string) (*b
 }
 
 func (k *KubernetesClient) Delete(resource dto.Resource) error {
+	apiResourceName, err := k.GVKtoAPIResourceName(
+		schema.GroupVersion{
+			Group:   resource.GetGroup(),
+			Version: resource.GetVersion(),
+		}, resource.GetKind())
+	if err != nil {
+		return err
+	}
+
 	gvr := schema.GroupVersionResource{
 		Group:    resource.GetGroup(),
 		Version:  resource.GetVersion(),
-		Resource: strings.ToLower(resource.GetKind()) + "s",
+		Resource: apiResourceName,
 	}
 
 	return k.Dynamic.Resource(gvr).Namespace(resource.GetNamespace()).Delete(
