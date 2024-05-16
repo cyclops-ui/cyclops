@@ -1,7 +1,6 @@
 package handler
 
 import (
-	"github.com/cyclops-ui/cyclops/cyclops-ctrl/internal/template/render"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -11,6 +10,7 @@ import (
 	"github.com/cyclops-ui/cyclops/cyclops-ctrl/internal/prometheus"
 	"github.com/cyclops-ui/cyclops/cyclops-ctrl/internal/telemetry"
 	templaterepo "github.com/cyclops-ui/cyclops/cyclops-ctrl/internal/template"
+	"github.com/cyclops-ui/cyclops/cyclops-ctrl/internal/template/render"
 )
 
 type Handler struct {

@@ -19,7 +19,6 @@ package modulecontroller
 import (
 	"context"
 	"fmt"
-	"github.com/cyclops-ui/cyclops/cyclops-ctrl/internal/template/render"
 	"strings"
 
 	"github.com/go-logr/logr"
@@ -37,6 +36,7 @@ import (
 	"github.com/cyclops-ui/cyclops/cyclops-ctrl/internal/models"
 	"github.com/cyclops-ui/cyclops/cyclops-ctrl/internal/telemetry"
 	templaterepo "github.com/cyclops-ui/cyclops/cyclops-ctrl/internal/template"
+	"github.com/cyclops-ui/cyclops/cyclops-ctrl/internal/template/render"
 )
 
 // ModuleReconciler reconciles a Module object

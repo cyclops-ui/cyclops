@@ -1,13 +1,14 @@
 package render
 
 import (
-	cyclopsv1alpha1 "github.com/cyclops-ui/cyclops/cyclops-ctrl/api/v1alpha1"
-	"github.com/cyclops-ui/cyclops/cyclops-ctrl/internal/cluster/k8sclient"
-	"github.com/cyclops-ui/cyclops/cyclops-ctrl/internal/models"
 	json "github.com/json-iterator/go"
 	helmchart "helm.sh/helm/v3/pkg/chart"
 	"helm.sh/helm/v3/pkg/chartutil"
 	"helm.sh/helm/v3/pkg/engine"
+
+	cyclopsv1alpha1 "github.com/cyclops-ui/cyclops/cyclops-ctrl/api/v1alpha1"
+	"github.com/cyclops-ui/cyclops/cyclops-ctrl/internal/cluster/k8sclient"
+	"github.com/cyclops-ui/cyclops/cyclops-ctrl/internal/models"
 )
 
 type Renderer struct {
@@ -61,16 +62,6 @@ func (r *Renderer) HelmTemplate(module cyclopsv1alpha1.Module, moduleTemplate *m
 		"Namespace": "",
 	}
 
-	type CapabilitiesKubeVersion struct {
-		Version    string
-		GitVersion string
-	}
-
-	type Capabilities struct {
-		APIVersions chartutil.VersionSet
-		KubeVersion CapabilitiesKubeVersion
-	}
-
 	versionInfo, err := r.k8sClient.VersionInfo()
 	if err != nil {
 		return "", err
@@ -95,4 +86,14 @@ func (r *Renderer) HelmTemplate(module cyclopsv1alpha1.Module, moduleTemplate *m
 	}
 
 	return manifest, err
+}
+
+type CapabilitiesKubeVersion struct {
+	Version    string
+	GitVersion string
+}
+
+type Capabilities struct {
+	APIVersions chartutil.VersionSet
+	KubeVersion CapabilitiesKubeVersion
 }

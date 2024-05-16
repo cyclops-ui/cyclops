@@ -3,7 +3,6 @@ package main
 import (
 	"flag"
 	"fmt"
-	"github.com/cyclops-ui/cyclops/cyclops-ctrl/internal/template/render"
 	"os"
 	"strconv"
 
@@ -24,6 +23,7 @@ import (
 	"github.com/cyclops-ui/cyclops/cyclops-ctrl/internal/telemetry"
 	"github.com/cyclops-ui/cyclops/cyclops-ctrl/internal/template"
 	"github.com/cyclops-ui/cyclops/cyclops-ctrl/internal/template/cache"
+	"github.com/cyclops-ui/cyclops/cyclops-ctrl/internal/template/render"
 
 	cyclopsv1alpha1 "github.com/cyclops-ui/cyclops/cyclops-ctrl/api/v1alpha1"
 )

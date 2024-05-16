@@ -2,7 +2,6 @@ package controller
 
 import (
 	"fmt"
-	"github.com/cyclops-ui/cyclops/cyclops-ctrl/internal/template/render"
 	"net/http"
 	"os"
 	"strings"
@@ -16,6 +15,7 @@ import (
 	"github.com/cyclops-ui/cyclops/cyclops-ctrl/internal/prometheus"
 	"github.com/cyclops-ui/cyclops/cyclops-ctrl/internal/telemetry"
 	"github.com/cyclops-ui/cyclops/cyclops-ctrl/internal/template"
+	"github.com/cyclops-ui/cyclops/cyclops-ctrl/internal/template/render"
 )
 
 type Modules struct {

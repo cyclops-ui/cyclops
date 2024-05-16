@@ -7,7 +7,6 @@ import (
 	"errors"
 	"fmt"
 	"io"
-	"k8s.io/apimachinery/pkg/version"
 	"os"
 	"os/exec"
 	"sort"
@@ -23,6 +22,7 @@ import (
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/labels"
 	"k8s.io/apimachinery/pkg/runtime/schema"
+	"k8s.io/apimachinery/pkg/version"
 	"k8s.io/client-go/discovery"
 	"k8s.io/client-go/dynamic"
 	"k8s.io/client-go/kubernetes"
@@ -69,11 +69,6 @@ func createLocalClient() (*KubernetesClient, error) {
 	if err != nil {
 		panic(err.Error())
 	}
-
-	v, err := discovery.ServerVersion()
-
-	fmt.Println("verzija", v.String())
-	fmt.Println("verzija", v.GitVersion)
 
 	return &KubernetesClient{
 		Dynamic:   dynamic,
@@ -354,8 +349,6 @@ func (k *KubernetesClient) CreateDynamic(obj *unstructured.Unstructured) error {
 		Version:  obj.GroupVersionKind().Version,
 		Resource: resourceName,
 	}
-
-	fmt.Println("gvr", gvr)
 
 	objNamespace := obj.GetNamespace()
 	if len(strings.TrimSpace(objNamespace)) == 0 {
