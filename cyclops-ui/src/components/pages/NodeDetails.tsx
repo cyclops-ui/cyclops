@@ -82,7 +82,7 @@ const NodeDetails = () => {
   const handleSearch = (
     selectedKeys: string[],
     confirm: (param?: FilterConfirmProps) => void,
-    dataIndex: DataIndex
+    dataIndex: DataIndex,
   ) => {
     confirm();
     setSearchText(selectedKeys[0]);
@@ -91,7 +91,7 @@ const NodeDetails = () => {
 
   const handleReset = (
     clearFilters: () => void,
-    confirm: (param?: FilterConfirmProps) => void
+    confirm: (param?: FilterConfirmProps) => void,
   ) => {
     clearFilters();
     setSearchText("");
@@ -99,7 +99,7 @@ const NodeDetails = () => {
   };
 
   const getColumnSearchProps = (
-    dataIndex: DataIndex
+    dataIndex: DataIndex,
   ): ColumnType<DataSourceType> => ({
     filterDropdown: ({
       setSelectedKeys,

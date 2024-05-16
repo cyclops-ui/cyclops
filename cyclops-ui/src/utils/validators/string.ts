@@ -2,7 +2,7 @@ import { Validator, isFieldNullOrUndefined } from "./common";
 
 export function stringInputValidators(
   field: any,
-  isRequired: boolean
+  isRequired: boolean,
 ): Validator[] {
   let rules: Validator[] = [];
 

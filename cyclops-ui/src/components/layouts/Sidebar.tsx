@@ -5,12 +5,12 @@ import {
   HddOutlined,
   BugFilled,
   SnippetsOutlined,
-  GithubFilled
+  GithubFilled,
 } from "@ant-design/icons";
 import { useLocation } from "react-router";
 import PathConstants from "../../routes/PathConstants";
 import { Link } from "react-router-dom";
-import styles from "./styles.module.css"
+import styles from "./styles.module.css";
 
 const SideNav = () => {
   const location = useLocation().pathname.split("/")[1];
@@ -35,11 +35,11 @@ const SideNav = () => {
 
   const tagChangelogLink = (tag: string) => {
     if (tag === "v0.0.0") {
-      return "https://github.com/cyclops-ui/cyclops/releases"
+      return "https://github.com/cyclops-ui/cyclops/releases";
     }
 
-    return "https://github.com/cyclops-ui/cyclops/releases/tag/" + tag
-  }
+    return "https://github.com/cyclops-ui/cyclops/releases/tag/" + tag;
+  };
 
   return (
     <div
@@ -54,10 +54,7 @@ const SideNav = () => {
             display: "inline-flex",
           }}
         >
-          <img
-            src={require("./cyclops_logo.png")}
-            alt="Cyclops"
-          />
+          <img src={require("./cyclops_logo.png")} alt="Cyclops" />
         </div>
       </a>
       <Menu
@@ -76,13 +73,18 @@ const SideNav = () => {
       >
         <b>Report a Bug</b>
       </Button>
-      <center style={{
-        color: "#FFF",
-        margin: "25px",
-        marginTop: "0",
-      }}>
-        <Link className={styles.taglink} to={tagChangelogLink(window.__RUNTIME_CONFIG__.REACT_APP_VERSION)}>
-          <GithubFilled/> {window.__RUNTIME_CONFIG__.REACT_APP_VERSION}
+      <center
+        style={{
+          color: "#FFF",
+          margin: "25px",
+          marginTop: "0",
+        }}
+      >
+        <Link
+          className={styles.taglink}
+          to={tagChangelogLink(window.__RUNTIME_CONFIG__.REACT_APP_VERSION)}
+        >
+          <GithubFilled /> {window.__RUNTIME_CONFIG__.REACT_APP_VERSION}
         </Link>
       </center>
     </div>
