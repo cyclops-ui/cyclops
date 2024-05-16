@@ -244,7 +244,7 @@ const TemplateStore = () => {
                     editForm.setFieldValue(["ref", "path"], template.ref.path);
                     editForm.setFieldValue(
                       ["ref", "version"],
-                      template.ref.version
+                      template.ref.version,
                     );
                     setEditModal(template.name);
                   }}

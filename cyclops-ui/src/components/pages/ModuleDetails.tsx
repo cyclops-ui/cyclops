@@ -133,7 +133,7 @@ const ModuleDetails = () => {
     version: string,
     kind: string,
     namespace: string,
-    name: string
+    name: string,
   ) {
     axios
       .get(`/api/manifest`, {
@@ -315,7 +315,7 @@ const ModuleDetails = () => {
       resourcesToDelete.push(
         <Row>
           {resource.kind}: {resource.namespace} / {resource.name}
-        </Row>
+        </Row>,
       );
     });
 
@@ -504,7 +504,7 @@ const ModuleDetails = () => {
                   resource.version,
                   resource.kind,
                   resource.namespace,
-                  resource.name
+                  resource.name,
                 );
               }}
               block
@@ -514,7 +514,7 @@ const ModuleDetails = () => {
           </Col>
         </Row>
         {resourceDetails}
-      </Collapse.Panel>
+      </Collapse.Panel>,
     );
   });
 

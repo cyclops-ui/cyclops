@@ -1,7 +1,7 @@
 .deletetemplate {
   color: red;
   transform: scale(1.2);
-  transition: transform .2s;
+  transition: transform 0.2s;
 }
 
 .deletetemplate:hover {
@@ -11,7 +11,7 @@
 .edittemplate {
   color: #4096ff;
   transform: scale(1.2);
-  transition: transform .2s;
+  transition: transform 0.2s;
 }
 
 .edittemplate:hover {

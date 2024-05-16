@@ -3,7 +3,7 @@ import { Validator, isFieldNullOrUndefined } from "./common";
 
 export function numberInputValidators(
   field: any,
-  isRequired: boolean
+  isRequired: boolean,
 ): Validator[] {
   let rules: Validator[] = [];
 
@@ -35,11 +35,11 @@ function validateMultiple(field: any) {
     const epsilon = 1e-10;
 
     return Math.abs(
-      value - Math.round(value / field.multipleOf) * field.multipleOf
+      value - Math.round(value / field.multipleOf) * field.multipleOf,
     ) < epsilon
       ? Promise.resolve()
       : Promise.reject(
-          `'${field.name}' must be a multiple of ${field.multipleOf}`
+          `'${field.name}' must be a multiple of ${field.multipleOf}`,
         );
   };
 }
