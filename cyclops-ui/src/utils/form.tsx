@@ -19,7 +19,7 @@ export function fileExtension(fileExt: string): string {
 
 export function flattenObjectKeys(
   obj: any,
-  parentKeys: string[] = []
+  parentKeys: string[] = [],
 ): (string | string[])[] {
   return Object.keys(obj).reduce((acc: (string | string[])[], key: string) => {
     if (obj[key] !== undefined) {

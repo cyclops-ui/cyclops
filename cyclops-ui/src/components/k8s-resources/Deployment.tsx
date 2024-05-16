@@ -176,14 +176,14 @@ const Deployment = ({ name, namespace }: Props) => {
           logsModal.pod +
           "/" +
           container +
-          "/logs"
+          "/logs",
       )
       .then((res) => {
         if (res.data) {
           let log = "";
           res.data.forEach((s: string) => {
             log += s;
-            log += '\n';
+            log += "\n";
           });
           setLogs(log);
         } else {
@@ -261,7 +261,7 @@ const Deployment = ({ name, namespace }: Props) => {
                     let color = container.status.running ? "green" : "red";
 
                     if (record.podPhase === "Pending") {
-                      color = "yellow"
+                      color = "yellow";
                     }
 
                     return (
@@ -292,14 +292,14 @@ const Deployment = ({ name, namespace }: Props) => {
                             pod.name +
                             "/" +
                             pod.containers[0].name +
-                            "/logs"
+                            "/logs",
                         )
                         .then((res) => {
                           if (res.data) {
                             let log = "";
                             res.data.forEach((s: string) => {
                               log += s;
-                              log += '\n';
+                              log += "\n";
                             });
                             setLogs(log);
                           } else {
