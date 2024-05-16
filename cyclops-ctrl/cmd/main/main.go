@@ -73,7 +73,6 @@ func main() {
 		cache.NewInMemoryTemplatesCache(),
 	)
 
-	handler, err := handler.New(templatesRepo, k8sClient, renderer, telemetryClient)
 	monitor, err := prometheus.NewMonitor(setupLog)
 	if err != nil {
 		setupLog.Error(err, "failed to set up prom monitor")
@@ -81,7 +80,7 @@ func main() {
 
 	renderer := render.NewRenderer(k8sClient)
 
-	handler, err := handler.New(templatesRepo, k8sClient, telemetryClient, monitor)
+	handler, err := handler.New(templatesRepo, k8sClient, renderer, telemetryClient, monitor)
 	if err != nil {
 		panic(err)
 	}
