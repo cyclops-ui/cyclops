@@ -478,7 +478,7 @@ const ModuleDetails = () => {
         style={{
           backgroundColor: getCollapseColor(collapseKey),
           borderTopLeftRadius: index == 0 ? "7px" : "0px",
-          borderTopRightRadius: index == 0 ? "7px" : "7px",
+          borderTopRightRadius: index == 0 ? "7px" : "0px",
         }}
       >
         <Row>
