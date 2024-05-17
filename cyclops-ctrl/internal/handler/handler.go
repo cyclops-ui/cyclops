@@ -7,8 +7,10 @@ import (
 
 	"github.com/cyclops-ui/cyclops/cyclops-ctrl/internal/cluster/k8sclient"
 	"github.com/cyclops-ui/cyclops/cyclops-ctrl/internal/controller"
+	"github.com/cyclops-ui/cyclops/cyclops-ctrl/internal/prometheus"
 	"github.com/cyclops-ui/cyclops/cyclops-ctrl/internal/telemetry"
 	templaterepo "github.com/cyclops-ui/cyclops/cyclops-ctrl/internal/template"
+	"github.com/cyclops-ui/cyclops/cyclops-ctrl/internal/template/render"
 )
 
 type Handler struct {
@@ -16,19 +18,25 @@ type Handler struct {
 
 	templatesRepo *templaterepo.Repo
 	k8sClient     *k8sclient.KubernetesClient
+	renderer      *render.Renderer
 
 	telemetryClient telemetry.Client
+	monitor         prometheus.Monitor
 }
 
 func New(
 	templatesRepo *templaterepo.Repo,
 	kubernetesClient *k8sclient.KubernetesClient,
+	renderer *render.Renderer,
 	telemetryClient telemetry.Client,
+	monitor prometheus.Monitor,
 ) (*Handler, error) {
 	return &Handler{
 		templatesRepo:   templatesRepo,
 		k8sClient:       kubernetesClient,
+		renderer:        renderer,
 		telemetryClient: telemetryClient,
+		monitor:         monitor,
 		router:          gin.New(),
 	}, nil
 }
@@ -37,7 +45,7 @@ func (h *Handler) Start() error {
 	gin.SetMode(gin.DebugMode)
 
 	templatesController := controller.NewTemplatesController(h.templatesRepo, h.k8sClient)
-	modulesController := controller.NewModulesController(h.templatesRepo, h.k8sClient, h.telemetryClient)
+	modulesController := controller.NewModulesController(h.templatesRepo, h.k8sClient, h.renderer, h.telemetryClient, h.monitor)
 	clusterController := controller.NewClusterController(h.k8sClient)
 
 	h.router = gin.New()
@@ -77,6 +85,8 @@ func (h *Handler) Start() error {
 
 	h.router.GET("/nodes", clusterController.ListNodes)
 	h.router.GET("/nodes/:name", clusterController.GetNode)
+
+	h.router.GET("/metrics", prometheus.PromHandler())
 
 	h.router.Use(h.options)
 

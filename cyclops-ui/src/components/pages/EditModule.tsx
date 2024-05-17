@@ -6,9 +6,11 @@ import {
   Collapse,
   Divider,
   Form,
+  FormListFieldData,
   Input,
   InputNumber,
   message,
+  Modal,
   Row,
   Select,
   Space,
@@ -38,7 +40,7 @@ import "ace-builds/src-noconflict/mode-toml";
 import "ace-builds/src-noconflict/mode-javascript";
 import "ace-builds/src-noconflict/mode-typescript";
 import "ace-builds/src-noconflict/snippets/yaml";
-import { fileExtension, flattenObjectKeys } from "../../utils/form";
+import { fileExtension, findMaps, flattenObjectKeys } from "../../utils/form";
 import "./custom.css";
 import { numberInputValidators } from "../../utils/validators/number";
 import { stringInputValidators } from "../../utils/validators/string";
@@ -72,11 +74,14 @@ const EditModule = () => {
     },
   });
 
+  const [previousValues, setPreviousValues] = useState();
+
   const [form] = Form.useForm();
   const [editTemplateForm] = Form.useForm();
 
   const [allConfigs, setAllConfigs] = useState([]);
   const [values, setValues] = useState({});
+  const [isChanged, setIsChanged] = useState(false);
   const [config, setConfig] = useState({
     name: "",
     manifest: "",
@@ -222,6 +227,7 @@ const EditModule = () => {
             });
             form.setFieldsValue(values);
             setValues(values);
+            setPreviousValues(res.data.values);
           })
           .catch((error) => {
             setLoadTemplate(true);
@@ -272,64 +278,12 @@ const EditModule = () => {
     configNames.push(<Select.Option key={c.name}>{c.name}</Select.Option>);
   });
 
-  const findMaps = (fields: any[], values: any): any => {
-    let out: any = {};
-    fields.forEach((field) => {
-      let valuesList: any[] = [];
-      switch (field.type) {
-        case "string":
-          out[field.name] = values[field.name];
-          break;
-        case "number":
-          out[field.name] = values[field.name];
-          break;
-        case "boolean":
-          out[field.name] = values[field.name];
-          break;
-        case "object":
-          if (values[field.name]) {
-            out[field.name] = findMaps(field.properties, values[field.name]);
-          }
-          break;
-        case "array":
-          valuesList = values[field.name] as any[];
-
-          if (!valuesList) {
-            out[field.name] = [];
-            break;
-          }
-
-          let objectArr: any[] = [];
-          valuesList.forEach((valueFromList) => {
-            switch (field.items.type) {
-              case "string":
-                objectArr.push(valueFromList);
-                break;
-              case "object":
-                objectArr.push(findMaps(field.items.properties, valueFromList));
-                break;
-            }
-          });
-          out[field.name] = objectArr;
-          break;
-        case "map":
-          valuesList = values[field.name] as any[];
-
-          if (!valuesList) {
-            out[field.name] = {};
-            break;
-          }
-
-          let object: any = {};
-          valuesList.forEach((valueFromList) => {
-            object[valueFromList.key] = valueFromList.value;
-          });
-          out[field.name] = object;
-          break;
-      }
-    });
-
-    return out;
+  const handleValuesChange = (changedValues: any, allValues: any) => {
+    if (JSON.stringify(allValues) === JSON.stringify(values)) {
+      setIsChanged(false);
+    } else {
+      setIsChanged(true);
+    }
   };
 
   const handleSubmitTemplateEdit = (values: any) => {
@@ -375,7 +329,7 @@ const EditModule = () => {
   };
 
   const handleSubmit = (values: any) => {
-    values = findMaps(config.root.properties, values);
+    values = findMaps(config.root.properties, values, previousValues);
 
     axios
       .post(`/api/modules/update`, {
@@ -1105,11 +1059,37 @@ const EditModule = () => {
             autoComplete={"off"}
             onFinish={handleSubmit}
             onFinishFailed={onFinishFailed}
+            onValuesChange={handleValuesChange}
           >
             <Divider orientation="left" orientationMargin="0">
               Edit Module
             </Divider>
             {formLoading()}
+            {mapFields(
+              config.root.properties,
+              "",
+              "",
+              0,
+              0,
+              undefined,
+              config.root.required,
+            )}
+            <div style={{ textAlign: "right" }}>
+              <Button
+                type="primary"
+                htmlType="submit"
+                name="Save"
+                disabled={!isChanged}
+              >
+                Save
+              </Button>{" "}
+              <Button
+                htmlType="button"
+                onClick={() => history("/modules/" + moduleName)}
+              >
+                Back
+              </Button>
+            </div>
           </Form>
         </Col>
       </Row>

@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"net/http"
 	"strconv"
+	"strings"
 
 	"github.com/gin-gonic/gin"
 
@@ -109,6 +110,22 @@ func (c *Templates) CreateTemplatesStore(ctx *gin.Context) {
 		return
 	}
 
+	templateStore.TemplateRef.URL = strings.Trim(templateStore.TemplateRef.URL, "/")
+	templateStore.TemplateRef.Path = strings.Trim(templateStore.TemplateRef.Path, "/")
+	templateStore.TemplateRef.Version = strings.Trim(templateStore.TemplateRef.Version, "/")
+
+	if templateStore.TemplateRef.URL == "" {
+		ctx.JSON(http.StatusBadRequest, dto.NewError("Invalid template reference", "Template repo not set"))
+		return
+	}
+
+	_, err := c.templatesRepo.GetTemplate(templateStore.TemplateRef.URL, templateStore.TemplateRef.Path, templateStore.TemplateRef.Version)
+	if err != nil {
+		fmt.Println(err)
+		ctx.JSON(http.StatusBadRequest, dto.NewError("Error loading template", err.Error()))
+		return
+	}
+
 	k8sTemplateStore := mapper.DTOToTemplateStore(*templateStore)
 
 	if err := c.kubernetesClient.CreateTemplateStore(k8sTemplateStore); err != nil {
@@ -126,6 +143,22 @@ func (c *Templates) EditTemplatesStore(ctx *gin.Context) {
 	if err := ctx.ShouldBind(&templateStore); err != nil {
 		fmt.Println("error binding request", templateStore)
 		ctx.JSON(http.StatusBadRequest, dto.NewError("Error binding request", err.Error()))
+		return
+	}
+
+	templateStore.TemplateRef.URL = strings.Trim(templateStore.TemplateRef.URL, "/")
+	templateStore.TemplateRef.Path = strings.Trim(templateStore.TemplateRef.Path, "/")
+	templateStore.TemplateRef.Version = strings.Trim(templateStore.TemplateRef.Version, "/")
+
+	if templateStore.TemplateRef.URL == "" {
+		ctx.JSON(http.StatusBadRequest, dto.NewError("Invalid template reference", "Template repo not set"))
+		return
+	}
+
+	_, err := c.templatesRepo.GetTemplate(templateStore.TemplateRef.URL, templateStore.TemplateRef.Path, templateStore.TemplateRef.Version)
+	if err != nil {
+		fmt.Println(err)
+		ctx.JSON(http.StatusBadRequest, dto.NewError("Error loading template", err.Error()))
 		return
 	}
 

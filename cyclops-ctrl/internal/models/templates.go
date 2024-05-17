@@ -16,7 +16,8 @@ type Template struct {
 	Version         string       `json:"version"`
 	ResolvedVersion string       `json:"resolvedVersion"`
 
-	Files []*chart.File `json:"files"`
+	Files     []*chart.File `json:"files"`
+	Templates []*chart.File `json:"templates"`
 
 	Dependencies []*Template `json:"dependencies"`
 }

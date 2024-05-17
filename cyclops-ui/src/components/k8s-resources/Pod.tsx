@@ -197,13 +197,14 @@ const Pod = ({ name, namespace }: Props) => {
           pod +
           "/" +
           container +
-          "/logs"
+          "/logs",
       )
       .then((res) => {
         if (res.data) {
           let log = "";
           res.data.forEach((s: string) => {
             log += s;
+            log += "\n";
           });
           setLogs(log);
         } else {
@@ -288,13 +289,14 @@ const Pod = ({ name, namespace }: Props) => {
                     name +
                     "/" +
                     pod.containers[0].name +
-                    "/logs"
+                    "/logs",
                 )
                 .then((res) => {
                   if (res.data) {
                     let log = "";
                     res.data.forEach((s: string) => {
                       log += s;
+                      log += "\n";
                     });
                     setLogs(log);
                   } else {

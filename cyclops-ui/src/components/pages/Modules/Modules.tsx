@@ -148,12 +148,14 @@ const Modules = () => {
       <Divider orientationMargin="0" />
       <Row gutter={[16, 16]}>
         {filteredData.map((module: any, index) => (
-          <Col key={index} span={8}>
+          <Col key={index} xs={24} sm={12} md={8} lg={8} xl={6}>
             <a href={"/modules/" + module.name}>
               <Card
                 title={module.name}
                 style={{
                   borderLeft: "solid " + getStatusColor(module) + " 5px",
+                  width: "100%",
+                  maxWidth: "500px",
                 }}
                 className={styles.modulecard}
               >
@@ -198,7 +200,7 @@ const Modules = () => {
                     </Link>
                   </Col>
                 </Row>
-                <Row>
+                <Row gutter={[16, 16]}>
                   <Col
                     span={24}
                     style={{
