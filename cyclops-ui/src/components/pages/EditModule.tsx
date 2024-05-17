@@ -40,7 +40,7 @@ import "ace-builds/src-noconflict/mode-toml";
 import "ace-builds/src-noconflict/mode-javascript";
 import "ace-builds/src-noconflict/mode-typescript";
 import "ace-builds/src-noconflict/snippets/yaml";
-import { fileExtension, flattenObjectKeys } from "../../utils/form";
+import { fileExtension, findMaps, flattenObjectKeys } from "../../utils/form";
 import "./custom.css";
 import { numberInputValidators } from "../../utils/validators/number";
 import { stringInputValidators } from "../../utils/validators/string";
@@ -62,6 +62,8 @@ const EditModule = () => {
       version: "",
     },
   });
+
+  const [previousValues, setPreviousValues] = useState();
 
   const [form] = Form.useForm();
 
@@ -191,6 +193,7 @@ const EditModule = () => {
             });
             form.setFieldsValue(values);
             setValues(values);
+            setPreviousValues(res.data.values);
           })
           .catch((error) => {
             setLoadTemplate(true);
@@ -241,65 +244,6 @@ const EditModule = () => {
     configNames.push(<Select.Option key={c.name}>{c.name}</Select.Option>);
   });
 
-  const findMaps = (fields: any[], values: any): any => {
-    let out: any = {};
-    fields.forEach((field) => {
-      let valuesList: any[] = [];
-      switch (field.type) {
-        case "string":
-          out[field.name] = values[field.name];
-          break;
-        case "number":
-          out[field.name] = values[field.name];
-          break;
-        case "boolean":
-          out[field.name] = values[field.name];
-          break;
-        case "object":
-          if (values[field.name]) {
-            out[field.name] = findMaps(field.properties, values[field.name]);
-          }
-          break;
-        case "array":
-          valuesList = values[field.name] as any[];
-
-          if (!valuesList) {
-            out[field.name] = [];
-            break;
-          }
-
-          let objectArr: any[] = [];
-          valuesList.forEach((valueFromList) => {
-            switch (field.items.type) {
-              case "string":
-                objectArr.push(valueFromList);
-                break;
-              case "object":
-                objectArr.push(findMaps(field.items.properties, valueFromList));
-                break;
-            }
-          });
-          out[field.name] = objectArr;
-          break;
-        case "map":
-          valuesList = values[field.name] as any[];
-
-          if (!valuesList) {
-            out[field.name] = {};
-            break;
-          }
-
-          let object: any = {};
-          valuesList.forEach((valueFromList) => {
-            object[valueFromList.key] = valueFromList.value;
-          });
-          out[field.name] = object;
-          break;
-      }
-    });
-
-    return out;
-  };
   const handleValuesChange = (changedValues: any, allValues: any) => {
     if (JSON.stringify(allValues) === JSON.stringify(values)) {
       setIsChanged(false);
@@ -307,8 +251,9 @@ const EditModule = () => {
       setIsChanged(true);
     }
   };
+
   const handleSubmit = (values: any) => {
-    values = findMaps(config.root.properties, values);
+    values = findMaps(config.root.properties, values, previousValues);
 
     axios
       .post(`/api/modules/update`, {

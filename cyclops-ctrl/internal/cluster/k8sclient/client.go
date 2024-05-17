@@ -22,6 +22,7 @@ import (
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/labels"
 	"k8s.io/apimachinery/pkg/runtime/schema"
+	"k8s.io/apimachinery/pkg/version"
 	"k8s.io/client-go/discovery"
 	"k8s.io/client-go/dynamic"
 	"k8s.io/client-go/kubernetes"
@@ -75,6 +76,10 @@ func createLocalClient() (*KubernetesClient, error) {
 		clientset: clientset,
 		moduleset: moduleSet,
 	}, nil
+}
+
+func (k *KubernetesClient) VersionInfo() (*version.Info, error) {
+	return k.discovery.ServerVersion()
 }
 
 func (k *KubernetesClient) GetDeployment(namespace, name string) (*v12.Deployment, error) {
@@ -241,10 +246,15 @@ func (k *KubernetesClient) GetStatefulSetsLogs(namespace, container, name string
 }
 
 func (k *KubernetesClient) GetManifest(group, version, kind, name, namespace string) (string, error) {
+	apiResourceName, err := k.GVKtoAPIResourceName(schema.GroupVersion{Group: group, Version: version}, kind)
+	if err != nil {
+		return "", err
+	}
+
 	resource, err := k.Dynamic.Resource(schema.GroupVersionResource{
 		Group:    group,
 		Version:  version,
-		Resource: strings.ToLower(kind) + "s",
+		Resource: apiResourceName,
 	}).Namespace(namespace).Get(context.Background(), name, metav1.GetOptions{})
 	if err != nil {
 		return "", err
@@ -306,10 +316,19 @@ func (k *KubernetesClient) GetDeploymentsYaml(name string, namespace string) (*b
 }
 
 func (k *KubernetesClient) Delete(resource dto.Resource) error {
+	apiResourceName, err := k.GVKtoAPIResourceName(
+		schema.GroupVersion{
+			Group:   resource.GetGroup(),
+			Version: resource.GetVersion(),
+		}, resource.GetKind())
+	if err != nil {
+		return err
+	}
+
 	gvr := schema.GroupVersionResource{
 		Group:    resource.GetGroup(),
 		Version:  resource.GetVersion(),
-		Resource: strings.ToLower(resource.GetKind()) + "s",
+		Resource: apiResourceName,
 	}
 
 	return k.Dynamic.Resource(gvr).Namespace(resource.GetNamespace()).Delete(
@@ -320,10 +339,15 @@ func (k *KubernetesClient) Delete(resource dto.Resource) error {
 }
 
 func (k *KubernetesClient) CreateDynamic(obj *unstructured.Unstructured) error {
+	resourceName, err := k.GVKtoAPIResourceName(obj.GroupVersionKind().GroupVersion(), obj.GroupVersionKind().Kind)
+	if err != nil {
+		return err
+	}
+
 	gvr := schema.GroupVersionResource{
 		Group:    obj.GroupVersionKind().Group,
 		Version:  obj.GroupVersionKind().Version,
-		Resource: strings.ToLower(obj.GroupVersionKind().Kind) + "s",
+		Resource: resourceName,
 	}
 
 	objNamespace := obj.GetNamespace()
@@ -573,13 +597,13 @@ func (k *KubernetesClient) mapPersistentVolumeClaims(group, version, kind, name,
 	}
 
 	return &dto.PersistentVolumeClaim{
-		Group:     	 group,
-		Version:   	 version,
-		Kind:      	 kind,
-		Name:      	 name,
-		Namespace: 	 namespace,
+		Group:       group,
+		Version:     version,
+		Kind:        kind,
+		Name:        name,
+		Namespace:   namespace,
 		AccessModes: persistentvolumeclaim.Spec.AccessModes,
-		Size: 		 storage,
+		Size:        storage,
 	}, nil
 }
 

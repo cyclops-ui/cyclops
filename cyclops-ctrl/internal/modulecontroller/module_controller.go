@@ -36,6 +36,7 @@ import (
 	"github.com/cyclops-ui/cyclops/cyclops-ctrl/internal/models"
 	"github.com/cyclops-ui/cyclops/cyclops-ctrl/internal/telemetry"
 	templaterepo "github.com/cyclops-ui/cyclops/cyclops-ctrl/internal/template"
+	"github.com/cyclops-ui/cyclops/cyclops-ctrl/internal/template/render"
 )
 
 // ModuleReconciler reconciles a Module object
@@ -45,6 +46,7 @@ type ModuleReconciler struct {
 
 	templatesRepo    *templaterepo.Repo
 	kubernetesClient *k8sclient.KubernetesClient
+	renderer         *render.Renderer
 
 	telemetryClient telemetry.Client
 	logger          logr.Logger
@@ -55,6 +57,7 @@ func NewModuleReconciler(
 	scheme *runtime.Scheme,
 	templatesRepo *templaterepo.Repo,
 	kubernetesClient *k8sclient.KubernetesClient,
+	renderer *render.Renderer,
 	telemetryClient telemetry.Client,
 ) *ModuleReconciler {
 	return &ModuleReconciler{
@@ -62,6 +65,7 @@ func NewModuleReconciler(
 		Scheme:           scheme,
 		templatesRepo:    templatesRepo,
 		kubernetesClient: kubernetesClient,
+		renderer:         renderer,
 		telemetryClient:  telemetryClient,
 		logger:           ctrl.Log.WithName("reconciler"),
 	}
@@ -180,7 +184,7 @@ func (r *ModuleReconciler) moduleToResources(name string) ([]string, error) {
 }
 
 func (r *ModuleReconciler) generateResources(kClient *k8sclient.KubernetesClient, module cyclopsv1alpha1.Module, moduleTemplate *models.Template) ([]string, error) {
-	out, err := templaterepo.HelmTemplate(module, moduleTemplate)
+	out, err := r.renderer.HelmTemplate(module, moduleTemplate)
 	if err != nil {
 		return nil, err
 	}
@@ -194,7 +198,6 @@ func (r *ModuleReconciler) generateResources(kClient *k8sclient.KubernetesClient
 		}
 
 		var obj unstructured.Unstructured
-
 		decoder := yaml.NewYAMLOrJSONDecoder(strings.NewReader(s), len(s))
 		if err := decoder.Decode(&obj); err != nil {
 			r.logger.Error(err, "could not decode resource",

@@ -23,6 +23,7 @@ import (
 	"github.com/cyclops-ui/cyclops/cyclops-ctrl/internal/telemetry"
 	"github.com/cyclops-ui/cyclops/cyclops-ctrl/internal/template"
 	"github.com/cyclops-ui/cyclops/cyclops-ctrl/internal/template/cache"
+	"github.com/cyclops-ui/cyclops/cyclops-ctrl/internal/template/render"
 
 	cyclopsv1alpha1 "github.com/cyclops-ui/cyclops/cyclops-ctrl/api/v1alpha1"
 )
@@ -77,7 +78,9 @@ func main() {
 		setupLog.Error(err, "failed to set up prom monitor")
 	}
 
-	handler, err := handler.New(templatesRepo, k8sClient, telemetryClient, monitor)
+	renderer := render.NewRenderer(k8sClient)
+
+	handler, err := handler.New(templatesRepo, k8sClient, renderer, telemetryClient, monitor)
 	if err != nil {
 		panic(err)
 	}
@@ -102,6 +105,7 @@ func main() {
 		mgr.GetScheme(),
 		templatesRepo,
 		k8sClient,
+		renderer,
 		telemetryClient,
 	)).SetupWithManager(mgr); err != nil {
 		setupLog.Error(err, "unable to create controller", "controller", "Module")

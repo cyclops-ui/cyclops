@@ -2,6 +2,7 @@ package k8sclient
 
 import (
 	"context"
+	"github.com/pkg/errors"
 	"sort"
 	"strings"
 
@@ -14,9 +15,7 @@ import (
 	yaml2 "k8s.io/apimachinery/pkg/util/yaml"
 
 	cyclopsv1alpha1 "github.com/cyclops-ui/cyclops/cyclops-ctrl/api/v1alpha1"
-	"github.com/cyclops-ui/cyclops/cyclops-ctrl/internal/models"
 	"github.com/cyclops-ui/cyclops/cyclops-ctrl/internal/models/dto"
-	template2 "github.com/cyclops-ui/cyclops/cyclops-ctrl/internal/template"
 )
 
 const (
@@ -65,14 +64,15 @@ func (k *KubernetesClient) GetResourcesForModule(name string) ([]dto.Resource, e
 		}
 
 		for _, apiResource := range resource.APIResources {
-			if gvk.Group == "discovery.k8s.io" && gvk.Version == "v1" && apiResource.Kind == "EndpointSlice" {
+			if gvk.Group == "discovery.k8s.io" && gvk.Version == "v1" && apiResource.Kind == "EndpointSlice" ||
+				gvk.Group == "" && gvk.Version == "v1" && apiResource.Kind == "Endpoints" {
 				continue
 			}
 
 			rs, err := k.Dynamic.Resource(schema.GroupVersionResource{
 				Group:    gvk.Group,
 				Version:  gvk.Version,
-				Resource: strings.ToLower(apiResource.Kind) + "s",
+				Resource: apiResource.Name,
 			}).List(context.Background(), metav1.ListOptions{
 				LabelSelector: "cyclops.module=" + name,
 			})
@@ -116,14 +116,8 @@ func (k *KubernetesClient) GetResourcesForModule(name string) ([]dto.Resource, e
 
 func (k *KubernetesClient) GetDeletedResources(
 	resources []dto.Resource,
-	module cyclopsv1alpha1.Module,
-	template *models.Template,
+	manifest string,
 ) ([]dto.Resource, error) {
-	manifest, err := template2.HelmTemplate(module, template)
-	if err != nil {
-		return nil, err
-	}
-
 	resourcesFromTemplate := make(map[string][]dto.Resource, 0)
 
 	for _, s := range strings.Split(manifest, "---") {
@@ -236,6 +230,21 @@ func (k *KubernetesClient) GetModuleResourcesHealth(name string) (string, error)
 	}
 
 	return statusHealthy, nil
+}
+
+func (k *KubernetesClient) GVKtoAPIResourceName(gv schema.GroupVersion, kind string) (string, error) {
+	apiResources, err := k.clientset.Discovery().ServerResourcesForGroupVersion(gv.String())
+	if err != nil {
+		return "", err
+	}
+
+	for _, resource := range apiResources.APIResources {
+		if resource.Kind == kind && len(resource.Name) != 0 {
+			return resource.Name, nil
+		}
+	}
+
+	return "", errors.Errorf("could not find api-resource for groupVersion: %v and kind: %v", gv.String(), kind)
 }
 
 func (k *KubernetesClient) getResourceStatus(o unstructured.Unstructured) (string, error) {

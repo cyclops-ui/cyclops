@@ -25,7 +25,7 @@ import {
   PlusOutlined,
   InfoCircleOutlined,
 } from "@ant-design/icons";
-import { fileExtension, flattenObjectKeys } from "../../utils/form";
+import { fileExtension, findMaps, flattenObjectKeys } from "../../utils/form";
 import "./custom.css";
 
 import YAML from "yaml";
@@ -77,6 +77,7 @@ const NewModule = () => {
   });
 
   const [initialValues, setInitialValues] = useState({});
+  const [initialValuesRaw, setInitialValuesRaw] = useState({});
 
   const [error, setError] = useState({
     message: "",
@@ -181,70 +182,10 @@ const NewModule = () => {
     return out;
   };
 
-  const findMaps = (fields: any[], values: any): any => {
-    let out: any = {};
-    fields.forEach((field) => {
-      let valuesList: any[] = [];
-      switch (field.type) {
-        case "string":
-          out[field.name] = values[field.name];
-          break;
-        case "number":
-          out[field.name] = values[field.name];
-          break;
-        case "boolean":
-          out[field.name] = values[field.name];
-          break;
-        case "object":
-          if (values[field.name]) {
-            out[field.name] = findMaps(field.properties, values[field.name]);
-          }
-          break;
-        case "array":
-          valuesList = values[field.name] as any[];
-
-          if (!valuesList) {
-            out[field.name] = [];
-            break;
-          }
-
-          let objectArr: any[] = [];
-          valuesList.forEach((valueFromList) => {
-            switch (field.items.type) {
-              case "string":
-                objectArr.push(valueFromList);
-                break;
-              case "object":
-                objectArr.push(findMaps(field.items.properties, valueFromList));
-                break;
-            }
-          });
-          out[field.name] = objectArr;
-          break;
-        case "map":
-          valuesList = values[field.name] as any[];
-
-          if (!valuesList) {
-            out[field.name] = {};
-            break;
-          }
-
-          let object: any = {};
-          valuesList.forEach((valueFromList) => {
-            object[valueFromList.key] = valueFromList.value;
-          });
-          out[field.name] = object;
-          break;
-      }
-    });
-
-    return out;
-  };
-
   const handleSubmit = (values: any) => {
     const moduleName = values["cyclops_module_name"];
 
-    values = findMaps(config.root.properties, values);
+    values = findMaps(config.root.properties, values, initialValuesRaw);
 
     axios
       .post(`/api/modules/new`, {
@@ -292,6 +233,7 @@ const NewModule = () => {
       dependencies: [],
     });
     form.setFieldsValue({});
+    setInitialValuesRaw({});
     setInitialValues({});
 
     setActiveCollapses(new Map());
@@ -364,6 +306,7 @@ const NewModule = () => {
           res.data,
         );
 
+        setInitialValuesRaw(res.data);
         setInitialValues(initialValuesMapped);
         form.setFieldsValue(initialValuesMapped);
 
