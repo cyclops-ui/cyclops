@@ -553,8 +553,6 @@ const NewModule = () => {
   function getValueFromNestedObject(obj: any, keys: string[]): any {
     let currentObj = obj;
 
-    console.log("printam keyeve", keys);
-
     for (const key of keys) {
       if (
         typeof currentObj === "object" &&
@@ -682,9 +680,6 @@ const NewModule = () => {
             k.push(item);
           }
           k.push(fieldName);
-
-          console.log("parent", parentFieldID);
-          console.log("uniqueFieldName", uniqueFieldName);
 
           let checked =
             getValueFromNestedObject(initialValues, k) === true
