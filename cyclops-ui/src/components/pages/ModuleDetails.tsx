@@ -16,6 +16,7 @@ import "ace-builds/src-noconflict/ace";
 import { useParams } from "react-router-dom";
 import axios from "axios";
 import {
+  CaretRightOutlined,
   CheckCircleTwoTone,
   CloseSquareTwoTone,
   LinkOutlined,
@@ -245,9 +246,21 @@ const ModuleDetails = () => {
       activeCollapses.get(fieldName) &&
       activeCollapses.get(fieldName) === true
     ) {
-      return "#fadab3";
-    } else {
       return "#fae8d4";
+      // return "#fe8801";
+    } else {
+      return "#F3F3F3";
+    }
+  };
+
+  const getCollapseWidth = (fieldName: string) => {
+    if (
+      activeCollapses.get(fieldName) &&
+      activeCollapses.get(fieldName) === true
+    ) {
+      return "250%";
+    } else {
+      return "100%";
     }
   };
 
@@ -369,9 +382,14 @@ const ModuleDetails = () => {
       <Row gutter={[0, 8]}>
         <Col
           span={15}
-          style={{ display: "flex", justifyContent: "flex-start" }}
+          style={{
+            display: "flex",
+            justifyContent: "flex-start",
+          }}
         >
-          {resource.name} {resource.kind} {statusIcon}
+          <h3 style={{ margin: "0" }}>
+            {resource.name} {resource.kind} {statusIcon}
+          </h3>
         </Col>
         <Col span={9} style={{ display: "flex", justifyContent: "flex-end" }}>
           {deletedIcon}
@@ -476,9 +494,14 @@ const ModuleDetails = () => {
         header={genExtra(resource, resource.status)}
         key={collapseKey}
         style={{
+          width: getCollapseWidth(collapseKey),
           backgroundColor: getCollapseColor(collapseKey),
-          borderTopLeftRadius: index == 0 ? "7px" : "0px",
-          borderTopRightRadius: index == 0 ? "7px" : "0px",
+          marginBottom: "10px",
+          // border: "none"
+          borderRadius: "10px",
+          border: "1px solid #E3E3E3",
+          // borderTopLeftRadius: index == 0 ? "7px" : "0px",
+          // borderTopRightRadius: index == 0 ? "7px" : "0px",
         }}
       >
         <Row>
@@ -525,6 +548,14 @@ const ModuleDetails = () => {
     if (loadResources) {
       return (
         <Collapse
+          expandIcon={({ isActive }) => (
+            <CaretRightOutlined rotate={isActive ? 90 : 0} />
+          )}
+          style={{
+            width: "40%",
+            border: "none",
+            backgroundColor: "#FFF",
+          }}
           onChange={function (values: string | string[]) {
             let m = new Map();
             for (let value of values) {
