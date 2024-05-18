@@ -89,7 +89,7 @@ const NewModule = () => {
     useState(false);
 
   const [activeCollapses, setActiveCollapses] = useState(new Map());
-  const updateActiveCollapses = (k: string[] | string, v: any) => {
+  const updateActiveCollapses = (k: string[], v: any) => {
     let kk = new Array(k);
     setActiveCollapses(new Map(activeCollapses.set(kk.join(""), v)));
   };
@@ -504,7 +504,7 @@ const NewModule = () => {
 
   const arrayInnerField = (
     field: any,
-    parentFieldID: string,
+    parentFieldID: string[],
     parent: string,
     level: number,
     arrayField: any,
@@ -570,7 +570,7 @@ const NewModule = () => {
 
   function mapFields(
     fields: any[],
-    parentFieldID: string | string[],
+    parentFieldID: string[],
     parent: string,
     level: number,
     arrayIndexLifetime: number,
@@ -588,10 +588,10 @@ const NewModule = () => {
 
       let formItemName = arrayField ? [arrayField.name, fieldName] : fieldName;
 
-      let uniqueFieldName: any =
+      let uniqueFieldName: string[] =
         parentFieldID.length === 0
-          ? field.name
-          : parentFieldID.concat(".").concat(field.name);
+          ? [field.name]
+          : [...parentFieldID, field.name];
 
       let isRequired = false;
 
@@ -705,10 +705,6 @@ const NewModule = () => {
           );
           return;
         case "object":
-          uniqueFieldName =
-            parentFieldID.length === 0
-              ? field.name
-              : parentFieldID.concat(".").concat(field.name);
           var header = <Row>{field.name}</Row>;
 
           if (field.description && field.description.length !== 0) {
@@ -762,7 +758,11 @@ const NewModule = () => {
                 <Collapse.Panel
                   key={fieldName}
                   header={header}
-                  style={{ backgroundColor: getCollapseColor(uniqueFieldName) }}
+                  style={{
+                    backgroundColor: getCollapseColor(
+                      uniqueFieldName.toString(),
+                    ),
+                  }}
                   forceRender={true}
                 >
                   <Form.List name={formItemName}>
@@ -770,7 +770,7 @@ const NewModule = () => {
                       <>
                         {mapFields(
                           field.properties,
-                          [fieldName],
+                          uniqueFieldName,
                           "",
                           level + 1,
                           arrayIndexLifetime,
@@ -786,10 +786,6 @@ const NewModule = () => {
           );
           return;
         case "array":
-          uniqueFieldName =
-            parentFieldID.length === 0
-              ? field.name
-              : parentFieldID.concat(".").concat(field.name);
           var header = <Row>{field.name}</Row>;
 
           if (field.description && field.description.length !== 0) {
@@ -843,7 +839,11 @@ const NewModule = () => {
                 <Collapse.Panel
                   key={fieldName}
                   header={header}
-                  style={{ backgroundColor: getCollapseColor(uniqueFieldName) }}
+                  style={{
+                    backgroundColor: getCollapseColor(
+                      uniqueFieldName.toString(),
+                    ),
+                  }}
                   forceRender={true}
                 >
                   <Form.List name={formItemName}>
@@ -853,7 +853,7 @@ const NewModule = () => {
                           <Col key={arrField.key}>
                             {arrayInnerField(
                               field,
-                              uniqueFieldName.concat(".").concat(arrField.name),
+                              [...uniqueFieldName, String(arrField.name)],
                               "",
                               level + 1,
                               arrField,
