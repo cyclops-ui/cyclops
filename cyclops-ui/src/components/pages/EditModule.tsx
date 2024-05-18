@@ -108,7 +108,7 @@ const EditModule = () => {
   const [loadTemplate, setLoadTemplate] = useState(false);
 
   const [activeCollapses, setActiveCollapses] = useState(new Map());
-  const updateActiveCollapses = (k: string[] | string, v: any) => {
+  const updateActiveCollapses = (k: string[], v: any) => {
     let kk = new Array(k);
     setActiveCollapses(new Map(activeCollapses.set(kk.join(""), v)));
   };
@@ -457,7 +457,7 @@ const EditModule = () => {
 
   const arrayInnerField = (
     field: any,
-    parentFieldID: string,
+    parentFieldID: string[],
     parent: string,
     level: number,
     arrayField: any,
@@ -523,7 +523,7 @@ const EditModule = () => {
 
   function mapFields(
     fields: any[],
-    parentFieldID: string | string[],
+    parentFieldID: string[],
     parent: string,
     level: number,
     arrayIndexLifetime: number,
@@ -536,10 +536,10 @@ const EditModule = () => {
 
       let formItemName = arrayField ? [arrayField.name, fieldName] : fieldName;
 
-      let uniqueFieldName: any =
+      let uniqueFieldName: string[] =
         parentFieldID.length === 0
-          ? field.name
-          : parentFieldID.concat(".").concat(field.name);
+          ? [field.name]
+          : [...parentFieldID, field.name];
 
       let isRequired = false;
 
@@ -655,10 +655,6 @@ const EditModule = () => {
           );
           return;
         case "object":
-          uniqueFieldName =
-            parentFieldID.length === 0
-              ? field.name
-              : parentFieldID.concat(".").concat(field.name);
           var header = <Row>{field.name}</Row>;
 
           if (field.description && field.description.length !== 0) {
@@ -712,7 +708,11 @@ const EditModule = () => {
                 <Collapse.Panel
                   key={fieldName}
                   header={header}
-                  style={{ backgroundColor: getCollapseColor(uniqueFieldName) }}
+                  style={{
+                    backgroundColor: getCollapseColor(
+                      uniqueFieldName.toString(),
+                    ),
+                  }}
                   forceRender={true}
                 >
                   <Form.List name={formItemName}>
@@ -720,7 +720,7 @@ const EditModule = () => {
                       <>
                         {mapFields(
                           field.properties,
-                          [fieldName],
+                          uniqueFieldName,
                           "",
                           level + 1,
                           arrayIndexLifetime,
@@ -736,10 +736,6 @@ const EditModule = () => {
           );
           return;
         case "array":
-          uniqueFieldName =
-            parentFieldID.length === 0
-              ? field.name
-              : parentFieldID.concat(".").concat(field.name);
           var header = <Row>{field.name}</Row>;
 
           if (field.description && field.description.length !== 0) {
@@ -793,7 +789,11 @@ const EditModule = () => {
                 <Collapse.Panel
                   key={fieldName}
                   header={header}
-                  style={{ backgroundColor: getCollapseColor(uniqueFieldName) }}
+                  style={{
+                    backgroundColor: getCollapseColor(
+                      uniqueFieldName.toString(),
+                    ),
+                  }}
                   forceRender={true}
                 >
                   <Form.List name={formItemName}>
@@ -803,7 +803,7 @@ const EditModule = () => {
                           <Col key={arrField.key}>
                             {arrayInnerField(
                               field,
-                              uniqueFieldName.concat(".").concat(arrField.name),
+                              [...uniqueFieldName, String(arrField.name)],
                               "",
                               level + 1,
                               arrField,
@@ -1067,7 +1067,7 @@ const EditModule = () => {
             {formLoading()}
             {mapFields(
               config.root.properties,
-              "",
+              [],
               "",
               0,
               0,
