@@ -705,10 +705,6 @@ const NewModule = () => {
           );
           return;
         case "object":
-          // uniqueFieldName =
-          //   parentFieldID.length === 0
-          //     ? field.name
-          //     : parentFieldID.concat(".").concat(field.name);
           var header = <Row>{field.name}</Row>;
 
           if (field.description && field.description.length !== 0) {
@@ -790,10 +786,6 @@ const NewModule = () => {
           );
           return;
         case "array":
-          // uniqueFieldName =
-          //   parentFieldID.length === 0
-          //     ? field.name
-          //     : parentFieldID.concat(".").concat(field.name);
           var header = <Row>{field.name}</Row>;
 
           if (field.description && field.description.length !== 0) {
