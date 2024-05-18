@@ -465,8 +465,6 @@ const EditModule = () => {
           ? [field.name]
           : [...parentFieldID, field.name];
 
-      console.log(uniqueFieldName.toString());
-
       let isRequired = false;
 
       if (required) {
