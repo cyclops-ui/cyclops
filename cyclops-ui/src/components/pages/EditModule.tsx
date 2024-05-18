@@ -905,7 +905,7 @@ const EditModule = () => {
       <div>
         {mapFields(
           config.root.properties,
-          "",
+          [],
           "",
           0,
           0,
