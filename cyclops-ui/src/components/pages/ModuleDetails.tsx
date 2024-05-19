@@ -2,11 +2,13 @@ import React, { useEffect, useState } from "react";
 import {
   Alert,
   Button,
+  Checkbox,
   Col,
   Collapse,
   Divider,
   Input,
   Modal,
+  Popover,
   Row,
   Spin,
   Tooltip,
@@ -19,7 +21,9 @@ import {
   CaretRightOutlined,
   CheckCircleTwoTone,
   CloseSquareTwoTone,
+  FilterFilled,
   LinkOutlined,
+  SearchOutlined,
   WarningTwoTone,
 } from "@ant-design/icons";
 import Link from "antd/lib/typography/Link";
@@ -32,6 +36,7 @@ import StatefulSet from "../k8s-resources/StatefulSet";
 import Pod from "../k8s-resources/Pod";
 import Service from "../k8s-resources/Service";
 import ConfigMap from "../k8s-resources/ConfigMap";
+import { gvkString } from "../../utils/k8s/gvk";
 const languages = [
   "javascript",
   "java",
@@ -119,6 +124,8 @@ const ModuleDetails = () => {
     name: "",
     namespace: "",
   });
+
+  const [resourceFilter, setResourceFilter] = useState<string[]>([]);
 
   const [activeCollapses, setActiveCollapses] = useState(new Map());
 
@@ -246,7 +253,8 @@ const ModuleDetails = () => {
       activeCollapses.get(fieldName) &&
       activeCollapses.get(fieldName) === true
     ) {
-      return "#fae8d4";
+      return "#E3E3E3";
+      // return "#fae8d4";
       // return "#fe8801";
     } else {
       return "#F3F3F3";
@@ -398,6 +406,24 @@ const ModuleDetails = () => {
     );
   };
 
+  const getResourceDisplay = (
+    group: string,
+    version: string,
+    kind: string,
+  ): string => {
+    if (resourceFilter.length === 0) {
+      return "";
+    }
+
+    for (let filter of resourceFilter) {
+      if (gvkString(group, version, kind) === filter) {
+        return "";
+      }
+    }
+
+    return "none";
+  };
+
   resources.forEach((resource: any, index) => {
     let collapseKey =
       resource.kind + "/" + resource.namespace + "/" + resource.name;
@@ -494,9 +520,14 @@ const ModuleDetails = () => {
         header={genExtra(resource, resource.status)}
         key={collapseKey}
         style={{
+          display: getResourceDisplay(
+            resource.group,
+            resource.version,
+            resource.kind,
+          ),
           width: getCollapseWidth(collapseKey),
           backgroundColor: getCollapseColor(collapseKey),
-          marginBottom: "10px",
+          marginBottom: "12px",
           // border: "none"
           borderRadius: "10px",
           border: "1px solid #E3E3E3",
@@ -700,6 +731,42 @@ const ModuleDetails = () => {
       });
   };
 
+  const onResourceFilterUpdate = (kinds: string[]) => {
+    setResourceFilter(kinds);
+  };
+
+  const resourceFilterOptions = () => {
+    let uniqueGVKs = new Set<string>();
+    resources.forEach(function (resource: any) {
+      uniqueGVKs.add(
+        gvkString(resource.group, resource.version, resource.kind),
+      );
+    });
+
+    let options: any[] = [];
+    uniqueGVKs.forEach(function (gvk: string) {
+      options.push(
+        <Row>
+          <Checkbox value={gvk}>{gvk}</Checkbox>
+        </Row>,
+      );
+    });
+
+    return options;
+  };
+
+  const resourceFilterPopover = () => {
+    return (
+      <Checkbox.Group
+        style={{ display: "block" }}
+        onChange={onResourceFilterUpdate}
+        value={resourceFilter}
+      >
+        {resourceFilterOptions()}
+      </Checkbox.Group>
+    );
+  };
+
   return (
     <div>
       {error.message.length !== 0 && (
@@ -767,7 +834,16 @@ const ModuleDetails = () => {
         orientationMargin="0"
         orientation={"left"}
       >
-        Resources
+        {"Resources  "}
+        <Popover
+          content={resourceFilterPopover()}
+          placement="rightBottom"
+          title="Filter resources"
+          trigger="click"
+        >
+          {/*<Button>Click me</Button>*/}
+          <SearchOutlined />
+        </Popover>
       </Divider>
       {resourcesLoading()}
       <Modal
