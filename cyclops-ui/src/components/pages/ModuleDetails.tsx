@@ -736,6 +736,10 @@ const ModuleDetails = () => {
   };
 
   const resourceFilterOptions = () => {
+    if (!loadResources) {
+      return <Spin />;
+    }
+
     let uniqueGVKs = new Set<string>();
     resources.forEach(function (resource: any) {
       uniqueGVKs.add(
