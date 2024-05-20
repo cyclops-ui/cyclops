@@ -42,6 +42,10 @@ import "ace-builds/src-noconflict/snippets/yaml";
 import { numberInputValidators } from "../../utils/validators/number";
 import { stringInputValidators } from "../../utils/validators/string";
 import { Option } from "antd/es/mentions";
+import {
+  FeedbackError,
+  FormValidationErrors,
+} from "../errors/FormValidationErrors";
 
 const { Title } = Typography;
 const layout = {
@@ -55,11 +59,6 @@ interface templateStoreOption {
     path: string;
     version: string;
   };
-}
-
-interface feedbackError {
-  key: string;
-  errors: string[];
 }
 
 const NewModule = () => {
@@ -112,26 +111,10 @@ const NewModule = () => {
   const history = useNavigate();
 
   const [notificationApi, contextHolder] = notification.useNotification();
-  const openNotification = (errors: feedbackError[]) => {
-    let feedbackErrors: React.JSX.Element[] = [];
-    errors.forEach((err: feedbackError) => {
-      let errorsForKey: React.JSX.Element[] = [];
-      for (let errorForKey of err.errors) {
-        errorsForKey.push(<Row>{errorForKey}</Row>);
-      }
-
-      feedbackErrors.push(
-        <div>
-          <Row style={{ fontWeight: "bold" }}>{err.key}</Row>
-          <Row>{errorsForKey}</Row>
-          <Divider style={{ margin: "10px 0px" }} />
-        </div>,
-      );
-    });
-
+  const openNotification = (errors: FeedbackError[]) => {
     notificationApi.error({
       message: "Submit failed!",
-      description: <div>{feedbackErrors}</div>,
+      description: <FormValidationErrors errors={errors} />,
       placement: "topRight",
       duration: 0,
     });
@@ -1061,7 +1044,7 @@ const NewModule = () => {
   };
 
   const onFinishFailed = (errors: any) => {
-    let errorMessages: feedbackError[] = [];
+    let errorMessages: FeedbackError[] = [];
     errors.errorFields.forEach(function (error: any) {
       let key = error.name.join(".");
       if (error.name.length === 1 && error.name[0] === "cyclops_module_name") {
