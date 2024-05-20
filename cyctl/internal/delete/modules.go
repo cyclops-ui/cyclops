@@ -7,15 +7,18 @@ import (
 )
 
 // DeleteModules deletes a specified module from the Cyclops API.
-func DeleteModules(clientset *client.CyclopsV1Alpha1Client, moduleName string) {
-	if len(moduleName) > 0 {
+func DeleteModules(clientset *client.CyclopsV1Alpha1Client, moduleNames []string) {
+	if len(moduleNames) == 0 {
+		fmt.Println("Error: module names cannot be empty")
+		return
+	}
+
+	for _, moduleName := range moduleNames {
 		err := clientset.Modules("cyclops").Delete(moduleName)
 		if err != nil {
-			fmt.Printf("Error deleting the module: %v\n", err)
-			return
+			fmt.Printf("Error deleting the module '%v': %v\n", moduleName, err)
+		} else {
+			fmt.Printf("Module '%v' deleted successfully.\n", moduleName)
 		}
-		fmt.Printf("module '%v' deleted", moduleName)
-	} else {
-		fmt.Println("Error: module name cannot be empty")
 	}
 }
