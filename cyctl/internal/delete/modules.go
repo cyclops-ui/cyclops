@@ -16,7 +16,7 @@ func DeleteModules(clientset *client.CyclopsV1Alpha1Client, moduleNames []string
 	for _, moduleName := range moduleNames {
 		err := clientset.Modules("cyclops").Delete(moduleName)
 		if err != nil {
-			fmt.Printf("Error deleting the module '%v': %v\n", moduleName, err)
+			fmt.Printf("Error from server (NotFound): %v\n", err)
 		} else {
 			fmt.Printf("Module '%v' deleted successfully.\n", moduleName)
 		}
