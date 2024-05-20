@@ -21,7 +21,6 @@ import {
   CaretRightOutlined,
   CheckCircleTwoTone,
   CloseSquareTwoTone,
-  FilterFilled,
   LinkOutlined,
   SearchOutlined,
   WarningTwoTone,
