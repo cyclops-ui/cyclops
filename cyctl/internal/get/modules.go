@@ -16,16 +16,18 @@ func ListModules(clientset *client.CyclopsV1Alpha1Client) {
 		return
 	}
 
-	longestName := 0
+	longestName := 20 // minimum column width
 	for _, module := range modules {
 		if len(module.Name) > longestName {
 			longestName = len(module.Name)
 		}
 	}
 
-	fmt.Println("NAME" + strings.Repeat(" ", longestName-4) + " AGE")
+	headerSpacing := max(0, longestName-4)
+	fmt.Println("NAME" + strings.Repeat(" ", headerSpacing) + " AGE")
 	for _, module := range modules {
 		age := time.Since(module.CreationTimestamp.Time).Round(time.Second)
-		fmt.Printf("%s"+strings.Repeat(" ", longestName-len(module.Name))+" %s\n", module.Name, age.String())
+		nameSpacing := max(0, longestName-len(module.Name))
+		fmt.Printf("%s"+strings.Repeat(" ", nameSpacing)+" %s\n", module.Name, age.String())
 	}
 }
