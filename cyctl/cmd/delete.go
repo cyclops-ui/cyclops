@@ -18,6 +18,10 @@ var deleteCMD = &cobra.Command{
 		switch deleteCommand {
 		case "modules", "module":
 			delete.DeleteModules(kubeconfig.Moduleset, resourceName)
+		case "templates", "template":
+			delete.DeleteTemplates(kubeconfig.Moduleset, resourceName)
+		case "templateauthrules", "templateauthrule":
+			delete.DeleteTemplateAuthRule(kubeconfig.Moduleset, resourceName)
 		default:
 			fmt.Println("Give the correct resource name")
 		}

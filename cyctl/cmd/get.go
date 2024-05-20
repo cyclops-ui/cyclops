@@ -16,8 +16,12 @@ var getCMD = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		getCommand := args[0]
 		switch getCommand {
-		case "modules":
+		case "modules", "module":
 			get.ListModules(kubeconfig.Moduleset)
+		case "templates", "template":
+			get.ListTemplateStore(kubeconfig.Moduleset)
+		case "templateauthrules", "templateauthrule":
+			get.ListTemplateAuthRules(kubeconfig.Moduleset)
 		default:
 			fmt.Println("Give the correct resource name")
 		}
