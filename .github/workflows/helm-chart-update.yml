@@ -4,6 +4,8 @@ on:
   push:
     paths:
       - 'install/chart/**'
+    branches:
+      - main
 
 jobs:
   test:
