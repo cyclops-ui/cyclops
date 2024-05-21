@@ -615,13 +615,18 @@ func (k *KubernetesClient) mapSecret(group, version, kind, name, namespace strin
 		return nil, err
 	}
 
+	dataKeys := make([]string, 0, len(secret.Data))
+	for key := range secret.Data {
+		dataKeys = append(dataKeys, key)
+	}
+
 	return &dto.Secret{
 		Group:     group,
 		Version:   version,
 		Kind:      kind,
 		Name:      name,
 		Namespace: namespace,
-		Data:      secret.Data,
+		DataKeys:  dataKeys,
 		Type:      string(secret.Type),
 	}, nil
 }

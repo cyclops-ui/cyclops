@@ -292,14 +292,14 @@ func (p *PersistentVolumeClaim) SetDeleted(deleted bool) {
 }
 
 type Secret struct {
-	Group     string            `json:"group"`
-	Version   string            `json:"version"`
-	Kind      string            `json:"kind"`
-	Name      string            `json:"name"`
-	Namespace string            `json:"namespace"`
-	Type      string            `json:"type"`
-	Data      map[string][]byte `json:"data"`
-	Deleted   bool              `json:"deleted"`
+	Group     string   `json:"group"`
+	Version   string   `json:"version"`
+	Kind      string   `json:"kind"`
+	Name      string   `json:"name"`
+	Namespace string   `json:"namespace"`
+	Type      string   `json:"type"`
+	DataKeys  []string `json:"dataKeys"`
+	Deleted   bool     `json:"deleted"`
 }
 
 func (s *Secret) GetGroupVersionKind() string {
@@ -330,8 +330,8 @@ func (s *Secret) GetType() string {
 	return s.Type
 }
 
-func (s *Secret) GetData() map[string][]byte {
-	return s.Data
+func (s *Secret) GetDataKeys() []string {
+	return s.DataKeys
 }
 
 func (s *Secret) GetDeleted() bool {
