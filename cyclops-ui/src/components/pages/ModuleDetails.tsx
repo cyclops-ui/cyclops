@@ -253,8 +253,6 @@ const ModuleDetails = () => {
       activeCollapses.get(fieldName) === true
     ) {
       return "#E3E3E3";
-      // return "#fae8d4";
-      // return "#fe8801";
     } else {
       return "#F3F3F3";
     }
@@ -527,11 +525,8 @@ const ModuleDetails = () => {
           width: getCollapseWidth(collapseKey),
           backgroundColor: getCollapseColor(collapseKey),
           marginBottom: "12px",
-          // border: "none"
           borderRadius: "10px",
           border: "1px solid #E3E3E3",
-          // borderTopLeftRadius: index == 0 ? "7px" : "0px",
-          // borderTopRightRadius: index == 0 ? "7px" : "0px",
         }}
       >
         <Row>
