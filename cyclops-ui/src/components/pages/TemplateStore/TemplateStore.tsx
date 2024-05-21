@@ -172,21 +172,6 @@ const TemplateStore = () => {
 
   return (
     <div>
-      {error.message.length !== 0 && (
-        <Alert
-          message={error.message}
-          description={error.description}
-          type="error"
-          closable
-          afterClose={() => {
-            setError({
-              message: "",
-              description: "",
-            });
-          }}
-          style={{ marginBottom: "20px" }}
-        />
-      )}
       <Row gutter={[40, 0]}>
         <Col span={18}>
           <Title level={2}>Templates: {templates.length}</Title>
