@@ -7,6 +7,8 @@ on:
   push:
     paths:
       - 'cyclops-ctrl/**'
+    branches:
+      - main
 
 jobs:
   test:
