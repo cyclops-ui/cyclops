@@ -14,9 +14,9 @@ import {
   Switch,
   Typography,
   Tooltip,
-  message,
   Modal,
   Spin,
+  notification,
 } from "antd";
 import axios from "axios";
 import { useNavigate } from "react-router";
@@ -42,6 +42,10 @@ import "ace-builds/src-noconflict/snippets/yaml";
 import { numberInputValidators } from "../../utils/validators/number";
 import { stringInputValidators } from "../../utils/validators/string";
 import { Option } from "antd/es/mentions";
+import {
+  FeedbackError,
+  FormValidationErrors,
+} from "../errors/FormValidationErrors";
 
 const { Title } = Typography;
 const layout = {
@@ -105,6 +109,16 @@ const NewModule = () => {
   const [templateStore, setTemplateStore] = useState<templateStoreOption[]>([]);
 
   const history = useNavigate();
+
+  const [notificationApi, contextHolder] = notification.useNotification();
+  const openNotification = (errors: FeedbackError[]) => {
+    notificationApi.error({
+      message: "Submit failed!",
+      description: <FormValidationErrors errors={errors} />,
+      placement: "topRight",
+      duration: 0,
+    });
+  };
 
   const [form] = Form.useForm();
 
@@ -1029,8 +1043,21 @@ const NewModule = () => {
       });
   };
 
-  const onFinishFailed = () => {
-    message.error("Submit failed!");
+  const onFinishFailed = (errors: any) => {
+    let errorMessages: FeedbackError[] = [];
+    errors.errorFields.forEach(function (error: any) {
+      let key = error.name.join(".");
+      if (error.name.length === 1 && error.name[0] === "cyclops_module_name") {
+        key = "Module name";
+      }
+
+      errorMessages.push({
+        key: key,
+        errors: error.errors,
+      });
+    });
+
+    openNotification(errorMessages);
   };
 
   return (
@@ -1050,6 +1077,7 @@ const NewModule = () => {
           style={{ marginBottom: "20px" }}
         />
       )}
+      {contextHolder}
       <Row gutter={[40, 0]}>
         <Col span={23}>
           <Title style={{ textAlign: "center" }} level={2}>

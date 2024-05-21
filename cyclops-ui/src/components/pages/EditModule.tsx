@@ -6,11 +6,9 @@ import {
   Collapse,
   Divider,
   Form,
-  FormListFieldData,
   Input,
   InputNumber,
-  message,
-  Modal,
+  notification,
   Row,
   Select,
   Space,
@@ -23,10 +21,8 @@ import axios from "axios";
 import { useNavigate } from "react-router";
 import {
   InfoCircleOutlined,
-  LinkOutlined,
   MinusCircleOutlined,
   PlusOutlined,
-  WarningFilled,
 } from "@ant-design/icons";
 
 import AceEditor from "react-ace";
@@ -44,6 +40,10 @@ import { fileExtension, findMaps, flattenObjectKeys } from "../../utils/form";
 import "./custom.css";
 import { numberInputValidators } from "../../utils/validators/number";
 import { stringInputValidators } from "../../utils/validators/string";
+import {
+  FeedbackError,
+  FormValidationErrors,
+} from "../errors/FormValidationErrors";
 
 const { TextArea } = Input;
 
@@ -82,6 +82,16 @@ const EditModule = () => {
     message: "",
     description: "",
   });
+
+  const [notificationApi, contextHolder] = notification.useNotification();
+  const openNotification = (errors: FeedbackError[]) => {
+    notificationApi.error({
+      message: "Submit failed!",
+      description: <FormValidationErrors errors={errors} />,
+      placement: "topRight",
+      duration: 0,
+    });
+  };
 
   const [loadValues, setLoadValues] = useState(false);
   const [loadTemplate, setLoadTemplate] = useState(false);
@@ -826,8 +836,16 @@ const EditModule = () => {
     }
   };
 
-  const onFinishFailed = () => {
-    message.error("Submit failed!");
+  const onFinishFailed = (errors: any) => {
+    let errorMessages: FeedbackError[] = [];
+    errors.errorFields.forEach(function (error: any) {
+      errorMessages.push({
+        key: error.name.join("."),
+        errors: error.errors,
+      });
+    });
+
+    openNotification(errorMessages);
   };
 
   return (
@@ -847,6 +865,7 @@ const EditModule = () => {
           style={{ marginBottom: "20px" }}
         />
       )}
+      {contextHolder}
       <Row gutter={[40, 0]}>
         <Col span={23}>
           <Title style={{ textAlign: "center" }} level={2}>
