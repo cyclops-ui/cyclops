@@ -249,14 +249,14 @@ func (s *StatefulSet) SetDeleted(deleted bool) {
 }
 
 type PersistentVolumeClaim struct {
-	Group       string 							`json:"group"`
-	Version     string 							`json:"version"`
-	Kind        string 							`json:"kind"`
-	Name        string 							`json:"name"`
-	Namespace   string 							`json:"namespace"`
+	Group       string                          `json:"group"`
+	Version     string                          `json:"version"`
+	Kind        string                          `json:"kind"`
+	Name        string                          `json:"name"`
+	Namespace   string                          `json:"namespace"`
 	AccessModes []v1.PersistentVolumeAccessMode `json:"accessmodes"`
-	Size        string							`json:"size"`
-	Deleted   	bool   							`json:"deleted"`
+	Size        string                          `json:"size"`
+	Deleted     bool                            `json:"deleted"`
 }
 
 func (p *PersistentVolumeClaim) GetGroupVersionKind() string {
@@ -289,6 +289,57 @@ func (p *PersistentVolumeClaim) GetDeleted() bool {
 
 func (p *PersistentVolumeClaim) SetDeleted(deleted bool) {
 	p.Deleted = deleted
+}
+
+type Secret struct {
+	Group     string            `json:"group"`
+	Version   string            `json:"version"`
+	Kind      string            `json:"kind"`
+	Name      string            `json:"name"`
+	Namespace string            `json:"namespace"`
+	Type      string            `json:"type"`
+	Data      map[string][]byte `json:"data"`
+	Deleted   bool              `json:"deleted"`
+}
+
+func (s *Secret) GetGroupVersionKind() string {
+	return s.Group + "/" + s.Version + ", Kind=" + s.Kind
+}
+
+func (s *Secret) GetGroup() string {
+	return s.Group
+}
+
+func (s *Secret) GetVersion() string {
+	return s.Version
+}
+
+func (s *Secret) GetKind() string {
+	return s.Kind
+}
+
+func (s *Secret) GetName() string {
+	return s.Name
+}
+
+func (s *Secret) GetNamespace() string {
+	return s.Namespace
+}
+
+func (s *Secret) GetType() string {
+	return s.Type
+}
+
+func (s *Secret) GetData() map[string][]byte {
+	return s.Data
+}
+
+func (s *Secret) GetDeleted() bool {
+	return s.Deleted
+}
+
+func (s *Secret) SetDeleted(deleted bool) {
+	s.Deleted = deleted
 }
 
 type Other struct {
