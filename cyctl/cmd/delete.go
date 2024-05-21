@@ -10,7 +10,7 @@ import (
 
 var deleteCMD = &cobra.Command{
 	Use:   "delete",
-	Short: "This is the delete command",
+	Short: "Delete custom resources like modules, templates, and templateauthrules",
 	Long:  "This is the delete command",
 	Args:  cobra.MinimumNArgs(2),
 	Run: func(cmd *cobra.Command, args []string) {

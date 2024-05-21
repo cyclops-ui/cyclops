@@ -16,6 +16,11 @@ func ListModules(clientset *client.CyclopsV1Alpha1Client) {
 		return
 	}
 
+	if len(modules) == 0 {
+		fmt.Println("No modules found.")
+		return
+	}
+
 	longestName := 20 // minimum column width
 	for _, module := range modules {
 		if len(module.Name) > longestName {

@@ -16,6 +16,11 @@ func ListTemplateStore(clientset *client.CyclopsV1Alpha1Client) {
 		return
 	}
 
+	if len(templates) == 0 {
+		fmt.Println("No templatestore found.")
+		return
+	}
+
 	longestName := 20 // minimum column width
 	for _, template := range templates {
 		if len(template.Name) > longestName {

@@ -10,10 +10,16 @@ import (
 
 var getCMD = &cobra.Command{
 	Use:   "get",
-	Short: "This is the get command",
-	Long:  "This is the get command",
+	Short: "Retrieve custom resources like modules, templates, and templateauthrules",
+	Long:  "getLong",
 	Args:  cobra.ExactArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
+		if len(args) == 0 {
+			fmt.Println(cmd.Long)
+			_ = cmd.Usage()
+			return
+		}
+
 		getCommand := args[0]
 		switch getCommand {
 		case "modules", "module":
