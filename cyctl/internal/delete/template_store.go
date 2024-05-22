@@ -4,10 +4,21 @@ import (
 	"fmt"
 
 	"github.com/cyclops-ui/cyclops/cyclops-ctrl/api/v1alpha1/client"
+	"github.com/cyclops-ui/cycops-cyctl/internal/kubeconfig"
+	"github.com/spf13/cobra"
+)
+
+var (
+	deleteTemplateExample = ` 
+	# Delete a single module
+	cyctl delete modules module1
+ 
+	# Delete multiple modules
+	cyctl delete modules module1 module2 module3`
 )
 
 // DeleteTemplates deletes a specified template from the TemplateStore Custom Resource.
-func DeleteTemplates(clientset *client.CyclopsV1Alpha1Client, templateNames []string) {
+func deleteTemplate(clientset *client.CyclopsV1Alpha1Client, templateNames []string) {
 	if len(templateNames) == 0 {
 		fmt.Println("Error: template names cannot be empty")
 		return
@@ -22,3 +33,17 @@ func DeleteTemplates(clientset *client.CyclopsV1Alpha1Client, templateNames []st
 		}
 	}
 }
+
+var (
+	DeleteTemplate = &cobra.Command{
+		Use:     "templates [template_name]",
+		Short:   "Delete one or more templates",
+		Long:    "The delete templates command allows you to remove one or more templates from the Cyclops API.",
+		Example: deleteTemplateExample,
+		Aliases: []string{"template"},
+		Args:    cobra.MinimumNArgs(1),
+		Run: func(cmd *cobra.Command, args []string) {
+			deleteTemplate(kubeconfig.Moduleset, args)
+		},
+	}
+)
