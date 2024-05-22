@@ -29,7 +29,7 @@ func deleteModules(clientset *client.CyclopsV1Alpha1Client, moduleNames []string
 		if err != nil {
 			fmt.Printf("Error from server (NotFound): %v\n", err)
 		} else {
-			fmt.Printf("Module '%v' deleted successfully.\n", moduleName)
+			fmt.Printf("Module %v deleted successfully.\n", moduleName)
 		}
 	}
 }
