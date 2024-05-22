@@ -29,7 +29,7 @@ func deleteTemplate(clientset *client.CyclopsV1Alpha1Client, templateNames []str
 		if err != nil {
 			fmt.Printf("Error from server (NotFound): %v\n", err)
 		} else {
-			fmt.Printf("Template '%v' deleted successfully.\n", templateName)
+			fmt.Printf("Template %v deleted successfully.\n", templateName)
 		}
 	}
 }

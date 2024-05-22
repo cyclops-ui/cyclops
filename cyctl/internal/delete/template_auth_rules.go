@@ -29,7 +29,7 @@ func deleteTemplateAuthRule(clientset *client.CyclopsV1Alpha1Client, templateAut
 		if err != nil {
 			fmt.Printf("Error from server (NotFound): %v\n", err)
 		} else {
-			fmt.Printf("TemplateAuthRule '%v' deleted successfully.\n", templateauthruleName)
+			fmt.Printf("TemplateAuthRule %v deleted successfully.\n", templateauthruleName)
 		}
 	}
 }
