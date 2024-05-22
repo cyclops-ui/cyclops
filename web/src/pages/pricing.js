@@ -1,99 +1,174 @@
-import React from "react";
 import Layout from "@theme/Layout";
-import { Card, Button, Input } from "antd";
+import { Card, Button, Typography } from "antd";
+import CalendlyWidget from "../components/CalendlyWidget";
+
+const { Title, Paragraph } = Typography;
 
 export default function Pricing() {
   return (
     <Layout>
       <div
         style={{
-          paddingLeft: "15vw",
-          paddingRight: "15vw",
-          minHeight: "75vh",
+          padding: "5vh 10vw",
+          minHeight: "70vh",
           display: "flex",
-          flex: "1 1 auto",
-          flexDirection: "row",
-          flexWrap: "wrap",
+          flexDirection: "column",
+          alignItems: "center",
           justifyContent: "center",
-          marginTop: "5vh",
+          backgroundColor: "#f0f2f5",
         }}
       >
-        <Card
-          title="We are Open Source !"
-          bordered={false}
+        <div
           style={{
-            minWidth: "40vh",
-            width: "40vh",
-            height: "60vh",
-            backgroundColor: "#F9FAFB",
-            margin: "25px",
-            padding: "30px",
             display: "flex",
-            flexDirection: "column",
-            fontSize: "1rem",
-            lineHeight: "1.5rem",
-            filter:
-              "drop-shadow(0 4px 3px rgba(0, 0, 0, 0.07)) drop-shadow(0 2px 2px rgba(0, 0, 0, 0.06))",
+            flexWrap: "wrap",
+            justifyContent: "center",
+            gap: "30px",
           }}
         >
-          <ul style={{ marginBottom: "20px" }}>
-            <li>free now and forever</li>
-            <li>host it yourself</li>
-            <li>show us your supirt by giving us star</li>
-          </ul>
-          <div
+          <Card
+            bordered={false}
             style={{
-              display: "flex",
-              justifyContent: "center",
-              alignItems: "flex-end", // Align the button to the bottom
-              flexGrow: 1, // Take all remaining space
-            }}
-          >
-            <Button href="../../docs/installation/install">
-              Quickstart Guide
-            </Button>
-          </div>
-        </Card>
-        <Card
-          title="Looking for something more ?"
-          bordered={false}
-          style={{
-            minWidth: "40vh",
-            width: "40vh",
-            height: "60vh",
-            backgroundColor: "#F9FAFB",
-            margin: "25px",
-            padding: "30px",
-            display: "flex",
-            flexDirection: "column",
-            fontSize: "1rem",
-            lineHeight: "1.5rem",
-            filter:
-              "drop-shadow(0 4px 3px rgba(0, 0, 0, 0.07)) drop-shadow(0 2px 2px rgba(0, 0, 0, 0.06))",
-          }}
-        >
-          <ul>
-            <li>Need onboarding?</li>
-            <li>Interested in Cross Cluster support?</li>
-            <li>RBAC?</li>
-          </ul>
-          <div
-            style={{
+              width: "350px",
+              padding: "20px",
+              backgroundColor: "#ffffff",
+              boxShadow: "0 4px 12px rgba(0, 0, 0, 0.1)",
+              borderRadius: "10px",
               display: "flex",
               flexDirection: "column",
-              justifyContent: "flex-end",
-              alignItems: "center",
-              flexGrow: 1,
+              textAlign: "center",
+              minHeight: "500px",
             }}
           >
-            <Input
-              type="email"
-              placeholder="Enter your email"
-              style={{ marginBottom: "20px" }}
-            />
-            <Button>Submit</Button>
-          </div>
-        </Card>
+            <Title
+              level={4}
+              style={{ fontStyle: "italic", fontSize: "1.5rem" }}
+            >
+              We are Open Source!
+            </Title>
+            <Paragraph style={{ fontSize: "1rem", flex: "1" }}>
+              <ul
+                style={{
+                  listStyleType: "circle",
+                  padding: 0,
+                  textAlign: "left",
+                  margin: 0,
+                }}
+              >
+                <li>Free now and forever</li>
+                <li>Host it yourself</li>
+              </ul>
+            </Paragraph>
+            <Button
+              href="../../docs/installation/install"
+              style={{
+                backgroundColor: "#fa8c16",
+                borderColor: "#fa8c16",
+                color: "#fff",
+                alignSelf: "center",
+                marginTop: "auto", // Ensure the button is at the bottom
+              }}
+            >
+              Quickstart Guide
+            </Button>
+          </Card>
+
+          <Card
+            bordered={false}
+            style={{
+              width: "350px",
+              padding: "20px",
+              backgroundColor: "#ffffff",
+              boxShadow: "0 4px 12px rgba(0, 0, 0, 0.1)",
+              borderRadius: "10px",
+              display: "flex",
+              flexDirection: "column",
+              textAlign: "center",
+              minHeight: "500px",
+            }}
+          >
+            <Title
+              level={4}
+              style={{ fontStyle: "italic", fontSize: "1.5rem" }}
+            >
+              Need onboarding?
+            </Title>
+            <Paragraph style={{ fontSize: "1rem", flex: "1" }}>
+              <span>We can help you get started with:</span>
+              <ul
+                style={{
+                  listStyleType: "circle",
+                  padding: 0,
+                  textAlign: "left",
+                  margin: 0,
+                }}
+              >
+                <li>Integrating Cyclops into your existing workflow</li>
+                <li>Creating custom templates for your use cases</li>
+                <li>Onboarding your developer teams</li>
+              </ul>
+            </Paragraph>
+            <div style={{ flexGrow: 1 }}></div> {/* Spacer */}
+            <div
+              style={{
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "center",
+                width: "100%",
+                marginTop: "auto",
+              }}
+            >
+              <CalendlyWidget />
+            </div>
+          </Card>
+
+          <Card
+            bordered={false}
+            style={{
+              width: "350px",
+              padding: "20px",
+              backgroundColor: "#ffffff",
+              boxShadow: "0 4px 12px rgba(0, 0, 0, 0.1)",
+              borderRadius: "10px",
+              display: "flex",
+              flexDirection: "column",
+              textAlign: "center",
+              minHeight: "500px",
+            }}
+          >
+            <Title
+              level={4}
+              style={{ fontStyle: "italic", fontSize: "1.5rem" }}
+            >
+              Looking for something more?
+            </Title>
+            <Paragraph style={{ fontSize: "1rem", flex: "1" }}>
+              <ul
+                style={{
+                  listStyleType: "circle",
+                  padding: 0,
+                  textAlign: "left",
+                  margin: 0,
+                }}
+              >
+                <li>Don't want to host it on your own?</li>
+                <li>Interested in additional features?</li>
+              </ul>
+            </Paragraph>
+            <div style={{ flexGrow: 1 }}></div> {/* Spacer */}
+            <div
+              style={{
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "center",
+                width: "100%",
+                marginTop: "auto",
+              }}
+            >
+              <CalendlyWidget />
+            </div>
+          </Card>
+        </div>
       </div>
     </Layout>
   );
