@@ -6,7 +6,6 @@ toolchain go1.22.2
 
 require (
 	github.com/cyclops-ui/cyclops/cyclops-ctrl v0.0.0-20240421163218-f48a78b7c0e7
-	github.com/savioxavier/termlink v1.3.0
 	github.com/spf13/cobra v1.8.0
 	k8s.io/apimachinery v0.30.0
 	k8s.io/client-go v0.30.0
