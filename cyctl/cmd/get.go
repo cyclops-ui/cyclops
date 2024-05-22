@@ -1,29 +1,34 @@
 package cmd
 
 import (
-	"fmt"
-
 	"github.com/cyclops-ui/cycops-cyctl/internal/get"
-	"github.com/cyclops-ui/cycops-cyctl/internal/kubeconfig"
 	"github.com/spf13/cobra"
 )
 
+var (
+	getExample = `
+	# List all modules in ps output format
+	cyctl get modules 
+ 
+	# List all templates available in template store in ps output format
+	cyctl get templates
+ 
+	# List all template auth rules available in ps format
+	cyctl get templateauthrules`
+)
+
 var getCMD = &cobra.Command{
-	Use:   "get",
-	Short: "This is the get command",
-	Long:  "This is the get command",
-	Args:  cobra.ExactArgs(1),
-	Run: func(cmd *cobra.Command, args []string) {
-		getCommand := args[0]
-		switch getCommand {
-		case "modules":
-			get.ListModules(kubeconfig.Moduleset)
-		default:
-			fmt.Println("Give the correct resource name")
-		}
-	},
+	Use:     "get",
+	Short:   "Retrieve custom resources like modules, templates, and templateauthrules",
+	Long:    "Retrieve custom resources like modules, templates, and templateauthrules",
+	Example: getExample,
+	// Run:     func(cmd *cobra.Command, args []string) {},
 }
 
 func init() {
+	getCMD.AddCommand(get.ListModule)
+	getCMD.AddCommand(get.ListTemplate)
+	getCMD.AddCommand(get.ListTemplateAuthRules)
+
 	RootCmd.AddCommand(getCMD)
 }

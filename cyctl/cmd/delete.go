@@ -1,29 +1,34 @@
 package cmd
 
 import (
-	"fmt"
-
 	"github.com/cyclops-ui/cycops-cyctl/internal/delete"
-	"github.com/cyclops-ui/cycops-cyctl/internal/kubeconfig"
 	"github.com/spf13/cobra"
 )
 
+var (
+	deleteExample = `
+	# Delete one or more modules
+	cyctl delete modules [module_name] 
+ 
+	# Delete one or more templates
+	cyctl delete templates [template_name] 
+ 
+	# Delete one or more templateauthrules.
+	cyctl delete templateauthrules [templateauthrules_name]`
+)
+
 var deleteCMD = &cobra.Command{
-	Use:   "delete",
-	Short: "This is the delete command",
-	Long:  "This is the delete command",
-	Args:  cobra.ExactArgs(2),
-	Run: func(cmd *cobra.Command, args []string) {
-		deleteCommand, resourceName := args[0], args[1]
-		switch deleteCommand {
-		case "modules", "module":
-			delete.DeleteModules(kubeconfig.Moduleset, resourceName)
-		default:
-			fmt.Println("Give the correct resource name")
-		}
-	},
+	Use:     "delete",
+	Short:   "Delete custom resources like modules, templates, and templateauthrules",
+	Long:    "Delete custom resources like modules, templates, and templateauthrules",
+	Example: deleteExample,
+	Args:    cobra.MinimumNArgs(1),
 }
 
 func init() {
+	deleteCMD.AddCommand(delete.DeleteModule)
+	deleteCMD.AddCommand(delete.DeleteTemplate)
+	deleteCMD.AddCommand(delete.DeleteTemplateAuthRule)
+
 	RootCmd.AddCommand(deleteCMD)
 }
