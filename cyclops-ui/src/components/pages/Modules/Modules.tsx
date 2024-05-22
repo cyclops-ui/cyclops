@@ -145,7 +145,7 @@ const Modules = () => {
       <Row gutter={[16, 16]}>
         {filteredData.length == 0 ? (
           <div style={{ width: "100%" }}>
-            <Empty description="No Module Found"></Empty>
+            <Empty description="No Modules Found"></Empty>
           </div>
         ) : (
           filteredData.map((module: any, index) => (
