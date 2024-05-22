@@ -144,11 +144,9 @@ const Modules = () => {
       <Divider orientationMargin="0" />
       <Row gutter={[16, 16]}>
         {filteredData.length == 0 ? (
-          <Empty description="No Module">
-            <Button onClick={handleClick} block>
-              Create
-            </Button>
-          </Empty>
+          <div style={{ width: "100%" }}>
+            <Empty description="No Module Found"></Empty>
+          </div>
         ) : (
           filteredData.map((module: any, index) => (
             <Col key={index} xs={24} sm={12} md={8} lg={8} xl={6}>
