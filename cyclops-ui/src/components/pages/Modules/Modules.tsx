@@ -12,6 +12,7 @@ import {
   Space,
   Card,
   Alert,
+  Empty,
 } from "antd";
 import { useNavigate } from "react-router";
 import axios from "axios";
@@ -143,15 +144,11 @@ const Modules = () => {
       <Divider orientationMargin="0" />
       <Row gutter={[16, 16]}>
         {filteredData.length == 0 ? (
-          <Card
-            title={"No Module Found"}
-            style={{
-              borderLeft: "solid " + getStatusColor(module) + " 5px",
-              width: "100%",
-              maxWidth: "200px",
-            }}
-            className={styles.modulecard}
-          ></Card>
+          <Empty description="No Module">
+            <Button onClick={handleClick} block>
+              Create
+            </Button>
+          </Empty>
         ) : (
           filteredData.map((module: any, index) => (
             <Col key={index} xs={24} sm={12} md={8} lg={8} xl={6}>
