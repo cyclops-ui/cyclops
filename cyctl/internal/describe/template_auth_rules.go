@@ -50,7 +50,7 @@ func describeTemplateAuthRules(clientset *client.CyclopsV1Alpha1Client, template
 			d.Println()
 			d.Printf("Credentails:\t\n")
 			d.Printf("Username:\t%s\n", templateAuth.Spec.Username.Key)
-			d.Printf("Password:\t%s\n", utility.EncodeBase64(templateAuth.Spec.Password.Key))
+			d.Printf("Password:\t%s\n", templateAuth.Spec.Password.Key)
 
 			d.Println()
 		})
