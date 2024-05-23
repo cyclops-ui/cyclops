@@ -36,27 +36,28 @@ func describeTemplateAuthRules(clientset *client.CyclopsV1Alpha1Client, template
 		templateAuth, err := clientset.TemplateAuthRules("cyclops").Get(templateAuthName)
 		if err != nil {
 			fmt.Printf("Error from server (NotFound): %v\n", err)
-		} else {
-			// Describe the templateAuthRule
-			s := utility.Describe(func(d *utility.Describer) {
-				d.DescribeTemplateAuthMetaData(*templateAuth)
-
-				d.Printf("\nCreation:\t%s\n", templateAuth.CreationTimestamp)
-
-				d.Println()
-				d.Printf("\nRepository:\t%s\n", templateAuth.Spec.Repo)
-
-				d.Println()
-				d.Printf("Credentails:\t\n")
-				d.Printf("Username:\t%s\n", templateAuth.Spec.Username.Key)
-				d.Printf("Password:\t%s\n", utility.EncodeBase64(templateAuth.Spec.Password.Key))
-
-				d.Println()
-			})
-
-			fmt.Printf("%s", s)
-			fmt.Println("-------------------------------")
+			return
 		}
+		// Describe the templateAuthRule
+		descirbe := utility.Describe(func(d *utility.Describer) {
+			d.DescribeTemplateAuthMetaData(*templateAuth)
+
+			d.Printf("\nCreation:\t%s\n", templateAuth.CreationTimestamp)
+
+			d.Println()
+			d.Printf("\nRepository:\t%s\n", templateAuth.Spec.Repo)
+
+			d.Println()
+			d.Printf("Credentails:\t\n")
+			d.Printf("Username:\t%s\n", templateAuth.Spec.Username.Key)
+			d.Printf("Password:\t%s\n", utility.EncodeBase64(templateAuth.Spec.Password.Key))
+
+			d.Println()
+		})
+
+		fmt.Printf("%s", descirbe)
+		fmt.Println("-------------------------------")
+
 	}
 }
 

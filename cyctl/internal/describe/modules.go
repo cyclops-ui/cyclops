@@ -36,38 +36,38 @@ func describeModules(clientset *client.CyclopsV1Alpha1Client, moduleNames []stri
 		module, err := clientset.Modules("cyclops").Get(moduleName)
 		if err != nil {
 			fmt.Printf("Error from server (NotFound): %v\n", err)
-		} else {
-			// Describe the module
-			s := utility.Describe(func(d *utility.Describer) {
-				d.DescribeModuleMetaData(*module)
-
-				d.Printf("\nCreation:\t%s\n", module.CreationTimestamp)
-
-				d.Printf("\nStatus:\t%s\n", module.Status.ReconciliationStatus.Status)
-
-				d.Println()
-				d.Printf("Template:\t\n")
-				d.Printf(" Repository:\t%s\n", module.Spec.TemplateRef.URL)
-				d.Printf(" Relative Path:\t%s\n", module.Spec.TemplateRef.Path)
-				d.Printf(" Branch:\t%s\n", module.Spec.TemplateRef.Version)
-
-				d.Println()
-				if len(module.Spec.Values.Raw) > 0 {
-					yamlData, err := utility.JsonToYAMLDescriber(module.Spec.Values.Raw)
-					if err != nil {
-						d.Printf("Values:\n%s\n", module.Spec.Values.Raw)
-					} else {
-						d.Printf("Values:\n%s\n", yamlData)
-					}
-				} else {
-					d.Printf("Values:\n<none>\n")
-				}
-			})
-
-			fmt.Printf("%s", s)
-			fmt.Println("-------------------------------")
-
+			return
 		}
+		// Describe the module
+		describe := utility.Describe(func(d *utility.Describer) {
+			d.DescribeModuleMetaData(*module)
+
+			d.Printf("\nCreation:\t%s\n", module.CreationTimestamp)
+
+			d.Printf("\nStatus:\t%s\n", module.Status.ReconciliationStatus.Status)
+
+			d.Println()
+			d.Printf("Template:\t\n")
+			d.Printf(" Repository:\t%s\n", module.Spec.TemplateRef.URL)
+			d.Printf(" Relative Path:\t%s\n", module.Spec.TemplateRef.Path)
+			d.Printf(" Branch:\t%s\n", module.Spec.TemplateRef.Version)
+
+			d.Println()
+			if len(module.Spec.Values.Raw) > 0 {
+				yamlData, err := utility.JsonToYAMLDescriber(module.Spec.Values.Raw)
+				if err != nil {
+					d.Printf("Values:\n%s\n", module.Spec.Values.Raw)
+				} else {
+					d.Printf("Values:\n%s\n", yamlData)
+				}
+			} else {
+				d.Printf("Values:\n<none>\n")
+			}
+		})
+
+		fmt.Printf("%s", describe)
+		fmt.Println("-------------------------------")
+
 	}
 }
 

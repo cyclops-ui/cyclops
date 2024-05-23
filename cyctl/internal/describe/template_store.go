@@ -36,23 +36,24 @@ func describeTemplate(clientset *client.CyclopsV1Alpha1Client, templateNames []s
 		template, err := clientset.TemplateStore("cyclops").Get(templateName)
 		if err != nil {
 			fmt.Printf("Error from server (NotFound): %v\n", err)
-		} else {
-			// Describe the template
-			s := utility.Describe(func(d *utility.Describer) {
-				d.DescribeTemplateStoreMetaData(*template)
-
-				d.Printf("\nCreation:\t%s\n", template.CreationTimestamp)
-
-				d.Println()
-				d.Printf("Repository:\t%s\n", template.Spec.URL)
-				d.Printf("Branch:\t%s\n", template.Spec.Version)
-				d.Printf("RelativePath:\t%s\n", template.Spec.Path)
-
-			})
-
-			fmt.Printf("%s", s)
-			fmt.Println("-------------------------------")
+			return
 		}
+		// Describe the template
+		describe := utility.Describe(func(d *utility.Describer) {
+			d.DescribeTemplateStoreMetaData(*template)
+
+			d.Printf("\nCreation:\t%s\n", template.CreationTimestamp)
+
+			d.Println()
+			d.Printf("Repository:\t%s\n", template.Spec.URL)
+			d.Printf("Branch:\t%s\n", template.Spec.Version)
+			d.Printf("RelativePath:\t%s\n", template.Spec.Path)
+
+		})
+
+		fmt.Printf("%s", describe)
+		fmt.Println("-------------------------------")
+
 	}
 }
 
