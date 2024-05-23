@@ -29,7 +29,7 @@ export default function Pricing() {
           <Card
             bordered={false}
             style={{
-              width: "350px",
+              width: "375px",
               padding: "20px",
               backgroundColor: "#ffffff",
               boxShadow: "0 4px 12px rgba(0, 0, 0, 0.1)",
@@ -40,23 +40,23 @@ export default function Pricing() {
               minHeight: "500px",
             }}
           >
-            <Title
-              level={4}
-              style={{ fontStyle: "italic", fontSize: "1.5rem" }}
-            >
+            <Title level={4} style={{ fontSize: "1.6rem" }}>
               We are Open Source!
             </Title>
-            <Paragraph style={{ fontSize: "1rem", flex: "1" }}>
+            <Paragraph style={{ fontWeight: "500", fontSize: "1rem" }}>
               <ul
                 style={{
                   listStyleType: "circle",
-                  padding: 0,
                   textAlign: "left",
-                  margin: 0,
                 }}
               >
-                <li>Free now and forever</li>
-                <li>Host it yourself</li>
+                <li style={{ marginBottom: "10px" }}>Free now and forever</li>
+                <li style={{ marginBottom: "10px" }}>
+                  Works with the Helm charts you already have
+                </li>
+                <li style={{ marginBottom: "10px" }}>
+                  Integrates smoothly into your workflow with ease
+                </li>
               </ul>
             </Paragraph>
             <Button
@@ -65,8 +65,10 @@ export default function Pricing() {
                 backgroundColor: "#fa8c16",
                 borderColor: "#fa8c16",
                 color: "#fff",
-                alignSelf: "center",
-                marginTop: "auto", // Ensure the button is at the bottom
+                fontWeight: "700",
+                position: "absolute",
+                bottom: "20px",
+                right: "30%",
               }}
             >
               Quickstart Guide
@@ -76,7 +78,7 @@ export default function Pricing() {
           <Card
             bordered={false}
             style={{
-              width: "350px",
+              width: "375px",
               padding: "20px",
               backgroundColor: "#ffffff",
               boxShadow: "0 4px 12px rgba(0, 0, 0, 0.1)",
@@ -87,35 +89,42 @@ export default function Pricing() {
               minHeight: "500px",
             }}
           >
-            <Title
-              level={4}
-              style={{ fontStyle: "italic", fontSize: "1.5rem" }}
-            >
+            <Title level={4} style={{ fontSize: "1.6rem" }}>
               Need onboarding?
             </Title>
-            <Paragraph style={{ fontSize: "1rem", flex: "1" }}>
-              <span>We can help you get started with:</span>
+            <Paragraph
+              style={{ fontWeight: "500", fontSize: "1rem", flex: "1" }}
+            >
+              <span style={{ fontSize: "1.2rem" }}>
+                We can get you started:
+              </span>
               <ul
                 style={{
                   listStyleType: "circle",
-                  padding: 0,
                   textAlign: "left",
-                  margin: 0,
+                  marginTop: "10px",
                 }}
               >
-                <li>Integrating Cyclops into your existing workflow</li>
-                <li>Creating custom templates for your use cases</li>
-                <li>Onboarding your developer teams</li>
+                <li style={{ marginBottom: "10px" }}>
+                  Integrating Cyclops into your existing workflow
+                </li>
+                <li style={{ marginBottom: "10px" }}>
+                  Creating custom templates for your use cases
+                </li>
+                <li style={{ marginBottom: "10px" }}>
+                  Onboarding your developer teams
+                </li>
               </ul>
             </Paragraph>
-            <div style={{ flexGrow: 1 }}></div> {/* Spacer */}
             <div
               style={{
                 display: "flex",
                 flexDirection: "column",
                 alignItems: "center",
                 width: "100%",
-                marginTop: "auto",
+                position: "absolute",
+                bottom: "20px",
+                right: "0%",
               }}
             >
               <CalendlyWidget />
@@ -125,7 +134,7 @@ export default function Pricing() {
           <Card
             bordered={false}
             style={{
-              width: "350px",
+              width: "375px",
               padding: "20px",
               backgroundColor: "#ffffff",
               boxShadow: "0 4px 12px rgba(0, 0, 0, 0.1)",
@@ -136,33 +145,33 @@ export default function Pricing() {
               minHeight: "500px",
             }}
           >
-            <Title
-              level={4}
-              style={{ fontStyle: "italic", fontSize: "1.5rem" }}
-            >
+            <Title level={4} style={{ fontSize: "1.6rem" }}>
               Looking for something more?
             </Title>
-            <Paragraph style={{ fontSize: "1rem", flex: "1" }}>
+            <Paragraph style={{ fontWeight: "500", fontSize: "1rem" }}>
               <ul
                 style={{
                   listStyleType: "circle",
-                  padding: 0,
                   textAlign: "left",
-                  margin: 0,
                 }}
               >
-                <li>Don't want to host it on your own?</li>
-                <li>Interested in additional features?</li>
+                <li style={{ marginBottom: "10px" }}>
+                  Don't want to host it on your own?
+                </li>
+                <li style={{ marginBottom: "10px" }}>
+                  Interested in additional features?
+                </li>
               </ul>
             </Paragraph>
-            <div style={{ flexGrow: 1 }}></div> {/* Spacer */}
             <div
               style={{
                 display: "flex",
                 flexDirection: "column",
                 alignItems: "center",
                 width: "100%",
-                marginTop: "auto",
+                position: "absolute",
+                bottom: "20px",
+                right: "0%",
               }}
             >
               <CalendlyWidget />

@@ -32,10 +32,10 @@ export default function CalendlyWidget() {
     <Button
       onClick={handleClick}
       style={{
-        width: "40%",
         backgroundColor: "#fa8c16",
         borderColor: "#fa8c16",
         color: "#fff",
+        fontWeight: "700",
       }}
     >
       Book a call
