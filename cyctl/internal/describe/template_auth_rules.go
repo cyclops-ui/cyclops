@@ -54,7 +54,7 @@ func describeTemplateAuthRules(clientset *client.CyclopsV1Alpha1Client, template
 				d.Println()
 			})
 
-			fmt.Printf("\n\n%s", s)
+			fmt.Printf("%s", s)
 			fmt.Println("-------------------------------")
 		}
 	}

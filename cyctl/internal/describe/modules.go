@@ -43,7 +43,6 @@ func describeModules(clientset *client.CyclopsV1Alpha1Client, moduleNames []stri
 
 				d.Printf("\nCreation:\t%s\n", module.CreationTimestamp)
 
-				d.Println()
 				d.Printf("\nStatus:\t%s\n", module.Status.ReconciliationStatus.Status)
 
 				d.Println()
@@ -65,7 +64,7 @@ func describeModules(clientset *client.CyclopsV1Alpha1Client, moduleNames []stri
 				}
 			})
 
-			fmt.Printf("\n\n%s", s)
+			fmt.Printf("%s", s)
 			fmt.Println("-------------------------------")
 
 		}
