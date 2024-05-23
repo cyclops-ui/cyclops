@@ -1,47 +1,38 @@
-import React, { useEffect } from "react";
-import { Button } from "antd";
+import React from "react";
+import { Button, ConfigProvider } from "antd";
 import styles from "../pages/index.module.css";
+import { Helmet } from "react-helmet";
 
 export default function CalendlyWidget() {
-  useEffect(() => {
-    const script = document.createElement("script");
-    script.src = "https://assets.calendly.com/assets/external/widget.js";
-    script.type = "text/javascript";
-    script.async = true;
-    document.body.appendChild(script);
-
-    const link = document.createElement("link");
-    link.href = "https://assets.calendly.com/assets/external/widget.css";
-    link.rel = "stylesheet";
-    document.head.appendChild(link);
-
-    return () => {
-      // Cleanup if the component is unmounted
-      document.body.removeChild(script);
-      document.head.removeChild(link);
-    };
-  }, []);
-
-  const handleClick = () => {
-    window.Calendly.initPopupWidget({
-      url: "https://calendly.com/juraj-cyclops/cyclops-discovery-call",
-    });
-    https: return false;
-  };
-
   return (
-    <Button
-      onClick={handleClick}
-      shape="round"
-      size={"large"}
-      className={styles.readTheDocs}
-      style={{
-        color: "white",
-        backgroundColor: "#fa8c16",
-        fontWeight: "700",
-      }}
-    >
-      Book a call
-    </Button>
+    <>
+      <Helmet>
+        <script
+          src="https://assets.calendly.com/assets/external/widget.js"
+          type="text/javascript"
+          async
+        />
+      </Helmet>
+      <ConfigProvider
+        theme={{
+          token: {
+            colorPrimary: "#FFF",
+          },
+        }}
+      >
+        <Button
+          onClick={() =>
+            Calendly.initPopupWidget({
+              url: "https://calendly.com/cyclops-ui/cyclops",
+            })
+          }
+          shape="round"
+          size={"large"}
+          className={styles.pricingButton}
+        >
+          <h4 style={{ margin: 0 }}>Book a call</h4>
+        </Button>
+      </ConfigProvider>
+    </>
   );
 }

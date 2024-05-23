@@ -24,7 +24,7 @@
 }
 
 .cyclopsDesc {
-  color: #FFF;
+  color: #fff;
   padding-top: 20px;
 }
 
@@ -82,4 +82,32 @@
 .backgroundcolor {
   width: 100%;
   background-image: linear-gradient(to bottom left, #111d5c, #000830);
+}
+
+.pricingCard {
+  overflow: visible;
+  width: 375px;
+  padding: 20px;
+  background-color: #ffffff;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  border-radius: 10px;
+  display: flex;
+  flex-direction: column;
+  text-align: center;
+  min-height: 500px;
+}
+
+.pricingButton {
+  border: none;
+  color: white;
+  background-color: #fe8801;
+  font-weight: 700;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+}
+
+.pricingButton:hover {
+  background-color: #ffa229;
+  text-decoration: none;
 }
