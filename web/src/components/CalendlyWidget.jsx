@@ -1,5 +1,6 @@
 import React, { useEffect } from "react";
 import { Button } from "antd";
+import styles from "../pages/index.module.css";
 
 export default function CalendlyWidget() {
   useEffect(() => {
@@ -31,10 +32,12 @@ export default function CalendlyWidget() {
   return (
     <Button
       onClick={handleClick}
+      shape="round"
+      size={"large"}
+      className={styles.readTheDocs}
       style={{
+        color: "white",
         backgroundColor: "#fa8c16",
-        borderColor: "#fa8c16",
-        color: "#fff",
         fontWeight: "700",
       }}
     >

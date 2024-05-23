@@ -1,34 +1,104 @@
 import Layout from "@theme/Layout";
 import { Card, Button, Typography } from "antd";
 import CalendlyWidget from "../components/CalendlyWidget";
+import styles from "./index.module.css";
+import yaml from "/static/img/yaml_background.png";
 
 const { Title, Paragraph } = Typography;
 
 export default function Pricing() {
   return (
     <Layout>
-      <div
-        style={{
-          padding: "5vh 10vw",
-          minHeight: "70vh",
-          display: "flex",
-          flexDirection: "column",
-          alignItems: "center",
-          justifyContent: "center",
-          backgroundColor: "#f0f2f5",
-        }}
-      >
+      <div className={styles.landing} style={{ height: "100%" }}>
+        <img
+          style={{
+            left: "10%",
+            animationIterationCount: "1",
+            animationDelay: "-16s",
+            opacity: 0,
+          }}
+          className={styles.backgroundYaml}
+          src={yaml}
+        />
+        <img
+          style={{
+            animationIterationCount: "1",
+            animationDelay: "-12s",
+            opacity: 0,
+          }}
+          className={styles.backgroundYaml}
+          src={yaml}
+        />
+        <img
+          style={{
+            left: "-10%",
+            animationIterationCount: "1",
+            animationDelay: "-8s",
+            opacity: 0,
+          }}
+          className={styles.backgroundYaml}
+          src={yaml}
+        />
+        <img
+          style={{
+            left: "10%",
+            animationIterationCount: "1",
+            animationDelay: "-4s",
+            opacity: 0,
+          }}
+          className={styles.backgroundYaml}
+          src={yaml}
+        />
+
+        <img
+          className={styles.backgroundYaml}
+          src={yaml}
+          style={{
+            opacity: 0,
+          }}
+        />
+        <img
+          style={{
+            left: "10%",
+            animationDelay: "4s",
+            opacity: 0,
+          }}
+          className={styles.backgroundYaml}
+          src={yaml}
+        />
+        <img
+          style={{
+            animationDelay: "8s",
+            opacity: 0,
+          }}
+          className={styles.backgroundYaml}
+          src={yaml}
+        />
+        <img
+          style={{
+            left: "-10%",
+            animationDelay: "12s",
+            opacity: 0,
+          }}
+          className={styles.backgroundYaml}
+          src={yaml}
+        />
         <div
           style={{
+            padding: "20vh",
+            minHeight: "70vh",
             display: "flex",
-            flexWrap: "wrap",
+            flexDirection: "row",
+            alignItems: "flex-start",
             justifyContent: "center",
-            gap: "30px",
+            flexWrap: "wrap",
+            gap: "40px",
           }}
         >
           <Card
             bordered={false}
             style={{
+              overflow: "visible",
               width: "375px",
               padding: "20px",
               backgroundColor: "#ffffff",
@@ -61,14 +131,16 @@ export default function Pricing() {
             </Paragraph>
             <Button
               href="../../docs/installation/install"
+              shape="round"
+              size={"large"}
+              className={styles.readTheDocs}
               style={{
+                color: "white",
                 backgroundColor: "#fa8c16",
-                borderColor: "#fa8c16",
-                color: "#fff",
                 fontWeight: "700",
                 position: "absolute",
-                bottom: "20px",
-                right: "30%",
+                bottom: "40px",
+                right: "27%",
               }}
             >
               Quickstart Guide
@@ -123,7 +195,7 @@ export default function Pricing() {
                 alignItems: "center",
                 width: "100%",
                 position: "absolute",
-                bottom: "20px",
+                bottom: "40px",
                 right: "0%",
               }}
             >
@@ -170,7 +242,7 @@ export default function Pricing() {
                 alignItems: "center",
                 width: "100%",
                 position: "absolute",
-                bottom: "20px",
+                bottom: "40px",
                 right: "0%",
               }}
             >
