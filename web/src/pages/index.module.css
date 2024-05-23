@@ -85,9 +85,10 @@
 }
 
 .pricingCard {
+  backdrop-filter: blur(3px);
+  background-color: rgba(255, 255, 255, 0.3);
   width: 375px;
   padding: 20px;
-  background-color: #ffffff;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
   border-radius: 10px;
   display: flex;
@@ -110,4 +111,10 @@
 .pricingButton:hover {
   background-color: #ffa229;
   text-decoration: none;
+}
+
+li::marker {
+  content: '+ ';
+  color: #fe8801;
+  fill: #fe8801;
 }

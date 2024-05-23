@@ -89,14 +89,7 @@ export default function Pricing() {
         >
           <Col xs={24} sm={24} md={16} lg={16} xl={8}>
             <Card bordered={false} className={styles.pricingCard} actions={[
-                <ConfigProvider
-                    theme={{
-                        token: {
-                            colorPrimary: "#FFF",
-                        },
-                    }}
-                >
-                    <Button
+                <Button
                         href="../../docs/installation/install"
                         shape="round"
                         size={"large"}
@@ -104,12 +97,11 @@ export default function Pricing() {
                     >
                         <h2 style={{ margin: 0 }}>Quickstart Guide</h2>
                     </Button>
-                </ConfigProvider>
-            ]}>
+            ]} bodyStyle={{backgroundColor: "red"}}>
               <h4 style={{ fontSize: "1.6rem" }}>
                 We are Open Source!
               </h4>
-              <Paragraph style={{ fontWeight: "500", fontSize: "1rem" }}>
+              <Paragraph style={{color: "#FFFFFF", fontWeight: "500", fontSize: "1rem" }}>
                 <ul
                   style={{
                     listStyleType: "circle",
@@ -131,11 +123,11 @@ export default function Pricing() {
             <Card bordered={false} className={styles.pricingCard} actions={[
                 <CalendlyWidget />
             ]}>
-              <Title level={4} style={{ fontSize: "1.6rem" }}>
+              <Title level={4} style={{ color: "#FFFFFF", fontSize: "1.6rem" }}>
                 Need onboarding?
               </Title>
               <Paragraph
-                style={{ fontWeight: "500", fontSize: "1rem", flex: "1" }}
+                style={{ color: "#FFFFFF", fontWeight: "500", fontSize: "1rem", flex: "1" }}
               >
                 <span style={{ fontSize: "1.2rem" }}>
                   We can get you started:
@@ -164,10 +156,10 @@ export default function Pricing() {
             <Card bordered={false} className={styles.pricingCard} actions={[
                 <CalendlyWidget />
             ]}>
-              <Title level={4} style={{ fontSize: "1.6rem" }}>
+              <Title level={4} style={{ color: "#FFFFFF", fontSize: "1.6rem" }}>
                 Looking for something more?
               </Title>
-              <Paragraph style={{ fontWeight: "500", fontSize: "1rem" }}>
+              <Paragraph style={{ color: "#FFFFFF", fontWeight: "500", fontSize: "1rem" }}>
                 <ul
                   style={{
                     listStyleType: "circle",
