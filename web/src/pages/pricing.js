@@ -88,10 +88,27 @@ export default function Pricing() {
           style={{ minHeight: "80vh", padding: "15vh 5vh" }}
         >
           <Col xs={24} sm={24} md={16} lg={16} xl={8}>
-            <Card bordered={false} className={styles.pricingCard}>
-              <Title level={4} style={{ fontSize: "1.6rem" }}>
+            <Card bordered={false} className={styles.pricingCard} actions={[
+                <ConfigProvider
+                    theme={{
+                        token: {
+                            colorPrimary: "#FFF",
+                        },
+                    }}
+                >
+                    <Button
+                        href="../../docs/installation/install"
+                        shape="round"
+                        size={"large"}
+                        className={styles.pricingButton}
+                    >
+                        <h2 style={{ margin: 0 }}>Quickstart Guide</h2>
+                    </Button>
+                </ConfigProvider>
+            ]}>
+              <h4 style={{ fontSize: "1.6rem" }}>
                 We are Open Source!
-              </Title>
+              </h4>
               <Paragraph style={{ fontWeight: "500", fontSize: "1rem" }}>
                 <ul
                   style={{
@@ -108,30 +125,12 @@ export default function Pricing() {
                   </li>
                 </ul>
               </Paragraph>
-              <div
-                style={{ position: "absolute", bottom: "40px", right: "95px" }}
-              >
-                <ConfigProvider
-                  theme={{
-                    token: {
-                      colorPrimary: "#FFF",
-                    },
-                  }}
-                >
-                  <Button
-                    href="../../docs/installation/install"
-                    shape="round"
-                    size={"large"}
-                    className={styles.pricingButton}
-                  >
-                    <h4 style={{ margin: 0 }}>Quickstart Guide</h4>
-                  </Button>
-                </ConfigProvider>
-              </div>
             </Card>
           </Col>
           <Col xs={24} sm={24} md={16} lg={16} xl={8}>
-            <Card bordered={false} className={styles.pricingCard}>
+            <Card bordered={false} className={styles.pricingCard} actions={[
+                <CalendlyWidget />
+            ]}>
               <Title level={4} style={{ fontSize: "1.6rem" }}>
                 Need onboarding?
               </Title>
@@ -159,15 +158,12 @@ export default function Pricing() {
                   </li>
                 </ul>
               </Paragraph>
-              <div
-                style={{ position: "absolute", bottom: "40px", right: "120px" }}
-              >
-                <CalendlyWidget />
-              </div>
             </Card>
           </Col>
           <Col xs={24} sm={24} md={16} lg={16} xl={8}>
-            <Card bordered={false} className={styles.pricingCard}>
+            <Card bordered={false} className={styles.pricingCard} actions={[
+                <CalendlyWidget />
+            ]}>
               <Title level={4} style={{ fontSize: "1.6rem" }}>
                 Looking for something more?
               </Title>
@@ -186,11 +182,6 @@ export default function Pricing() {
                   </li>
                 </ul>
               </Paragraph>
-              <div
-                style={{ position: "absolute", bottom: "40px", right: "120px" }}
-              >
-                <CalendlyWidget />
-              </div>
             </Card>
           </Col>
         </Row>

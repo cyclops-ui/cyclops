@@ -30,7 +30,7 @@ export default function CalendlyWidget() {
           size={"large"}
           className={styles.pricingButton}
         >
-          <h4 style={{ margin: 0 }}>Book a call</h4>
+          <h2 style={{ margin: 0 }}>Book a call</h2>
         </Button>
       </ConfigProvider>
     </>
