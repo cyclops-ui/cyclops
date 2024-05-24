@@ -1,7 +1,7 @@
 // @ts-check
 // Note: type annotations allow type checking and IDEs autocompletion
 
-import {Button} from "antd";
+import { Button } from "antd";
 
 /** @type {import('@docusaurus/types').Config} */
 const config = {
@@ -60,7 +60,7 @@ const config = {
       // Replace with your project's social card
       image: "img/cyclops-social-card.png",
       navbar: {
-        style: 'dark',
+        style: "dark",
         logo: {
           alt: "Cyclops logo",
           src: "img/cyclops-simplistic.png",
@@ -72,17 +72,23 @@ const config = {
             position: "left",
             label: "Docs",
           },
+          {
+            to: "pricing",
+            label: "Pricing",
+            position: "left",
+          },
           { to: "blog", label: "Blog", position: "left" },
           {
-            type: 'html',
-            position: 'right',
-            value: '<a href="/docs/installation/install/manifest" style="background-color: #FF8803; color: #FFF; height: 30px; width: 150px; text-decoration: none; display: inline-flex; align-items: center; border-radius: 30px 30px 30px 30px"' +
-                'onmouseover="this.style.backgroundColor=\'#FFA229\';"' +
-                'onmouseout="this.style.backgroundColor=\'#FF8803\';">' +
-                '<h3 style="margin: 0px auto;">' +
-                  'Get started' +
-                '</h3>' +
-                '</a>',
+            type: "html",
+            position: "right",
+            value:
+              '<a href="/docs/installation/install/manifest" style="background-color: #FF8803; color: #FFF; height: 30px; width: 150px; text-decoration: none; display: inline-flex; align-items: center; border-radius: 30px 30px 30px 30px"' +
+              "onmouseover=\"this.style.backgroundColor='#FFA229';\"" +
+              "onmouseout=\"this.style.backgroundColor='#FF8803';\">" +
+              '<h3 style="margin: 0px auto;">' +
+              "Get started" +
+              "</h3>" +
+              "</a>",
           },
           {
             href: "https://github.com/cyclops-ui/cyclops",
