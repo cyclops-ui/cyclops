@@ -24,6 +24,15 @@ const Blogs = () => {
                 <Row gutter={[16, 16]}>
                     <Col xs={{ span: 20, offset: 2 }} md={{ span: 6, offset: 3 }}>
                         <Blog
+                            title={"Is Kubernetes a database? CRDs explained in 5 minutes"}
+                            description={"When you touch on containerized apps today, Kubernetes usually comes up as their orchestrator"}
+                            blogLink={"https://cyclops-ui.com/blog/2024/05/24/is-k8s-database"}
+                            avatar={"https://github.com/KaradzaJuraj.png"}
+                            banner={'/img/2024-05-24-is-k8s-database/k8s-database-cover.png'}
+                        />
+                    </Col>
+                    <Col xs={{ span: 20, offset: 2 }} md={{ span: 6, offset: 0 }}>
+                        <Blog
                             title={"How Telemetry Saved my Open-Source Platform"}
                             description={"What started as a frustration with not being able to get in touch with our users, quickly developed into a redesign of the flow of our platform"}
                             blogLink={"https://cyclops-ui.com/blog/2024/04/12/telemetry"}
@@ -38,15 +47,6 @@ const Blogs = () => {
                             blogLink={"https://cyclops-ui.com/blog/2024/03/26/devs-perspective"}
                             avatar={"https://github.com/KaradzaJuraj.png"}
                             banner={'/img/2024-03-26-devs-perspective/devs-perspective-preview.png'}
-                        />
-                    </Col>
-                    <Col xs={{ span: 20, offset: 2 }} md={{ span: 6, offset: 0 }}>
-                        <Blog
-                            title={"Contributing to Open Source"}
-                            description={"Have you ever thought of contributing to open source?"}
-                            blogLink={"https://cyclops-ui.com/blog/2024/02/23/contributing-to-OS"}
-                            avatar={"https://github.com/KaradzaJuraj.png"}
-                            banner={'/img/2024-02-23-contributing-to-OS/contributing-to-OS-preview.jpeg'}
                         />
                     </Col>
                 </Row>
