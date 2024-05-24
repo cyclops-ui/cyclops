@@ -113,8 +113,9 @@
   text-decoration: none;
 }
 
-li::marker {
+.paragraphlist li::marker {
   content: '+ ';
+  font-weight: bold;
   color: #fe8801;
   fill: #fe8801;
 }

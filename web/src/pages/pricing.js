@@ -133,6 +133,7 @@ export default function Pricing() {
                   We can get you started:
                 </span>
                 <ul
+                  className={styles.paragraphlist}
                   style={{
                     listStyleType: "circle",
                     textAlign: "left",
@@ -162,6 +163,7 @@ export default function Pricing() {
                   </h4>
                   <Paragraph style={{color: "#FFFFFF", fontWeight: "500", fontSize: "1rem"}}>
                       <ul
+                          className={styles.paragraphlist}
                           style={{
                               listStyleType: "circle",
                               textAlign: "left",
