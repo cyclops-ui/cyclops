@@ -8,7 +8,8 @@ import (
 	"strings"
 	"text/tabwriter"
 
-	"github.com/cyclops-ui/cyclops/cyclops-ctrl/api/v1alpha1"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+
 	"sigs.k8s.io/yaml"
 )
 
@@ -41,26 +42,8 @@ func (d *Describer) Println(args ...interface{}) {
 	fmt.Fprintln(d.out, args...)
 }
 
-// DescribeModuleMetaData describes standard Module metadata in a consistent manner.
-func (d *Describer) DescribeModuleMetaData(metadata v1alpha1.Module) {
-	d.Printf("Name:\t%s\n", metadata.Name)
-	d.Printf("Namespace:\t%s\n", metadata.Namespace)
-	d.DescribeMap("Labels", metadata.Labels)
-	d.DescribeMap("Annotations", metadata.Annotations)
-
-}
-
-// DescribeTemplateAuthMetaData describes standard TemplateAuthRule metadata in a consistent manner.
-func (d *Describer) DescribeTemplateAuthMetaData(metadata v1alpha1.TemplateAuthRule) {
-	d.Printf("Name:\t%s\n", metadata.Name)
-	d.Printf("Namespace:\t%s\n", metadata.Namespace)
-	d.DescribeMap("Labels", metadata.Labels)
-	d.DescribeMap("Annotations", metadata.Annotations)
-
-}
-
-// DescribeTemplateStoreMetaData describes standard TemplateStore metadata in a consistent manner.
-func (d *Describer) DescribeTemplateStoreMetaData(metadata v1alpha1.TemplateStore) {
+// DescribeMetaData describes standard TemplateStore, Template, TemplateAuthRule metadata in a consistent manner.
+func (d *Describer) DescribeMetaData(metadata metav1.ObjectMeta) {
 	d.Printf("Name:\t%s\n", metadata.Name)
 	d.Printf("Namespace:\t%s\n", metadata.Namespace)
 	d.DescribeMap("Labels", metadata.Labels)

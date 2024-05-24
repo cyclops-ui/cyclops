@@ -40,7 +40,7 @@ func describeModules(clientset *client.CyclopsV1Alpha1Client, moduleNames []stri
 		}
 		// Describe the module
 		describe := utility.Describe(func(d *utility.Describer) {
-			d.DescribeModuleMetaData(*module)
+			d.DescribeMetaData(module.ObjectMeta)
 
 			d.Printf("Creation:\t%s\n", module.CreationTimestamp)
 

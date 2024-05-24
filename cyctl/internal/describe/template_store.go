@@ -40,7 +40,7 @@ func describeTemplate(clientset *client.CyclopsV1Alpha1Client, templateNames []s
 		}
 		// Describe the template
 		describe := utility.Describe(func(d *utility.Describer) {
-			d.DescribeTemplateStoreMetaData(*template)
+			d.DescribeMetaData(template.ObjectMeta)
 
 			d.Printf("Creation:\t%s\n", template.CreationTimestamp)
 
