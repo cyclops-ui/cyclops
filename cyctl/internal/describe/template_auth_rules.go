@@ -42,10 +42,10 @@ func describeTemplateAuthRules(clientset *client.CyclopsV1Alpha1Client, template
 		descirbe := utility.Describe(func(d *utility.Describer) {
 			d.DescribeTemplateAuthMetaData(*templateAuth)
 
-			d.Printf("\nCreation:\t%s\n", templateAuth.CreationTimestamp)
+			d.Printf("Creation:\t%s\n", templateAuth.CreationTimestamp)
 
 			d.Println()
-			d.Printf("\nRepository:\t%s\n", templateAuth.Spec.Repo)
+			d.Printf("Repository:\t%s\n", templateAuth.Spec.Repo)
 
 			d.Println()
 			d.Printf("Credentails:\t\n")
