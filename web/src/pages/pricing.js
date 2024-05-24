@@ -88,46 +88,46 @@ export default function Pricing() {
           style={{ minHeight: "80vh", padding: "15vh 5vh" }}
         >
           <Col xs={24} sm={24} md={16} lg={16} xl={8}>
-            <Card bordered={false} className={styles.pricingCard} actions={[
-                <Button
-                        href="../../docs/installation/install"
-                        shape="round"
-                        size={"large"}
-                        className={styles.pricingButton}
-                    >
-                        <h2 style={{ margin: 0 }}>Quickstart Guide</h2>
-                    </Button>
-            ]} bodyStyle={{backgroundColor: "red"}}>
-              <h4 style={{ fontSize: "1.6rem" }}>
-                We are Open Source!
-              </h4>
-              <Paragraph style={{color: "#FFFFFF", fontWeight: "500", fontSize: "1rem" }}>
-                <ul
-                  style={{
-                    listStyleType: "circle",
-                    textAlign: "left",
-                  }}
-                >
-                  <li style={{ marginBottom: "10px" }}>Free now and forever</li>
-                  <li style={{ marginBottom: "10px" }}>
-                    Works with the Helm charts you already have
-                  </li>
-                  <li style={{ marginBottom: "10px" }}>
-                    Integrates smoothly into your workflow with ease
-                  </li>
-                </ul>
-              </Paragraph>
-            </Card>
+              <Card bordered={false} className={styles.pricingCard}>
+                  <h4 style={{fontSize: "1.6rem", color: "#FFF"}}>
+                      We are Open Source!
+                  </h4>
+                  <Paragraph style={{color: "#FFFFFF", fontWeight: "500", fontSize: "1rem"}}>
+                      <ul
+                          className={styles.paragraphlist}
+                          style={{
+                              listStyleType: "circle",
+                              textAlign: "left",
+                          }}
+                      >
+                          <li style={{marginBottom: "10px"}}>Free now and forever</li>
+                          <li style={{marginBottom: "10px"}}>
+                              Works with the Helm charts you already have
+                          </li>
+                          <li style={{marginBottom: "10px"}}>
+                              Integrates smoothly into your workflow with ease
+                          </li>
+                      </ul>
+                  </Paragraph>
+                  <div style={{position: "absolute", left: "0", bottom: "20px", width: "100%"}}>
+                      <Button
+                          href="../../docs/installation/install"
+                          shape="round"
+                          size={"large"}
+                          className={styles.pricingButton}
+                      >
+                          <h2 style={{margin: 0}}>Quickstart Guide</h2>
+                      </Button>
+                  </div>
+              </Card>
           </Col>
-          <Col xs={24} sm={24} md={16} lg={16} xl={8}>
-            <Card bordered={false} className={styles.pricingCard} actions={[
-                <CalendlyWidget />
-            ]}>
-              <Title level={4} style={{ color: "#FFFFFF", fontSize: "1.6rem" }}>
-                Need onboarding?
-              </Title>
-              <Paragraph
-                style={{ color: "#FFFFFF", fontWeight: "500", fontSize: "1rem", flex: "1" }}
+            <Col xs={24} sm={24} md={16} lg={16} xl={8}>
+                <Card bordered={false} className={styles.pricingCard}>
+                <h4 style={{fontSize: "1.6rem", color: "#FFF"}}>
+                    Need onboarding?
+                </h4>
+                <Paragraph
+                    style={{color: "#FFFFFF", fontWeight: "500", fontSize: "1rem", flex: "1" }}
               >
                 <span style={{ fontSize: "1.2rem" }}>
                   We can get you started:
@@ -150,31 +150,35 @@ export default function Pricing() {
                   </li>
                 </ul>
               </Paragraph>
+                <div style={{position: "absolute", left: "0", bottom: "20px", width: "100%"}}>
+                    <CalendlyWidget />
+                </div>
             </Card>
           </Col>
           <Col xs={24} sm={24} md={16} lg={16} xl={8}>
-            <Card bordered={false} className={styles.pricingCard} actions={[
-                <CalendlyWidget />
-            ]}>
-              <Title level={4} style={{ color: "#FFFFFF", fontSize: "1.6rem" }}>
-                Looking for something more?
-              </Title>
-              <Paragraph style={{ color: "#FFFFFF", fontWeight: "500", fontSize: "1rem" }}>
-                <ul
-                  style={{
-                    listStyleType: "circle",
-                    textAlign: "left",
-                  }}
-                >
-                  <li style={{ marginBottom: "10px" }}>
-                    Don't want to host it on your own?
-                  </li>
-                  <li style={{ marginBottom: "10px" }}>
-                    Interested in additional features?
-                  </li>
-                </ul>
-              </Paragraph>
-            </Card>
+              <Card bordered={false} className={styles.pricingCard}>
+                  <h4 style={{fontSize: "1.6rem", color: "#FFF"}}>
+                      Looking for something more?
+                  </h4>
+                  <Paragraph style={{color: "#FFFFFF", fontWeight: "500", fontSize: "1rem"}}>
+                      <ul
+                          style={{
+                              listStyleType: "circle",
+                              textAlign: "left",
+                          }}
+                      >
+                          <li style={{marginBottom: "10px"}}>
+                              Don't want to host it on your own?
+                          </li>
+                          <li style={{marginBottom: "10px"}}>
+                              Interested in additional features?
+                          </li>
+                      </ul>
+                  </Paragraph>
+                  <div style={{position: "absolute", left: "0", bottom: "20px", width: "100%"}}>
+                      <CalendlyWidget/>
+                  </div>
+              </Card>
           </Col>
         </Row>
       </div>
