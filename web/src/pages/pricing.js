@@ -110,14 +110,22 @@ export default function Pricing() {
                       </ul>
                   </Paragraph>
                   <div style={{position: "absolute", left: "0", bottom: "20px", width: "100%"}}>
-                      <Button
-                          href="../../docs/installation/install"
-                          shape="round"
-                          size={"large"}
-                          className={styles.pricingButton}
+                      <ConfigProvider
+                          theme={{
+                              token: {
+                                  colorPrimary: "#FFF",
+                              },
+                          }}
                       >
-                          <h2 style={{margin: 0}}>Quickstart Guide</h2>
-                      </Button>
+                          <Button
+                              href="../../docs/installation/install"
+                              shape="round"
+                              size={"large"}
+                              className={styles.pricingButton}
+                          >
+                              <h2 style={{margin: 0}}>Quickstart Guide</h2>
+                          </Button>
+                      </ConfigProvider>
                   </div>
               </Card>
           </Col>
