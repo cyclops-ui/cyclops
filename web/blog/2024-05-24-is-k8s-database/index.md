@@ -21,9 +21,9 @@ We're developing Cyclops as an open-source project. If you're keen to give it a 
 
 Before diving into CRDs, let's take a step back and look at Kubernetes control plane components, specifically Kubernetes API and its ETCD database. We made a [blog](https://dev.to/cyclops-ui/complexity-by-simplicity-a-deep-dive-into-kubernetes-components-4l59) on each one of those components previously, so feel free to check it out for more details.
 
-You will likely talk to your Kubernetes cluster using the command-line tool `[kubectl](https://kubernetes.io/docs/reference/kubectl/)`. This tool allows you to create, read, and delete resources in your Kubernetes clusters. When I say “talk” to a Kubernetes cluster, I mean making requests against the API. Kubernetes API is the only component we, as users, ever interact with.
+You will likely talk to your Kubernetes cluster using the command-line tool [kubectl](https://kubernetes.io/docs/reference/kubectl/). This tool allows you to create, read, and delete resources in your Kubernetes clusters. When I say “talk” to a Kubernetes cluster, I mean making requests against the API. Kubernetes API is the only component we, as users, ever interact with.
 
-Each time we create or update a K8s resource, the Kubernetes API stores it in its database—`etcd`. [etcd](https://etcd.io/) is a distributed key-value store used to store all of your resource configurations, such as deployments, services, and so on. A neat feature of `etcd` is that you can subscribe to changes in some keys in the database, which is used by other Kubernetes mechanisms.
+Each time we create or update a K8s resource, the Kubernetes API stores it in its database — `etcd`. [etcd](https://etcd.io/) is a distributed key-value store used to store all of your resource configurations, such as deployments, services, and so on. A neat feature of `etcd` is that you can subscribe to changes in some keys in the database, which is used by other Kubernetes mechanisms.
 
 ![Kubernetes control plane](../../static/img/2024-05-24-is-k8s-database/k8s-cp.png)
 
@@ -48,7 +48,7 @@ spec:
 and apply it to the cluster using `kubectl`:
 
 ```bash
-**kubectl apply -f service.yaml**
+kubectl apply -f service.yaml
 
 service/my-service created
 ```
@@ -115,7 +115,7 @@ We defined two properties for version `v1alpha1` under `.properties.spec`:
 To tell the Kubernetes API, there is a new type of object, we can just apply the previous file to the cluster:
 
 ```bash
-**kubectl apply -f apple-crd.yaml**
+kubectl apply -f apple-crd.yaml
 
 customresourcedefinition.apiextensions.k8s.io/apples.my-fruit.com created
 ```
@@ -139,7 +139,7 @@ spec:
 and apply it to the cluster:
 
 ```bash
-**kubectl apply -f green-apple.yaml**
+kubectl apply -f green-apple.yaml
 
 apple.my-fruit.com/green-apple created
 ```
@@ -147,7 +147,7 @@ apple.my-fruit.com/green-apple created
 Now, your cluster can handle one more type of resource, and you can store and handle your custom data inside the same Kubernetes cluster. This is now a completely valid command:
 
 ```bash
-**kubectl get apples**
+kubectl get apples
 
 NAME          AGE
 green-apple   6s
@@ -159,8 +159,8 @@ Now that we know we can store any type of object in our Kubernetes database and 
 
 Obviously, your application data (like fruits in the example) would fall into the **misuse** category when talking about CRDs. You should develop stand-alone APIs with separate databases for such cases.
 
-CRDs are a great fit if you need your objects to be accessible through `kubectl` and the API to the object is [declarative](https://kubernetes.io/docs/concepts/extend-kubernetes/api-extension/custom-resources/#declarative-apis). Also, another great use case for extending the Kubernetes API is when you are implementing the [Kubernetes Operator patter](https://kubernetes.io/docs/concepts/extend-kubernetes/operator/)n, but more on that in future blog posts 😄
+CRDs are a great fit if you need your objects to be accessible through `kubectl` and the API to the object is [declarative](https://kubernetes.io/docs/concepts/extend-kubernetes/api-extension/custom-resources/#declarative-apis). Also, another great use case for extending the Kubernetes API is when you are implementing the [Kubernetes Operator pattern](https://kubernetes.io/docs/concepts/extend-kubernetes/operator/), but more on that in future blog posts 😄
 
 On the other hand, if you decide to go the CRD route, you are very much dependent on how K8s API works with resources, and you can get restricted because of its API groups and namespaces.
 
-Kubernetes CRDs are a powerful tool and can help you build new developer platforms and tools. We at Cyclops develop on top of our CRDs so feel free to check them out on our repository https://github.com/cyclops-ui/cyclops
+Kubernetes CRDs are a powerful tool and can help you build new developer platforms and tools. We at Cyclops develop on top of our CRDs so feel free to check them out on our [repository](https://github.com/cyclops-ui/cyclops).
