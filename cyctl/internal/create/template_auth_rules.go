@@ -28,7 +28,6 @@ var (
 
 // createTemplateAuthRule allows you to create create TemplateAuthRule Custom Resource.
 func createTemplateAuthRule(clientset *client.CyclopsV1Alpha1Client, templateAuthRuleName string) {
-	_ = clientset
 	usernameSlice := strings.Split(username, ":")
 	passwordSlice := strings.Split(password, ":")
 
