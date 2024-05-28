@@ -355,15 +355,10 @@ spec:
   ingress:
     - {}
   egress:
-    - to:
-      - podSelector:
-          matchLabels:
-            app: cyclops-ctrl
-      ports:
-        - protocol: TCP
-          port: 8080
+    - {}
   policyTypes:
     - Ingress
+    - Egress
 ---
 apiVersion: apps/v1
 kind: Deployment
