@@ -5,11 +5,8 @@ import {
   Divider,
   Row,
   Select,
-  Table,
-  Tag,
   Typography,
   Input,
-  Space,
   Card,
   Alert,
   Empty,
@@ -19,6 +16,7 @@ import axios from "axios";
 import Link from "antd/lib/typography/Link";
 
 import styles from "./styles.module.css";
+import { PlusCircleOutlined } from "@ant-design/icons";
 
 const { Title } = Typography;
 
@@ -127,7 +125,15 @@ const Modules = () => {
           <Title level={2}>Deployed modules</Title>
         </Col>
         <Col span={6}>
-          <Button onClick={handleClick} block>
+          <Button
+            onClick={handleClick}
+            block
+            size={"large"}
+            style={{
+              fontWeight: "600",
+            }}
+          >
+            <PlusCircleOutlined />
             Add module
           </Button>
         </Col>
