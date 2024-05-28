@@ -36,7 +36,7 @@ glasskube install cyclops
 and open Cyclops with
 
 ```shell
-glasskube open cylcops
+glasskube open cyclops
 ```
 
 You can now access Cyclops in your browser on [http://localhost:3000](http://localhost:3000).
