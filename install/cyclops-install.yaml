@@ -352,6 +352,8 @@ spec:
   podSelector:
     matchLabels:
       app: cyclops-ui
+  ingress:
+    - {}
   egress:
     - to:
       - podSelector:
@@ -361,7 +363,7 @@ spec:
         - protocol: TCP
           port: 8080
   policyTypes:
-    - Egress
+    - Ingress
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -435,5 +437,8 @@ spec:
       ports:
         - protocol: TCP
           port: 8080
+  egress:
+    - {}
   policyTypes:
   - Ingress
+  - Egress
