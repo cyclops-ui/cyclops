@@ -222,7 +222,9 @@ const ModuleHistory = () => {
       <Modal
         title="Manifest"
         open={manifestModal.open}
-        onCancel={handleCancelManifest}
+        onOk={handleCancelManifest}
+        //onCancel={handleCancelManifest}
+        cancelButtonProps={{style:{display: 'none'}}}
         width={"40%"}
       >
         <ReactAce
