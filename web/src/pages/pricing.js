@@ -100,7 +100,7 @@ export default function Pricing() {
           gutter={[40, 40]}
           style={{ minHeight: "80vh", padding: "5vh 5vw 15vh 5vw" }}
         >
-          <Col xs={24} sm={24} md={16} lg={16} xl={8}>
+          <Col xs={24} sm={24} md={24} lg={8} xl={8}>
             <Card bordered={false} className={styles.pricingCard}>
               <h4 style={{ fontSize: "1.6rem", color: "#FFF" }}>
                 We are Open Source!
@@ -155,7 +155,7 @@ export default function Pricing() {
               </div>
             </Card>
           </Col>
-          <Col xs={24} sm={24} md={16} lg={16} xl={8}>
+          <Col xs={24} sm={24} md={24} lg={8} xl={8}>
             <Card bordered={false} className={styles.pricingCard}>
               <h4 style={{ fontSize: "1.6rem", color: "#FFF" }}>
                 Need onboarding?
@@ -199,7 +199,7 @@ export default function Pricing() {
               </div>
             </Card>
           </Col>
-          <Col xs={24} sm={24} md={16} lg={16} xl={8}>
+          <Col xs={24} sm={24} md={24} lg={8} xl={8}>
             <Card bordered={false} className={styles.pricingCard}>
               <h4 style={{ fontSize: "1.6rem", color: "#FFF" }}>
                 Looking for something more?
