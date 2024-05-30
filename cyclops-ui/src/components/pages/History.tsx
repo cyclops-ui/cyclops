@@ -223,7 +223,7 @@ const ModuleHistory = () => {
         title="Manifest"
         open={manifestModal.open}
         onOk={handleCancelManifest}
-        //onCancel={handleCancelManifest}
+        onCancel={handleCancelManifest}
         cancelButtonProps={{style:{display: 'none'}}}
         width={"40%"}
       >
