@@ -471,7 +471,10 @@ func (k *KubernetesClient) mapDaemonSet(group, version, kind, name, namespace st
 		return nil, err
 	}
 
-	// TODO pods handling
+	pods, err := k.getPodsForDaemonSet(*daemonSet)
+	if err != nil {
+		return nil, err
+	}
 
 	return &dto.DaemonSet{
 		Group:     group,
@@ -479,6 +482,8 @@ func (k *KubernetesClient) mapDaemonSet(group, version, kind, name, namespace st
 		Kind:      kind,
 		Name:      daemonSet.Name,
 		Namespace: daemonSet.Namespace,
+		Pods:      pods,
+		Status:    getDaemonSetStatus(pods),
 	}, nil
 }
 

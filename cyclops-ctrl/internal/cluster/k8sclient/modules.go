@@ -2,9 +2,10 @@ package k8sclient
 
 import (
 	"context"
-	"github.com/pkg/errors"
 	"sort"
 	"strings"
+
+	"github.com/pkg/errors"
 
 	appsv1 "k8s.io/api/apps/v1"
 	apiv1 "k8s.io/api/core/v1"
@@ -350,6 +351,52 @@ func (k *KubernetesClient) getPods(deployment appsv1.Deployment) ([]dto.Pod, err
 	return out, nil
 }
 
+func (k *KubernetesClient) getPodsForDaemonSet(daemonSet appsv1.DaemonSet) ([]dto.Pod, error) {
+	pods, err := k.clientset.CoreV1().Pods(daemonSet.Namespace).List(context.Background(), metav1.ListOptions{
+		LabelSelector: labels.Set(daemonSet.Spec.Selector.MatchLabels).String(),
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	out := make([]dto.Pod, 0, len(pods.Items))
+	for _, item := range pods.Items {
+		containers := make([]dto.Container, 0, len(item.Spec.Containers))
+
+		for _, cnt := range item.Spec.Containers {
+			env := make(map[string]string)
+			for _, envVar := range cnt.Env {
+				env[envVar.Name] = envVar.Value
+			}
+
+			var status apiv1.ContainerStatus
+			for _, c := range item.Status.ContainerStatuses {
+				if c.Name == cnt.Name {
+					status = c
+					break
+				}
+			}
+
+			containers = append(containers, dto.Container{
+				Name:   cnt.Name,
+				Image:  cnt.Image,
+				Env:    env,
+				Status: containerStatus(status),
+			})
+		}
+
+		out = append(out, dto.Pod{
+			Name:       item.Name,
+			Containers: containers,
+			Node:       item.Spec.NodeName,
+			PodPhase:   string(item.Status.Phase),
+			Started:    item.Status.StartTime,
+		})
+	}
+
+	return out, nil
+}
+
 func (k *KubernetesClient) getStatefulsetPods(deployment appsv1.StatefulSet) ([]dto.Pod, error) {
 	pods, err := k.clientset.CoreV1().Pods(deployment.Namespace).List(context.Background(), metav1.ListOptions{
 		LabelSelector: labels.Set(deployment.Spec.Selector.MatchLabels).String(),
@@ -444,6 +491,22 @@ func containerStatus(status apiv1.ContainerStatus) dto.ContainerStatus {
 }
 
 func getDeploymentStatus(pods []dto.Pod) bool {
+	for _, pod := range pods {
+		for _, container := range pod.Containers {
+			if !container.Status.Running {
+				return false
+			}
+		}
+	}
+
+	return true
+}
+
+func getDaemonSetStatus(pods []dto.Pod) bool {
+	if len(pods) == 0 {
+		return false
+	}
+
 	for _, pod := range pods {
 		for _, container := range pod.Containers {
 			if !container.Status.Running {
