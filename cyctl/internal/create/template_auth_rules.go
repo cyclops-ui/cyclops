@@ -46,6 +46,11 @@ func createTemplateAuthRule(clientset *client.CyclopsV1Alpha1Client, templateAut
 		passwordName = passwordSlice[0]
 	}
 
+	if usernameName == "" || passwordName == "" {
+		fmt.Printf("Invalid format for username or password. Both name and key are required.\n")
+		return
+	}
+
 	var localObjectNameRef, localObjectPasswordRef v1Spec.LocalObjectReference
 	if usernameName != "" {
 		localObjectNameRef = v1Spec.LocalObjectReference{
