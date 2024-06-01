@@ -386,7 +386,7 @@ const ModuleDetails = () => {
     return (
       <Row gutter={[0, 8]}>
         <Col
-          span={15}
+          span={20}
           style={{
             display: "flex",
             justifyContent: "flex-start",
@@ -396,7 +396,7 @@ const ModuleDetails = () => {
             {resource.name} {resource.kind} {statusIcon}
           </h3>
         </Col>
-        <Col span={9} style={{ display: "flex", justifyContent: "flex-end" }}>
+        <Col span={4} style={{ display: "flex", justifyContent: "flex-end" }}>
           {deletedIcon}
         </Col>
       </Row>

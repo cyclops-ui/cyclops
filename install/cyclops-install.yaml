@@ -317,7 +317,7 @@ spec:
     spec:
       containers:
         - name: cyclops-ui
-          image: cyclopsui/cyclops-ui:v0.5.0
+          image: cyclopsui/cyclops-ui:v0.6.1
           ports:
             - containerPort: 80
           env:
@@ -352,15 +352,12 @@ spec:
   podSelector:
     matchLabels:
       app: cyclops-ui
+  ingress:
+    - {}
   egress:
-    - to:
-      - podSelector:
-          matchLabels:
-            app: cyclops-ctrl
-      ports:
-        - protocol: TCP
-          port: 8080
+    - {}
   policyTypes:
+    - Ingress
     - Egress
 ---
 apiVersion: apps/v1
@@ -383,7 +380,7 @@ spec:
       serviceAccountName: cyclops-ctrl
       containers:
         - name: cyclops-ctrl
-          image: cyclopsui/cyclops-ctrl:v0.5.0
+          image: cyclopsui/cyclops-ctrl:v0.6.1
           ports:
             - containerPort: 8080
           env:
@@ -435,5 +432,8 @@ spec:
       ports:
         - protocol: TCP
           port: 8080
+  egress:
+    - {}
   policyTypes:
   - Ingress
+  - Egress

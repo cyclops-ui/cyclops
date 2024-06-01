@@ -60,6 +60,49 @@ func (d *Deployment) SetDeleted(deleted bool) {
 	d.Deleted = deleted
 }
 
+type DaemonSet struct {
+	Group     string `json:"group"`
+	Version   string `json:"version"`
+	Kind      string `json:"kind"`
+	Name      string `json:"name"`
+	Namespace string `json:"namespace"`
+	Pods      []Pod  `json:"pods"`
+	Status    bool   `json:"status"`
+	Deleted   bool   `json:"deleted"`
+}
+
+func (d *DaemonSet) GetGroupVersionKind() string {
+	return d.Group + "/" + d.Version + ", Kind=" + d.Kind
+}
+
+func (d *DaemonSet) GetGroup() string {
+	return d.Group
+}
+
+func (d *DaemonSet) GetVersion() string {
+	return d.Version
+}
+
+func (d *DaemonSet) GetKind() string {
+	return d.Kind
+}
+
+func (d *DaemonSet) GetName() string {
+	return d.Name
+}
+
+func (d *DaemonSet) GetNamespace() string {
+	return d.Namespace
+}
+
+func (d *DaemonSet) GetDeleted() bool {
+	return d.Deleted
+}
+
+func (d *DaemonSet) SetDeleted(deleted bool) {
+	d.Deleted = deleted
+}
+
 type Service struct {
 	Group     string           `json:"group"`
 	Version   string           `json:"version"`

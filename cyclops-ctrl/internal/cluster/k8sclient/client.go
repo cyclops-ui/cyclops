@@ -272,6 +272,8 @@ func (k *KubernetesClient) GetResource(group, version, kind, name, namespace str
 	switch {
 	case isDeployment(group, version, kind):
 		return k.mapDeployment(group, version, kind, name, namespace)
+	case isDaemonSet(group, version, kind):
+		return k.mapDaemonSet(group, version, kind, name, namespace)
 	case isService(group, version, kind):
 		return k.mapService(group, version, kind, name, namespace)
 	case isStatefulSet(group, version, kind):
@@ -460,6 +462,28 @@ func (k *KubernetesClient) mapDeployment(group, version, kind, name, namespace s
 		Replicas:  int(*deployment.Spec.Replicas),
 		Pods:      pods,
 		Status:    getDeploymentStatus(pods),
+	}, nil
+}
+
+func (k *KubernetesClient) mapDaemonSet(group, version, kind, name, namespace string) (*dto.DaemonSet, error) {
+	daemonSet, err := k.clientset.AppsV1().DaemonSets(namespace).Get(context.Background(), name, metav1.GetOptions{})
+	if err != nil {
+		return nil, err
+	}
+
+	pods, err := k.getPodsForDaemonSet(*daemonSet)
+	if err != nil {
+		return nil, err
+	}
+
+	return &dto.DaemonSet{
+		Group:     group,
+		Version:   version,
+		Kind:      kind,
+		Name:      daemonSet.Name,
+		Namespace: daemonSet.Namespace,
+		Pods:      pods,
+		Status:    getDaemonSetStatus(pods),
 	}, nil
 }
 
@@ -657,6 +681,10 @@ func (k *KubernetesClient) isResourceNamespaced(gvk schema.GroupVersionKind) (bo
 
 func isDeployment(group, version, kind string) bool {
 	return group == "apps" && version == "v1" && kind == "Deployment"
+}
+
+func isDaemonSet(group, version, kind string) bool {
+	return group == "apps" && version == "v1" && kind == "DaemonSet"
 }
 
 func isStatefulSet(group, version, kind string) bool {
