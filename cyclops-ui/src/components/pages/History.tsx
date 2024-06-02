@@ -264,6 +264,12 @@ const ModuleHistory = () => {
           useDarkTheme={false}
         />
       </Modal>
+      <Button style={{float:"right"}}
+          htmlType="button"
+          onClick={() => history("/modules/" + moduleName)}
+        >
+          Back
+      </Button>
     </div>
   );
 };
