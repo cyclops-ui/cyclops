@@ -26,28 +26,31 @@ var (
 	password string
 )
 
+func validateSecretKeySelector(username, password string) (string, string, string, string, error) {
+	usernameName, usernameKey := _splitNameKey(username)
+	passwordName, passwordKey := _splitNameKey(password)
+
+	// Ensure both name and key are present
+	if usernameName == "" || usernameKey == "" || passwordName == "" || passwordKey == "" {
+		return "", "", "", "", fmt.Errorf("invalid format for username or password. Expected 'name:key'")
+	}
+
+	return usernameName, usernameKey, passwordName, passwordKey, nil
+}
+
+func _splitNameKey(input string) (string, string) {
+	parts := strings.SplitN(input, ":", 2)
+	if len(parts) < 2 {
+		return "", ""
+	}
+	return parts[0], parts[1]
+}
+
 // createTemplateAuthRule allows you to create create TemplateAuthRule Custom Resource.
 func createTemplateAuthRule(clientset *client.CyclopsV1Alpha1Client, templateAuthRuleName string) {
-	usernameSlice := strings.Split(username, ":")
-	passwordSlice := strings.Split(password, ":")
-
-	// Ensure key is present for both username and password
-	if len(usernameSlice) < 2 || usernameSlice[1] == "" || len(passwordSlice) < 2 || passwordSlice[1] == "" {
-		fmt.Printf("Invalid format for username or password. Expected 'name:key'.\n")
-		return
-	}
-
-	usernameKey, passwordKey := usernameSlice[1], passwordSlice[1]
-	var usernameName, passwordName string
-	if len(usernameSlice) > 1 {
-		usernameName = usernameSlice[0]
-	}
-	if len(passwordSlice) > 1 {
-		passwordName = passwordSlice[0]
-	}
-
-	if usernameName == "" || passwordName == "" {
-		fmt.Printf("Invalid format for username or password. Both name and key are required.\n")
+	usernameName, usernameKey, passwordName, passwordKey, err := validateSecretKeySelector(username, password)
+	if err != nil {
+		fmt.Println(err)
 		return
 	}
 
