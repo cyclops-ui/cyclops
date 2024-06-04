@@ -10,7 +10,7 @@ Please note we have a [code of conduct](./CODE_OF_CONDUCT.md); follow it in all 
 
 Cyclops is a mono-repo that contains both the frontend (`UI`) and the backend (`controller`) of the platform, as well as the code for our website and documentation (`web`).
 
-![img.png](./web/static/img/cyclops-arch.png)
+![Cyclops architecture](./web/static/img/cyclops-arch.png)
 
 - **controller**
 
