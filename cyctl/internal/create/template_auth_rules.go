@@ -27,8 +27,8 @@ var (
 )
 
 func validateSecretKeySelector(username, password string) (string, string, string, string, error) {
-	usernameName, usernameKey := _splitNameKey(username)
-	passwordName, passwordKey := _splitNameKey(password)
+	usernameName, usernameKey := splitNameKey(username)
+	passwordName, passwordKey := splitNameKey(password)
 
 	// Ensure both name and key are present
 	if usernameName == "" || usernameKey == "" || passwordName == "" || passwordKey == "" {
@@ -38,7 +38,7 @@ func validateSecretKeySelector(username, password string) (string, string, strin
 	return usernameName, usernameKey, passwordName, passwordKey, nil
 }
 
-func _splitNameKey(input string) (string, string) {
+func splitNameKey(input string) (string, string) {
 	parts := strings.SplitN(input, ":", 2)
 	if len(parts) < 2 {
 		return "", ""
