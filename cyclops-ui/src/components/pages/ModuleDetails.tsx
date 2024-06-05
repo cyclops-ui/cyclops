@@ -25,7 +25,6 @@ import {
   SearchOutlined,
   WarningTwoTone,
 } from "@ant-design/icons";
-import Link from "antd/lib/typography/Link";
 import "./custom.css";
 
 import "ace-builds/src-noconflict/mode-jsx";
