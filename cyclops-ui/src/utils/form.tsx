@@ -34,7 +34,7 @@ export function flattenObjectKeys(
 }
 
 export function findMaps(fields: any[], values: any, initialValues: any): any {
-  let out: any = initialValues;
+  let out: any = initialValues ? initialValues : {};
   fields.forEach((field) => {
     let valuesList: any[] = [];
     switch (field.type) {

@@ -272,6 +272,8 @@ func (k *KubernetesClient) GetResource(group, version, kind, name, namespace str
 	switch {
 	case isDeployment(group, version, kind):
 		return k.mapDeployment(group, version, kind, name, namespace)
+	case isDaemonSet(group, version, kind):
+		return k.mapDaemonSet(group, version, kind, name, namespace)
 	case isService(group, version, kind):
 		return k.mapService(group, version, kind, name, namespace)
 	case isStatefulSet(group, version, kind):
@@ -282,6 +284,8 @@ func (k *KubernetesClient) GetResource(group, version, kind, name, namespace str
 		return k.mapConfigMap(group, version, kind, name, namespace)
 	case isPersistentVolumeClaims(group, version, kind):
 		return k.mapPersistentVolumeClaims(group, version, kind, name, namespace)
+	case isSecret(group, version, kind):
+		return k.mapSecret(group, version, kind, name, namespace)
 	}
 
 	return nil, nil
@@ -461,6 +465,28 @@ func (k *KubernetesClient) mapDeployment(group, version, kind, name, namespace s
 	}, nil
 }
 
+func (k *KubernetesClient) mapDaemonSet(group, version, kind, name, namespace string) (*dto.DaemonSet, error) {
+	daemonSet, err := k.clientset.AppsV1().DaemonSets(namespace).Get(context.Background(), name, metav1.GetOptions{})
+	if err != nil {
+		return nil, err
+	}
+
+	pods, err := k.getPodsForDaemonSet(*daemonSet)
+	if err != nil {
+		return nil, err
+	}
+
+	return &dto.DaemonSet{
+		Group:     group,
+		Version:   version,
+		Kind:      kind,
+		Name:      daemonSet.Name,
+		Namespace: daemonSet.Namespace,
+		Pods:      pods,
+		Status:    getDaemonSetStatus(pods),
+	}, nil
+}
+
 func (k *KubernetesClient) mapStatefulSet(group, version, kind, name, namespace string) (*dto.StatefulSet, error) {
 	statefulset, err := k.clientset.AppsV1().StatefulSets(namespace).Get(context.Background(), name, metav1.GetOptions{})
 	if err != nil {
@@ -607,6 +633,28 @@ func (k *KubernetesClient) mapPersistentVolumeClaims(group, version, kind, name,
 	}, nil
 }
 
+func (k *KubernetesClient) mapSecret(group, version, kind, name, namespace string) (*dto.Secret, error) {
+	secret, err := k.clientset.CoreV1().Secrets(namespace).Get(context.Background(), name, metav1.GetOptions{})
+	if err != nil {
+		return nil, err
+	}
+
+	dataKeys := make([]string, 0, len(secret.Data))
+	for key := range secret.Data {
+		dataKeys = append(dataKeys, key)
+	}
+
+	return &dto.Secret{
+		Group:     group,
+		Version:   version,
+		Kind:      kind,
+		Name:      name,
+		Namespace: namespace,
+		DataKeys:  dataKeys,
+		Type:      string(secret.Type),
+	}, nil
+}
+
 func (k *KubernetesClient) isResourceNamespaced(gvk schema.GroupVersionKind) (bool, error) {
 	resourcesList, err := k.discovery.ServerPreferredResources()
 	if err != nil {
@@ -635,6 +683,10 @@ func isDeployment(group, version, kind string) bool {
 	return group == "apps" && version == "v1" && kind == "Deployment"
 }
 
+func isDaemonSet(group, version, kind string) bool {
+	return group == "apps" && version == "v1" && kind == "DaemonSet"
+}
+
 func isStatefulSet(group, version, kind string) bool {
 	return group == "apps" && version == "v1" && kind == "StatefulSet"
 }
@@ -653,4 +705,8 @@ func isConfigMap(group, version, kind string) bool {
 
 func isPersistentVolumeClaims(group, version, kind string) bool {
 	return group == "" && version == "v1" && kind == "PersistentVolumeClaim"
+}
+
+func isSecret(group, version, kind string) bool {
+	return group == "" && version == "v1" && kind == "Secret"
 }

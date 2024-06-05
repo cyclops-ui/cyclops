@@ -7,6 +7,8 @@ on:
   push:
     paths:
       - 'cyclops-ui/**'
+    branches:
+      - main
 
 jobs:
   test:

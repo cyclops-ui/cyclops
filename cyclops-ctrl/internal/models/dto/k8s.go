@@ -60,6 +60,49 @@ func (d *Deployment) SetDeleted(deleted bool) {
 	d.Deleted = deleted
 }
 
+type DaemonSet struct {
+	Group     string `json:"group"`
+	Version   string `json:"version"`
+	Kind      string `json:"kind"`
+	Name      string `json:"name"`
+	Namespace string `json:"namespace"`
+	Pods      []Pod  `json:"pods"`
+	Status    bool   `json:"status"`
+	Deleted   bool   `json:"deleted"`
+}
+
+func (d *DaemonSet) GetGroupVersionKind() string {
+	return d.Group + "/" + d.Version + ", Kind=" + d.Kind
+}
+
+func (d *DaemonSet) GetGroup() string {
+	return d.Group
+}
+
+func (d *DaemonSet) GetVersion() string {
+	return d.Version
+}
+
+func (d *DaemonSet) GetKind() string {
+	return d.Kind
+}
+
+func (d *DaemonSet) GetName() string {
+	return d.Name
+}
+
+func (d *DaemonSet) GetNamespace() string {
+	return d.Namespace
+}
+
+func (d *DaemonSet) GetDeleted() bool {
+	return d.Deleted
+}
+
+func (d *DaemonSet) SetDeleted(deleted bool) {
+	d.Deleted = deleted
+}
+
 type Service struct {
 	Group     string           `json:"group"`
 	Version   string           `json:"version"`
@@ -249,14 +292,14 @@ func (s *StatefulSet) SetDeleted(deleted bool) {
 }
 
 type PersistentVolumeClaim struct {
-	Group       string 							`json:"group"`
-	Version     string 							`json:"version"`
-	Kind        string 							`json:"kind"`
-	Name        string 							`json:"name"`
-	Namespace   string 							`json:"namespace"`
+	Group       string                          `json:"group"`
+	Version     string                          `json:"version"`
+	Kind        string                          `json:"kind"`
+	Name        string                          `json:"name"`
+	Namespace   string                          `json:"namespace"`
 	AccessModes []v1.PersistentVolumeAccessMode `json:"accessmodes"`
-	Size        string							`json:"size"`
-	Deleted   	bool   							`json:"deleted"`
+	Size        string                          `json:"size"`
+	Deleted     bool                            `json:"deleted"`
 }
 
 func (p *PersistentVolumeClaim) GetGroupVersionKind() string {
@@ -289,6 +332,57 @@ func (p *PersistentVolumeClaim) GetDeleted() bool {
 
 func (p *PersistentVolumeClaim) SetDeleted(deleted bool) {
 	p.Deleted = deleted
+}
+
+type Secret struct {
+	Group     string   `json:"group"`
+	Version   string   `json:"version"`
+	Kind      string   `json:"kind"`
+	Name      string   `json:"name"`
+	Namespace string   `json:"namespace"`
+	Type      string   `json:"type"`
+	DataKeys  []string `json:"dataKeys"`
+	Deleted   bool     `json:"deleted"`
+}
+
+func (s *Secret) GetGroupVersionKind() string {
+	return s.Group + "/" + s.Version + ", Kind=" + s.Kind
+}
+
+func (s *Secret) GetGroup() string {
+	return s.Group
+}
+
+func (s *Secret) GetVersion() string {
+	return s.Version
+}
+
+func (s *Secret) GetKind() string {
+	return s.Kind
+}
+
+func (s *Secret) GetName() string {
+	return s.Name
+}
+
+func (s *Secret) GetNamespace() string {
+	return s.Namespace
+}
+
+func (s *Secret) GetType() string {
+	return s.Type
+}
+
+func (s *Secret) GetDataKeys() []string {
+	return s.DataKeys
+}
+
+func (s *Secret) GetDeleted() bool {
+	return s.Deleted
+}
+
+func (s *Secret) SetDeleted(deleted bool) {
+	s.Deleted = deleted
 }
 
 type Other struct {

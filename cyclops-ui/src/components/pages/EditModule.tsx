@@ -6,11 +6,9 @@ import {
   Collapse,
   Divider,
   Form,
-  FormListFieldData,
   Input,
   InputNumber,
-  message,
-  Modal,
+  notification,
   Row,
   Select,
   Space,
@@ -48,6 +46,10 @@ import {
   moduleTemplateReferenceView,
   templateRef,
 } from "../../utils/templateRef";
+import {
+  FeedbackError,
+  FormValidationErrors,
+} from "../errors/FormValidationErrors";
 
 const { TextArea } = Input;
 
@@ -103,6 +105,16 @@ const EditModule = () => {
     message: "",
     description: "",
   });
+
+  const [notificationApi, contextHolder] = notification.useNotification();
+  const openNotification = (errors: FeedbackError[]) => {
+    notificationApi.error({
+      message: "Submit failed!",
+      description: <FormValidationErrors errors={errors} />,
+      placement: "topRight",
+      duration: 0,
+    });
+  };
 
   const [loadValues, setLoadValues] = useState(false);
   const [loadTemplate, setLoadTemplate] = useState(false);
@@ -927,8 +939,16 @@ const EditModule = () => {
     );
   };
 
-  const onFinishFailed = () => {
-    message.error("Submit failed!");
+  const onFinishFailed = (errors: any) => {
+    let errorMessages: FeedbackError[] = [];
+    errors.errorFields.forEach(function (error: any) {
+      errorMessages.push({
+        key: error.name.join("."),
+        errors: error.errors,
+      });
+    });
+
+    openNotification(errorMessages);
   };
 
   const lockButton = () => {
@@ -974,6 +994,7 @@ const EditModule = () => {
           style={{ marginBottom: "20px" }}
         />
       )}
+      {contextHolder}
       <Row gutter={[40, 0]}>
         <Col span={24}>
           <Title level={2}>{module.name}</Title>

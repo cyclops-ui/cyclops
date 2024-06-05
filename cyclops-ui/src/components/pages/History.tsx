@@ -222,7 +222,9 @@ const ModuleHistory = () => {
       <Modal
         title="Manifest"
         open={manifestModal.open}
+        onOk={handleCancelManifest}
         onCancel={handleCancelManifest}
+        cancelButtonProps={{ style: { display: "none" } }}
         width={"40%"}
       >
         <ReactAce
@@ -262,6 +264,13 @@ const ModuleHistory = () => {
           useDarkTheme={false}
         />
       </Modal>
+      <Button
+        style={{ float: "right" }}
+        htmlType="button"
+        onClick={() => history("/modules/" + moduleName)}
+      >
+        Back
+      </Button>
     </div>
   );
 };
