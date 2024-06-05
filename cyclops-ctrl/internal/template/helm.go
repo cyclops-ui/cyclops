@@ -272,7 +272,7 @@ func (r Repo) mapHelmChartInitialValues(files map[string][]byte) (map[interface{
 		}
 	}
 
-	var values map[interface{}]interface{}
+	values := make(map[interface{}]interface{})
 	if err := yaml.Unmarshal(valuesBytes, &values); err != nil {
 		return nil, err
 	}
