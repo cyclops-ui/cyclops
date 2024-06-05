@@ -73,9 +73,9 @@ type ModuleStatus struct {
 }
 
 type HistoryTemplateRef struct {
-	URL             string `json:"repo"`
-	Path            string `json:"path"`
-	ResolvedVersion string `json:"resolvedVersion"`
+	URL     string `json:"repo"`
+	Path    string `json:"path"`
+	Version string `json:"version"`
 }
 
 type HistoryEntry struct {

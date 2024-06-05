@@ -128,7 +128,7 @@ func (m *Modules) Manifest(ctx *gin.Context) {
 	targetTemplate, err := m.templatesRepo.GetTemplate(
 		request.TemplateRef.URL,
 		request.TemplateRef.Path,
-		request.TemplateRef.ResolvedVersion,
+		request.TemplateRef.Version,
 	)
 	if err != nil {
 		fmt.Println(err)
@@ -141,7 +141,7 @@ func (m *Modules) Manifest(ctx *gin.Context) {
 			TemplateRef: v1alpha1.TemplateRef{
 				URL:     request.TemplateRef.URL,
 				Path:    request.TemplateRef.Path,
-				Version: request.TemplateRef.ResolvedVersion,
+				Version: request.TemplateRef.Version,
 			},
 			Values: request.Values,
 		},
@@ -274,9 +274,9 @@ func (m *Modules) UpdateModule(ctx *gin.Context) {
 	module.History = append([]v1alpha1.HistoryEntry{{
 		Generation: curr.Generation,
 		TemplateRef: v1alpha1.HistoryTemplateRef{
-			URL:             curr.Spec.TemplateRef.URL,
-			Path:            curr.Spec.TemplateRef.Path,
-			ResolvedVersion: curr.Status.TemplateResolvedVersion,
+			URL:     curr.Spec.TemplateRef.URL,
+			Path:    curr.Spec.TemplateRef.Path,
+			Version: curr.Status.TemplateResolvedVersion,
 		},
 		Values: curr.Spec.Values,
 	}}, history...)

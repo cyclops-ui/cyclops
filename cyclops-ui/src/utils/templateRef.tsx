@@ -27,7 +27,9 @@ export function githubTemplateReferenceView(templateRef: templateRef) {
     refView += " @ " + templateRef.version;
   }
 
-  refView += " - " + templateRef.resolvedVersion.substring(0, 7);
+  if (templateRef.resolvedVersion && templateRef.resolvedVersion !== "") {
+    refView += " - " + templateRef.resolvedVersion.substring(0, 7);
+  }
 
   return (
     <Row>

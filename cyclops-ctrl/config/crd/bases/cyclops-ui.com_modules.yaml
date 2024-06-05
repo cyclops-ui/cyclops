@@ -37,12 +37,12 @@ spec:
                       type: string
                     repo:
                       type: string
-                    resolvedVersion:
+                    version:
                       type: string
                   required:
                   - path
                   - repo
-                  - resolvedVersion
+                  - version
                   type: object
                 values:
                   x-kubernetes-preserve-unknown-fields: true
