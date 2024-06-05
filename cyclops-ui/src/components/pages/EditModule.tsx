@@ -925,7 +925,12 @@ const EditModule = () => {
           config.root.required,
         )}
         <div style={{ textAlign: "right" }}>
-          <Button type="primary" htmlType="submit" name="Save">
+          <Button
+            type="primary"
+            htmlType="submit"
+            name="Save"
+            disabled={!isChanged}
+          >
             Save
           </Button>{" "}
           <Button
@@ -1086,31 +1091,6 @@ const EditModule = () => {
               Edit Module
             </Divider>
             {formLoading()}
-            {mapFields(
-              config.root.properties,
-              [],
-              "",
-              0,
-              0,
-              undefined,
-              config.root.required,
-            )}
-            <div style={{ textAlign: "right" }}>
-              <Button
-                type="primary"
-                htmlType="submit"
-                name="Save"
-                disabled={!isChanged}
-              >
-                Save
-              </Button>{" "}
-              <Button
-                htmlType="button"
-                onClick={() => history("/modules/" + moduleName)}
-              >
-                Back
-              </Button>
-            </div>
           </Form>
         </Col>
       </Row>
