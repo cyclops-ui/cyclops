@@ -92,6 +92,8 @@ spec:
                     type: array
                   reason:
                     type: string
+                  retries:
+                    type: integer
                   status:
                     default: unknown
                     enum:
