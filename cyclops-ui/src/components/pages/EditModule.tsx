@@ -84,6 +84,7 @@ const EditModule = () => {
   const [allConfigs, setAllConfigs] = useState([]);
   const [values, setValues] = useState({});
   const [isChanged, setIsChanged] = useState(false);
+  const [isTemplateChanged, setIsTemplateChanged] = useState(false);
   const [config, setConfig] = useState({
     name: "",
     manifest: "",
@@ -298,6 +299,26 @@ const EditModule = () => {
     }
   };
 
+  const handleTemplateRefChange = (
+    repo: string,
+    path: string,
+    version: string,
+    resolvedVersion: string,
+  ) => {
+    let newTemplate: templateRef = {
+      repo: repo,
+      path: path,
+      version: version,
+      resolvedVersion: resolvedVersion,
+    };
+
+    if (JSON.stringify(module.template) === JSON.stringify(newTemplate)) {
+      setIsTemplateChanged(false);
+    } else {
+      setIsTemplateChanged(true);
+    }
+  };
+
   const handleSubmitTemplateEdit = (values: any) => {
     setLoadTemplate(false);
     axios
@@ -318,6 +339,12 @@ const EditModule = () => {
           version: values.version,
           resolvedVersion: res.data.resolvedVersion,
         });
+        handleTemplateRefChange(
+          values.repo,
+          values.path,
+          values.version,
+          res.data.resolvedVersion,
+        );
       })
       .catch((error) => {
         setLoadTemplate(true);
@@ -929,7 +956,7 @@ const EditModule = () => {
             type="primary"
             htmlType="submit"
             name="Save"
-            disabled={!isChanged}
+            disabled={!isChanged && !isTemplateChanged}
           >
             Save
           </Button>{" "}
