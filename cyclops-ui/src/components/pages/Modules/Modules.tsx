@@ -95,12 +95,17 @@ const Modules = () => {
     return "#FF0000";
   };
 
-  const getTemplateVersion = (version: string) => {
+  const getTemplateVersion = (version: string, resolvedVersion: string) => {
     if (version === "") {
-      return "main";
+      return (
+        <span>
+          <span style={{ color: "#A0A0A0" }}>{"<default>"}</span>
+          {" - " + resolvedVersion.substring(0, 7)}
+        </span>
+      );
     }
 
-    return version;
+    return version + " - " + resolvedVersion.substring(0, 7);
   };
 
   return (
@@ -198,7 +203,10 @@ const Modules = () => {
                         href={
                           module.template.repo +
                           `/tree/` +
-                          getTemplateVersion(module.template.version) +
+                          getTemplateVersion(
+                            module.template.version,
+                            module.template.resolvedVersion,
+                          ) +
                           `/` +
                           module.template.path
                         }
@@ -217,7 +225,14 @@ const Modules = () => {
                         display: "block",
                       }}
                     >
-                      Version: {getTemplateVersion(module.template.version)}
+                      Version:
+                      <span style={{ color: "#1677ff" }}>
+                        {" "}
+                        {getTemplateVersion(
+                          module.template.version,
+                          module.template.resolvedVersion,
+                        )}
+                      </span>
                     </Col>
                   </Row>
                 </Card>

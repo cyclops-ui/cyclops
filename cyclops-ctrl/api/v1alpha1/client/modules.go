@@ -18,6 +18,7 @@ type ModuleInterface interface {
 	Update(*cyclopsv1alpha1.Module) (*cyclopsv1alpha1.Module, error)
 	Watch(opts metav1.ListOptions) (watch.Interface, error)
 	Delete(name string) error
+	UpdateSubresource(module *cyclopsv1alpha1.Module, subresources ...string) (*cyclopsv1alpha1.Module, error)
 }
 
 type moduleClient struct {
@@ -64,17 +65,17 @@ func (c *moduleClient) Create(project *cyclopsv1alpha1.Module) (*cyclopsv1alpha1
 	return &result, err
 }
 
-// Update takes the representation of a service and updates it. Returns the server's representation of the service, and an error, if there is any.
-func (c *moduleClient) Update(module *cyclopsv1alpha1.Module) (project *cyclopsv1alpha1.Module, err error) {
+func (c *moduleClient) Update(module *cyclopsv1alpha1.Module) (*cyclopsv1alpha1.Module, error) {
 	result := &cyclopsv1alpha1.Module{}
-	err = c.restClient.Put().
+	err := c.restClient.Put().
 		Namespace(c.ns).
 		Resource("modules").
 		Name(module.Name).
 		Body(module).
 		Do(context.TODO()).
 		Into(result)
-	return
+
+	return result, err
 }
 
 func (c *moduleClient) Watch(opts metav1.ListOptions) (watch.Interface, error) {
@@ -98,4 +99,19 @@ func (c *moduleClient) Delete(name string) error {
 		Name(name).
 		Do(context.Background()).
 		Error()
+}
+
+func (c *moduleClient) UpdateSubresource(module *cyclopsv1alpha1.Module, subresources ...string) (*cyclopsv1alpha1.Module, error) {
+	result := &cyclopsv1alpha1.Module{}
+
+	err := c.restClient.Put().
+		Namespace(c.ns).
+		Resource("modules").
+		Name(module.Name).
+		SubResource(subresources...).
+		Body(module).
+		Do(context.TODO()).
+		Into(result)
+
+	return result, err
 }

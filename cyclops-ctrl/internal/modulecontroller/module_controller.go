@@ -95,11 +95,6 @@ func (r *ModuleReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctr
 		resources, err := r.kubernetesClient.GetResourcesForModule(req.Name)
 		if err != nil {
 			r.logger.Error(err, "error on get module resources", "namespaced name", req.NamespacedName)
-
-			if err = r.setStatus(ctx, module, req.NamespacedName, cyclopsv1alpha1.Failed, err.Error(), nil); err != nil {
-				return ctrl.Result{}, err
-			}
-
 			return ctrl.Result{}, err
 		}
 
@@ -113,10 +108,6 @@ func (r *ModuleReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctr
 					"resource namespaced name",
 					fmt.Sprintf("%s/%s", resource.GetNamespace(), resource.GetName()),
 				)
-
-				if err = r.setStatus(ctx, module, req.NamespacedName, cyclopsv1alpha1.Failed, err.Error(), nil); err != nil {
-					return ctrl.Result{}, err
-				}
 			}
 		}
 
@@ -128,11 +119,31 @@ func (r *ModuleReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctr
 
 	r.logger.Info("upsert module", "namespaced name", req.NamespacedName)
 
-	installErrors, err := r.moduleToResources(req.Name)
+	templateVersion := module.Status.TemplateResolvedVersion
+	if len(templateVersion) == 0 {
+		templateVersion = module.Spec.TemplateRef.Version
+	}
+
+	template, err := r.templatesRepo.GetTemplate(
+		module.Spec.TemplateRef.URL,
+		module.Spec.TemplateRef.Path,
+		templateVersion,
+	)
+	if err != nil {
+		r.logger.Error(err, "error fetching module template", "namespaced name", req.NamespacedName)
+
+		if err = r.setStatus(ctx, module, req.NamespacedName, cyclopsv1alpha1.Failed, templateVersion, err.Error(), nil); err != nil {
+			return ctrl.Result{}, err
+		}
+
+		return ctrl.Result{}, err
+	}
+
+	installErrors, err := r.moduleToResources(req.Name, template)
 	if err != nil {
 		r.logger.Error(err, "error on upsert module", "namespaced name", req.NamespacedName)
 
-		if err = r.setStatus(ctx, module, req.NamespacedName, cyclopsv1alpha1.Failed, err.Error(), nil); err != nil {
+		if err = r.setStatus(ctx, module, req.NamespacedName, cyclopsv1alpha1.Failed, template.ResolvedVersion, err.Error(), nil); err != nil {
 			return ctrl.Result{}, err
 		}
 
@@ -145,12 +156,13 @@ func (r *ModuleReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctr
 			module,
 			req.NamespacedName,
 			cyclopsv1alpha1.Failed,
+			template.ResolvedVersion,
 			"error decoding/applying resources",
 			installErrors,
 		)
 	}
 
-	return ctrl.Result{}, r.setStatus(ctx, module, req.NamespacedName, cyclopsv1alpha1.Succeeded, "", nil)
+	return ctrl.Result{}, r.setStatus(ctx, module, req.NamespacedName, cyclopsv1alpha1.Succeeded, template.ResolvedVersion, "", nil)
 }
 
 // SetupWithManager sets up the controller with the Manager.
@@ -160,17 +172,8 @@ func (r *ModuleReconciler) SetupWithManager(mgr ctrl.Manager) error {
 		Complete(r)
 }
 
-func (r *ModuleReconciler) moduleToResources(name string) ([]string, error) {
+func (r *ModuleReconciler) moduleToResources(name string, template *models.Template) ([]string, error) {
 	module, err := r.kubernetesClient.GetModule(name)
-	if err != nil {
-		return nil, err
-	}
-
-	template, err := r.templatesRepo.GetTemplate(
-		module.Spec.TemplateRef.URL,
-		module.Spec.TemplateRef.Path,
-		module.Spec.TemplateRef.Version,
-	)
 	if err != nil {
 		return nil, err
 	}
@@ -267,14 +270,23 @@ func (r *ModuleReconciler) setStatus(
 	module cyclopsv1alpha1.Module,
 	namespacedName types.NamespacedName,
 	status cyclopsv1alpha1.ReconciliationStatusState,
+	templateResolvedVersion string,
 	reason string,
 	installErrors []string,
 ) error {
-	module.Status = cyclopsv1alpha1.ModuleStatus{ReconciliationStatus: cyclopsv1alpha1.ReconciliationStatus{
-		Status: status,
-		Reason: reason,
-		Errors: installErrors,
-	}}
+	trv := module.Status.TemplateResolvedVersion
+	if len(trv) == 0 {
+		trv = templateResolvedVersion
+	}
+
+	module.Status = cyclopsv1alpha1.ModuleStatus{
+		ReconciliationStatus: cyclopsv1alpha1.ReconciliationStatus{
+			Status: status,
+			Reason: reason,
+			Errors: installErrors,
+		},
+		TemplateResolvedVersion: templateResolvedVersion,
+	}
 
 	if err := r.Status().Update(ctx, &module); err != nil {
 		r.logger.Error(err, "error updating module status", "namespaced name", namespacedName)

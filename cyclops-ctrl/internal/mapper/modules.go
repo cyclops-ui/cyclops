@@ -41,7 +41,7 @@ func ModuleToDTO(module cyclopsv1alpha1.Module) (dto.Module, error) {
 		Name:      module.Name,
 		Namespace: module.Namespace,
 		Version:   module.Spec.TemplateRef.Version,
-		Template:  k8sTemplateRefToDTO(module.Spec.TemplateRef),
+		Template:  k8sTemplateRefToDTO(module.Spec.TemplateRef, module.Status.TemplateResolvedVersion),
 		Values:    module.Spec.Values,
 	}, nil
 }
@@ -55,7 +55,7 @@ func ModuleListToDTO(modules []cyclopsv1alpha1.Module) []dto.Module {
 			Name:      module.Name,
 			Namespace: module.Namespace,
 			Version:   module.Spec.TemplateRef.Version,
-			Template:  k8sTemplateRefToDTO(module.Spec.TemplateRef),
+			Template:  k8sTemplateRefToDTO(module.Spec.TemplateRef, module.Status.TemplateResolvedVersion),
 			Values:    values,
 		})
 	}
@@ -71,11 +71,12 @@ func DtoTemplateRefToK8s(dto dto.Template) cyclopsv1alpha1.TemplateRef {
 	}
 }
 
-func k8sTemplateRefToDTO(templateRef cyclopsv1alpha1.TemplateRef) dto.Template {
+func k8sTemplateRefToDTO(templateRef cyclopsv1alpha1.TemplateRef, templateResolvedVersion string) dto.Template {
 	return dto.Template{
-		URL:     templateRef.URL,
-		Path:    templateRef.Path,
-		Version: templateRef.Version,
+		URL:             templateRef.URL,
+		Path:            templateRef.Path,
+		Version:         templateRef.Version,
+		ResolvedVersion: templateResolvedVersion,
 	}
 }
 
