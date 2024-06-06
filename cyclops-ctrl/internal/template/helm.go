@@ -68,6 +68,9 @@ func (r Repo) LoadHelmChart(repo, chart, version string) (*models.Template, erro
 		return nil, err
 	}
 
+	template.Version = version
+	template.ResolvedVersion = strictVersion
+
 	r.cache.SetTemplate(repo, chart, strictVersion, template)
 
 	return template, nil
@@ -234,9 +237,6 @@ func (r Repo) mapHelmChart(chartName string, files map[string][]byte) (*models.T
 	return &models.Template{
 		Name:         chartName,
 		RootField:    mapper.HelmSchemaToFields("", schema, dependencies),
-		Created:      "",
-		Edited:       "",
-		Version:      "",
 		Files:        chartFiles,
 		Templates:    templateFiles,
 		Dependencies: dependencies,

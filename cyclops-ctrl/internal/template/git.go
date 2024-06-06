@@ -50,6 +50,9 @@ func (r Repo) LoadTemplate(repoURL, path, commit string) (*models.Template, erro
 			return nil, err
 		}
 
+		ghTemplate.Version = commit
+		ghTemplate.ResolvedVersion = commitSHA
+
 		r.cache.SetTemplate(repoURL, path, commitSHA, ghTemplate)
 
 		return ghTemplate, nil
@@ -130,14 +133,15 @@ func (r Repo) LoadTemplate(repoURL, path, commit string) (*models.Template, erro
 	// endregion
 
 	template := &models.Template{
-		Name:         "",
-		Manifest:     strings.Join(manifests, "---\n"),
-		RootField:    mapper.HelmSchemaToFields("", schema, dependencies),
-		Created:      "",
-		Edited:       "",
-		Version:      "",
-		Files:        chartFiles,
-		Dependencies: dependencies,
+		Name:            "",
+		Manifest:        strings.Join(manifests, "---\n"),
+		RootField:       mapper.HelmSchemaToFields("", schema, dependencies),
+		Created:         "",
+		Edited:          "",
+		Version:         commit,
+		ResolvedVersion: commitSHA,
+		Files:           chartFiles,
+		Dependencies:    dependencies,
 	}
 
 	r.cache.SetTemplate(repoURL, path, commitSHA, template)

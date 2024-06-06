@@ -99,12 +99,12 @@ spec:
                     - succeeded
                     - failed
                     type: string
-                required:
-                - reason
-                - status
                 type: object
+              templateResolvedVersion:
+                type: string
             required:
             - reconciliationStatus
+            - templateResolvedVersion
             type: object
         type: object
     served: true

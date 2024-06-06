@@ -21,8 +21,10 @@ import axios from "axios";
 import { useNavigate } from "react-router";
 import {
   InfoCircleOutlined,
+  LockFilled,
   MinusCircleOutlined,
   PlusOutlined,
+  UnlockFilled,
 } from "@ant-design/icons";
 
 import AceEditor from "react-ace";
@@ -41,6 +43,10 @@ import "./custom.css";
 import { numberInputValidators } from "../../utils/validators/number";
 import { stringInputValidators } from "../../utils/validators/string";
 import {
+  moduleTemplateReferenceView,
+  templateRef,
+} from "../../utils/templateRef";
+import {
   FeedbackError,
   FormValidationErrors,
 } from "../errors/FormValidationErrors";
@@ -52,24 +58,33 @@ const layout = {
   wrapperCol: { span: 16 },
 };
 
+interface module {
+  name: string;
+  values: any;
+  template: templateRef;
+}
+
 const EditModule = () => {
-  const [module, setModule] = useState({
+  const [module, setModule] = useState<module>({
     name: "",
     values: {},
     template: {
       repo: "",
       path: "",
       version: "",
+      resolvedVersion: "",
     },
   });
 
   const [previousValues, setPreviousValues] = useState();
 
   const [form] = Form.useForm();
+  const [editTemplateForm] = Form.useForm();
 
   const [allConfigs, setAllConfigs] = useState([]);
   const [values, setValues] = useState({});
   const [isChanged, setIsChanged] = useState(false);
+  const [isTemplateChanged, setIsTemplateChanged] = useState(false);
   const [config, setConfig] = useState({
     name: "",
     manifest: "",
@@ -78,6 +93,15 @@ const EditModule = () => {
       required: [],
     },
   });
+
+  const [templateRef, setTemplateRef] = useState<templateRef>({
+    repo: "",
+    path: "",
+    version: "",
+    resolvedVersion: "",
+  });
+  const [templateRefLock, setTemplateRefLock] = useState(true);
+
   const [error, setError] = useState({
     message: "",
     description: "",
@@ -178,6 +202,19 @@ const EditModule = () => {
       .then((res) => {
         setLoadValues(true);
 
+        editTemplateForm.setFieldsValue({
+          repo: res.data.template.repo,
+          path: res.data.template.path,
+          version: res.data.template.version,
+        });
+
+        setTemplateRef({
+          repo: res.data.template.repo,
+          path: res.data.template.path,
+          version: res.data.template.version,
+          resolvedVersion: res.data.template.resolvedVersion,
+        });
+
         axios
           .get(
             `/api/templates?repo=` +
@@ -185,7 +222,7 @@ const EditModule = () => {
               `&path=` +
               res.data.template.path +
               `&commit=` +
-              res.data.template.version,
+              res.data.template.resolvedVersion,
           )
           .then((templatesRes) => {
             setConfig(templatesRes.data);
@@ -262,6 +299,74 @@ const EditModule = () => {
     }
   };
 
+  const handleTemplateRefChange = (
+    repo: string,
+    path: string,
+    version: string,
+    resolvedVersion: string,
+  ) => {
+    let newTemplate: templateRef = {
+      repo: repo,
+      path: path,
+      version: version,
+      resolvedVersion: resolvedVersion,
+    };
+
+    if (JSON.stringify(module.template) === JSON.stringify(newTemplate)) {
+      setIsTemplateChanged(false);
+    } else {
+      setIsTemplateChanged(true);
+    }
+  };
+
+  const handleSubmitTemplateEdit = (values: any) => {
+    setLoadTemplate(false);
+    axios
+      .get(
+        `/api/templates?repo=` +
+          values.repo +
+          `&path=` +
+          values.path +
+          `&commit=` +
+          values.version,
+      )
+      .then((res) => {
+        setConfig(res.data);
+        setLoadTemplate(true);
+        setTemplateRef({
+          repo: values.repo,
+          path: values.path,
+          version: values.version,
+          resolvedVersion: res.data.resolvedVersion,
+        });
+        handleTemplateRefChange(
+          values.repo,
+          values.path,
+          values.version,
+          res.data.resolvedVersion,
+        );
+      })
+      .catch((error) => {
+        setLoadTemplate(true);
+        if (error?.response?.data) {
+          setError({
+            message: error.response.data.message || String(error),
+            description:
+              error.response.data.description ||
+              "Check if Cyclops backend is available on: " +
+                window.__RUNTIME_CONFIG__.REACT_APP_CYCLOPS_CTRL_HOST,
+          });
+        } else {
+          setError({
+            message: String(error),
+            description:
+              "Check if Cyclops backend is available on: " +
+              window.__RUNTIME_CONFIG__.REACT_APP_CYCLOPS_CTRL_HOST,
+          });
+        }
+      });
+  };
+
   const handleSubmit = (values: any) => {
     values = findMaps(config.root.properties, values, previousValues);
 
@@ -269,7 +374,7 @@ const EditModule = () => {
       .post(`/api/modules/update`, {
         values: values,
         name: module.name,
-        template: module.template,
+        template: templateRef,
       })
       .then((res) => {
         window.location.href = "/modules/" + moduleName;
@@ -834,6 +939,36 @@ const EditModule = () => {
         <Spin tip="Loading" size="large" style={{ alignContent: "center" }} />
       );
     }
+
+    return (
+      <div>
+        {mapFields(
+          config.root.properties,
+          [],
+          "",
+          0,
+          0,
+          undefined,
+          config.root.required,
+        )}
+        <div style={{ textAlign: "right" }}>
+          <Button
+            type="primary"
+            htmlType="submit"
+            name="Save"
+            disabled={!isChanged && !isTemplateChanged}
+          >
+            Save
+          </Button>{" "}
+          <Button
+            htmlType="button"
+            onClick={() => history("/modules/" + moduleName)}
+          >
+            Back
+          </Button>
+        </div>
+      </div>
+    );
   };
 
   const onFinishFailed = (errors: any) => {
@@ -846,6 +981,32 @@ const EditModule = () => {
     });
 
     openNotification(errorMessages);
+  };
+
+  const lockButton = () => {
+    if (templateRefLock) {
+      return (
+        <Button
+          type="primary"
+          icon={<LockFilled />}
+          style={{ marginRight: "10px" }}
+          onClick={function () {
+            setTemplateRefLock(false);
+          }}
+        />
+      );
+    }
+
+    return (
+      <Button
+        type="primary"
+        icon={<UnlockFilled />}
+        style={{ marginRight: "10px" }}
+        onClick={function () {
+          setTemplateRefLock(true);
+        }}
+      />
+    );
   };
 
   return (
@@ -867,10 +1028,79 @@ const EditModule = () => {
       )}
       {contextHolder}
       <Row gutter={[40, 0]}>
-        <Col span={23}>
-          <Title style={{ textAlign: "center" }} level={2}>
-            {module.name}
-          </Title>
+        <Col span={24}>
+          <Title level={2}>{module.name}</Title>
+        </Col>
+      </Row>
+      <Row gutter={[40, 0]}>
+        <Col span={24}>
+          <Divider orientation="left" orientationMargin="0">
+            Template
+          </Divider>
+          <Row>
+            <Form
+              form={editTemplateForm}
+              layout="inline"
+              autoComplete={"off"}
+              onFinish={handleSubmitTemplateEdit}
+              onFinishFailed={onFinishFailed}
+              style={{ width: "100%" }}
+            >
+              {lockButton()}
+              <Form.Item
+                name={"repo"}
+                style={{ width: "40%", marginRight: "0" }}
+              >
+                <Input placeholder={"Repository"} disabled={templateRefLock} />
+              </Form.Item>
+              <div
+                style={{
+                  width: "15px",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                }}
+              >
+                /
+              </div>
+              <Form.Item
+                name={"path"}
+                style={{ width: "20%", marginRight: "0" }}
+              >
+                <Input placeholder={"Path"} disabled={templateRefLock} />
+              </Form.Item>
+              <div
+                style={{
+                  width: "15px",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                }}
+              >
+                @
+              </div>
+              <Form.Item
+                name={"version"}
+                style={{ width: "20%", marginRight: "0" }}
+              >
+                <Input
+                  placeholder={"Version"}
+                  addonAfter={templateRef.resolvedVersion.substring(0, 7)}
+                  disabled={templateRefLock}
+                />
+              </Form.Item>
+              <Form.Item style={{ paddingLeft: "10px", width: "5%" }}>
+                <Button
+                  type="primary"
+                  htmlType="submit"
+                  loading={!loadTemplate}
+                  disabled={templateRefLock}
+                >
+                  Load
+                </Button>
+              </Form.Item>
+            </Form>
+          </Row>
         </Col>
       </Row>
       <Row gutter={[40, 0]}>
@@ -888,31 +1118,6 @@ const EditModule = () => {
               Edit Module
             </Divider>
             {formLoading()}
-            {mapFields(
-              config.root.properties,
-              [],
-              "",
-              0,
-              0,
-              undefined,
-              config.root.required,
-            )}
-            <div style={{ textAlign: "right" }}>
-              <Button
-                type="primary"
-                htmlType="submit"
-                name="Save"
-                disabled={!isChanged}
-              >
-                Save
-              </Button>{" "}
-              <Button
-                htmlType="button"
-                onClick={() => history("/modules/" + moduleName)}
-              >
-                Back
-              </Button>
-            </div>
           </Form>
         </Col>
       </Row>

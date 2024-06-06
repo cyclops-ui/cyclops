@@ -25,7 +25,6 @@ import {
   SearchOutlined,
   WarningTwoTone,
 } from "@ant-design/icons";
-import Link from "antd/lib/typography/Link";
 import "./custom.css";
 
 import "ace-builds/src-noconflict/mode-jsx";
@@ -35,6 +34,10 @@ import StatefulSet from "../k8s-resources/StatefulSet";
 import Pod from "../k8s-resources/Pod";
 import Service from "../k8s-resources/Service";
 import ConfigMap from "../k8s-resources/ConfigMap";
+import {
+  moduleTemplateReferenceView,
+  templateRef,
+} from "../../utils/templateRef";
 import { gvkString } from "../../utils/k8s/gvk";
 const languages = [
   "javascript",
@@ -77,21 +80,17 @@ themes.forEach((theme) => require(`ace-builds/src-noconflict/theme-${theme}`));
 const { Title } = Typography;
 
 interface module {
-  name: String;
-  namespace: String;
-  template: {
-    repo: String;
-    path: String;
-    version: String;
-  };
+  name: string;
+  namespace: string;
+  template: templateRef;
 }
 
 interface resourceRef {
-  group: String;
-  version: String;
-  kind: String;
-  name: String;
-  namespace: String;
+  group: string;
+  version: string;
+  kind: string;
+  name: string;
+  namespace: string;
 }
 
 const ModuleDetails = () => {
@@ -112,6 +111,7 @@ const ModuleDetails = () => {
       repo: "",
       path: "",
       version: "",
+      resolvedVersion: "",
     },
   });
 
@@ -600,20 +600,6 @@ const ModuleDetails = () => {
 
   const moduleLoading = () => {
     if (loadModule) {
-      let commit = "";
-      let commitLink =
-        module.template.repo + `/tree/main/` + module.template.path;
-
-      if (module.template.version && module.template.version !== "") {
-        commit = " @ " + module.template.version;
-        commitLink =
-          module.template.repo +
-          `/tree/` +
-          module.template.version +
-          `/` +
-          module.template.path;
-      }
-
       return (
         <div>
           <Row gutter={[40, 0]}>
@@ -629,15 +615,7 @@ const ModuleDetails = () => {
             </Col>
           </Row>
           <Row gutter={[40, 0]}>
-            <Col span={9}>
-              {commitLink.startsWith("https://github.com") && (
-                <Link aria-level={3} href={commitLink}>
-                  <LinkOutlined />
-                  {module.template.path.length !== 0 &&
-                    module.template.path + commit}
-                </Link>
-              )}
-            </Col>
+            <Col span={24}>{moduleTemplateReferenceView(module.template)}</Col>
           </Row>
         </div>
       );

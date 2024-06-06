@@ -118,7 +118,7 @@ func (m *Modules) GetModuleHistory(ctx *gin.Context) {
 func (m *Modules) Manifest(ctx *gin.Context) {
 	ctx.Header("Access-Control-Allow-Origin", "*")
 
-	var request v1alpha1.ModuleSpec
+	var request v1alpha1.HistoryEntry
 	if err := ctx.BindJSON(&request); err != nil {
 		fmt.Println("error binding request", request)
 		ctx.JSON(http.StatusBadRequest, dto.NewError("Error loading template", err.Error()))
@@ -136,7 +136,16 @@ func (m *Modules) Manifest(ctx *gin.Context) {
 		return
 	}
 
-	manifest, err := m.renderer.HelmTemplate(v1alpha1.Module{Spec: request}, targetTemplate)
+	manifest, err := m.renderer.HelmTemplate(v1alpha1.Module{
+		Spec: v1alpha1.ModuleSpec{
+			TemplateRef: v1alpha1.TemplateRef{
+				URL:     request.TemplateRef.URL,
+				Path:    request.TemplateRef.Path,
+				Version: request.TemplateRef.Version,
+			},
+			Values: request.Values,
+		},
+	}, targetTemplate)
 	if err != nil {
 		fmt.Println(err)
 		ctx.Status(http.StatusInternalServerError)
@@ -246,7 +255,7 @@ func (m *Modules) UpdateModule(ctx *gin.Context) {
 	curr, err := m.kubernetesClient.GetModule(request.Name)
 	if err != nil {
 		fmt.Println(err)
-		ctx.JSON(http.StatusInternalServerError, dto.NewError("Error fetcing module", err.Error()))
+		ctx.JSON(http.StatusInternalServerError, dto.NewError("Error fetching module", err.Error()))
 		return
 	}
 
@@ -263,9 +272,13 @@ func (m *Modules) UpdateModule(ctx *gin.Context) {
 	}
 
 	module.History = append([]v1alpha1.HistoryEntry{{
-		Generation:  curr.Generation,
-		TemplateRef: curr.Spec.TemplateRef,
-		Values:      curr.Spec.Values,
+		Generation: curr.Generation,
+		TemplateRef: v1alpha1.HistoryTemplateRef{
+			URL:     curr.Spec.TemplateRef.URL,
+			Path:    curr.Spec.TemplateRef.Path,
+			Version: curr.Status.TemplateResolvedVersion,
+		},
+		Values: curr.Spec.Values,
 	}}, history...)
 
 	if len(module.History) > 10 {
@@ -274,7 +287,16 @@ func (m *Modules) UpdateModule(ctx *gin.Context) {
 
 	module.SetResourceVersion(curr.GetResourceVersion())
 
-	err = m.kubernetesClient.UpdateModule(module)
+	module.Status.TemplateResolvedVersion = request.Template.ResolvedVersion
+	result, err := m.kubernetesClient.UpdateModuleStatus(&module)
+	if err != nil {
+		fmt.Println(err)
+		ctx.JSON(http.StatusInternalServerError, dto.NewError("Error updating module status", err.Error()))
+		return
+	}
+
+	module.ResourceVersion = result.ResourceVersion
+	err = m.kubernetesClient.UpdateModule(&module)
 	if err != nil {
 		fmt.Println(err)
 		ctx.JSON(http.StatusInternalServerError, dto.NewError("Error updating module", err.Error()))
@@ -294,10 +316,15 @@ func (m *Modules) ResourcesForModule(ctx *gin.Context) {
 		return
 	}
 
+	templateVersion := module.Status.TemplateResolvedVersion
+	if len(templateVersion) == 0 {
+		templateVersion = module.Spec.TemplateRef.Version
+	}
+
 	t, err := m.templatesRepo.GetTemplate(
 		module.Spec.TemplateRef.URL,
 		module.Spec.TemplateRef.Path,
-		module.Spec.TemplateRef.Version,
+		templateVersion,
 	)
 	if err != nil {
 		fmt.Println(err)
