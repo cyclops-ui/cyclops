@@ -15,6 +15,7 @@ import axios from "axios";
 import { formatPodAge } from "../../utils/pods";
 // import { DownloadOutlined } from "@ant-design/icons";
 import ReactAce from "react-ace";
+import { mapResponseError } from "../../utils/api/errors";
 
 interface Props {
   name: string;
@@ -54,22 +55,7 @@ const StatefulSet = ({ name, namespace }: Props) => {
         setStatefulSet(res.data);
       })
       .catch((error) => {
-        if (error?.response?.data) {
-          setError({
-            message: error.response.data.message || String(error),
-            description:
-              error.response.data.description ||
-              "Check if Cyclops backend is available on: " +
-                window.__RUNTIME_CONFIG__.REACT_APP_CYCLOPS_CTRL_HOST,
-          });
-        } else {
-          setError({
-            message: String(error),
-            description:
-              "Check if Cyclops backend is available on: " +
-              window.__RUNTIME_CONFIG__.REACT_APP_CYCLOPS_CTRL_HOST,
-          });
-        }
+        setError(mapResponseError(error));
       });
   }
 
@@ -191,22 +177,7 @@ const StatefulSet = ({ name, namespace }: Props) => {
         }
       })
       .catch((error) => {
-        if (error?.response?.data) {
-          setError({
-            message: error.response.data.message || String(error),
-            description:
-              error.response.data.description ||
-              "Check if Cyclops backend is available on: " +
-                window.__RUNTIME_CONFIG__.REACT_APP_CYCLOPS_CTRL_HOST,
-          });
-        } else {
-          setError({
-            message: String(error),
-            description:
-              "Check if Cyclops backend is available on: " +
-              window.__RUNTIME_CONFIG__.REACT_APP_CYCLOPS_CTRL_HOST,
-          });
-        }
+        setError(mapResponseError(error));
       });
   };
 
@@ -307,25 +278,7 @@ const StatefulSet = ({ name, namespace }: Props) => {
                           }
                         })
                         .catch((error) => {
-                          if (error?.response?.data) {
-                            setError({
-                              message:
-                                error.response.data.message || String(error),
-                              description:
-                                error.response.data.description ||
-                                "Check if Cyclops backend is available on: " +
-                                  window.__RUNTIME_CONFIG__
-                                    .REACT_APP_CYCLOPS_CTRL_HOST,
-                            });
-                          } else {
-                            setError({
-                              message: String(error),
-                              description:
-                                "Check if Cyclops backend is available on: " +
-                                window.__RUNTIME_CONFIG__
-                                  .REACT_APP_CYCLOPS_CTRL_HOST,
-                            });
-                          }
+                          setError(mapResponseError(error));
                         });
                       setLogsModal({
                         on: true,
