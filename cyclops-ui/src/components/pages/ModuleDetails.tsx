@@ -39,6 +39,7 @@ import {
   templateRef,
 } from "../../utils/templateRef";
 import { gvkString } from "../../utils/k8s/gvk";
+import { mapResponseError } from "../../utils/api/errors";
 const languages = [
   "javascript",
   "java",
@@ -161,22 +162,7 @@ const ModuleDetails = () => {
       .catch((error) => {
         setLoading(false);
         setLoadModule(true);
-        if (error?.response?.data) {
-          setError({
-            message: error.response.data.message || String(error),
-            description:
-              error.response.data.description ||
-              "Check if Cyclops backend is available on: " +
-                window.__RUNTIME_CONFIG__.REACT_APP_CYCLOPS_CTRL_HOST,
-          });
-        } else {
-          setError({
-            message: String(error),
-            description:
-              "Check if Cyclops backend is available on: " +
-              window.__RUNTIME_CONFIG__.REACT_APP_CYCLOPS_CTRL_HOST,
-          });
-        }
+        setError(mapResponseError(error));
       });
   }
 
@@ -190,22 +176,7 @@ const ModuleDetails = () => {
       .catch((error) => {
         setLoading(false);
         setLoadModule(true);
-        if (error?.response?.data) {
-          setError({
-            message: error.response.data.message || String(error),
-            description:
-              error.response.data.description ||
-              "Check if Cyclops backend is available on: " +
-                window.__RUNTIME_CONFIG__.REACT_APP_CYCLOPS_CTRL_HOST,
-          });
-        } else {
-          setError({
-            message: String(error),
-            description:
-              "Check if Cyclops backend is available on: " +
-              window.__RUNTIME_CONFIG__.REACT_APP_CYCLOPS_CTRL_HOST,
-          });
-        }
+        setError(mapResponseError(error));
       });
   }
 
@@ -219,22 +190,7 @@ const ModuleDetails = () => {
       .catch((error) => {
         setLoading(false);
         setLoadResources(true);
-        if (error?.response?.data) {
-          setError({
-            message: error.response.data.message || String(error),
-            description:
-              error.response.data.description ||
-              "Check if Cyclops backend is available on: " +
-                window.__RUNTIME_CONFIG__.REACT_APP_CYCLOPS_CTRL_HOST,
-          });
-        } else {
-          setError({
-            message: String(error),
-            description:
-              "Check if Cyclops backend is available on: " +
-              window.__RUNTIME_CONFIG__.REACT_APP_CYCLOPS_CTRL_HOST,
-          });
-        }
+        setError(mapResponseError(error));
       });
   }
 
@@ -307,22 +263,7 @@ const ModuleDetails = () => {
       })
       .catch((error) => {
         setLoading(false);
-        if (error?.response?.data) {
-          setError({
-            message: error.response.data.message || String(error),
-            description:
-              error.response.data.description ||
-              "Check if Cyclops backend is available on: " +
-                window.__RUNTIME_CONFIG__.REACT_APP_CYCLOPS_CTRL_HOST,
-          });
-        } else {
-          setError({
-            message: String(error),
-            description:
-              "Check if Cyclops backend is available on: " +
-              window.__RUNTIME_CONFIG__.REACT_APP_CYCLOPS_CTRL_HOST,
-          });
-        }
+        setError(mapResponseError(error));
       });
   };
 
@@ -684,22 +625,7 @@ const ModuleDetails = () => {
       })
       .catch((error) => {
         setLoading(false);
-        if (error?.response?.data) {
-          setError({
-            message: error.response.data.message || String(error),
-            description:
-              error.response.data.description ||
-              "Check if Cyclops backend is available on: " +
-                window.__RUNTIME_CONFIG__.REACT_APP_CYCLOPS_CTRL_HOST,
-          });
-        } else {
-          setError({
-            message: String(error),
-            description:
-              "Check if Cyclops backend is available on: " +
-              window.__RUNTIME_CONFIG__.REACT_APP_CYCLOPS_CTRL_HOST,
-          });
-        }
+        setError(mapResponseError(error));
       });
   };
 

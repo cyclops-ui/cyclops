@@ -46,6 +46,7 @@ import {
   FeedbackError,
   FormValidationErrors,
 } from "../errors/FormValidationErrors";
+import { mapResponseError } from "../../utils/api/errors";
 
 const { Title } = Typography;
 const layout = {
@@ -216,22 +217,7 @@ const NewModule = () => {
       })
       .catch((error) => {
         setLoading(false);
-        if (error?.response?.data) {
-          setError({
-            message: error.response.data.message || String(error),
-            description:
-              error.response.data.description ||
-              "Check if Cyclops backend is available on: " +
-                window.__RUNTIME_CONFIG__.REACT_APP_CYCLOPS_CTRL_HOST,
-          });
-        } else {
-          setError({
-            message: String(error),
-            description:
-              "Check if Cyclops backend is available on: " +
-              window.__RUNTIME_CONFIG__.REACT_APP_CYCLOPS_CTRL_HOST,
-          });
-        }
+        setError(mapResponseError(error));
       });
   };
 
@@ -287,22 +273,7 @@ const NewModule = () => {
       })
       .catch(function (error) {
         setLoadingTemplate(false);
-        if (error?.response?.data) {
-          setError({
-            message: error.response.data.message || String(error),
-            description:
-              error.response.data.description ||
-              "Check if Cyclops backend is available on: " +
-                window.__RUNTIME_CONFIG__.REACT_APP_CYCLOPS_CTRL_HOST,
-          });
-        } else {
-          setError({
-            message: String(error),
-            description:
-              "Check if Cyclops backend is available on: " +
-              window.__RUNTIME_CONFIG__.REACT_APP_CYCLOPS_CTRL_HOST,
-          });
-        }
+        setError(mapResponseError(error));
       });
 
     axios
@@ -333,22 +304,7 @@ const NewModule = () => {
       })
       .catch(function (error) {
         setLoadingTemplateInitialValues(false);
-        if (error?.response?.data) {
-          setError({
-            message: error.response.data.message || String(error),
-            description:
-              error.response.data.description ||
-              "Check if Cyclops backend is available on: " +
-                window.__RUNTIME_CONFIG__.REACT_APP_CYCLOPS_CTRL_HOST,
-          });
-        } else {
-          setError({
-            message: String(error),
-            description:
-              "Check if Cyclops backend is available on: " +
-              window.__RUNTIME_CONFIG__.REACT_APP_CYCLOPS_CTRL_HOST,
-          });
-        }
+        setError(mapResponseError(error));
       });
 
     setActiveCollapses(new Map());
@@ -362,19 +318,7 @@ const NewModule = () => {
       })
       .catch(function (error) {
         setLoadingTemplate(false);
-        if (error.response === undefined) {
-          setError({
-            message: String(error),
-            description:
-              "Check if Cyclops backend is available on: " +
-              window.__RUNTIME_CONFIG__.REACT_APP_CYCLOPS_CTRL_HOST,
-          });
-        } else {
-          setError({
-            message: error.message,
-            description: error.response.data,
-          });
-        }
+        setError(mapResponseError(error));
       });
   };
 
@@ -1027,19 +971,7 @@ const NewModule = () => {
       .catch(function (error) {
         // setLoadingTemplate(false);
         // setSuccessLoad(false);
-        if (error?.response?.data) {
-          setError({
-            message: error.response.data.message,
-            description:
-              "Unable to fetch values file; Check if the file path is correct",
-          });
-        } else {
-          setError({
-            message: String(error),
-            description:
-              "Error loading file; Check if the file path is correct",
-          });
-        }
+        setError(mapResponseError(error));
       });
   };
 

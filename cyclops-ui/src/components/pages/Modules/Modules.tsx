@@ -17,6 +17,7 @@ import Link from "antd/lib/typography/Link";
 
 import styles from "./styles.module.css";
 import { PlusCircleOutlined } from "@ant-design/icons";
+import { mapResponseError } from "../../../utils/api/errors";
 
 const { Title } = Typography;
 
@@ -38,22 +39,7 @@ const Modules = () => {
         setFilteredData(res.data);
       })
       .catch((error) => {
-        if (error?.response?.data) {
-          setError({
-            message: error.response.data.message || String(error),
-            description:
-              error.response.data.description ||
-              "Check if Cyclops backend is available on: " +
-                window.__RUNTIME_CONFIG__.REACT_APP_CYCLOPS_CTRL_HOST,
-          });
-        } else {
-          setError({
-            message: String(error),
-            description:
-              "Check if Cyclops backend is available on: " +
-              window.__RUNTIME_CONFIG__.REACT_APP_CYCLOPS_CTRL_HOST,
-          });
-        }
+        setError(mapResponseError(error));
       });
   }, []);
 

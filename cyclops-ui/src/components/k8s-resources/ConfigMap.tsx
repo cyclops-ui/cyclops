@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { Divider, Row, Alert, Descriptions } from "antd";
 import axios from "axios";
 import ReactAce from "react-ace";
+import { mapResponseError } from "../../utils/api/errors";
 
 interface Props {
   name: string;
@@ -30,22 +31,7 @@ const ConfigMap = ({ name, namespace }: Props) => {
         setConfigMap(res.data);
       })
       .catch((error) => {
-        if (error?.response?.data) {
-          setError({
-            message: error.response.data.message || String(error),
-            description:
-              error.response.data.description ||
-              "Check if Cyclops backend is available on: " +
-                window.__RUNTIME_CONFIG__.REACT_APP_CYCLOPS_CTRL_HOST,
-          });
-        } else {
-          setError({
-            message: String(error),
-            description:
-              "Check if Cyclops backend is available on: " +
-              window.__RUNTIME_CONFIG__.REACT_APP_CYCLOPS_CTRL_HOST,
-          });
-        }
+        setError(mapResponseError(error));
       });
   }
 
