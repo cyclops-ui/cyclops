@@ -75,4 +75,4 @@ templateauthrule.cyclops-ui.com/private-repo-rule created
 ```
 
 You can now add the same template reference that failed before, and it should now be added so you can use it when creating Modules. You can create a module by going to: <br/>
-**Modules** (in the sidebar) **>** **Add module** **>** select the `private` template in **Module template**
+**Modules** (in the sidebar) **>** **Add module** **>** select your private template in **Module template**
