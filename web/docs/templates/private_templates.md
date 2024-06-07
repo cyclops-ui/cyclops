@@ -1,6 +1,6 @@
 # Private templates
 
-You might want to store your templates in a private repository and load them into Cyclops, but you must authorize Cyclops to pull the template.
+You might want to store your templates in a private repository and load them into Cyclops, but you must authorize Cyclops to be able to pull the template.
 
 ## About
 
