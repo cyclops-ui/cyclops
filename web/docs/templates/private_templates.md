@@ -6,7 +6,7 @@ You might want to store your templates in a private repository and load them int
 
 Cyclops has a `CRD (Custom Resource Definition)` that allows you to define authorization for specific repositories. You can set different authorization data for different templates. The CRD defines which templates you want to authorize and points Cyclops to the authorization data needed for those templates.
 
-Each time the Cyclops controller fetches a template, it retrieves **TemplateAuthRule** custom resources from the cluster and checks if the template host matches any of the TemplateAuthRules. If it does, it will fetch the Kubernetes secrets TemplateAuthRule references and apply username and password to authenticate.
+Each time the Cyclops controller fetches a template, it retrieves **TemplateAuthRule (TAR)** custom resources from the cluster and checks if the template host matches any of the TemplateAuthRules. If it does, it will fetch the Kubernetes secrets TemplateAuthRule references and apply username and password to authenticate.
 
 ![Dependencies rendering](../../static/img/templates/private-templates/tar_arch.png)
 
