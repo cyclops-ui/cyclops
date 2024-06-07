@@ -48,7 +48,7 @@ builds:
 
 archives:
   - format: tar.gz
-    name_template: "cyctl_{{ .Os }}_{{ .Arch }}"
+    name_template: "cyctl_{{ .Os }}_{{ .Arch }}_v{{.Version}}"
     format_overrides:
       - goos: windows
         format: zip
@@ -57,7 +57,7 @@ checksum:
   name_template: "cyctl_checksums.sha256"
 
 nfpms:
-  - file_name_template: 'cyctl_{{ .Os }}_{{ .Arch }}'
+  - file_name_template: 'cyctl_{{ .Os }}_{{ .Arch }}_v{{.Version}}'
     maintainer: Petar Cvitanović
     homepage: https://cyclops-ui.com/
     description: customizable UI for Kubernetes workloads.
