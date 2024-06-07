@@ -73,8 +73,8 @@ func authToken(creds *auth.Credentials) string {
 	return creds.Password
 }
 
-func SanitizeGHFiles(files map[string][]byte, path string) map[string][]byte {
-	out := make(map[string][]byte, len(files))
+func SanitizeGHFiles(files map[string][]byte, path string) (map[string][]byte, bool) {
+	out := make(map[string][]byte)
 
 	for key, value := range files {
 		repoFileName := removeFirstSegment(key)
@@ -91,7 +91,11 @@ func SanitizeGHFiles(files map[string][]byte, path string) map[string][]byte {
 		out[path2.Join(folder, trimmed)] = value
 	}
 
-	return out
+	if len(out) == 0 {
+		return nil, false
+	}
+
+	return out, true
 }
 
 func removeFirstSegment(path string) string {
