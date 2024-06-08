@@ -51,6 +51,7 @@ import {
   FormValidationErrors,
 } from "../errors/FormValidationErrors";
 import { mapResponseError } from "../../utils/api/errors";
+import { getTemplate, Template } from "../../utils/api/template";
 
 const { TextArea } = Input;
 
@@ -82,13 +83,16 @@ const EditModule = () => {
   const [form] = Form.useForm();
   const [editTemplateForm] = Form.useForm();
 
+  const [initialValues, setInitialValues] = useState({});
+  const [initialValuesRaw, setInitialValuesRaw] = useState({});
+
   const [allConfigs, setAllConfigs] = useState([]);
   const [values, setValues] = useState({});
   const [isChanged, setIsChanged] = useState(false);
   const [isTemplateChanged, setIsTemplateChanged] = useState(false);
-  const [config, setConfig] = useState({
+  const [config, setConfig] = useState<Template>({
     name: "",
-    manifest: "",
+    resolvedVersion: "",
     root: {
       properties: [],
       required: [],
@@ -198,39 +202,34 @@ const EditModule = () => {
   };
 
   useEffect(() => {
-    axios
-      .get(`/api/modules/` + moduleName)
-      .then((res) => {
-        setLoadValues(true);
+    const fetchModuleData = async () => {
+      axios
+        .get("/api/modules/" + moduleName)
+        .then(async (res) => {
+          editTemplateForm.setFieldsValue({
+            repo: res.data.template.repo,
+            path: res.data.template.path,
+            version: res.data.template.version,
+          });
+          setLoadValues(true);
 
-        editTemplateForm.setFieldsValue({
-          repo: res.data.template.repo,
-          path: res.data.template.path,
-          version: res.data.template.version,
-        });
+          setTemplateRef({
+            repo: res.data.template.repo,
+            path: res.data.template.path,
+            version: res.data.template.version,
+            resolvedVersion: res.data.template.resolvedVersion,
+          });
 
-        setTemplateRef({
-          repo: res.data.template.repo,
-          path: res.data.template.path,
-          version: res.data.template.version,
-          resolvedVersion: res.data.template.resolvedVersion,
-        });
+          let result = await getTemplate(
+            res.data.template.repo,
+            res.data.template.path,
+            res.data.template.resolvedVersion,
+          );
 
-        axios
-          .get(
-            `/api/templates?repo=` +
-              res.data.template.repo +
-              `&path=` +
-              res.data.template.path +
-              `&commit=` +
-              res.data.template.resolvedVersion,
-          )
-          .then((templatesRes) => {
-            setConfig(templatesRes.data);
-            setLoadTemplate(true);
-
+          if (result.success) {
+            setConfig(result.template);
             let values = mapsToArray(
-              templatesRes.data.root.properties,
+              result.template.root.properties,
               res.data.values,
             );
 
@@ -242,15 +241,20 @@ const EditModule = () => {
             form.setFieldsValue(values);
             setValues(values);
             setPreviousValues(res.data.values);
-          })
-          .catch((error) => {
-            setLoadTemplate(true);
-            setError(mapResponseError(error));
-          });
-      })
-      .catch((error) => {
-        setError(mapResponseError(error));
-      });
+          } else {
+            console.log(result);
+            setError(result.error);
+          }
+
+          setLoadTemplate(true);
+        })
+        .catch((error) => {
+          setError(mapResponseError(error));
+          setLoadTemplate(true);
+          setLoadValues(true);
+        });
+    };
+    fetchModuleData();
   }, []);
 
   useEffect(() => {
@@ -290,38 +294,31 @@ const EditModule = () => {
     }
   };
 
-  const handleSubmitTemplateEdit = (values: any) => {
+  async function handleSubmitTemplateEdit(values: any) {
     setLoadTemplate(false);
-    axios
-      .get(
-        `/api/templates?repo=` +
-          values.repo +
-          `&path=` +
-          values.path +
-          `&commit=` +
-          values.version,
-      )
-      .then((res) => {
-        setConfig(res.data);
-        setLoadTemplate(true);
-        setTemplateRef({
-          repo: values.repo,
-          path: values.path,
-          version: values.version,
-          resolvedVersion: res.data.resolvedVersion,
-        });
-        handleTemplateRefChange(
-          values.repo,
-          values.path,
-          values.version,
-          res.data.resolvedVersion,
-        );
-      })
-      .catch((error) => {
-        setLoadTemplate(true);
-        setError(mapResponseError(error));
+
+    let result = await getTemplate(values.repo, values.path, values.version);
+
+    if (result.success) {
+      setConfig(result.template);
+      setTemplateRef({
+        repo: values.repo,
+        path: values.path,
+        version: values.version,
+        resolvedVersion: result.template.resolvedVersion,
       });
-  };
+      handleTemplateRefChange(
+        values.repo,
+        values.path,
+        values.version,
+        result.template.resolvedVersion,
+      );
+    } else {
+      setError(mapResponseError(error));
+    }
+
+    setLoadTemplate(true);
+  }
 
   const handleSubmit = (values: any) => {
     values = findMaps(config.root.properties, values, previousValues);
@@ -970,7 +967,7 @@ const EditModule = () => {
       {contextHolder}
       <Row gutter={[40, 0]}>
         <Col span={24}>
-          <Title level={2}>{module.name}</Title>
+          <Title level={2}>{moduleName}</Title>
         </Col>
       </Row>
       <Row gutter={[40, 0]}>
