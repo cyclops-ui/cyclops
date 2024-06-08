@@ -51,7 +51,11 @@ import {
   FormValidationErrors,
 } from "../errors/FormValidationErrors";
 import { mapResponseError } from "../../utils/api/errors";
-import { getTemplate, Template } from "../../utils/api/template";
+import {
+  getTemplate,
+  getTemplateInitialValues,
+  Template,
+} from "../../utils/api/template";
 
 const { TextArea } = Input;
 
@@ -294,34 +298,72 @@ const EditModule = () => {
     }
   };
 
-  async function handleSubmitTemplateEdit(values: any) {
+  async function handleSubmitTemplateEdit(templateEditValues: any) {
     setLoadTemplate(false);
 
-    let result = await getTemplate(values.repo, values.path, values.version);
+    let templateResult = await getTemplate(
+      templateEditValues.repo,
+      templateEditValues.path,
+      templateEditValues.version,
+    );
 
-    if (result.success) {
-      setConfig(result.template);
+    if (templateResult.success) {
+      setConfig(templateResult.template);
       setTemplateRef({
-        repo: values.repo,
-        path: values.path,
-        version: values.version,
-        resolvedVersion: result.template.resolvedVersion,
+        repo: templateEditValues.repo,
+        path: templateEditValues.path,
+        version: templateEditValues.version,
+        resolvedVersion: templateResult.template.resolvedVersion,
       });
       handleTemplateRefChange(
-        values.repo,
-        values.path,
-        values.version,
-        result.template.resolvedVersion,
+        templateEditValues.repo,
+        templateEditValues.path,
+        templateEditValues.version,
+        templateResult.template.resolvedVersion,
       );
     } else {
-      setError(mapResponseError(error));
+      setConfig({
+        name: "",
+        resolvedVersion: "",
+        root: { properties: [], required: [] },
+      });
+      setLoadTemplate(true);
+      setError(templateResult.error);
+      return;
     }
 
+    let initialValuesResult = await getTemplateInitialValues(
+      templateEditValues.repo,
+      templateEditValues.path,
+      templateEditValues.version,
+    );
+
+    if (initialValuesResult.success) {
+      let initialValuesMapped = mapsToArray(
+        templateResult.template.root.properties,
+        initialValuesResult.initialValues,
+      );
+
+      setInitialValuesRaw(initialValuesResult.initialValues);
+      setInitialValues(initialValuesMapped);
+      form.setFieldsValue(initialValuesMapped);
+      form.setFieldsValue(values);
+    } else {
+      setLoadTemplate(true);
+      setError(initialValuesResult.error);
+      return;
+    }
+
+    setError({ message: "", description: "" });
     setLoadTemplate(true);
   }
 
   const handleSubmit = (values: any) => {
-    values = findMaps(config.root.properties, values, previousValues);
+    if (isTemplateChanged) {
+      values = findMaps(config.root.properties, values, initialValuesRaw);
+    } else {
+      values = findMaps(config.root.properties, values, previousValues);
+    }
 
     axios
       .post(`/api/modules/update`, {
