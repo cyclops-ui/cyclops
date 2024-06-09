@@ -311,7 +311,6 @@ func (m *Modules) ResourcesForModule(ctx *gin.Context) {
 
 	module, err := m.kubernetesClient.GetModule(ctx.Param("name"))
 	if err != nil {
-		fmt.Println(err)
 		ctx.JSON(http.StatusBadRequest, dto.NewError("Error mapping module request", err.Error()))
 		return
 	}
@@ -327,7 +326,6 @@ func (m *Modules) ResourcesForModule(ctx *gin.Context) {
 		templateVersion,
 	)
 	if err != nil {
-		fmt.Println(err)
 		ctx.JSON(http.StatusInternalServerError, dto.NewError("Error fetching template", err.Error()))
 		return
 	}

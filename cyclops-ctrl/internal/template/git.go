@@ -473,7 +473,10 @@ func (r Repo) mapGitHubRepoTemplate(repoURL, path, commitSHA string, creds *auth
 		return nil, err
 	}
 
-	ghRepoFiles = gitproviders.SanitizeGHFiles(ghRepoFiles, path)
+	ghRepoFiles, exists := gitproviders.SanitizeGHFiles(ghRepoFiles, path)
+	if !exists {
+		return nil, errors.Errorf("provided path %v for repo %v does not exist on version %v", path, repoURL, commitSHA)
+	}
 
 	template, err := r.mapHelmChart(path, ghRepoFiles)
 	if err != nil {
@@ -494,7 +497,10 @@ func (r Repo) mapGitHubRepoInitialValues(repoURL, path, commitSHA string, creds 
 		return nil, err
 	}
 
-	ghRepoFiles = gitproviders.SanitizeGHFiles(ghRepoFiles, path)
+	ghRepoFiles, exists := gitproviders.SanitizeGHFiles(ghRepoFiles, path)
+	if !exists {
+		return nil, errors.Errorf("provided path %v for repo %v does not exist on version %v", path, repoURL, commitSHA)
+	}
 
 	initial, err := r.mapHelmChartInitialValues(ghRepoFiles)
 	if err != nil {
