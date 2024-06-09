@@ -21,7 +21,6 @@ import {
   CaretRightOutlined,
   CheckCircleTwoTone,
   CloseSquareTwoTone,
-  LinkOutlined,
   SearchOutlined,
   WarningTwoTone,
 } from "@ant-design/icons";
@@ -34,6 +33,8 @@ import StatefulSet from "../k8s-resources/StatefulSet";
 import Pod from "../k8s-resources/Pod";
 import Service from "../k8s-resources/Service";
 import ConfigMap from "../k8s-resources/ConfigMap";
+import PersistentVolumeClaim from "../k8s-resources/PersistentVolumeClaim";
+
 import {
   moduleTemplateReferenceView,
   templateRef,
@@ -393,6 +394,14 @@ const ModuleDetails = () => {
       case "ConfigMap":
         resourceDetails = (
           <ConfigMap name={resource.name} namespace={resource.namespace} />
+        );
+        break;
+      case "PersistentVolumeClaim":
+        resourceDetails = (
+          <PersistentVolumeClaim
+            name={resource.name}
+            namespace={resource.namespace}
+          />
         );
         break;
     }
