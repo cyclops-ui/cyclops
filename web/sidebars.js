@@ -75,6 +75,7 @@ const sidebars = {
         "templates/template_storage",
         "templates/validations",
         "templates/dependencies",
+        "templates/private_templates",
       ],
     },
     {
