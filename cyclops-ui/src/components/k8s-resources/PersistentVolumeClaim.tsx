@@ -24,9 +24,6 @@ const PersistentVolumeClaim = ({ name, namespace }: Props) => {
   });
 
   useEffect(() => {
-    // Move function to useEffect to avoid es-lint React Hook useEffect has a missing dependency
-    // Ref: https://stackoverflow.com/questions/55840294/how-to-fix-missing-dependency-warning-when-using-useeffect-react-hook
-    // Ref: https://github.com/facebook/react/issues/14920
     function fetchPersistentVolumeClaim() {
       axios
         .get(`/api/resources`, {
