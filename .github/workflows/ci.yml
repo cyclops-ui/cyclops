@@ -131,3 +131,19 @@ jobs:
               --target ${{ steps.extract_branch.outputs.branch }}\
               --prerelease
           fi
+
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Set up Go
+        uses: actions/setup-go@v4
+      - name: Run GoReleaser
+        uses: goreleaser/goreleaser-action@v5
+        with:
+          distribution: goreleaser
+          version: '~> v1'
+          args: release --clean
+          workdir: ./cyctl
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
