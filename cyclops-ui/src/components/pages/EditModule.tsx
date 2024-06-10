@@ -27,8 +27,6 @@ import {
   UnlockFilled,
 } from "@ant-design/icons";
 
-import _ from "lodash";
-
 import AceEditor from "react-ace";
 
 import { useParams } from "react-router-dom";
