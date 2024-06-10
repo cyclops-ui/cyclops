@@ -10,6 +10,7 @@ import (
 	"github.com/cyclops-ui/cycops-cyctl/internal/kubeconfig"
 	"github.com/spf13/cobra"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+    "os"
 )
 
 var (
@@ -21,7 +22,6 @@ var (
  cyctl get templateauthrule`
 )
 
-// listTemplateAuthRules retrieves and displays a list of templateauthrules from the Cyclops API.
 // listTemplateAuthRules retrieves and displays a list of templateauthrules from the Cyclops API.
 func listTemplateAuthRules(clientset *client.CyclopsV1Alpha1Client, templateAuthNames []string) {
 	templates, err := clientset.TemplateAuthRules("cyclops").List(metav1.ListOptions{})
@@ -43,13 +43,16 @@ func listTemplateAuthRules(clientset *client.CyclopsV1Alpha1Client, templateAuth
 	}
 
 	filteredTemplatesAuthRules := templates
-	if len(templateAuthNames) > 0 {
+	notFoundTemplatesAuthRules := make([]string, 0)
+	
+    if len(templateAuthNames) > 0 {
 		nameSet := make(map[string]struct{}, len(templateAuthNames))
 		for _, name := range templateAuthNames {
 			nameSet[name] = struct{}{}
 		}
-		foundTemplatesAuthRules := make([]v1alpha1.TemplateAuthRule, 0)
-		notFoundTemplatesAuthRules := make([]string, 0)
+		
+        foundTemplatesAuthRules := make([]v1alpha1.TemplateAuthRule, 0)
+
 		for _, template := range templates {
 			if _, found := nameSet[template.Name]; found {
 				foundTemplatesAuthRules = append(foundTemplatesAuthRules, template)
@@ -79,6 +82,9 @@ func listTemplateAuthRules(clientset *client.CyclopsV1Alpha1Client, templateAuth
 		nameSpacing := max(0, longestName-len(template.Name))
 		fmt.Printf("%s"+strings.Repeat(" ", nameSpacing)+" %s\n", template.Name, age.String())
 	}
+    if len(notFoundTemplatesAuthRules) > 0 {
+        os.Exit(1)
+    }
 }
 
 var (

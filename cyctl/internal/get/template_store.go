@@ -10,6 +10,7 @@ import (
 	"github.com/cyclops-ui/cycops-cyctl/internal/kubeconfig"
 	"github.com/spf13/cobra"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+    "os"
 )
 
 var (
@@ -21,7 +22,6 @@ var (
  cyctl get templates`
 )
 
-// listTemplate retrieves and displays a list of templatestore from the Cyclops API.
 // listTemplate retrieves and displays a list of templatestore from the Cyclops API.
 func listTemplate(clientset *client.CyclopsV1Alpha1Client, templateNames []string) {
 	templates, err := clientset.TemplateStore("cyclops").List(metav1.ListOptions{})
@@ -43,14 +43,16 @@ func listTemplate(clientset *client.CyclopsV1Alpha1Client, templateNames []strin
 	}
 
 	filteredTemplates := templates
-	if len(templateNames) > 0 {
+	notFoundTemplates := make([]string, 0)
+	
+    if len(templateNames) > 0 {
 		nameSet := make(map[string]struct{}, len(templateNames))
 		for _, name := range templateNames {
 			nameSet[name] = struct{}{}
 		}
 
 		foundTemplates := make([]v1alpha1.TemplateStore, 0)
-		notFoundTemplates := make([]string, 0)
+
 		for _, template := range templates {
 			if _, found := nameSet[template.Name]; found {
 				foundTemplates = append(foundTemplates, template)
@@ -80,6 +82,9 @@ func listTemplate(clientset *client.CyclopsV1Alpha1Client, templateNames []strin
 		nameSpacing := max(0, longestName-len(template.Name))
 		fmt.Printf("%s"+strings.Repeat(" ", nameSpacing)+" %s\n", template.Name, age.String())
 	}
+    if len(notFoundTemplates) > 0 {
+        os.Exit(1)
+    }
 }
 
 var (

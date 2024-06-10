@@ -43,13 +43,14 @@ func listModules(clientset *client.CyclopsV1Alpha1Client, moduleNames []string) 
 	}
 
 	filteredModules := modules
+	notFoundModules := make([]string, 0)
+
 	if len(moduleNames) > 0 {
 		nameSet := make(map[string]struct{}, len(moduleNames))
 		for _, name := range moduleNames {
 			nameSet[name] = struct{}{}
 		}
 		foundModules := make([]v1alpha1.Module, 0)
-		notFoundModules := make([]string, 0)
 
 		for _, module := range modules {
 			if _, found := nameSet[module.Name]; found {
@@ -66,15 +67,12 @@ func listModules(clientset *client.CyclopsV1Alpha1Client, moduleNames []string) 
 			}
 		}
 		filteredModules = foundModules
-
 	}
 
 	headerSpacing := max(0, longestName-4)
 	output := ""
 	if len(filteredModules) > 0 {
 		output += "NAME" + strings.Repeat(" ", headerSpacing) + " AGE\n"
-	} else {
-		os.Exit(1)
 	}
 
 	fmt.Print(output)
@@ -82,6 +80,9 @@ func listModules(clientset *client.CyclopsV1Alpha1Client, moduleNames []string) 
 		age := time.Since(module.CreationTimestamp.Time).Round(time.Second)
 		nameSpacing := max(0, longestName-len(module.Name))
 		fmt.Printf("%s"+strings.Repeat(" ", nameSpacing)+" %s\n", module.Name, age.String())
+	}
+	if len(notFoundModules) > 0 {
+		os.Exit(1)
 	}
 }
 
