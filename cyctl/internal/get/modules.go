@@ -40,7 +40,8 @@ func listModules(clientset *client.CyclopsV1Alpha1Client, moduleNames []string) 
 			longestName = len(module.Name)
 		}
 	}
-
+    
+    foundModule := false
 	filteredModules := modules
 	if len(moduleNames) > 0 {
 		nameSet := make(map[string]struct{}, len(moduleNames))
@@ -51,8 +52,12 @@ func listModules(clientset *client.CyclopsV1Alpha1Client, moduleNames []string) 
 		for _, module := range modules {
 			if _, found := nameSet[module.Name]; found {
 				filteredModules = append(filteredModules, module)
+                foundModule = true
 			}
 		}
+        if !foundModule {
+            fmt.Printf("no module found with name: %v \n", moduleNames)
+        }
 	}
 
 	headerSpacing := max(0, longestName-4)
