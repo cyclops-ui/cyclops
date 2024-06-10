@@ -10,7 +10,7 @@ import (
 	"github.com/cyclops-ui/cycops-cyctl/internal/kubeconfig"
 	"github.com/spf13/cobra"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-    "os"
+	"os"
 )
 
 var (
@@ -44,8 +44,8 @@ func listTemplate(clientset *client.CyclopsV1Alpha1Client, templateNames []strin
 
 	filteredTemplates := templates
 	notFoundTemplates := make([]string, 0)
-	
-    if len(templateNames) > 0 {
+
+	if len(templateNames) > 0 {
 		nameSet := make(map[string]struct{}, len(templateNames))
 		for _, name := range templateNames {
 			nameSet[name] = struct{}{}
@@ -82,9 +82,9 @@ func listTemplate(clientset *client.CyclopsV1Alpha1Client, templateNames []strin
 		nameSpacing := max(0, longestName-len(template.Name))
 		fmt.Printf("%s"+strings.Repeat(" ", nameSpacing)+" %s\n", template.Name, age.String())
 	}
-    if len(notFoundTemplates) > 0 {
-        os.Exit(1)
-    }
+	if len(notFoundTemplates) > 0 {
+		os.Exit(1)
+	}
 }
 
 var (
