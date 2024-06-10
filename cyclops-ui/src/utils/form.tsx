@@ -39,13 +39,19 @@ export function findMaps(fields: any[], values: any, initialValues: any): any {
     let valuesList: any[] = [];
     switch (field.type) {
       case "string":
-        out[field.name] = values[field.name];
+        if (values[field.name]) {
+          out[field.name] = values[field.name];
+        }
         break;
       case "number":
-        out[field.name] = values[field.name];
+        if (values[field.name]) {
+          out[field.name] = values[field.name];
+        }
         break;
       case "boolean":
-        out[field.name] = values[field.name];
+        if (values[field.name]) {
+          out[field.name] = values[field.name];
+        }
         break;
       case "object":
         if (values[field.name]) {
@@ -101,4 +107,30 @@ export function findMaps(fields: any[], values: any, initialValues: any): any {
   });
 
   return out;
+}
+
+function isObject(obj: any): any {
+  return obj !== null && typeof obj === "object" && !Array.isArray(obj);
+}
+
+export function mergeDeep(target: any, source: any): any {
+  const output = { ...target };
+
+  if (isObject(target) && isObject(source)) {
+    for (const key in source) {
+      if (isObject(source[key])) {
+        if (!(key in target)) {
+          output[key] = source[key];
+        } else {
+          output[key] = mergeDeep(target[key], source[key]);
+        }
+      } else if (Array.isArray(source[key])) {
+        output[key] = (target[key] || []).concat(source[key]);
+      } else {
+        output[key] = source[key];
+      }
+    }
+  }
+
+  return output;
 }

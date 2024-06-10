@@ -27,6 +27,8 @@ import {
   UnlockFilled,
 } from "@ant-design/icons";
 
+import _ from "lodash";
+
 import AceEditor from "react-ace";
 
 import { useParams } from "react-router-dom";
@@ -87,7 +89,6 @@ const EditModule = () => {
   const [form] = Form.useForm();
   const [editTemplateForm] = Form.useForm();
 
-  const [initialValues, setInitialValues] = useState({});
   const [initialValuesRaw, setInitialValuesRaw] = useState({});
 
   const [allConfigs, setAllConfigs] = useState([]);
@@ -276,6 +277,8 @@ const EditModule = () => {
     } else {
       setIsChanged(true);
     }
+
+    setValues(allValues);
   };
 
   const handleTemplateRefChange = (
@@ -301,27 +304,15 @@ const EditModule = () => {
   async function handleSubmitTemplateEdit(templateEditValues: any) {
     setLoadTemplate(false);
 
+    let currentValues = form.getFieldsValue();
+
     let templateResult = await getTemplate(
       templateEditValues.repo,
       templateEditValues.path,
       templateEditValues.version,
     );
 
-    if (templateResult.success) {
-      setConfig(templateResult.template);
-      setTemplateRef({
-        repo: templateEditValues.repo,
-        path: templateEditValues.path,
-        version: templateEditValues.version,
-        resolvedVersion: templateResult.template.resolvedVersion,
-      });
-      handleTemplateRefChange(
-        templateEditValues.repo,
-        templateEditValues.path,
-        templateEditValues.version,
-        templateResult.template.resolvedVersion,
-      );
-    } else {
+    if (!templateResult.success) {
       setConfig({
         name: "",
         resolvedVersion: "",
@@ -338,23 +329,49 @@ const EditModule = () => {
       templateEditValues.version,
     );
 
-    if (initialValuesResult.success) {
-      let initialValuesMapped = mapsToArray(
-        templateResult.template.root.properties,
-        initialValuesResult.initialValues,
-      );
-
-      setInitialValuesRaw(initialValuesResult.initialValues);
-      setInitialValues(initialValuesMapped);
-      form.setFieldsValue(initialValuesMapped);
-      form.setFieldsValue(values);
-    } else {
+    if (!initialValuesResult.success) {
+      setConfig({
+        name: "",
+        resolvedVersion: "",
+        root: { properties: [], required: [] },
+      });
       setLoadTemplate(true);
-      setError(initialValuesResult.error);
+      setError(templateResult.error);
       return;
     }
 
-    setError({ message: "", description: "" });
+    // both requests successful
+    setTemplateRef({
+      repo: templateEditValues.repo,
+      path: templateEditValues.path,
+      version: templateEditValues.version,
+      resolvedVersion: templateResult.template.resolvedVersion,
+    });
+    handleTemplateRefChange(
+      templateEditValues.repo,
+      templateEditValues.path,
+      templateEditValues.version,
+      templateResult.template.resolvedVersion,
+    );
+
+    setConfig(templateResult.template);
+
+    let mergedValues = findMaps(
+      templateResult.template.root.properties,
+      currentValues,
+      initialValuesResult.initialValues,
+    );
+
+    let mergedValuesMapped = mapsToArray(
+      templateResult.template.root.properties,
+      mergedValues,
+    );
+
+    setValues(mergedValuesMapped);
+
+    setInitialValuesRaw(initialValuesResult.initialValues);
+    form.setFieldsValue(mergedValuesMapped);
+
     setLoadTemplate(true);
   }
 
@@ -638,7 +655,7 @@ const EditModule = () => {
           );
           return;
         case "boolean":
-          let moduleValues: any = module.values;
+          let moduleValues: any = values;
 
           let k = [];
           for (const item of parentFieldID) {
