@@ -10,6 +10,7 @@ import (
 	"github.com/cyclops-ui/cycops-cyctl/internal/kubeconfig"
 	"github.com/spf13/cobra"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"os"
 )
 
 var (
@@ -47,8 +48,8 @@ func listModules(clientset *client.CyclopsV1Alpha1Client, moduleNames []string) 
 		for _, name := range moduleNames {
 			nameSet[name] = struct{}{}
 		}
-		foundModules := []v1alpha1.Module{}
-		notFoundModules := []string{}
+		foundModules := make([]v1alpha1.Module, 0)
+		notFoundModules := make([]string, 0)
 
 		for _, module := range modules {
 			if _, found := nameSet[module.Name]; found {
@@ -72,6 +73,8 @@ func listModules(clientset *client.CyclopsV1Alpha1Client, moduleNames []string) 
 	output := ""
 	if len(filteredModules) > 0 {
 		output += "NAME" + strings.Repeat(" ", headerSpacing) + " AGE\n"
+	} else {
+		os.Exit(1)
 	}
 
 	fmt.Print(output)
