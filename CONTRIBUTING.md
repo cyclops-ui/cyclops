@@ -66,7 +66,7 @@ Cyclops has its own [custom resource](https://kubernetes.io/docs/concepts/extend
 You can install it using the command below:
 
 ```zsh
-kubectl apply -f https://raw.githubusercontent.com/cyclops-ui/cyclops/main/cyclops-ctrl/config/crd/bases/cyclops-ui.com_modules.yaml \
+kubectl apply -n cyclops -f https://raw.githubusercontent.com/cyclops-ui/cyclops/main/cyclops-ctrl/config/crd/bases/cyclops-ui.com_modules.yaml \
   -f https://raw.githubusercontent.com/cyclops-ui/cyclops/main/cyclops-ctrl/config/crd/bases/cyclops-ui.com_templateauthrules.yaml \
   -f https://raw.githubusercontent.com/cyclops-ui/cyclops/main/cyclops-ctrl/config/crd/bases/cyclops-ui.com_templatestores.yaml
 ```
