@@ -211,7 +211,7 @@ const TemplateStore = () => {
             width="5%"
             render={(template) => (
               <>
-                {loadingTemplateName === template.name ? ( // Render Spin component when loading
+                {loadingTemplateName === template.name ? (
                   <Spin />
                 ) : (
                   <FileSyncOutlined
