@@ -11,10 +11,17 @@ import {
   Form,
   Input,
   Divider,
+  message,
+  Spin,
 } from "antd";
 import axios from "axios";
 import Title from "antd/es/typography/Title";
-import { DeleteOutlined, EditOutlined } from "@ant-design/icons";
+import {
+  DeleteOutlined,
+  EditOutlined,
+  FileSyncOutlined,
+} from "@ant-design/icons";
+import classNames from "classnames";
 import styles from "./styles.module.css";
 import { mapResponseError } from "../../../utils/api/errors";
 
@@ -25,6 +32,10 @@ const TemplateStore = () => {
   const [newTemplateModal, setNewTemplateModal] = useState(false);
   const [confirmLoading, setConfirmLoading] = useState(false);
   const [editModal, setEditModal] = useState("");
+  const [loadingTemplateName, setLoadingTemplateName] = useState("");
+  const [requestStatus, setRequestStatus] = useState<{ [key: string]: string }>(
+    {},
+  );
   const [error, setError] = useState({
     message: "",
     description: "",
@@ -83,6 +94,28 @@ const TemplateStore = () => {
       .catch((error) => {
         setConfirmLoading(false);
         setError(mapResponseError(error));
+      });
+  };
+
+  const checkTemplateReference = (repo: any, path: any, templateName: any) => {
+    setLoadingTemplateName(templateName);
+    axios
+      .get(`/api/templates?repo=${repo}&path=${path}`)
+      .then((res) => {
+        setLoadingTemplateName("");
+        setRequestStatus((prevStatus) => ({
+          ...prevStatus,
+          [templateName]: "success",
+        }));
+        message.success("Template reference is valid!");
+      })
+      .catch((error) => {
+        setLoadingTemplateName("");
+        setRequestStatus((prevStatus) => ({
+          ...prevStatus,
+          [templateName]: "error",
+        }));
+        message.error("Error checking template reference!");
       });
   };
 
@@ -173,6 +206,31 @@ const TemplateStore = () => {
               }
               return value;
             }}
+          />
+          <Table.Column
+            width="5%"
+            render={(template) => (
+              <>
+                {loadingTemplateName === template.name ? ( // Render Spin component when loading
+                  <Spin />
+                ) : (
+                  <FileSyncOutlined
+                    className={classNames(styles.statustemplate, {
+                      [styles.success]:
+                        requestStatus[template.name] === "success",
+                      [styles.error]: requestStatus[template.name] === "error",
+                    })}
+                    onClick={function () {
+                      checkTemplateReference(
+                        template.ref.repo,
+                        template.ref.path,
+                        template.name,
+                      );
+                    }}
+                  />
+                )}
+              </>
+            )}
           />
           <Table.Column
             width="5%"
