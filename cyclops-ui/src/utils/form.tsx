@@ -39,13 +39,19 @@ export function findMaps(fields: any[], values: any, initialValues: any): any {
     let valuesList: any[] = [];
     switch (field.type) {
       case "string":
-        out[field.name] = values[field.name];
+        if (values[field.name]) {
+          out[field.name] = values[field.name];
+        }
         break;
       case "number":
-        out[field.name] = values[field.name];
+        if (values[field.name]) {
+          out[field.name] = values[field.name];
+        }
         break;
       case "boolean":
-        out[field.name] = values[field.name];
+        if (values[field.name]) {
+          out[field.name] = values[field.name];
+        }
         break;
       case "object":
         if (values[field.name]) {
