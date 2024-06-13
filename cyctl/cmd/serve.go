@@ -63,7 +63,7 @@ func startPortForwarding() {
 		log.Fatal(err)
 	}
 	if len(podList.Items) == 0 {
-		log.Fatal("no pods found for service my-service in namespace default")
+		log.Fatal("no pods found for service cyclops-ui in namespace cyclops")
 	}
 
 	rand.Seed(time.Now().UnixNano())
