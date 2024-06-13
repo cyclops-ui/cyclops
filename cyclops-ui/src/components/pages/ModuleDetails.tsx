@@ -29,6 +29,7 @@ import "./custom.css";
 import "ace-builds/src-noconflict/mode-jsx";
 import ReactAce from "react-ace";
 import Deployment from "../k8s-resources/Deployment";
+import DaemonSet from "../k8s-resources/DaemonSet";
 import StatefulSet from "../k8s-resources/StatefulSet";
 import Pod from "../k8s-resources/Pod";
 import Service from "../k8s-resources/Service";
@@ -374,6 +375,11 @@ const ModuleDetails = () => {
       case "Deployment":
         resourceDetails = (
           <Deployment name={resource.name} namespace={resource.namespace} />
+        );
+        break;
+      case "DaemonSet":
+        resourceDetails = (
+          <DaemonSet name={resource.name} namespace={resource.namespace} />
         );
         break;
       case "StatefulSet":
