@@ -29,9 +29,7 @@ const TemplateStore = () => {
   const [confirmLoading, setConfirmLoading] = useState(false);
   const [editModal, setEditModal] = useState("");
   const [loadingTemplateName, setLoadingTemplateName] = useState("");
-  const [requestStatus, setRequestStatus] = useState<{ [key: string]: string }>(
-    {},
-  );
+  const [requestStatus, setRequestStatus] = useState<{ [key: string]: string }>({});
   const [error, setError] = useState({
     message: "",
     description: "",
