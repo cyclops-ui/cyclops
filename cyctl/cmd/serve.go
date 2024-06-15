@@ -24,15 +24,19 @@ import (
 )
 
 var serveCMD = &cobra.Command{
-	Use:   "serve",
+	Use:   "serve -port [port]",
 	Short: "Start the Cyclops UI",
 	Long:  "Start the Cyclops UI by forwarding the Cyclops UI service's port to a local port",
 	Run: func(cmd *cobra.Command, args []string) {
-		startPortForwarding()
+		localPort, err := cmd.Flags().GetInt("port")
+		if err != nil {
+			log.Fatal(err)
+		}
+		startPortForwarding(localPort)
 	},
 }
 
-func startPortForwarding() {
+func startPortForwarding(localPort int) {
 	var kubeconfig *string
 	if home := homedir.HomeDir(); home != "" {
 		kubeconfig = flag.String("kubeconfig", filepath.Join(home, ".kube", "config"), "(optional) absolute path to the kubeconfig file")
@@ -81,7 +85,7 @@ func startPortForwarding() {
 
 	dialer := spdy.NewDialer(upgrader, &http.Client{Transport: roundTripper}, http.MethodPost, &serverURL)
 
-	ports := []string{"3000:80"}
+	ports := []string{fmt.Sprintf("%d:80", localPort)}
 
 	stopChan, readyChan := make(chan struct{}, 1), make(chan struct{}, 1)
 	out, errOut := new(bytes.Buffer), new(bytes.Buffer)
@@ -109,5 +113,6 @@ func startPortForwarding() {
 }
 
 func init() {
+	serveCMD.Flags().IntP("port", "p", 3000, "local port to forward to")
 	RootCmd.AddCommand(serveCMD)
 }
