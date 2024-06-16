@@ -23,6 +23,8 @@ import (
 	"k8s.io/client-go/util/homedir"
 )
 
+var Clientset *kubernetes.Clientset
+
 var serveCMD = &cobra.Command{
 	Use:   "serve -port [port]",
 	Short: "Start the Cyclops UI",
@@ -32,11 +34,11 @@ var serveCMD = &cobra.Command{
 		if err != nil {
 			log.Fatal(err)
 		}
-		startPortForwarding(localPort)
+		startPortForwarding(Clientset, localPort)
 	},
 }
 
-func startPortForwarding(localPort int) {
+func startPortForwarding(clientset *kubernetes.Clientset, localPort int) {
 	var kubeconfig *string
 	if home := homedir.HomeDir(); home != "" {
 		kubeconfig = flag.String("kubeconfig", filepath.Join(home, ".kube", "config"), "(optional) absolute path to the kubeconfig file")
@@ -50,7 +52,7 @@ func startPortForwarding(localPort int) {
 		log.Fatal(err)
 	}
 
-	clientset, err := kubernetes.NewForConfig(config)
+	clientset, err = kubernetes.NewForConfig(config)
 	if err != nil {
 		log.Fatal(err)
 	}
