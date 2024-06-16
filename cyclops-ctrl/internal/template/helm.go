@@ -240,6 +240,7 @@ func (r Repo) mapHelmChart(chartName string, files map[string][]byte) (*models.T
 		Files:        chartFiles,
 		Templates:    templateFiles,
 		Dependencies: dependencies,
+		IconURL:      metadata.Icon,
 	}, nil
 }
 
