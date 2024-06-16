@@ -1,10 +1,9 @@
 package prometheus
 
 import (
-	"github.com/gin-gonic/gin"
 	"github.com/go-logr/logr"
 	"github.com/prometheus/client_golang/prometheus"
-	"github.com/prometheus/client_golang/prometheus/promhttp"
+	"sigs.k8s.io/controller-runtime/pkg/metrics"
 )
 
 type Monitor struct {
@@ -19,7 +18,7 @@ func NewMonitor(logger logr.Logger) (Monitor, error) {
 			Namespace: "cyclops",
 		}),
 	}
-	if err := prometheus.Register(m.ModulesDeployed); err != nil {
+	if err := metrics.Registry.Register(m.ModulesDeployed); err != nil {
 		logger.Error(err, "unable to connect prometheus")
 		return Monitor{}, err
 	}
@@ -33,8 +32,4 @@ func (m *Monitor) IncModule() {
 
 func (m *Monitor) DecModule() {
 	m.ModulesDeployed.Dec()
-}
-
-func PromHandler() gin.HandlerFunc {
-	return gin.WrapH(promhttp.Handler())
 }
