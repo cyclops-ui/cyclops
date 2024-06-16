@@ -376,7 +376,7 @@ func (k *KubernetesClient) createDynamicNamespaced(
 	namespace string,
 	obj *unstructured.Unstructured,
 ) error {
-	_, err := k.Dynamic.Resource(gvr).Namespace(namespace).Get(context.TODO(), obj.GetName(), metav1.GetOptions{})
+	current, err := k.Dynamic.Resource(gvr).Namespace(namespace).Get(context.TODO(), obj.GetName(), metav1.GetOptions{})
 	if err != nil {
 		if k8serrors.IsNotFound(err) {
 			_, err := k.Dynamic.Resource(gvr).Namespace(namespace).Create(
@@ -388,6 +388,12 @@ func (k *KubernetesClient) createDynamicNamespaced(
 			return err
 		}
 		return err
+	}
+
+	if isJob(obj.GroupVersionKind().Group, obj.GroupVersionKind().Version, obj.GroupVersionKind().Kind) {
+		if err := copyJobSelectors(current, obj); err != nil {
+			return err
+		}
 	}
 
 	_, err = k.Dynamic.Resource(gvr).Namespace(namespace).Update(
@@ -424,6 +430,30 @@ func (k *KubernetesClient) createDynamicNonNamespaced(
 	)
 
 	return err
+}
+
+func copyJobSelectors(source, destination *unstructured.Unstructured) error {
+	selectors, ok, err := unstructured.NestedMap(source.Object, "spec", "selector")
+	if err != nil {
+		return err
+	}
+	if !ok {
+		return errors.New(fmt.Sprintf("job %v selectors not found"))
+	}
+
+	templateLables, _, _ := unstructured.NestedMap(source.Object, "spec", "template", "metadata", "labels")
+	if err != nil {
+		return err
+	}
+	if !ok {
+		return errors.New(fmt.Sprintf("job %v selectors not found"))
+	}
+
+	if err := unstructured.SetNestedMap(destination.Object, selectors, "spec", "selector"); err != nil {
+		return err
+	}
+
+	return unstructured.SetNestedMap(destination.Object, templateLables, "spec", "template", "metadata", "labels")
 }
 
 func (k *KubernetesClient) ListNodes() ([]apiv1.Node, error) {
@@ -693,6 +723,10 @@ func isStatefulSet(group, version, kind string) bool {
 
 func isPod(group, version, kind string) bool {
 	return group == "" && version == "v1" && kind == "Pod"
+}
+
+func isJob(group, version, kind string) bool {
+	return group == "batch" && version == "v1" && kind == "Job"
 }
 
 func isService(group, version, kind string) bool {
