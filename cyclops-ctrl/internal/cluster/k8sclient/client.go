@@ -438,7 +438,7 @@ func copyJobSelectors(source, destination *unstructured.Unstructured) error {
 		return err
 	}
 	if !ok {
-		return errors.New(fmt.Sprintf("job %v selectors not found"))
+		return errors.New(fmt.Sprintf("job %v selectors not found", source.GetName()))
 	}
 
 	templateLables, _, _ := unstructured.NestedMap(source.Object, "spec", "template", "metadata", "labels")
@@ -446,7 +446,7 @@ func copyJobSelectors(source, destination *unstructured.Unstructured) error {
 		return err
 	}
 	if !ok {
-		return errors.New(fmt.Sprintf("job %v selectors not found"))
+		return errors.New(fmt.Sprintf("job %v selectors not found", source.GetName()))
 	}
 
 	if err := unstructured.SetNestedMap(destination.Object, selectors, "spec", "selector"); err != nil {
