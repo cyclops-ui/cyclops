@@ -1,10 +1,12 @@
 package handler
 
 import (
+	"log"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
 
+	cerbos "github.com/cyclops-ui/cyclops/cyclops-ctrl/internal/cerbos"
 	"github.com/cyclops-ui/cyclops/cyclops-ctrl/internal/cluster/k8sclient"
 	"github.com/cyclops-ui/cyclops/cyclops-ctrl/internal/controller"
 	"github.com/cyclops-ui/cyclops/cyclops-ctrl/internal/prometheus"
@@ -19,6 +21,7 @@ type Handler struct {
 	templatesRepo *templaterepo.Repo
 	k8sClient     *k8sclient.KubernetesClient
 	renderer      *render.Renderer
+	cerbosClient  *cerbos.CerbosSvc
 
 	telemetryClient telemetry.Client
 	monitor         prometheus.Monitor
@@ -28,6 +31,7 @@ func New(
 	templatesRepo *templaterepo.Repo,
 	kubernetesClient *k8sclient.KubernetesClient,
 	renderer *render.Renderer,
+	cerbosSvc *cerbos.CerbosSvc,
 	telemetryClient telemetry.Client,
 	monitor prometheus.Monitor,
 ) (*Handler, error) {
@@ -35,6 +39,7 @@ func New(
 		templatesRepo:   templatesRepo,
 		k8sClient:       kubernetesClient,
 		renderer:        renderer,
+		cerbosClient:    cerbosSvc,
 		telemetryClient: telemetryClient,
 		monitor:         monitor,
 		router:          gin.New(),
@@ -44,13 +49,19 @@ func New(
 func (h *Handler) Start() error {
 	gin.SetMode(gin.DebugMode)
 
-	templatesController := controller.NewTemplatesController(h.templatesRepo, h.k8sClient)
-	modulesController := controller.NewModulesController(h.templatesRepo, h.k8sClient, h.renderer, h.telemetryClient, h.monitor)
+	templatesController := controller.NewTemplatesController(h.templatesRepo, h.k8sClient, h.cerbosClient)
+	modulesController := controller.NewModulesController(h.templatesRepo, h.k8sClient, h.renderer, h.telemetryClient, h.monitor, h.cerbosClient)
 	clusterController := controller.NewClusterController(h.k8sClient)
 
 	h.router = gin.New()
 
+	if err := h.router.SetTrustedProxies([]string{"127.0.0.1"}); err != nil {
+		log.Fatalf("Failed to set trusted proxies: %v", err)
+	}
+
 	h.router.GET("/ping", h.pong())
+
+	h.router.Use(cerbos.AuthMiddleware(h.cerbosClient))
 
 	// templates
 	h.router.GET("/templates", templatesController.GetTemplate)
