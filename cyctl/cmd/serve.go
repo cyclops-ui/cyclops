@@ -64,7 +64,7 @@ func startPortForwarding(clientset *kubernetes.Clientset, localPort int) {
 
 	stopChan, readyChan := make(chan struct{}, 1), make(chan struct{}, 1)
 
-	forwarder, err := portforward.New(dialer, ports, stopChan, readyChan, os.Stout, os.Stderr)
+	forwarder, err := portforward.New(dialer, ports, stopChan, readyChan, os.Stdout, os.Stderr)
 	if err != nil {
 		log.Fatal(err)
 	}
