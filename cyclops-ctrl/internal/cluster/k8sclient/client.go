@@ -441,7 +441,7 @@ func copyJobSelectors(source, destination *unstructured.Unstructured) error {
 		return errors.New(fmt.Sprintf("job %v selectors not found", source.GetName()))
 	}
 
-	templateLables, _, _ := unstructured.NestedMap(source.Object, "spec", "template", "metadata", "labels")
+	templateLabels, ok, err := unstructured.NestedMap(source.Object, "spec", "template", "metadata", "labels")
 	if err != nil {
 		return err
 	}
@@ -453,7 +453,7 @@ func copyJobSelectors(source, destination *unstructured.Unstructured) error {
 		return err
 	}
 
-	return unstructured.SetNestedMap(destination.Object, templateLables, "spec", "template", "metadata", "labels")
+	return unstructured.SetNestedMap(destination.Object, templateLabels, "spec", "template", "metadata", "labels")
 }
 
 func (k *KubernetesClient) ListNodes() ([]apiv1.Node, error) {
