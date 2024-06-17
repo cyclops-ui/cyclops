@@ -1,29 +1,21 @@
 package cmd
 
 import (
-	"bytes"
 	"context"
-	"flag"
 	"fmt"
 	"github.com/spf13/cobra"
 	"log"
-	"math/rand"
 	"net/http"
 	"net/url"
-	"path/filepath"
 	"strings"
-	"time"
 
+	"github.com/cyclops-ui/cycops-cyctl/internal/kubeconfig"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/labels"
 	"k8s.io/client-go/kubernetes"
-	"k8s.io/client-go/tools/clientcmd"
 	"k8s.io/client-go/tools/portforward"
 	"k8s.io/client-go/transport/spdy"
-	"k8s.io/client-go/util/homedir"
 )
-
-var Clientset *kubernetes.Clientset
 
 var serveCMD = &cobra.Command{
 	Use:   "serve -port [port]",
@@ -34,29 +26,11 @@ var serveCMD = &cobra.Command{
 		if err != nil {
 			log.Fatal(err)
 		}
-		startPortForwarding(Clientset, localPort)
+		startPortForwarding(kubeconfig.Clientset, localPort)
 	},
 }
 
 func startPortForwarding(clientset *kubernetes.Clientset, localPort int) {
-	var kubeconfig *string
-	if home := homedir.HomeDir(); home != "" {
-		kubeconfig = flag.String("kubeconfig", filepath.Join(home, ".kube", "config"), "(optional) absolute path to the kubeconfig file")
-	} else {
-		kubeconfig = flag.String("kubeconfig", "", "absolute path to the kubeconfig file")
-	}
-	flag.Parse()
-
-	config, err := clientcmd.BuildConfigFromFlags("", *kubeconfig)
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	clientset, err = kubernetes.NewForConfig(config)
-	if err != nil {
-		log.Fatal(err)
-	}
-
 	service, err := clientset.CoreV1().Services("cyclops").Get(context.TODO(), "cyclops-ui", metav1.GetOptions{})
 	if err != nil {
 		log.Fatal(err)
@@ -72,17 +46,15 @@ func startPortForwarding(clientset *kubernetes.Clientset, localPort int) {
 		log.Fatal("no pods found for service cyclops-ui in namespace cyclops")
 	}
 
-	rand.Seed(time.Now().UnixNano())
-	podIndex := rand.Intn(len(podList.Items))
-	podName := podList.Items[podIndex].Name
+	podName := podList.Items[0].Name
 
-	roundTripper, upgrader, err := spdy.RoundTripperFor(config)
+	roundTripper, upgrader, err := spdy.RoundTripperFor(kubeconfig.Config)
 	if err != nil {
 		log.Fatal(err)
 	}
 
 	path := fmt.Sprintf("/api/v1/namespaces/%s/pods/%s/portforward", "cyclops", podName)
-	hostIP := strings.TrimLeft(config.Host, "htps:/")
+	hostIP := strings.TrimLeft(kubeconfig.Config.Host, "htps:/")
 	serverURL := url.URL{Scheme: "https", Path: path, Host: hostIP}
 
 	dialer := spdy.NewDialer(upgrader, &http.Client{Transport: roundTripper}, http.MethodPost, &serverURL)
