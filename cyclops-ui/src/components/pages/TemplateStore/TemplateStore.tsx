@@ -16,7 +16,11 @@ import {
 } from "antd";
 import axios from "axios";
 import Title from "antd/es/typography/Title";
-import { DeleteOutlined, EditOutlined, FileSyncOutlined } from "@ant-design/icons";
+import {
+  DeleteOutlined,
+  EditOutlined,
+  FileSyncOutlined,
+} from "@ant-design/icons";
 import classNames from "classnames";
 import styles from "./styles.module.css";
 import { mapResponseError } from "../../../utils/api/errors";
@@ -29,7 +33,9 @@ const TemplateStore = () => {
   const [confirmLoading, setConfirmLoading] = useState(false);
   const [editModal, setEditModal] = useState("");
   const [loadingTemplateName, setLoadingTemplateName] = useState("");
-  const [requestStatus, setRequestStatus] = useState<{ [key: string]: string }>({});
+  const [requestStatus, setRequestStatus] = useState<{ [key: string]: string }>(
+    {},
+  );
   const [error, setError] = useState({
     message: "",
     description: "",
@@ -91,10 +97,15 @@ const TemplateStore = () => {
       });
   };
 
-  const checkTemplateReference = (repo: any, path: any, templateName: any) => {
+  const checkTemplateReference = (
+    repo: string,
+    path: string,
+    version: string,
+    templateName: string,
+  ) => {
     setLoadingTemplateName(templateName);
     axios
-      .get(`/api/templates?repo=${repo}&path=${path}`)
+      .get(`/api/templates?repo=${repo}&path=${path}&commit=${version}`)
       .then((res) => {
         setLoadingTemplateName("");
         setRequestStatus((prevStatus) => ({
@@ -102,6 +113,7 @@ const TemplateStore = () => {
           [templateName]: "success",
         }));
         message.success("Template reference is valid!");
+        setError({ message: "", description: "" });
       })
       .catch((error) => {
         setLoadingTemplateName("");
@@ -210,15 +222,18 @@ const TemplateStore = () => {
                   <Spin />
                 ) : (
                   <FileSyncOutlined
-                      className={classNames(
-                      styles.statustemplate, 
-                      {
-                        [styles.success]: requestStatus[template.name] === "success",
-                        [styles.error]: requestStatus[template.name] === "error"
-                      }
-                    )}
+                    className={classNames(styles.statustemplate, {
+                      [styles.success]:
+                        requestStatus[template.name] === "success",
+                      [styles.error]: requestStatus[template.name] === "error",
+                    })}
                     onClick={function () {
-                      checkTemplateReference( template.ref.repo, template.ref.path, template.name);
+                      checkTemplateReference(
+                        template.ref.repo,
+                        template.ref.path,
+                        template.ref.version,
+                        template.name,
+                      );
                     }}
                   />
                 )}

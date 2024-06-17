@@ -24,10 +24,6 @@
   transition: transform 0.2s;
 }
 
-.loading {
-  color: orange;
-}
-
 .success {
   color: green;
 }
