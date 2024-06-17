@@ -36,7 +36,7 @@ func GetKubeConfig() func(cmd *cobra.Command, args []string) {
 			panic(err.Error())
 		}
 
-		Clientset, err = client.NewForConfig(Config)
+		Clientset, err = kubernetes.NewForConfig(Config)
 		if err != nil {
 			panic(err.Error())
 		}
