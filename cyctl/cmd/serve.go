@@ -7,8 +7,8 @@ import (
 	"log"
 	"net/http"
 	"net/url"
+	"os"
 	"strings"
-    "os"
 
 	"github.com/cyclops-ui/cycops-cyctl/internal/kubeconfig"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
