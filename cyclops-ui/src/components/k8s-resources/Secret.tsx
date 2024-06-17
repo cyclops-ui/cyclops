@@ -10,13 +10,13 @@ interface Props {
 
 interface secret {
   type: string;
-  dataKeys: string;
+  dataKeys: string[];
 }
 
 const Secret = ({ name, namespace }: Props) => {
   const [secret, setSecret] = useState<secret>({
     type: "",
-    dataKeys: "",
+    dataKeys: [],
   });
   const [error, setError] = useState({
     message: "",
@@ -38,7 +38,7 @@ const Secret = ({ name, namespace }: Props) => {
         .then((res) => {
           setSecret({
             type: res.data.type,
-            dataKeys: res.data.dataKeys.join(","),
+            dataKeys: res.data.dataKeys,
           });
         })
         .catch((error) => {
@@ -70,16 +70,23 @@ const Secret = ({ name, namespace }: Props) => {
           style={{ marginBottom: "20px" }}
         />
       )}
-      <Divider />
+      <Divider
+        style={{ fontSize: "120%" }}
+        orientationMargin="0"
+        orientation={"left"}
+      >
+        Type: {secret.type}
+      </Divider>
+
       <Descriptions style={{ width: "100%" }} bordered>
-        {Object.entries(secret).map(([key, dataValue]) => (
+        {secret.dataKeys.map((key, index) => (
           <Descriptions.Item
-            key={key}
+            key={index}
             labelStyle={{ width: "20%" }}
             label={key}
-            span={24}
+            span={1}
           >
-            {dataValue}
+            ****
           </Descriptions.Item>
         ))}
       </Descriptions>
