@@ -42,6 +42,7 @@ import {
 } from "../../utils/templateRef";
 import { gvkString } from "../../utils/k8s/gvk";
 import { mapResponseError } from "../../utils/api/errors";
+import Secret from "../k8s-resources/Secret";
 const languages = [
   "javascript",
   "java",
@@ -408,6 +409,11 @@ const ModuleDetails = () => {
             name={resource.name}
             namespace={resource.namespace}
           />
+        );
+        break;
+      case "Secret":
+        resourceDetails = (
+          <Secret name={resource.name} namespace={resource.namespace} />
         );
         break;
     }

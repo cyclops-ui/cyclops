@@ -122,6 +122,7 @@ npm start
 
 ## How to contribute
 
+- Pick an issue [here](https://github.com/cyclops-ui/cyclops/issues). If you have already contributed, we encourage you not to pick issues labeled with `good first issue` since those are useful to first-time contributors to onboard
 - [Fork the repository](https://github.com/cyclops-ui/cyclops/fork) and clone it locally
 - Create a new branch
 - Make your changes
