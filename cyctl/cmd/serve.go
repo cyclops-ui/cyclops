@@ -70,14 +70,15 @@ func startPortForwarding(clientset *kubernetes.Clientset, localPort int) {
 	}
 
 	go func() {
-		for range readyChan {
+		if err = forwarder.ForwardPorts(); err != nil {
+			log.Fatal(err)
 		}
 	}()
 
-	if err = forwarder.ForwardPorts(); err != nil {
-		log.Fatal(err)
-	}
+	<-readyChan
+	fmt.Println("Ready to accept traffic")
 
+	<-stopChan
 	fmt.Println("Port forwarding stopped")
 }
 
