@@ -18,9 +18,8 @@ package modulecontroller
 
 import (
 	"context"
+	"errors"
 	"fmt"
-	"strings"
-
 	"github.com/go-logr/logr"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
@@ -30,6 +29,9 @@ import (
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/log"
+	"sigs.k8s.io/controller-runtime/pkg/reconcile"
+	"strings"
+	"time"
 
 	cyclopsv1alpha1 "github.com/cyclops-ui/cyclops/cyclops-ctrl/api/v1alpha1"
 	"github.com/cyclops-ui/cyclops/cyclops-ctrl/internal/cluster/k8sclient"
@@ -114,7 +116,7 @@ func (r *ModuleReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctr
 		return ctrl.Result{}, nil
 	}
 	if err != nil {
-		return ctrl.Result{}, err
+		return ctrl.Result{}, nil
 	}
 
 	r.logger.Info("upsert module", "namespaced name", req.NamespacedName)
@@ -132,26 +134,18 @@ func (r *ModuleReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctr
 	if err != nil {
 		r.logger.Error(err, "error fetching module template", "namespaced name", req.NamespacedName)
 
-		if err = r.setStatus(ctx, module, req.NamespacedName, cyclopsv1alpha1.Failed, templateVersion, err.Error(), nil); err != nil {
-			return ctrl.Result{}, err
-		}
-
-		return ctrl.Result{}, err
+		return r.setStatus(ctx, module, req.NamespacedName, cyclopsv1alpha1.Failed, templateVersion, err.Error(), nil)
 	}
 
 	installErrors, err := r.moduleToResources(req.Name, template)
 	if err != nil {
 		r.logger.Error(err, "error on upsert module", "namespaced name", req.NamespacedName)
 
-		if err = r.setStatus(ctx, module, req.NamespacedName, cyclopsv1alpha1.Failed, template.ResolvedVersion, err.Error(), nil); err != nil {
-			return ctrl.Result{}, err
-		}
-
-		return ctrl.Result{}, err
+		return r.setStatus(ctx, module, req.NamespacedName, cyclopsv1alpha1.Failed, template.ResolvedVersion, err.Error(), nil)
 	}
 
 	if len(installErrors) != 0 {
-		return ctrl.Result{}, r.setStatus(
+		return r.setStatus(
 			ctx,
 			module,
 			req.NamespacedName,
@@ -162,7 +156,7 @@ func (r *ModuleReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctr
 		)
 	}
 
-	return ctrl.Result{}, r.setStatus(ctx, module, req.NamespacedName, cyclopsv1alpha1.Succeeded, template.ResolvedVersion, "", nil)
+	return r.setStatus(ctx, module, req.NamespacedName, cyclopsv1alpha1.Succeeded, template.ResolvedVersion, "", nil)
 }
 
 // SetupWithManager sets up the controller with the Manager.
@@ -273,25 +267,43 @@ func (r *ModuleReconciler) setStatus(
 	templateResolvedVersion string,
 	reason string,
 	installErrors []string,
-) error {
+) (ctrl.Result, error) {
 	trv := module.Status.TemplateResolvedVersion
 	if len(trv) == 0 {
 		trv = templateResolvedVersion
 	}
 
+	retries := 0
+	if module.Status.ReconciliationStatus.Status == cyclopsv1alpha1.Failed {
+		retries = module.Status.ReconciliationStatus.Retries + 1
+	}
+
+	if retries > 5 {
+		return ctrl.Result{}, reconcile.TerminalError(errors.New(reason))
+	}
+
 	module.Status = cyclopsv1alpha1.ModuleStatus{
 		ReconciliationStatus: cyclopsv1alpha1.ReconciliationStatus{
-			Status: status,
-			Reason: reason,
-			Errors: installErrors,
+			Status:  status,
+			Reason:  reason,
+			Retries: retries,
+			Errors:  installErrors,
 		},
 		TemplateResolvedVersion: templateResolvedVersion,
 	}
 
 	if err := r.Status().Update(ctx, &module); err != nil {
+		time.Sleep(time.Second)
 		r.logger.Error(err, "error updating module status", "namespaced name", namespacedName)
-		return err
+
+		return ctrl.Result{}, reconcile.TerminalError(errors.New("error updating module status"))
 	}
 
-	return nil
+	time.Sleep(time.Second * 3)
+
+	if status == cyclopsv1alpha1.Failed {
+		return ctrl.Result{}, errors.New(reason)
+	}
+
+	return ctrl.Result{}, nil
 }

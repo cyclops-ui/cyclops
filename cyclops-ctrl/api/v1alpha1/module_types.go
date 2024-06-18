@@ -61,6 +61,8 @@ type ReconciliationStatus struct {
 	// +kubebuilder:default:=unknown
 	Status ReconciliationStatusState `json:"status,omitempty"`
 	// +kubebuilder:validation:Optional
+	Retries int `json:"retries"`
+	// +kubebuilder:validation:Optional
 	Reason string `json:"reason,omitempty"`
 	// +kubebuilder:validation:Optional
 	Errors []string `json:"errors"`
