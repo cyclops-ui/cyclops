@@ -474,50 +474,66 @@ func (k *KubernetesClient) getStatefulsetPods(deployment appsv1.StatefulSet) ([]
 
 func (k *KubernetesClient) getPodsForCronJob(cronJob batchv1.CronJob) ([]dto.Pod, error) {
 	jobTemplateLabels := cronJob.Spec.JobTemplate.Spec.Template.Labels
-	labelSelector := labels.SelectorFromSet(jobTemplateLabels).String()
-	pods, err := k.clientset.CoreV1().Pods(cronJob.Namespace).List(context.Background(), metav1.ListOptions{
-		LabelSelector: labelSelector,
+	jobLabelSelector := labels.SelectorFromSet(jobTemplateLabels).String()
+
+	jobs, err := k.clientset.BatchV1().Jobs(cronJob.Namespace).List(context.Background(), metav1.ListOptions{
+		LabelSelector: jobLabelSelector,
 	})
 	if err != nil {
 		return nil, err
 	}
 
-	out := make([]dto.Pod, 0, len(pods.Items))
-	for _, item := range pods.Items {
-		containers := make([]dto.Container, 0, len(item.Spec.Containers))
+	out := make([]dto.Pod, 0)
 
-		for _, cnt := range item.Spec.Containers {
-			env := make(map[string]string)
-			for _, envVar := range cnt.Env {
-				env[envVar.Name] = envVar.Value
-			}
+	for _, job := range jobs.Items {
+		podTemplateLabels := job.Spec.Template.Labels
+		podLabelSelector := labels.SelectorFromSet(podTemplateLabels).String()
 
-			var status apiv1.ContainerStatus
-			for _, c := range item.Status.ContainerStatuses {
-				if c.Name == cnt.Name {
-					status = c
-					break
-				}
-			}
+		pods, err := k.clientset.CoreV1().Pods(cronJob.Namespace).List(context.Background(), metav1.ListOptions{
+			LabelSelector: podLabelSelector,
+		})
 
-			containers = append(containers, dto.Container{
-				Name:   cnt.Name,
-				Image:  cnt.Image,
-				Env:    env,
-				Status: containerStatus(status),
-			})
+		if err != nil {
+			return nil, err
 		}
 
-		out = append(out, dto.Pod{
-			Name:       item.Name,
-			Containers: containers,
-			Node:       item.Spec.NodeName,
-			PodPhase:   string(item.Status.Phase),
-			Started:    item.Status.StartTime,
-		})
+		for _, item := range pods.Items {
+			containers := make([]dto.Container, 0, len(item.Spec.Containers))
+
+			for _, cnt := range item.Spec.Containers {
+				env := make(map[string]string)
+				for _, envVar := range cnt.Env {
+					env[envVar.Name] = envVar.Value
+				}
+
+				var status apiv1.ContainerStatus
+				for _, c := range item.Status.ContainerStatuses {
+					if c.Name == cnt.Name {
+						status = c
+						break
+					}
+				}
+
+				containers = append(containers, dto.Container{
+					Name:   cnt.Name,
+					Image:  cnt.Image,
+					Env:    env,
+					Status: containerStatus(status),
+				})
+			}
+
+			out = append(out, dto.Pod{
+				Name:       item.Name,
+				Containers: containers,
+				Node:       item.Spec.NodeName,
+				PodPhase:   string(item.Status.Phase),
+				Started:    item.Status.StartTime,
+			})
+		}
 	}
 
 	return out, nil
+
 }
 
 func containerStatus(status apiv1.ContainerStatus) dto.ContainerStatus {
