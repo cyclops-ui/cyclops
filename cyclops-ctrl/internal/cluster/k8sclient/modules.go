@@ -8,6 +8,7 @@ import (
 	"github.com/pkg/errors"
 
 	appsv1 "k8s.io/api/apps/v1"
+	batchv1 "k8s.io/api/batch/v1"
 	apiv1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
@@ -465,6 +466,54 @@ func (k *KubernetesClient) getStatefulsetPods(deployment appsv1.StatefulSet) ([]
 			Node:           item.Spec.NodeName,
 			PodPhase:       string(item.Status.Phase),
 			Started:        item.Status.StartTime,
+		})
+	}
+
+	return out, nil
+}
+
+func (k *KubernetesClient) getPodsForCronJob(cronJob batchv1.CronJob) ([]dto.Pod, error) {
+	jobTemplateLabels := cronJob.Spec.JobTemplate.Spec.Template.Labels
+	labelSelector := labels.SelectorFromSet(jobTemplateLabels).String()
+	pods, err := k.clientset.CoreV1().Pods(cronJob.Namespace).List(context.Background(), metav1.ListOptions{
+		LabelSelector: labelSelector,
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	out := make([]dto.Pod, 0, len(pods.Items))
+	for _, item := range pods.Items {
+		containers := make([]dto.Container, 0, len(item.Spec.Containers))
+
+		for _, cnt := range item.Spec.Containers {
+			env := make(map[string]string)
+			for _, envVar := range cnt.Env {
+				env[envVar.Name] = envVar.Value
+			}
+
+			var status apiv1.ContainerStatus
+			for _, c := range item.Status.ContainerStatuses {
+				if c.Name == cnt.Name {
+					status = c
+					break
+				}
+			}
+
+			containers = append(containers, dto.Container{
+				Name:   cnt.Name,
+				Image:  cnt.Image,
+				Env:    env,
+				Status: containerStatus(status),
+			})
+		}
+
+		out = append(out, dto.Pod{
+			Name:       item.Name,
+			Containers: containers,
+			Node:       item.Spec.NodeName,
+			PodPhase:   string(item.Status.Phase),
+			Started:    item.Status.StartTime,
 		})
 	}
 
