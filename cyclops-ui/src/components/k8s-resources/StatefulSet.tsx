@@ -22,8 +22,21 @@ interface Props {
   namespace: string;
 }
 
+interface container {
+  name: string;
+}
+interface pod {
+  name: string;
+  containers: container[];
+}
+
+interface statefulSet {
+  status: string;
+  pods: pod[];
+}
+
 const StatefulSet = ({ name, namespace }: Props) => {
-  const [statefulSet, setStatefulSet] = useState({
+  const [statefulSet, setStatefulSet] = useState<statefulSet>({
     status: "",
     pods: [],
   });
@@ -34,6 +47,10 @@ const StatefulSet = ({ name, namespace }: Props) => {
     pod: "",
     containers: [],
     initContainers: [],
+  });
+  const [statefulSetLogs, setStatefulSetLogs] = useState("");
+  const [statefulSetLogsModal, setStatefulSetLogsModal] = useState({
+    on: false,
   });
   const [error, setError] = useState({
     message: "",
@@ -76,6 +93,13 @@ const StatefulSet = ({ name, namespace }: Props) => {
       initContainers: [],
     });
     setLogs("");
+  };
+
+  const handleCancelStatefulSetLogs = () => {
+    setStatefulSetLogsModal({
+      on: false,
+    });
+    setStatefulSetLogs("");
   };
 
   const downloadLogs = (container: string) => {
@@ -181,6 +205,65 @@ const StatefulSet = ({ name, namespace }: Props) => {
       });
   };
 
+  const getStatefulSetLogsTabItems = () => {
+    let items: TabsProps["items"] = [];
+    let keys: string[] = [];
+
+    if (statefulSet.pods !== null) {
+      for (var pod of statefulSet.pods) {
+        for (var container of pod.containers) {
+          if (!keys.includes(container.name)) {
+            items.push({
+              key: `${container.name}`,
+              label: `${container.name}`,
+              children: (
+                <Col>
+                  <ReactAce
+                    style={{ width: "100%" }}
+                    mode={"sass"}
+                    value={statefulSetLogs}
+                    readOnly={true}
+                  />
+                </Col>
+              ),
+            });
+            keys.push(container.name);
+          }
+        }
+      }
+    }
+
+    return items;
+  };
+
+  const getStatefulSetLogs = (container: string) => {
+    axios
+      .get(
+        "/api/resources/statefulsets/" +
+          namespace +
+          "/" +
+          name +
+          "/" +
+          container +
+          "/logs",
+      )
+      .then((res) => {
+        if (res.data) {
+          let log = "";
+          res.data.forEach((s: string) => {
+            log += s;
+            log += "\n";
+          });
+          setStatefulSetLogs(log);
+        } else {
+          setStatefulSetLogs("No logs available");
+        }
+      })
+      .catch((error) => {
+        setError(mapResponseError(error));
+      });
+  };
+
   return (
     <div>
       {error.message.length !== 0 && (
@@ -198,6 +281,25 @@ const StatefulSet = ({ name, namespace }: Props) => {
           style={{ marginBottom: "20px" }}
         />
       )}
+      <Row>
+        <Divider
+          style={{ fontSize: "120%" }}
+          orientationMargin="0"
+          orientation={"left"}
+        >
+          Statefulset logs
+        </Divider>
+        <Button
+          onClick={function () {
+            getStatefulSetLogs(statefulSet.pods[0].containers[0].name);
+            setStatefulSetLogsModal({
+              on: true,
+            });
+          }}
+        >
+          View Logs
+        </Button>
+      </Row>
       <Row>
         <Divider
           style={{ fontSize: "120%" }}
@@ -307,6 +409,19 @@ const StatefulSet = ({ name, namespace }: Props) => {
         width={"60%"}
       >
         <Tabs items={getTabItems()} onChange={onLogsTabsChange} />
+      </Modal>
+      <Modal
+        title="Stefulset Logs"
+        open={statefulSetLogsModal.on}
+        onOk={handleCancelStatefulSetLogs}
+        onCancel={handleCancelStatefulSetLogs}
+        cancelButtonProps={{ style: { display: "none" } }}
+        width={"60%"}
+      >
+        <Tabs
+          items={getStatefulSetLogsTabItems()}
+          onChange={getStatefulSetLogs}
+        />
       </Modal>
     </div>
   );
