@@ -449,6 +449,49 @@ func (c *CronJob) SetDeleted(deleted bool) {
 	c.Deleted = deleted
 }
 
+type Job struct {
+	Group          string `json:"group"`
+	Version        string `json:"version"`
+	Kind           string `json:"kind"`
+	Name           string `json:"name"`
+	Namespace      string `json:"namespace"`
+	Pods           []Pod  `json:"pods"`
+	CompletionTime string `json:"completionTime"`
+	StartTime      string `json:"startTime"`
+}
+
+func (c *Job) GetGroupVersionKind() string {
+	return c.Group + "/" + c.Version + ", Kind=" + c.Kind
+}
+
+func (c *Job) GetGroup() string {
+	return c.Group
+}
+
+func (c *Job) GetVersion() string {
+	return c.Version
+}
+
+func (c *Job) GetKind() string {
+	return c.Kind
+}
+
+func (c *Job) GetName() string {
+	return c.Name
+}
+
+func (c *Job) GetNamespace() string {
+	return c.Namespace
+}
+
+func (c *Job) GetCompletionTime() string {
+	return c.CompletionTime
+}
+
+func (c *Job) GetStartTime() string {
+	return c.StartTime
+}
+
 type Other struct {
 	Group     string `json:"group"`
 	Version   string `json:"version"`
