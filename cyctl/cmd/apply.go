@@ -3,10 +3,12 @@ package cmd
 import (
 	"bufio"
 	"bytes"
+	"encoding/json"
 	"io"
 	"io/ioutil"
 	"net/http"
 
+	"k8s.io/apimachinery/pkg/types"
 	utilyaml "k8s.io/apimachinery/pkg/util/yaml"
 
 	"context"
@@ -53,8 +55,13 @@ func doServerSideApply(ctx context.Context, cfg *rest.Config, obj *unstructured.
 		dr = dyn.Resource(mapping.Resource)
 	}
 
-	_, err = dr.Create(ctx, obj, metav1.CreateOptions{
-		FieldManager: "sample-controller",
+	data, err := json.Marshal(obj)
+	if err != nil {
+		return err
+	}
+
+	_, err = dr.Patch(ctx, obj.GetName(), types.ApplyPatchType, data, metav1.PatchOptions{
+		FieldManager: "cyctl",
 	})
 
 	return err
@@ -115,6 +122,8 @@ var applyCmd = &cobra.Command{
 			log.Fatal(err)
 		}
 
+		defer deploy.Body.Close()
+
 		deployYamlFile, err := ioutil.ReadAll(deploy.Body)
 		if err != nil {
 			log.Printf("yamlFile.Get err   #%v ", err)
@@ -135,7 +144,6 @@ var applyCmd = &cobra.Command{
 			log.Fatal(err)
 		}
 
-		defer deploy.Body.Close()
 		defer demo.Body.Close()
 
 		demoYamlFile, err := ioutil.ReadAll(demo.Body)
