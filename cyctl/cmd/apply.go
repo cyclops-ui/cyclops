@@ -126,7 +126,7 @@ var applyCmd = &cobra.Command{
 
 		deployYamlFile, err := ioutil.ReadAll(deploy.Body)
 		if err != nil {
-			log.Printf("yamlFile.Get err   #%v ", err)
+			log.Fatal(err)
 		}
 
 		fmt.Println("initializing cyclops resources")
@@ -148,7 +148,7 @@ var applyCmd = &cobra.Command{
 
 		demoYamlFile, err := ioutil.ReadAll(demo.Body)
 		if err != nil {
-			log.Printf("yamlFile.Get err   #%v ", err)
+			log.Fatal(err)
 		}
 
 		fmt.Println("creating demo templates")
