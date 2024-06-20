@@ -10,16 +10,14 @@ import (
 	utilyaml "k8s.io/apimachinery/pkg/util/yaml"
 
 	"context"
-	"encoding/json"
 	"fmt"
 	"log"
 
+	"github.com/cyclops-ui/cycops-cyctl/internal/kubeconfig"
 	"k8s.io/apimachinery/pkg/api/meta"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-    "github.com/cyclops-ui/cycops-cyctl/internal/kubeconfig"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/runtime/serializer/yaml"
-	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/client-go/discovery"
 	"k8s.io/client-go/discovery/cached/memory"
 	"k8s.io/client-go/dynamic"
@@ -55,75 +53,11 @@ func doServerSideApply(ctx context.Context, cfg *rest.Config, obj *unstructured.
 		dr = dyn.Resource(mapping.Resource)
 	}
 
-	data, err := json.Marshal(obj)
-	if err != nil {
-		return err
-	}
-
-	_, err = dr.Patch(ctx, obj.GetName(), types.ApplyPatchType, data, metav1.PatchOptions{
+	_, err = dr.Create(ctx, obj, metav1.CreateOptions{
 		FieldManager: "sample-controller",
 	})
 
 	return err
-}
-
-var applyCmd = &cobra.Command{
-	Use:   "init",
-	Short: "initialize cyclops with all the resources (along with demo templates)",
-	Run: func(cmd *cobra.Command, args []string) {
-		version, err := cmd.Flags().GetString("version")
-		if err != nil {
-			log.Fatal(err)
-		}
-
-		var deploy_url string
-		var demo_url string
-
-		if version != "main" {
-			deploy_url = "https://raw.githubusercontent.com/cyclops-ui/cyclops/v" + version + "/install/cyclops-install.yaml"
-			demo_url = "https://raw.githubusercontent.com/cyclops-ui/cyclops/v" + version + "/install/demo-templates.yaml"
-		} else {
-			deploy_url = "https://raw.githubusercontent.com/cyclops-ui/cyclops/" + version + "/install/cyclops-install.yaml"
-			demo_url = "https://raw.githubusercontent.com/cyclops-ui/cyclops/" + version + "/install/demo-templates.yaml"
-		}
-
-		deploy, err := http.Get(deploy_url)
-		if err != nil {
-			log.Fatal(err)
-		}
-
-		demo, err := http.Get(demo_url)
-		if err != nil {
-			log.Fatal(err)
-		}
-
-		fmt.Println("using version:", version)
-		defer deploy.Body.Close()
-		defer demo.Body.Close()
-
-		deployYamlFile, err := ioutil.ReadAll(deploy.Body)
-		if err != nil {
-			log.Printf("yamlFile.Get err   #%v ", err)
-		}
-
-		demoYamlFile, err := ioutil.ReadAll(demo.Body)
-		if err != nil {
-			log.Printf("yamlFile.Get err   #%v ", err)
-		}
-
-		fmt.Println("initializing cyclops resources")
-		err = applyYaml(deployYamlFile, kubeconfig.Config)
-		if err != nil {
-			log.Fatal(err)
-		}
-
-		fmt.Println("initialization successful")
-		fmt.Println("creating demo templates")
-		err = applyYaml(demoYamlFile, kubeconfig.Config)
-		if err != nil {
-			log.Fatal(err)
-		}
-	},
 }
 
 func applyYaml(yamlFile []byte, config *rest.Config) error {
@@ -153,8 +87,71 @@ func applyYaml(yamlFile []byte, config *rest.Config) error {
 	return nil
 }
 
-func init() {
-	applyCmd.Flags().StringP("version", "v", "main", "specify version for cyclops")
-	RootCmd.AddCommand(applyCmd)
+var applyCmd = &cobra.Command{
+	Use:   "init",
+	Short: "initialize cyclops with all the resources (along with demo templates)",
+	Run: func(cmd *cobra.Command, args []string) {
+		version, err := cmd.Flags().GetString("version")
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		var deployUrl string
+		var demoUrl string
+
+		if version != "main" {
+			deployUrl = "https://raw.githubusercontent.com/cyclops-ui/cyclops/v" + version + "/install/cyclops-install.yaml"
+			demoUrl = "https://raw.githubusercontent.com/cyclops-ui/cyclops/v" + version + "/install/demo-templates.yaml"
+		} else {
+			deployUrl = "https://raw.githubusercontent.com/cyclops-ui/cyclops/" + version + "/install/cyclops-install.yaml"
+			demoUrl = "https://raw.githubusercontent.com/cyclops-ui/cyclops/" + version + "/install/demo-templates.yaml"
+		}
+
+		fmt.Println("using version:", version)
+
+		fmt.Println("fetching cyclops manifest")
+		deploy, err := http.Get(deployUrl)
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		deployYamlFile, err := ioutil.ReadAll(deploy.Body)
+		if err != nil {
+			log.Printf("yamlFile.Get err   #%v ", err)
+		}
+
+		fmt.Println("initializing cyclops resources")
+
+		err = applyYaml(deployYamlFile, kubeconfig.Config)
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		fmt.Println("initialization successful")
+
+		fmt.Println("fetching demo templates manifest")
+		demo, err := http.Get(demoUrl)
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		defer deploy.Body.Close()
+		defer demo.Body.Close()
+
+		demoYamlFile, err := ioutil.ReadAll(demo.Body)
+		if err != nil {
+			log.Printf("yamlFile.Get err   #%v ", err)
+		}
+
+		fmt.Println("creating demo templates")
+		err = applyYaml(demoYamlFile, kubeconfig.Config)
+		if err != nil {
+			log.Fatal(err)
+		}
+	},
 }
 
+func init() {
+	applyCmd.Flags().StringP("version", "v", "main", "specify cyclops version")
+	RootCmd.AddCommand(applyCmd)
+}
