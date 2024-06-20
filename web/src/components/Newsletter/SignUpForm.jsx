@@ -27,7 +27,6 @@ const formStyles = {
 const domain = "app.loops.so";
 
 export default function SignUpForm() {
-  // testing verification
   const [email, setEmail] = useState("");
   const [formState, setFormState] = useState(INIT);
   const [errorMessage, setErrorMessage] = useState("");
