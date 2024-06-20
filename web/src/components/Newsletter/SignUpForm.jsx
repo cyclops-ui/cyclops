@@ -137,6 +137,7 @@ export default function SignUpForm() {
               alignItems: "center",
               justifyContent: "center",
               width: "100%",
+              flexWrap: "wrap",
             }}
           >
             <input
@@ -149,7 +150,7 @@ export default function SignUpForm() {
               style={{
                 color: formStyles.formFontColor,
                 fontSize: `${formStyles.formFontSizePx}px`,
-                margin: isInline ? "0px 10px 0px 0px" : "0px 0px 10px",
+                margin: isInline ? "0px 10px 10px 0px" : "0px 0px 10px",
                 width: "100%",
                 maxWidth: "300px",
                 minWidth: "100px",
@@ -232,6 +233,7 @@ export default function SignUpForm() {
           lineHeight: "20px",
           border: "none",
           cursor: "pointer",
+          marginBottom: "10px",
         }}
       >
         {formState === SUBMITTING ? "Please wait..." : formStyles.buttonText}
