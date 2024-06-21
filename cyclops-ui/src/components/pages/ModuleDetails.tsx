@@ -378,9 +378,9 @@ const ModuleDetails = () => {
           <Deployment name={resource.name} namespace={resource.namespace} />
         );
         break;
-      case "CronJobs":
+      case "CronJob":
         resourceDetails = (
-          <CronJobs name={resource.name} namespace={resource.namespace} />
+          <CronJob name={resource.name} namespace={resource.namespace} />
         );
         break;
       case "DaemonSet":
