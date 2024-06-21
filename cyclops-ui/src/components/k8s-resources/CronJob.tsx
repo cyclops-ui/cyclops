@@ -22,7 +22,7 @@ interface Props {
   namespace: string;
 }
 
-const CronJobs = ({ name, namespace }: Props) => {
+const CronJob = ({ name, namespace }: Props) => {
   const [cronjob, setCronjob] = useState({
     status: "",
     pods: [],
@@ -40,7 +40,7 @@ const CronJobs = ({ name, namespace }: Props) => {
     description: "",
   });
 
-  function fetchCronJobs() {
+  function fetchCronJob() {
     axios
       .get(`/api/resources`, {
         params: {
@@ -60,8 +60,8 @@ const CronJobs = ({ name, namespace }: Props) => {
   }
 
   useEffect(() => {
-    fetchCronJobs();
-    const interval = setInterval(() => fetchCronJobs(), 15000);
+    fetchCronJob();
+    const interval = setInterval(() => fetchCronJob(), 15000);
     return () => {
       clearInterval(interval);
     };
