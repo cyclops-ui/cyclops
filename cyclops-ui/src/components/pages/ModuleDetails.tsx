@@ -378,6 +378,11 @@ const ModuleDetails = () => {
           <Deployment name={resource.name} namespace={resource.namespace} />
         );
         break;
+      case "CronJobs":
+        resourceDetails = (
+          <CronJobs name={resource.name} namespace={resource.namespace} />
+        );
+        break;
       case "DaemonSet":
         resourceDetails = (
           <DaemonSet name={resource.name} namespace={resource.namespace} />
