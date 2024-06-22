@@ -5,20 +5,17 @@ import (
 	"errors"
 	"fmt"
 	"log"
-	"os"
+	"strings"
 
-	"gopkg.in/yaml.v2"
-	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes"
 	ctrl "sigs.k8s.io/controller-runtime"
 )
 
 type UserRecord struct {
-	Username     string
-	PasswordHash []byte
-	Roles        []string
-	Resources    []string
-	Actions      []string
+	Username string
+	Password string
+	Roles    []string
 }
 
 type UsersData struct {
@@ -29,22 +26,6 @@ type UserConfig struct {
 	clientset *kubernetes.Clientset
 }
 
-// LoadUsers loads users from the YAML file.
-func loadUsers(filePath string) (*UsersData, error) {
-	data, err := os.ReadFile(filePath)
-	if err != nil {
-		return nil, err
-	}
-
-	var usersData UsersData
-	err = yaml.Unmarshal(data, &usersData)
-	if err != nil {
-		return nil, err
-	}
-
-	return &usersData, nil
-}
-
 // NewUserConfig creates a new UserConfig with a Kubernetes clientset.
 func NewUserConfig() (*UserConfig, error) {
 	config := ctrl.GetConfigOrDie()
@@ -52,25 +33,54 @@ func NewUserConfig() (*UserConfig, error) {
 	if err != nil {
 		return nil, err
 	}
-
 	return &UserConfig{clientset: clientset}, nil
 }
 
-// loadUserConfig fetches the user configuration from a Kubernetes secret.
-func (u *UserConfig) loadUserConfig(namespace, secretName, key string) (*UsersData, error) {
-	secret, err := u.clientset.CoreV1().Secrets(namespace).Get(context.TODO(), secretName, v1.GetOptions{})
+// loadUserConfig fetches the user configuration from a Kubernetes secret based on a label selector.
+func (u *UserConfig) loadUserConfig(namespace, userName string) (*UserRecord, error) {
+	labelSelector := fmt.Sprintf("app.kubernetes.io/part-of=cyclops,app.kubernetes.io/type=user,app.kubernetes.io/name=%v", userName)
+	secrets, err := u.clientset.CoreV1().Secrets(namespace).List(context.TODO(), metav1.ListOptions{
+		LabelSelector: labelSelector,
+	})
 	if err != nil {
-		return nil, fmt.Errorf("failed to fetch secret: %w", err)
+		return nil, fmt.Errorf("failed to list secrets: %w", err)
 	}
 
-	userDataBytes := secret.Data[key]
-	var usersData UsersData
-	err = yaml.Unmarshal(userDataBytes, &usersData)
+	if len(secrets.Items) == 0 {
+		return nil, errors.New("no secrets found matching the label selector")
+	}
+
+	// Assuming the first secret is the one we need.
+	secret := secrets.Items[0]
+
+	userRecord, err := mapSecretData(secret.Data)
 	if err != nil {
 		return nil, err
 	}
 
-	return &usersData, nil
+	return userRecord, nil
+}
+
+// mapSecretData extracts the user record from the secret data.
+func mapSecretData(secretData map[string][]byte) (*UserRecord, error) {
+	username, ok := secretData["username"]
+	if !ok {
+		return nil, errors.New("username key not found in secret data")
+	}
+	password, ok := secretData["password"]
+	if !ok {
+		return nil, errors.New("password key not found in secret data")
+	}
+	roles, ok := secretData["roles"]
+	if !ok {
+		return nil, errors.New("roles key not found in secret data")
+	}
+
+	return &UserRecord{
+		Username: string(username),
+		Password: string(password),
+		Roles:    strings.Split(string(roles), ","),
+	}, nil
 }
 
 // LookupUser retrieves the record for the given username from cerbos-users-config secret.
@@ -80,15 +90,13 @@ func LookupUser(ctx context.Context, userName string) (*UserRecord, error) {
 		return nil, fmt.Errorf("failed to create user config: %w", err)
 	}
 
-	usersData, err := userConf.loadUserConfig("cyclops", "cerbos-users-config", "users.yaml")
+	userRecord, err := userConf.loadUserConfig("cyclops", userName)
 	if err != nil {
 		log.Fatalf("Failed to load users: %v", err)
 	}
 
-	for _, user := range usersData.Users {
-		if user.Username == userName {
-			return &user, nil
-		}
+	if userRecord.Username == userName {
+		return userRecord, nil
 	}
 
 	return nil, errors.New("user not found")
