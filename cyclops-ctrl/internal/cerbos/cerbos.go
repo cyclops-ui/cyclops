@@ -8,9 +8,9 @@ import (
 	"net/http"
 
 	cerbosSDK "github.com/cerbos/cerbos-sdk-go/cerbos"
-	"github.com/cyclops-ui/cyclops/cyclops-ctrl/api/v1alpha1"
 	"github.com/cyclops-ui/cyclops/cyclops-ctrl/internal/cerbos/db"
 	"github.com/gin-gonic/gin"
+	"github.com/golang-jwt/jwt"
 	ctrl "sigs.k8s.io/controller-runtime"
 )
 
@@ -28,10 +28,7 @@ type authContext struct {
 }
 
 type CerbosSvc struct {
-	cerbos           *cerbosSDK.GRPCClient
-	Module           *v1alpha1.Module
-	TemplateStore    *v1alpha1.TemplateStore
-	TemplateAuthRule *v1alpha1.TemplateAuthRule
+	cerbos *cerbosSDK.GRPCClient
 }
 
 var (
@@ -84,20 +81,29 @@ func (s *CerbosSvc) principalContext(ctx context.Context) cerbosSDK.PrincipalCon
 // AuthMiddleware is a Gin middleware for authenticating requests and setting the auth context.
 func AuthMiddleware(cerbosClient *CerbosSvc) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		// username, password, ok := c.Request.BasicAuth()
-
-		// if !ok {
-		// 	c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "unauthorized"})
-		// 	return
-		// }
-		username := "samal"
-		password := "YWRtaW4K"
-		authCtx, err := buildAuthContext(username, password, c, cerbosClient)
+		accessToken, err := c.Cookie("cyclops.token")
 		if err != nil {
-			log.Printf("Failed to authenticate user [%s]: %v", username, err)
+			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "unauthorized access"})
+			return
+		}
+
+		claims := &Claims{}
+		token, err := jwt.ParseWithClaims(accessToken, claims, func(token *jwt.Token) (interface{}, error) {
+			return jwtKey, nil
+		})
+
+		if err != nil || !token.Valid {
 			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "unauthorized"})
 			return
 		}
+
+		authCtx, err := buildAuthContext(claims.Subject, c, cerbosClient)
+		if err != nil {
+			log.Printf("Failed to authenticate user [%s]: %v", claims.Subject, err)
+			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "unauthorized"})
+			return
+		}
+
 		requestCtx := c.Request.Context()
 		ctx := context.WithValue(requestCtx, authCtxKey, authCtx)
 		c.Request = c.Request.WithContext(ctx)
@@ -105,11 +111,8 @@ func AuthMiddleware(cerbosClient *CerbosSvc) gin.HandlerFunc {
 	}
 }
 
-// buildAuthContext verifies the username and password and creates an authContext.
-func buildAuthContext(username, password string, c *gin.Context, _ *CerbosSvc) (*authContext, error) {
-	// In a real application, verify the username and password against a user database.
-	// Create Cerbos principal object using info from db & request.
-	_ = password
+// buildAuthContext verifies the username and creates an authContext.
+func buildAuthContext(username string, c *gin.Context, _ *CerbosSvc) (*authContext, error) {
 	userRecord, err := db.LookupUser(c.Request.Context(), username)
 	if err != nil {
 		return nil, err

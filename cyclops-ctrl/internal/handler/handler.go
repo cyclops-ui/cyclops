@@ -61,6 +61,9 @@ func (h *Handler) Start() error {
 
 	h.router.GET("/ping", h.pong())
 
+	// authentication
+	h.router.POST("/login", cerbos.Login(h.cerbosClient))
+
 	h.router.Use(cerbos.AuthMiddleware(h.cerbosClient))
 
 	// templates
