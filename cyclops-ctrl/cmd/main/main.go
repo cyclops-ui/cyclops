@@ -75,7 +75,7 @@ func main() {
 	)
 
 	var cerbosAddr string
-	flag.StringVar(&cerbosAddr, "cerbos", "localhost:3593", "Address of the Cerbos server")
+	flag.StringVar(&cerbosAddr, "cerbos", os.Getenv("CERBOS_URL"), "Address of the Cerbos server")
 	flag.Parse()
 
 	cerbosClient, err := cerbos.New(cerbosAddr)
