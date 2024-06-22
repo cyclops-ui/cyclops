@@ -17,6 +17,7 @@ import Link from "antd/lib/typography/Link";
 
 import styles from "./styles.module.css";
 import { PlusCircleOutlined } from "@ant-design/icons";
+import { mapResponseError } from "../../../utils/api/errors";
 
 const { Title } = Typography;
 
@@ -38,22 +39,7 @@ const Modules = () => {
         setFilteredData(res.data);
       })
       .catch((error) => {
-        if (error?.response?.data) {
-          setError({
-            message: error.response.data.message || String(error),
-            description:
-              error.response.data.description ||
-              "Check if Cyclops backend is available on: " +
-                window.__RUNTIME_CONFIG__.REACT_APP_CYCLOPS_CTRL_HOST,
-          });
-        } else {
-          setError({
-            message: String(error),
-            description:
-              "Check if Cyclops backend is available on: " +
-              window.__RUNTIME_CONFIG__.REACT_APP_CYCLOPS_CTRL_HOST,
-          });
-        }
+        setError(mapResponseError(error));
       });
   }, []);
 
@@ -95,12 +81,17 @@ const Modules = () => {
     return "#FF0000";
   };
 
-  const getTemplateVersion = (version: string) => {
+  const getTemplateVersion = (version: string, resolvedVersion: string) => {
     if (version === "") {
-      return "main";
+      return (
+        <span>
+          <span style={{ color: "#A0A0A0" }}>{"<default>"}</span>
+          {" - " + resolvedVersion.substring(0, 7)}
+        </span>
+      );
     }
 
-    return version;
+    return version + " - " + resolvedVersion.substring(0, 7);
   };
 
   return (
@@ -198,7 +189,10 @@ const Modules = () => {
                         href={
                           module.template.repo +
                           `/tree/` +
-                          getTemplateVersion(module.template.version) +
+                          getTemplateVersion(
+                            module.template.version,
+                            module.template.resolvedVersion,
+                          ) +
                           `/` +
                           module.template.path
                         }
@@ -217,7 +211,14 @@ const Modules = () => {
                         display: "block",
                       }}
                     >
-                      Version: {getTemplateVersion(module.template.version)}
+                      Version:
+                      <span style={{ color: "#1677ff" }}>
+                        {" "}
+                        {getTemplateVersion(
+                          module.template.version,
+                          module.template.resolvedVersion,
+                        )}
+                      </span>
                     </Col>
                   </Row>
                 </Card>

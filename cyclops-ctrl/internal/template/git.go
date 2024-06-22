@@ -50,6 +50,9 @@ func (r Repo) LoadTemplate(repoURL, path, commit string) (*models.Template, erro
 			return nil, err
 		}
 
+		ghTemplate.Version = commit
+		ghTemplate.ResolvedVersion = commitSHA
+
 		r.cache.SetTemplate(repoURL, path, commitSHA, ghTemplate)
 
 		return ghTemplate, nil
@@ -130,14 +133,15 @@ func (r Repo) LoadTemplate(repoURL, path, commit string) (*models.Template, erro
 	// endregion
 
 	template := &models.Template{
-		Name:         "",
-		Manifest:     strings.Join(manifests, "---\n"),
-		RootField:    mapper.HelmSchemaToFields("", schema, dependencies),
-		Created:      "",
-		Edited:       "",
-		Version:      "",
-		Files:        chartFiles,
-		Dependencies: dependencies,
+		Name:            "",
+		Manifest:        strings.Join(manifests, "---\n"),
+		RootField:       mapper.HelmSchemaToFields("", schema, dependencies),
+		Created:         "",
+		Edited:          "",
+		Version:         commit,
+		ResolvedVersion: commitSHA,
+		Files:           chartFiles,
+		Dependencies:    dependencies,
 	}
 
 	r.cache.SetTemplate(repoURL, path, commitSHA, template)
@@ -469,7 +473,10 @@ func (r Repo) mapGitHubRepoTemplate(repoURL, path, commitSHA string, creds *auth
 		return nil, err
 	}
 
-	ghRepoFiles = gitproviders.SanitizeGHFiles(ghRepoFiles, path)
+	ghRepoFiles, exists := gitproviders.SanitizeGHFiles(ghRepoFiles, path)
+	if !exists {
+		return nil, errors.Errorf("provided path %v for repo %v does not exist on version %v", path, repoURL, commitSHA)
+	}
 
 	template, err := r.mapHelmChart(path, ghRepoFiles)
 	if err != nil {
@@ -490,7 +497,10 @@ func (r Repo) mapGitHubRepoInitialValues(repoURL, path, commitSHA string, creds 
 		return nil, err
 	}
 
-	ghRepoFiles = gitproviders.SanitizeGHFiles(ghRepoFiles, path)
+	ghRepoFiles, exists := gitproviders.SanitizeGHFiles(ghRepoFiles, path)
+	if !exists {
+		return nil, errors.Errorf("provided path %v for repo %v does not exist on version %v", path, repoURL, commitSHA)
+	}
 
 	initial, err := r.mapHelmChartInitialValues(ghRepoFiles)
 	if err != nil {

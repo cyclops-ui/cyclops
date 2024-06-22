@@ -10,6 +10,7 @@ import (
 	"github.com/cyclops-ui/cycops-cyctl/internal/kubeconfig"
 	"github.com/spf13/cobra"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"os"
 )
 
 var (
@@ -42,25 +43,46 @@ func listModules(clientset *client.CyclopsV1Alpha1Client, moduleNames []string) 
 	}
 
 	filteredModules := modules
+	notFoundModules := make([]string, 0)
+
 	if len(moduleNames) > 0 {
 		nameSet := make(map[string]struct{}, len(moduleNames))
 		for _, name := range moduleNames {
 			nameSet[name] = struct{}{}
 		}
-		filteredModules = []v1alpha1.Module{}
+		foundModules := make([]v1alpha1.Module, 0)
+
 		for _, module := range modules {
 			if _, found := nameSet[module.Name]; found {
-				filteredModules = append(filteredModules, module)
+				foundModules = append(foundModules, module)
+				delete(nameSet, module.Name)
 			}
 		}
+		for name := range nameSet {
+			notFoundModules = append(notFoundModules, name)
+		}
+		if len(notFoundModules) > 0 {
+			for _, name := range notFoundModules {
+				fmt.Printf("no module found with name: %s\n", name)
+			}
+		}
+		filteredModules = foundModules
 	}
 
 	headerSpacing := max(0, longestName-4)
-	fmt.Println("NAME" + strings.Repeat(" ", headerSpacing) + " AGE")
+	output := ""
+	if len(filteredModules) > 0 {
+		output += "NAME" + strings.Repeat(" ", headerSpacing) + " AGE\n"
+	}
+
+	fmt.Print(output)
 	for _, module := range filteredModules {
 		age := time.Since(module.CreationTimestamp.Time).Round(time.Second)
 		nameSpacing := max(0, longestName-len(module.Name))
 		fmt.Printf("%s"+strings.Repeat(" ", nameSpacing)+" %s\n", module.Name, age.String())
+	}
+	if len(notFoundModules) > 0 {
+		os.Exit(1)
 	}
 }
 

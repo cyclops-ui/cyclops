@@ -8,6 +8,7 @@ import (
 	"github.com/pkg/errors"
 
 	appsv1 "k8s.io/api/apps/v1"
+	batchv1 "k8s.io/api/batch/v1"
 	apiv1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
@@ -35,9 +36,13 @@ func (k *KubernetesClient) CreateModule(module cyclopsv1alpha1.Module) error {
 	return err
 }
 
-func (k *KubernetesClient) UpdateModule(module cyclopsv1alpha1.Module) error {
-	_, err := k.moduleset.Modules(cyclopsNamespace).Update(&module)
+func (k *KubernetesClient) UpdateModule(module *cyclopsv1alpha1.Module) error {
+	_, err := k.moduleset.Modules(cyclopsNamespace).Update(module)
 	return err
+}
+
+func (k *KubernetesClient) UpdateModuleStatus(module *cyclopsv1alpha1.Module) (*cyclopsv1alpha1.Module, error) {
+	return k.moduleset.Modules(cyclopsNamespace).UpdateSubresource(module, "status")
 }
 
 func (k *KubernetesClient) DeleteModule(name string) error {
@@ -465,6 +470,119 @@ func (k *KubernetesClient) getStatefulsetPods(deployment appsv1.StatefulSet) ([]
 	}
 
 	return out, nil
+}
+
+func (k *KubernetesClient) getPodsForCronJob(cronJob batchv1.CronJob) ([]dto.Pod, error) {
+	jobTemplateLabels := cronJob.Spec.JobTemplate.Spec.Template.Labels
+	jobLabelSelector := labels.SelectorFromSet(jobTemplateLabels).String()
+
+	jobs, err := k.clientset.BatchV1().Jobs(cronJob.Namespace).List(context.Background(), metav1.ListOptions{
+		LabelSelector: jobLabelSelector,
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	out := make([]dto.Pod, 0)
+
+	for _, job := range jobs.Items {
+		podTemplateLabels := job.Spec.Template.Labels
+		podLabelSelector := labels.SelectorFromSet(podTemplateLabels).String()
+
+		pods, err := k.clientset.CoreV1().Pods(cronJob.Namespace).List(context.Background(), metav1.ListOptions{
+			LabelSelector: podLabelSelector,
+		})
+
+		if err != nil {
+			return nil, err
+		}
+
+		for _, item := range pods.Items {
+			containers := make([]dto.Container, 0, len(item.Spec.Containers))
+
+			for _, cnt := range item.Spec.Containers {
+				env := make(map[string]string)
+				for _, envVar := range cnt.Env {
+					env[envVar.Name] = envVar.Value
+				}
+
+				var status apiv1.ContainerStatus
+				for _, c := range item.Status.ContainerStatuses {
+					if c.Name == cnt.Name {
+						status = c
+						break
+					}
+				}
+
+				containers = append(containers, dto.Container{
+					Name:   cnt.Name,
+					Image:  cnt.Image,
+					Env:    env,
+					Status: containerStatus(status),
+				})
+			}
+
+			out = append(out, dto.Pod{
+				Name:       item.Name,
+				Containers: containers,
+				Node:       item.Spec.NodeName,
+				PodPhase:   string(item.Status.Phase),
+				Started:    item.Status.StartTime,
+			})
+		}
+	}
+
+	return out, nil
+
+}
+
+func (k *KubernetesClient) getPodsForJob(job batchv1.Job) ([]dto.Pod, error) {
+
+	pods, err := k.clientset.CoreV1().Pods(job.Namespace).List(context.Background(), metav1.ListOptions{
+		LabelSelector: labels.Set(job.Spec.Selector.MatchLabels).String(),
+	})
+
+	if err != nil {
+		return nil, err
+	}
+
+	out := make([]dto.Pod, 0, len(pods.Items))
+	for _, item := range pods.Items {
+		containers := make([]dto.Container, 0, len(item.Spec.Containers))
+
+		for _, cnt := range item.Spec.Containers {
+			env := make(map[string]string)
+			for _, envVar := range cnt.Env {
+				env[envVar.Name] = envVar.Value
+			}
+
+			var status apiv1.ContainerStatus
+			for _, c := range item.Status.ContainerStatuses {
+				if c.Name == cnt.Name {
+					status = c
+					break
+				}
+			}
+
+			containers = append(containers, dto.Container{
+				Name:   cnt.Name,
+				Image:  cnt.Image,
+				Env:    env,
+				Status: containerStatus(status),
+			})
+		}
+
+		out = append(out, dto.Pod{
+			Name:       item.Name,
+			Containers: containers,
+			Node:       item.Spec.NodeName,
+			PodPhase:   string(item.Status.Phase),
+			Started:    item.Status.StartTime,
+		})
+	}
+
+	return out, nil
+
 }
 
 func containerStatus(status apiv1.ContainerStatus) dto.ContainerStatus {

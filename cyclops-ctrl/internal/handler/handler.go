@@ -100,8 +100,6 @@ func (h *Handler) Start() error {
 	h.router.GET("/nodes", clusterController.ListNodes)
 	h.router.GET("/nodes/:name", clusterController.GetNode)
 
-	h.router.GET("/metrics", prometheus.PromHandler())
-
 	h.router.Use(h.options)
 
 	return h.router.Run()

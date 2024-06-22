@@ -26,9 +26,6 @@ import (
 
 // ModuleSpec defines the desired state of Module
 type ModuleSpec struct {
-	// INSERT ADDITIONAL SPEC FIELDS - desired state of cluster
-	// Important: Run "make" to regenerate code after modifying this file
-
 	TemplateRef TemplateRef          `json:"template"`
 	Values      apiextensionsv1.JSON `json:"values"`
 }
@@ -59,22 +56,31 @@ const (
 )
 
 type ReconciliationStatus struct {
+	// +kubebuilder:validation:Optional
 	// +kubebuilder:validation:Enum=unknown;succeeded;failed
 	// +kubebuilder:default:=unknown
-	Status ReconciliationStatusState `json:"status"`
-	Reason string                    `json:"reason"`
+	Status ReconciliationStatusState `json:"status,omitempty"`
+	// +kubebuilder:validation:Optional
+	Reason string `json:"reason,omitempty"`
 	// +kubebuilder:validation:Optional
 	Errors []string `json:"errors"`
 }
 
 // ModuleStatus defines the observed state of Module
 type ModuleStatus struct {
-	ReconciliationStatus ReconciliationStatus `json:"reconciliationStatus"`
+	ReconciliationStatus    ReconciliationStatus `json:"reconciliationStatus"`
+	TemplateResolvedVersion string               `json:"templateResolvedVersion"`
+}
+
+type HistoryTemplateRef struct {
+	URL     string `json:"repo"`
+	Path    string `json:"path"`
+	Version string `json:"version"`
 }
 
 type HistoryEntry struct {
 	Generation  int64                `json:"generation"`
-	TemplateRef TemplateRef          `json:"template"`
+	TemplateRef HistoryTemplateRef   `json:"template"`
 	Values      apiextensionsv1.JSON `json:"values"`
 }
 

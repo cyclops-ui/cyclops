@@ -1,0 +1,31 @@
+name: goreleaser
+
+on:
+  workflow_run:
+    workflows: [cyclops-CI]
+    types:
+      - completed
+
+permissions:
+  contents: write
+
+jobs:
+  goreleaser:
+    runs-on: ubuntu-latest
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Set up Go
+        uses: actions/setup-go@v4
+      - name: Run GoReleaser
+        uses: goreleaser/goreleaser-action@v5
+        with:
+          distribution: goreleaser
+          version: latest
+          args: release --clean
+          workdir: ./cyctl
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

@@ -57,39 +57,52 @@ var _ = Describe("Module mapper test", func() {
 	})
 
 	Describe("k8sTemplateRefToDTO", func() {
+		type inCase struct {
+			template        cyclopsv1alpha1.TemplateRef
+			resolvedVersion string
+		}
+
 		testCases := []struct {
-			in  cyclopsv1alpha1.TemplateRef
+			in  inCase
 			out dto.Template
 		}{
 			{
-				in: cyclopsv1alpha1.TemplateRef{
-					URL:     "https://my.template.com",
-					Path:    "templates",
-					Version: "develop",
+				in: inCase{
+					template: cyclopsv1alpha1.TemplateRef{
+						URL:     "https://my.template.com",
+						Path:    "templates",
+						Version: "develop",
+					},
+					resolvedVersion: "abc123",
 				},
 				out: dto.Template{
-					URL:     "https://my.template.com",
-					Path:    "templates",
-					Version: "develop",
+					URL:             "https://my.template.com",
+					Path:            "templates",
+					Version:         "develop",
+					ResolvedVersion: "abc123",
 				},
 			},
 			{
-				in: cyclopsv1alpha1.TemplateRef{
-					URL:     "oci://my.template.com",
-					Path:    "templates",
-					Version: "rest-api",
+				in: inCase{
+					template: cyclopsv1alpha1.TemplateRef{
+						URL:     "oci://my.template.com",
+						Path:    "templates",
+						Version: "0.x.x",
+					},
+					resolvedVersion: "0.3.4",
 				},
 				out: dto.Template{
-					URL:     "oci://my.template.com",
-					Path:    "templates",
-					Version: "rest-api",
+					URL:             "oci://my.template.com",
+					Path:            "templates",
+					Version:         "0.x.x",
+					ResolvedVersion: "0.3.4",
 				},
 			},
 		}
 
 		It("maps template refs correctly", func() {
 			for _, testCase := range testCases {
-				actual := k8sTemplateRefToDTO(testCase.in)
+				actual := k8sTemplateRefToDTO(testCase.in.template, testCase.in.resolvedVersion)
 
 				Expect(actual).To(BeEquivalentTo(testCase.out))
 			}

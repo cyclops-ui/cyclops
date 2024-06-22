@@ -11,11 +11,15 @@ import {
   Form,
   Input,
   Divider,
+  message,
+  Spin,
 } from "antd";
 import axios from "axios";
 import Title from "antd/es/typography/Title";
-import { DeleteOutlined, EditOutlined } from "@ant-design/icons";
+import { DeleteOutlined, EditOutlined, FileSyncOutlined } from "@ant-design/icons";
+import classNames from "classnames";
 import styles from "./styles.module.css";
+import { mapResponseError } from "../../../utils/api/errors";
 
 const TemplateStore = () => {
   const [templates, setTemplates] = useState([]);
@@ -24,6 +28,8 @@ const TemplateStore = () => {
   const [newTemplateModal, setNewTemplateModal] = useState(false);
   const [confirmLoading, setConfirmLoading] = useState(false);
   const [editModal, setEditModal] = useState("");
+  const [loadingTemplateName, setLoadingTemplateName] = useState("");
+  const [requestStatus, setRequestStatus] = useState<{ [key: string]: string }>({});
   const [error, setError] = useState({
     message: "",
     description: "",
@@ -39,22 +45,7 @@ const TemplateStore = () => {
         setTemplates(res.data);
       })
       .catch((error) => {
-        if (error?.response?.data) {
-          setError({
-            message: error.response.data.message || String(error),
-            description:
-              error.response.data.description ||
-              "Check if Cyclops backend is available on: " +
-                window.__RUNTIME_CONFIG__.REACT_APP_CYCLOPS_CTRL_HOST,
-          });
-        } else {
-          setError({
-            message: String(error),
-            description:
-              "Check if Cyclops backend is available on: " +
-              window.__RUNTIME_CONFIG__.REACT_APP_CYCLOPS_CTRL_HOST,
-          });
-        }
+        setError(mapResponseError(error));
       });
   }, []);
 
@@ -78,22 +69,7 @@ const TemplateStore = () => {
       })
       .catch((error) => {
         setConfirmLoading(false);
-        if (error?.response?.data) {
-          setError({
-            message: error.response.data.message || String(error),
-            description:
-              error.response.data.description ||
-              "Check if Cyclops backend is available on: " +
-                window.__RUNTIME_CONFIG__.REACT_APP_CYCLOPS_CTRL_HOST,
-          });
-        } else {
-          setError({
-            message: String(error),
-            description:
-              "Check if Cyclops backend is available on: " +
-              window.__RUNTIME_CONFIG__.REACT_APP_CYCLOPS_CTRL_HOST,
-          });
-        }
+        setError(mapResponseError(error));
       });
   };
 
@@ -111,22 +87,30 @@ const TemplateStore = () => {
       })
       .catch((error) => {
         setConfirmLoading(false);
-        if (error?.response?.data) {
-          setError({
-            message: error.response.data.message || String(error),
-            description:
-              error.response.data.description ||
-              "Check if Cyclops backend is available on: " +
-                window.__RUNTIME_CONFIG__.REACT_APP_CYCLOPS_CTRL_HOST,
-          });
-        } else {
-          setError({
-            message: String(error),
-            description:
-              "Check if Cyclops backend is available on: " +
-              window.__RUNTIME_CONFIG__.REACT_APP_CYCLOPS_CTRL_HOST,
-          });
-        }
+        setError(mapResponseError(error));
+      });
+  };
+
+  const checkTemplateReference = (repo: string, path: string, version: string, templateName: string) => {
+    setLoadingTemplateName(templateName);
+    axios
+      .get(`/api/templates?repo=${repo}&path=${path}&commit=${version}`)
+      .then((res) => {
+        setLoadingTemplateName("");
+        setRequestStatus((prevStatus) => ({
+          ...prevStatus,
+          [templateName]: "success",
+        }));
+        message.success("Template reference is valid!");
+        setError({ message: "", description: "" });
+      })
+      .catch((error) => {
+        setLoadingTemplateName("");
+        setRequestStatus((prevStatus) => ({
+          ...prevStatus,
+          [templateName]: "error",
+        }));
+        setError(mapResponseError(error));
       });
   };
 
@@ -139,22 +123,7 @@ const TemplateStore = () => {
         window.location.href = "/templates";
       })
       .catch((error) => {
-        if (error?.response?.data) {
-          setError({
-            message: error.response.data.message || String(error),
-            description:
-              error.response.data.description ||
-              "Check if Cyclops backend is available on: " +
-                window.__RUNTIME_CONFIG__.REACT_APP_CYCLOPS_CTRL_HOST,
-          });
-        } else {
-          setError({
-            message: String(error),
-            description:
-              "Check if Cyclops backend is available on: " +
-              window.__RUNTIME_CONFIG__.REACT_APP_CYCLOPS_CTRL_HOST,
-          });
-        }
+        setError(mapResponseError(error));
       });
   };
 
@@ -232,6 +201,30 @@ const TemplateStore = () => {
               }
               return value;
             }}
+          />
+          <Table.Column
+            title="Validate"
+            width="5%"
+            render={(template) => (
+              <>
+                {loadingTemplateName === template.name ? (
+                  <Spin />
+                ) : (
+                  <FileSyncOutlined
+                      className={classNames(
+                      styles.statustemplate, 
+                      {
+                        [styles.success]: requestStatus[template.name] === "success",
+                        [styles.error]: requestStatus[template.name] === "error"
+                      }
+                    )}
+                    onClick={function () {
+                      checkTemplateReference( template.ref.repo, template.ref.path, template.ref.version, template.name);
+                    }}
+                  />
+                )}
+              </>
+            )}
           />
           <Table.Column
             width="5%"

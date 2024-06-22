@@ -286,6 +286,10 @@ func (k *KubernetesClient) GetResource(group, version, kind, name, namespace str
 		return k.mapPersistentVolumeClaims(group, version, kind, name, namespace)
 	case isSecret(group, version, kind):
 		return k.mapSecret(group, version, kind, name, namespace)
+	case isCronJob(group, version, kind):
+		return k.mapCronJob(group, version, kind, name, namespace)
+	case isJob(group, version, kind):
+		return k.mapJob(group, version, kind, name, namespace)
 	}
 
 	return nil, nil
@@ -376,7 +380,7 @@ func (k *KubernetesClient) createDynamicNamespaced(
 	namespace string,
 	obj *unstructured.Unstructured,
 ) error {
-	_, err := k.Dynamic.Resource(gvr).Namespace(namespace).Get(context.TODO(), obj.GetName(), metav1.GetOptions{})
+	current, err := k.Dynamic.Resource(gvr).Namespace(namespace).Get(context.TODO(), obj.GetName(), metav1.GetOptions{})
 	if err != nil {
 		if k8serrors.IsNotFound(err) {
 			_, err := k.Dynamic.Resource(gvr).Namespace(namespace).Create(
@@ -388,6 +392,12 @@ func (k *KubernetesClient) createDynamicNamespaced(
 			return err
 		}
 		return err
+	}
+
+	if isJob(obj.GroupVersionKind().Group, obj.GroupVersionKind().Version, obj.GroupVersionKind().Kind) {
+		if err := copyJobSelectors(current, obj); err != nil {
+			return err
+		}
 	}
 
 	_, err = k.Dynamic.Resource(gvr).Namespace(namespace).Update(
@@ -424,6 +434,30 @@ func (k *KubernetesClient) createDynamicNonNamespaced(
 	)
 
 	return err
+}
+
+func copyJobSelectors(source, destination *unstructured.Unstructured) error {
+	selectors, ok, err := unstructured.NestedMap(source.Object, "spec", "selector")
+	if err != nil {
+		return err
+	}
+	if !ok {
+		return errors.New(fmt.Sprintf("job %v selectors not found", source.GetName()))
+	}
+
+	templateLabels, ok, err := unstructured.NestedMap(source.Object, "spec", "template", "metadata", "labels")
+	if err != nil {
+		return err
+	}
+	if !ok {
+		return errors.New(fmt.Sprintf("job %v selectors not found", source.GetName()))
+	}
+
+	if err := unstructured.SetNestedMap(destination.Object, selectors, "spec", "selector"); err != nil {
+		return err
+	}
+
+	return unstructured.SetNestedMap(destination.Object, templateLabels, "spec", "template", "metadata", "labels")
 }
 
 func (k *KubernetesClient) ListNodes() ([]apiv1.Node, error) {
@@ -655,6 +689,55 @@ func (k *KubernetesClient) mapSecret(group, version, kind, name, namespace strin
 	}, nil
 }
 
+func (k *KubernetesClient) mapCronJob(group, version, kind, name, namespace string) (*dto.CronJob, error) {
+	cronJob, err := k.clientset.BatchV1().CronJobs(namespace).Get(context.Background(), name, metav1.GetOptions{})
+	if err != nil {
+		return nil, err
+	}
+	pods, err := k.getPodsForCronJob(*cronJob)
+	if err != nil {
+		return nil, err
+	}
+
+	status := dto.StatusCronJob{
+		LastScheduleTime:   cronJob.Status.LastScheduleTime,
+		LastSuccessfulTime: cronJob.Status.LastSuccessfulTime,
+	}
+
+	return &dto.CronJob{
+		Group:     group,
+		Version:   version,
+		Kind:      kind,
+		Name:      cronJob.Name,
+		Namespace: cronJob.Namespace,
+		Schedule:  cronJob.Spec.Schedule,
+		Status:    status,
+		Pods:      pods,
+	}, nil
+}
+
+func (k *KubernetesClient) mapJob(group, version, kind, name, namespace string) (*dto.Job, error) {
+	job, err := k.clientset.BatchV1().Jobs(namespace).Get(context.Background(), name, metav1.GetOptions{})
+	if err != nil {
+		return nil, err
+	}
+	pods, err := k.getPodsForJob(*job)
+	if err != nil {
+		return nil, err
+	}
+
+	return &dto.Job{
+		Group:          group,
+		Version:        version,
+		Kind:           kind,
+		Name:           job.Name,
+		Namespace:      job.Namespace,
+		CompletionTime: job.Status.CompletionTime.String(),
+		StartTime:      job.Status.StartTime.String(),
+		Pods:           pods,
+	}, nil
+}
+
 func (k *KubernetesClient) isResourceNamespaced(gvk schema.GroupVersionKind) (bool, error) {
 	resourcesList, err := k.discovery.ServerPreferredResources()
 	if err != nil {
@@ -695,6 +778,10 @@ func isPod(group, version, kind string) bool {
 	return group == "" && version == "v1" && kind == "Pod"
 }
 
+func isJob(group, version, kind string) bool {
+	return group == "batch" && version == "v1" && kind == "Job"
+}
+
 func isService(group, version, kind string) bool {
 	return group == "" && version == "v1" && kind == "Service"
 }
@@ -709,4 +796,8 @@ func isPersistentVolumeClaims(group, version, kind string) bool {
 
 func isSecret(group, version, kind string) bool {
 	return group == "" && version == "v1" && kind == "Secret"
+}
+
+func isCronJob(group, version, kind string) bool {
+	return group == "batch" && version == "v1" && kind == "CronJob"
 }

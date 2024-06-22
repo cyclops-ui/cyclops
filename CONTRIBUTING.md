@@ -10,6 +10,8 @@ Please note we have a [code of conduct](./CODE_OF_CONDUCT.md); follow it in all 
 
 Cyclops is a mono-repo that contains both the frontend (`UI`) and the backend (`controller`) of the platform, as well as the code for our website and documentation (`web`).
 
+![Cyclops architecture](./web/static/img/cyclops-arch.png)
+
 - **controller**
 
   - `/cyclops-ctrl`
@@ -64,9 +66,9 @@ Cyclops has its own [custom resource](https://kubernetes.io/docs/concepts/extend
 You can install it using the command below:
 
 ```zsh
-kubectl apply -f https://raw.githubusercontent.com/cyclops-ui/cyclops/main/install/chart/crds/cyclops-module.yaml \
-  -f https://raw.githubusercontent.com/cyclops-ui/cyclops/main/install/chart/crds/template-auth-rule.yaml \
-  -f https://raw.githubusercontent.com/cyclops-ui/cyclops/main/install/chart/crds/template-store.yaml
+kubectl apply -f https://raw.githubusercontent.com/cyclops-ui/cyclops/main/cyclops-ctrl/config/crd/bases/cyclops-ui.com_modules.yaml \
+  -f https://raw.githubusercontent.com/cyclops-ui/cyclops/main/cyclops-ctrl/config/crd/bases/cyclops-ui.com_templateauthrules.yaml \
+  -f https://raw.githubusercontent.com/cyclops-ui/cyclops/main/cyclops-ctrl/config/crd/bases/cyclops-ui.com_templatestores.yaml
 ```
 
 ## **Controller** `/cyclops-ctrl`
@@ -120,6 +122,7 @@ npm start
 
 ## How to contribute
 
+- Pick an issue [here](https://github.com/cyclops-ui/cyclops/issues). If you have already contributed, we encourage you not to pick issues labeled with `good first issue` since those are useful to first-time contributors to onboard
 - [Fork the repository](https://github.com/cyclops-ui/cyclops/fork) and clone it locally
 - Create a new branch
 - Make your changes
