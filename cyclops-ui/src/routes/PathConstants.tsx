@@ -8,6 +8,7 @@ const PathConstants = {
   NODES: "/nodes",
   NODE_GET: "/nodes/:nodeName",
   TEMPLATES: "/templates",
+  LOGIN: "/login",
 };
 
 export default PathConstants;
