@@ -373,13 +373,14 @@ const ModuleDetails = () => {
     let resourceDetails = <p />;
 
     switch (resource.kind) {
-      case "CronJob":
-        resourceDetails = (
-          <CronJob name={resource.name} namespace={resource.namespace} />
-        );
       case "Deployment":
         resourceDetails = (
           <Deployment name={resource.name} namespace={resource.namespace} />
+        );
+        break;
+      case "CronJob":
+        resourceDetails = (
+          <CronJob name={resource.name} namespace={resource.namespace} />
         );
         break;
       case "DaemonSet":
