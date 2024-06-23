@@ -14,7 +14,6 @@ const NodeDetails = React.lazy(() => import("../components/pages/NodeDetails"));
 const Templates = React.lazy(
   () => import("../components/pages/TemplateStore/TemplateStore"),
 );
-const Login = React.lazy(() => import("../components/pages/Login"));
 
 const routes = [
   { path: PathConstants.HOME, element: <Home /> },
@@ -26,7 +25,6 @@ const routes = [
   { path: PathConstants.NODES, element: <Nodes /> },
   { path: PathConstants.NODE_GET, element: <NodeDetails /> },
   { path: PathConstants.TEMPLATES, element: <Templates /> },
-  { path: PathConstants.LOGIN, element: <Login /> },
 ];
 
 export default routes;
