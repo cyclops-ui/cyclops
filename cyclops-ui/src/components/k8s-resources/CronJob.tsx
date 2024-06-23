@@ -204,7 +204,7 @@ const CronJob = ({ name, namespace }: Props) => {
           orientationMargin="0"
           orientation={"left"}
         >
-          Replicas: {cronjob.pods.length}
+          Pods: {cronjob.pods.length}
         </Divider>
         <Col span={24} style={{ overflowX: "auto" }}>
           <Table dataSource={cronjob.pods}>
