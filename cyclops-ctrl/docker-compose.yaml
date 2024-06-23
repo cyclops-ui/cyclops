@@ -1,7 +1,19 @@
-version: "3.0"
+version: "3.8"
+
 services:
   redis:
     container_name: redis
     image: redis
     ports:
       - 6379:6379
+
+  cerbos:
+    container_name: cerbos
+    image: ghcr.io/cerbos/cerbos:latest
+    ports:
+      - "3592:3592"
+      - "3593:3593"
+    volumes:
+      - ./internal/cerbos/config:/config
+      - ./internal/cerbos/policies:/policies
+    command: server --config=/config/conf.yaml
