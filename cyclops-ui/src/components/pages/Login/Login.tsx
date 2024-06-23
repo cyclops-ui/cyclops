@@ -8,23 +8,8 @@ import {
   EyeInvisibleOutlined,
   EyeTwoTone,
 } from "@ant-design/icons";
-import {
-  Button,
-  Col,
-  Divider,
-  Row,
-  Select,
-  Typography,
-  Input,
-  Card,
-  Alert,
-  Empty,
-} from "antd";
+import { Input } from "antd";
 import styles from "./styles.module.css";
-
-interface LoginResponse {
-  token: string;
-}
 
 const Login = () => {
   const [username, setUsername] = useState<string>("");
@@ -48,12 +33,9 @@ const Login = () => {
         password,
       })
       .then((response: any) => {
-        console.log("token", response.data.token);
-        console.log(
-          "_isAuthenticated: ",
-          Cookies.set("_isAuthenticated", "true"),
-        );
         // response
+        // console.log("token", response.data.token);
+        Cookies.set("_isAuthenticated", "true");
       })
       .catch((err) => console.error(err));
     //
@@ -101,7 +83,6 @@ const Login = () => {
             <Input.Password
               size="large"
               placeholder="Password"
-              // value={password}
               onChange={handlePasswordChange}
               required
               iconRender={(visible) =>
