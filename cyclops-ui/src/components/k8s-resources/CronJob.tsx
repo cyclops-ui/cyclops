@@ -44,7 +44,7 @@ const CronJob = ({ name, namespace }: Props) => {
     axios
       .get(`/api/resources`, {
         params: {
-          group: `apps`,
+          group: `batch`,
           version: `v1`,
           kind: `CronJob`,
           name: name,
@@ -204,10 +204,10 @@ const CronJob = ({ name, namespace }: Props) => {
           orientationMargin="0"
           orientation={"left"}
         >
-          Replicas: {deployment.pods.length}
+          Replicas: {cronjob.pods.length}
         </Divider>
         <Col span={24} style={{ overflowX: "auto" }}>
-          <Table dataSource={deployment.pods}>
+          <Table dataSource={cronjob.pods}>
             <Table.Column
               title="Name"
               dataIndex="name"
@@ -312,4 +312,4 @@ const CronJob = ({ name, namespace }: Props) => {
   );
 };
 
-export default Deployment;
+export default CronJob;
