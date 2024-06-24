@@ -25,32 +25,19 @@ var (
 	valuesFile string
 )
 
-// DeleteTemplateAuthRule deletes a specified template auth rule from the TemplateAuthRule Custom Resource.
+// createcreateModuleTemplate allows you to create module Custom Resource.
 func createModule(clientset *client.CyclopsV1Alpha1Client, moduleName, repo, path, version, namespace, valuesFile string) {
 
 	values, err := os.ReadFile(valuesFile)
 	if err != nil {
 		log.Fatalf("Error reading values file: %v", err)
 	}
-
-	// Convert values to JSON format
-	// var jsonValues map[string]interface{}
-	// if err := yaml.Unmarshal(values, &jsonValues); err != nil {
-	// 	log.Fatalf("Error unmarshalling values file: %v", err)
-	// }
-
-	// // Marshal jsonValues into a JSON raw message
-	// jsonRawMessage, err := json.Marshal(jsonValues)
-	// if err != nil {
-	// 	log.Fatalf("Error marshalling values to JSON: %v", err)
-	// }
-
 	jsonValues, err := yaml.YAMLToJSON(values)
 	if err != nil {
 		log.Fatalf("Error converting values file to JSON: %v", err)
 	}
 
-	// Define a new TemplateStore object
+	// Define a new Module object
 	newModule := v1alpha1.Module{
 		TypeMeta: v1.TypeMeta{
 			APIVersion: "cyclops-ui.com/v1alpha1",
@@ -80,12 +67,12 @@ func createModule(clientset *client.CyclopsV1Alpha1Client, moduleName, repo, pat
 
 var (
 	CreateModule = &cobra.Command{
-		Use:     "modules NAME -f values.yaml --repo=repo --path=path --version=version",
+		Use:     "module NAME -f values.yaml --repo=repo --path=path --version=version",
 		Short:   "Create Modules",
 		Long:    "The create template command allows you to create module from the Cyclops API.",
 		Example: createModuleExample,
 		Args:    cobra.ExactArgs(1),
-		Aliases: []string{"module"},
+		Aliases: []string{"modules"},
 		Run: func(cmd *cobra.Command, args []string) {
 			createModule(kubeconfig.Moduleset, args[0], repo, path, version, namespace, valuesFile)
 		},
