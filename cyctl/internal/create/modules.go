@@ -69,7 +69,7 @@ var (
 	CreateModule = &cobra.Command{
 		Use:     "module NAME -f values.yaml --repo=repo --path=path --version=version",
 		Short:   "Create Modules",
-		Long:    "The create template command allows you to create module from the Cyclops API.",
+		Long:    "The create module command allows you to create module from the Cyclops API.",
 		Example: createModuleExample,
 		Args:    cobra.ExactArgs(1),
 		Aliases: []string{"modules"},

@@ -7,8 +7,8 @@ import (
 
 var (
 	createExample = `
-	# Create one or more modules
-	cyctl create modules NAME
+	# Create modules
+	cyctl create module NAME -f values.yaml --repo='github.com/repo/a' --path='/path/to/charts' --version='main' 
  
 	# Create one or more templates
 	cyctl create template NAME --repo='github.com/repo/a' --path='/path/to/charts' --version='main'
