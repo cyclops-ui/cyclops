@@ -9,12 +9,11 @@ import (
 )
 
 var (
-	deleteModuleExample = ` 
-	# Delete a single module
-	cyctl delete modules module1
- 
-	# Delete multiple modules
-	cyctl delete modules module1 module2 module3`
+	deleteModuleExample = `# Delete a single module
+cyctl delete modules module1
+
+# Delete multiple modules
+cyctl delete modules module1 module2 module3`
 )
 
 // DeleteModules deletes a specified module from the Cyclops API.

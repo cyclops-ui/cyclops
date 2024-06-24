@@ -13,12 +13,11 @@ import (
 )
 
 var (
-	createTemplateAuthRuleExample = ` 
-	# Create templateauth rule
-	cyctl create templateauthrule NAME --repo='github.com/repo/a' --username='name:key' --password='name:key'
- 
-	# Create templateauthrule
-	cyctl create templateauthrule demo-templateauthrule --repo='https://github.com/cyclops-ui/templates' --username='name:john' --password='name:random'`
+	createTemplateAuthRuleExample = `# Create templateauth rule
+cyctl create templateauthrule NAME --repo='github.com/repo/a' --username='name:key' --password='name:key'
+
+# Create templateauthrule
+cyctl create templateauthrule demo-templateauthrule --repo='https://github.com/cyclops-ui/templates' --username='name:john' --password='name:random'`
 )
 
 var (
