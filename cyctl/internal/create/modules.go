@@ -25,7 +25,7 @@ var (
 	valuesFile string
 )
 
-// createcreateModuleTemplate allows you to create module Custom Resource.
+// createModule allows you to create module Custom Resource.
 func createModule(clientset *client.CyclopsV1Alpha1Client, moduleName, repo, path, version, namespace, valuesFile string) {
 
 	values, err := os.ReadFile(valuesFile)
