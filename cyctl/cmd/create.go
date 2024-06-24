@@ -26,6 +26,7 @@ var createCMD = &cobra.Command{
 }
 
 func init() {
+	createCMD.AddCommand(create.CreateModule)
 	createCMD.AddCommand(create.CreateTemplate)
 	createCMD.AddCommand(create.CreateTemplateAuthRule)
 
