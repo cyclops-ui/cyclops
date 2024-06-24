@@ -6,15 +6,14 @@ import (
 )
 
 var (
-	describeExample = `
- # Describe one or more modules
- cyctl describe modules [module_name] 
- 
- # Describe one or more templates
- cyctl describe templates [template_name] 
- 
- # Describe one or more templateauthrules.
- cyctl describe templateauthrules [templateauthrules_name]`
+	describeExample = `# Describe one or more modules
+cyctl describe modules [module_name] 
+
+# Describe one or more templates
+cyctl describe templates [template_name] 
+
+# Describe one or more templateauthrules.
+cyctl describe templateauthrules [templateauthrules_name]`
 )
 
 var describeCMD = &cobra.Command{

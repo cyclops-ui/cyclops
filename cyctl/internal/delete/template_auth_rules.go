@@ -9,12 +9,11 @@ import (
 )
 
 var (
-	deleteTemplateAuthRuleExample = ` 
-	# Delete a single module
-	cyctl delete modules module1
- 
-	# Delete multiple modules
-	cyctl delete modules module1 module2 module3`
+	deleteTemplateAuthRuleExample = `# Delete a single module
+cyctl delete modules module1
+
+# Delete multiple modules
+cyctl delete modules module1 module2 module3`
 )
 
 // DeleteTemplateAuthRule deletes a specified template auth rule from the TemplateAuthRule Custom Resource.
