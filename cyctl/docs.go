@@ -2,11 +2,13 @@ package main
 
 import (
 	"fmt"
-	"github.com/cyclops-ui/cycops-cyctl/cmd"
-	"github.com/spf13/cobra/doc"
 	"log"
 	"path/filepath"
 	"strings"
+
+	"github.com/spf13/cobra/doc"
+	
+	"github.com/cyclops-ui/cycops-cyctl/cmd"
 )
 
 func main() {
