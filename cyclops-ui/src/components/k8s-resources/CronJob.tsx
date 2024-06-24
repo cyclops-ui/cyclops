@@ -13,7 +13,6 @@ import {
 } from "antd";
 import axios from "axios";
 import { formatPodAge } from "../../utils/pods";
-// import { DownloadOutlined } from "@ant-design/icons";
 import ReactAce from "react-ace";
 import { mapResponseError } from "../../utils/api/errors";
 
