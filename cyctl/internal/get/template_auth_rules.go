@@ -14,12 +14,11 @@ import (
 )
 
 var (
-	templateAuthExample = `
- # List specific templateauthrule(s) in ps output format
- cyctl get templateauthrule TEMPLATE_AUTH_RULE_NAME 
- 
- # List all templatesauthrule available in ps output format
- cyctl get templateauthrule`
+	templateAuthExample = `# List specific templateauthrule(s) in ps output format
+cyctl get templateauthrule TEMPLATE_AUTH_RULE_NAME 
+
+# List all templatesauthrule available in ps output format
+cyctl get templateauthrule`
 )
 
 // listTemplateAuthRules retrieves and displays a list of templateauthrules from the Cyclops API.

@@ -11,12 +11,11 @@ import (
 )
 
 var (
-	describeModuleExample = ` 
-	# Describe a single module
-	cyctl describe modules module1
- 
-	# Describe multiple modules
-	cyctl describe modules module1 module2 module3`
+	describeModuleExample = `# Describe a single module
+cyctl describe modules module1
+
+# Describe multiple modules
+cyctl describe modules module1 module2 module3`
 )
 
 // describeModules describe specified module from the Cyclops API.
