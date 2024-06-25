@@ -45,7 +45,7 @@ func splitNameKey(input string) (string, string) {
 	return parts[0], parts[1]
 }
 
-// createTemplateAuthRule allows you to create create TemplateAuthRule Custom Resource.
+// createTemplateAuthRule allows you to create TemplateAuthRule Custom Resource.
 func createTemplateAuthRule(clientset *client.CyclopsV1Alpha1Client, templateAuthRuleName string) {
 	usernameName, usernameKey, passwordName, passwordKey, err := validateSecretKeySelector(username, password)
 	if err != nil {

@@ -7,7 +7,7 @@ import (
 
 var (
 	createExample = `# Create one or more modules
-cyctl create modules NAME
+cyctl create module NAME -f values.yaml --repo='github.com/repo/a' --path='/path/to/charts' --version='main' 
 
 # Create one or more templates
 cyctl create template NAME --repo='github.com/repo/a' --path='/path/to/charts' --version='main'
@@ -25,6 +25,7 @@ var createCMD = &cobra.Command{
 }
 
 func init() {
+	createCMD.AddCommand(create.CreateModule)
 	createCMD.AddCommand(create.CreateTemplate)
 	createCMD.AddCommand(create.CreateTemplateAuthRule)
 
