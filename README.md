@@ -7,6 +7,7 @@
 <div align="center">
     <a href="https://github.com/cyclops-ui/cyclops/blob/main/LICENSE"><img height="20" src="https://img.shields.io/github/license/cyclops-ui/cyclops"></a>
     <a href="https://landscape.cncf.io/?item=app-definition-and-development--application-definition-image-build--cyclops"><img height="20" src="https://img.shields.io/badge/CNCF%20Landscape-5699C6"></a>
+    <a href="https://goreportcard.com/badge/github.com/cyclops-ui/cyclops/cyclops-ctrl"><img height="20" src="https://goreportcard.com/badge/github.com/cyclops-ui/cyclops/cyclops-ctrl"></a>
     <a href="https://github.com/cyclops-ui/cyclops/actions/workflows/web.yaml"><img height="20" src="https://github.com/cyclops-ui/cyclops/actions/workflows/web.yaml/badge.svg"></a>
     <a href="https://github.com/cyclops-ui/cyclops/actions/workflows/ci.yml"><img height="20" src="https://github.com/cyclops-ui/cyclops/actions/workflows/ci.yml/badge.svg"></a>
 </div>
