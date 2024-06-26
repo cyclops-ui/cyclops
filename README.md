@@ -1,5 +1,5 @@
 <p align="center" width="100%">
-<img width="60%" src="./web/static/img/cyclops-simplistic.png">
+<img width="70%" src="./web/static/img/cyclops-simplistic.png">
 <p/>
 <h1></h1>
 <p align="center">Customizable UI for Kubernetes Workloads 👁️</p>
