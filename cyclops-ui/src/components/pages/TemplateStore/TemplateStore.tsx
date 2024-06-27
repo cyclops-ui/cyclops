@@ -223,8 +223,7 @@ const TemplateStore = () => {
                 ) : (
                   <FileSyncOutlined
                     className={classNames(styles.statustemplate, {
-                      [styles.success]:
-                        requestStatus[template.name] === "success",
+                      [styles.success]: requestStatus[template.name] === "success",
                       [styles.error]: requestStatus[template.name] === "error",
                     })}
                     onClick={function () {
