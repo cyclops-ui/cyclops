@@ -5,7 +5,7 @@
 <p align="center">Customizable UI for Kubernetes Workloads 👁️</p>
 
 <div align="center">
-    <a style="text-decoration: none" href="https://landscape.cncf.io/?item=app-definition-and-development--application-definition-image-build--cyclops">
+    <a style="width: 80%" href="https://landscape.cncf.io/?item=app-definition-and-development--application-definition-image-build--cyclops">
         <img height="20" src="https://img.shields.io/badge/CNCF%20Landscape-5699C6?color=5699C6">
     </a>
     <a style="text-decoration: none" href="https://hub.docker.com/repository/docker/cyclopsui/cyclops-ui/general">
