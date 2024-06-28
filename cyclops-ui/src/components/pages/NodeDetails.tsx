@@ -166,7 +166,7 @@ const NodeDetails = () => {
       </div>
     ),
     filterIcon: (filtered: boolean) => (
-      <SearchOutlined style={{ color: filtered ? "#1677ff" : undefined }} />
+      <SearchOutlined style={{ color: filtered ? "#ff8803" : undefined }} />
     ),
     onFilter: (value, record) =>
       record[dataIndex]
@@ -209,10 +209,6 @@ const NodeDetails = () => {
         <div
           style={{
             padding: 8,
-            maxHeight: 200,
-            overflowY: "auto",
-            margin: "8px 0",
-            border: "1px solid #ccc",
           }}
         >
           <div style={{ marginBottom: 8 }}>
@@ -268,7 +264,7 @@ const NodeDetails = () => {
       );
     },
     filterIcon: (filtered: boolean) => (
-      <SearchOutlined style={{ color: filtered ? "#1677ff" : undefined }} />
+      <SearchOutlined style={{ color: filtered ? "#ff8803" : undefined }} />
     ),
     onFilter: (value, record) =>
       record[dataIndex]
