@@ -5,11 +5,24 @@
 <p align="center">Customizable UI for Kubernetes Workloads 👁️</p>
 
 <div align="center">
-    <a href="https://github.com/cyclops-ui/cyclops/blob/main/LICENSE"><img height="20" src="https://img.shields.io/github/license/cyclops-ui/cyclops"></a>
-    <a href="https://landscape.cncf.io/?item=app-definition-and-development--application-definition-image-build--cyclops"><img height="20" src="https://img.shields.io/badge/CNCF%20Landscape-5699C6"></a>
-    <a href="https://goreportcard.com/report/github.com/cyclops-ui/cyclops/cyclops-ctrl"><img height="20" src="https://goreportcard.com/badge/github.com/cyclops-ui/cyclops/cyclops-ctrl"></a>
-    <a href="https://github.com/cyclops-ui/cyclops/actions/workflows/web.yaml"><img height="20" src="https://github.com/cyclops-ui/cyclops/actions/workflows/web.yaml/badge.svg"></a>
-    <a href="https://github.com/cyclops-ui/cyclops/actions/workflows/ci.yml"><img height="20" src="https://github.com/cyclops-ui/cyclops/actions/workflows/ci.yml/badge.svg"></a>
+    <a href="https://landscape.cncf.io/?item=app-definition-and-development--application-definition-image-build--cyclops">
+        <img alt="Static Badge" src="https://img.shields.io/badge/CNCF%20Landscape-5699C6?style=flat-square&color=5699C6">
+    </a>
+    <a href="https://hub.docker.com/repository/docker/cyclopsui/cyclops-ui/general">
+        <img alt="Docker Pulls" src="https://img.shields.io/docker/pulls/cyclopsui/cyclops-ui?style=flat-square&logo=docker&color=%230db7ed">
+    </a>
+    <a href="https://goreportcard.com/report/github.com/cyclops-ui/cyclops/cyclops-ctrl">
+        <img height="20" src="https://goreportcard.com/badge/github.com/cyclops-ui/cyclops/cyclops-ctrl?style=flat-square&labelColor=white">
+    </a>
+    <a href="https://github.com/cyclops-ui/cyclops/actions/workflows/web.yaml">
+        <img alt="GitHub Actions Workflow Status" src="https://img.shields.io/github/actions/workflow/status/cyclops-ui/cyclops/web.yaml?style=flat-square&logo=github&logoColor=white&label=GitHub%20pages%20build">
+    </a>
+    <a href="https://github.com/cyclops-ui/cyclops/actions/workflows/ci.yml">
+        <img alt="GitHub Actions Workflow Status" src="https://img.shields.io/github/actions/workflow/status/cyclops-ui/cyclops/ci.yml?style=flat-square&logo=github&logoColor=white&label=cyclops%20build">
+    </a>
+    <a href="https://github.com/cyclops-ui/cyclops/blob/main/LICENSE">
+        <img alt="GitHub License" src="https://img.shields.io/github/license/cyclops-ui/cyclops?style=flat-square&link=https%3A%2F%2Fgithub.com%2Fcyclops-ui%2Fcyclops%2Fblob%2Fmain%2FLICENSE">
+    </a>
 </div>
 
 ![which-would-you-prefer.png](web%2Fstatic%2Fimg%2Fwhich-would-you-prefer.png)
