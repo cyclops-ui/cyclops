@@ -68,6 +68,7 @@ const NewModule = () => {
     name: "",
     version: "",
     manifest: "",
+    namespace: "",
     root: {
       properties: [],
       required: [],
@@ -199,13 +200,14 @@ const NewModule = () => {
 
   const handleSubmit = (values: any) => {
     const moduleName = values["cyclops_module_name"];
-
+    const moduleNamespace = values["cyclops_module_namespace"];
     values = findMaps(config.root.properties, values, initialValuesRaw);
 
     axios
       .post(`/api/modules/new`, {
         name: moduleName,
         values: values,
+        namespace: moduleNamespace,
         template: {
           repo: template.repo,
           path: template.path,
@@ -213,7 +215,7 @@ const NewModule = () => {
         },
       })
       .then((res) => {
-        window.location.href = "/modules/" + moduleName;
+        window.location.href = "/modules/" + moduleNamespace + "/" + moduleName;
       })
       .catch((error) => {
         setLoading(false);
@@ -226,6 +228,7 @@ const NewModule = () => {
       name: "",
       version: "",
       manifest: "",
+      namespace: "",
       root: {
         properties: [],
         required: [],
@@ -1073,6 +1076,41 @@ const NewModule = () => {
                   pattern: /^[a-z0-9](?:[a-z0-9-]*[a-z0-9])?$/, // only alphanumeric characters and hyphens, cannot start or end with a hyphen and the alpha characters can only be lowercase
                   message:
                     "Module name must follow the Kubernetes naming convention",
+                },
+              ]}
+              hasFeedback={true}
+              validateDebounce={1000}
+            >
+              <Input />
+            </Form.Item>
+            <Divider orientation="left" orientationMargin="0">
+              Module namespace
+            </Divider>
+            <Form.Item
+              name="cyclops_module_namespace"
+              id="cyclops_module_namespace"
+              label={
+                <div>
+                  Module namespace
+                  <p style={{ color: "#8b8e91", marginBottom: "0px" }}>
+                    Enter a unique module namespace
+                  </p>
+                </div>
+              }
+              rules={[
+                {
+                  required: false,
+                  message: "Module namespace is required",
+                },
+                {
+                  max: 63,
+                  message:
+                    "Module namespace must contain no more than 63 characters",
+                },
+                {
+                  pattern: /^[a-z0-9](?:[a-z0-9-]*[a-z0-9])?$/, // only alphanumeric characters and hyphens, cannot start or end with a hyphen and the alpha characters can only be lowercase
+                  message:
+                    "Module namespace must follow the Kubernetes naming convention",
                 },
               ]}
               hasFeedback={true}

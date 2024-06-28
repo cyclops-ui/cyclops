@@ -17,6 +17,8 @@ func RequestToModule(req dto.Module) (cyclopsv1alpha1.Module, error) {
 	if err != nil {
 		return cyclopsv1alpha1.Module{}, err
 	}
+	println("Namespace : ", req.Namespace)
+	println("Namespace : ", req.Name)
 
 	return cyclopsv1alpha1.Module{
 		TypeMeta: metav1.TypeMeta{
@@ -24,7 +26,8 @@ func RequestToModule(req dto.Module) (cyclopsv1alpha1.Module, error) {
 			APIVersion: "cyclops-ui.com/v1alpha1",
 		},
 		ObjectMeta: metav1.ObjectMeta{
-			Name: req.Name,
+			Name:      req.Name,
+			Namespace: req.Namespace,
 		},
 		Spec: cyclopsv1alpha1.ModuleSpec{
 			TemplateRef: DtoTemplateRefToK8s(req.Template),

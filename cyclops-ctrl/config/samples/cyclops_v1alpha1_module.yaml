@@ -8,5 +8,6 @@ metadata:
     app.kubernetes.io/managed-by: kustomize
     app.kubernetes.io/created-by: kubebuilder
   name: module-sample
+  namespace: desired-namespace # else it will be cyclops
 spec:
   # TODO(user): Add fields here
