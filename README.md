@@ -14,15 +14,6 @@
     <a href="https://goreportcard.com/report/github.com/cyclops-ui/cyclops/cyclops-ctrl">
         <img height="20" src="https://goreportcard.com/badge/github.com/cyclops-ui/cyclops/cyclops-ctrl?labelColor=white">
     </a>
-    <a href="https://github.com/cyclops-ui/cyclops/actions/workflows/web.yaml">
-        <img height="20" src="https://img.shields.io/github/actions/workflow/status/cyclops-ui/cyclops/web.yaml?logo=github&logoColor=white&label=GitHub%20pages%20build">
-    </a>
-    <a href="https://github.com/cyclops-ui/cyclops/actions/workflows/ci.yml">
-        <img height="20" src="https://img.shields.io/github/actions/workflow/status/cyclops-ui/cyclops/ci.yml?logo=github&logoColor=white&label=cyclops%20build">
-    </a>
-    <a href="https://github.com/cyclops-ui/cyclops/blob/main/LICENSE">
-        <img height="20" src="https://img.shields.io/github/license/cyclops-ui/cyclops?link=https%3A%2F%2Fgithub.com%2Fcyclops-ui%2Fcyclops%2Fblob%2Fmain%2FLICENSE">
-    </a>
 </div>
 
 ![which-would-you-prefer.png](web%2Fstatic%2Fimg%2Fwhich-would-you-prefer.png)
