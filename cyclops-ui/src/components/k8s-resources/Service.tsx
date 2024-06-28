@@ -41,6 +41,7 @@ const Service = ({ name, namespace }: Props) => {
       })
       .then((res) => {
         setService(res.data);
+        console.log(res.data);
       })
       .catch((error) => {
         setError(mapResponseError(error));
@@ -76,7 +77,12 @@ const Service = ({ name, namespace }: Props) => {
       <Row>
         <Col span={24} style={{ overflowX: "auto" }}>
           <Table dataSource={service.ports}>
-            <Table.Column title="Name" dataIndex="name" key="name" />
+            <Table.Column
+              title="Name"
+              dataIndex="name"
+              key="name"
+              render={(text) => (text ? text : "not set")}
+            />
             <Table.Column title="Protocol" dataIndex="protocol" />
             <Table.Column title="Port" dataIndex="port" />
             <Table.Column title="Target port" dataIndex="targetPort" />
