@@ -4,7 +4,7 @@
 <h1></h1>
 <p align="center">Customizable UI for Kubernetes Workloads 👁️</p>
 
-<div align="center">
+<div align="center" style="padding-bottom: 20px">
     <a href="https://landscape.cncf.io/?item=app-definition-and-development--application-definition-image-build--cyclops">
         <img alt="Static Badge" src="https://img.shields.io/badge/CNCF%20Landscape-5699C6?style=flat-square&color=5699C6">
     </a>
