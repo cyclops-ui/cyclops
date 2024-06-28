@@ -145,7 +145,6 @@ func (r *ModuleReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctr
 	}
 
 	installErrors, err := r.moduleToResources(req.Name, req.Namespace, template)
-	fmt.Println("err : ", err)
 	if err != nil {
 		r.logger.Error(err, "error on upsert module", "namespaced name", req.NamespacedName)
 
@@ -179,12 +178,10 @@ func (r *ModuleReconciler) SetupWithManager(mgr ctrl.Manager) error {
 }
 
 func (r *ModuleReconciler) moduleToResources(name, namespace string, template *models.Template) ([]string, error) {
-	println("GET MODULES----------------------")
 	module, err := r.kubernetesClient.GetModule(name, namespace)
 	if err != nil {
 		return nil, err
 	}
-	println("GENERATING RESOURCES ----------------------")
 	installErrors, err := r.generateResources(r.kubernetesClient, *module, template, namespace)
 	if err != nil {
 		return nil, err
