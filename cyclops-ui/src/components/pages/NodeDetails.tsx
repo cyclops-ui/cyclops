@@ -2,6 +2,7 @@ import React, { useEffect, useRef, useState } from "react";
 import {
   Alert,
   Button,
+  Checkbox,
   Card,
   Col,
   Divider,
@@ -190,6 +191,97 @@ const NodeDetails = () => {
       ),
   });
 
+  const getColumnFilterProps = (
+    dataIndex: DataIndex,
+  ): ColumnType<DataSourceType> => ({
+    filterDropdown: ({
+      setSelectedKeys,
+      selectedKeys,
+      confirm,
+      clearFilters,
+      close,
+    }) => {
+      const uniqueValues = Array.from(
+        new Set(node.pods.map((pod: DataSourceType) => pod[dataIndex])),
+      );
+
+      return (
+        <div
+          style={{
+            padding: 8,
+            maxHeight: 200,
+            overflowY: "auto",
+            margin: "8px 0",
+            border: "1px solid #ccc",
+          }}
+        >
+          <div style={{ marginBottom: 8 }}>
+            {uniqueValues.map((value) => (
+              <div
+                key={value}
+                style={{ display: "flex", alignItems: "center" }}
+              >
+                <Checkbox
+                  checked={selectedKeys.includes(value)}
+                  onChange={(e) => {
+                    const checked = e.target.checked;
+                    const updatedKeys = checked
+                      ? [...selectedKeys, value]
+                      : selectedKeys.filter((v: any) => v !== value);
+                    setSelectedKeys(updatedKeys);
+                  }}
+                />
+                <span style={{ marginLeft: 8 }}>{value}</span>
+              </div>
+            ))}
+          </div>
+          <Space>
+            <Button
+              type="primary"
+              icon={<SearchOutlined />}
+              size="small"
+              style={{ width: 90 }}
+              onClick={() =>
+                handleSearch(selectedKeys as string[], confirm, dataIndex)
+              }
+            >
+              Filter
+            </Button>
+            <Button
+              onClick={() => clearFilters && handleReset(clearFilters, confirm)}
+              size="small"
+              style={{ width: 90 }}
+            >
+              Reset
+            </Button>
+            <Button
+              type="link"
+              size="small"
+              onClick={() => {
+                close();
+              }}
+            >
+              Close
+            </Button>
+          </Space>
+        </div>
+      );
+    },
+    filterIcon: (filtered: boolean) => (
+      <SearchOutlined style={{ color: filtered ? "#1677ff" : undefined }} />
+    ),
+    onFilter: (value, record) =>
+      record[dataIndex]
+        .toString()
+        .toLowerCase()
+        .includes((value as string).toLowerCase()),
+    onFilterDropdownOpenChange: (visible) => {
+      if (visible) {
+        setTimeout(() => searchInput.current?.select(), 100);
+      }
+    },
+  });
+
   const fetchNodeData = () => {
     axios
       .get(`/api/nodes/` + nodeName)
@@ -235,6 +327,7 @@ const NodeDetails = () => {
       dataIndex: "namespace",
       key: "namespace",
       width: "30%",
+      ...getColumnFilterProps("namespace"), // temp
     },
     {
       title: "CPU",
