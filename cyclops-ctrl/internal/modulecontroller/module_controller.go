@@ -19,6 +19,7 @@ package modulecontroller
 import (
 	"context"
 	"fmt"
+	"helm.sh/helm/v3/pkg/chart"
 	"strings"
 
 	"github.com/go-logr/logr"
@@ -178,12 +179,19 @@ func (r *ModuleReconciler) moduleToResources(name string, template *models.Templ
 		return nil, err
 	}
 
+	crdInstallErrors := r.applyCRDs(template)
+	if err != nil {
+		return nil, err
+	}
+
+	return crdInstallErrors, nil
+
 	installErrors, err := r.generateResources(r.kubernetesClient, *module, template)
 	if err != nil {
 		return nil, err
 	}
 
-	return installErrors, nil
+	return append(crdInstallErrors, installErrors...), nil
 }
 
 func (r *ModuleReconciler) generateResources(kClient *k8sclient.KubernetesClient, module cyclopsv1alpha1.Module, moduleTemplate *models.Template) ([]string, error) {
@@ -263,6 +271,62 @@ func (r *ModuleReconciler) generateResources(kClient *k8sclient.KubernetesClient
 	}
 
 	return installErrors, nil
+}
+
+func (r *ModuleReconciler) applyCRDs(template *models.Template) []string {
+	installErrors := make([]string, 0)
+
+	for _, d := range template.Dependencies {
+		for _, crdFile := range d.CRDs {
+			installErrors = append(installErrors, r.applyCRDFile(crdFile)...)
+		}
+	}
+
+	for _, crdFile := range template.CRDs {
+		installErrors = append(installErrors, r.applyCRDFile(crdFile)...)
+	}
+
+	return installErrors
+}
+
+func (r *ModuleReconciler) applyCRDFile(file *chart.File) []string {
+	installErrors := make([]string, 0)
+
+	for _, s := range strings.Split(string(file.Data), "---") {
+		s := strings.TrimSpace(s)
+		if len(s) == 0 {
+			continue
+		}
+
+		var crd *unstructured.Unstructured
+		decoder := yaml.NewYAMLOrJSONDecoder(strings.NewReader(s), len(string(s)))
+		err := decoder.Decode(&crd)
+
+		if crd == nil {
+			continue
+		}
+
+		if err != nil {
+			installErrors = append(installErrors, fmt.Sprintf(
+				"failed to decode CRD from file %v: %v",
+				file.Name,
+				err.Error(),
+			))
+			continue
+		}
+
+		if err := r.kubernetesClient.ApplyCRD(crd); err != nil {
+			installErrors = append(installErrors, fmt.Sprintf(
+				"failed to create CRD %v from filem %v: %v",
+				crd.GetName(),
+				file.Name,
+				err.Error(),
+			))
+			continue
+		}
+	}
+
+	return installErrors
 }
 
 func (r *ModuleReconciler) setStatus(

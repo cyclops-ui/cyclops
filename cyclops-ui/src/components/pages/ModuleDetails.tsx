@@ -223,7 +223,7 @@ const ModuleDetails = () => {
       activeCollapses.get(fieldName) &&
       activeCollapses.get(fieldName) === true
     ) {
-      return "250%";
+      return "150%";
     } else {
       return "100%";
     }
@@ -545,7 +545,7 @@ const ModuleDetails = () => {
             <CaretRightOutlined rotate={isActive ? 90 : 0} />
           )}
           style={{
-            width: "40%",
+            width: "60%",
             border: "none",
             backgroundColor: "#FFF",
           }}

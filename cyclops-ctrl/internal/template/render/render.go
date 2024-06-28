@@ -1,6 +1,7 @@
 package render
 
 import (
+	"github.com/cyclops-ui/cyclops/cyclops-ctrl/internal/models/helm"
 	json "github.com/json-iterator/go"
 	helmchart "helm.sh/helm/v3/pkg/chart"
 	"helm.sh/helm/v3/pkg/chartutil"
@@ -28,7 +29,7 @@ func (r *Renderer) HelmTemplate(module cyclopsv1alpha1.Module, moduleTemplate *m
 
 	chart := &helmchart.Chart{
 		Raw:       []*helmchart.File{},
-		Metadata:  &helmchart.Metadata{},
+		Metadata:  mapMetadata(moduleTemplate.HelmChartMetadata),
 		Lock:      &helmchart.Lock{},
 		Values:    map[string]interface{}{},
 		Schema:    []byte{},
@@ -37,11 +38,10 @@ func (r *Renderer) HelmTemplate(module cyclopsv1alpha1.Module, moduleTemplate *m
 	}
 
 	for _, dependency := range moduleTemplate.Dependencies {
+
 		chart.AddDependency(&helmchart.Chart{
-			Raw: []*helmchart.File{},
-			Metadata: &helmchart.Metadata{
-				Name: dependency.Name,
-			},
+			Raw:       []*helmchart.File{},
+			Metadata:  mapMetadata(dependency.HelmChartMetadata),
 			Lock:      &helmchart.Lock{},
 			Values:    map[string]interface{}{},
 			Schema:    []byte{},
@@ -86,6 +86,51 @@ func (r *Renderer) HelmTemplate(module cyclopsv1alpha1.Module, moduleTemplate *m
 	}
 
 	return manifest, err
+}
+
+func mapMetadata(metadata *helm.Metadata) *helmchart.Metadata {
+	dependencies := make([]*helmchart.Dependency, 0, len(metadata.Dependencies))
+	for _, dependency := range metadata.Dependencies {
+		dependencies = append(dependencies, &helmchart.Dependency{
+			Name:         dependency.Name,
+			Version:      dependency.Version,
+			Repository:   dependency.Repository,
+			Condition:    dependency.Condition,
+			Tags:         dependency.Tags,
+			Enabled:      dependency.Enabled,
+			ImportValues: dependency.ImportValues,
+			Alias:        dependency.Alias,
+		})
+	}
+
+	maintainers := make([]*helmchart.Maintainer, 0, len(metadata.Maintainers))
+	for _, maintainer := range metadata.Maintainers {
+		maintainers = append(maintainers, &helmchart.Maintainer{
+			Name:  maintainer.Name,
+			Email: maintainer.Email,
+			URL:   maintainer.URL,
+		})
+	}
+
+	return &helmchart.Metadata{
+		Name:         metadata.Name,
+		Home:         metadata.Home,
+		Sources:      metadata.Sources,
+		Version:      metadata.Version,
+		Description:  metadata.Description,
+		Keywords:     metadata.Keywords,
+		Maintainers:  maintainers,
+		Icon:         metadata.Icon,
+		APIVersion:   metadata.APIVersion,
+		Condition:    metadata.Condition,
+		Tags:         metadata.Tags,
+		AppVersion:   metadata.AppVersion,
+		Deprecated:   metadata.Deprecated,
+		Annotations:  metadata.Annotations,
+		KubeVersion:  metadata.KubeVersion,
+		Dependencies: dependencies,
+		Type:         metadata.Type,
+	}
 }
 
 type CapabilitiesKubeVersion struct {

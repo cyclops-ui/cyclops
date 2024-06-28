@@ -2,6 +2,7 @@ package controller
 
 import (
 	"fmt"
+	json "github.com/json-iterator/go"
 	"net/http"
 	"strconv"
 	"strings"
@@ -83,7 +84,14 @@ func (c *Templates) GetTemplateInitialValues(ctx *gin.Context) {
 		return
 	}
 
-	ctx.Data(http.StatusOK, gin.MIMEJSON, initial)
+	data, err := json.Marshal(initial)
+	if err != nil {
+		fmt.Println(err)
+		ctx.JSON(http.StatusBadRequest, dto.NewError("Error loading template initial values", err.Error()))
+		return
+	}
+
+	ctx.Data(http.StatusOK, gin.MIMEJSON, data)
 }
 
 func (c *Templates) ListTemplatesStore(ctx *gin.Context) {

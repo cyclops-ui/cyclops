@@ -436,6 +436,38 @@ func (k *KubernetesClient) createDynamicNonNamespaced(
 	return err
 }
 
+func (k *KubernetesClient) ApplyCRD(obj *unstructured.Unstructured) error {
+	gvr := schema.GroupVersionResource{
+		Group:    "apiextensions.k8s.io",
+		Version:  "v1",
+		Resource: "customresourcedefinitions",
+	}
+
+	fmt.Println(obj.GetName())
+
+	_, err := k.Dynamic.Resource(gvr).Get(context.TODO(), obj.GetName(), metav1.GetOptions{})
+	if err != nil {
+		if k8serrors.IsNotFound(err) {
+			_, err := k.Dynamic.Resource(gvr).Create(
+				context.Background(),
+				obj,
+				metav1.CreateOptions{},
+			)
+
+			return err
+		}
+		return err
+	}
+
+	_, err = k.Dynamic.Resource(gvr).Update(
+		context.Background(),
+		obj,
+		metav1.UpdateOptions{},
+	)
+
+	return err
+}
+
 func copyJobSelectors(source, destination *unstructured.Unstructured) error {
 	selectors, ok, err := unstructured.NestedMap(source.Object, "spec", "selector")
 	if err != nil {
