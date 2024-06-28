@@ -5,13 +5,13 @@
 <p align="center">Customizable UI for Kubernetes Workloads 👁️</p>
 
 <div align="center">
-    <a style="text-decoration: none" href="https://landscape.cncf.io/?item=app-definition-and-development--application-definition-image-build--cyclops">
+    <a style="width: 100%" href="https://landscape.cncf.io/?item=app-definition-and-development--application-definition-image-build--cyclops">
         <img height="20" src="https://img.shields.io/badge/CNCF%20Landscape-5699C6?color=5699C6">
     </a>
-    <a style="text-decoration: none" href="https://hub.docker.com/repository/docker/cyclopsui/cyclops-ui/general">
+    <a style="width: 100%" href="https://hub.docker.com/repository/docker/cyclopsui/cyclops-ui/general">
         <img height="20" src="https://img.shields.io/docker/pulls/cyclopsui/cyclops-ui?logo=docker&color=%230db7ed">
     </a>
-    <a style="text-decoration: none" href="https://goreportcard.com/report/github.com/cyclops-ui/cyclops/cyclops-ctrl">
+    <a style="width: 100%" href="https://goreportcard.com/report/github.com/cyclops-ui/cyclops/cyclops-ctrl">
         <img height="20" src="https://goreportcard.com/badge/github.com/cyclops-ui/cyclops/cyclops-ctrl?labelColor=white">
     </a>
 </div>
