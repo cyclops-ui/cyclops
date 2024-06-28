@@ -41,7 +41,6 @@ const Service = ({ name, namespace }: Props) => {
       })
       .then((res) => {
         setService(res.data);
-        console.log(res.data);
       })
       .catch((error) => {
         setError(mapResponseError(error));
