@@ -512,7 +512,9 @@ const ModuleDetails = () => {
           </Col>
         </Row>
         <Row>
-          <Title level={4}>{resource.namespace}</Title>
+          <Title level={4}>
+            {resource.namespace === "default" ? "not set" : resource.namespace}
+          </Title>
         </Row>
         <Row>
           <Col style={{ float: "right" }}>
