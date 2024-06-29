@@ -45,7 +45,7 @@ func NewModulesController(
 func (m *Modules) GetModule(ctx *gin.Context) {
 	ctx.Header("Access-Control-Allow-Origin", "*")
 
-	module, err := m.kubernetesClient.GetModule(ctx.Param("name"))
+	module, err := m.kubernetesClient.GetModule(ctx.Param("name"), ctx.Param("namespace"))
 	if err != nil {
 		fmt.Println(err)
 		ctx.Status(http.StatusInternalServerError)
@@ -91,7 +91,7 @@ func (m *Modules) ListModules(ctx *gin.Context) {
 func (m *Modules) DeleteModule(ctx *gin.Context) {
 	ctx.Header("Access-Control-Allow-Origin", "*")
 
-	err := m.kubernetesClient.DeleteModule(ctx.Param("name"))
+	err := m.kubernetesClient.DeleteModule(ctx.Param("name"), ctx.Param("namespace"))
 	if err != nil {
 		fmt.Println(err)
 		ctx.JSON(http.StatusInternalServerError, dto.NewError("Error deleting module", err.Error()))
@@ -105,7 +105,7 @@ func (m *Modules) DeleteModule(ctx *gin.Context) {
 func (m *Modules) GetModuleHistory(ctx *gin.Context) {
 	ctx.Header("Access-Control-Allow-Origin", "*")
 
-	module, err := m.kubernetesClient.GetModule(ctx.Param("name"))
+	module, err := m.kubernetesClient.GetModule(ctx.Param("name"), ctx.Param("namespace"))
 	if err != nil {
 		fmt.Println(err)
 		ctx.Status(http.StatusInternalServerError)
@@ -161,7 +161,7 @@ func (m *Modules) Manifest(ctx *gin.Context) {
 func (m *Modules) CurrentManifest(ctx *gin.Context) {
 	ctx.Header("Access-Control-Allow-Origin", "*")
 
-	module, err := m.kubernetesClient.GetModule(ctx.Param("name"))
+	module, err := m.kubernetesClient.GetModule(ctx.Param("name"), ctx.Param("namespace"))
 	if err != nil {
 		fmt.Println(err)
 		ctx.Status(http.StatusInternalServerError)
@@ -252,7 +252,7 @@ func (m *Modules) UpdateModule(ctx *gin.Context) {
 		return
 	}
 
-	curr, err := m.kubernetesClient.GetModule(request.Name)
+	curr, err := m.kubernetesClient.GetModule(request.Name, request.Namespace)
 	if err != nil {
 		fmt.Println(err)
 		ctx.JSON(http.StatusInternalServerError, dto.NewError("Error fetching module", err.Error()))
@@ -309,7 +309,7 @@ func (m *Modules) UpdateModule(ctx *gin.Context) {
 func (m *Modules) ResourcesForModule(ctx *gin.Context) {
 	ctx.Header("Access-Control-Allow-Origin", "*")
 
-	module, err := m.kubernetesClient.GetModule(ctx.Param("name"))
+	module, err := m.kubernetesClient.GetModule(ctx.Param("name"), ctx.Param("namespace"))
 	if err != nil {
 		ctx.JSON(http.StatusBadRequest, dto.NewError("Error mapping module request", err.Error()))
 		return
@@ -330,7 +330,7 @@ func (m *Modules) ResourcesForModule(ctx *gin.Context) {
 		return
 	}
 
-	resources, err := m.kubernetesClient.GetResourcesForModule(ctx.Param("name"))
+	resources, err := m.kubernetesClient.GetResourcesForModule(ctx.Param("name"), ctx.Param("namespace"))
 	if err != nil {
 		fmt.Println(err)
 		ctx.JSON(http.StatusInternalServerError, dto.NewError("Error fetching module resources", err.Error()))
@@ -357,7 +357,7 @@ func (m *Modules) ResourcesForModule(ctx *gin.Context) {
 func (m *Modules) Template(ctx *gin.Context) {
 	ctx.Header("Access-Control-Allow-Origin", "*")
 
-	module, err := m.kubernetesClient.GetModule(ctx.Param("name"))
+	module, err := m.kubernetesClient.GetModule(ctx.Param("name"), ctx.Param("namespace"))
 	if err != nil {
 		fmt.Println(err)
 		ctx.JSON(http.StatusInternalServerError, dto.NewError("Error fetching module", err.Error()))
@@ -411,7 +411,7 @@ func (m *Modules) Template(ctx *gin.Context) {
 func (m *Modules) HelmTemplate(ctx *gin.Context) {
 	ctx.Header("Access-Control-Allow-Origin", "*")
 
-	module, err := m.kubernetesClient.GetModule(ctx.Param("name"))
+	module, err := m.kubernetesClient.GetModule(ctx.Param("name"), ctx.Param("namespace"))
 	if err != nil {
 		fmt.Println(err)
 		ctx.JSON(http.StatusInternalServerError, dto.NewError("Error fetching module", err.Error()))

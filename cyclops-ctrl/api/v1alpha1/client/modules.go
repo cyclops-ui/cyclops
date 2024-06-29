@@ -30,7 +30,6 @@ func (c *moduleClient) List(opts metav1.ListOptions) ([]cyclopsv1alpha1.Module, 
 	result := cyclopsv1alpha1.ModuleList{}
 	err := c.restClient.
 		Get().
-		Namespace(c.ns).
 		Resource("modules").
 		Do(context.Background()).
 		Into(&result)
