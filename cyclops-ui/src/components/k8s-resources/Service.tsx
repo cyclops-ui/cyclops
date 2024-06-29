@@ -80,7 +80,13 @@ const Service = ({ name, namespace }: Props) => {
               title="Name"
               dataIndex="name"
               key="name"
-              render={(text) => (text ? text : "not set")}
+              render={(text) =>
+                text ? (
+                  text
+                ) : (
+                  <span style={{ color: "#A0A0A0" }}>{"<not set>"}</span>
+                )
+              }
             />
             <Table.Column title="Protocol" dataIndex="protocol" />
             <Table.Column title="Port" dataIndex="port" />
