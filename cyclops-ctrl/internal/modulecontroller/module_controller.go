@@ -92,7 +92,7 @@ func (r *ModuleReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctr
 	err := r.Get(ctx, req.NamespacedName, &module)
 	if apierrors.IsNotFound(err) {
 		r.logger.Info("delete module", "namespaced name", req.NamespacedName)
-		resources, err := r.kubernetesClient.GetResourcesForModule(req.Name)
+		resources, err := r.kubernetesClient.GetResourcesForModule(req.Name, req.Namespace)
 		if err != nil {
 			r.logger.Error(err, "error on get module resources", "namespaced name", req.NamespacedName)
 			return ctrl.Result{}, err
@@ -139,7 +139,7 @@ func (r *ModuleReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctr
 		return ctrl.Result{}, err
 	}
 
-	installErrors, err := r.moduleToResources(req.Name, template)
+	installErrors, err := r.moduleToResources(req.Name, req.Namespace, template)
 	if err != nil {
 		r.logger.Error(err, "error on upsert module", "namespaced name", req.NamespacedName)
 
@@ -172,13 +172,13 @@ func (r *ModuleReconciler) SetupWithManager(mgr ctrl.Manager) error {
 		Complete(r)
 }
 
-func (r *ModuleReconciler) moduleToResources(name string, template *models.Template) ([]string, error) {
-	module, err := r.kubernetesClient.GetModule(name)
+func (r *ModuleReconciler) moduleToResources(name, namespace string, template *models.Template) ([]string, error) {
+	module, err := r.kubernetesClient.GetModule(name, namespace)
 	if err != nil {
 		return nil, err
 	}
 
-	installErrors, err := r.generateResources(r.kubernetesClient, *module, template)
+	installErrors, err := r.generateResources(r.kubernetesClient, *module, template, namespace)
 	if err != nil {
 		return nil, err
 	}
@@ -186,7 +186,7 @@ func (r *ModuleReconciler) moduleToResources(name string, template *models.Templ
 	return installErrors, nil
 }
 
-func (r *ModuleReconciler) generateResources(kClient *k8sclient.KubernetesClient, module cyclopsv1alpha1.Module, moduleTemplate *models.Template) ([]string, error) {
+func (r *ModuleReconciler) generateResources(kClient *k8sclient.KubernetesClient, module cyclopsv1alpha1.Module, moduleTemplate *models.Template, namespace string) ([]string, error) {
 	out, err := r.renderer.HelmTemplate(module, moduleTemplate)
 	if err != nil {
 		return nil, err
@@ -232,6 +232,9 @@ func (r *ModuleReconciler) generateResources(kClient *k8sclient.KubernetesClient
 		labels := obj.GetLabels()
 		if labels == nil {
 			labels = make(map[string]string)
+		}
+		if obj.GetNamespace() == "" {
+			obj.SetNamespace(namespace)
 		}
 
 		labels["app.kubernetes.io/managed-by"] = "cyclops"
