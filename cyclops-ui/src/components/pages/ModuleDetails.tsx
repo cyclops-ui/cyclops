@@ -29,6 +29,7 @@ import "./custom.css";
 import "ace-builds/src-noconflict/mode-jsx";
 import ReactAce from "react-ace";
 import Deployment from "../k8s-resources/Deployment";
+import CronJob from "../k8s-resources/CronJob";
 import DaemonSet from "../k8s-resources/DaemonSet";
 import StatefulSet from "../k8s-resources/StatefulSet";
 import Pod from "../k8s-resources/Pod";
@@ -42,6 +43,7 @@ import {
 } from "../../utils/templateRef";
 import { gvkString } from "../../utils/k8s/gvk";
 import { mapResponseError } from "../../utils/api/errors";
+import Secret from "../k8s-resources/Secret";
 const languages = [
   "javascript",
   "java",
@@ -377,6 +379,11 @@ const ModuleDetails = () => {
           <Deployment name={resource.name} namespace={resource.namespace} />
         );
         break;
+      case "CronJob":
+        resourceDetails = (
+          <CronJob name={resource.name} namespace={resource.namespace} />
+        );
+        break;
       case "DaemonSet":
         resourceDetails = (
           <DaemonSet name={resource.name} namespace={resource.namespace} />
@@ -408,6 +415,11 @@ const ModuleDetails = () => {
             name={resource.name}
             namespace={resource.namespace}
           />
+        );
+        break;
+      case "Secret":
+        resourceDetails = (
+          <Secret name={resource.name} namespace={resource.namespace} />
         );
         break;
     }
@@ -567,7 +579,10 @@ const ModuleDetails = () => {
           </Row>
           <Row gutter={[40, 0]}>
             <Col span={9}>
-              <Title level={3}>{module.namespace}</Title>
+              <Title level={3}>
+                {"Namespace: "}
+                {module.namespace}
+              </Title>
             </Col>
           </Row>
           <Row gutter={[40, 0]}>

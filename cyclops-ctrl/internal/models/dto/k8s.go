@@ -385,6 +385,113 @@ func (s *Secret) SetDeleted(deleted bool) {
 	s.Deleted = deleted
 }
 
+type StatusCronJob struct {
+	LastScheduleTime   *metav1.Time `json:"lastScheduleTime"`
+	LastSuccessfulTime *metav1.Time `json:"lastSuccessfulTime"`
+}
+
+func (s *StatusCronJob) GetLastScheduleTime() string {
+	if s.LastScheduleTime != nil {
+		return s.LastScheduleTime.String()
+	}
+	return ""
+}
+
+func (s *StatusCronJob) GetLastSuccessfulTime() string {
+	if s.LastSuccessfulTime != nil {
+		return s.LastSuccessfulTime.String()
+	}
+	return ""
+}
+
+type CronJob struct {
+	Group     string        `json:"group"`
+	Version   string        `json:"version"`
+	Kind      string        `json:"kind"`
+	Name      string        `json:"name"`
+	Namespace string        `json:"namespace"`
+	Pods      []Pod         `json:"pods"`
+	Schedule  string        `json:"schedule"`
+	Status    StatusCronJob `json:"status"`
+	Suspend   bool          `json:"suspend"`
+	Deleted   bool          `json:"deleted"`
+}
+
+func (c *CronJob) GetGroupVersionKind() string {
+	return c.Group + "/" + c.Version + ", Kind=" + c.Kind
+}
+
+func (c *CronJob) GetGroup() string {
+	return c.Group
+}
+
+func (c *CronJob) GetVersion() string {
+	return c.Version
+}
+
+func (c *CronJob) GetKind() string {
+	return c.Kind
+}
+
+func (c *CronJob) GetName() string {
+	return c.Name
+}
+
+func (c *CronJob) GetNamespace() string {
+	return c.Namespace
+}
+
+func (c *CronJob) GetDeleted() bool {
+	return c.Deleted
+}
+
+func (c *CronJob) SetDeleted(deleted bool) {
+	c.Deleted = deleted
+}
+
+type Job struct {
+	Group          string `json:"group"`
+	Version        string `json:"version"`
+	Kind           string `json:"kind"`
+	Name           string `json:"name"`
+	Namespace      string `json:"namespace"`
+	Pods           []Pod  `json:"pods"`
+	CompletionTime string `json:"completionTime"`
+	StartTime      string `json:"startTime"`
+}
+
+func (c *Job) GetGroupVersionKind() string {
+	return c.Group + "/" + c.Version + ", Kind=" + c.Kind
+}
+
+func (c *Job) GetGroup() string {
+	return c.Group
+}
+
+func (c *Job) GetVersion() string {
+	return c.Version
+}
+
+func (c *Job) GetKind() string {
+	return c.Kind
+}
+
+func (c *Job) GetName() string {
+	return c.Name
+}
+
+func (c *Job) GetNamespace() string {
+	return c.Namespace
+}
+
+func (c *Job) GetCompletionTime() string {
+	return c.CompletionTime
+}
+
+func (c *Job) GetStartTime() string {
+	return c.StartTime
+}
+
 type Other struct {
 	Group     string `json:"group"`
 	Version   string `json:"version"`

@@ -6,15 +6,14 @@ import (
 )
 
 var (
-	deleteExample = `
-	# Delete one or more modules
-	cyctl delete modules [module_name] 
- 
-	# Delete one or more templates
-	cyctl delete templates [template_name] 
- 
-	# Delete one or more templateauthrules.
-	cyctl delete templateauthrules [templateauthrules_name]`
+	deleteExample = `# Delete one or more modules
+cyctl delete modules [module_name] 
+
+# Delete one or more templates
+cyctl delete templates [template_name] 
+
+# Delete one or more templateauthrules.
+cyctl delete templateauthrules [templateauthrules_name]`
 )
 
 var deleteCMD = &cobra.Command{

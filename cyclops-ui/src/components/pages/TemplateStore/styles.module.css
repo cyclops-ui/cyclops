@@ -17,3 +17,17 @@
 .edittemplate:hover {
   transform: scale(1.4);
 }
+
+.statustemplate {
+  color: grey;
+  transform: scale(1.2);
+  transition: transform 0.2s;
+}
+
+.success {
+  color: green;
+}
+
+.error {
+  color: red;
+}

@@ -1,8 +1,10 @@
 name: goreleaser
 
 on:
-  release:
-    types: [published]
+  workflow_run:
+    workflows: [cyclops-CI]
+    types:
+      - completed
 
 permissions:
   contents: write
@@ -10,6 +12,7 @@ permissions:
 jobs:
   goreleaser:
     runs-on: ubuntu-latest
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4

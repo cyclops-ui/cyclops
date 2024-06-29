@@ -14,12 +14,11 @@ import (
 )
 
 var (
-	moduleExample = `
- # List specific module(s) in ps output format
- cyctl get module MODULE_NAME 
- 
- # List all modules available in ps output format
- cyctl get modules`
+	moduleExample = `# List specific module(s) in ps output format
+cyctl get module MODULE_NAME 
+
+# List all modules available in ps output format
+cyctl get modules`
 )
 
 // listModules retrieves and displays a list of modules from the Cyclops API.
