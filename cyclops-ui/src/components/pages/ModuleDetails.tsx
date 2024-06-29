@@ -579,7 +579,10 @@ const ModuleDetails = () => {
           </Row>
           <Row gutter={[40, 0]}>
             <Col span={9}>
-              <Title level={3}>{module.namespace}</Title>
+              <Title level={3}>
+                {"Namespace: "}
+                {module.namespace}
+              </Title>
             </Col>
           </Row>
           <Row gutter={[40, 0]}>
