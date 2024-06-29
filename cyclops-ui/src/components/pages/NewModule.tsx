@@ -52,7 +52,7 @@ const { Title } = Typography;
 const layout = {
   wrapperCol: { span: 16 },
 };
-
+const { Panel } = Collapse;
 interface templateStoreOption {
   name: string;
   ref: {
@@ -200,7 +200,7 @@ const NewModule = () => {
 
   const handleSubmit = (values: any) => {
     const moduleName = values["cyclops_module_name"];
-    const moduleNamespace = values["cyclops_module_namespace"];
+    var moduleNamespace = values["cyclops_module_namespace"];
     values = findMaps(config.root.properties, values, initialValuesRaw);
 
     axios
@@ -215,6 +215,9 @@ const NewModule = () => {
         },
       })
       .then((res) => {
+        if (moduleNamespace === "") {
+          moduleNamespace = "dafault";
+        }
         window.location.href = "/modules/" + moduleNamespace + "/" + moduleName;
       })
       .catch((error) => {
@@ -1083,45 +1086,47 @@ const NewModule = () => {
             >
               <Input />
             </Form.Item>
-            <Divider orientation="left" orientationMargin="0">
-              Module namespace
-            </Divider>
-            <Form.Item
-              name="cyclops_module_namespace"
-              id="cyclops_module_namespace"
-              label={
-                <div>
-                  Module namespace
-                  <p style={{ color: "#8b8e91", marginBottom: "0px" }}>
-                    Enter a unique module namespace
-                  </p>
-                </div>
-              }
-              rules={[
-                {
-                  required: false,
-                  message: "Module namespace is required",
-                },
-                {
-                  max: 63,
-                  message:
-                    "Module namespace must contain no more than 63 characters",
-                },
-                {
-                  pattern: /^[a-z0-9](?:[a-z0-9-]*[a-z0-9])?$/, // only alphanumeric characters and hyphens, cannot start or end with a hyphen and the alpha characters can only be lowercase
-                  message:
-                    "Module namespace must follow the Kubernetes naming convention",
-                },
-              ]}
-              hasFeedback={true}
-              validateDebounce={1000}
-            >
-              <Input />
-            </Form.Item>
+            <Collapse style={{ width: "66.7%" }}>
+              <Panel header="Options" key="1" style={{ width: "100%" }}>
+                <Form.Item
+                  name="cyclops_module_namespace"
+                  id="cyclops_module_namespace"
+                  label={
+                    <div>
+                      Module namespace
+                      <p style={{ color: "#8b8e91", marginBottom: "0px" }}>
+                        Enter a unique module namespace
+                      </p>
+                    </div>
+                  }
+                  rules={[
+                    {
+                      required: false,
+                      message: "Module namespace is required",
+                    },
+                    {
+                      max: 63,
+                      message:
+                        "Module namespace must contain no more than 63 characters",
+                    },
+                    {
+                      pattern: /^[a-z0-9](?:[a-z0-9-]*[a-z0-9])?$/, // only alphanumeric characters and hyphens, cannot start or end with a hyphen and the alpha characters can only be lowercase
+                      message:
+                        "Module namespace must follow the Kubernetes naming convention",
+                    },
+                  ]}
+                  hasFeedback={true}
+                  validateDebounce={1000}
+                >
+                  <Input />
+                </Form.Item>
+              </Panel>
+            </Collapse>
             <Divider orientation="left" orientationMargin="0">
               Define Module
             </Divider>
             {renderFormFields()}
+
             <div style={{ textAlign: "right" }}>
               <Button
                 onClick={function () {
