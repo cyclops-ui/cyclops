@@ -307,6 +307,34 @@ func (k *KubernetesClient) getResourceStatus(o unstructured.Unstructured) (strin
 		return statusUnhealthy, nil
 	}
 
+	if isDaemonSet(o.GroupVersionKind().Group, o.GroupVersionKind().Version, o.GetKind()) {
+		daemonset, err := k.clientset.AppsV1().DaemonSets(o.GetNamespace()).Get(context.Background(), o.GetName(), metav1.GetOptions{})
+		if err != nil {
+			return statusUndefined, err
+		}
+
+		if daemonset.Generation == daemonset.Status.ObservedGeneration &&
+			daemonset.Status.UpdatedNumberScheduled == daemonset.Status.DesiredNumberScheduled &&
+			daemonset.Status.NumberUnavailable == 0 {
+			return statusHealthy, nil
+		}
+
+		return statusUnhealthy, nil
+	}
+
+	if isPersistentVolumeClaims(o.GroupVersionKind().Group, o.GroupVersionKind().Version, o.GetKind()) {
+		pvc, err := k.clientset.CoreV1().PersistentVolumeClaims(o.GetNamespace()).Get(context.Background(), o.GetName(), metav1.GetOptions{})
+		if err != nil {
+			return statusUndefined, err
+		}
+
+		if pvc.Status.Phase == apiv1.ClaimBound {
+			return statusHealthy, nil
+		}
+
+		return statusUnhealthy, nil
+	}
+
 	return statusUndefined, nil
 }
 
