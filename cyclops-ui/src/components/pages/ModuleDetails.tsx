@@ -384,6 +384,7 @@ const ModuleDetails = () => {
         resourceDetails = (
           <CronJob name={resource.name} namespace={resource.namespace} />
         );
+        break;
       case "Job":
         resourceDetails = (
           <Job name={resource.name} namespace={resource.namespace} />
