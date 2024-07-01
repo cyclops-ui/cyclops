@@ -21,8 +21,12 @@ jobs:
       - name: Install dependencies
         run: |
           cd ${{ github.workspace }}/cyclops-ui
-          npm install --force
+          yarn install
       - name: Run tests
         run: |
           cd ${{ github.workspace }}/cyclops-ui
-          npm test
+          yarn test
+      - name: Run tests
+        run: |
+          cd ${{ github.workspace }}/cyclops-ui
+          yarn build
