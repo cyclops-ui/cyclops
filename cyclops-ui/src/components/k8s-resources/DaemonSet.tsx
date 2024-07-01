@@ -19,32 +19,32 @@ const DaemonSet = ({ name, namespace }: Props) => {
     description: "",
   });
 
-  function fetchDaemonSet() {
-    axios
-      .get(`/api/resources`, {
-        params: {
-          group: `apps`,
-          version: `v1`,
-          kind: `DaemonSet`,
-          name: name,
-          namespace: namespace,
-        },
-      })
-      .then((res) => {
-        setDaemonSet(res.data);
-      })
-      .catch((error) => {
-        setError(mapResponseError(error));
-      });
-  }
-
   useEffect(() => {
+    function fetchDaemonSet() {
+      axios
+        .get(`/api/resources`, {
+          params: {
+            group: `apps`,
+            version: `v1`,
+            kind: `DaemonSet`,
+            name: name,
+            namespace: namespace,
+          },
+        })
+        .then((res) => {
+          setDaemonSet(res.data);
+        })
+        .catch((error) => {
+          setError(mapResponseError(error));
+        });
+    }
+
     fetchDaemonSet();
     const interval = setInterval(() => fetchDaemonSet(), 15000);
     return () => {
       clearInterval(interval);
     };
-  }, []);
+  }, [name, namespace]);
 
   return (
     <div>
