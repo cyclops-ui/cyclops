@@ -5,6 +5,7 @@ import {
   Checkbox,
   Col,
   Collapse,
+  Descriptions,
   Divider,
   Input,
   Modal,
@@ -573,19 +574,48 @@ const ModuleDetails = () => {
           <Row gutter={[40, 0]}>
             <Col span={9}>
               <Title level={1}>
-                {module.name} {moduleStatusIcon()}
+                <img
+                  style={{ height: "1.5em", marginRight: "8px" }}
+                  src={
+                    "https://bitnami.com/assets/stacks/rabbitmq/img/rabbitmq-stack-220x234.png"
+                  }
+                />
+                {module.name}
               </Title>
             </Col>
           </Row>
-          <Row gutter={[40, 0]}>
-            <Col span={9}>
-              <Title level={3}>
-                {"Namespace: "}
-                {module.namespace}
-              </Title>
-            </Col>
-          </Row>
-          <Row gutter={[40, 0]}>
+          <Descriptions
+            column={1}
+            colon={false}
+            style={{ border: "0px" }}
+            labelStyle={{
+              color: "#737373",
+              fontSize: "24px",
+              fontWeight: "550",
+            }}
+          >
+            <Descriptions.Item
+              style={{ paddingBottom: "0" }}
+              key={"status"}
+              label={"status"}
+              contentStyle={{
+                fontSize: "150%",
+              }}
+            >
+              {moduleStatusIcon()}
+            </Descriptions.Item>
+            <Descriptions.Item
+              key={"namespace"}
+              label={"namespace"}
+              contentStyle={{
+                fontSize: "24px",
+                fontWeight: "550",
+              }}
+            >
+              {module.namespace}
+            </Descriptions.Item>
+          </Descriptions>
+          <Row gutter={[40, 0]} style={{ paddingTop: "8px" }}>
             <Col span={24}>{moduleTemplateReferenceView(module.template)}</Col>
           </Row>
         </div>
@@ -620,7 +650,12 @@ const ModuleDetails = () => {
     if (status) {
       statusIcon = (
         <CheckCircleTwoTone
-          style={{ verticalAlign: "middle" }}
+          style={{
+            verticalAlign: "middle",
+            height: "100%",
+            marginBottom: "4px",
+            fontSize: "150%",
+          }}
           twoToneColor={"#52c41a"}
         />
       );
@@ -628,7 +663,12 @@ const ModuleDetails = () => {
     if (!status) {
       statusIcon = (
         <CloseSquareTwoTone
-          style={{ verticalAlign: "middle" }}
+          style={{
+            verticalAlign: "middle",
+            height: "100%",
+            marginBottom: "4px",
+            fontSize: "150%",
+          }}
           twoToneColor={"red"}
         />
       );

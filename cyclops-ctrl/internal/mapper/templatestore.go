@@ -11,8 +11,14 @@ func TemplateStoreListToDTO(store []v1alpha1.TemplateStore) []dto.TemplateStore 
 	out := make([]dto.TemplateStore, 0, len(store))
 
 	for _, templateStore := range store {
+		iconURL := ""
+		if templateStore.GetAnnotations() != nil {
+			iconURL = templateStore.GetAnnotations()["cyclops-ui.com/icon"]
+		}
+
 		out = append(out, dto.TemplateStore{
-			Name: templateStore.Name,
+			Name:    templateStore.Name,
+			IconURL: iconURL,
 			TemplateRef: dto.Template{
 				URL:     templateStore.Spec.URL,
 				Path:    templateStore.Spec.Path,
@@ -24,7 +30,7 @@ func TemplateStoreListToDTO(store []v1alpha1.TemplateStore) []dto.TemplateStore 
 	return out
 }
 
-func DTOToTemplateStore(store dto.TemplateStore) *v1alpha1.TemplateStore {
+func DTOToTemplateStore(store dto.TemplateStore, iconURL string) *v1alpha1.TemplateStore {
 	return &v1alpha1.TemplateStore{
 		TypeMeta: metav1.TypeMeta{
 			Kind:       "TemplateStore",
@@ -32,6 +38,9 @@ func DTOToTemplateStore(store dto.TemplateStore) *v1alpha1.TemplateStore {
 		},
 		ObjectMeta: metav1.ObjectMeta{
 			Name: store.Name,
+			Annotations: map[string]string{
+				"cyclops-ui.com/icon": iconURL,
+			},
 		},
 		Spec: v1alpha1.TemplateRef{
 			URL:     store.TemplateRef.URL,

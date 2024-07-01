@@ -2,11 +2,9 @@ import React, { useEffect, useState } from "react";
 import {
   Col,
   Table,
-  Typography,
   Alert,
   Row,
   Button,
-  Tabs,
   Modal,
   Form,
   Input,
@@ -185,6 +183,22 @@ const TemplateStore = () => {
       </Row>
       <Col span={24} style={{ overflowX: "auto" }}>
         <Table dataSource={templates}>
+          <Table.Column
+            dataIndex="iconURL"
+            width={"3%"}
+            render={function (iconURL) {
+              return (
+                <img
+                  style={{
+                    verticalAlign: "middle",
+                    margin: "-1rem",
+                    height: "2.5rem",
+                  }}
+                  src={iconURL}
+                />
+              );
+            }}
+          />
           <Table.Column title="Name" dataIndex="name" width={"30%"} />
           <Table.Column
             title="Repo"
@@ -223,7 +237,8 @@ const TemplateStore = () => {
                 ) : (
                   <FileSyncOutlined
                     className={classNames(styles.statustemplate, {
-                      [styles.success]: requestStatus[template.name] === "success",
+                      [styles.success]:
+                        requestStatus[template.name] === "success",
                       [styles.error]: requestStatus[template.name] === "error",
                     })}
                     onClick={function () {

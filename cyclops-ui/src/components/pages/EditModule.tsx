@@ -731,6 +731,9 @@ const EditModule = () => {
             >
               <Collapse
                 size={"small"}
+                style={{
+                  borderColor: "#d3d3d3",
+                }}
                 onChange={function (value: string | string[]) {
                   if (value.length === 0) {
                     updateActiveCollapses(uniqueFieldName, false);
@@ -743,6 +746,7 @@ const EditModule = () => {
                   key={fieldName}
                   header={header}
                   style={{
+                    borderRadius: "7px",
                     backgroundColor: getCollapseColor(
                       uniqueFieldName.toString(),
                     ),
@@ -824,6 +828,7 @@ const EditModule = () => {
                   key={fieldName}
                   header={header}
                   style={{
+                    borderRadius: "7px",
                     backgroundColor: getCollapseColor(
                       uniqueFieldName.toString(),
                     ),
