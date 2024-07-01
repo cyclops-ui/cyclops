@@ -1,6 +1,6 @@
 global:
-  createNamespace: true
   disableTelemetry: false
+  enableNetworkPolicies: false
 
 ctrl:
   replicas: 1
