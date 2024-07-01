@@ -30,7 +30,7 @@ import "ace-builds/src-noconflict/mode-jsx";
 import ReactAce from "react-ace";
 import Deployment from "../k8s-resources/Deployment";
 import CronJob from "../k8s-resources/CronJob";
-import CronJob from "../k8s-resources/Job";
+import Job from "../k8s-resources/Job";
 import DaemonSet from "../k8s-resources/DaemonSet";
 import StatefulSet from "../k8s-resources/StatefulSet";
 import Pod from "../k8s-resources/Pod";
