@@ -26,7 +26,3 @@ jobs:
         run: |
           cd ${{ github.workspace }}/cyclops-ui
           yarn test
-      - name: Run tests
-        run: |
-          cd ${{ github.workspace }}/cyclops-ui
-          yarn build
