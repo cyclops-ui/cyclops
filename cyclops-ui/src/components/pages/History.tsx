@@ -4,7 +4,6 @@ import { useNavigate } from "react-router";
 import axios from "axios";
 import { useParams } from "react-router-dom";
 import ReactDiffViewer from "react-diff-viewer";
-import AceEditor from "react-ace";
 import ReactAce from "react-ace";
 
 const { Title, Text } = Typography;
