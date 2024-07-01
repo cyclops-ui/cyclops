@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Button, Col, Divider, Row, Table, Typography, Alert } from "antd";
+import { Button, Col, Row, Table, Typography, Alert } from "antd";
 import { useNavigate } from "react-router";
 import axios from "axios";
 import { formatBytes } from "../../utils/common";
