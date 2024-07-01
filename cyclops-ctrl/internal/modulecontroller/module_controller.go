@@ -184,8 +184,6 @@ func (r *ModuleReconciler) moduleToResources(name string, template *models.Templ
 		return nil, err
 	}
 
-	return crdInstallErrors, nil
-
 	installErrors, err := r.generateResources(r.kubernetesClient, *module, template)
 	if err != nil {
 		return nil, err
@@ -202,7 +200,7 @@ func (r *ModuleReconciler) generateResources(kClient *k8sclient.KubernetesClient
 
 	installErrors := make([]string, 0)
 
-	for _, s := range strings.Split(out, "---") {
+	for _, s := range strings.Split(out, "\n---\n") {
 		s := strings.TrimSpace(s)
 		if len(s) == 0 {
 			continue
@@ -292,14 +290,14 @@ func (r *ModuleReconciler) applyCRDs(template *models.Template) []string {
 func (r *ModuleReconciler) applyCRDFile(file *chart.File) []string {
 	installErrors := make([]string, 0)
 
-	for _, s := range strings.Split(string(file.Data), "---") {
+	for _, s := range strings.Split(string(file.Data), "\n---\n") {
 		s := strings.TrimSpace(s)
 		if len(s) == 0 {
 			continue
 		}
 
 		var crd *unstructured.Unstructured
-		decoder := yaml.NewYAMLOrJSONDecoder(strings.NewReader(s), len(string(s)))
+		decoder := yaml.NewYAMLOrJSONDecoder(strings.NewReader(s), len(s))
 		err := decoder.Decode(&crd)
 
 		if crd == nil {
@@ -307,6 +305,11 @@ func (r *ModuleReconciler) applyCRDFile(file *chart.File) []string {
 		}
 
 		if err != nil {
+			r.logger.Error(err, "could not decode crd",
+				"crd file",
+				file.Name,
+			)
+
 			installErrors = append(installErrors, fmt.Sprintf(
 				"failed to decode CRD from file %v: %v",
 				file.Name,
@@ -316,8 +319,15 @@ func (r *ModuleReconciler) applyCRDFile(file *chart.File) []string {
 		}
 
 		if err := r.kubernetesClient.ApplyCRD(crd); err != nil {
+			r.logger.Error(err, "failed to apply crd",
+				"crd",
+				crd.GetName(),
+				"crd file",
+				file.Name,
+			)
+
 			installErrors = append(installErrors, fmt.Sprintf(
-				"failed to create CRD %v from filem %v: %v",
+				"failed to create CRD %v from file %v: %v",
 				crd.GetName(),
 				file.Name,
 				err.Error(),

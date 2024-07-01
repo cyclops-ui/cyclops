@@ -400,6 +400,8 @@ func (k *KubernetesClient) createDynamicNamespaced(
 		}
 	}
 
+	obj.SetResourceVersion(current.GetResourceVersion())
+
 	_, err = k.Dynamic.Resource(gvr).Namespace(namespace).Update(
 		context.Background(),
 		obj,
@@ -413,7 +415,7 @@ func (k *KubernetesClient) createDynamicNonNamespaced(
 	gvr schema.GroupVersionResource,
 	obj *unstructured.Unstructured,
 ) error {
-	_, err := k.Dynamic.Resource(gvr).Get(context.TODO(), obj.GetName(), metav1.GetOptions{})
+	current, err := k.Dynamic.Resource(gvr).Get(context.TODO(), obj.GetName(), metav1.GetOptions{})
 	if err != nil {
 		if k8serrors.IsNotFound(err) {
 			_, err := k.Dynamic.Resource(gvr).Create(
@@ -426,6 +428,8 @@ func (k *KubernetesClient) createDynamicNonNamespaced(
 		}
 		return err
 	}
+
+	obj.SetResourceVersion(current.GetResourceVersion())
 
 	_, err = k.Dynamic.Resource(gvr).Update(
 		context.Background(),
@@ -443,26 +447,13 @@ func (k *KubernetesClient) ApplyCRD(obj *unstructured.Unstructured) error {
 		Resource: "customresourcedefinitions",
 	}
 
-	fmt.Println(obj.GetName())
-
-	_, err := k.Dynamic.Resource(gvr).Get(context.TODO(), obj.GetName(), metav1.GetOptions{})
-	if err != nil {
-		if k8serrors.IsNotFound(err) {
-			_, err := k.Dynamic.Resource(gvr).Create(
-				context.Background(),
-				obj,
-				metav1.CreateOptions{},
-			)
-
-			return err
-		}
-		return err
-	}
-
-	_, err = k.Dynamic.Resource(gvr).Update(
+	_, err := k.Dynamic.Resource(gvr).Apply(
 		context.Background(),
+		obj.GetName(),
 		obj,
-		metav1.UpdateOptions{},
+		metav1.ApplyOptions{
+			FieldManager: "cyclops-ctrl",
+		},
 	)
 
 	return err

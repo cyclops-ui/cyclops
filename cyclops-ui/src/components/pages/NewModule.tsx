@@ -717,6 +717,7 @@ const NewModule = () => {
                   key={fieldName}
                   header={header}
                   style={{
+                    borderRadius: "7px",
                     backgroundColor: getCollapseColor(
                       uniqueFieldName.toString(),
                     ),
@@ -798,6 +799,7 @@ const NewModule = () => {
                   key={fieldName}
                   header={header}
                   style={{
+                    borderRadius: "7px",
                     backgroundColor: getCollapseColor(
                       uniqueFieldName.toString(),
                     ),

@@ -330,7 +330,7 @@ func overlayValues(existing interface{}, overlay interface{}) interface{} {
 	for key, overlayValue := range overlayMap {
 		if existingValue, exists := existingMap[key]; exists {
 			switch existingValueTyped := existingValue.(type) {
-			case map[interface{}]interface{}:
+			case map[string]interface{}:
 				if overlayValueTyped, ok := overlayValue.(map[string]interface{}); ok {
 					existingMap[key] = overlayValues(existingValueTyped, overlayValueTyped)
 				} else {
