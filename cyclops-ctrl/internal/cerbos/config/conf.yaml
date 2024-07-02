@@ -1,0 +1,21 @@
+---
+server:
+  httpListenAddr: ":3592"
+  grpcListenAddr: ":3593"
+  #grpcListenAddr: "unix:/tmp/sock/cerbos.grpc"
+  #httpListenAddr: "unix:/tmp/sock/cerbos.http"
+
+storage:
+  driver: "disk"
+  disk:
+    directory: /policies
+    watchForChanges: true 
+
+# audit:
+#   enabled: false # enable audit logging.
+#   accessLogsEnabled: true # Log API access attempts
+#   # decisionLogsEnabled: true # Log policy decisions
+#   backend: local # Audit backend to use.
+#   local: # Configuration for the local audit backend
+#     storagePath: /auditlogs # Path to store the data
+#     retentionPeriod: 168h # Records older than this will be automatically deleted

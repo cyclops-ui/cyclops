@@ -1,0 +1,17 @@
+volumes:
+  - name: cerbos-policies
+    hostPath:
+      path: /data/cerbos-policies
+
+volumeMounts:
+  - name: cerbos-policies
+    mountPath: /policies
+    readOnly: true
+
+cerbos:
+  config:
+    storage:
+      driver: "disk"
+      disk:
+        directory: /policies
+        watchForChanges: true
