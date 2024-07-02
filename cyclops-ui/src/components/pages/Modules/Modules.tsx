@@ -147,7 +147,7 @@ const Modules = () => {
         ) : (
           filteredData.map((module: any, index) => (
             <Col key={index} xs={24} sm={12} md={8} lg={8} xl={6}>
-              <a href={"/modules/" + module.name}>
+              <a href={"/modules/" + module.namespace + "/" + module.name}>
                 <Card
                   title={module.name}
                   style={{

@@ -140,6 +140,7 @@ const ModuleDetails = () => {
   });
 
   let { moduleName } = useParams();
+  let { moduleNamespace } = useParams();
 
   function fetchManifest(
     group: string,
@@ -173,7 +174,7 @@ const ModuleDetails = () => {
 
   function fetchModule() {
     axios
-      .get(`/api/modules/` + moduleName)
+      .get(`/api/modules/` + moduleNamespace + "/" + moduleName)
       .then((res) => {
         setModule(res.data);
         setLoadModule(true);
@@ -187,7 +188,7 @@ const ModuleDetails = () => {
 
   function fetchModuleResources() {
     axios
-      .get(`/api/modules/` + moduleName + `/resources`)
+      .get(`/api/modules/` + moduleNamespace + `/` + moduleName + `/resources`)
       .then((res) => {
         setResources(res.data);
         setLoadResources(true);
@@ -262,7 +263,7 @@ const ModuleDetails = () => {
 
   const deleteDeployment = () => {
     axios
-      .delete(`/api/modules/` + moduleName)
+      .delete(`/api/modules/` + moduleNamespace + "/" + moduleName)
       .then(() => {
         window.location.href = "/modules";
       })
@@ -645,15 +646,18 @@ const ModuleDetails = () => {
 
   const deleteResource = () => {
     axios
-      .delete(`/api/modules/` + moduleName + `/resources`, {
-        data: {
-          group: deleteResourceRef.group,
-          version: deleteResourceRef.version,
-          kind: deleteResourceRef.kind,
-          name: deleteResourceRef.name,
-          namespace: deleteResourceRef.namespace,
+      .delete(
+        `/api/modules/` + moduleNamespace + "/" + moduleName + `/resources`,
+        {
+          data: {
+            group: deleteResourceRef.group,
+            version: deleteResourceRef.version,
+            kind: deleteResourceRef.kind,
+            name: deleteResourceRef.name,
+            namespace: deleteResourceRef.namespace,
+          },
         },
-      })
+      )
       .then(() => {
         setLoadResources(false);
         setDeleteResourceModal(false);
@@ -737,7 +741,8 @@ const ModuleDetails = () => {
         <Col>
           <Button
             onClick={function () {
-              window.location.href = "/modules/" + moduleName + "/edit";
+              window.location.href =
+                "/modules/" + moduleNamespace + "/" + moduleName + "/edit";
             }}
             block
           >
@@ -747,7 +752,8 @@ const ModuleDetails = () => {
         <Col>
           <Button
             onClick={function () {
-              window.location.href = "/modules/" + moduleName + "/rollback";
+              window.location.href =
+                "/modules/" + moduleNamespace + "/" + moduleName + "/rollback";
             }}
             block
           >

@@ -32,18 +32,30 @@ const ModuleHistory = () => {
   const [historyEntries, setHistoryEntries] = useState([]);
 
   let { moduleName } = useParams();
-  useEffect(() => {
-    axios.get(`/api/modules/` + moduleName + `/history`).then((res) => {
-      console.log(res.data);
-      setHistoryEntries(res.data);
-    });
+  let { moduleNamespace } = useParams();
 
-    axios.get(`/api/modules/` + moduleName + `/currentManifest`).then((res) => {
-      setDiff({
-        curr: res.data,
-        previous: diff.previous,
+  useEffect(() => {
+    axios
+      .get(`/api/modules/` + moduleNamespace + "/" + moduleName + `/history`)
+      .then((res) => {
+        console.log(res.data);
+        setHistoryEntries(res.data);
       });
-    });
+
+    axios
+      .get(
+        `/api/modules/` +
+          moduleNamespace +
+          "/" +
+          moduleName +
+          `/currentManifest`,
+      )
+      .then((res) => {
+        setDiff({
+          curr: res.data,
+          previous: diff.previous,
+        });
+      });
   }, []);
 
   const handleOk = () => {
@@ -63,10 +75,11 @@ const ModuleHistory = () => {
       .post(`/api/modules/update`, {
         values: target.values,
         name: moduleName,
+        namespace: moduleNamespace,
         template: target.template,
       })
       .then((res) => {
-        window.location.href = "/modules/" + moduleName;
+        window.location.href = "/modules/" + moduleNamespace + "/" + moduleName;
       })
       .catch((error) => {
         // setLoading(false);
@@ -104,10 +117,13 @@ const ModuleHistory = () => {
     });
 
     axios
-      .post("/api/modules/" + moduleName + "/manifest", {
-        template: target.template,
-        values: target.values,
-      })
+      .post(
+        "/api/modules/" + moduleNamespace + "/" + moduleName + "/manifest",
+        {
+          template: target.template,
+          values: target.values,
+        },
+      )
       .then(function (res) {
         setDiff({
           curr: diff.curr,
@@ -133,10 +149,13 @@ const ModuleHistory = () => {
     });
 
     axios
-      .post("/api/modules/" + moduleName + "/manifest", {
-        template: target.template,
-        values: target.values,
-      })
+      .post(
+        "/api/modules/" + moduleNamespace + "/" + moduleName + "/manifest",
+        {
+          template: target.template,
+          values: target.values,
+        },
+      )
       .then(function (res) {
         setManifest(res.data);
       })
@@ -266,7 +285,9 @@ const ModuleHistory = () => {
       <Button
         style={{ float: "right" }}
         htmlType="button"
-        onClick={() => history("/modules/" + moduleName)}
+        onClick={() =>
+          history("/modules/" + moduleNamespace + "/" + moduleName)
+        }
       >
         Back
       </Button>
