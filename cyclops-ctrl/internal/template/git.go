@@ -135,7 +135,7 @@ func (r Repo) LoadTemplate(repoURL, path, commit string) (*models.Template, erro
 	template := &models.Template{
 		Name:            "",
 		Manifest:        strings.Join(manifests, "---\n"),
-		RootField:       mapper.HelmSchemaToFields("", schema, dependencies),
+		RootField:       mapper.HelmSchemaToFields("", schema, schema.Definitions, dependencies),
 		Created:         "",
 		Edited:          "",
 		Version:         commit,
