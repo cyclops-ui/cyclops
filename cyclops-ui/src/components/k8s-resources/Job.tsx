@@ -1,19 +1,6 @@
 import React, { useEffect, useState } from "react";
-import {
-  Button,
-  Col,
-  Divider,
-  Row,
-  Table,
-  Alert,
-  Tag,
-  Tabs,
-  Modal,
-  TabsProps,
-} from "antd";
+import { Col, Divider, Row, Alert } from "antd";
 import axios from "axios";
-import { formatPodAge } from "../../utils/pods";
-import ReactAce from "react-ace";
 import { mapResponseError } from "../../utils/api/errors";
 import PodTable from "./common/PodTable";
 

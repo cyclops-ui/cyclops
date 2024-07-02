@@ -1041,6 +1041,10 @@ const NewModule = () => {
                 >
                   {templateStore.map((option: any, index) => (
                     <Option key={option.name} value={option.name}>
+                      <img
+                        style={{ height: "1.5em", marginRight: "8px" }}
+                        src={option.iconURL}
+                      />
                       {option.name}
                     </Option>
                   ))}

@@ -191,15 +191,15 @@ const TemplateStore = () => {
                 <img
                   style={{
                     verticalAlign: "middle",
-                    margin: "-1rem",
-                    height: "2.5rem",
+                    margin: "-5px",
+                    height: "36px",
                   }}
                   src={iconURL}
                 />
               );
             }}
           />
-          <Table.Column title="Name" dataIndex="name" width={"30%"} />
+          <Table.Column title="Name" dataIndex="name" width={"20%"} />
           <Table.Column
             title="Repo"
             dataIndex={["ref", "repo"]}
@@ -208,7 +208,7 @@ const TemplateStore = () => {
           <Table.Column
             title="Path"
             dataIndex={["ref", "path"]}
-            width={"10%"}
+            width={"20%"}
             render={function (value: any, record: any, index: number) {
               if (!value.startsWith("/")) {
                 return "/" + value;

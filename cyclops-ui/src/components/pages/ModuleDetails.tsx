@@ -90,6 +90,7 @@ interface module {
   name: string;
   namespace: string;
   template: templateRef;
+  iconURL: string;
 }
 
 interface resourceRef {
@@ -120,6 +121,7 @@ const ModuleDetails = () => {
       version: "",
       resolvedVersion: "",
     },
+    iconURL: "",
   });
 
   const [deleteResourceModal, setDeleteResourceModal] = useState(false);
@@ -574,64 +576,77 @@ const ModuleDetails = () => {
   };
 
   const moduleLoading = () => {
-    if (loadModule) {
-      return (
-        <div>
-          <Row gutter={[40, 0]}>
-            <Col span={9}>
-              <Title level={1}>
-                <img
-                  style={{ height: "1.5em", marginRight: "8px" }}
-                  src={
-                    "https://bitnami.com/assets/stacks/rabbitmq/img/rabbitmq-stack-220x234.png"
-                  }
-                />
-                {module.name}
-              </Title>
-            </Col>
-          </Row>
-          <Descriptions
-            column={1}
-            colon={false}
-            style={{ border: "0px" }}
-            labelStyle={{
-              color: "#737373",
+    if (!loadModule) {
+      return <Spin />;
+    }
+
+    return (
+      <div>
+        <Row gutter={[40, 0]}>
+          <Col span={9}>
+            <Title level={1}>
+              <img
+                style={{ height: "1.5em", marginRight: "8px" }}
+                src={module.iconURL}
+              />
+              {module.name}
+            </Title>
+          </Col>
+        </Row>
+        <Descriptions
+          column={1}
+          colon={false}
+          style={{ border: "0px" }}
+          labelStyle={{
+            color: "#737373",
+            fontSize: "24px",
+            fontWeight: "550",
+          }}
+        >
+          <Descriptions.Item
+            style={{ paddingBottom: "0" }}
+            key={"status"}
+            label={"status"}
+            contentStyle={{
+              fontSize: "150%",
+            }}
+          >
+            {moduleStatusIcon()}
+          </Descriptions.Item>
+          <Descriptions.Item
+            key={"namespace"}
+            label={"namespace"}
+            contentStyle={{
               fontSize: "24px",
               fontWeight: "550",
             }}
           >
-            <Descriptions.Item
-              style={{ paddingBottom: "0" }}
-              key={"status"}
-              label={"status"}
-              contentStyle={{
-                fontSize: "150%",
-              }}
-            >
-              {moduleStatusIcon()}
-            </Descriptions.Item>
-            <Descriptions.Item
-              key={"namespace"}
-              label={"namespace"}
-              contentStyle={{
-                fontSize: "24px",
-                fontWeight: "550",
-              }}
-            >
-              {module.namespace}
-            </Descriptions.Item>
-          </Descriptions>
-          <Row gutter={[40, 0]} style={{ paddingTop: "8px" }}>
-            <Col span={24}>{moduleTemplateReferenceView(module.template)}</Col>
-          </Row>
-        </div>
-      );
-    } else {
-      return <Spin />;
-    }
+            {module.namespace}
+          </Descriptions.Item>
+        </Descriptions>
+        <Row gutter={[40, 0]} style={{ paddingTop: "8px" }}>
+          <Col span={24}>{moduleTemplateReferenceView(module.template)}</Col>
+        </Row>
+      </div>
+    );
   };
 
   const moduleStatusIcon = () => {
+    if (!loadModule || !loadResources) {
+      return (
+        <div
+          style={{
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+            height: "100%",
+          }}
+        >
+          <Spin />
+        </div>
+      );
+    }
+
     let resourcesWithStatus = 0;
     let status = true;
     for (let i = resources.length - 1; i >= 0; i--) {
