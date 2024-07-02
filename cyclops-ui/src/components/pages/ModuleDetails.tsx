@@ -278,6 +278,10 @@ const ModuleDetails = () => {
   const getResourcesToDelete = () => {
     let resourcesToDelete: JSX.Element[] = [];
 
+    if (!loadResources) {
+      return <Spin />;
+    }
+
     resources.forEach((resource: any) => {
       resourcesToDelete.push(
         <Row>
