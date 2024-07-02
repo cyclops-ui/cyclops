@@ -187,12 +187,59 @@ func (k *KubernetesClient) GetModuleResourcesHealth(name string) (string, error)
 	resourcesWithHealth += len(deployments.Items)
 	for _, item := range deployments.Items {
 		if item.Generation != item.Status.ObservedGeneration ||
-			*item.Spec.Replicas != item.Status.UpdatedReplicas {
+			item.Status.Replicas != item.Status.UpdatedReplicas ||
+			item.Status.UnavailableReplicas != 0 {
 			return statusUnhealthy, nil
 		}
 	}
 
-	pods, err := k.clientset.CoreV1().Pods("default").List(context.Background(), metav1.ListOptions{
+	statefulsets, err := k.clientset.AppsV1().StatefulSets("").List(context.Background(), metav1.ListOptions{
+		LabelSelector: "cyclops.module=" + name,
+	})
+	if err != nil {
+		return statusUndefined, err
+	}
+
+	resourcesWithHealth += len(statefulsets.Items)
+	for _, item := range statefulsets.Items {
+		if item.Generation != item.Status.ObservedGeneration ||
+			item.Status.Replicas != item.Status.UpdatedReplicas ||
+			item.Status.Replicas != item.Status.AvailableReplicas {
+			return statusUnhealthy, nil
+		}
+	}
+
+	daemonsets, err := k.clientset.AppsV1().DaemonSets("").List(context.Background(), metav1.ListOptions{
+		LabelSelector: "cyclops.module=" + name,
+	})
+	if err != nil {
+		return statusUndefined, err
+	}
+
+	resourcesWithHealth += len(daemonsets.Items)
+	for _, item := range daemonsets.Items {
+		if item.Generation != item.Status.ObservedGeneration ||
+			item.Status.UpdatedNumberScheduled != item.Status.DesiredNumberScheduled ||
+			item.Status.NumberUnavailable != 0 {
+			return statusUnhealthy, nil
+		}
+	}
+
+	pvcs, err := k.clientset.CoreV1().PersistentVolumeClaims("").List(context.Background(), metav1.ListOptions{
+		LabelSelector: "cyclops.module=" + name,
+	})
+	if err != nil {
+		return statusUndefined, err
+	}
+
+	resourcesWithHealth += len(pvcs.Items)
+	for _, item := range pvcs.Items {
+		if item.Status.Phase != apiv1.ClaimBound {
+			return statusUnhealthy, nil
+		}
+	}
+
+	pods, err := k.clientset.CoreV1().Pods("").List(context.Background(), metav1.ListOptions{
 		LabelSelector: "cyclops.module=" + name,
 	})
 	if err != nil {
@@ -213,21 +260,6 @@ func (k *KubernetesClient) GetModuleResourcesHealth(name string) (string, error)
 			if !containerStatus(status).Running {
 				return statusUnhealthy, nil
 			}
-		}
-	}
-
-	statefulsets, err := k.clientset.AppsV1().StatefulSets("default").List(context.Background(), metav1.ListOptions{
-		LabelSelector: "cyclops.module=" + name,
-	})
-	if err != nil {
-		return statusUndefined, err
-	}
-
-	resourcesWithHealth += len(statefulsets.Items)
-	for _, item := range statefulsets.Items {
-		if item.Generation != item.Status.ObservedGeneration ||
-			*item.Spec.Replicas != item.Status.UpdatedReplicas {
-			return statusUnhealthy, nil
 		}
 	}
 
