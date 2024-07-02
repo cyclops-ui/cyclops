@@ -133,7 +133,7 @@ func (r *ModuleReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctr
 	if err != nil {
 		r.logger.Error(err, "error fetching module template", "namespaced name", req.NamespacedName)
 
-		if err = r.setStatus(ctx, module, req.NamespacedName, cyclopsv1alpha1.Failed, templateVersion, err.Error(), nil); err != nil {
+		if err = r.setStatus(ctx, module, req.NamespacedName, cyclopsv1alpha1.Failed, templateVersion, err.Error(), nil, ""); err != nil {
 			return ctrl.Result{}, err
 		}
 
@@ -144,7 +144,7 @@ func (r *ModuleReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctr
 	if err != nil {
 		r.logger.Error(err, "error on upsert module", "namespaced name", req.NamespacedName)
 
-		if err = r.setStatus(ctx, module, req.NamespacedName, cyclopsv1alpha1.Failed, template.ResolvedVersion, err.Error(), nil); err != nil {
+		if err = r.setStatus(ctx, module, req.NamespacedName, cyclopsv1alpha1.Failed, template.ResolvedVersion, err.Error(), nil, template.IconURL); err != nil {
 			return ctrl.Result{}, err
 		}
 
@@ -160,10 +160,11 @@ func (r *ModuleReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctr
 			template.ResolvedVersion,
 			"error decoding/applying resources",
 			installErrors,
+			template.IconURL,
 		)
 	}
 
-	return ctrl.Result{}, r.setStatus(ctx, module, req.NamespacedName, cyclopsv1alpha1.Succeeded, template.ResolvedVersion, "", nil)
+	return ctrl.Result{}, r.setStatus(ctx, module, req.NamespacedName, cyclopsv1alpha1.Succeeded, template.ResolvedVersion, "", nil, template.IconURL)
 }
 
 // SetupWithManager sets up the controller with the Manager.
@@ -347,6 +348,7 @@ func (r *ModuleReconciler) setStatus(
 	templateResolvedVersion string,
 	reason string,
 	installErrors []string,
+	iconURL string,
 ) error {
 	trv := module.Status.TemplateResolvedVersion
 	if len(trv) == 0 {
@@ -360,6 +362,7 @@ func (r *ModuleReconciler) setStatus(
 			Errors: installErrors,
 		},
 		TemplateResolvedVersion: templateResolvedVersion,
+		IconURL:                 iconURL,
 	}
 
 	if err := r.Status().Update(ctx, &module); err != nil {

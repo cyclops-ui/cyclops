@@ -13,7 +13,7 @@ func TemplateStoreListToDTO(store []v1alpha1.TemplateStore) []dto.TemplateStore 
 	for _, templateStore := range store {
 		iconURL := ""
 		if templateStore.GetAnnotations() != nil {
-			iconURL = templateStore.GetAnnotations()["cyclops-ui.com/icon"]
+			iconURL = templateStore.GetAnnotations()[v1alpha1.IconURLAnnotation]
 		}
 
 		out = append(out, dto.TemplateStore{
@@ -39,7 +39,7 @@ func DTOToTemplateStore(store dto.TemplateStore, iconURL string) *v1alpha1.Templ
 		ObjectMeta: metav1.ObjectMeta{
 			Name: store.Name,
 			Annotations: map[string]string{
-				"cyclops-ui.com/icon": iconURL,
+				v1alpha1.IconURLAnnotation: iconURL,
 			},
 		},
 		Spec: v1alpha1.TemplateRef{
