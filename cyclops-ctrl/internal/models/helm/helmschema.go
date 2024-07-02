@@ -10,6 +10,8 @@ type Property struct {
 	Enum          []string            `json:"enum"`
 	Required      []string            `json:"required"`
 	FileExtension string              `json:"fileExtension"`
+	Reference     string              `json:"$ref"`
+	Definitions   map[string]Property `json:"$defs"`
 
 	// number validation
 	Minimum          *float64 `json:"minimum"`
@@ -22,4 +24,8 @@ type Property struct {
 	MinLength *int    `json:"minLength"`
 	MaxLength *int    `json:"maxLength"`
 	Pattern   *string `json:"pattern"`
+}
+
+func (p Property) HasRef() bool {
+	return len(p.Reference) > 0
 }

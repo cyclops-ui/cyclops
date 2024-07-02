@@ -307,6 +307,34 @@ func (k *KubernetesClient) getResourceStatus(o unstructured.Unstructured) (strin
 		return statusUnhealthy, nil
 	}
 
+	if isDaemonSet(o.GroupVersionKind().Group, o.GroupVersionKind().Version, o.GetKind()) {
+		daemonset, err := k.clientset.AppsV1().DaemonSets(o.GetNamespace()).Get(context.Background(), o.GetName(), metav1.GetOptions{})
+		if err != nil {
+			return statusUndefined, err
+		}
+
+		if daemonset.Generation == daemonset.Status.ObservedGeneration &&
+			daemonset.Status.UpdatedNumberScheduled == daemonset.Status.DesiredNumberScheduled &&
+			daemonset.Status.NumberUnavailable == 0 {
+			return statusHealthy, nil
+		}
+
+		return statusUnhealthy, nil
+	}
+
+	if isPersistentVolumeClaims(o.GroupVersionKind().Group, o.GroupVersionKind().Version, o.GetKind()) {
+		pvc, err := k.clientset.CoreV1().PersistentVolumeClaims(o.GetNamespace()).Get(context.Background(), o.GetName(), metav1.GetOptions{})
+		if err != nil {
+			return statusUndefined, err
+		}
+
+		if pvc.Status.Phase == apiv1.ClaimBound {
+			return statusHealthy, nil
+		}
+
+		return statusUnhealthy, nil
+	}
+
 	return statusUndefined, nil
 }
 
@@ -537,7 +565,6 @@ func (k *KubernetesClient) getPodsForCronJob(cronJob batchv1.CronJob) ([]dto.Pod
 }
 
 func (k *KubernetesClient) getPodsForJob(job batchv1.Job) ([]dto.Pod, error) {
-
 	pods, err := k.clientset.CoreV1().Pods(job.Namespace).List(context.Background(), metav1.ListOptions{
 		LabelSelector: labels.Set(job.Spec.Selector.MatchLabels).String(),
 	})
