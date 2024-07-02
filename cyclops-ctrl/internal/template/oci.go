@@ -52,7 +52,7 @@ func (r Repo) LoadOCIHelmChart(repo, chart, version string) (*models.Template, e
 	return template, nil
 }
 
-func (r Repo) LoadOCIHelmChartInitialValues(repo, chart, version string) (map[interface{}]interface{}, error) {
+func (r Repo) LoadOCIHelmChartInitialValues(repo, chart, version string) (map[string]interface{}, error) {
 	var err error
 	strictVersion := version
 	if !isValidVersion(version) {

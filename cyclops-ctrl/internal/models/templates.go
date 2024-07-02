@@ -1,6 +1,7 @@
 package models
 
 import (
+	"github.com/cyclops-ui/cyclops/cyclops-ctrl/internal/models/helm"
 	"helm.sh/helm/v3/pkg/chart"
 
 	"github.com/cyclops-ui/cyclops/cyclops-ctrl/internal/models/dto"
@@ -17,8 +18,11 @@ type Template struct {
 	ResolvedVersion string       `json:"resolvedVersion"`
 	IconURL         string       `json:"iconURL"`
 
+	HelmChartMetadata *helm.Metadata `json:"helmChartMetadata"`
+
 	Files     []*chart.File `json:"files"`
 	Templates []*chart.File `json:"templates"`
+	CRDs      []*chart.File `json:"crds"`
 
 	Dependencies []*Template `json:"dependencies"`
 }

@@ -7,6 +7,7 @@ type Module struct {
 	Version   string      `json:"version"`
 	Values    interface{} `json:"values"`
 	Status    string      `json:"status"`
+	IconURL   string      `json:"iconURL"`
 }
 
 type Template struct {

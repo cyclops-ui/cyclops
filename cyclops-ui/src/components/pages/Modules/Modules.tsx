@@ -149,7 +149,15 @@ const Modules = () => {
             <Col key={index} xs={24} sm={12} md={8} lg={8} xl={6}>
               <a href={"/modules/" + module.name}>
                 <Card
-                  title={module.name}
+                  title={
+                    <div>
+                      <img
+                        style={{ height: "2em", marginRight: "8px" }}
+                        src={module.iconURL}
+                      />
+                      {module.name}
+                    </div>
+                  }
                   style={{
                     borderLeft: "solid " + getStatusColor(module) + " 5px",
                     width: "100%",

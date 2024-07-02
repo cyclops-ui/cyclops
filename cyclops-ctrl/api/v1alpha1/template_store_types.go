@@ -23,6 +23,8 @@ import (
 // EDIT THIS FILE!  THIS IS SCAFFOLDING FOR YOU TO OWN!
 // NOTE: json tags are required.  Any new fields you add must have json tags for the fields to be serialized.
 
+const IconURLAnnotation = "cyclops-ui.com/icon"
+
 //+kubebuilder:object:root=true
 
 // TemplateStore holds reference to a template that can be offered as a starting point

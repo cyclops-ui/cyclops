@@ -70,6 +70,8 @@ type ReconciliationStatus struct {
 type ModuleStatus struct {
 	ReconciliationStatus    ReconciliationStatus `json:"reconciliationStatus"`
 	TemplateResolvedVersion string               `json:"templateResolvedVersion"`
+	// +kubebuilder:validation:Optional
+	IconURL string `json:"iconURL"`
 }
 
 type HistoryTemplateRef struct {

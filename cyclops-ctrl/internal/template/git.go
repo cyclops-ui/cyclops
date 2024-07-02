@@ -75,7 +75,7 @@ func (r Repo) LoadTemplate(repoURL, path, commit string) (*models.Template, erro
 		return nil, err
 	}
 
-	var metadata chart.Metadata
+	var metadata *helm.Metadata
 	if err := yaml.Unmarshal(chartMetadataBuffer.Bytes(), &metadata); err != nil {
 		return nil, err
 	}
@@ -133,15 +133,16 @@ func (r Repo) LoadTemplate(repoURL, path, commit string) (*models.Template, erro
 	// endregion
 
 	template := &models.Template{
-		Name:            "",
-		Manifest:        strings.Join(manifests, "---\n"),
-		RootField:       mapper.HelmSchemaToFields("", schema, schema.Definitions, dependencies),
-		Created:         "",
-		Edited:          "",
-		Version:         commit,
-		ResolvedVersion: commitSHA,
-		Files:           chartFiles,
-		Dependencies:    dependencies,
+		Name:              "",
+		Manifest:          strings.Join(manifests, "---\n"),
+		RootField:         mapper.HelmSchemaToFields("", schema, schema.Definitions, dependencies),
+		Created:           "",
+		Edited:            "",
+		Version:           commit,
+		ResolvedVersion:   commitSHA,
+		Files:             chartFiles,
+		Dependencies:      dependencies,
+		HelmChartMetadata: metadata,
 	}
 
 	r.cache.SetTemplate(repoURL, path, commitSHA, template)
@@ -149,7 +150,7 @@ func (r Repo) LoadTemplate(repoURL, path, commit string) (*models.Template, erro
 	return template, err
 }
 
-func (r Repo) LoadInitialTemplateValues(repoURL, path, commit string) (map[interface{}]interface{}, error) {
+func (r Repo) LoadInitialTemplateValues(repoURL, path, commit string) (map[string]interface{}, error) {
 	creds, err := r.credResolver.RepoAuthCredentials(repoURL)
 	if err != nil {
 		return nil, err
@@ -193,7 +194,7 @@ func (r Repo) LoadInitialTemplateValues(repoURL, path, commit string) (map[inter
 		return nil, err
 	}
 
-	var metadata chart.Metadata
+	var metadata *helm.Metadata
 	if err := yaml.Unmarshal(chartMetadataBuffer.Bytes(), &metadata); err != nil {
 		return nil, err
 	}
@@ -205,7 +206,7 @@ func (r Repo) LoadInitialTemplateValues(repoURL, path, commit string) (map[inter
 		return nil, err
 	}
 
-	var initialValues map[interface{}]interface{}
+	var initialValues map[string]interface{}
 	if err := yaml.Unmarshal(data, &initialValues); err != nil {
 		return nil, err
 	}
@@ -213,7 +214,7 @@ func (r Repo) LoadInitialTemplateValues(repoURL, path, commit string) (map[inter
 
 	// region read dependency values
 	if initialValues == nil {
-		initialValues = make(map[interface{}]interface{})
+		initialValues = make(map[string]interface{})
 	}
 
 	depInitialValues, err := r.loadDependenciesInitialValues(metadata)
@@ -486,7 +487,7 @@ func (r Repo) mapGitHubRepoTemplate(repoURL, path, commitSHA string, creds *auth
 	return template, nil
 }
 
-func (r Repo) mapGitHubRepoInitialValues(repoURL, path, commitSHA string, creds *auth.Credentials) (map[interface{}]interface{}, error) {
+func (r Repo) mapGitHubRepoInitialValues(repoURL, path, commitSHA string, creds *auth.Credentials) (map[string]interface{}, error) {
 	tgzData, err := gitproviders.GitHubClone(repoURL, commitSHA, creds)
 	if err != nil {
 		return nil, err

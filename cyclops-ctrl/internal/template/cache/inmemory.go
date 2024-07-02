@@ -58,13 +58,13 @@ func (t Templates) SetTemplate(repo, path, version string, template *models.Temp
 	t.cache.Wait()
 }
 
-func (t Templates) GetTemplateInitialValues(repo, path, version string) (map[interface{}]interface{}, bool) {
+func (t Templates) GetTemplateInitialValues(repo, path, version string) (map[string]interface{}, bool) {
 	data, found := t.cache.Get(initialValuesKey(repo, path, version))
 	if !found {
 		return nil, false
 	}
 
-	values, ok := data.(map[interface{}]interface{})
+	values, ok := data.(map[string]interface{})
 	if !ok {
 		return nil, false
 	}
@@ -72,7 +72,7 @@ func (t Templates) GetTemplateInitialValues(repo, path, version string) (map[int
 	return values, ok
 }
 
-func (t Templates) SetTemplateInitialValues(repo, path, version string, values map[interface{}]interface{}) {
+func (t Templates) SetTemplateInitialValues(repo, path, version string, values map[string]interface{}) {
 	data, err := json.Marshal(values)
 	if err != nil {
 		return

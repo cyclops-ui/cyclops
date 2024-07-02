@@ -46,7 +46,7 @@ const ConfigMap = ({ name, namespace }: Props) => {
   const configMapData = (configMap: any) => {
     if (configMap.data) {
       return (
-        <Descriptions style={{ width: "100%" }} bordered>
+        <Descriptions style={{ width: "100%" }} bordered column={1}>
           {Object.entries<string>(configMap.data).map(([key, dataValue]) => (
             <Descriptions.Item
               key={key}
@@ -63,6 +63,10 @@ const ConfigMap = ({ name, namespace }: Props) => {
   };
 
   const configMapDataValues = (key: string, data: string) => {
+    if (configMapDataExtension(key) === "json") {
+      data = JSON.stringify(JSON.parse(data), null, 2);
+    }
+
     const lines = data.split("\n").length;
 
     if (lines > 1) {
@@ -95,7 +99,7 @@ const ConfigMap = ({ name, namespace }: Props) => {
       case "json":
         return "json";
       default:
-        return "json";
+        return "text";
     }
   };
 

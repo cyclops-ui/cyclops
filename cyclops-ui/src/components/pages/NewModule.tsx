@@ -717,6 +717,7 @@ const NewModule = () => {
                   key={fieldName}
                   header={header}
                   style={{
+                    borderRadius: "7px",
                     backgroundColor: getCollapseColor(
                       uniqueFieldName.toString(),
                     ),
@@ -798,6 +799,7 @@ const NewModule = () => {
                   key={fieldName}
                   header={header}
                   style={{
+                    borderRadius: "7px",
                     backgroundColor: getCollapseColor(
                       uniqueFieldName.toString(),
                     ),
@@ -1039,6 +1041,10 @@ const NewModule = () => {
                 >
                   {templateStore.map((option: any, index) => (
                     <Option key={option.name} value={option.name}>
+                      <img
+                        style={{ height: "1.5em", marginRight: "8px" }}
+                        src={option.iconURL}
+                      />
                       {option.name}
                     </Option>
                   ))}
