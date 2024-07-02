@@ -504,7 +504,6 @@ const ModuleDetails = () => {
               <Title style={{ paddingRight: "10px" }} level={3}>
                 {resource.name}
               </Title>
-              {statusIcon}
             </Row>
           </Col>
           <Col span={4} style={{ display: "flex", justifyContent: "flex-end" }}>
