@@ -19,10 +19,10 @@ package modulecontroller
 import (
 	"context"
 	"fmt"
-	"helm.sh/helm/v3/pkg/chart"
 	"strings"
 
 	"github.com/go-logr/logr"
+	"helm.sh/helm/v3/pkg/chart"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/runtime"
@@ -276,9 +276,7 @@ func (r *ModuleReconciler) applyCRDs(template *models.Template) []string {
 	installErrors := make([]string, 0)
 
 	for _, d := range template.Dependencies {
-		for _, crdFile := range d.CRDs {
-			installErrors = append(installErrors, r.applyCRDFile(crdFile)...)
-		}
+		installErrors = append(installErrors, r.applyCRDs(d)...)
 	}
 
 	for _, crdFile := range template.CRDs {

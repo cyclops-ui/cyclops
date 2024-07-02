@@ -2,12 +2,12 @@ package controller
 
 import (
 	"fmt"
-	json "github.com/json-iterator/go"
 	"net/http"
 	"strconv"
 	"strings"
 
 	"github.com/gin-gonic/gin"
+	json "github.com/json-iterator/go"
 
 	"github.com/cyclops-ui/cyclops/cyclops-ctrl/internal/cluster/k8sclient"
 	"github.com/cyclops-ui/cyclops/cyclops-ctrl/internal/mapper"

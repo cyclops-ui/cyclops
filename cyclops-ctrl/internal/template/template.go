@@ -1,11 +1,11 @@
 package template
 
 import (
-	"github.com/cyclops-ui/cyclops/cyclops-ctrl/internal/models/helm"
 	"helm.sh/helm/v3/pkg/registry"
 
 	"github.com/cyclops-ui/cyclops/cyclops-ctrl/internal/auth"
 	"github.com/cyclops-ui/cyclops/cyclops-ctrl/internal/models"
+	"github.com/cyclops-ui/cyclops/cyclops-ctrl/internal/models/helm"
 )
 
 type Repo struct {
