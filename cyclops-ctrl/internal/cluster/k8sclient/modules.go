@@ -565,7 +565,6 @@ func (k *KubernetesClient) getPodsForCronJob(cronJob batchv1.CronJob) ([]dto.Pod
 }
 
 func (k *KubernetesClient) getPodsForJob(job batchv1.Job) ([]dto.Pod, error) {
-
 	pods, err := k.clientset.CoreV1().Pods(job.Namespace).List(context.Background(), metav1.ListOptions{
 		LabelSelector: labels.Set(job.Spec.Selector.MatchLabels).String(),
 	})

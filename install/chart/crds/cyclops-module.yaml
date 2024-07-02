@@ -84,6 +84,10 @@ spec:
               properties:
                 reconciliationStatus:
                   properties:
+                    errors:
+                      items:
+                        type: string
+                      type: array
                     reason:
                       type: string
                     status:
@@ -93,12 +97,12 @@ spec:
                         - succeeded
                         - failed
                       type: string
-                  required:
-                    - reason
-                    - status
                   type: object
+                templateResolvedVersion:
+                  type: string
               required:
                 - reconciliationStatus
+                - templateResolvedVersion
               type: object
           type: object
       served: true

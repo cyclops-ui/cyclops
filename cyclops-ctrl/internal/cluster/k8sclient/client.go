@@ -749,14 +749,24 @@ func (k *KubernetesClient) mapJob(group, version, kind, name, namespace string) 
 		return nil, err
 	}
 
+	startTime := ""
+	if job.Status.StartTime != nil {
+		startTime = job.Status.StartTime.String()
+	}
+
+	completionTime := ""
+	if job.Status.CompletionTime != nil {
+		completionTime = job.Status.CompletionTime.String()
+	}
+
 	return &dto.Job{
 		Group:          group,
 		Version:        version,
 		Kind:           kind,
 		Name:           job.Name,
 		Namespace:      job.Namespace,
-		CompletionTime: job.Status.CompletionTime.String(),
-		StartTime:      job.Status.StartTime.String(),
+		CompletionTime: completionTime,
+		StartTime:      startTime,
 		Pods:           pods,
 	}, nil
 }

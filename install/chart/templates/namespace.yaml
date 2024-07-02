@@ -1,6 +1,0 @@
-{{- if ne ((.Values.global).createNamespace) false -}}
-apiVersion: v1
-kind: Namespace
-metadata:
-  name: cyclops
-{{- end }}
