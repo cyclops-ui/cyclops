@@ -22,8 +22,21 @@ interface Props {
   namespace: string;
 }
 
+interface container {
+  name: string;
+}
+interface pod {
+  name: string;
+  containers: container[];
+}
+
+interface deployment {
+  status: string;
+  pods: pod[];
+}
+
 const Deployment = ({ name, namespace }: Props) => {
-  const [deployment, setDeployment] = useState({
+  const [deployment, setDeployment] = useState<deployment>({
     status: "",
     pods: [],
   });
@@ -34,6 +47,10 @@ const Deployment = ({ name, namespace }: Props) => {
     pod: "",
     containers: [],
     initContainers: [],
+  });
+  const [deploymentLogs, setDeploymentLogs] = useState("");
+  const [deploymentLogsModal, setDeploymentLogsModal] = useState({
+    on: false,
   });
   const [error, setError] = useState({
     message: "",
@@ -76,6 +93,13 @@ const Deployment = ({ name, namespace }: Props) => {
       initContainers: [],
     });
     setLogs("");
+  };
+
+  const handleCancelDeploymentLogs = () => {
+    setDeploymentLogsModal({
+      on: false,
+    });
+    setDeploymentLogs("");
   };
 
   const downloadLogs = (container: string) => {
@@ -181,134 +205,220 @@ const Deployment = ({ name, namespace }: Props) => {
       });
   };
 
-  return (
-    <div>
-      {error.message.length !== 0 && (
-        <Alert
-          message={error.message}
-          description={error.description}
-          type="error"
-          closable
-          afterClose={() => {
-            setError({
-              message: "",
-              description: "",
+  const getDeploymentLogsTabItems = () => {
+    let items: TabsProps["items"] = [];
+    let keys: string[] = [];
+
+    if (deployment.pods !== null) {
+      for (var pod of deployment.pods) {
+        for (var container of pod.containers) {
+          if (!keys.includes(container.name)) {
+            items.push({
+              key: `${container.name}`,
+              label: `${container.name}`,
+              children: (
+                <Col>
+                  <ReactAce
+                    style={{ width: "100%" }}
+                    mode={"sass"}
+                    value={deploymentLogs}
+                    readOnly={true}
+                  />
+                </Col>
+              ),
             });
-          }}
-          style={{ marginBottom: "20px" }}
-        />
-      )}
-      <Row>
-        <Divider
-          style={{ fontSize: "120%" }}
-          orientationMargin="0"
-          orientation={"left"}
-        >
-          Replicas: {deployment.pods.length}
-        </Divider>
-        <Col span={24} style={{ overflowX: "auto" }}>
-          <Table dataSource={deployment.pods}>
-            <Table.Column
-              title="Name"
-              dataIndex="name"
-              filterSearch={true}
-              key="name"
-            />
-            <Table.Column title="Node" dataIndex="node" />
-            <Table.Column title="Phase" dataIndex="podPhase" />
-            <Table.Column
-              title="Started"
-              dataIndex="started"
-              render={(value) => <span>{formatPodAge(value)}</span>}
-            />
-            <Table.Column
-              title="Images"
-              dataIndex="containers"
-              key="containers"
-              width="15%"
-              render={(containers, record: any) => (
-                <>
-                  {containers.map((container: any) => {
-                    let color = container.status.running ? "green" : "red";
+            keys.push(container.name);
+          }
+        }
+      }
+    }
 
-                    if (record.podPhase === "Pending") {
-                      color = "yellow";
-                    }
+    return items;
+  };
 
-                    return (
-                      <Tag
-                        color={color}
-                        key={container.image}
-                        style={{ fontSize: "100%" }}
-                      >
-                        {container.image}
-                      </Tag>
-                    );
-                  })}
-                </>
-              )}
-            />
-            <Table.Column
-              title="Logs"
-              width="15%"
-              render={(pod) => (
-                <>
-                  <Button
-                    onClick={function () {
-                      axios
-                        .get(
-                          "/api/resources/pods/" +
-                            namespace +
-                            "/" +
-                            pod.name +
-                            "/" +
-                            pod.containers[0].name +
-                            "/logs",
-                        )
-                        .then((res) => {
-                          if (res.data) {
-                            let log = "";
-                            res.data.forEach((s: string) => {
-                              log += s;
-                              log += "\n";
-                            });
-                            setLogs(log);
-                          } else {
-                            setLogs("No logs available");
-                          }
-                        })
-                        .catch((error) => {
-                          setError(mapResponseError(error));
-                        });
-                      setLogsModal({
-                        on: true,
-                        namespace: namespace,
-                        pod: pod.name,
-                        containers: pod.containers,
-                        initContainers: pod.initContainers,
-                      });
-                    }}
-                    block
-                  >
-                    View Logs
-                  </Button>
-                </>
-              )}
-            />
-          </Table>
-        </Col>
-      </Row>
-      <Modal
-        title="Logs"
-        open={logsModal.on}
-        onOk={handleCancelLogs}
-        onCancel={handleCancelLogs}
-        cancelButtonProps={{ style: { display: "none" } }}
-        width={"60%"}
+  const getDeploymentLogs = (container: string) => {
+    axios
+      .get(
+        "/api/resources/deployments/" +
+          namespace +
+          "/" +
+          name +
+          "/" +
+          container +
+          "/logs",
+      )
+      .then((res) => {
+        if (res.data) {
+          let log = "";
+          res.data.forEach((s: string) => {
+            log += s;
+            log += "\n";
+          });
+          setDeploymentLogs(log);
+        } else {
+          setDeploymentLogs("No logs available");
+        }
+      })
+      .catch((error) => {
+        setError(mapResponseError(error));
+      });
+  };
+
+  return (
+    <>
+      <Button
+        onClick={function () {
+          getDeploymentLogs(deployment.pods[0].containers[0].name);
+          setDeploymentLogsModal({
+            on: true,
+          });
+        }}
+        style={{ marginLeft: "10px" }}
       >
-        <Tabs items={getTabItems()} onChange={onLogsTabsChange} />
-      </Modal>
-    </div>
+        View Logs
+      </Button>
+      <div>
+        {error.message.length !== 0 && (
+          <Alert
+            message={error.message}
+            description={error.description}
+            type="error"
+            closable
+            afterClose={() => {
+              setError({
+                message: "",
+                description: "",
+              });
+            }}
+            style={{ marginBottom: "20px" }}
+          />
+        )}
+
+        <Row>
+          <Divider
+            style={{ fontSize: "120%" }}
+            orientationMargin="0"
+            orientation={"left"}
+          >
+            Replicas: {deployment.pods.length}
+          </Divider>
+          <Col span={24} style={{ overflowX: "auto" }}>
+            <Table dataSource={deployment.pods}>
+              <Table.Column
+                title="Name"
+                dataIndex="name"
+                filterSearch={true}
+                key="name"
+              />
+              <Table.Column title="Node" dataIndex="node" />
+              <Table.Column title="Phase" dataIndex="podPhase" />
+              <Table.Column
+                title="Started"
+                dataIndex="started"
+                render={(value) => <span>{formatPodAge(value)}</span>}
+              />
+              <Table.Column
+                title="Images"
+                dataIndex="containers"
+                key="containers"
+                width="15%"
+                render={(containers, record: any) => (
+                  <>
+                    {containers.map((container: any) => {
+                      let color = container.status.running ? "green" : "red";
+
+                      if (record.podPhase === "Pending") {
+                        color = "yellow";
+                      }
+
+                      return (
+                        <Tag
+                          color={color}
+                          key={container.image}
+                          style={{ fontSize: "100%" }}
+                        >
+                          {container.image}
+                        </Tag>
+                      );
+                    })}
+                  </>
+                )}
+              />
+              <Table.Column
+                title="Logs"
+                width="15%"
+                render={(pod) => (
+                  <>
+                    <Button
+                      onClick={function () {
+                        axios
+                          .get(
+                            "/api/resources/pods/" +
+                              namespace +
+                              "/" +
+                              pod.name +
+                              "/" +
+                              pod.containers[0].name +
+                              "/logs",
+                          )
+                          .then((res) => {
+                            if (res.data) {
+                              let log = "";
+                              res.data.forEach((s: string) => {
+                                log += s;
+                                log += "\n";
+                              });
+                              setLogs(log);
+                            } else {
+                              setLogs("No logs available");
+                            }
+                          })
+                          .catch((error) => {
+                            setError(mapResponseError(error));
+                          });
+                        setLogsModal({
+                          on: true,
+                          namespace: namespace,
+                          pod: pod.name,
+                          containers: pod.containers,
+                          initContainers: pod.initContainers,
+                        });
+                      }}
+                      block
+                    >
+                      View Logs
+                    </Button>
+                  </>
+                )}
+              />
+            </Table>
+          </Col>
+        </Row>
+        <Modal
+          title="Logs"
+          open={logsModal.on}
+          onOk={handleCancelLogs}
+          onCancel={handleCancelLogs}
+          cancelButtonProps={{ style: { display: "none" } }}
+          width={"60%"}
+        >
+          <Tabs items={getTabItems()} onChange={onLogsTabsChange} />
+        </Modal>
+        <Modal
+          title="Deployment Logs"
+          open={deploymentLogsModal.on}
+          onOk={handleCancelDeploymentLogs}
+          onCancel={handleCancelDeploymentLogs}
+          cancelButtonProps={{ style: { display: "none" } }}
+          width={"60%"}
+        >
+          <Tabs
+            items={getDeploymentLogsTabItems()}
+            onChange={getDeploymentLogs}
+          />
+        </Modal>
+      </div>
+    </>
   );
 };
 

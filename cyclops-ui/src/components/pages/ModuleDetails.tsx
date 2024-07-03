@@ -520,24 +520,19 @@ const ModuleDetails = () => {
         <Row>
           <Title level={4}>{resource.namespace}</Title>
         </Row>
-        <Row>
-          <Col style={{ float: "right" }}>
-            <Button
-              onClick={function () {
-                fetchManifest(
-                  resource.group,
-                  resource.version,
-                  resource.kind,
-                  resource.namespace,
-                  resource.name,
-                );
-              }}
-              block
-            >
-              View Manifest
-            </Button>
-          </Col>
-        </Row>
+        <Button
+          onClick={function () {
+            fetchManifest(
+              resource.group,
+              resource.version,
+              resource.kind,
+              resource.namespace,
+              resource.name,
+            );
+          }}
+        >
+          View Manifest
+        </Button>
         {resourceDetails}
       </Collapse.Panel>,
     );
