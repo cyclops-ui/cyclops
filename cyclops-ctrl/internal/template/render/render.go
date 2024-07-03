@@ -38,7 +38,6 @@ func (r *Renderer) HelmTemplate(module cyclopsv1alpha1.Module, moduleTemplate *m
 	}
 
 	for _, dependency := range moduleTemplate.Dependencies {
-
 		chart.AddDependency(&helmchart.Chart{
 			Raw:       []*helmchart.File{},
 			Metadata:  mapMetadata(dependency.HelmChartMetadata),
