@@ -590,6 +590,7 @@ const ModuleDetails = () => {
           <Col span={9}>
             <Title level={1}>
               <img
+                alt=""
                 style={{ height: "1.5em", marginRight: "8px" }}
                 src={module.iconURL}
               />

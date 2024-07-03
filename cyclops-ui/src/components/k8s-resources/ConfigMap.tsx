@@ -16,32 +16,32 @@ const ConfigMap = ({ name, namespace }: Props) => {
     description: "",
   });
 
-  function fetchConfigMap() {
-    axios
-      .get(`/api/resources`, {
-        params: {
-          group: ``,
-          version: `v1`,
-          kind: `ConfigMap`,
-          name: name,
-          namespace: namespace,
-        },
-      })
-      .then((res) => {
-        setConfigMap(res.data);
-      })
-      .catch((error) => {
-        setError(mapResponseError(error));
-      });
-  }
-
   useEffect(() => {
+    function fetchConfigMap() {
+      axios
+        .get(`/api/resources`, {
+          params: {
+            group: ``,
+            version: `v1`,
+            kind: `ConfigMap`,
+            name: name,
+            namespace: namespace,
+          },
+        })
+        .then((res) => {
+          setConfigMap(res.data);
+        })
+        .catch((error) => {
+          setError(mapResponseError(error));
+        });
+    }
+
     fetchConfigMap();
     const interval = setInterval(() => fetchConfigMap(), 15000);
     return () => {
       clearInterval(interval);
     };
-  }, []);
+  }, [name, namespace]);
 
   const configMapData = (configMap: any) => {
     if (configMap.data) {

@@ -42,10 +42,7 @@ import { fileExtension, findMaps, flattenObjectKeys } from "../../utils/form";
 import "./custom.css";
 import { numberInputValidators } from "../../utils/validators/number";
 import { stringInputValidators } from "../../utils/validators/string";
-import {
-  moduleTemplateReferenceView,
-  templateRef,
-} from "../../utils/templateRef";
+import { templateRef } from "../../utils/templateRef";
 import {
   FeedbackError,
   FormValidationErrors,
@@ -56,8 +53,6 @@ import {
   getTemplateInitialValues,
   Template,
 } from "../../utils/api/template";
-
-const { TextArea } = Input;
 
 const { Title } = Typography;
 const layout = {
@@ -89,7 +84,6 @@ const EditModule = () => {
 
   const [initialValuesRaw, setInitialValuesRaw] = useState({});
 
-  const [allConfigs, setAllConfigs] = useState([]);
   const [values, setValues] = useState({});
   const [isChanged, setIsChanged] = useState(false);
   const [isTemplateChanged, setIsTemplateChanged] = useState(false);
@@ -258,16 +252,11 @@ const EditModule = () => {
         });
     };
     fetchModuleData();
-  }, []);
+  }, [editTemplateForm, form, moduleName]);
 
   useEffect(() => {
     form.validateFields(flattenObjectKeys(values));
-  }, [values]);
-
-  const configNames: {} | any = [];
-  allConfigs.map((c: any) => {
-    configNames.push(<Select.Option key={c.name}>{c.name}</Select.Option>);
-  });
+  }, [values, form]);
 
   const handleValuesChange = (changedValues: any, allValues: any) => {
     if (JSON.stringify(allValues) === JSON.stringify(values)) {
@@ -590,6 +579,7 @@ const EditModule = () => {
         arrayIndexLifetime = arrayIndexLifetime - 1;
       }
 
+      var header;
       switch (field.type) {
         case "string":
           if (field.enum) {
@@ -689,7 +679,7 @@ const EditModule = () => {
           );
           return;
         case "object":
-          var header = <Row>{field.name}</Row>;
+          header = <Row>{field.name}</Row>;
 
           if (field.description && field.description.length !== 0) {
             header = (
@@ -774,7 +764,7 @@ const EditModule = () => {
           );
           return;
         case "array":
-          var header = <Row>{field.name}</Row>;
+          header = <Row>{field.name}</Row>;
 
           if (field.description && field.description.length !== 0) {
             header = (
