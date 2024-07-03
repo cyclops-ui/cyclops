@@ -2,25 +2,38 @@ package mapper
 
 import (
 	"sort"
+	"strings"
 
 	"github.com/cyclops-ui/cyclops/cyclops-ctrl/internal/models"
 	"github.com/cyclops-ui/cyclops/cyclops-ctrl/internal/models/helm"
 )
 
-func HelmSchemaToFields(name string, schema helm.Property, dependencies []*models.Template) models.Field {
+func HelmSchemaToFields(name string, schema helm.Property, defs map[string]helm.Property, dependencies []*models.Template) models.Field {
 	if schema.Type == "array" {
 		return models.Field{
 			Name:        name,
 			Description: schema.Description,
 			Type:        mapHelmPropertyTypeToFieldType(schema),
 			DisplayName: mapTitle(name, schema),
-			Items:       arrayItem(schema.Items),
+			Items:       arrayItem(schema.Items, defs),
 		}
 	}
 
 	fields := make([]models.Field, 0, len(schema.Properties))
 	for propertyName, property := range schema.Properties {
-		fields = append(fields, HelmSchemaToFields(propertyName, property, nil))
+		if property.HasRef() {
+			key := strings.TrimPrefix(property.Reference, "#/$defs/")
+
+			fields = append(fields, HelmSchemaToFields(
+				propertyName,
+				resolveJSONSchemaRef(defs, strings.Split(key, "/")),
+				defs,
+				nil,
+			))
+			continue
+		}
+
+		fields = append(fields, HelmSchemaToFields(propertyName, property, defs, nil))
 	}
 
 	fields = sortFields(fields, schema.Order)
@@ -126,7 +139,7 @@ func mapHelmPropertyTypeToFieldType(property helm.Property) string {
 	}
 }
 
-func arrayItem(item *helm.Property) *models.Field {
+func arrayItem(item *helm.Property, defs map[string]helm.Property) *models.Field {
 	if item == nil {
 		return nil
 	}
@@ -137,7 +150,7 @@ func arrayItem(item *helm.Property) *models.Field {
 		}
 	}
 
-	field := HelmSchemaToFields("", *item, nil)
+	field := HelmSchemaToFields("", *item, defs, nil)
 	return &field
 }
 
@@ -155,4 +168,21 @@ func mapTitle(name string, field helm.Property) string {
 	}
 
 	return name
+}
+
+func resolveJSONSchemaRef(defs map[string]helm.Property, ref []string) helm.Property {
+	if len(ref) == 0 {
+		return helm.Property{}
+	}
+
+	def, ok := defs[ref[0]]
+	if !ok {
+		return helm.Property{}
+	}
+	
+	if len(ref) == 1 {
+		return def
+	}
+
+	return resolveJSONSchemaRef(def.Properties, ref[1:])
 }

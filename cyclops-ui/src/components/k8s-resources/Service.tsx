@@ -76,7 +76,18 @@ const Service = ({ name, namespace }: Props) => {
       <Row>
         <Col span={24} style={{ overflowX: "auto" }}>
           <Table dataSource={service.ports}>
-            <Table.Column title="Name" dataIndex="name" key="name" />
+            <Table.Column
+              title="Name"
+              dataIndex="name"
+              key="name"
+              render={(text) =>
+                text ? (
+                  text
+                ) : (
+                  <span style={{ color: "#A0A0A0" }}>{"<not set>"}</span>
+                )
+              }
+            />
             <Table.Column title="Protocol" dataIndex="protocol" />
             <Table.Column title="Port" dataIndex="port" />
             <Table.Column title="Target port" dataIndex="targetPort" />

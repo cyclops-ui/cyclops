@@ -288,6 +288,8 @@ func (k *KubernetesClient) GetResource(group, version, kind, name, namespace str
 		return k.mapSecret(group, version, kind, name, namespace)
 	case isCronJob(group, version, kind):
 		return k.mapCronJob(group, version, kind, name, namespace)
+	case isJob(group, version, kind):
+		return k.mapJob(group, version, kind, name, namespace)
 	}
 
 	return nil, nil
@@ -711,6 +713,38 @@ func (k *KubernetesClient) mapCronJob(group, version, kind, name, namespace stri
 		Schedule:  cronJob.Spec.Schedule,
 		Status:    status,
 		Pods:      pods,
+	}, nil
+}
+
+func (k *KubernetesClient) mapJob(group, version, kind, name, namespace string) (*dto.Job, error) {
+	job, err := k.clientset.BatchV1().Jobs(namespace).Get(context.Background(), name, metav1.GetOptions{})
+	if err != nil {
+		return nil, err
+	}
+	pods, err := k.getPodsForJob(*job)
+	if err != nil {
+		return nil, err
+	}
+
+	startTime := ""
+	if job.Status.StartTime != nil {
+		startTime = job.Status.StartTime.String()
+	}
+
+	completionTime := ""
+	if job.Status.CompletionTime != nil {
+		completionTime = job.Status.CompletionTime.String()
+	}
+
+	return &dto.Job{
+		Group:          group,
+		Version:        version,
+		Kind:           kind,
+		Name:           job.Name,
+		Namespace:      job.Namespace,
+		CompletionTime: completionTime,
+		StartTime:      startTime,
+		Pods:           pods,
 	}, nil
 }
 

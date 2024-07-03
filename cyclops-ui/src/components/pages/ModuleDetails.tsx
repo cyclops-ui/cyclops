@@ -29,6 +29,8 @@ import "./custom.css";
 import "ace-builds/src-noconflict/mode-jsx";
 import ReactAce from "react-ace";
 import Deployment from "../k8s-resources/Deployment";
+import CronJob from "../k8s-resources/CronJob";
+import Job from "../k8s-resources/Job";
 import DaemonSet from "../k8s-resources/DaemonSet";
 import StatefulSet from "../k8s-resources/StatefulSet";
 import Pod from "../k8s-resources/Pod";
@@ -222,7 +224,7 @@ const ModuleDetails = () => {
       activeCollapses.get(fieldName) &&
       activeCollapses.get(fieldName) === true
     ) {
-      return "250%";
+      return "166%";
     } else {
       return "100%";
     }
@@ -376,6 +378,16 @@ const ModuleDetails = () => {
       case "Deployment":
         resourceDetails = (
           <Deployment name={resource.name} namespace={resource.namespace} />
+        );
+        break;
+      case "CronJob":
+        resourceDetails = (
+          <CronJob name={resource.name} namespace={resource.namespace} />
+        );
+        break;
+      case "Job":
+        resourceDetails = (
+          <Job name={resource.name} namespace={resource.namespace} />
         );
         break;
       case "DaemonSet":
@@ -539,7 +551,7 @@ const ModuleDetails = () => {
             <CaretRightOutlined rotate={isActive ? 90 : 0} />
           )}
           style={{
-            width: "40%",
+            width: "60%",
             border: "none",
             backgroundColor: "#FFF",
           }}
@@ -573,7 +585,10 @@ const ModuleDetails = () => {
           </Row>
           <Row gutter={[40, 0]}>
             <Col span={9}>
-              <Title level={3}>{module.namespace}</Title>
+              <Title level={3}>
+                {"Namespace: "}
+                {module.namespace}
+              </Title>
             </Col>
           </Row>
           <Row gutter={[40, 0]}>

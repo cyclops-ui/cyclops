@@ -542,7 +542,7 @@ func (m *Modules) DownloadLogs(ctx *gin.Context) {
 	defer tempFile.Close()
 
 	for _, log := range logs {
-		_, err = tempFile.WriteString(log)
+		_, err = tempFile.WriteString(log + "\n")
 		if err != nil {
 			ctx.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to write to file"})
 			return
