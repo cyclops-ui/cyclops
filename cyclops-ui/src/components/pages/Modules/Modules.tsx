@@ -10,6 +10,7 @@ import {
   Card,
   Alert,
   Empty,
+  Spin,
 } from "antd";
 import { useNavigate } from "react-router";
 import axios from "axios";
@@ -25,6 +26,7 @@ const Modules = () => {
   const history = useNavigate();
   const [allData, setAllData] = useState([]);
   const [filteredData, setFilteredData] = useState([]);
+  const [loadingModules, setLoadingModules] = useState(false);
   const [namespacesState, setNamespacesState] = useState([]);
   const [error, setError] = useState({
     message: "",
@@ -32,14 +34,17 @@ const Modules = () => {
   });
 
   useEffect(() => {
+    setLoadingModules(true);
     axios
       .get(`/api/modules/list`)
       .then((res) => {
         setAllData(res.data);
         setFilteredData(res.data);
+        setLoadingModules(false);
       })
       .catch((error) => {
         setError(mapResponseError(error));
+        setLoadingModules(false);
       });
   }, []);
 
@@ -94,6 +99,109 @@ const Modules = () => {
     return version + " - " + resolvedVersion.substring(0, 7);
   };
 
+  const renderModulesCards = () => {
+    if (loadingModules) {
+      return <Spin size={"large"} />;
+    }
+
+    if (filteredData.length == 0) {
+      return (
+        <div style={{ width: "100%" }}>
+          <Empty description="No Modules Found"></Empty>
+        </div>
+      );
+    }
+
+    return filteredData.map((module: any, index) => (
+      <Col key={index} xs={24} sm={12} md={8} lg={8} xl={6}>
+        <a href={"/modules/" + module.name}>
+          <Card
+            title={
+              <div>
+                <img
+                  style={{ height: "2em", marginRight: "8px" }}
+                  src={module.iconURL}
+                />
+                {module.name}
+              </div>
+            }
+            style={{
+              borderLeft: "solid " + getStatusColor(module) + " 5px",
+              width: "100%",
+              maxWidth: "500px",
+            }}
+            className={styles.modulecard}
+          >
+            <Row gutter={[16, 16]}>
+              <Col
+                span={24}
+                style={{
+                  whiteSpace: "nowrap",
+                  overflow: "hidden",
+                  textOverflow: "ellipsis",
+                  display: "block",
+                }}
+              >
+                Repo:
+                <Link aria-level={3} href={module.template.repo}>
+                  {" " + module.template.repo}
+                </Link>
+              </Col>
+            </Row>
+            <Row gutter={[16, 16]}>
+              <Col
+                span={24}
+                style={{
+                  whiteSpace: "nowrap",
+                  overflow: "hidden",
+                  textOverflow: "ellipsis",
+                  display: "block",
+                }}
+              >
+                Path:
+                <Link
+                  aria-level={3}
+                  href={
+                    module.template.repo +
+                    `/tree/` +
+                    getTemplateVersion(
+                      module.template.version,
+                      module.template.resolvedVersion,
+                    ) +
+                    `/` +
+                    module.template.path
+                  }
+                >
+                  {" " + module.template.path}
+                </Link>
+              </Col>
+            </Row>
+            <Row gutter={[16, 16]}>
+              <Col
+                span={24}
+                style={{
+                  whiteSpace: "nowrap",
+                  overflow: "hidden",
+                  textOverflow: "ellipsis",
+                  display: "block",
+                }}
+              >
+                Version:
+                <span style={{ color: "#1677ff" }}>
+                  {" "}
+                  {getTemplateVersion(
+                    module.template.version,
+                    module.template.resolvedVersion,
+                  )}
+                </span>
+              </Col>
+            </Row>
+          </Card>
+        </a>
+      </Col>
+    ));
+  };
+
   return (
     <div>
       {error.message.length !== 0 && (
@@ -139,94 +247,7 @@ const Modules = () => {
         </Col>
       </Row>
       <Divider orientationMargin="0" />
-      <Row gutter={[16, 16]}>
-        {filteredData.length == 0 ? (
-          <div style={{ width: "100%" }}>
-            <Empty description="No Modules Found"></Empty>
-          </div>
-        ) : (
-          filteredData.map((module: any, index) => (
-            <Col key={index} xs={24} sm={12} md={8} lg={8} xl={6}>
-              <a href={"/modules/" + module.name}>
-                <Card
-                  title={module.name}
-                  style={{
-                    borderLeft: "solid " + getStatusColor(module) + " 5px",
-                    width: "100%",
-                    maxWidth: "500px",
-                  }}
-                  className={styles.modulecard}
-                >
-                  <Row gutter={[16, 16]}>
-                    <Col
-                      span={24}
-                      style={{
-                        whiteSpace: "nowrap",
-                        overflow: "hidden",
-                        textOverflow: "ellipsis",
-                        display: "block",
-                      }}
-                    >
-                      Repo:
-                      <Link aria-level={3} href={module.template.repo}>
-                        {" " + module.template.repo}
-                      </Link>
-                    </Col>
-                  </Row>
-                  <Row gutter={[16, 16]}>
-                    <Col
-                      span={24}
-                      style={{
-                        whiteSpace: "nowrap",
-                        overflow: "hidden",
-                        textOverflow: "ellipsis",
-                        display: "block",
-                      }}
-                    >
-                      Path:
-                      <Link
-                        aria-level={3}
-                        href={
-                          module.template.repo +
-                          `/tree/` +
-                          getTemplateVersion(
-                            module.template.version,
-                            module.template.resolvedVersion,
-                          ) +
-                          `/` +
-                          module.template.path
-                        }
-                      >
-                        {" " + module.template.path}
-                      </Link>
-                    </Col>
-                  </Row>
-                  <Row gutter={[16, 16]}>
-                    <Col
-                      span={24}
-                      style={{
-                        whiteSpace: "nowrap",
-                        overflow: "hidden",
-                        textOverflow: "ellipsis",
-                        display: "block",
-                      }}
-                    >
-                      Version:
-                      <span style={{ color: "#1677ff" }}>
-                        {" "}
-                        {getTemplateVersion(
-                          module.template.version,
-                          module.template.resolvedVersion,
-                        )}
-                      </span>
-                    </Col>
-                  </Row>
-                </Card>
-              </a>
-            </Col>
-          ))
-        )}
-      </Row>
+      <Row gutter={[16, 16]}>{renderModulesCards()}</Row>
     </div>
   );
 };

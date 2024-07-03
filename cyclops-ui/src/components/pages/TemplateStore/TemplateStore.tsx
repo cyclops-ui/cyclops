@@ -2,11 +2,9 @@ import React, { useEffect, useState } from "react";
 import {
   Col,
   Table,
-  Typography,
   Alert,
   Row,
   Button,
-  Tabs,
   Modal,
   Form,
   Input,
@@ -185,7 +183,23 @@ const TemplateStore = () => {
       </Row>
       <Col span={24} style={{ overflowX: "auto" }}>
         <Table dataSource={templates}>
-          <Table.Column title="Name" dataIndex="name" width={"30%"} />
+          <Table.Column
+            dataIndex="iconURL"
+            width={"3%"}
+            render={function (iconURL) {
+              return (
+                <img
+                  style={{
+                    verticalAlign: "middle",
+                    margin: "-5px",
+                    height: "36px",
+                  }}
+                  src={iconURL}
+                />
+              );
+            }}
+          />
+          <Table.Column title="Name" dataIndex="name" width={"20%"} />
           <Table.Column
             title="Repo"
             dataIndex={["ref", "repo"]}
@@ -194,7 +208,7 @@ const TemplateStore = () => {
           <Table.Column
             title="Path"
             dataIndex={["ref", "path"]}
-            width={"10%"}
+            width={"20%"}
             render={function (value: any, record: any, index: number) {
               if (!value.startsWith("/")) {
                 return "/" + value;
@@ -223,7 +237,8 @@ const TemplateStore = () => {
                 ) : (
                   <FileSyncOutlined
                     className={classNames(styles.statustemplate, {
-                      [styles.success]: requestStatus[template.name] === "success",
+                      [styles.success]:
+                        requestStatus[template.name] === "success",
                       [styles.error]: requestStatus[template.name] === "error",
                     })}
                     onClick={function () {

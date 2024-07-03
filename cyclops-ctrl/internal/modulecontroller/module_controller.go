@@ -22,6 +22,7 @@ import (
 	"strings"
 
 	"github.com/go-logr/logr"
+	"helm.sh/helm/v3/pkg/chart"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/runtime"
@@ -132,7 +133,7 @@ func (r *ModuleReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctr
 	if err != nil {
 		r.logger.Error(err, "error fetching module template", "namespaced name", req.NamespacedName)
 
-		if err = r.setStatus(ctx, module, req.NamespacedName, cyclopsv1alpha1.Failed, templateVersion, err.Error(), nil); err != nil {
+		if err = r.setStatus(ctx, module, req.NamespacedName, cyclopsv1alpha1.Failed, templateVersion, err.Error(), nil, ""); err != nil {
 			return ctrl.Result{}, err
 		}
 
@@ -143,7 +144,7 @@ func (r *ModuleReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctr
 	if err != nil {
 		r.logger.Error(err, "error on upsert module", "namespaced name", req.NamespacedName)
 
-		if err = r.setStatus(ctx, module, req.NamespacedName, cyclopsv1alpha1.Failed, template.ResolvedVersion, err.Error(), nil); err != nil {
+		if err = r.setStatus(ctx, module, req.NamespacedName, cyclopsv1alpha1.Failed, template.ResolvedVersion, err.Error(), nil, template.IconURL); err != nil {
 			return ctrl.Result{}, err
 		}
 
@@ -159,10 +160,11 @@ func (r *ModuleReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctr
 			template.ResolvedVersion,
 			"error decoding/applying resources",
 			installErrors,
+			template.IconURL,
 		)
 	}
 
-	return ctrl.Result{}, r.setStatus(ctx, module, req.NamespacedName, cyclopsv1alpha1.Succeeded, template.ResolvedVersion, "", nil)
+	return ctrl.Result{}, r.setStatus(ctx, module, req.NamespacedName, cyclopsv1alpha1.Succeeded, template.ResolvedVersion, "", nil, template.IconURL)
 }
 
 // SetupWithManager sets up the controller with the Manager.
@@ -178,12 +180,17 @@ func (r *ModuleReconciler) moduleToResources(name string, template *models.Templ
 		return nil, err
 	}
 
+	crdInstallErrors := r.applyCRDs(template)
+	if err != nil {
+		return nil, err
+	}
+
 	installErrors, err := r.generateResources(r.kubernetesClient, *module, template)
 	if err != nil {
 		return nil, err
 	}
 
-	return installErrors, nil
+	return append(crdInstallErrors, installErrors...), nil
 }
 
 func (r *ModuleReconciler) generateResources(kClient *k8sclient.KubernetesClient, module cyclopsv1alpha1.Module, moduleTemplate *models.Template) ([]string, error) {
@@ -194,7 +201,7 @@ func (r *ModuleReconciler) generateResources(kClient *k8sclient.KubernetesClient
 
 	installErrors := make([]string, 0)
 
-	for _, s := range strings.Split(out, "---") {
+	for _, s := range strings.Split(out, "\n---\n") {
 		s := strings.TrimSpace(s)
 		if len(s) == 0 {
 			continue
@@ -265,6 +272,72 @@ func (r *ModuleReconciler) generateResources(kClient *k8sclient.KubernetesClient
 	return installErrors, nil
 }
 
+func (r *ModuleReconciler) applyCRDs(template *models.Template) []string {
+	installErrors := make([]string, 0)
+
+	for _, d := range template.Dependencies {
+		installErrors = append(installErrors, r.applyCRDs(d)...)
+	}
+
+	for _, crdFile := range template.CRDs {
+		installErrors = append(installErrors, r.applyCRDFile(crdFile)...)
+	}
+
+	return installErrors
+}
+
+func (r *ModuleReconciler) applyCRDFile(file *chart.File) []string {
+	installErrors := make([]string, 0)
+
+	for _, s := range strings.Split(string(file.Data), "\n---\n") {
+		s := strings.TrimSpace(s)
+		if len(s) == 0 {
+			continue
+		}
+
+		var crd *unstructured.Unstructured
+		decoder := yaml.NewYAMLOrJSONDecoder(strings.NewReader(s), len(s))
+		err := decoder.Decode(&crd)
+
+		if crd == nil {
+			continue
+		}
+
+		if err != nil {
+			r.logger.Error(err, "could not decode crd",
+				"crd file",
+				file.Name,
+			)
+
+			installErrors = append(installErrors, fmt.Sprintf(
+				"failed to decode CRD from file %v: %v",
+				file.Name,
+				err.Error(),
+			))
+			continue
+		}
+
+		if err := r.kubernetesClient.ApplyCRD(crd); err != nil {
+			r.logger.Error(err, "failed to apply crd",
+				"crd",
+				crd.GetName(),
+				"crd file",
+				file.Name,
+			)
+
+			installErrors = append(installErrors, fmt.Sprintf(
+				"failed to create CRD %v from file %v: %v",
+				crd.GetName(),
+				file.Name,
+				err.Error(),
+			))
+			continue
+		}
+	}
+
+	return installErrors
+}
+
 func (r *ModuleReconciler) setStatus(
 	ctx context.Context,
 	module cyclopsv1alpha1.Module,
@@ -273,6 +346,7 @@ func (r *ModuleReconciler) setStatus(
 	templateResolvedVersion string,
 	reason string,
 	installErrors []string,
+	iconURL string,
 ) error {
 	trv := module.Status.TemplateResolvedVersion
 	if len(trv) == 0 {
@@ -286,6 +360,7 @@ func (r *ModuleReconciler) setStatus(
 			Errors: installErrors,
 		},
 		TemplateResolvedVersion: templateResolvedVersion,
+		IconURL:                 iconURL,
 	}
 
 	if err := r.Status().Update(ctx, &module); err != nil {
