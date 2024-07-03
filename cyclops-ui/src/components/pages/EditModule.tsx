@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import {
   Alert,
   Button,
@@ -132,7 +132,7 @@ const EditModule = () => {
 
   let { moduleName } = useParams();
 
-  const mapsToArray = (fields: any[], values: any): any => {
+  const mapsToArray = useCallback((fields: any[], values: any): any => {
     let out: any = {};
     fields.forEach((field) => {
       let valuesList: any[] = [];
@@ -196,7 +196,7 @@ const EditModule = () => {
     });
 
     return out;
-  };
+  }, []);
 
   useEffect(() => {
     const fetchModuleData = async () => {
@@ -252,7 +252,7 @@ const EditModule = () => {
         });
     };
     fetchModuleData();
-  }, [editTemplateForm, form, moduleName]);
+  }, [editTemplateForm, form, moduleName, mapsToArray]);
 
   useEffect(() => {
     form.validateFields(flattenObjectKeys(values));
