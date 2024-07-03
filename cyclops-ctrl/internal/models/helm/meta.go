@@ -9,7 +9,7 @@ type Metadata struct {
 	Keywords     []string          `json:"keywords,omitempty" yaml:"keywords,omitempty"`
 	Maintainers  []*Maintainer     `json:"maintainers,omitempty" yaml:"maintainers,omitempty"`
 	Icon         string            `json:"icon,omitempty" yaml:"icon,omitempty"`
-	APIVersion   string            `json:"apiVersion,omitempty" yaml:"APIVersion,omitempty"`
+	APIVersion   string            `json:"apiVersion,omitempty" yaml:"apiVersion,omitempty"`
 	Condition    string            `json:"condition,omitempty" yaml:"condition,omitempty"`
 	Tags         string            `json:"tags,omitempty" yaml:"tags,omitempty"`
 	AppVersion   string            `json:"appVersion,omitempty" yaml:"appVersion,omitempty"`
@@ -23,7 +23,7 @@ type Metadata struct {
 type Maintainer struct {
 	Name  string `json:"name,omitempty" yaml:"name"`
 	Email string `json:"email,omitempty" yaml:"email"`
-	URL   string `json:"url,omitempty" yaml:"URL"`
+	URL   string `json:"url,omitempty" yaml:"url"`
 }
 
 type Dependency struct {
