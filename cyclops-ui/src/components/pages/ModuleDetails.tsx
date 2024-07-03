@@ -370,7 +370,6 @@ const ModuleDetails = () => {
   resources.forEach((resource: any, index) => {
     let collapseKey =
       resource.kind + "/" + resource.namespace + "/" + resource.name;
-    let statusIcon = <p />;
 
     let resourceDetails = <p />;
 
@@ -469,23 +468,6 @@ const ModuleDetails = () => {
       );
     }
 
-    if (resource.status === "healthy") {
-      statusIcon = (
-        <CheckCircleTwoTone
-          style={{ fontSize: "200%", verticalAlign: "middle" }}
-          twoToneColor={"#52c41a"}
-        />
-      );
-    }
-
-    if (resource.status === "unhealthy") {
-      statusIcon = (
-        <CloseSquareTwoTone
-          style={{ fontSize: "200%", verticalAlign: "middle" }}
-          twoToneColor={"red"}
-        />
-      );
-    }
     resourceCollapses.push(
       <Collapse.Panel
         header={genExtra(resource, resource.status)}
