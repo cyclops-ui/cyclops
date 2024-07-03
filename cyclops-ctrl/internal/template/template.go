@@ -52,12 +52,7 @@ func (r Repo) GetTemplate(repo, path, version string) (*models.Template, error) 
 func (r Repo) GetTemplateInitialValues(repo, path, version string) (map[string]interface{}, error) {
 	// region load OCI chart
 	if registry.IsOCI(repo) {
-		initial, err := r.LoadOCIHelmChartInitialValues(repo, path, version)
-		if err != nil {
-			return nil, err
-		}
-
-		return initial, err
+		return r.LoadOCIHelmChartInitialValues(repo, path, version)
 	}
 	// endregion
 
@@ -68,22 +63,12 @@ func (r Repo) GetTemplateInitialValues(repo, path, version string) (map[string]i
 	}
 
 	if isHelmRepo {
-		initial, err := r.LoadHelmChartInitialValues(repo, path, version)
-		if err != nil {
-			return nil, err
-		}
-
-		return initial, err
+		return r.LoadHelmChartInitialValues(repo, path, version)
 	}
 	// endregion
 
 	// fallback to cloning from git
-	initial, err := r.LoadInitialTemplateValues(repo, path, version)
-	if err != nil {
-		return nil, err
-	}
-
-	return initial, err
+	return r.LoadInitialTemplateValues(repo, path, version)
 }
 
 func (r Repo) loadDependencies(metadata *helm.Metadata) ([]*models.Template, error) {
