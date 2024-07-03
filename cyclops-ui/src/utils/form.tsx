@@ -49,7 +49,7 @@ export function findMaps(fields: any[], values: any, initialValues: any): any {
         }
         break;
       case "boolean":
-        if (values[field.name]) {
+        if (values[field.name] !== undefined && values[field.name] !== null) {
           out[field.name] = values[field.name];
         }
         break;
