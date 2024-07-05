@@ -13,7 +13,6 @@ import {
   Typography,
 } from "antd";
 import "ace-builds/src-noconflict/ace";
-import { useNavigate } from "react-router";
 import { useParams } from "react-router-dom";
 import axios from "axios";
 import "ace-builds/src-noconflict/mode-jsx";
@@ -26,7 +25,7 @@ import { SearchOutlined } from "@ant-design/icons";
 import Highlighter from "react-highlight-words";
 import { mapResponseError } from "../../utils/api/errors";
 
-const { Title, Text } = Typography;
+const { Title } = Typography;
 
 interface DataSourceType {
   name: string;
@@ -38,7 +37,6 @@ interface DataSourceType {
 type DataIndex = keyof DataSourceType;
 
 const NodeDetails = () => {
-  const history = useNavigate();
   let { nodeName } = useParams();
 
   const [node, setNode] = useState({
@@ -66,11 +64,6 @@ const NodeDetails = () => {
     memory: 0,
     pod_count: 0,
   });
-
-  const [activeCollapses, setActiveCollapses] = useState(new Map());
-  const updateActiveCollapses = (k: any, v: any) => {
-    setActiveCollapses(new Map(activeCollapses.set(k, v)));
-  };
 
   const [error, setError] = useState({
     message: "",
@@ -278,27 +271,27 @@ const NodeDetails = () => {
     },
   });
 
-  const fetchNodeData = () => {
-    axios
-      .get(`/api/nodes/` + nodeName)
-      .then((res) => {
-        setNode(res.data);
-        setResources({
-          cpu: +(res.data.requested.cpu / res.data.available.cpu).toFixed(4),
-          memory: +(
-            res.data.requested.memory / res.data.available.memory
-          ).toFixed(4),
-          pod_count: +(
-            res.data.requested.pod_count / res.data.available.pod_count
-          ).toFixed(4),
-        });
-      })
-      .catch((error) => {
-        setError(mapResponseError(error));
-      });
-  };
-
   useEffect(() => {
+    const fetchNodeData = () => {
+      axios
+        .get(`/api/nodes/` + nodeName)
+        .then((res) => {
+          setNode(res.data);
+          setResources({
+            cpu: +(res.data.requested.cpu / res.data.available.cpu).toFixed(4),
+            memory: +(
+              res.data.requested.memory / res.data.available.memory
+            ).toFixed(4),
+            pod_count: +(
+              res.data.requested.pod_count / res.data.available.pod_count
+            ).toFixed(4),
+          });
+        })
+        .catch((error) => {
+          setError(mapResponseError(error));
+        });
+    };
+
     fetchNodeData();
 
     // setInterval to refresh data every 15 seconds
@@ -308,7 +301,7 @@ const NodeDetails = () => {
 
     // Cleanup the interval when the component is unmounted
     return () => clearInterval(intervalId);
-  }, []);
+  }, [nodeName]);
 
   const columns: ColumnType<DataSourceType>[] = [
     {
@@ -347,13 +340,13 @@ const NodeDetails = () => {
       if (cond.type === type) {
         switch (type) {
           case "MemoryPressure":
-            return cond.status == "True" ? "#de3428" : "green";
+            return cond.status === "True" ? "#de3428" : "green";
           case "DiskPressure":
-            return cond.status == "True" ? "#de3428" : "green";
+            return cond.status === "True" ? "#de3428" : "green";
           case "PIDPressure":
-            return cond.status == "True" ? "#de3428" : "green";
+            return cond.status === "True" ? "#de3428" : "green";
           case "Ready":
-            return cond.status == "True" ? "green" : "#de3428";
+            return cond.status === "True" ? "green" : "#de3428";
           default:
             console.log("default", type);
         }
