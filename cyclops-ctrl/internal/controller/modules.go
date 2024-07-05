@@ -564,8 +564,9 @@ func (m *Modules) GetManifest(ctx *gin.Context) {
 	kind := ctx.Query("kind")
 	name := ctx.Query("name")
 	namespace := ctx.Query("namespace")
+	includeManagedFields := ctx.Query("includeManagedFields") == "false"
 
-	manifest, err := m.kubernetesClient.GetManifest(group, version, kind, name, namespace)
+	manifest, err := m.kubernetesClient.GetManifest(group, version, kind, name, namespace,includeManagedFields)
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, gin.H{
 			"error":  "Failed to fetch resource manifest",

@@ -46,6 +46,7 @@ import {
 import { gvkString } from "../../utils/k8s/gvk";
 import { mapResponseError } from "../../utils/api/errors";
 import Secret from "../k8s-resources/Secret";
+import { CheckboxChangeEvent } from 'antd/es/checkbox';
 const languages = [
   "javascript",
   "java",
@@ -144,6 +145,32 @@ const ModuleDetails = () => {
 
   let { moduleName } = useParams();
 
+  const [kind, setKind] = useState<string>("");
+  const [showManagedFields, setShowManagedFields] = useState(false);
+
+
+  const handleCheckboxChange = (e: CheckboxChangeEvent) => {
+    setShowManagedFields(e.target.checked);
+  };
+
+
+  useEffect(() => {
+    resources.forEach((resource: any, index) => {
+      if(resource.kind === kind){
+        fetchManifest(
+          resource.group,
+          resource.version,
+          resource.kind,
+          resource.namespace,
+          resource.name,
+        );
+      }
+    })
+  },[showManagedFields]);
+
+  
+  
+
   function fetchManifest(
     group: string,
     version: string,
@@ -159,19 +186,20 @@ const ModuleDetails = () => {
           kind: kind,
           name: name,
           namespace: namespace,
+          includeManagedFields: showManagedFields,
         },
       })
       .then((res) => {
+        let manifestData = res.data;
         setManifestModal({
           on: true,
-          manifest: res.data,
+          manifest: manifestData,
         });
       })
       .catch((error) => {
-        setLoading(false);
-        setLoadModule(true);
-        setError(mapResponseError(error));
+        console.error("Error fetching manifest:", error);
       });
+      setKind(kind);
   }
 
   function fetchModule() {
@@ -880,6 +908,14 @@ const ModuleDetails = () => {
         cancelButtonProps={{ style: { display: "none" } }}
         width={"40%"}
       >
+        <div style={{ marginBottom: '10px' }}>
+        <Checkbox
+        onChange={handleCheckboxChange} checked={showManagedFields} >
+          Include Managed Fields
+        </Checkbox>
+      </div>
+
+
         <ReactAce
           style={{ width: "100%" }}
           mode={"sass"}
