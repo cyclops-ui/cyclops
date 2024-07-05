@@ -189,6 +189,7 @@ const TemplateStore = () => {
             render={function (iconURL) {
               return (
                 <img
+                  alt=""
                   style={{
                     verticalAlign: "middle",
                     margin: "-5px",

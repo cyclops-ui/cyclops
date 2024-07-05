@@ -1,7 +1,7 @@
 import axios from "axios";
 import React, { useEffect, useState } from "react";
 import { mapResponseError } from "../../utils/api/errors";
-import { Alert, Descriptions, Divider, Table } from "antd";
+import { Alert, Descriptions, Divider } from "antd";
 
 interface Props {
   name: string;

@@ -25,32 +25,32 @@ const StatefulSet = ({ name, namespace }: Props) => {
     description: "",
   });
 
-  function fetchStatefulSet() {
-    axios
-      .get(`/api/resources`, {
-        params: {
-          group: `apps`,
-          version: `v1`,
-          kind: `StatefulSet`,
-          name: name,
-          namespace: namespace,
-        },
-      })
-      .then((res) => {
-        setStatefulSet(res.data);
-      })
-      .catch((error) => {
-        setError(mapResponseError(error));
-      });
-  }
-
   useEffect(() => {
+    function fetchStatefulSet() {
+      axios
+        .get(`/api/resources`, {
+          params: {
+            group: `apps`,
+            version: `v1`,
+            kind: `StatefulSet`,
+            name: name,
+            namespace: namespace,
+          },
+        })
+        .then((res) => {
+          setStatefulSet(res.data);
+        })
+        .catch((error) => {
+          setError(mapResponseError(error));
+        });
+    }
+
     fetchStatefulSet();
     const interval = setInterval(() => fetchStatefulSet(), 15000);
     return () => {
       clearInterval(interval);
     };
-  }, []);
+  }, [name, namespace]);
 
   return (
     <div>

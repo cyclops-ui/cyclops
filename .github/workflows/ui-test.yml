@@ -3,10 +3,10 @@ name: ui tests
 on:
   pull_request:
     paths:
-      - 'cyclops-ui/**'
+      - "cyclops-ui/**"
   push:
     paths:
-      - 'cyclops-ui/**'
+      - "cyclops-ui/**"
     branches:
       - main
 
@@ -27,8 +27,6 @@ jobs:
           cd ${{ github.workspace }}/cyclops-ui
           yarn test
       - name: Build
-        env:
-          CI: false
         run: |
           cd ${{ github.workspace }}/cyclops-ui
           yarn build
