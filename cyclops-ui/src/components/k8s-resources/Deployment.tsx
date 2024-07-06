@@ -19,32 +19,32 @@ const Deployment = ({ name, namespace }: Props) => {
     description: "",
   });
 
-  function fetchDeployment() {
-    axios
-      .get(`/api/resources`, {
-        params: {
-          group: `apps`,
-          version: `v1`,
-          kind: `Deployment`,
-          name: name,
-          namespace: namespace,
-        },
-      })
-      .then((res) => {
-        setDeployment(res.data);
-      })
-      .catch((error) => {
-        setError(mapResponseError(error));
-      });
-  }
-
   useEffect(() => {
+    function fetchDeployment() {
+      axios
+        .get(`/api/resources`, {
+          params: {
+            group: `apps`,
+            version: `v1`,
+            kind: `Deployment`,
+            name: name,
+            namespace: namespace,
+          },
+        })
+        .then((res) => {
+          setDeployment(res.data);
+        })
+        .catch((error) => {
+          setError(mapResponseError(error));
+        });
+    }
+
     fetchDeployment();
     const interval = setInterval(() => fetchDeployment(), 15000);
     return () => {
       clearInterval(interval);
     };
-  }, []);
+  }, [name, namespace]);
 
   return (
     <div>

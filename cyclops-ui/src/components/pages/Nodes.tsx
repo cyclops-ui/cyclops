@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from "react";
 import { Button, Col, Row, Table, Typography, Alert } from "antd";
-import { useNavigate } from "react-router";
 import axios from "axios";
 import { formatBytes } from "../../utils/common";
 import { mapResponseError } from "../../utils/api/errors";
@@ -8,9 +7,7 @@ import { mapResponseError } from "../../utils/api/errors";
 const { Title } = Typography;
 
 const Nodes = () => {
-  const history = useNavigate();
   const [nodes, setNodes] = useState([]);
-  const [filteredNodes, setFilteredNodes] = useState([]);
   const [error, setError] = useState({
     message: "",
     description: "",
@@ -21,7 +18,6 @@ const Nodes = () => {
       .get(`/api/nodes`)
       .then((res) => {
         setNodes(res.data);
-        setFilteredNodes(res.data);
       })
       .catch((error) => {
         setError(mapResponseError(error));

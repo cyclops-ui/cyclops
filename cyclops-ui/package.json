@@ -70,6 +70,7 @@
     ]
   },
   "devDependencies": {
+    "@babel/plugin-proposal-private-property-in-object": "^7.21.0",
     "@types/react-gauge-chart": "^0.4.3",
     "@types/react-highlight-words": "^0.16.7",
     "husky": "^9.0.11",

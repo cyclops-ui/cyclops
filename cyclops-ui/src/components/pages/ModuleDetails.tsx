@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import {
   Alert,
   Button,
@@ -217,21 +217,7 @@ const ModuleDetails = () => {
       });
   }
 
-  function fetchModule() {
-    axios
-      .get(`/api/modules/` + moduleName)
-      .then((res) => {
-        setModule(res.data);
-        setLoadModule(true);
-      })
-      .catch((error) => {
-        setLoading(false);
-        setLoadModule(true);
-        setError(mapResponseError(error));
-      });
-  }
-
-  function fetchModuleResources() {
+  const fetchModuleResources = useCallback(() => {
     axios
       .get(`/api/modules/` + moduleName + `/resources`)
       .then((res) => {
@@ -243,16 +229,30 @@ const ModuleDetails = () => {
         setLoadResources(true);
         setError(mapResponseError(error));
       });
-  }
+  }, [moduleName]);
 
   useEffect(() => {
+    function fetchModule() {
+      axios
+        .get(`/api/modules/` + moduleName)
+        .then((res) => {
+          setModule(res.data);
+          setLoadModule(true);
+        })
+        .catch((error) => {
+          setLoading(false);
+          setLoadModule(true);
+          setError(mapResponseError(error));
+        });
+    }
+
     fetchModule();
     fetchModuleResources();
     const interval = setInterval(() => fetchModuleResources(), 15000);
     return () => {
       clearInterval(interval);
     };
-  }, []);
+  }, [moduleName, fetchModuleResources]);
 
   const getCollapseColor = (fieldName: string) => {
     if (
@@ -420,7 +420,6 @@ const ModuleDetails = () => {
   resources.forEach((resource: any, index) => {
     let collapseKey =
       resource.kind + "/" + resource.namespace + "/" + resource.name;
-    let statusIcon = <p />;
 
     let resourceDetails = <p />;
 
@@ -519,23 +518,6 @@ const ModuleDetails = () => {
       );
     }
 
-    if (resource.status === "healthy") {
-      statusIcon = (
-        <CheckCircleTwoTone
-          style={{ fontSize: "200%", verticalAlign: "middle" }}
-          twoToneColor={"#52c41a"}
-        />
-      );
-    }
-
-    if (resource.status === "unhealthy") {
-      statusIcon = (
-        <CloseSquareTwoTone
-          style={{ fontSize: "200%", verticalAlign: "middle" }}
-          twoToneColor={"red"}
-        />
-      );
-    }
     resourceCollapses.push(
       <Collapse.Panel
         header={genExtra(resource, resource.status)}
@@ -560,7 +542,6 @@ const ModuleDetails = () => {
               <Title style={{ paddingRight: "10px" }} level={3}>
                 {resource.name}
               </Title>
-              {statusIcon}
             </Row>
           </Col>
           <Col span={4} style={{ display: "flex", justifyContent: "flex-end" }}>
@@ -625,6 +606,7 @@ const ModuleDetails = () => {
           <Col span={9}>
             <Title level={1}>
               <img
+                alt=""
                 style={{ height: "1.5em", marginRight: "8px" }}
                 src={module.iconURL}
               />

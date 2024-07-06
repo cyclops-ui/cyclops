@@ -20,32 +20,32 @@ const CronJob = ({ name, namespace }: Props) => {
     description: "",
   });
 
-  function fetchCronJob() {
-    axios
-      .get(`/api/resources`, {
-        params: {
-          group: `batch`,
-          version: `v1`,
-          kind: `CronJob`,
-          name: name,
-          namespace: namespace,
-        },
-      })
-      .then((res) => {
-        setCronjob(res.data);
-      })
-      .catch((error) => {
-        setError(mapResponseError(error));
-      });
-  }
-
   useEffect(() => {
+    function fetchCronJob() {
+      axios
+        .get(`/api/resources`, {
+          params: {
+            group: `batch`,
+            version: `v1`,
+            kind: `CronJob`,
+            name: name,
+            namespace: namespace,
+          },
+        })
+        .then((res) => {
+          setCronjob(res.data);
+        })
+        .catch((error) => {
+          setError(mapResponseError(error));
+        });
+    }
+
     fetchCronJob();
     const interval = setInterval(() => fetchCronJob(), 15000);
     return () => {
       clearInterval(interval);
     };
-  }, []);
+  }, [name, namespace]);
 
   return (
     <div>
