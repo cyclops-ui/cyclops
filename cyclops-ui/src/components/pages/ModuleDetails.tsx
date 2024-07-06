@@ -105,7 +105,14 @@ interface resourceRef {
 const ModuleDetails = () => {
   const [manifestModal, setManifestModal] = useState({
     on: false,
-    manifest: "",
+    resource: {
+      group: '',
+      version: '',
+      kind: '',
+      name: '',
+      namespace: ''
+    },
+    manifest: ""
   });
   const [loading, setLoading] = useState(false);
   const [loadModule, setLoadModule] = useState(false);
@@ -145,7 +152,6 @@ const ModuleDetails = () => {
 
   let { moduleName } = useParams();
 
-  const [kind, setKind] = useState<string>("");
   const [showManagedFields, setShowManagedFields] = useState(false);
 
 
@@ -153,23 +159,32 @@ const ModuleDetails = () => {
     setShowManagedFields(e.target.checked);
   };
 
+  const handleManifestClick = (resource:any) => {
+    setManifestModal({
+      on: true,
+      resource: {
+        group: resource.group,
+        version: resource.version,
+        kind: resource.kind,
+        name: resource.name,
+        namespace: resource.namespace
+      },
+      manifest: ''
+    });
+  };
 
   useEffect(() => {
-    resources.forEach((resource: any, index) => {
-      if(resource.kind === kind){
-        fetchManifest(
-          resource.group,
-          resource.version,
-          resource.kind,
-          resource.namespace,
-          resource.name,
-        );
-      }
-    })
-  },[showManagedFields]);
+    if (manifestModal.on) {
+      fetchManifest(
+        manifestModal.resource.group,
+        manifestModal.resource.version,
+        manifestModal.resource.kind,
+        manifestModal.resource.namespace,
+        manifestModal.resource.name
+      );
+    }
+  }, [showManagedFields, manifestModal.on]);
 
-  
-  
 
   function fetchManifest(
     group: string,
@@ -190,16 +205,16 @@ const ModuleDetails = () => {
         },
       })
       .then((res) => {
-        let manifestData = res.data;
-        setManifestModal({
-          on: true,
-          manifest: manifestData,
-        });
+        setManifestModal((prev) => ({
+          ...prev,
+          manifest: res.data
+        }));
       })
       .catch((error) => {
-        console.error("Error fetching manifest:", error);
+        setLoading(false);
+        setLoadModule(true);
+        setError(mapResponseError(error));
       });
-      setKind(kind);
   }
 
   function fetchModule() {
@@ -271,8 +286,8 @@ const ModuleDetails = () => {
 
   const handleCancelManifest = () => {
     setManifestModal({
-      on: false,
-      manifest: "",
+      ...manifestModal,
+      on: false
     });
   };
 
@@ -558,15 +573,7 @@ const ModuleDetails = () => {
         <Row>
           <Col style={{ float: "right" }}>
             <Button
-              onClick={function () {
-                fetchManifest(
-                  resource.group,
-                  resource.version,
-                  resource.kind,
-                  resource.namespace,
-                  resource.name,
-                );
-              }}
+              onClick={() => handleManifestClick(resource)}
               block
             >
               View Manifest
@@ -908,12 +915,14 @@ const ModuleDetails = () => {
         cancelButtonProps={{ style: { display: "none" } }}
         width={"40%"}
       >
-        <div style={{ marginBottom: '10px' }}>
-        <Checkbox
-        onChange={handleCheckboxChange} checked={showManagedFields} >
-          Include Managed Fields
-        </Checkbox>
-      </div>
+        <div>
+          <Divider>
+            <Checkbox
+            onChange={handleCheckboxChange} checked={showManagedFields} >
+              Include Managed Fields
+            </Checkbox>
+          </Divider>
+        </div>
 
 
         <ReactAce

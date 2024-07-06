@@ -260,7 +260,7 @@ func (k *KubernetesClient) GetManifest(group, version, kind, name, namespace str
 		return "", err
 	}
 
-	if includeManagedFields {
+	if (!includeManagedFields) {
 		resource.SetManagedFields(nil)
 	}
 

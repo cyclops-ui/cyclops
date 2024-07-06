@@ -564,7 +564,7 @@ func (m *Modules) GetManifest(ctx *gin.Context) {
 	kind := ctx.Query("kind")
 	name := ctx.Query("name")
 	namespace := ctx.Query("namespace")
-	includeManagedFields := ctx.Query("includeManagedFields") == "false"
+	includeManagedFields := ctx.Query("includeManagedFields") == "true"
 
 	manifest, err := m.kubernetesClient.GetManifest(group, version, kind, name, namespace,includeManagedFields)
 	if err != nil {
