@@ -135,7 +135,7 @@ func mapHelmPropertyTypeToFieldType(property helm.Property) string {
 
 		return "object"
 	default:
-		return property.Type
+		return string(property.Type)
 	}
 }
 
@@ -179,7 +179,7 @@ func resolveJSONSchemaRef(defs map[string]helm.Property, ref []string) helm.Prop
 	if !ok {
 		return helm.Property{}
 	}
-	
+
 	if len(ref) == 1 {
 		return def
 	}

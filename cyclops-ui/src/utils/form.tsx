@@ -72,6 +72,11 @@ export function findMaps(fields: any[], values: any, initialValues: any): any {
 
         let objectArr: any[] = [];
         valuesList.forEach((valueFromList) => {
+          if (field.items === null || field.items === undefined) {
+            objectArr.push(valueFromList);
+            return;
+          }
+
           switch (field.items.type) {
             case "string":
               objectArr.push(valueFromList);

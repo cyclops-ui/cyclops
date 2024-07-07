@@ -179,7 +179,7 @@ const EditModule = () => {
           let object: any[] = [];
 
           if (values[field.name] === undefined || values[field.name] === null) {
-            out[field.name] = {};
+            out[field.name] = [];
             break;
           }
 
