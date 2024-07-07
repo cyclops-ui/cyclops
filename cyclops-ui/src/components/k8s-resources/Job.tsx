@@ -20,32 +20,32 @@ const Job = ({ name, namespace }: Props) => {
     description: "",
   });
 
-  function fetchJob() {
-    axios
-      .get(`/api/resources`, {
-        params: {
-          group: `batch`,
-          version: `v1`,
-          kind: `Job`,
-          name: name,
-          namespace: namespace,
-        },
-      })
-      .then((res) => {
-        setJob(res.data);
-      })
-      .catch((error) => {
-        setError(mapResponseError(error));
-      });
-  }
-
   useEffect(() => {
+    function fetchJob() {
+      axios
+        .get(`/api/resources`, {
+          params: {
+            group: `batch`,
+            version: `v1`,
+            kind: `Job`,
+            name: name,
+            namespace: namespace,
+          },
+        })
+        .then((res) => {
+          setJob(res.data);
+        })
+        .catch((error) => {
+          setError(mapResponseError(error));
+        });
+    }
+
     fetchJob();
     const interval = setInterval(() => fetchJob(), 15000);
     return () => {
       clearInterval(interval);
     };
-  }, []);
+  }, [name, namespace]);
 
   return (
     <div>

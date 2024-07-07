@@ -128,7 +128,7 @@ const NewModule = () => {
 
   useEffect(() => {
     form.validateFields(flattenObjectKeys(initialValues));
-  }, [initialValues]);
+  }, [initialValues, form]);
 
   const mapsToArray = (fields: any[], values: any): any => {
     let out: any = {};
@@ -581,6 +581,7 @@ const NewModule = () => {
         arrayIndexLifetime = arrayIndexLifetime - 1;
       }
 
+      var header;
       switch (field.type) {
         case "string":
           if (field.enum) {
@@ -678,7 +679,7 @@ const NewModule = () => {
           );
           return;
         case "object":
-          var header = <Row>{field.display_name}</Row>;
+          header = <Row>{field.display_name}</Row>;
 
           if (field.description && field.description.length !== 0) {
             header = (
@@ -760,7 +761,7 @@ const NewModule = () => {
           );
           return;
         case "array":
-          var header = <Row>{field.name}</Row>;
+          header = <Row>{field.name}</Row>;
 
           if (field.description && field.description.length !== 0) {
             header = (
@@ -1090,6 +1091,7 @@ const NewModule = () => {
                   {templateStore.map((option: any, index) => (
                     <Option key={option.name} value={option.name}>
                       <img
+                        alt=""
                         style={{ height: "1.5em", marginRight: "8px" }}
                         src={option.iconURL}
                       />

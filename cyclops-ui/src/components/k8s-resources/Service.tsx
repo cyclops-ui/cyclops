@@ -28,32 +28,32 @@ const Service = ({ name, namespace }: Props) => {
     description: "",
   });
 
-  function fetchService() {
-    axios
-      .get(`/api/resources`, {
-        params: {
-          group: ``,
-          version: `v1`,
-          kind: `Service`,
-          name: name,
-          namespace: namespace,
-        },
-      })
-      .then((res) => {
-        setService(res.data);
-      })
-      .catch((error) => {
-        setError(mapResponseError(error));
-      });
-  }
-
   useEffect(() => {
+    function fetchService() {
+      axios
+        .get(`/api/resources`, {
+          params: {
+            group: ``,
+            version: `v1`,
+            kind: `Service`,
+            name: name,
+            namespace: namespace,
+          },
+        })
+        .then((res) => {
+          setService(res.data);
+        })
+        .catch((error) => {
+          setError(mapResponseError(error));
+        });
+    }
+
     fetchService();
     const interval = setInterval(() => fetchService(), 15000);
     return () => {
       clearInterval(interval);
     };
-  }, []);
+  }, [name, namespace]);
 
   return (
     <div>

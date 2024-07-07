@@ -101,6 +101,11 @@ const config = {
             className: "header-linkedin-link",
           },
           {
+            href: "https://x.com/CyclopsUI",
+            position: "right",
+            className: "header-x-link",
+          },
+          {
             href: "https://discord.com/invite/8ErnK3qDb3",
             className: "header-discord-link",
             position: "right",
@@ -204,6 +209,10 @@ const config = {
           {
             title: "Contact",
             items: [
+              {
+                label: "X",
+                href: "https://x.com/CyclopsUI",
+              },
               {
                 label: "LinkedIn",
                 href: "https://www.linkedin.com/company/cyclops-ui/",

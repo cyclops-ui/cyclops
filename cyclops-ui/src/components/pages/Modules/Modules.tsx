@@ -4,7 +4,6 @@ import {
   Col,
   Divider,
   Row,
-  Select,
   Typography,
   Input,
   Card,
@@ -27,7 +26,6 @@ const Modules = () => {
   const [allData, setAllData] = useState([]);
   const [filteredData, setFilteredData] = useState([]);
   const [loadingModules, setLoadingModules] = useState(false);
-  const [namespacesState, setNamespacesState] = useState([]);
   const [error, setError] = useState({
     message: "",
     description: "",
@@ -48,21 +46,8 @@ const Modules = () => {
       });
   }, []);
 
-  const namespaces: {} | any = [];
-  namespacesState.map((namespace: any) => {
-    namespaces.push(
-      <Select.Option key={namespace.name}>{namespace.name}</Select.Option>,
-    );
-  });
-
-  const [value, setValue] = useState("");
-
   const handleClick = () => {
     history("/modules/new");
-  };
-
-  const handleClickNew = () => {
-    history("/new-app");
   };
 
   const handleSearch = (event: any) => {
@@ -104,7 +89,7 @@ const Modules = () => {
       return <Spin size={"large"} />;
     }
 
-    if (filteredData.length == 0) {
+    if (filteredData.length === 0) {
       return (
         <div style={{ width: "100%" }}>
           <Empty description="No Modules Found"></Empty>
@@ -119,6 +104,7 @@ const Modules = () => {
             title={
               <div>
                 <img
+                  alt=""
                   style={{ height: "2em", marginRight: "8px" }}
                   src={module.iconURL}
                 />

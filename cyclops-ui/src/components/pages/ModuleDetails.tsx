@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import {
   Alert,
   Button,
@@ -174,21 +174,7 @@ const ModuleDetails = () => {
       });
   }
 
-  function fetchModule() {
-    axios
-      .get(`/api/modules/` + moduleName)
-      .then((res) => {
-        setModule(res.data);
-        setLoadModule(true);
-      })
-      .catch((error) => {
-        setLoading(false);
-        setLoadModule(true);
-        setError(mapResponseError(error));
-      });
-  }
-
-  function fetchModuleResources() {
+  const fetchModuleResources = useCallback(() => {
     axios
       .get(`/api/modules/` + moduleName + `/resources`)
       .then((res) => {
@@ -200,16 +186,30 @@ const ModuleDetails = () => {
         setLoadResources(true);
         setError(mapResponseError(error));
       });
-  }
+  }, [moduleName]);
 
   useEffect(() => {
+    function fetchModule() {
+      axios
+        .get(`/api/modules/` + moduleName)
+        .then((res) => {
+          setModule(res.data);
+          setLoadModule(true);
+        })
+        .catch((error) => {
+          setLoading(false);
+          setLoadModule(true);
+          setError(mapResponseError(error));
+        });
+    }
+
     fetchModule();
     fetchModuleResources();
     const interval = setInterval(() => fetchModuleResources(), 15000);
     return () => {
       clearInterval(interval);
     };
-  }, []);
+  }, [moduleName, fetchModuleResources]);
 
   const getCollapseColor = (fieldName: string) => {
     if (
@@ -571,6 +571,7 @@ const ModuleDetails = () => {
           <Col span={9}>
             <Title level={1}>
               <img
+                alt=""
                 style={{ height: "1.5em", marginRight: "8px" }}
                 src={module.iconURL}
               />

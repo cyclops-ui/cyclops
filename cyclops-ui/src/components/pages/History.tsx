@@ -6,7 +6,7 @@ import { useParams } from "react-router-dom";
 import ReactDiffViewer from "react-diff-viewer";
 import ReactAce from "react-ace";
 
-const { Title, Text } = Typography;
+const { Title } = Typography;
 
 require(`ace-builds/src-noconflict/mode-sass`);
 require(`ace-builds/src-noconflict/snippets/sass`);
@@ -44,7 +44,7 @@ const ModuleHistory = () => {
         previous: diff.previous,
       });
     });
-  }, []);
+  }, [diff.previous, moduleName]);
 
   const handleOk = () => {
     setDiffModal({
