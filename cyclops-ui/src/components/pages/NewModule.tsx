@@ -679,7 +679,7 @@ const NewModule = () => {
           );
           return;
         case "object":
-          var header = <Row>{field.name}</Row>;
+          var header = <Row>{field.display_name}</Row>;
 
           if (field.description && field.description.length !== 0) {
             header = (
