@@ -234,7 +234,7 @@ const ModuleDetails = () => {
         setLoadResources(true);
         setError(mapResponseError(error));
       });
-  }, [moduleName]);
+  }, [moduleName,moduleNamespace]);
 
   useEffect(() => {
     function fetchModule() {
@@ -257,7 +257,7 @@ const ModuleDetails = () => {
     return () => {
       clearInterval(interval);
     };
-  }, [moduleName, fetchModuleResources]);
+  }, [moduleName, moduleNamespace,fetchModuleResources]);
 
   const getCollapseColor = (fieldName: string) => {
     if (

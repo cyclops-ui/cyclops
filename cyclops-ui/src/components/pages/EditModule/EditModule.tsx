@@ -275,7 +275,7 @@ const EditModule = () => {
         });
     };
     fetchModuleData();
-  }, [editTemplateForm, form, moduleName, mapsToArray]);
+  }, [editTemplateForm, form, moduleName,moduleNamespace, mapsToArray]);
 
   useEffect(() => {
     form.validateFields(flattenObjectKeys(values));
