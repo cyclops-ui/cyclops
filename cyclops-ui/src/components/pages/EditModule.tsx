@@ -502,43 +502,43 @@ const EditModule = () => {
     arrayField: any,
     remove: Function,
   ) => {
-    switch (field.items.type) {
-      case "object":
-        return (
-          <div>
-            {mapFields(
-              field.items.properties,
-              parentFieldID,
-              "",
-              level + 1,
-              2,
-              arrayField,
-              field.items.required,
-            )}
-            <MinusCircleOutlined
-              style={{ fontSize: "16px" }}
-              onClick={() => remove(arrayField.name)}
-            />
-          </div>
-        );
-      case "string":
-        return (
-          <Row>
-            <Form.Item
-              style={{ paddingBottom: "0px", marginBottom: "0px" }}
-              wrapperCol={24}
-              {...arrayField}
-              initialValue={field.initialValue}
-              name={[arrayField.name]}
-            >
-              <Input />
-            </Form.Item>
-            <MinusCircleOutlined
-              style={{ fontSize: "16px", paddingLeft: "10px" }}
-              onClick={() => remove(arrayField.name)}
-            />
-          </Row>
-        );
+    if (!field.items || typeof field.items === "string") {
+      return (
+        <Row>
+          <Form.Item
+            style={{ paddingBottom: "0px", marginBottom: "0px" }}
+            wrapperCol={24}
+            {...arrayField}
+            initialValue={field.initialValue}
+            name={[arrayField.name]}
+          >
+            <Input />
+          </Form.Item>
+          <MinusCircleOutlined
+            style={{ fontSize: "16px", paddingLeft: "10px" }}
+            onClick={() => remove(arrayField.name)}
+          />
+        </Row>
+      );
+    }
+    if (field.items === "object") {
+      return (
+        <div>
+          {mapFields(
+            field.items.properties,
+            parentFieldID,
+            "",
+            level + 1,
+            2,
+            arrayField,
+            field.items.required,
+          )}
+          <MinusCircleOutlined
+            style={{ fontSize: "16px" }}
+            onClick={() => remove(arrayField.name)}
+          />
+        </div>
+      );
     }
   };
 
