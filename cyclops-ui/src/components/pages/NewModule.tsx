@@ -688,7 +688,7 @@ const NewModule = () => {
                   span={15}
                   style={{ display: "flex", justifyContent: "flex-start" }}
                 >
-                  {field.name}
+                  {field.display_name}
                 </Col>
                 <Col
                   span={9}

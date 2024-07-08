@@ -14,13 +14,16 @@ func HelmSchemaToFields(name string, schema helm.Property, defs map[string]helm.
 			Name:        name,
 			Description: schema.Description,
 			Type:        mapHelmPropertyTypeToFieldType(schema),
-			DisplayName: mapTitle(name, schema),
+			DisplayName: mapTitle(name, schema.Title),
 			Items:       arrayItem(schema.Items, defs),
 		}
 	}
 
+	uniqueFieldNames := make(map[string]struct{})
 	fields := make([]models.Field, 0, len(schema.Properties))
 	for propertyName, property := range schema.Properties {
+		uniqueFieldNames[propertyName] = struct{}{}
+
 		if property.HasRef() {
 			key := strings.TrimPrefix(property.Reference, "#/$defs/")
 
@@ -39,11 +42,16 @@ func HelmSchemaToFields(name string, schema helm.Property, defs map[string]helm.
 	fields = sortFields(fields, schema.Order)
 
 	for _, dependency := range dependencies {
+		// if the dependency schema is already present in the root schema, skip using schema from dependency
+		if _, ok := uniqueFieldNames[dependency.Name]; ok {
+			continue
+		}
+
 		fields = append(fields, models.Field{
 			Name:             dependency.Name,
 			Description:      dependency.RootField.Description,
 			Type:             dependency.RootField.Type,
-			DisplayName:      dependency.RootField.DisplayName,
+			DisplayName:      mapTitle(dependency.Name, dependency.RootField.DisplayName),
 			ManifestKey:      dependency.RootField.ManifestKey,
 			Value:            dependency.RootField.Value,
 			Properties:       dependency.RootField.Properties,
@@ -66,7 +74,7 @@ func HelmSchemaToFields(name string, schema helm.Property, defs map[string]helm.
 		Name:             name,
 		Description:      schema.Description,
 		Type:             mapHelmPropertyTypeToFieldType(schema),
-		DisplayName:      mapTitle(name, schema),
+		DisplayName:      mapTitle(name, schema.Title),
 		ManifestKey:      name,
 		Properties:       fields,
 		Enum:             schema.Enum,
@@ -162,9 +170,9 @@ func arrayRequired(item *helm.Property) []string {
 	return item.Required
 }
 
-func mapTitle(name string, field helm.Property) string {
-	if len(field.Title) != 0 {
-		return field.Title
+func mapTitle(name, displayName string) string {
+	if len(displayName) != 0 {
+		return displayName
 	}
 
 	return name

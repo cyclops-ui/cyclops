@@ -679,7 +679,7 @@ const EditModule = () => {
           );
           return;
         case "object":
-          header = <Row>{field.name}</Row>;
+          header = <Row>{field.display_name}</Row>;
 
           if (field.description && field.description.length !== 0) {
             header = (
@@ -688,7 +688,7 @@ const EditModule = () => {
                   span={15}
                   style={{ display: "flex", justifyContent: "flex-start" }}
                 >
-                  {field.name}
+                  {field.display_name}
                 </Col>
                 <Col
                   span={9}
