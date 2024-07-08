@@ -396,6 +396,12 @@ func (k *KubernetesClient) createDynamicNamespaced(
 		}
 	}
 
+	if isPersistentVolumeClaims(obj.GroupVersionKind().Group, obj.GroupVersionKind().Version, obj.GroupVersionKind().Kind) {
+		if err := mergePVCWithCurrent(current, obj); err != nil {
+			return err
+		}
+	}
+
 	obj.SetResourceVersion(current.GetResourceVersion())
 
 	_, err = k.Dynamic.Resource(gvr).Namespace(namespace).Update(
@@ -477,6 +483,22 @@ func copyJobSelectors(source, destination *unstructured.Unstructured) error {
 	}
 
 	return unstructured.SetNestedMap(destination.Object, templateLabels, "spec", "template", "metadata", "labels")
+}
+
+func mergePVCWithCurrent(current, obj *unstructured.Unstructured) error {
+	requests, ok, err := unstructured.NestedMap(obj.Object, "spec", "resources", "requests")
+	if err != nil {
+		return err
+	}
+	if !ok {
+		return fmt.Errorf("PVC %v spec.resources.requests not found", obj.GetName())
+	}
+
+	for key, value := range current.Object {
+		obj.Object[key] = value
+	}
+
+	return unstructured.SetNestedMap(current.Object, requests, "spec", "resources", "requests")
 }
 
 func (k *KubernetesClient) ListNodes() ([]apiv1.Node, error) {
