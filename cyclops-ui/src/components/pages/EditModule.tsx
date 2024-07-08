@@ -152,10 +152,26 @@ const EditModule = () => {
           }
           break;
         case "array":
-          valuesList = values[field.name] as any[];
+          if (values[field.name] === undefined || values[field.name] === null) {
+            out[field.name] = [];
+            break;
+          }
+
+          valuesList = [];
+          if (Array.isArray(values[field.name])) {
+            valuesList = values[field.name];
+          } else if (typeof values[field.name] === "string") {
+            valuesList = [values[field.name]];
+          }
 
           let objectArr: any[] = [];
           valuesList.forEach((valueFromList) => {
+            // array items not defined
+            if (field.items === null || field.items === undefined) {
+              objectArr.push(valueFromList);
+              return;
+            }
+
             switch (field.items.type) {
               case "string":
                 objectArr.push(valueFromList);
