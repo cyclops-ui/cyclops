@@ -6,6 +6,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"github.com/cyclops-ui/cyclops/cyclops-ctrl/api/v1alpha1"
 	"io"
 	"os"
 	"os/exec"
@@ -346,16 +347,11 @@ func (k *KubernetesClient) Delete(resource dto.Resource) error {
 	)
 }
 
-func (k *KubernetesClient) CreateDynamic(obj *unstructured.Unstructured) error {
-	resourceName, err := k.GVKtoAPIResourceName(obj.GroupVersionKind().GroupVersion(), obj.GroupVersionKind().Kind)
-	if err != nil {
-		return err
-	}
-
+func (k *KubernetesClient) CreateDynamic(resource v1alpha1.GroupVersionResource, obj *unstructured.Unstructured) error {
 	gvr := schema.GroupVersionResource{
-		Group:    obj.GroupVersionKind().Group,
-		Version:  obj.GroupVersionKind().Version,
-		Resource: resourceName,
+		Group:    resource.Group,
+		Version:  resource.Version,
+		Resource: resource.Resource,
 	}
 
 	objNamespace := obj.GetNamespace()

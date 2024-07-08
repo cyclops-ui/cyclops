@@ -66,10 +66,18 @@ type ReconciliationStatus struct {
 	Errors []string `json:"errors"`
 }
 
+type GroupVersionResource struct {
+	Group    string `json:"group"`
+	Version  string `json:"version"`
+	Resource string `json:"resource"`
+}
+
 // ModuleStatus defines the observed state of Module
 type ModuleStatus struct {
 	ReconciliationStatus    ReconciliationStatus `json:"reconciliationStatus"`
 	TemplateResolvedVersion string               `json:"templateResolvedVersion"`
+	// +kubebuilder:validation:Optional
+	ManagedGVRs []GroupVersionResource `json:"managedGVRs"`
 	// +kubebuilder:validation:Optional
 	IconURL string `json:"iconURL"`
 }
