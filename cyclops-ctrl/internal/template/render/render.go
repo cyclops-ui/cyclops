@@ -69,6 +69,8 @@ func (r *Renderer) HelmTemplate(module cyclopsv1alpha1.Module, moduleTemplate *m
 	top["Capabilities"] = Capabilities{
 		KubeVersion: CapabilitiesKubeVersion{
 			Version:    versionInfo.String(),
+			Minor:      versionInfo.Minor,
+			Major:      versionInfo.Major,
 			GitVersion: versionInfo.GitVersion,
 		},
 	}
@@ -134,6 +136,8 @@ func mapMetadata(metadata *helm.Metadata) *helmchart.Metadata {
 
 type CapabilitiesKubeVersion struct {
 	Version    string
+	Minor      string
+	Major      string
 	GitVersion string
 }
 
