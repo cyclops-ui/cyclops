@@ -133,18 +133,18 @@ func (r *ModuleReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctr
 	if err != nil {
 		r.logger.Error(err, "error fetching module template", "namespaced name", req.NamespacedName)
 
-		if err = r.setStatus(ctx, module, req.NamespacedName, cyclopsv1alpha1.Failed, templateVersion, err.Error(), nil, ""); err != nil {
+		if err = r.setStatus(ctx, module, req.NamespacedName, cyclopsv1alpha1.Failed, templateVersion, err.Error(), nil, nil, ""); err != nil {
 			return ctrl.Result{}, err
 		}
 
 		return ctrl.Result{}, err
 	}
 
-	installErrors, err := r.moduleToResources(req.Name, template)
+	installErrors, childrenResources, err := r.moduleToResources(req.Name, template)
 	if err != nil {
 		r.logger.Error(err, "error on upsert module", "namespaced name", req.NamespacedName)
 
-		if err = r.setStatus(ctx, module, req.NamespacedName, cyclopsv1alpha1.Failed, template.ResolvedVersion, err.Error(), nil, template.IconURL); err != nil {
+		if err = r.setStatus(ctx, module, req.NamespacedName, cyclopsv1alpha1.Failed, template.ResolvedVersion, err.Error(), nil, nil, template.IconURL); err != nil {
 			return ctrl.Result{}, err
 		}
 
@@ -160,11 +160,22 @@ func (r *ModuleReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctr
 			template.ResolvedVersion,
 			"error decoding/applying resources",
 			installErrors,
+			childrenResources,
 			template.IconURL,
 		)
 	}
 
-	return ctrl.Result{}, r.setStatus(ctx, module, req.NamespacedName, cyclopsv1alpha1.Succeeded, template.ResolvedVersion, "", nil, template.IconURL)
+	return ctrl.Result{}, r.setStatus(
+		ctx,
+		module,
+		req.NamespacedName,
+		cyclopsv1alpha1.Succeeded,
+		template.ResolvedVersion,
+		"",
+		nil,
+		childrenResources,
+		template.IconURL,
+	)
 }
 
 // SetupWithManager sets up the controller with the Manager.
@@ -174,32 +185,34 @@ func (r *ModuleReconciler) SetupWithManager(mgr ctrl.Manager) error {
 		Complete(r)
 }
 
-func (r *ModuleReconciler) moduleToResources(name string, template *models.Template) ([]string, error) {
+func (r *ModuleReconciler) moduleToResources(name string, template *models.Template) ([]string, []cyclopsv1alpha1.GroupVersionResource, error) {
 	module, err := r.kubernetesClient.GetModule(name)
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 
 	crdInstallErrors := r.applyCRDs(template)
+
+	installErrors, childrenGVRs, err := r.generateResources(r.kubernetesClient, *module, template)
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 
-	installErrors, err := r.generateResources(r.kubernetesClient, *module, template)
-	if err != nil {
-		return nil, err
-	}
-
-	return append(crdInstallErrors, installErrors...), nil
+	return append(crdInstallErrors, installErrors...), childrenGVRs, nil
 }
 
-func (r *ModuleReconciler) generateResources(kClient *k8sclient.KubernetesClient, module cyclopsv1alpha1.Module, moduleTemplate *models.Template) ([]string, error) {
+func (r *ModuleReconciler) generateResources(
+	kClient *k8sclient.KubernetesClient,
+	module cyclopsv1alpha1.Module,
+	moduleTemplate *models.Template,
+) ([]string, []cyclopsv1alpha1.GroupVersionResource, error) {
 	out, err := r.renderer.HelmTemplate(module, moduleTemplate)
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 
 	installErrors := make([]string, 0)
+	childrenGVRs := make([]cyclopsv1alpha1.GroupVersionResource, 0)
 
 	for _, s := range strings.Split(out, "\n---\n") {
 		s := strings.TrimSpace(s)
@@ -245,7 +258,29 @@ func (r *ModuleReconciler) generateResources(kClient *k8sclient.KubernetesClient
 		labels["cyclops.module"] = module.Name
 		obj.SetLabels(labels)
 
-		if err := kClient.CreateDynamic(&obj); err != nil {
+		resourceName, err := kClient.GVKtoAPIResourceName(obj.GroupVersionKind().GroupVersion(), obj.GroupVersionKind().Kind)
+		if err != nil {
+			installErrors = append(installErrors, fmt.Sprintf(
+				"%v%v/%v %v/%v failed to apply: %v",
+				obj.GroupVersionKind().Group,
+				obj.GroupVersionKind().Version,
+				obj.GroupVersionKind().Kind,
+				obj.GetNamespace(),
+				obj.GetName(),
+				err.Error(),
+			))
+
+			continue
+		}
+
+		gvr := cyclopsv1alpha1.GroupVersionResource{
+			Group:    obj.GroupVersionKind().Group,
+			Version:  obj.GroupVersionKind().Version,
+			Resource: resourceName,
+		}
+		childrenGVRs = append(childrenGVRs, gvr)
+
+		if err := kClient.CreateDynamic(gvr, &obj); err != nil {
 			r.logger.Error(err, "could not apply resource",
 				"module namespaced name",
 				module.Name,
@@ -269,7 +304,7 @@ func (r *ModuleReconciler) generateResources(kClient *k8sclient.KubernetesClient
 		}
 	}
 
-	return installErrors, nil
+	return installErrors, childrenGVRs, nil
 }
 
 func (r *ModuleReconciler) applyCRDs(template *models.Template) []string {
@@ -338,6 +373,24 @@ func (r *ModuleReconciler) applyCRDFile(file *chart.File) []string {
 	return installErrors
 }
 
+func (r *ModuleReconciler) mergeChildrenGVRs(existing, current []cyclopsv1alpha1.GroupVersionResource) []cyclopsv1alpha1.GroupVersionResource {
+	unique := make(map[cyclopsv1alpha1.GroupVersionResource]struct{})
+	for _, resource := range existing {
+		unique[resource] = struct{}{}
+	}
+
+	for _, resource := range current {
+		unique[resource] = struct{}{}
+	}
+
+	merged := make([]cyclopsv1alpha1.GroupVersionResource, 0)
+	for u := range unique {
+		merged = append(merged, u)
+	}
+
+	return merged
+}
+
 func (r *ModuleReconciler) setStatus(
 	ctx context.Context,
 	module cyclopsv1alpha1.Module,
@@ -346,6 +399,7 @@ func (r *ModuleReconciler) setStatus(
 	templateResolvedVersion string,
 	reason string,
 	installErrors []string,
+	childrenResources []cyclopsv1alpha1.GroupVersionResource,
 	iconURL string,
 ) error {
 	trv := module.Status.TemplateResolvedVersion
@@ -359,6 +413,7 @@ func (r *ModuleReconciler) setStatus(
 			Reason: reason,
 			Errors: installErrors,
 		},
+		ManagedGVRs:             r.mergeChildrenGVRs(module.Status.ManagedGVRs, childrenResources),
 		TemplateResolvedVersion: templateResolvedVersion,
 		IconURL:                 iconURL,
 	}

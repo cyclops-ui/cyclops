@@ -56,39 +56,27 @@ func (k *KubernetesClient) GetModule(name string) (*cyclopsv1alpha1.Module, erro
 func (k *KubernetesClient) GetResourcesForModule(name string) ([]dto.Resource, error) {
 	out := make([]dto.Resource, 0, 0)
 
-	apiResources, err := k.clientset.Discovery().ServerPreferredResources()
+	module, err := k.GetModule(name)
+	if err != nil {
+		return nil, err
+	}
+
+	managedGVRs, err := k.getManagedGVRs(module)
 	if err != nil {
 		return nil, err
 	}
 
 	other := make([]unstructured.Unstructured, 0)
-
-	for _, resource := range apiResources {
-		gvk, err := schema.ParseGroupVersion(resource.GroupVersion)
+	for _, gvr := range managedGVRs {
+		rs, err := k.Dynamic.Resource(gvr).List(context.Background(), metav1.ListOptions{
+			LabelSelector: "cyclops.module=" + name,
+		})
 		if err != nil {
 			continue
 		}
 
-		for _, apiResource := range resource.APIResources {
-			if gvk.Group == "discovery.k8s.io" && gvk.Version == "v1" && apiResource.Kind == "EndpointSlice" ||
-				gvk.Group == "" && gvk.Version == "v1" && apiResource.Kind == "Endpoints" {
-				continue
-			}
-
-			rs, err := k.Dynamic.Resource(schema.GroupVersionResource{
-				Group:    gvk.Group,
-				Version:  gvk.Version,
-				Resource: apiResource.Name,
-			}).List(context.Background(), metav1.ListOptions{
-				LabelSelector: "cyclops.module=" + name,
-			})
-			if err != nil {
-				continue
-			}
-
-			for _, item := range rs.Items {
-				other = append(other, item)
-			}
+		for _, item := range rs.Items {
+			other = append(other, item)
 		}
 	}
 
@@ -118,6 +106,53 @@ func (k *KubernetesClient) GetResourcesForModule(name string) ([]dto.Resource, e
 	})
 
 	return out, nil
+}
+
+func (k *KubernetesClient) getManagedGVRs(module *cyclopsv1alpha1.Module) ([]schema.GroupVersionResource, error) {
+	if module == nil {
+		return nil, errors.New("nil module provided")
+	}
+
+	if len(module.Status.ManagedGVRs) != 0 {
+		existing := make([]schema.GroupVersionResource, 0, len(module.Status.ManagedGVRs))
+		for _, r := range module.Status.ManagedGVRs {
+			existing = append(existing, schema.GroupVersionResource{
+				Group:    r.Group,
+				Version:  r.Version,
+				Resource: r.Resource,
+			})
+		}
+
+		return existing, nil
+	}
+
+	apiResources, err := k.clientset.Discovery().ServerPreferredResources()
+	if err != nil {
+		return nil, err
+	}
+
+	gvrs := make([]schema.GroupVersionResource, 0)
+	for _, resource := range apiResources {
+		gvk, err := schema.ParseGroupVersion(resource.GroupVersion)
+		if err != nil {
+			continue
+		}
+
+		for _, apiResource := range resource.APIResources {
+			if gvk.Group == "discovery.k8s.io" && gvk.Version == "v1" && apiResource.Kind == "EndpointSlice" ||
+				gvk.Group == "" && gvk.Version == "v1" && apiResource.Kind == "Endpoints" {
+				continue
+			}
+
+			gvrs = append(gvrs, schema.GroupVersionResource{
+				Group:    gvk.Group,
+				Version:  gvk.Version,
+				Resource: apiResource.Name,
+			})
+		}
+	}
+
+	return gvrs, nil
 }
 
 func (k *KubernetesClient) GetDeletedResources(
