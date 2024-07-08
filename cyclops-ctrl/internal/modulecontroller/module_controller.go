@@ -97,7 +97,7 @@ func (r *ModuleReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctr
 	err := r.Get(ctx, req.NamespacedName, &module)
 	if apierrors.IsNotFound(err) {
 		r.logger.Info("delete module", "namespaced name", req.NamespacedName)
-		resources, err := r.kubernetesClient.GetResourcesForModule(req.Name)
+		resources, err := r.kubernetesClient.GetResourcesForModule(req.Name, req.Namespace)
 		if err != nil {
 			r.logger.Error(err, "error on get module resources", "namespaced name", req.NamespacedName)
 			return ctrl.Result{}, err
@@ -144,7 +144,7 @@ func (r *ModuleReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctr
 		return ctrl.Result{}, err
 	}
 
-	installErrors, childrenResources, err := r.moduleToResources(req.Name, template)
+	installErrors, childrenResources, err := r.moduleToResources(req.Name, req.Namespace, template)
 	if err != nil {
 		r.logger.Error(err, "error on upsert module", "namespaced name", req.NamespacedName)
 
@@ -194,15 +194,15 @@ func (r *ModuleReconciler) SetupWithManager(mgr ctrl.Manager) error {
 		Complete(r)
 }
 
-func (r *ModuleReconciler) moduleToResources(name string, template *models.Template) ([]string, []cyclopsv1alpha1.GroupVersionResource, error) {
-	module, err := r.kubernetesClient.GetModule(name)
+func (r *ModuleReconciler) moduleToResources(name, namespace string, template *models.Template) ([]string, []cyclopsv1alpha1.GroupVersionResource, error) {
+	module, err := r.kubernetesClient.GetModule(name, namespace)
 	if err != nil {
 		return nil, nil, err
 	}
 
 	crdInstallErrors := r.applyCRDs(template)
 
-	installErrors, childrenGVRs, err := r.generateResources(r.kubernetesClient, *module, template)
+	installErrors, childrenGVRs, err := r.generateResources(r.kubernetesClient, *module, template, namespace)
 	if err != nil {
 		return nil, nil, err
 	}
@@ -214,6 +214,7 @@ func (r *ModuleReconciler) generateResources(
 	kClient *k8sclient.KubernetesClient,
 	module cyclopsv1alpha1.Module,
 	moduleTemplate *models.Template,
+	namespace string,
 ) ([]string, []cyclopsv1alpha1.GroupVersionResource, error) {
 	out, err := r.renderer.HelmTemplate(module, moduleTemplate)
 	if err != nil {
@@ -240,6 +241,10 @@ func (r *ModuleReconciler) generateResources(
 				"resource namespaced name",
 				fmt.Sprintf("%s/%s", obj.GetNamespace(), obj.GetName()),
 			)
+
+			if obj.GetNamespace() == "" {
+				obj.SetNamespace(namespace)
+			}
 
 			installErrors = append(installErrors, fmt.Sprintf(
 				"%v%v/%v %v/%v failed to decode: %v",

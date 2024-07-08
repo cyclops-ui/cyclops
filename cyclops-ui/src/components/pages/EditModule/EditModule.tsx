@@ -64,6 +64,7 @@ const layout = {
 
 interface module {
   name: string;
+  namespace: string,
   values: any;
   template: templateRef;
 }
@@ -71,6 +72,7 @@ interface module {
 const EditModule = () => {
   const [module, setModule] = useState<module>({
     name: "",
+    namespace: "",
     values: {},
     template: {
       repo: "",
@@ -134,6 +136,7 @@ const EditModule = () => {
   const history = useNavigate();
 
   let { moduleName } = useParams();
+  let { moduleNamespace } = useParams();
 
   const mapsToArray = useCallback((fields: any[], values: any): any => {
     let out: any = {};
@@ -220,7 +223,7 @@ const EditModule = () => {
   useEffect(() => {
     const fetchModuleData = async () => {
       axios
-        .get("/api/modules/" + moduleName)
+        .get("/api/modules/" + moduleNamespace + "/" + moduleName)
         .then(async (res) => {
           editTemplateForm.setFieldsValue({
             repo: res.data.template.repo,
@@ -251,6 +254,7 @@ const EditModule = () => {
 
             setModule({
               name: res.data.name,
+              namespace: res.data.namespace,
               values: values,
               template: res.data.template,
             });
@@ -392,10 +396,11 @@ const EditModule = () => {
       .post(`/api/modules/update`, {
         values: values,
         name: module.name,
+        namespace: module.namespace,
         template: templateRef,
       })
       .then((res) => {
-        window.location.href = "/modules/" + moduleName;
+        window.location.href = "/modules/" + moduleNamespace + "/" + moduleName;
       })
       .catch((error) => {
         setError(mapResponseError(error));
@@ -1105,8 +1110,9 @@ const EditModule = () => {
           </Button>{" "}
           <Button
             htmlType="button"
-            onClick={() => history("/modules/" + moduleName)}
-            disabled={!loadTemplate}
+            onClick={() =>
+              history("/modules/" + moduleNamespace + "/" + moduleName)
+            }
           >
             Back
           </Button>
