@@ -109,7 +109,7 @@ var _ = Describe("Helm mapper test", func() {
 			name := "fieldName"
 			property := helm.Property{Title: "title"}
 
-			out := mapTitle(name, property)
+			out := mapTitle(name, property.Title)
 
 			It("return title override", func() {
 				Expect(out).To(BeEquivalentTo(property.Title))
@@ -120,7 +120,7 @@ var _ = Describe("Helm mapper test", func() {
 			name := "fieldName"
 			property := helm.Property{}
 
-			out := mapTitle(name, property)
+			out := mapTitle(name, property.Title)
 
 			It("return title override", func() {
 				Expect(out).To(BeEquivalentTo(name))

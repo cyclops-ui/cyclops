@@ -216,12 +216,14 @@ func (r Repo) mapHelmChart(chartName string, files map[string][]byte) (*models.T
 	// unmarshal values schema only if present
 	if len(schemaBytes) > 0 {
 		if err := json.Unmarshal(schemaBytes, &schema); err != nil {
+			fmt.Println("error on schema bytes", chartName)
 			return &models.Template{}, err
 		}
 	}
 
 	var metadata *helm.Metadata
 	if err := yaml.Unmarshal(metadataBytes, &metadata); err != nil {
+		fmt.Println("error on meta unm", chartName)
 		return &models.Template{}, err
 	}
 

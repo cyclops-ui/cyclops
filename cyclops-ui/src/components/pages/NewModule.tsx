@@ -10,7 +10,6 @@ import {
   InputNumber,
   Row,
   Select,
-  Space,
   Switch,
   Typography,
   Tooltip,
@@ -151,10 +150,26 @@ const NewModule = () => {
           }
           break;
         case "array":
-          valuesList = values[field.name] as any[];
+          if (values[field.name] === undefined || values[field.name] === null) {
+            out[field.name] = [];
+            break;
+          }
+
+          valuesList = [];
+          if (Array.isArray(values[field.name])) {
+            valuesList = values[field.name];
+          } else if (typeof values[field.name] === "string") {
+            valuesList = [values[field.name]];
+          }
 
           let objectArr: any[] = [];
           valuesList.forEach((valueFromList) => {
+            // array items not defined
+            if (field.items === null || field.items === undefined) {
+              objectArr.push(valueFromList);
+              return;
+            }
+
             switch (field.items.type) {
               case "string":
                 objectArr.push(valueFromList);
@@ -172,7 +187,7 @@ const NewModule = () => {
           let object: any[] = [];
 
           if (values[field.name] === undefined || values[field.name] === null) {
-            out[field.name] = {};
+            out[field.name] = [];
             break;
           }
 
@@ -468,43 +483,43 @@ const NewModule = () => {
     arrayField: any,
     remove: Function,
   ) => {
-    switch (field.items.type) {
-      case "object":
-        return (
-          <div>
-            {mapFields(
-              field.items.properties,
-              parentFieldID,
-              "",
-              level + 1,
-              2,
-              arrayField,
-              field.items.required,
-            )}
-            <MinusCircleOutlined
-              style={{ fontSize: "16px" }}
-              onClick={() => remove(arrayField.name)}
-            />
-          </div>
-        );
-      case "string":
-        return (
-          <Row>
-            <Form.Item
-              style={{ paddingBottom: "0px", marginBottom: "0px" }}
-              wrapperCol={24}
-              {...arrayField}
-              initialValue={field.initialValue}
-              name={[arrayField.name]}
-            >
-              <Input />
-            </Form.Item>
-            <MinusCircleOutlined
-              style={{ fontSize: "16px", paddingLeft: "10px" }}
-              onClick={() => remove(arrayField.name)}
-            />
-          </Row>
-        );
+    if (!field.items || typeof field.items === "string") {
+      return (
+        <Row>
+          <Form.Item
+            style={{ paddingBottom: "0px", marginBottom: "0px" }}
+            wrapperCol={24}
+            {...arrayField}
+            initialValue={field.initialValue}
+            name={[arrayField.name]}
+          >
+            <Input />
+          </Form.Item>
+          <MinusCircleOutlined
+            style={{ fontSize: "16px", paddingLeft: "10px" }}
+            onClick={() => remove(arrayField.name)}
+          />
+        </Row>
+      );
+    }
+    if (field.items === "object") {
+      return (
+        <div>
+          {mapFields(
+            field.items.properties,
+            parentFieldID,
+            "",
+            level + 1,
+            2,
+            arrayField,
+            field.items.required,
+          )}
+          <MinusCircleOutlined
+            style={{ fontSize: "16px" }}
+            onClick={() => remove(arrayField.name)}
+          />
+        </div>
+      );
     }
   };
 
@@ -664,7 +679,7 @@ const NewModule = () => {
           );
           return;
         case "object":
-          header = <Row>{field.name}</Row>;
+          header = <Row>{field.display_name}</Row>;
 
           if (field.description && field.description.length !== 0) {
             header = (
@@ -673,7 +688,7 @@ const NewModule = () => {
                   span={15}
                   style={{ display: "flex", justifyContent: "flex-start" }}
                 >
-                  {field.name}
+                  {field.display_name}
                 </Col>
                 <Col
                   span={9}
@@ -845,6 +860,7 @@ const NewModule = () => {
         case "map":
           formFields.push(
             <Form.Item
+              wrapperCol={{ span: level === 0 ? 16 : 24 }}
               name={fieldName}
               rules={[{ required: isRequired }]}
               label={
@@ -858,45 +874,77 @@ const NewModule = () => {
             >
               <Form.List name={formItemName} initialValue={[]}>
                 {(fields, { add, remove }) => (
-                  <>
-                    {fields.map((arrField) => (
-                      <Space
+                  <div
+                    style={{
+                      border: "solid 1px #d3d3d3",
+                      borderRadius: "7px",
+                      padding: "12px",
+                      width: "100%",
+                      backgroundColor: "#fafafa",
+                    }}
+                  >
+                    {fields.map((arrField, index) => (
+                      <Row
                         key={arrField.key}
-                        style={{ display: "flex", marginBottom: 8 }}
-                        align="baseline"
+                        style={{
+                          display: "flex",
+                          marginBottom: 8,
+                          width: "100%",
+                        }}
                       >
-                        <Form.Item
-                          {...arrField}
-                          name={[arrField.name, "key"]}
-                          rules={[{ required: true, message: "Missing key" }]}
-                        >
-                          <Input />
-                        </Form.Item>
-                        <Form.Item
-                          {...arrField}
-                          name={[arrField.name, "value"]}
-                          rules={[{ required: true, message: "Missing value" }]}
-                        >
-                          <Input />
-                        </Form.Item>
+                        <Col span={10}>
+                          <Form.Item
+                            {...arrField}
+                            name={[arrField.name, "key"]}
+                            rules={[{ required: true, message: "Missing key" }]}
+                            style={{ margin: 0, flex: 1, marginRight: "8px" }}
+                          >
+                            <Input style={{ margin: 0, width: "100%" }} />
+                          </Form.Item>
+                        </Col>
+                        <Col span={10}>
+                          <Form.Item
+                            {...arrField}
+                            name={[arrField.name, "value"]}
+                            rules={[
+                              { required: true, message: "Missing value" },
+                            ]}
+                            style={{ margin: 0, flex: 1, marginRight: "12px" }}
+                          >
+                            <Input style={{ margin: 0 }} />
+                          </Form.Item>
+                        </Col>
                         <MinusCircleOutlined
                           onClick={() => remove(arrField.name)}
                         />
-                      </Space>
+                        {fields !== null &&
+                        fields !== undefined &&
+                        index + 1 === fields.length ? (
+                          <Divider
+                            style={{ marginTop: "12px", marginBottom: "4px" }}
+                          />
+                        ) : (
+                          ""
+                        )}
+                      </Row>
                     ))}
-                    <Form.Item>
-                      <Button
-                        type="dashed"
-                        onClick={() => {
-                          add();
-                        }}
-                        block
-                        icon={<PlusOutlined />}
+                    <Col span={24}>
+                      <Form.Item
+                        style={{ marginBottom: "0", marginRight: "12px" }}
                       >
-                        Add
-                      </Button>
-                    </Form.Item>
-                  </>
+                        <Button
+                          type="dashed"
+                          onClick={() => {
+                            add();
+                          }}
+                          block
+                          icon={<PlusOutlined />}
+                        >
+                          Add
+                        </Button>
+                      </Form.Item>
+                    </Col>
+                  </div>
                 )}
               </Form.List>
             </Form.Item>,
