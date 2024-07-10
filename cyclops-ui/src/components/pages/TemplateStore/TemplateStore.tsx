@@ -18,7 +18,6 @@ import {
   DeleteOutlined,
   EditOutlined,
   FileSyncOutlined,
-  SettingOutlined,
 } from "@ant-design/icons";
 import classNames from "classnames";
 import styles from "./styles.module.css";
