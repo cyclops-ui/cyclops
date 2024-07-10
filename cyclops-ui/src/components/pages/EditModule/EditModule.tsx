@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import {
   Alert,
   Button,
@@ -8,28 +8,27 @@ import {
   Form,
   Input,
   InputNumber,
+  notification,
   Row,
   Select,
-  Switch,
-  Typography,
-  Tooltip,
-  Modal,
   Spin,
-  notification,
+  Switch,
+  Tooltip,
+  Typography,
 } from "antd";
 import axios from "axios";
 import { useNavigate } from "react-router";
 import {
+  InfoCircleOutlined,
+  LockFilled,
   MinusCircleOutlined,
   PlusOutlined,
-  InfoCircleOutlined,
+  UnlockFilled,
 } from "@ant-design/icons";
-import { fileExtension, findMaps, flattenObjectKeys } from "../../utils/form";
-import "./custom.css";
-
-import YAML from "yaml";
 
 import AceEditor from "react-ace";
+
+import { useParams } from "react-router-dom";
 
 import "ace-builds/src-noconflict/theme-github";
 
@@ -38,77 +37,80 @@ import "ace-builds/src-noconflict/mode-toml";
 import "ace-builds/src-noconflict/mode-javascript";
 import "ace-builds/src-noconflict/mode-typescript";
 import "ace-builds/src-noconflict/snippets/yaml";
-import { numberInputValidators } from "../../utils/validators/number";
-import { stringInputValidators } from "../../utils/validators/string";
-import { Option } from "antd/es/mentions";
+import {
+  fileExtension,
+  findMaps,
+  flattenObjectKeys,
+} from "../../../utils/form";
+import "./custom.css";
+import { numberInputValidators } from "../../../utils/validators/number";
+import { stringInputValidators } from "../../../utils/validators/string";
+import { templateRef } from "../../../utils/templateRef";
 import {
   FeedbackError,
   FormValidationErrors,
-} from "../errors/FormValidationErrors";
-import { mapResponseError } from "../../utils/api/errors";
+} from "../../errors/FormValidationErrors";
+import { mapResponseError } from "../../../utils/api/errors";
+import {
+  getTemplate,
+  getTemplateInitialValues,
+  Template,
+} from "../../../utils/api/template";
 
 const { Title } = Typography;
 const layout = {
   wrapperCol: { span: 16 },
 };
 
-interface templateStoreOption {
+interface module {
   name: string;
-  ref: {
-    repo: string;
-    path: string;
-    version: string;
-  };
+  values: any;
+  template: templateRef;
 }
 
-const NewModule = () => {
-  const [loading, setLoading] = useState(false);
-  const [config, setConfig] = useState({
+const EditModule = () => {
+  const [module, setModule] = useState<module>({
     name: "",
-    version: "",
-    manifest: "",
+    values: {},
+    template: {
+      repo: "",
+      path: "",
+      version: "",
+      resolvedVersion: "",
+    },
+  });
+
+  const [previousValues, setPreviousValues] = useState();
+
+  const [form] = Form.useForm();
+  const [editTemplateForm] = Form.useForm();
+
+  const [initialValuesRaw, setInitialValuesRaw] = useState({});
+
+  const [values, setValues] = useState({});
+  const [isChanged, setIsChanged] = useState(false);
+  const [isTemplateChanged, setIsTemplateChanged] = useState(false);
+  const [config, setConfig] = useState<Template>({
+    name: "",
+    resolvedVersion: "",
     root: {
       properties: [],
       required: [],
     },
-    dependencies: [],
   });
 
-  const [template, setTemplate] = useState({
+  const [templateRef, setTemplateRef] = useState<templateRef>({
     repo: "",
     path: "",
     version: "",
+    resolvedVersion: "",
   });
-
-  const [initialValues, setInitialValues] = useState({});
-  const [initialValuesRaw, setInitialValuesRaw] = useState({});
+  const [templateRefLock, setTemplateRefLock] = useState(true);
 
   const [error, setError] = useState({
     message: "",
     description: "",
   });
-
-  const [loadingTemplate, setLoadingTemplate] = useState(false);
-  const [loadingTemplateInitialValues, setLoadingTemplateInitialValues] =
-    useState(false);
-
-  const [activeCollapses, setActiveCollapses] = useState(new Map());
-  const updateActiveCollapses = (k: string[], v: any) => {
-    let kk = new Array(k);
-    setActiveCollapses(new Map(activeCollapses.set(kk.join(""), v)));
-  };
-
-  var initLoadedFrom: string[];
-  initLoadedFrom = [];
-  const [newFile, setNewFile] = useState("");
-  const [loadedFrom, setLoadedFrom] = useState(initLoadedFrom);
-  const [loadedValues, setLoadedValues] = useState("");
-  const [loadingValuesFile, setLoadingValuesFile] = useState(false);
-  const [loadingValuesModal, setLoadingValuesModal] = useState(false);
-
-  const [templateStore, setTemplateStore] = useState<templateStoreOption[]>([]);
-
-  const history = useNavigate();
 
   const [notificationApi, contextHolder] = notification.useNotification();
   const openNotification = (errors: FeedbackError[]) => {
@@ -120,17 +122,20 @@ const NewModule = () => {
     });
   };
 
-  const [form] = Form.useForm();
+  const [loadValues, setLoadValues] = useState(false);
+  const [loadTemplate, setLoadTemplate] = useState(false);
 
-  useEffect(() => {
-    loadTemplateStore();
-  }, []);
+  const [activeCollapses, setActiveCollapses] = useState(new Map());
+  const updateActiveCollapses = (k: string[], v: any) => {
+    let kk = new Array(k);
+    setActiveCollapses(new Map(activeCollapses.set(kk.join(""), v)));
+  };
 
-  useEffect(() => {
-    form.validateFields(flattenObjectKeys(initialValues));
-  }, [initialValues, form]);
+  const history = useNavigate();
 
-  const mapsToArray = (fields: any[], values: any): any => {
+  let { moduleName } = useParams();
+
+  const mapsToArray = useCallback((fields: any[], values: any): any => {
     let out: any = {};
     fields.forEach((field) => {
       let valuesList: any[] = [];
@@ -210,174 +215,191 @@ const NewModule = () => {
     });
 
     return out;
+  }, []);
+
+  useEffect(() => {
+    const fetchModuleData = async () => {
+      axios
+        .get("/api/modules/" + moduleName)
+        .then(async (res) => {
+          editTemplateForm.setFieldsValue({
+            repo: res.data.template.repo,
+            path: res.data.template.path,
+            version: res.data.template.version,
+          });
+          setLoadValues(true);
+
+          setTemplateRef({
+            repo: res.data.template.repo,
+            path: res.data.template.path,
+            version: res.data.template.version,
+            resolvedVersion: res.data.template.resolvedVersion,
+          });
+
+          let result = await getTemplate(
+            res.data.template.repo,
+            res.data.template.path,
+            res.data.template.resolvedVersion,
+          );
+
+          if (result.success) {
+            setConfig(result.template);
+            let values = mapsToArray(
+              result.template.root.properties,
+              res.data.values,
+            );
+
+            setModule({
+              name: res.data.name,
+              values: values,
+              template: res.data.template,
+            });
+            form.setFieldsValue(values);
+            setValues(values);
+            setPreviousValues(res.data.values);
+          } else {
+            console.log(result);
+            setError(result.error);
+          }
+
+          setLoadTemplate(true);
+        })
+        .catch((error) => {
+          setError(mapResponseError(error));
+          setLoadTemplate(true);
+          setLoadValues(true);
+        });
+    };
+    fetchModuleData();
+  }, [editTemplateForm, form, moduleName, mapsToArray]);
+
+  useEffect(() => {
+    form.validateFields(flattenObjectKeys(values));
+  }, [values, form]);
+
+  const handleValuesChange = (changedValues: any, allValues: any) => {
+    if (JSON.stringify(allValues) === JSON.stringify(values)) {
+      setIsChanged(false);
+    } else {
+      setIsChanged(true);
+    }
+
+    setValues(allValues);
   };
 
-  const handleSubmit = (values: any) => {
-    const moduleName = values["cyclops_module_name"];
+  const handleTemplateRefChange = (
+    repo: string,
+    path: string,
+    version: string,
+    resolvedVersion: string,
+  ) => {
+    let newTemplate: templateRef = {
+      repo: repo,
+      path: path,
+      version: version,
+      resolvedVersion: resolvedVersion,
+    };
 
-    values = findMaps(config.root.properties, values, initialValuesRaw);
+    if (JSON.stringify(module.template) === JSON.stringify(newTemplate)) {
+      setIsTemplateChanged(false);
+    } else {
+      setIsTemplateChanged(true);
+    }
+  };
+
+  async function handleSubmitTemplateEdit(templateEditValues: any) {
+    setLoadTemplate(false);
+
+    let currentValues = form.getFieldsValue();
+
+    let templateResult = await getTemplate(
+      templateEditValues.repo,
+      templateEditValues.path,
+      templateEditValues.version,
+    );
+
+    if (!templateResult.success) {
+      setConfig({
+        name: "",
+        resolvedVersion: "",
+        root: { properties: [], required: [] },
+      });
+      setLoadTemplate(true);
+      setError(templateResult.error);
+      return;
+    }
+
+    let initialValuesResult = await getTemplateInitialValues(
+      templateEditValues.repo,
+      templateEditValues.path,
+      templateEditValues.version,
+    );
+
+    if (!initialValuesResult.success) {
+      setConfig({
+        name: "",
+        resolvedVersion: "",
+        root: { properties: [], required: [] },
+      });
+      setLoadTemplate(true);
+      setError(templateResult.error);
+      return;
+    }
+
+    // both requests successful
+    setTemplateRef({
+      repo: templateEditValues.repo,
+      path: templateEditValues.path,
+      version: templateEditValues.version,
+      resolvedVersion: templateResult.template.resolvedVersion,
+    });
+    handleTemplateRefChange(
+      templateEditValues.repo,
+      templateEditValues.path,
+      templateEditValues.version,
+      templateResult.template.resolvedVersion,
+    );
+
+    setConfig(templateResult.template);
+
+    let mergedValues = findMaps(
+      templateResult.template.root.properties,
+      currentValues,
+      initialValuesResult.initialValues,
+    );
+
+    let mergedValuesMapped = mapsToArray(
+      templateResult.template.root.properties,
+      mergedValues,
+    );
+
+    setValues(mergedValuesMapped);
+
+    setInitialValuesRaw(initialValuesResult.initialValues);
+    form.setFieldsValue(mergedValuesMapped);
+
+    setLoadTemplate(true);
+  }
+
+  const handleSubmit = (values: any) => {
+    if (isTemplateChanged) {
+      values = findMaps(config.root.properties, values, initialValuesRaw);
+    } else {
+      values = findMaps(config.root.properties, values, previousValues);
+    }
 
     axios
-      .post(`/api/modules/new`, {
-        name: moduleName,
+      .post(`/api/modules/update`, {
         values: values,
-        template: {
-          repo: template.repo,
-          path: template.path,
-          version: template.version,
-        },
+        name: module.name,
+        template: templateRef,
       })
       .then((res) => {
         window.location.href = "/modules/" + moduleName;
       })
       .catch((error) => {
-        setLoading(false);
         setError(mapResponseError(error));
       });
-  };
-
-  const loadTemplate = async (repo: string, path: string, commit: string) => {
-    setConfig({
-      name: "",
-      version: "",
-      manifest: "",
-      root: {
-        properties: [],
-        required: [],
-      },
-      dependencies: [],
-    });
-    form.setFieldsValue({});
-    setInitialValuesRaw({});
-    setInitialValues({});
-
-    setActiveCollapses(new Map());
-    setLoadingTemplate(true);
-    setLoadingTemplateInitialValues(true);
-
-    setError({
-      message: "",
-      description: "",
-    });
-
-    if (repo.trim() === "") {
-      setError({
-        message: "Invalid repository name",
-        description: "Repository name must not be empty",
-      });
-      setLoadingTemplate(false);
-      setLoadingTemplateInitialValues(false);
-      return;
-    }
-
-    let tmpConfig: any = {};
-
-    await axios
-      .get(
-        `/api/templates?repo=` + repo + `&path=` + path + `&commit=` + commit,
-      )
-      .then((templatesRes) => {
-        setConfig(templatesRes.data);
-        tmpConfig = templatesRes.data;
-
-        setError({
-          message: "",
-          description: "",
-        });
-        setLoadingTemplate(false);
-      })
-      .catch(function (error) {
-        setLoadingTemplate(false);
-        setError(mapResponseError(error));
-      });
-
-    axios
-      .get(
-        `/api/templates/initial?repo=` +
-          repo +
-          `&path=` +
-          path +
-          `&commit=` +
-          commit,
-      )
-      .then((res) => {
-        let initialValuesMapped = mapsToArray(
-          tmpConfig.root.properties,
-          res.data,
-        );
-
-        setInitialValuesRaw(res.data);
-        setInitialValues(initialValuesMapped);
-        form.setFieldsValue(initialValuesMapped);
-
-        setError({
-          message: "",
-          description: "",
-        });
-
-        setLoadingTemplateInitialValues(false);
-      })
-      .catch(function (error) {
-        setLoadingTemplateInitialValues(false);
-        setError(mapResponseError(error));
-      });
-
-    setActiveCollapses(new Map());
-  };
-
-  const loadTemplateStore = async () => {
-    await axios
-      .get(`/api/templates/store`)
-      .then((res) => {
-        setTemplateStore(res.data);
-      })
-      .catch(function (error) {
-        setLoadingTemplate(false);
-        setError(mapResponseError(error));
-      });
-  };
-
-  const findTemplateStoreSelected = (name: string) => {
-    for (let ts of templateStore) {
-      if (ts.name === name) {
-        return ts;
-      }
-    }
-
-    return null;
-  };
-
-  const onTemplateStoreSelected = (v: string) => {
-    const ts = findTemplateStoreSelected(v);
-    if (ts === null) {
-      return;
-    }
-
-    setTemplate({
-      repo: ts.ref.repo,
-      path: ts.ref.path,
-      version: ts.ref.version,
-    });
-
-    loadTemplate(ts.ref.repo, ts.ref.path, ts.ref.version);
-  };
-
-  const onLoadFromFile = () => {
-    setLoadingValuesFile(true);
-    setLoadedValues("");
-
-    if (newFile.trim() === "") {
-      setError({
-        message: "Invalid values file",
-        description: "Values file can't be empty",
-      });
-      return;
-    }
-
-    setLoadingValuesModal(true);
-
-    loadValues(newFile);
-    setLoadingValuesFile(false);
   };
 
   const getCollapseColor = (fieldName: string) => {
@@ -409,6 +431,10 @@ const NewModule = () => {
         {...arrayField}
         name={formItemName}
         rules={[{ required: isRequired }]}
+        style={{
+          paddingTop: "8px",
+          marginBottom: "12px",
+        }}
         label={
           <div>
             {field.display_name}
@@ -441,6 +467,10 @@ const NewModule = () => {
       <Form.Item
         {...arrayField}
         name={formItemName}
+        style={{
+          paddingTop: "8px",
+          marginBottom: "12px",
+        }}
         label={
           <div>
             {field.display_name}
@@ -551,11 +581,6 @@ const NewModule = () => {
     required?: string[],
   ) {
     const formFields: {} | any = [];
-
-    if (!fields) {
-      return <></>;
-    }
-
     fields.forEach((field: any) => {
       let fieldName = field.name;
 
@@ -604,6 +629,10 @@ const NewModule = () => {
             <Form.Item
               {...arrayField}
               name={formItemName}
+              style={{
+                paddingTop: "8px",
+                marginBottom: "12px",
+              }}
               label={
                 <div>
                   {field.display_name}
@@ -628,6 +657,10 @@ const NewModule = () => {
               {...arrayField}
               initialValue={field.initialValue}
               name={formItemName}
+              style={{
+                paddingTop: "8px",
+                marginBottom: "12px",
+              }}
               label={
                 <div>
                   {field.display_name}
@@ -645,6 +678,8 @@ const NewModule = () => {
           );
           return;
         case "boolean":
+          let moduleValues: any = values;
+
           let k = [];
           for (const item of parentFieldID) {
             if (item === "") {
@@ -656,7 +691,7 @@ const NewModule = () => {
           k.push(fieldName);
 
           let checked =
-            getValueFromNestedObject(initialValues, k) === true
+            getValueFromNestedObject(moduleValues, k) === true
               ? "checked"
               : "unchecked";
           formFields.push(
@@ -664,7 +699,10 @@ const NewModule = () => {
               initialValue={field.initialValue}
               name={fieldName}
               id={fieldName}
-              valuePropName={checked}
+              style={{
+                paddingTop: "8px",
+                marginBottom: "12px",
+              }}
               label={
                 <div>
                   {field.display_name}
@@ -673,6 +711,7 @@ const NewModule = () => {
                   </p>
                 </div>
               }
+              valuePropName={checked}
             >
               <Switch />
             </Form.Item>,
@@ -712,15 +751,20 @@ const NewModule = () => {
               span={level === 0 ? 16 : 24}
               offset={level === 0 ? 2 : 0}
               style={{
-                paddingBottom: "15px",
-                marginLeft: "0px",
-                marginRight: "0px",
+                paddingTop: "8px",
+                paddingBottom: "8px",
                 paddingLeft: "0px",
                 paddingRight: "0px",
+                marginLeft: "0px",
+                marginRight: "0px",
               }}
             >
               <Collapse
                 size={"small"}
+                bordered={false}
+                style={{
+                  borderColor: "#d3d3d3",
+                }}
                 onChange={function (value: string | string[]) {
                   if (value.length === 0) {
                     updateActiveCollapses(uniqueFieldName, false);
@@ -794,7 +838,8 @@ const NewModule = () => {
               span={level === 0 ? 16 : 24}
               offset={level === 0 ? 2 : 0}
               style={{
-                paddingBottom: "15px",
+                paddingTop: "8px",
+                paddingBottom: "8px",
                 marginLeft: "0px",
                 marginRight: "0px",
                 paddingLeft: "0px",
@@ -803,6 +848,7 @@ const NewModule = () => {
             >
               <Collapse
                 size={"small"}
+                bordered={false}
                 onChange={function (value: string | string[]) {
                   if (value.length === 0) {
                     updateActiveCollapses(uniqueFieldName, false);
@@ -863,6 +909,10 @@ const NewModule = () => {
               wrapperCol={{ span: level === 0 ? 16 : 24 }}
               name={fieldName}
               rules={[{ required: isRequired }]}
+              style={{
+                paddingTop: "8px",
+                marginBottom: "12px",
+              }}
               label={
                 <div>
                   {field.display_name}
@@ -872,7 +922,7 @@ const NewModule = () => {
                 </div>
               }
             >
-              <Form.List name={formItemName} initialValue={[]}>
+              <Form.List name={formItemName}>
                 {(fields, { add, remove }) => (
                   <div
                     style={{
@@ -955,92 +1005,80 @@ const NewModule = () => {
     return formFields;
   }
 
-  function renderFormFields() {
-    if (!loadingTemplate && !loadingTemplateInitialValues) {
-      return mapFields(
-        config.root.properties,
-        [],
-        "",
-        0,
-        0,
-        undefined,
-        config.root.required,
+  const formLoading = () => {
+    if (loadTemplate === false || loadValues === false) {
+      return (
+        <Spin tip="Loading" size="large" style={{ alignContent: "center" }} />
       );
     }
 
-    return <Spin size="large" />;
-  }
-
-  const handleCancel = () => {
-    setLoadingValuesModal(false);
-  };
-
-  const handleImportValues = () => {
-    form.setFieldsValue(YAML.parse(loadedValues));
-    setLoadedValues("");
-    setLoadingValuesModal(false);
-  };
-
-  const renderLoadedFromFiles = () => {
-    if (loadedFrom.length === 0) {
-      return;
-    }
-
-    const files: {} | any = [];
-
-    loadedFrom.forEach((value: string) => {
-      files.push(<p>{value}</p>);
-    });
-
     return (
-      <Collapse
-        ghost
-        items={[
-          {
-            key: "1",
-            label: "Imported values from",
-            children: files,
-          },
-        ]}
-      />
+      <div>
+        {mapFields(
+          config.root.properties,
+          [],
+          "",
+          0,
+          0,
+          undefined,
+          config.root.required,
+        )}
+        <div style={{ textAlign: "right" }}>
+          <Button
+            type="primary"
+            htmlType="submit"
+            name="Save"
+            disabled={!isChanged && !isTemplateChanged}
+          >
+            Save
+          </Button>{" "}
+          <Button
+            htmlType="button"
+            onClick={() => history("/modules/" + moduleName)}
+          >
+            Back
+          </Button>
+        </div>
+      </div>
     );
-  };
-
-  const loadValues = (fileName: string) => {
-    axios
-      .get(fileName)
-      .then((res) => {
-        setLoadedValues(res.data);
-        setError({
-          message: "",
-          description: "",
-        });
-        let tmp = loadedFrom;
-        tmp.push(newFile);
-        setLoadedFrom(tmp);
-      })
-      .catch(function (error) {
-        // setLoadingTemplate(false);
-        // setSuccessLoad(false);
-        setError(mapResponseError(error));
-      });
   };
 
   const onFinishFailed = (errors: any) => {
     let errorMessages: FeedbackError[] = [];
     errors.errorFields.forEach(function (error: any) {
-      let key = error.name.join(".");
-      if (error.name.length === 1 && error.name[0] === "cyclops_module_name") {
-        key = "Module name";
-      }
-
       errorMessages.push({
-        key: key,
+        key: error.name.join("."),
         errors: error.errors,
       });
     });
 
     openNotification(errorMessages);
+  };
+
+  const lockButton = () => {
+    if (templateRefLock) {
+      return (
+        <Button
+          type="primary"
+          icon={<LockFilled />}
+          style={{ marginRight: "10px" }}
+          onClick={function () {
+            setTemplateRefLock(false);
+          }}
+        />
+      );
+    }
+
+    return (
+      <Button
+        type="primary"
+        icon={<UnlockFilled />}
+        style={{ marginRight: "10px" }}
+        onClick={function () {
+          setTemplateRefLock(true);
+        }}
+      />
+    );
   };
 
   return (
@@ -1062,10 +1100,79 @@ const NewModule = () => {
       )}
       {contextHolder}
       <Row gutter={[40, 0]}>
-        <Col span={23}>
-          <Title style={{ textAlign: "center" }} level={2}>
-            Define Module
-          </Title>
+        <Col span={24}>
+          <Title level={2}>{moduleName}</Title>
+        </Col>
+      </Row>
+      <Row gutter={[40, 0]}>
+        <Col span={24}>
+          <Divider orientation="left" orientationMargin="0">
+            Template
+          </Divider>
+          <Row>
+            <Form
+              form={editTemplateForm}
+              layout="inline"
+              autoComplete={"off"}
+              onFinish={handleSubmitTemplateEdit}
+              onFinishFailed={onFinishFailed}
+              style={{ width: "100%" }}
+            >
+              {lockButton()}
+              <Form.Item
+                name={"repo"}
+                style={{ width: "40%", marginRight: "0" }}
+              >
+                <Input placeholder={"Repository"} disabled={templateRefLock} />
+              </Form.Item>
+              <div
+                style={{
+                  width: "15px",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                }}
+              >
+                /
+              </div>
+              <Form.Item
+                name={"path"}
+                style={{ width: "20%", marginRight: "0" }}
+              >
+                <Input placeholder={"Path"} disabled={templateRefLock} />
+              </Form.Item>
+              <div
+                style={{
+                  width: "15px",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                }}
+              >
+                @
+              </div>
+              <Form.Item
+                name={"version"}
+                style={{ width: "20%", marginRight: "0" }}
+              >
+                <Input
+                  placeholder={"Version"}
+                  addonAfter={templateRef.resolvedVersion.substring(0, 7)}
+                  disabled={templateRefLock}
+                />
+              </Form.Item>
+              <Form.Item style={{ paddingLeft: "10px", width: "5%" }}>
+                <Button
+                  type="primary"
+                  htmlType="submit"
+                  loading={!loadTemplate}
+                  disabled={templateRefLock}
+                >
+                  Load
+                </Button>
+              </Form.Item>
+            </Form>
+          </Row>
         </Col>
       </Row>
       <Row gutter={[40, 0]}>
@@ -1077,157 +1184,16 @@ const NewModule = () => {
             autoComplete={"off"}
             onFinish={handleSubmit}
             onFinishFailed={onFinishFailed}
+            onValuesChange={handleValuesChange}
           >
             <Divider orientation="left" orientationMargin="0">
-              Module template
+              Edit Module
             </Divider>
-            <Row>
-              <Col span={16}>
-                <Select
-                  onChange={onTemplateStoreSelected}
-                  style={{ width: "100%" }}
-                  placeholder="Select an option"
-                >
-                  {templateStore.map((option: any, index) => (
-                    <Option key={option.name} value={option.name}>
-                      <img
-                        alt=""
-                        style={{ height: "1.5em", marginRight: "8px" }}
-                        src={option.iconURL}
-                      />
-                      {option.name}
-                    </Option>
-                  ))}
-                </Select>
-              </Col>
-            </Row>
-            <Divider orientation="left" orientationMargin="0">
-              Module name
-            </Divider>
-            <Form.Item
-              name="cyclops_module_name"
-              id="cyclops_module_name"
-              label={
-                <div>
-                  Module name
-                  <p style={{ color: "#8b8e91", marginBottom: "0px" }}>
-                    Enter a unique module name
-                  </p>
-                </div>
-              }
-              rules={[
-                {
-                  required: true,
-                  message: "Module name is required",
-                },
-                {
-                  max: 63,
-                  message:
-                    "Module name must contain no more than 63 characters",
-                },
-                {
-                  pattern: /^[a-z0-9](?:[a-z0-9-]*[a-z0-9])?$/, // only alphanumeric characters and hyphens, cannot start or end with a hyphen and the alpha characters can only be lowercase
-                  message:
-                    "Module name must follow the Kubernetes naming convention",
-                },
-              ]}
-              hasFeedback={true}
-              validateDebounce={1000}
-            >
-              <Input />
-            </Form.Item>
-            <Divider orientation="left" orientationMargin="0">
-              Define Module
-            </Divider>
-            {renderFormFields()}
-            <div style={{ textAlign: "right" }}>
-              <Button
-                onClick={function () {
-                  setLoadingValuesModal(true);
-                }}
-                name="Save"
-              >
-                Load values from file
-              </Button>{" "}
-              <Button
-                type="primary"
-                loading={loading}
-                htmlType="submit"
-                name="Save"
-              >
-                Save
-              </Button>{" "}
-              <Button htmlType="button" onClick={() => history("/")}>
-                Back
-              </Button>
-            </div>
+            {formLoading()}
           </Form>
         </Col>
       </Row>
-      <Modal
-        title="Values to import"
-        visible={loadingValuesModal}
-        onCancel={handleCancel}
-        onOk={handleImportValues}
-        width={"50%"}
-      >
-        {error.message.length !== 0 && (
-          <Alert
-            message={error.message}
-            description={error.description}
-            type="error"
-            closable
-            afterClose={() => {
-              setError({
-                message: "",
-                description: "",
-              });
-            }}
-            style={{ marginBottom: "20px" }}
-          />
-        )}
-        {renderLoadedFromFiles()}
-        <Input
-          placeholder={"File reference"}
-          style={{ width: "90%", marginBottom: "10px" }}
-          onChange={(value: any) => {
-            setNewFile(value.target.value);
-          }}
-        />
-        {"  "}
-        <Button
-          type="primary"
-          htmlType="button"
-          style={{ width: "9%" }}
-          onClick={onLoadFromFile}
-          loading={loadingValuesFile}
-        >
-          Load
-        </Button>
-        <AceEditor
-          mode={"yaml"}
-          theme="github"
-          fontSize={12}
-          showPrintMargin={true}
-          showGutter={true}
-          highlightActiveLine={true}
-          onChange={setLoadedValues}
-          setOptions={{
-            enableBasicAutocompletion: true,
-            enableLiveAutocompletion: true,
-            enableSnippets: false,
-            showLineNumbers: true,
-            tabSize: 4,
-            useWorker: false,
-          }}
-          style={{
-            height: "25em",
-            width: "100%",
-          }}
-          value={loadedValues}
-        />
-      </Modal>
     </div>
   );
 };
-export default NewModule;
+export default EditModule;
