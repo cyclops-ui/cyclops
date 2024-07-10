@@ -506,49 +506,168 @@ const EditModule = () => {
   };
 
   const arrayInnerField = (
+    fieldName: string,
+    uniqueFieldName: string[],
+    formItemName: any,
     field: any,
-    parentFieldID: string[],
-    parent: string,
     level: number,
-    arrayField: any,
-    remove: Function,
+    header: React.JSX.Element,
   ) => {
-    if (!field.items || typeof field.items === "string") {
+    if (!field.items || field.items.type === "string") {
       return (
-        <Row>
-          <Form.Item
-            style={{ paddingBottom: "0px", marginBottom: "0px" }}
-            wrapperCol={24}
-            {...arrayField}
-            initialValue={field.initialValue}
-            name={[arrayField.name]}
-          >
-            <Input />
-          </Form.Item>
-          <MinusCircleOutlined
-            style={{ fontSize: "16px", paddingLeft: "10px" }}
-            onClick={() => remove(arrayField.name)}
-          />
-        </Row>
+        <Form.Item
+          wrapperCol={{ span: level === 0 ? 16 : 24 }}
+          name={fieldName}
+          style={{
+            paddingTop: "0px",
+            marginBottom: "12px",
+          }}
+          label={
+            <div>
+              {field.display_name}
+              <p style={{ color: "#8b8e91", marginBottom: "0px" }}>
+                {field.description}
+              </p>
+            </div>
+          }
+        >
+          <Form.List name={formItemName}>
+            {(arrFields, { add, remove }) => (
+              <div
+                style={{
+                  border: "solid 1px #d3d3d3",
+                  borderRadius: "7px",
+                  padding: "12px",
+                  width: "100%",
+                  backgroundColor: "#fafafa",
+                }}
+              >
+                {arrFields.map((arrField, index) => (
+                  <Col key={arrField.key}>
+                    <Row>
+                      <Form.Item
+                        style={{
+                          paddingBottom: "8px",
+                          marginBottom: "0px",
+                          width: "80%",
+                        }}
+                        wrapperCol={{ span: 24 }}
+                        {...arrField}
+                        initialValue={field.initialValue}
+                        name={[arrField.name]}
+                      >
+                        <Input />
+                      </Form.Item>
+                      <MinusCircleOutlined
+                        style={{ fontSize: "16px", paddingLeft: "10px" }}
+                        onClick={() => remove(arrField.name)}
+                      />
+                    </Row>
+                    {arrFields !== null &&
+                    arrFields !== undefined &&
+                    index + 1 === arrFields.length ? (
+                      <Divider
+                        style={{ marginTop: "4px", marginBottom: "12px" }}
+                      />
+                    ) : (
+                      <></>
+                    )}
+                  </Col>
+                ))}
+                <Form.Item style={{ marginBottom: "0" }}>
+                  <Button
+                    type="dashed"
+                    onClick={() => add()}
+                    block
+                    icon={<PlusOutlined />}
+                  >
+                    Add
+                  </Button>
+                </Form.Item>
+              </div>
+            )}
+          </Form.List>
+        </Form.Item>
       );
     }
-    if (field.items === "object") {
+    if (field.items.type === "object") {
       return (
-        <div>
-          {mapFields(
-            field.items.properties,
-            parentFieldID,
-            "",
-            level + 1,
-            2,
-            arrayField,
-            field.items.required,
-          )}
-          <MinusCircleOutlined
-            style={{ fontSize: "16px" }}
-            onClick={() => remove(arrayField.name)}
-          />
-        </div>
+        <Collapse
+          size={"small"}
+          bordered={false}
+          onChange={function (value: string | string[]) {
+            if (value.length === 0) {
+              updateActiveCollapses(uniqueFieldName, false);
+            } else {
+              updateActiveCollapses(uniqueFieldName, true);
+            }
+          }}
+        >
+          <Collapse.Panel
+            key={fieldName}
+            header={header}
+            style={{
+              borderRadius: "7px",
+              backgroundColor: getCollapseColor(uniqueFieldName.toString()),
+            }}
+            forceRender={true}
+          >
+            <Form.Item
+              wrapperCol={{ span: 16 }}
+              style={{
+                paddingTop: "8px",
+                marginBottom: "0",
+              }}
+            >
+              <Form.List name={formItemName}>
+                {(arrFields, { add, remove }) => (
+                  <>
+                    {arrFields.map((arrField) => (
+                      <Col
+                        key={arrField.key}
+                        style={{ padding: 0, paddingBottom: "12px" }}
+                      >
+                        <div
+                          style={{
+                            border: "solid 1.5px #c3c3c3",
+                            borderRadius: "7px",
+                            padding: "12px",
+                            width: "100%",
+                            backgroundColor: "#fafafa",
+                          }}
+                        >
+                          {mapFields(
+                            field.items.properties,
+                            [...uniqueFieldName, String(arrField.name)],
+                            "",
+                            level + 1,
+                            2,
+                            arrField,
+                            field.items.required,
+                          )}
+                          <MinusCircleOutlined
+                            style={{ fontSize: "16px" }}
+                            onClick={() => remove(arrField.name)}
+                          />
+                        </div>
+                      </Col>
+                    ))}
+                    <Form.Item style={{ marginBottom: "0" }}>
+                      <Button
+                        type="dashed"
+                        onClick={() => add()}
+                        block
+                        icon={<PlusOutlined />}
+                      >
+                        Add
+                      </Button>
+                    </Form.Item>
+                  </>
+                )}
+              </Form.List>
+            </Form.Item>
+          </Collapse.Panel>
+        </Collapse>
       );
     }
   };
@@ -840,66 +959,20 @@ const EditModule = () => {
               style={{
                 paddingTop: "8px",
                 paddingBottom: "8px",
-                marginLeft: "0px",
-                marginRight: "0px",
                 paddingLeft: "0px",
                 paddingRight: "0px",
+                marginLeft: "0px",
+                marginRight: "0px",
               }}
             >
-              <Collapse
-                size={"small"}
-                bordered={false}
-                onChange={function (value: string | string[]) {
-                  if (value.length === 0) {
-                    updateActiveCollapses(uniqueFieldName, false);
-                  } else {
-                    updateActiveCollapses(uniqueFieldName, true);
-                  }
-                }}
-              >
-                <Collapse.Panel
-                  key={fieldName}
-                  header={header}
-                  style={{
-                    borderRadius: "7px",
-                    backgroundColor: getCollapseColor(
-                      uniqueFieldName.toString(),
-                    ),
-                  }}
-                  forceRender={true}
-                >
-                  <Form.List name={formItemName}>
-                    {(arrFields, { add, remove }) => (
-                      <>
-                        {arrFields.map((arrField) => (
-                          <Col key={arrField.key}>
-                            {arrayInnerField(
-                              field,
-                              [...uniqueFieldName, String(arrField.name)],
-                              "",
-                              level + 1,
-                              arrField,
-                              remove,
-                            )}
-                            <Divider />
-                          </Col>
-                        ))}
-
-                        <Form.Item>
-                          <Button
-                            type="dashed"
-                            onClick={() => add()}
-                            block
-                            icon={<PlusOutlined />}
-                          >
-                            Add
-                          </Button>
-                        </Form.Item>
-                      </>
-                    )}
-                  </Form.List>
-                </Collapse.Panel>
-              </Collapse>
+              {arrayInnerField(
+                fieldName,
+                uniqueFieldName,
+                formItemName,
+                field,
+                level + 1,
+                header,
+              )}
             </Col>,
           );
           return;
@@ -979,9 +1052,7 @@ const EditModule = () => {
                       </Row>
                     ))}
                     <Col span={24}>
-                      <Form.Item
-                        style={{ marginBottom: "0", marginRight: "12px" }}
-                      >
+                      <Form.Item style={{ marginBottom: "0" }}>
                         <Button
                           type="dashed"
                           onClick={() => {

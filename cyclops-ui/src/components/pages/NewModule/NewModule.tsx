@@ -498,7 +498,22 @@ const NewModule = () => {
   ) => {
     if (!field.items || field.items.type === "string") {
       return (
-        <Form.Item>
+        <Form.Item
+          wrapperCol={{ span: level === 0 ? 16 : 24 }}
+          name={fieldName}
+          style={{
+            paddingTop: "0px",
+            marginBottom: "12px",
+          }}
+          label={
+            <div>
+              {field.display_name}
+              <p style={{ color: "#8b8e91", marginBottom: "0px" }}>
+                {field.description}
+              </p>
+            </div>
+          }
+        >
           <Form.List name={formItemName}>
             {(arrFields, { add, remove }) => (
               <div
@@ -510,16 +525,16 @@ const NewModule = () => {
                   backgroundColor: "#fafafa",
                 }}
               >
-                {arrFields.map((arrField) => (
+                {arrFields.map((arrField, index) => (
                   <Col key={arrField.key}>
                     <Row>
                       <Form.Item
                         style={{
-                          paddingBottom: "0px",
+                          paddingBottom: "8px",
                           marginBottom: "0px",
                           width: "80%",
                         }}
-                        wrapperCol={{ span: 242 }}
+                        wrapperCol={{ span: 24 }}
                         {...arrField}
                         initialValue={field.initialValue}
                         name={[arrField.name]}
@@ -531,10 +546,18 @@ const NewModule = () => {
                         onClick={() => remove(arrField.name)}
                       />
                     </Row>
+                    {arrFields !== null &&
+                    arrFields !== undefined &&
+                    index + 1 === arrFields.length ? (
+                      <Divider
+                        style={{ marginTop: "4px", marginBottom: "12px" }}
+                      />
+                    ) : (
+                      <></>
+                    )}
                   </Col>
                 ))}
-
-                <Form.Item>
+                <Form.Item style={{ marginBottom: "0" }}>
                   <Button
                     type="dashed"
                     onClick={() => add()}
@@ -554,6 +577,7 @@ const NewModule = () => {
       return (
         <Collapse
           size={"small"}
+          bordered={false}
           onChange={function (value: string | string[]) {
             if (value.length === 0) {
               updateActiveCollapses(uniqueFieldName, false);
@@ -571,7 +595,13 @@ const NewModule = () => {
             }}
             forceRender={true}
           >
-            <Form.Item>
+            <Form.Item
+              wrapperCol={{ span: 16 }}
+              style={{
+                paddingTop: "8px",
+                marginBottom: "0",
+              }}
+            >
               <Form.List name={formItemName}>
                 {(arrFields, { add, remove }) => (
                   <>
@@ -582,7 +612,7 @@ const NewModule = () => {
                       >
                         <div
                           style={{
-                            border: "solid 1px #d3d3d3",
+                            border: "solid 1.5px #c3c3c3",
                             borderRadius: "7px",
                             padding: "12px",
                             width: "100%",
@@ -605,7 +635,7 @@ const NewModule = () => {
                         </div>
                       </Col>
                     ))}
-                    <Form.Item>
+                    <Form.Item style={{ marginBottom: "0" }}>
                       <Button
                         type="dashed"
                         onClick={() => add()}
@@ -1005,9 +1035,7 @@ const NewModule = () => {
                       </Row>
                     ))}
                     <Col span={24}>
-                      <Form.Item
-                        style={{ marginBottom: "0", marginRight: "12px" }}
-                      >
+                      <Form.Item style={{ marginBottom: "0" }}>
                         <Button
                           type="dashed"
                           onClick={() => {
