@@ -71,7 +71,7 @@ export function findMaps(fields: any[], values: any, initialValues: any): any {
         }
 
         let objectArr: any[] = [];
-        valuesList.forEach((valueFromList) => {
+        valuesList.forEach((valueFromList, index) => {
           if (field.items === null || field.items === undefined) {
             objectArr.push(valueFromList);
             return;
@@ -86,7 +86,7 @@ export function findMaps(fields: any[], values: any, initialValues: any): any {
                 findMaps(
                   field.items.properties,
                   valueFromList,
-                  initialValues[field.name],
+                  getObjectArrayInitialValue(initialValues, field.name, index),
                 ),
               );
               break;
@@ -112,4 +112,27 @@ export function findMaps(fields: any[], values: any, initialValues: any): any {
   });
 
   return out;
+}
+
+function getObjectArrayInitialValue(
+  initialValue: any,
+  name: string,
+  index: number,
+): any | null {
+  if (initialValue === null || initialValue === undefined) {
+    return null;
+  }
+
+  if (initialValue[name] === null || initialValue[name] === undefined) {
+    return null;
+  }
+
+  if (
+    Array.isArray(initialValue[name]) &&
+    index >= 0 &&
+    index < initialValue[name].length
+  ) {
+    return initialValue[name][index];
+  }
+  return null;
 }

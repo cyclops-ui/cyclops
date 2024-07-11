@@ -11,7 +11,6 @@ import (
 	"os/exec"
 	"sort"
 	"strings"
-	"time"
 
 	"github.com/cyclops-ui/cyclops/cyclops-ctrl/api/v1alpha1"
 
@@ -248,22 +247,7 @@ func (k *KubernetesClient) GetStatefulSetsLogs(namespace, container, name string
 	return logs, nil
 }
 
-func (k *KubernetesClient) RestartDeployment(group, version, kind, name, namespace string) error {
-	deploy, err := k.clientset.AppsV1().Deployments(namespace).Get(context.Background(), name, metav1.GetOptions{})
-	if err != nil {
-		return err
-	}
-
-	if deploy.Spec.Template.ObjectMeta.Annotations == nil {
-		deploy.Spec.Template.ObjectMeta.Annotations = make(map[string]string)
-	}
-	deploy.Spec.Template.ObjectMeta.Annotations["kubectl.kubernetes.io/restartedAt"] = time.Now().Format(time.RFC3339)
-
-	_, err = k.clientset.AppsV1().Deployments(namespace).Update(context.Background(), deploy, metav1.UpdateOptions{})
-	return err
-}
-
-func (k *KubernetesClient) GetManifest(group, version, kind, name, namespace string) (string, error) {
+func (k *KubernetesClient) GetManifest(group, version, kind, name, namespace string, includeManagedFields bool) (string, error) {
 	apiResourceName, err := k.GVKtoAPIResourceName(schema.GroupVersion{Group: group, Version: version}, kind)
 	if err != nil {
 		return "", err
@@ -276,6 +260,10 @@ func (k *KubernetesClient) GetManifest(group, version, kind, name, namespace str
 	}).Namespace(namespace).Get(context.Background(), name, metav1.GetOptions{})
 	if err != nil {
 		return "", err
+	}
+
+	if !includeManagedFields {
+		resource.SetManagedFields(nil)
 	}
 
 	data, err := yaml.Marshal(resource.Object)
@@ -413,6 +401,12 @@ func (k *KubernetesClient) createDynamicNamespaced(
 		}
 	}
 
+	if isPersistentVolumeClaims(obj.GroupVersionKind().Group, obj.GroupVersionKind().Version, obj.GroupVersionKind().Kind) {
+		if err := mergePVCWithCurrent(current, obj); err != nil {
+			return err
+		}
+	}
+
 	obj.SetResourceVersion(current.GetResourceVersion())
 
 	_, err = k.Dynamic.Resource(gvr).Namespace(namespace).Update(
@@ -494,6 +488,22 @@ func copyJobSelectors(source, destination *unstructured.Unstructured) error {
 	}
 
 	return unstructured.SetNestedMap(destination.Object, templateLabels, "spec", "template", "metadata", "labels")
+}
+
+func mergePVCWithCurrent(current, obj *unstructured.Unstructured) error {
+	requests, ok, err := unstructured.NestedMap(obj.Object, "spec", "resources", "requests")
+	if err != nil {
+		return err
+	}
+	if !ok {
+		return fmt.Errorf("PVC %v spec.resources.requests not found", obj.GetName())
+	}
+
+	for key, value := range current.Object {
+		obj.Object[key] = value
+	}
+
+	return unstructured.SetNestedMap(current.Object, requests, "spec", "resources", "requests")
 }
 
 func (k *KubernetesClient) ListNodes() ([]apiv1.Node, error) {

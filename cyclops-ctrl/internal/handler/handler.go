@@ -83,7 +83,7 @@ func (h *Handler) Start() error {
 	h.router.GET("/manifest", modulesController.GetManifest)
 	h.router.GET("/resources", modulesController.GetResource)
 
-	h.router.GET("/resources/restart", modulesController.GetRestarted)
+	//h.router.GET("/resources/restart", modulesController.GetRestarted)
 
 	h.router.GET("/nodes", clusterController.ListNodes)
 	h.router.GET("/nodes/:name", clusterController.GetNode)

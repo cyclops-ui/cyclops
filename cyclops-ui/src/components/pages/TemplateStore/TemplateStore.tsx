@@ -22,6 +22,7 @@ import {
 import classNames from "classnames";
 import styles from "./styles.module.css";
 import { mapResponseError } from "../../../utils/api/errors";
+import defaultTemplate from "../../../static/img/default-template-icon.png";
 
 const TemplateStore = () => {
   const [templates, setTemplates] = useState([]);
@@ -187,13 +188,27 @@ const TemplateStore = () => {
             dataIndex="iconURL"
             width={"3%"}
             render={function (iconURL) {
+              if (!iconURL || iconURL.length === 0) {
+                return (
+                  <img
+                    alt=""
+                    style={{
+                      verticalAlign: "middle",
+                      margin: "-5px",
+                      maxHeight: "36px",
+                    }}
+                    src={defaultTemplate}
+                  />
+                );
+              }
+
               return (
                 <img
                   alt=""
                   style={{
                     verticalAlign: "middle",
                     margin: "-5px",
-                    height: "36px",
+                    maxHeight: "36px",
                   }}
                   src={iconURL}
                 />
