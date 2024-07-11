@@ -73,7 +73,6 @@ export function findMaps(fields: any[], values: any, initialValues: any): any {
         let objectArr: any[] = [];
         valuesList.forEach((valueFromList, index) => {
           if (field.items === null || field.items === undefined) {
-            console.log("valueFromList2", field.name);
             objectArr.push(valueFromList);
             return;
           }
