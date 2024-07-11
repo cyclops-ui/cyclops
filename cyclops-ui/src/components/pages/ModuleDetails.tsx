@@ -47,7 +47,7 @@ import { gvkString } from "../../utils/k8s/gvk";
 import { mapResponseError } from "../../utils/api/errors";
 import Secret from "../k8s-resources/Secret";
 import { CheckboxChangeEvent } from "antd/es/checkbox";
-import defaultTemplate from "../../static/img/default-template-icon.png";
+
 const languages = [
   "javascript",
   "java",
@@ -613,15 +613,7 @@ const ModuleDetails = () => {
                   src={module.iconURL}
                 />
               ) : (
-                <img
-                  alt=""
-                  style={{
-                    maxHeight: "1.5em",
-                    maxWidth: "1.5em",
-                    marginRight: "12px",
-                  }}
-                  src={defaultTemplate}
-                />
+                <></>
               )}
               {module.name}
             </Title>

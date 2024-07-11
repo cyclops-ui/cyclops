@@ -18,7 +18,6 @@ import Link from "antd/lib/typography/Link";
 import styles from "./styles.module.css";
 import { PlusCircleOutlined } from "@ant-design/icons";
 import { mapResponseError } from "../../../utils/api/errors";
-import defaultTemplate from "../../../static/img/default-template-icon.png";
 
 const { Title } = Typography;
 
@@ -111,11 +110,7 @@ const Modules = () => {
                     src={module.iconURL}
                   />
                 ) : (
-                  <img
-                    alt=""
-                    style={{ height: "2em", marginRight: "8px" }}
-                    src={defaultTemplate}
-                  />
+                  <></>
                 )}
                 {module.name}
               </div>
