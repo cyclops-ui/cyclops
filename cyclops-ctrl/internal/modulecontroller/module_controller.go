@@ -19,7 +19,9 @@ package modulecontroller
 import (
 	"context"
 	"fmt"
+	"sort"
 	"strings"
+	"time"
 
 	"github.com/go-logr/logr"
 	"helm.sh/helm/v3/pkg/chart"
@@ -28,8 +30,10 @@ import (
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/apimachinery/pkg/util/yaml"
+	"k8s.io/client-go/util/workqueue"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
+	"sigs.k8s.io/controller-runtime/pkg/controller"
 	"sigs.k8s.io/controller-runtime/pkg/log"
 
 	cyclopsv1alpha1 "github.com/cyclops-ui/cyclops/cyclops-ctrl/api/v1alpha1"
@@ -180,8 +184,13 @@ func (r *ModuleReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctr
 
 // SetupWithManager sets up the controller with the Manager.
 func (r *ModuleReconciler) SetupWithManager(mgr ctrl.Manager) error {
+	rateLimiter := workqueue.NewMaxOfRateLimiter(
+		workqueue.NewItemExponentialFailureRateLimiter(2*time.Second, 64*time.Second),
+	)
+
 	return ctrl.NewControllerManagedBy(mgr).
 		For(&cyclopsv1alpha1.Module{}).
+		WithOptions(controller.Options{RateLimiter: rateLimiter}).
 		Complete(r)
 }
 
@@ -387,6 +396,16 @@ func (r *ModuleReconciler) mergeChildrenGVRs(existing, current []cyclopsv1alpha1
 	for u := range unique {
 		merged = append(merged, u)
 	}
+
+	sort.Slice(merged, func(i, j int) bool {
+		if merged[i].Group != merged[j].Group {
+			return merged[i].Group < merged[j].Group
+		}
+		if merged[i].Version != merged[j].Version {
+			return merged[i].Version < merged[j].Version
+		}
+		return merged[i].Resource < merged[j].Resource
+	})
 
 	return merged
 }

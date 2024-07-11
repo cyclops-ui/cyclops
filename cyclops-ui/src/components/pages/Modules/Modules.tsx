@@ -103,11 +103,15 @@ const Modules = () => {
           <Card
             title={
               <div>
-                <img
-                  alt=""
-                  style={{ height: "2em", marginRight: "8px" }}
-                  src={module.iconURL}
-                />
+                {module.iconURL ? (
+                  <img
+                    alt=""
+                    style={{ height: "2em", marginRight: "8px" }}
+                    src={module.iconURL}
+                  />
+                ) : (
+                  <></>
+                )}
                 {module.name}
               </div>
             }
