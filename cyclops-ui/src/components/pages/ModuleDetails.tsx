@@ -47,6 +47,7 @@ import { gvkString } from "../../utils/k8s/gvk";
 import { mapResponseError } from "../../utils/api/errors";
 import Secret from "../k8s-resources/Secret";
 import { CheckboxChangeEvent } from "antd/es/checkbox";
+
 const languages = [
   "javascript",
   "java",
@@ -907,7 +908,6 @@ const ModuleDetails = () => {
           </Checkbox>
           <Divider style={{ marginTop: "12px", marginBottom: "12px" }} />
         </div>
-
         <ReactAce
           style={{ width: "100%" }}
           mode={"sass"}
