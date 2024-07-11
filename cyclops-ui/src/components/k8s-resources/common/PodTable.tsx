@@ -74,6 +74,7 @@ const PodTable = ({ pods, namespace }: Props) => {
                 type="primary"
                 // icon={<DownloadOutlined />}
                 onClick={downloadLogs(container.name)}
+                disabled={logs === "No logs available"}
               >
                 Download
               </Button>
@@ -101,6 +102,7 @@ const PodTable = ({ pods, namespace }: Props) => {
                 type="primary"
                 // icon={<DownloadOutlined />}
                 onClick={downloadLogs(container.name)}
+                disabled={logs === "No logs available"}
               >
                 Download
               </Button>

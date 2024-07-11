@@ -46,6 +46,7 @@ import {
 import { gvkString } from "../../utils/k8s/gvk";
 import { mapResponseError } from "../../utils/api/errors";
 import Secret from "../k8s-resources/Secret";
+import { CheckboxChangeEvent } from "antd/es/checkbox";
 import defaultTemplate from "../../static/img/default-template-icon.png";
 const languages = [
   "javascript",
@@ -105,6 +106,13 @@ interface resourceRef {
 const ModuleDetails = () => {
   const [manifestModal, setManifestModal] = useState({
     on: false,
+    resource: {
+      group: "",
+      version: "",
+      kind: "",
+      name: "",
+      namespace: "",
+    },
     manifest: "",
   });
   const [loading, setLoading] = useState(false);
@@ -145,12 +153,49 @@ const ModuleDetails = () => {
 
   let { moduleName } = useParams();
 
+  const [showManagedFields, setShowManagedFields] = useState(false);
+
+  const handleCheckboxChange = (e: CheckboxChangeEvent) => {
+    setShowManagedFields(e.target.checked);
+    fetchManifest(
+      manifestModal.resource.group,
+      manifestModal.resource.version,
+      manifestModal.resource.kind,
+      manifestModal.resource.namespace,
+      manifestModal.resource.name,
+      e.target.checked,
+    );
+  };
+
+  const handleManifestClick = (resource: any) => {
+    setManifestModal({
+      on: true,
+      resource: {
+        group: resource.group,
+        version: resource.version,
+        kind: resource.kind,
+        name: resource.name,
+        namespace: resource.namespace,
+      },
+      manifest: "",
+    });
+    fetchManifest(
+      resource.group,
+      resource.version,
+      resource.kind,
+      resource.namespace,
+      resource.name,
+      showManagedFields,
+    );
+  };
+
   function fetchManifest(
     group: string,
     version: string,
     kind: string,
     namespace: string,
     name: string,
+    showManagedFields: boolean,
   ) {
     axios
       .get(`/api/manifest`, {
@@ -160,13 +205,14 @@ const ModuleDetails = () => {
           kind: kind,
           name: name,
           namespace: namespace,
+          includeManagedFields: showManagedFields,
         },
       })
       .then((res) => {
-        setManifestModal({
-          on: true,
+        setManifestModal((prev) => ({
+          ...prev,
           manifest: res.data,
-        });
+        }));
       })
       .catch((error) => {
         setLoading(false);
@@ -244,8 +290,8 @@ const ModuleDetails = () => {
 
   const handleCancelManifest = () => {
     setManifestModal({
+      ...manifestModal,
       on: false,
-      manifest: "",
     });
   };
 
@@ -511,18 +557,7 @@ const ModuleDetails = () => {
         </Row>
         <Row>
           <Col style={{ float: "right" }}>
-            <Button
-              onClick={function () {
-                fetchManifest(
-                  resource.group,
-                  resource.version,
-                  resource.kind,
-                  resource.namespace,
-                  resource.name,
-                );
-              }}
-              block
-            >
+            <Button onClick={() => handleManifestClick(resource)} block>
               View Manifest
             </Button>
           </Col>
@@ -875,6 +910,12 @@ const ModuleDetails = () => {
         cancelButtonProps={{ style: { display: "none" } }}
         width={"40%"}
       >
+        <div>
+          <Checkbox onChange={handleCheckboxChange} checked={showManagedFields}>
+            Include Managed Fields
+          </Checkbox>
+          <Divider style={{ marginTop: "12px", marginBottom: "12px" }} />
+        </div>
         <ReactAce
           style={{ width: "100%" }}
           mode={"sass"}

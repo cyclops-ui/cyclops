@@ -246,7 +246,7 @@ func (k *KubernetesClient) GetStatefulSetsLogs(namespace, container, name string
 	return logs, nil
 }
 
-func (k *KubernetesClient) GetManifest(group, version, kind, name, namespace string) (string, error) {
+func (k *KubernetesClient) GetManifest(group, version, kind, name, namespace string, includeManagedFields bool) (string, error) {
 	apiResourceName, err := k.GVKtoAPIResourceName(schema.GroupVersion{Group: group, Version: version}, kind)
 	if err != nil {
 		return "", err
@@ -259,6 +259,10 @@ func (k *KubernetesClient) GetManifest(group, version, kind, name, namespace str
 	}).Namespace(namespace).Get(context.Background(), name, metav1.GetOptions{})
 	if err != nil {
 		return "", err
+	}
+
+	if (!includeManagedFields) {
+		resource.SetManagedFields(nil)
 	}
 
 	data, err := yaml.Marshal(resource.Object)
