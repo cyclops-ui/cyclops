@@ -1,4 +1,4 @@
-name: controller tests
+name: cyctl tests
 
 on:
   pull_request:
