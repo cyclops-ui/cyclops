@@ -578,6 +578,27 @@ func (m *Modules) GetManifest(ctx *gin.Context) {
 	ctx.String(http.StatusOK, manifest)
 }
 
+func (m *Modules) Restart(ctx *gin.Context) {
+	ctx.Header("Access-Control-Allow-Origin", "*")
+
+	group := ctx.Query("group")
+	version := ctx.Query("version")
+	kind := ctx.Query("kind")
+	name := ctx.Query("name")
+	namespace := ctx.Query("namespace")
+
+	_, err := m.kubernetesClient.Restart(group, version, kind, name, namespace)
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, gin.H{
+			"error":  "Failed to fetch resource manifest",
+			"reason": err.Error(),
+		})
+		return
+	}
+
+	ctx.String(http.StatusOK, "")
+}
+
 func (m *Modules) GetResource(ctx *gin.Context) {
 	ctx.Header("Access-Control-Allow-Origin", "*")
 
