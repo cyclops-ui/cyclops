@@ -587,7 +587,7 @@ func (m *Modules) Restart(ctx *gin.Context) {
 	name := ctx.Query("name")
 	namespace := ctx.Query("namespace")
 
-	_, err := m.kubernetesClient.Restart(group, version, kind, name, namespace)
+	err := m.kubernetesClient.Restart(group, version, kind, name, namespace)
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, gin.H{
 			"error":  "Failed to fetch resource manifest",

@@ -317,17 +317,17 @@ func (k *KubernetesClient) GetManifest(group, version, kind, name, namespace str
 	return string(data), nil
 }
 
-func (k *KubernetesClient) Restart(group, version, kind, name, namespace string) (any, error) {
+func (k *KubernetesClient) Restart(group, version, kind, name, namespace string) error {
 	switch {
 	case isDeployment(group, version, kind):
-		return nil, k.RestartDeployment(group, version, kind, name, namespace)
+		return k.RestartDeployment(group, version, kind, name, namespace)
 	case isDaemonSet(group, version, kind):
-		return nil, k.RestartDaemonsets(group, version, kind, name, namespace)
+		return k.RestartDaemonsets(group, version, kind, name, namespace)
 	case isStatefulSet(group, version, kind):
-		return nil, k.RestartStatefulSets(group, version, kind, name, namespace)
+		return k.RestartStatefulSets(group, version, kind, name, namespace)
 	}
 
-	return nil, nil
+	return errors.New(fmt.Sprintf("cannot restart: %v/%v %v %v/%v", group, version, kind, namespace, name))
 }
 
 func (k *KubernetesClient) GetResource(group, version, kind, name, namespace string) (any, error) {
