@@ -16,10 +16,10 @@ kind: TemplateStore
 metadata:
   annotations:
     cyclops-ui.com/icon: https://github.com/cyclops-ui/cyclops/blob/main/cyclops-ui/src/static/img/default-template-icon.png?raw=true
-  name: demo-extended
+  name: app-template
   namespace: cyclops
 spec:
-  path: demo-extended
+  path: app-template
   repo: https://github.com/cyclops-ui/templates
   version: main
 ---
