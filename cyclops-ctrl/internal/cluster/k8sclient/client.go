@@ -6,12 +6,14 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"github.com/cyclops-ui/cyclops/cyclops-ctrl/api/v1alpha1"
 	"io"
 	"os"
 	"os/exec"
 	"sort"
 	"strings"
+	"time"
+
+	"github.com/cyclops-ui/cyclops/cyclops-ctrl/api/v1alpha1"
 
 	"gopkg.in/yaml.v2"
 
@@ -245,6 +247,48 @@ func (k *KubernetesClient) GetStatefulSetsLogs(namespace, container, name string
 	sort.Strings(logs)
 	return logs, nil
 }
+func (k *KubernetesClient) RestartDeployment(group, version, kind, name, namespace string) error {
+	deploy, err := k.clientset.AppsV1().Deployments(namespace).Get(context.Background(), name, metav1.GetOptions{})
+	if err != nil {
+		return err
+	}
+
+	if deploy.Spec.Template.ObjectMeta.Annotations == nil {
+		deploy.Spec.Template.ObjectMeta.Annotations = make(map[string]string)
+	}
+	deploy.Spec.Template.ObjectMeta.Annotations["kubectl.kubernetes.io/restartedAt"] = time.Now().Format(time.RFC3339)
+
+	_, err = k.clientset.AppsV1().Deployments(namespace).Update(context.Background(), deploy, metav1.UpdateOptions{})
+	return err
+}
+func (k *KubernetesClient) RestartStatefulSets(group, version, kind, name, namespace string) error {
+	statefulset, err := k.clientset.AppsV1().StatefulSets(namespace).Get(context.Background(), name, metav1.GetOptions{})
+	if err != nil {
+		return err
+	}
+
+	if statefulset.Spec.Template.ObjectMeta.Annotations == nil {
+		statefulset.Spec.Template.ObjectMeta.Annotations = make(map[string]string)
+	}
+	statefulset.Spec.Template.ObjectMeta.Annotations["kubectl.kubernetes.io/restartedAt"] = time.Now().Format(time.RFC3339)
+
+	_, err = k.clientset.AppsV1().StatefulSets(namespace).Update(context.Background(), statefulset, metav1.UpdateOptions{})
+	return err
+}
+func (k *KubernetesClient) RestartDaemonsets(group, version, kind, name, namespace string) error {
+	daemonset, err := k.clientset.AppsV1().DaemonSets(namespace).Get(context.Background(), name, metav1.GetOptions{})
+	if err != nil {
+		return err
+	}
+
+	if daemonset.Spec.Template.ObjectMeta.Annotations == nil {
+		daemonset.Spec.Template.ObjectMeta.Annotations = make(map[string]string)
+	}
+	daemonset.Spec.Template.ObjectMeta.Annotations["kubectl.kubernetes.io/restartedAt"] = time.Now().Format(time.RFC3339)
+
+	_, err = k.clientset.AppsV1().DaemonSets(namespace).Update(context.Background(), daemonset, metav1.UpdateOptions{})
+	return err
+}
 
 func (k *KubernetesClient) GetManifest(group, version, kind, name, namespace string, includeManagedFields bool) (string, error) {
 	apiResourceName, err := k.GVKtoAPIResourceName(schema.GroupVersion{Group: group, Version: version}, kind)
@@ -261,7 +305,7 @@ func (k *KubernetesClient) GetManifest(group, version, kind, name, namespace str
 		return "", err
 	}
 
-	if (!includeManagedFields) {
+	if !includeManagedFields {
 		resource.SetManagedFields(nil)
 	}
 
@@ -271,6 +315,19 @@ func (k *KubernetesClient) GetManifest(group, version, kind, name, namespace str
 	}
 
 	return string(data), nil
+}
+
+func (k *KubernetesClient) Restart(group, version, kind, name, namespace string) error {
+	switch {
+	case isDeployment(group, version, kind):
+		return k.RestartDeployment(group, version, kind, name, namespace)
+	case isDaemonSet(group, version, kind):
+		return k.RestartDaemonsets(group, version, kind, name, namespace)
+	case isStatefulSet(group, version, kind):
+		return k.RestartStatefulSets(group, version, kind, name, namespace)
+	}
+
+	return errors.New(fmt.Sprintf("cannot restart: %v/%v %v %v/%v", group, version, kind, namespace, name))
 }
 
 func (k *KubernetesClient) GetResource(group, version, kind, name, namespace string) (any, error) {
