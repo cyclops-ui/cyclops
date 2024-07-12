@@ -247,21 +247,23 @@ func (k *KubernetesClient) GetStatefulSetsLogs(namespace, container, name string
 	sort.Strings(logs)
 	return logs, nil
 }
-func (k *KubernetesClient) RestartDeployment(group, version, kind, name, namespace string) error {
-	deploy, err := k.clientset.AppsV1().Deployments(namespace).Get(context.Background(), name, metav1.GetOptions{})
+
+func (k *KubernetesClient) RestartDeployment(name, namespace string) error {
+	deployment, err := k.clientset.AppsV1().Deployments(namespace).Get(context.Background(), name, metav1.GetOptions{})
 	if err != nil {
 		return err
 	}
 
-	if deploy.Spec.Template.ObjectMeta.Annotations == nil {
-		deploy.Spec.Template.ObjectMeta.Annotations = make(map[string]string)
+	if deployment.Spec.Template.ObjectMeta.Annotations == nil {
+		deployment.Spec.Template.ObjectMeta.Annotations = make(map[string]string)
 	}
-	deploy.Spec.Template.ObjectMeta.Annotations["kubectl.kubernetes.io/restartedAt"] = time.Now().Format(time.RFC3339)
+	deployment.Spec.Template.ObjectMeta.Annotations["kubectl.kubernetes.io/restartedAt"] = time.Now().Format(time.RFC3339)
 
-	_, err = k.clientset.AppsV1().Deployments(namespace).Update(context.Background(), deploy, metav1.UpdateOptions{})
+	_, err = k.clientset.AppsV1().Deployments(namespace).Update(context.Background(), deployment, metav1.UpdateOptions{})
 	return err
 }
-func (k *KubernetesClient) RestartStatefulSets(group, version, kind, name, namespace string) error {
+
+func (k *KubernetesClient) RestartStatefulSet(name, namespace string) error {
 	statefulset, err := k.clientset.AppsV1().StatefulSets(namespace).Get(context.Background(), name, metav1.GetOptions{})
 	if err != nil {
 		return err
@@ -275,7 +277,8 @@ func (k *KubernetesClient) RestartStatefulSets(group, version, kind, name, names
 	_, err = k.clientset.AppsV1().StatefulSets(namespace).Update(context.Background(), statefulset, metav1.UpdateOptions{})
 	return err
 }
-func (k *KubernetesClient) RestartDaemonsets(group, version, kind, name, namespace string) error {
+
+func (k *KubernetesClient) RestartDaemonSet(name, namespace string) error {
 	daemonset, err := k.clientset.AppsV1().DaemonSets(namespace).Get(context.Background(), name, metav1.GetOptions{})
 	if err != nil {
 		return err
@@ -320,11 +323,11 @@ func (k *KubernetesClient) GetManifest(group, version, kind, name, namespace str
 func (k *KubernetesClient) Restart(group, version, kind, name, namespace string) error {
 	switch {
 	case isDeployment(group, version, kind):
-		return k.RestartDeployment(group, version, kind, name, namespace)
+		return k.RestartDeployment(name, namespace)
 	case isDaemonSet(group, version, kind):
-		return k.RestartDaemonsets(group, version, kind, name, namespace)
+		return k.RestartDaemonSet(name, namespace)
 	case isStatefulSet(group, version, kind):
-		return k.RestartStatefulSets(group, version, kind, name, namespace)
+		return k.RestartStatefulSet(name, namespace)
 	}
 
 	return errors.New(fmt.Sprintf("cannot restart: %v/%v %v %v/%v", group, version, kind, namespace, name))

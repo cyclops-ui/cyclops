@@ -590,7 +590,7 @@ func (m *Modules) Restart(ctx *gin.Context) {
 	err := m.kubernetesClient.Restart(group, version, kind, name, namespace)
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, gin.H{
-			"error":  "Failed to fetch resource manifest",
+			"error":  "Failed to restart resource",
 			"reason": err.Error(),
 		})
 		return
