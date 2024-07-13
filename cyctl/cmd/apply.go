@@ -67,7 +67,7 @@ func doServerSideApply(ctx context.Context, cfg *rest.Config, obj *unstructured.
 	return err
 }
 
-func applyYaml(yamlFile []byte, config *rest.Config) error {
+func applyYaml(yamlFile []byte, config *rest.Config, telemetry bool) error {
 	multidocReader := utilyaml.NewYAMLReader(bufio.NewReader(bytes.NewReader(yamlFile)))
 
 	for {
@@ -89,6 +89,44 @@ func applyYaml(yamlFile []byte, config *rest.Config) error {
 		if err != nil {
 			return err
 		}
+
+		if telemetry {
+			if obj.GetKind() == "Deployment" {
+				labels, _, _ := unstructured.NestedMap(obj.Object, "metadata", "labels")
+				if labels != nil {
+					appLabel, _, _ := unstructured.NestedString(labels, "app")
+					if appLabel == "cyclops-ctrl" {
+						containers, _, _ := unstructured.NestedSlice(obj.Object, "spec", "template", "spec", "containers")
+						if len(containers) > 0 {
+							container := containers[0].(map[string]interface{})
+							env, _, _ := unstructured.NestedSlice(container, "env")
+							newEnv := map[string]interface{}{
+								"name":  "DISABLE_TELEMETRY",
+								"value": "true",
+							}
+							env = append(env, newEnv)
+							err := unstructured.SetNestedSlice(container, env, "env")
+							if err != nil {
+								log.Fatal(err)
+							}
+							containers[0] = container
+							err = unstructured.SetNestedSlice(obj.Object, containers, "spec", "template", "spec", "containers")
+							if err != nil {
+								log.Fatal(err)
+							}
+						}
+						err = doServerSideApply(context.TODO(), config, obj)
+						if err != nil {
+							log.Fatal(err)
+						}
+						fmt.Println("telemetry is disabled.")
+
+					}
+				}
+			}
+
+		}
+
 	}
 
 	return nil
@@ -102,6 +140,8 @@ var applyCmd = &cobra.Command{
 		if err != nil {
 			log.Fatal(err)
 		}
+
+		telemetry, _ := cmd.Flags().GetBool("telemetry")
 
 		var deployUrl string
 		var demoUrl string
@@ -131,7 +171,7 @@ var applyCmd = &cobra.Command{
 
 		fmt.Println("initializing cyclops resources")
 
-		err = applyYaml(deployYamlFile, kubeconfig.Config)
+		err = applyYaml(deployYamlFile, kubeconfig.Config, telemetry)
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -152,7 +192,7 @@ var applyCmd = &cobra.Command{
 		}
 
 		fmt.Println("creating demo templates")
-		err = applyYaml(demoYamlFile, kubeconfig.Config)
+		err = applyYaml(demoYamlFile, kubeconfig.Config, telemetry)
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -161,5 +201,6 @@ var applyCmd = &cobra.Command{
 
 func init() {
 	applyCmd.Flags().StringP("version", "v", "main", "specify cyclops version")
+	applyCmd.Flags().BoolP("telemetry", "t", false, "disable telemetry")
 	RootCmd.AddCommand(applyCmd)
 }
