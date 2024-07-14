@@ -161,7 +161,7 @@ func (k *KubernetesClient) GetDeletedResources(
 ) ([]dto.Resource, error) {
 	resourcesFromTemplate := make(map[string][]dto.Resource, 0)
 
-	for _, s := range strings.Split(manifest, "---") {
+	for _, s := range strings.Split(manifest, "\n---\n") {
 		s := strings.TrimSpace(s)
 		if len(s) == 0 {
 			continue

@@ -58,7 +58,7 @@ export function findMaps(fields: any[], values: any, initialValues: any): any {
           out[field.name] = findMaps(
             field.properties,
             values[field.name],
-            initialValues[field.name],
+            initialValues ? initialValues[field.name] : {},
           );
         }
         break;
