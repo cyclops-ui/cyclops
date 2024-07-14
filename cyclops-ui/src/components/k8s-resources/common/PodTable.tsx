@@ -9,6 +9,7 @@ import {
   Tabs,
   Modal,
   Alert,
+  Tooltip,
 } from "antd";
 import axios from "axios";
 import { formatPodAge } from "../../../utils/pods";
@@ -161,6 +162,46 @@ const PodTable = ({ pods, namespace }: Props) => {
         />
         <Table.Column title="Node" dataIndex="node" />
         <Table.Column title="Phase" dataIndex="podPhase" />
+        <Table.Column
+          title="Status"
+          dataIndex="containers"
+          key="containers"
+          render={(containers: any) => (
+            <>
+              {containers.map((container: any) => {
+                let color = "yellow";
+
+                const greenStates = ["running", "ready", "completed"];
+                if (greenStates.includes(container.status.status)) {
+                  color = "green";
+                }
+
+                const redStates = ["terminated", "crashLoopBackOff", "error"];
+                if (redStates.includes(container.status.status)) {
+                  color = "red";
+                }
+
+                return (
+                  <Tooltip
+                    key={container.name}
+                    title={
+                      <div>
+                        <div key={container.name}>
+                          <strong>{container.name}:</strong>{" "}
+                          {container.status.status}
+                          <br />
+                          <small>{container.status.message}</small>
+                        </div>
+                      </div>
+                    }
+                  >
+                    <Tag color={color}>{container.status.status}</Tag>
+                  </Tooltip>
+                );
+              })}
+            </>
+          )}
+        />
         <Table.Column
           title="Started"
           dataIndex="started"
