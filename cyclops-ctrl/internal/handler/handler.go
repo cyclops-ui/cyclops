@@ -2,6 +2,7 @@ package handler
 
 import (
 	"net/http"
+	"os"
 
 	"github.com/gin-gonic/gin"
 
@@ -59,7 +60,9 @@ func (h *Handler) Start() error {
 	// authentication
 	h.router.POST("/login", cerbos.Login(h.cerbosClient))
 
-	h.router.Use(cerbos.AuthMiddleware(h.cerbosClient))
+	if os.Getenv("ENABLE_AUTHORIZATION") == "true" {
+		h.router.Use(cerbos.AuthMiddleware(h.cerbosClient))
+	}
 
 	// templates
 	h.router.GET("/templates", templatesController.GetTemplate)
