@@ -5,6 +5,12 @@
 [![GitHub Actions web](https://img.shields.io/github/actions/workflow/status/cyclops-ui/cyclops/web.yaml?style=flat-square&logo=github&logoColor=white&label=GitHub%20pages%20build)](https://github.com/cyclops-ui/cyclops/actions/workflows/web.yaml)
 [![GitHub License](https://img.shields.io/github/license/cyclops-ui/cyclops?style=flat-square&link=https%3A%2F%2Fgithub.com%2Fcyclops-ui%2Fcyclops%2Fblob%2Fmain%2FLICENSE)](https://github.com/cyclops-ui/cyclops/blob/main/LICENSE)
 
+<p align="center">
+    <a href="https://www.producthunt.com/products/cyclops?utm_source=badge-follow&utm_medium=badge&utm_souce=badge-cyclops" target="_blank">
+        <img src="https://api.producthunt.com/widgets/embed-image/v1/follow.svg?product_id=566069&theme=light" alt="Cyclops - Developer&#0032;Friendly&#0032;Kubernetes | Product Hunt" style="width: 250px; height: 54px;" width="250" height="54" />
+    </a>
+</p>
+
 <hr>
 
 <p align="center" width="100%">
