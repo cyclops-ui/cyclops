@@ -1,8 +1,4 @@
-import {
-  createBrowserRouter,
-  RouterProvider,
-  Navigate,
-} from "react-router-dom";
+import { createBrowserRouter, RouterProvider } from "react-router-dom";
 import routes from "./routes";
 import Page404 from "./components/pages/Page404";
 import AppLayout from "./components/layouts/AppLayout";
