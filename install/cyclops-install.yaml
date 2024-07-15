@@ -82,6 +82,23 @@ spec:
             status:
               description: ModuleStatus defines the observed state of Module
               properties:
+                iconURL:
+                  type: string
+                managedGVRs:
+                  items:
+                    properties:
+                      group:
+                        type: string
+                      resource:
+                        type: string
+                      version:
+                        type: string
+                    required:
+                      - group
+                      - resource
+                      - version
+                    type: object
+                  type: array
                 reconciliationStatus:
                   properties:
                     errors:

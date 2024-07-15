@@ -56,12 +56,7 @@ func (k *KubernetesClient) GetModule(name string) (*cyclopsv1alpha1.Module, erro
 func (k *KubernetesClient) GetResourcesForModule(name string) ([]dto.Resource, error) {
 	out := make([]dto.Resource, 0, 0)
 
-	module, err := k.GetModule(name)
-	if err != nil {
-		return nil, err
-	}
-
-	managedGVRs, err := k.getManagedGVRs(module)
+	managedGVRs, err := k.getManagedGVRs(name)
 	if err != nil {
 		return nil, err
 	}
@@ -108,12 +103,10 @@ func (k *KubernetesClient) GetResourcesForModule(name string) ([]dto.Resource, e
 	return out, nil
 }
 
-func (k *KubernetesClient) getManagedGVRs(module *cyclopsv1alpha1.Module) ([]schema.GroupVersionResource, error) {
-	if module == nil {
-		return nil, errors.New("nil module provided")
-	}
+func (k *KubernetesClient) getManagedGVRs(moduleName string) ([]schema.GroupVersionResource, error) {
+	module, _ := k.GetModule(moduleName)
 
-	if len(module.Status.ManagedGVRs) != 0 {
+	if module != nil && len(module.Status.ManagedGVRs) != 0 {
 		existing := make([]schema.GroupVersionResource, 0, len(module.Status.ManagedGVRs))
 		for _, r := range module.Status.ManagedGVRs {
 			existing = append(existing, schema.GroupVersionResource{
@@ -161,7 +154,7 @@ func (k *KubernetesClient) GetDeletedResources(
 ) ([]dto.Resource, error) {
 	resourcesFromTemplate := make(map[string][]dto.Resource, 0)
 
-	for _, s := range strings.Split(manifest, "---") {
+	for _, s := range strings.Split(manifest, "\n---\n") {
 		s := strings.TrimSpace(s)
 		if len(s) == 0 {
 			continue
