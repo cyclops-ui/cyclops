@@ -10,6 +10,7 @@ import {
   Alert,
   Empty,
   Spin,
+  Dropdown,
 } from "antd";
 import { useNavigate } from "react-router";
 import axios from "axios";
@@ -26,10 +27,16 @@ const Modules = () => {
   const [allData, setAllData] = useState([]);
   const [filteredData, setFilteredData] = useState([]);
   const [loadingModules, setLoadingModules] = useState(false);
+  const [displaymodule, setDisplayModule] = useState("ALL Modules");
   const [error, setError] = useState({
     message: "",
     description: "",
   });
+  const items = [
+    { label: "Healthy", key: "1" },
+    { label: "Unhealthy", key: "2" },
+    { label: "Unknown", key: "3" },
+  ];
 
   useEffect(() => {
     setLoadingModules(true);
@@ -49,7 +56,9 @@ const Modules = () => {
   const handleClick = () => {
     history("/modules/new");
   };
-
+  const handleSelectItem = (key: any) => {
+    setDisplayModule(key.label);
+  };
   const handleSearch = (event: any) => {
     const query = event.target.value;
     var updatedList = [...allData];
@@ -88,7 +97,6 @@ const Modules = () => {
     if (loadingModules) {
       return <Spin size={"large"} />;
     }
-
     if (filteredData.length === 0) {
       return (
         <div style={{ width: "100%" }}>
@@ -227,13 +235,28 @@ const Modules = () => {
           </Button>
         </Col>
       </Row>
-      <Row gutter={[40, 0]}>
-        <Col span={18}>
+
+      <Row gutter={[10, 0]}>
+        <Col span={5}>
           <Input
             placeholder={"Search modules"}
-            style={{ width: "30%" }}
+            style={{ width: "100%" }}
             onChange={handleSearch}
           ></Input>
+        </Col>
+        <Col span={2}>
+          <Dropdown
+            menu={{
+              items: items.map((item) => ({
+                key: item.key,
+                label: item.label,
+                onClick: () => handleSelectItem(item), // Handle item click
+              })),
+            }}
+            trigger={["click"]}
+          >
+            <Button>{displaymodule}</Button>
+          </Dropdown>
         </Col>
       </Row>
       <Divider orientationMargin="0" />
