@@ -33,6 +33,7 @@ const Modules = () => {
     description: "",
   });
   const items = [
+    { label: "ALL Modules", key: "0" },
     { label: "Healthy", key: "1" },
     { label: "Unhealthy", key: "2" },
     { label: "Unknown", key: "3" },
@@ -104,100 +105,196 @@ const Modules = () => {
         </div>
       );
     }
-
-    return filteredData.map((module: any, index) => (
-      <Col key={index} xs={24} sm={12} md={8} lg={8} xl={6}>
-        <a href={"/modules/" + module.name}>
-          <Card
-            title={
-              <div>
-                {module.iconURL ? (
-                  <img
-                    alt=""
-                    style={{ height: "2em", marginRight: "8px" }}
-                    src={module.iconURL}
-                  />
-                ) : (
-                  <></>
-                )}
-                {module.name}
-              </div>
-            }
-            style={{
-              borderLeft: "solid " + getStatusColor(module) + " 5px",
-              width: "100%",
-              maxWidth: "500px",
-            }}
-            className={styles.modulecard}
-          >
-            <Row gutter={[16, 16]}>
-              <Col
-                span={24}
-                style={{
-                  whiteSpace: "nowrap",
-                  overflow: "hidden",
-                  textOverflow: "ellipsis",
-                  display: "block",
-                }}
-              >
-                Repo:
-                <Link aria-level={3} href={module.template.repo}>
-                  {" " + module.template.repo}
-                </Link>
-              </Col>
-            </Row>
-            <Row gutter={[16, 16]}>
-              <Col
-                span={24}
-                style={{
-                  whiteSpace: "nowrap",
-                  overflow: "hidden",
-                  textOverflow: "ellipsis",
-                  display: "block",
-                }}
-              >
-                Path:
-                <Link
-                  aria-level={3}
-                  href={
-                    module.template.repo +
-                    `/tree/` +
-                    getTemplateVersion(
+    if (displaymodule === "ALL Modules") {
+      return filteredData.map((module: any, index) => (
+        <Col key={index} xs={24} sm={12} md={8} lg={8} xl={6}>
+          <a href={"/modules/" + module.name}>
+            <Card
+              title={
+                <div>
+                  {module.iconURL ? (
+                    <img
+                      alt=""
+                      style={{ height: "2em", marginRight: "8px" }}
+                      src={module.iconURL}
+                    />
+                  ) : (
+                    <></>
+                  )}
+                  {module.name}
+                </div>
+              }
+              style={{
+                borderLeft: "solid " + getStatusColor(module) + " 5px",
+                width: "100%",
+                maxWidth: "500px",
+              }}
+              className={styles.modulecard}
+            >
+              <Row gutter={[16, 16]}>
+                <Col
+                  span={24}
+                  style={{
+                    whiteSpace: "nowrap",
+                    overflow: "hidden",
+                    textOverflow: "ellipsis",
+                    display: "block",
+                  }}
+                >
+                  Repo:
+                  <Link aria-level={3} href={module.template.repo}>
+                    {" " + module.template.repo}
+                  </Link>
+                </Col>
+              </Row>
+              <Row gutter={[16, 16]}>
+                <Col
+                  span={24}
+                  style={{
+                    whiteSpace: "nowrap",
+                    overflow: "hidden",
+                    textOverflow: "ellipsis",
+                    display: "block",
+                  }}
+                >
+                  Path:
+                  <Link
+                    aria-level={3}
+                    href={
+                      module.template.repo +
+                      `/tree/` +
+                      getTemplateVersion(
+                        module.template.version,
+                        module.template.resolvedVersion,
+                      ) +
+                      `/` +
+                      module.template.path
+                    }
+                  >
+                    {" " + module.template.path}
+                  </Link>
+                </Col>
+              </Row>
+              <Row gutter={[16, 16]}>
+                <Col
+                  span={24}
+                  style={{
+                    whiteSpace: "nowrap",
+                    overflow: "hidden",
+                    textOverflow: "ellipsis",
+                    display: "block",
+                  }}
+                >
+                  Version:
+                  <span style={{ color: "#1677ff" }}>
+                    {" "}
+                    {getTemplateVersion(
                       module.template.version,
                       module.template.resolvedVersion,
-                    ) +
-                    `/` +
-                    module.template.path
-                  }
-                >
-                  {" " + module.template.path}
-                </Link>
-              </Col>
-            </Row>
-            <Row gutter={[16, 16]}>
-              <Col
-                span={24}
-                style={{
-                  whiteSpace: "nowrap",
-                  overflow: "hidden",
-                  textOverflow: "ellipsis",
-                  display: "block",
-                }}
-              >
-                Version:
-                <span style={{ color: "#1677ff" }}>
-                  {" "}
-                  {getTemplateVersion(
-                    module.template.version,
-                    module.template.resolvedVersion,
+                    )}
+                  </span>
+                </Col>
+              </Row>
+            </Card>
+          </a>
+        </Col>
+      ));
+    }
+    return filteredData
+      .filter((module: any) => module.status === displaymodule)
+      .map((module: any, index) => (
+        <Col key={index} xs={24} sm={12} md={8} lg={8} xl={6}>
+          <a href={"/modules/" + module.name}>
+            <Card
+              title={
+                <div>
+                  {module.iconURL ? (
+                    <img
+                      alt=""
+                      style={{ height: "2em", marginRight: "8px" }}
+                      src={module.iconURL}
+                    />
+                  ) : (
+                    <></>
                   )}
-                </span>
-              </Col>
-            </Row>
-          </Card>
-        </a>
-      </Col>
-    ));
+                  {module.name}
+                </div>
+              }
+              style={{
+                borderLeft: "solid " + getStatusColor(module) + " 5px",
+                width: "100%",
+                maxWidth: "500px",
+              }}
+              className={styles.modulecard}
+            >
+              <Row gutter={[16, 16]}>
+                <Col
+                  span={24}
+                  style={{
+                    whiteSpace: "nowrap",
+                    overflow: "hidden",
+                    textOverflow: "ellipsis",
+                    display: "block",
+                  }}
+                >
+                  Repo:
+                  <Link aria-level={3} href={module.template.repo}>
+                    {" " + module.template.repo}
+                  </Link>
+                </Col>
+              </Row>
+              <Row gutter={[16, 16]}>
+                <Col
+                  span={24}
+                  style={{
+                    whiteSpace: "nowrap",
+                    overflow: "hidden",
+                    textOverflow: "ellipsis",
+                    display: "block",
+                  }}
+                >
+                  Path:
+                  <Link
+                    aria-level={3}
+                    href={
+                      module.template.repo +
+                      `/tree/` +
+                      getTemplateVersion(
+                        module.template.version,
+                        module.template.resolvedVersion,
+                      ) +
+                      `/` +
+                      module.template.path
+                    }
+                  >
+                    {" " + module.template.path}
+                  </Link>
+                </Col>
+              </Row>
+              <Row gutter={[16, 16]}>
+                <Col
+                  span={24}
+                  style={{
+                    whiteSpace: "nowrap",
+                    overflow: "hidden",
+                    textOverflow: "ellipsis",
+                    display: "block",
+                  }}
+                >
+                  Version:
+                  <span style={{ color: "#1677ff" }}>
+                    {" "}
+                    {getTemplateVersion(
+                      module.template.version,
+                      module.template.resolvedVersion,
+                    )}
+                  </span>
+                </Col>
+              </Row>
+            </Card>
+          </a>
+        </Col>
+      ));
   };
 
   return (
@@ -247,11 +344,13 @@ const Modules = () => {
         <Col span={2}>
           <Dropdown
             menu={{
-              items: items.map((item) => ({
-                key: item.key,
-                label: item.label,
-                onClick: () => handleSelectItem(item), // Handle item click
-              })),
+              items: items
+                .filter((items: any) => items.label !== displaymodule)
+                .map((item) => ({
+                  key: item.key,
+                  label: item.label,
+                  onClick: () => handleSelectItem(item), // Handle item click
+                })),
             }}
             trigger={["click"]}
           >
