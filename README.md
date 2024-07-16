@@ -19,11 +19,11 @@
 <h3 align="center">Developer Friendly Kubernetes</h3>
 <p align="center">
     <a href="https://cyclops-ui.com">Webpage</a>
-    -
+ -
     <a href="https://discord.com/invite/8ErnK3qDb3">Discord</a>
-    -
+ -
     <a href="https://x.com/CyclopsUI">X</a>
-    -
+ -
     <a href="https://www.linkedin.com/company/cyclops-ui">LinkedIn</a>
 </p>
 
@@ -31,7 +31,7 @@
 
 Cyclops is an open-source dev tool that simplifies Kubernetes with an easy-to-use UI, making it less daunting and easy to use. Instead of creating and configuring your Kubernetes manifests with YAML, use Cyclops to quickly and easily configure and deploy your applications - validations included!
 
-The UI that Cyclops provides is highly customizable when it comes to defining your configurations through its templates feature. It also comes with a couple of predefined templates to get you started on your journey. Thanks to our templates, Cyclops turns hours and days of configuring applications into a few clicks.
+Cyclops's UI is highly customizable when it comes to defining configurations through its templates feature. It also comes with a couple of predefined templates to get you started on your journey. Thanks to our templates, Cyclops turns hours and days of configuring applications into a few clicks.
 
 <p align= "center">
     <img src="https://github.com/user-attachments/assets/4c1e3fff-7106-4afb-9c29-e0aef7d7dd86"/>
@@ -53,7 +53,7 @@ Read more about it [here](#-templates)
 
 Cyclops can either be installed manually by applying the latest manifest or with the [Glasskube Kubernetes Package Manager](https://github.com/glasskube/glasskube/).
 
-To install Cyclops using `kubectl` into your cluster, run commands below:
+To install Cyclops using `kubectl` into your cluster, run the commands below:
 
 ```bash
 kubectl apply -f https://raw.githubusercontent.com/cyclops-ui/cyclops/v0.8.2/install/cyclops-install.yaml && kubectl apply -f https://raw.githubusercontent.com/cyclops-ui/cyclops/v0.8.2/install/demo-templates.yaml
@@ -61,7 +61,7 @@ kubectl apply -f https://raw.githubusercontent.com/cyclops-ui/cyclops/v0.8.2/ins
 
 It will create a new namespace called `cyclops` and deploy everything you need for your Cyclops instance to run.
 
-Now all that is left is to expose Cyclops server outside the cluster:
+Now, all that is left is to expose the Cyclops server outside the cluster:
 
 ```bash
 kubectl port-forward svc/cyclops-ui 3000:3000 -n cyclops
@@ -73,7 +73,7 @@ You can now access Cyclops in your browser on [http://localhost:3000](http://loc
 
 Every Cyclops instance comes with a couple of predefined templates. Feel free to use and abuse them!
 
-Helm charts used for these templates can be found [here](https://github.com/cyclops-ui/templates). You can use this repo as a guide if you want to create your own templates. More information on creating your own can be found on our [web](https://cyclops-ui.com/docs/templates/).
+Helm charts used for these templates can be found [here](https://github.com/cyclops-ui/templates). You can use this repo as a guide to create your own templates. More information on making your own can be found on our [web](https://cyclops-ui.com/docs/templates/).
 
 ## 🚧 `cyctl`
 
@@ -87,7 +87,7 @@ brew install cyctl
 
 Besides the basic commands like getting all modules or templates, you can integrate it with GitHub actions to automate some of the Cyclops processes.
 
-For example, once you create a template and publish it on GitHub, GitHub actions could automatically connect the template to your Cyclops instance using our CLI. This would **allow your developers instant access to each new template or even any update the template receives**.
+For example, once you create a template and publish it on GitHub, GitHub actions could automatically connect the template to your Cyclops instance using our CLI. This would **allow your developers instant access to each new template or any update the template receives**.
 
 ## 💪 Contributing
 
@@ -107,6 +107,6 @@ Start your contributing journey at our [CONTRIBUTING.md](./CONTRIBUTING.md) and 
 - **Authentification** -> secure login
 - **Role-based access control** -> limit the resources your devs have access to
 - **GitOps** -> integrate with GitOps tools
-- **Support for Kustomize** -> currently, only Helm is supported for creating tsemplates
+- **Support for Kustomize** -> currently, only Helm is supported for creating templates
 - **`cyctl` for Windows** -> Chocolatey
 - **Customizable Module details page** -> create custom views of resources that your module uses
