@@ -304,6 +304,7 @@ const ModuleDetails = () => {
       name: "",
       namespace: "",
     });
+    setDeleteResourceVerify("");
   };
 
   const handleCancel = () => {
@@ -505,6 +506,7 @@ const ModuleDetails = () => {
       deleteButton = (
         <Button
           onClick={function () {
+            setDeleteResourceVerify("");
             setDeleteResourceModal(true);
             setDeleteResourceRef({
               group: resource.group,
@@ -948,6 +950,7 @@ const ModuleDetails = () => {
         <Input
           placeholder={deleteResourceRef.kind + " " + deleteResourceRef.name}
           onChange={changeDeleteResourceVerify}
+          value={deleteResourceVerify}
           required
         />
       </Modal>
