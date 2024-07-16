@@ -868,7 +868,7 @@ const ModuleDetails = () => {
       </Divider>
       {resourcesLoading()}
       <Modal
-        title="Delete module"
+        title={`Delete module ${moduleName}`}
         open={loading}
         onCancel={handleCancel}
         width={"40%"}
