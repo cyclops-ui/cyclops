@@ -1080,7 +1080,9 @@ const NewModule = () => {
   };
 
   const handleImportValues = () => {
-    form.setFieldsValue(YAML.parse(loadedValues));
+    form.setFieldsValue(
+      mapsToArray(config.root.properties, YAML.parse(loadedValues)),
+    );
     setLoadedValues("");
     setLoadingValuesModal(false);
   };
