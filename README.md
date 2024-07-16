@@ -33,7 +33,9 @@ Cyclops is an open-source dev tool that simplifies Kubernetes with an easy-to-us
 
 The UI that Cyclops provides is highly customizable when it comes to defining your configurations through its templates feature. It also comes with a couple of predefined templates to get you started on your journey. Thanks to our templates, Cyclops turns hours and days of configuring applications into a few clicks.
 
-<img align="center" src="https://github.com/user-attachments/assets/4c1e3fff-7106-4afb-9c29-e0aef7d7dd86"/>
+<p align= "center">
+    <img src="https://github.com/user-attachments/assets/4c1e3fff-7106-4afb-9c29-e0aef7d7dd86"/>
+</p>
 
 ## 💡 How it works?
 
@@ -89,9 +91,9 @@ For example, once you create a template and publish it on GitHub, GitHub actions
 
 ## 💪 Contributing
 
-Cyclops is **open-source** and open to external contributors. There are plenty of ways you can contribute to the Cyclpos project - with code, feedback, content and GitHub stars ⭐
+Cyclops is **open-source** and open to external contributors. There are plenty of ways you can contribute to the Cyclops project - with code, feedback, content and GitHub stars⭐
 
-Start your contributing journey at our [CONTRIBUTING.md](./CONTRIBUTING.md) file and join our wall of fame 👐
+Start your contributing journey at our [CONTRIBUTING.md](./CONTRIBUTING.md) and join our wall of fame 👐
 
 <a align="center" width="705" href="https://github.com/cyclops-ui/cyclops/graphs/contributors">
 <img src="https://contrib.rocks/image?repo=cyclops-ui/cyclops" />
