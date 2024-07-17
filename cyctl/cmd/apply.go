@@ -85,48 +85,33 @@ func applyYaml(yamlFile []byte, config *rest.Config, telemetry bool) error {
 			return err
 		}
 
+		if telemetry && obj.GetKind() == "Deployment" && obj.GetName() == "cyclops-ctrl" {
+			containers, _, _ := unstructured.NestedSlice(obj.Object, "spec", "template", "spec", "containers")
+			if len(containers) > 0 {
+				container := containers[0].(map[string]interface{})
+				env, _, _ := unstructured.NestedSlice(container, "env")
+				newEnv := map[string]interface{}{
+					"name":  "DISABLE_TELEMETRY",
+					"value": "true",
+				}
+				env = append(env, newEnv)
+				err := unstructured.SetNestedSlice(container, env, "env")
+				if err != nil {
+					log.Fatal(err)
+				}
+				containers[0] = container
+				err = unstructured.SetNestedSlice(obj.Object, containers, "spec", "template", "spec", "containers")
+				if err != nil {
+					log.Fatal(err)
+				}
+				fmt.Println("telemetry is disabled")
+			}
+		}
+
 		err = doServerSideApply(context.TODO(), config, obj)
 		if err != nil {
 			return err
 		}
-
-		if telemetry {
-			if obj.GetKind() == "Deployment" {
-				labels, _, _ := unstructured.NestedMap(obj.Object, "metadata", "labels")
-				if labels != nil {
-					appLabel, _, _ := unstructured.NestedString(labels, "app")
-					if appLabel == "cyclops-ctrl" {
-						containers, _, _ := unstructured.NestedSlice(obj.Object, "spec", "template", "spec", "containers")
-						if len(containers) > 0 {
-							container := containers[0].(map[string]interface{})
-							env, _, _ := unstructured.NestedSlice(container, "env")
-							newEnv := map[string]interface{}{
-								"name":  "DISABLE_TELEMETRY",
-								"value": "true",
-							}
-							env = append(env, newEnv)
-							err := unstructured.SetNestedSlice(container, env, "env")
-							if err != nil {
-								log.Fatal(err)
-							}
-							containers[0] = container
-							err = unstructured.SetNestedSlice(obj.Object, containers, "spec", "template", "spec", "containers")
-							if err != nil {
-								log.Fatal(err)
-							}
-						}
-						err = doServerSideApply(context.TODO(), config, obj)
-						if err != nil {
-							log.Fatal(err)
-						}
-						fmt.Println("telemetry is disabled.")
-
-					}
-				}
-			}
-
-		}
-
 	}
 
 	return nil
@@ -141,7 +126,7 @@ var applyCmd = &cobra.Command{
 			log.Fatal(err)
 		}
 
-		telemetry, _ := cmd.Flags().GetBool("telemetry")
+		telemetry, _ := cmd.Flags().GetBool("disable-telemetry")
 
 		var deployUrl string
 		var demoUrl string
@@ -201,6 +186,6 @@ var applyCmd = &cobra.Command{
 
 func init() {
 	applyCmd.Flags().StringP("version", "v", "main", "specify cyclops version")
-	applyCmd.Flags().BoolP("telemetry", "t", false, "disable telemetry")
+	applyCmd.Flags().BoolP("disable-telemetry", "t", false, "disable emitting telemetry metrics from cyclops controller")
 	RootCmd.AddCommand(applyCmd)
 }
