@@ -32,7 +32,7 @@
 
 Cyclops is an open-source dev tool that simplifies Kubernetes with an easy-to-use UI, making it less intimidating. Instead of creating and configuring your Kubernetes manifests with YAML, use Cyclops to painlessly configure and deploy your applications - validations included!
 
-Cyclops's UI is highly customizable when it comes to defining configurations through its templates system. Thanks to our templates, Cyclops turns hours and days of configuring applications into a few clicks.
+Thanks to the templates system, Cyclops's UI is highly customizable when defining configurations. Our templates turn hours and days of configuring applications into a few clicks.
 
 <p align= "center">
     <img src="https://github.com/user-attachments/assets/4c1e3fff-7106-4afb-9c29-e0aef7d7dd86"/>
