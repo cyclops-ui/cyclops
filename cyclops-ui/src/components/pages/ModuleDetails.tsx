@@ -1,10 +1,11 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import {
   Alert,
   Button,
   Checkbox,
   Col,
   Collapse,
+  Descriptions,
   Divider,
   Input,
   Modal,
@@ -45,6 +46,8 @@ import {
 import { gvkString } from "../../utils/k8s/gvk";
 import { mapResponseError } from "../../utils/api/errors";
 import Secret from "../k8s-resources/Secret";
+import { CheckboxChangeEvent } from "antd/es/checkbox";
+
 const languages = [
   "javascript",
   "java",
@@ -89,6 +92,7 @@ interface module {
   name: string;
   namespace: string;
   template: templateRef;
+  iconURL: string;
 }
 
 interface resourceRef {
@@ -102,6 +106,13 @@ interface resourceRef {
 const ModuleDetails = () => {
   const [manifestModal, setManifestModal] = useState({
     on: false,
+    resource: {
+      group: "",
+      version: "",
+      kind: "",
+      name: "",
+      namespace: "",
+    },
     manifest: "",
   });
   const [loading, setLoading] = useState(false);
@@ -119,6 +130,7 @@ const ModuleDetails = () => {
       version: "",
       resolvedVersion: "",
     },
+    iconURL: "",
   });
 
   const [deleteResourceModal, setDeleteResourceModal] = useState(false);
@@ -141,12 +153,49 @@ const ModuleDetails = () => {
 
   let { moduleName } = useParams();
 
+  const [showManagedFields, setShowManagedFields] = useState(false);
+
+  const handleCheckboxChange = (e: CheckboxChangeEvent) => {
+    setShowManagedFields(e.target.checked);
+    fetchManifest(
+      manifestModal.resource.group,
+      manifestModal.resource.version,
+      manifestModal.resource.kind,
+      manifestModal.resource.namespace,
+      manifestModal.resource.name,
+      e.target.checked,
+    );
+  };
+
+  const handleManifestClick = (resource: any) => {
+    setManifestModal({
+      on: true,
+      resource: {
+        group: resource.group,
+        version: resource.version,
+        kind: resource.kind,
+        name: resource.name,
+        namespace: resource.namespace,
+      },
+      manifest: "",
+    });
+    fetchManifest(
+      resource.group,
+      resource.version,
+      resource.kind,
+      resource.namespace,
+      resource.name,
+      showManagedFields,
+    );
+  };
+
   function fetchManifest(
     group: string,
     version: string,
     kind: string,
     namespace: string,
     name: string,
+    showManagedFields: boolean,
   ) {
     axios
       .get(`/api/manifest`, {
@@ -156,13 +205,14 @@ const ModuleDetails = () => {
           kind: kind,
           name: name,
           namespace: namespace,
+          includeManagedFields: showManagedFields,
         },
       })
       .then((res) => {
-        setManifestModal({
-          on: true,
+        setManifestModal((prev) => ({
+          ...prev,
           manifest: res.data,
-        });
+        }));
       })
       .catch((error) => {
         setLoading(false);
@@ -171,21 +221,7 @@ const ModuleDetails = () => {
       });
   }
 
-  function fetchModule() {
-    axios
-      .get(`/api/modules/` + moduleName)
-      .then((res) => {
-        setModule(res.data);
-        setLoadModule(true);
-      })
-      .catch((error) => {
-        setLoading(false);
-        setLoadModule(true);
-        setError(mapResponseError(error));
-      });
-  }
-
-  function fetchModuleResources() {
+  const fetchModuleResources = useCallback(() => {
     axios
       .get(`/api/modules/` + moduleName + `/resources`)
       .then((res) => {
@@ -197,16 +233,30 @@ const ModuleDetails = () => {
         setLoadResources(true);
         setError(mapResponseError(error));
       });
-  }
+  }, [moduleName]);
 
   useEffect(() => {
+    function fetchModule() {
+      axios
+        .get(`/api/modules/` + moduleName)
+        .then((res) => {
+          setModule(res.data);
+          setLoadModule(true);
+        })
+        .catch((error) => {
+          setLoading(false);
+          setLoadModule(true);
+          setError(mapResponseError(error));
+        });
+    }
+
     fetchModule();
     fetchModuleResources();
     const interval = setInterval(() => fetchModuleResources(), 15000);
     return () => {
       clearInterval(interval);
     };
-  }, []);
+  }, [moduleName, fetchModuleResources]);
 
   const getCollapseColor = (fieldName: string) => {
     if (
@@ -240,8 +290,8 @@ const ModuleDetails = () => {
 
   const handleCancelManifest = () => {
     setManifestModal({
+      ...manifestModal,
       on: false,
-      manifest: "",
     });
   };
 
@@ -254,6 +304,7 @@ const ModuleDetails = () => {
       name: "",
       namespace: "",
     });
+    setDeleteResourceVerify("");
   };
 
   const handleCancel = () => {
@@ -274,6 +325,10 @@ const ModuleDetails = () => {
 
   const getResourcesToDelete = () => {
     let resourcesToDelete: JSX.Element[] = [];
+
+    if (!loadResources) {
+      return <Spin />;
+    }
 
     resources.forEach((resource: any) => {
       resourcesToDelete.push(
@@ -451,6 +506,7 @@ const ModuleDetails = () => {
       deleteButton = (
         <Button
           onClick={function () {
+            setDeleteResourceVerify("");
             setDeleteResourceModal(true);
             setDeleteResourceRef({
               group: resource.group,
@@ -503,18 +559,7 @@ const ModuleDetails = () => {
         </Row>
         <Row>
           <Col style={{ float: "right" }}>
-            <Button
-              onClick={function () {
-                fetchManifest(
-                  resource.group,
-                  resource.version,
-                  resource.kind,
-                  resource.namespace,
-                  resource.name,
-                );
-              }}
-              block
-            >
+            <Button onClick={() => handleManifestClick(resource)} block>
               View Manifest
             </Button>
           </Col>
@@ -554,35 +599,82 @@ const ModuleDetails = () => {
   };
 
   const moduleLoading = () => {
-    if (loadModule) {
-      return (
-        <div>
-          <Row gutter={[40, 0]}>
-            <Col span={9}>
-              <Title level={1}>
-                {module.name} {moduleStatusIcon()}
-              </Title>
-            </Col>
-          </Row>
-          <Row gutter={[40, 0]}>
-            <Col span={9}>
-              <Title level={3}>
-                {"Namespace: "}
-                {module.namespace}
-              </Title>
-            </Col>
-          </Row>
-          <Row gutter={[40, 0]}>
-            <Col span={24}>{moduleTemplateReferenceView(module.template)}</Col>
-          </Row>
-        </div>
-      );
-    } else {
+    if (!loadModule) {
       return <Spin />;
     }
+
+    return (
+      <div>
+        <Row gutter={[40, 0]}>
+          <Col>
+            <Title level={1}>
+              {module.iconURL ? (
+                <img
+                  alt=""
+                  style={{ height: "1.5em", marginRight: "8px" }}
+                  src={module.iconURL}
+                />
+              ) : (
+                <></>
+              )}
+              {module.name}
+            </Title>
+          </Col>
+        </Row>
+        <Descriptions
+          column={1}
+          colon={false}
+          style={{ border: "0px" }}
+          labelStyle={{
+            color: "#737373",
+            fontSize: "24px",
+            fontWeight: "550",
+          }}
+        >
+          <Descriptions.Item
+            style={{ paddingBottom: "0" }}
+            key={"status"}
+            label={"status"}
+            contentStyle={{
+              fontSize: "150%",
+            }}
+          >
+            {moduleStatusIcon()}
+          </Descriptions.Item>
+          <Descriptions.Item
+            key={"namespace"}
+            label={"namespace"}
+            contentStyle={{
+              fontSize: "24px",
+              fontWeight: "550",
+            }}
+          >
+            {module.namespace}
+          </Descriptions.Item>
+        </Descriptions>
+        <Row gutter={[40, 0]} style={{ paddingTop: "8px" }}>
+          <Col span={24}>{moduleTemplateReferenceView(module.template)}</Col>
+        </Row>
+      </div>
+    );
   };
 
   const moduleStatusIcon = () => {
+    if (!loadModule || !loadResources) {
+      return (
+        <div
+          style={{
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+            height: "100%",
+          }}
+        >
+          <Spin />
+        </div>
+      );
+    }
+
     let resourcesWithStatus = 0;
     let status = true;
     for (let i = resources.length - 1; i >= 0; i--) {
@@ -607,7 +699,12 @@ const ModuleDetails = () => {
     if (status) {
       statusIcon = (
         <CheckCircleTwoTone
-          style={{ verticalAlign: "middle" }}
+          style={{
+            verticalAlign: "middle",
+            height: "100%",
+            marginBottom: "4px",
+            fontSize: "150%",
+          }}
           twoToneColor={"#52c41a"}
         />
       );
@@ -615,7 +712,12 @@ const ModuleDetails = () => {
     if (!status) {
       statusIcon = (
         <CloseSquareTwoTone
-          style={{ verticalAlign: "middle" }}
+          style={{
+            verticalAlign: "middle",
+            height: "100%",
+            marginBottom: "4px",
+            fontSize: "150%",
+          }}
           twoToneColor={"red"}
         />
       );
@@ -766,7 +868,7 @@ const ModuleDetails = () => {
       </Divider>
       {resourcesLoading()}
       <Modal
-        title="Delete module"
+        title={`Delete module ${moduleName}`}
         open={loading}
         onCancel={handleCancel}
         width={"40%"}
@@ -802,6 +904,12 @@ const ModuleDetails = () => {
         cancelButtonProps={{ style: { display: "none" } }}
         width={"40%"}
       >
+        <div>
+          <Checkbox onChange={handleCheckboxChange} checked={showManagedFields}>
+            Include Managed Fields
+          </Checkbox>
+          <Divider style={{ marginTop: "12px", marginBottom: "12px" }} />
+        </div>
         <ReactAce
           style={{ width: "100%" }}
           mode={"sass"}
@@ -842,6 +950,7 @@ const ModuleDetails = () => {
         <Input
           placeholder={deleteResourceRef.kind + " " + deleteResourceRef.name}
           onChange={changeDeleteResourceVerify}
+          value={deleteResourceVerify}
           required
         />
       </Modal>

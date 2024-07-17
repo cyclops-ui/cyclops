@@ -1,0 +1,22 @@
+name: cyctl tests
+
+on:
+  pull_request:
+    paths:
+      - 'cyctl/**'
+  push:
+    paths:
+      - 'cyctl/**'
+    branches:
+      - main
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+      - name: Build
+        run: |
+          cd ${{ github.workspace }}/cyctl
+          go build -o delme ./main.go && rm delme

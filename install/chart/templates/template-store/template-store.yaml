@@ -5,6 +5,8 @@ kind: TemplateStore
 metadata:
   name: {{ required "Template name is required for each template" .name }}
   namespace: cyclops
+  annotations:
+    cyclops-ui.com/icon: {{ .iconURL | default "" | quote }}
 spec:
   repo: {{ required "Template repo is required for each template" .repo | quote }}
   path: {{ required "Template path/name is required for each template" .path | quote }}

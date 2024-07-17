@@ -3,11 +3,15 @@ import PathConstants from "./PathConstants";
 
 const Home = React.lazy(() => import("../components/pages/Modules/Modules"));
 const Modules = React.lazy(() => import("../components/pages/Modules/Modules"));
-const NewModule = React.lazy(() => import("../components/pages/NewModule"));
+const NewModule = React.lazy(
+  () => import("../components/pages/NewModule/NewModule"),
+);
 const ModuleDetails = React.lazy(
   () => import("../components/pages/ModuleDetails"),
 );
-const EditModule = React.lazy(() => import("../components/pages/EditModule"));
+const EditModule = React.lazy(
+  () => import("../components/pages/EditModule/EditModule"),
+);
 const ModuleHistory = React.lazy(() => import("../components/pages/History"));
 const Nodes = React.lazy(() => import("../components/pages/Nodes"));
 const NodeDetails = React.lazy(() => import("../components/pages/NodeDetails"));

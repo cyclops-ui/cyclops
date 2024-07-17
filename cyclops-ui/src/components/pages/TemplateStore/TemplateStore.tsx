@@ -2,11 +2,9 @@ import React, { useEffect, useState } from "react";
 import {
   Col,
   Table,
-  Typography,
   Alert,
   Row,
   Button,
-  Tabs,
   Modal,
   Form,
   Input,
@@ -24,6 +22,7 @@ import {
 import classNames from "classnames";
 import styles from "./styles.module.css";
 import { mapResponseError } from "../../../utils/api/errors";
+import defaultTemplate from "../../../static/img/default-template-icon.png";
 
 const TemplateStore = () => {
   const [templates, setTemplates] = useState([]);
@@ -185,7 +184,38 @@ const TemplateStore = () => {
       </Row>
       <Col span={24} style={{ overflowX: "auto" }}>
         <Table dataSource={templates}>
-          <Table.Column title="Name" dataIndex="name" width={"30%"} />
+          <Table.Column
+            dataIndex="iconURL"
+            width={"3%"}
+            render={function (iconURL) {
+              if (!iconURL || iconURL.length === 0) {
+                return (
+                  <img
+                    alt=""
+                    style={{
+                      verticalAlign: "middle",
+                      margin: "-5px",
+                      maxHeight: "36px",
+                    }}
+                    src={defaultTemplate}
+                  />
+                );
+              }
+
+              return (
+                <img
+                  alt=""
+                  style={{
+                    verticalAlign: "middle",
+                    margin: "-5px",
+                    maxHeight: "36px",
+                  }}
+                  src={iconURL}
+                />
+              );
+            }}
+          />
+          <Table.Column title="Name" dataIndex="name" width={"20%"} />
           <Table.Column
             title="Repo"
             dataIndex={["ref", "repo"]}
@@ -194,7 +224,7 @@ const TemplateStore = () => {
           <Table.Column
             title="Path"
             dataIndex={["ref", "path"]}
-            width={"10%"}
+            width={"20%"}
             render={function (value: any, record: any, index: number) {
               if (!value.startsWith("/")) {
                 return "/" + value;
@@ -223,7 +253,8 @@ const TemplateStore = () => {
                 ) : (
                   <FileSyncOutlined
                     className={classNames(styles.statustemplate, {
-                      [styles.success]: requestStatus[template.name] === "success",
+                      [styles.success]:
+                        requestStatus[template.name] === "success",
                       [styles.error]: requestStatus[template.name] === "error",
                     })}
                     onClick={function () {
