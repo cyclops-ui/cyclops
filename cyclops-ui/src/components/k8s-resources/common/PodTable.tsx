@@ -163,46 +163,6 @@ const PodTable = ({ pods, namespace }: Props) => {
         <Table.Column title="Node" dataIndex="node" />
         <Table.Column title="Phase" dataIndex="podPhase" />
         <Table.Column
-          title="Status"
-          dataIndex="containers"
-          key="containers"
-          render={(containers: any) => (
-            <>
-              {containers.map((container: any) => {
-                let color = "yellow";
-
-                const greenStates = ["running", "ready", "completed"];
-                if (greenStates.includes(container.status.status)) {
-                  color = "green";
-                }
-
-                const redStates = ["terminated", "crashLoopBackOff", "error"];
-                if (redStates.includes(container.status.status)) {
-                  color = "red";
-                }
-
-                return (
-                  <Tooltip
-                    key={container.name}
-                    title={
-                      <div>
-                        <div key={container.name}>
-                          <strong>{container.name}:</strong>{" "}
-                          {container.status.status}
-                          <br />
-                          <small>{container.status.message}</small>
-                        </div>
-                      </div>
-                    }
-                  >
-                    <Tag color={color}>{container.status.status}</Tag>
-                  </Tooltip>
-                );
-              })}
-            </>
-          )}
-        />
-        <Table.Column
           title="Started"
           dataIndex="started"
           render={(value) => <span>{formatPodAge(value)}</span>}
@@ -222,13 +182,27 @@ const PodTable = ({ pods, namespace }: Props) => {
                 }
 
                 return (
-                  <Tag
-                    color={color}
-                    key={container.image}
-                    style={{ fontSize: "100%" }}
+                  <Tooltip
+                    key={container.name}
+                    title={
+                      <div>
+                        <div key={container.name}>
+                          <strong>{container.name}:</strong>{" "}
+                          {container.status.status}
+                          <br />
+                          <small>{container.status.message}</small>
+                        </div>
+                      </div>
+                    }
                   >
-                    {container.image}
-                  </Tag>
+                    <Tag
+                      color={color}
+                      key={container.image}
+                      style={{ fontSize: "100%" }}
+                    >
+                      {container.image}
+                    </Tag>
+                  </Tooltip>
                 );
               })}
             </>
