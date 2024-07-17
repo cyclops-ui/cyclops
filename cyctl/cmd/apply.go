@@ -159,7 +159,7 @@ var applyCmd = &cobra.Command{
 
 		fmt.Println("initializing cyclops resources")
 
-		err = applyYaml(deployYamlFile, kubeconfig.Config, telemetry)
+		err = applyYaml(deployYamlFile, kubeconfig.Config, disableTelemetry)
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -180,7 +180,7 @@ var applyCmd = &cobra.Command{
 		}
 
 		fmt.Println("creating demo templates")
-		err = applyYaml(demoYamlFile, kubeconfig.Config, telemetry)
+		err = applyYaml(demoYamlFile, kubeconfig.Config, disableTelemetry)
 		if err != nil {
 			log.Fatal(err)
 		}
