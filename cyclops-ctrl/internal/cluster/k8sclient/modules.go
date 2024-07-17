@@ -42,7 +42,7 @@ func (k *KubernetesClient) UpdateModule(module *cyclopsv1alpha1.Module) error {
 }
 
 func (k *KubernetesClient) UpdateModuleStatus(module *cyclopsv1alpha1.Module) (*cyclopsv1alpha1.Module, error) {
-	return k.moduleset.Modules(module.Namespace).UpdateSubresource(module, "status")
+	return k.moduleset.Modules(module.Namespace).PatchStatus(module)
 }
 
 func (k *KubernetesClient) DeleteModule(name, namespace string) error {
@@ -61,7 +61,7 @@ func (k *KubernetesClient) GetResourcesForModule(name, namespace string) ([]dto.
 		return nil, err
 	}
 
-	managedGVRs, err := k.getManagedGVRs(module.Name, module.Namespace)
+	managedGVRs, err := k.getManagedGVRs(module.Name, namespace)
 	if err != nil {
 		return nil, err
 	}
@@ -108,8 +108,8 @@ func (k *KubernetesClient) GetResourcesForModule(name, namespace string) ([]dto.
 	return out, nil
 }
 
-func (k *KubernetesClient) getManagedGVRs(moduleName, moduleNamespace string) ([]schema.GroupVersionResource, error) {
-	module, _ := k.GetModule(moduleName, moduleNamespace)
+func (k *KubernetesClient) getManagedGVRs(moduleName, namespace string) ([]schema.GroupVersionResource, error) {
+	module, _ := k.GetModule(moduleName, namespace)
 
 	if module != nil && len(module.Status.ManagedGVRs) != 0 {
 		existing := make([]schema.GroupVersionResource, 0, len(module.Status.ManagedGVRs))
