@@ -30,9 +30,9 @@
 
 ## 🟠 What is Cyclops?
 
-Cyclops is an open-source dev tool that simplifies Kubernetes with an easy-to-use UI, making it less daunting and easy to use. Instead of creating and configuring your Kubernetes manifests with YAML, use Cyclops to quickly and easily configure and deploy your applications - validations included!
+Cyclops is an open-source dev tool that simplifies Kubernetes with an easy-to-use UI, making it less intimidating. Instead of creating and configuring your Kubernetes manifests with YAML, use Cyclops to painlessly configure and deploy your applications - validations included!
 
-Cyclops's UI is highly customizable when it comes to defining configurations through its templates feature. It also comes with a couple of predefined templates to get you started on your journey. Thanks to our templates, Cyclops turns hours and days of configuring applications into a few clicks.
+Cyclops's UI is highly customizable when it comes to defining configurations through its templates system. Thanks to our templates, Cyclops turns hours and days of configuring applications into a few clicks.
 
 <p align= "center">
     <img src="https://github.com/user-attachments/assets/4c1e3fff-7106-4afb-9c29-e0aef7d7dd86"/>
@@ -40,11 +40,11 @@ Cyclops's UI is highly customizable when it comes to defining configurations thr
 
 ## 💡 How it works?
 
-Cyclops is a platform that allows DevOps teams to quickly and without coding create custom UIs (called templates) for developers, QA teams, product managers, and other team members who do not necessarily have experience working with Kubernetes.
+Cyclops is a platform that allows DevOps teams to quickly and without coding create custom UIs for developers, QA teams, product managers, and other team members who do not necessarily have experience working with Kubernetes.
 
 **But don’t worry! If you do not have a DevOps team with you, Cyclops comes with a bunch of predefined templates to get you started!**
 
-Under the hood, Cyclops uses Helm charts to create your desired UIs. This means you can try Cyclops with any of your existing Helm charts or any public Helm charts you can find! (Just make sure they have a `values.schema.json` file).
+Under the hood, Cyclops uses Helm charts to create your desired UIs. This means you can try Cyclops with any of your existing Helm charts or any public Helm charts you can find!
 
 Read more about it [here](#-templates)
 
@@ -96,9 +96,11 @@ Cyclops is **open-source** and open to external contributors. There are plenty o
 
 Start your contributing journey at our [CONTRIBUTING.md](./CONTRIBUTING.md) and join our wall of fame 👐
 
-<a align="center" width="705" href="https://github.com/cyclops-ui/cyclops/graphs/contributors">
-<img src="https://contrib.rocks/image?repo=cyclops-ui/cyclops" />
-</a>
+<p align="center">
+    <a href="https://github.com/cyclops-ui/cyclops/graphs/contributors">
+        <img src="https://contrib.rocks/image?repo=cyclops-ui/cyclops&columns=10" />
+    </a>
+</p>
 
 ## 🧭 Roadmap
 
