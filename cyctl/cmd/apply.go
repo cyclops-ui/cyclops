@@ -126,7 +126,10 @@ var applyCmd = &cobra.Command{
 			log.Fatal(err)
 		}
 
-		telemetry, _ := cmd.Flags().GetBool("disable-telemetry")
+		disableTelemetry, err := cmd.Flags().GetBool("disable-telemetry")
+		if err != nil {
+			log.Fatal(err)
+		}
 
 		var deployUrl string
 		var demoUrl string
