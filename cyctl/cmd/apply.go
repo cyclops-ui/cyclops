@@ -67,7 +67,7 @@ func doServerSideApply(ctx context.Context, cfg *rest.Config, obj *unstructured.
 	return err
 }
 
-func applyYaml(yamlFile []byte, config *rest.Config, telemetry bool) error {
+func applyYaml(yamlFile []byte, config *rest.Config, disableTelemetry bool) error {
 	multidocReader := utilyaml.NewYAMLReader(bufio.NewReader(bytes.NewReader(yamlFile)))
 
 	for {
@@ -85,7 +85,7 @@ func applyYaml(yamlFile []byte, config *rest.Config, telemetry bool) error {
 			return err
 		}
 
-		if telemetry && obj.GetKind() == "Deployment" && obj.GetName() == "cyclops-ctrl" {
+		if disableTelemetry && obj.GetKind() == "Deployment" && obj.GetName() == "cyclops-ctrl" {
 			containers, _, _ := unstructured.NestedSlice(obj.Object, "spec", "template", "spec", "containers")
 			if len(containers) > 0 {
 				container := containers[0].(map[string]interface{})
