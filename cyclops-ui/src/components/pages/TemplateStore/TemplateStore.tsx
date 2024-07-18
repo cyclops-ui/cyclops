@@ -54,7 +54,7 @@ const TemplateStore = () => {
 
   useEffect(() => {
     axios
-      .get(`/api/templates/store`)
+      .get(`https://stunning-space-computing-machine-wxxpjrpr4v5fgqv6-3000.app.github.dev//api/templates/store`)
       .then((res) => {
         setTemplates(res.data);
       })
@@ -257,14 +257,7 @@ const TemplateStore = () => {
   });
 
   interface DataSourceType {
-    iconURL: string;
     name: string;
-    repo: string;
-    path: number;
-    version: string;
-    validate: string;
-    edit: string;
-    delete: string;
   }
   type DataIndex = keyof DataSourceType;
 
