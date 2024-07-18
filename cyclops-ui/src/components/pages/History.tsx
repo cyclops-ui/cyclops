@@ -107,6 +107,7 @@ const ModuleHistory = () => {
       .post("/api/modules/" + moduleName + "/manifest", {
         template: target.template,
         values: target.values,
+        name: moduleName,
       })
       .then(function (res) {
         setDiff({

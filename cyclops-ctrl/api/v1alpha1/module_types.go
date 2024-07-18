@@ -91,6 +91,7 @@ type HistoryTemplateRef struct {
 type HistoryEntry struct {
 	Generation  int64                `json:"generation"`
 	TemplateRef HistoryTemplateRef   `json:"template"`
+	Name        *string              `json:"name,omitempty"`
 	Values      apiextensionsv1.JSON `json:"values"`
 }
 

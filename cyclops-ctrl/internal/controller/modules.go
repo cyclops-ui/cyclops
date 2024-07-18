@@ -16,6 +16,7 @@ import (
 	"github.com/cyclops-ui/cyclops/cyclops-ctrl/internal/telemetry"
 	"github.com/cyclops-ui/cyclops/cyclops-ctrl/internal/template"
 	"github.com/cyclops-ui/cyclops/cyclops-ctrl/internal/template/render"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
 type Modules struct {
@@ -136,7 +137,15 @@ func (m *Modules) Manifest(ctx *gin.Context) {
 		return
 	}
 
+	var name string
+	if request.Name != nil {
+		name = *request.Name
+	}
+
 	manifest, err := m.renderer.HelmTemplate(v1alpha1.Module{
+		ObjectMeta: metav1.ObjectMeta{
+			Name: name,
+		},
 		Spec: v1alpha1.ModuleSpec{
 			TemplateRef: v1alpha1.TemplateRef{
 				URL:     request.TemplateRef.URL,
