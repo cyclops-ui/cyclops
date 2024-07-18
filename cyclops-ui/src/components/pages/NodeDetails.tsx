@@ -398,7 +398,7 @@ const NodeDetails = () => {
       </Row>
       <Row>
         <Text keyboard>
-          Created on:-{" "}
+          Created on: {" "}
           {new Date(
             node.node?.metadata?.creationTimestamp.toString(),
           ).toLocaleString()}
