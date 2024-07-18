@@ -96,6 +96,35 @@ const TemplateStore = () => {
       });
   };
 
+  const validateAllTemplates = async () => {
+    for (const templateToBeValidate of templates) {
+      const templateInfo = (templateToBeValidate as any).ref;
+      const templateName = (templateToBeValidate as any).name;
+      setLoadingTemplateName(templateName);
+      await axios
+        .get(
+          `/api/templates?repo=${templateInfo.repo}&path=${templateInfo.path}&commit=${templateInfo.version}`,
+        )
+        .then(() => {
+          setLoadingTemplateName("");
+          setRequestStatus((prevStatus) => ({
+            ...prevStatus,
+            [templateName]: "success",
+          }));
+          message.success(templateName + " Template reference is valid!");
+          setError({ message: "", description: "" });
+        })
+        .catch((error) => {
+          setLoadingTemplateName("");
+          setRequestStatus((prevStatus) => ({
+            ...prevStatus,
+            [templateName]: "error",
+          }));
+          setError(mapResponseError(error));
+        });
+    }
+  };
+
   const checkTemplateReference = (
     repo: string,
     path: string,
@@ -105,7 +134,7 @@ const TemplateStore = () => {
     setLoadingTemplateName(templateName);
     axios
       .get(`/api/templates?repo=${repo}&path=${path}&commit=${version}`)
-      .then((res) => {
+      .then(() => {
         setLoadingTemplateName("");
         setRequestStatus((prevStatus) => ({
           ...prevStatus,
@@ -306,6 +335,18 @@ const TemplateStore = () => {
           />
         </Table>
       </Col>
+      {templates.length !== 0 && (
+        <Row justify={"end"} style={{ marginTop: "0.5rem" }}>
+          <Button
+            type={"primary"}
+            onClick={() => {
+              validateAllTemplates();
+            }}
+          >
+            Validate All Templates
+          </Button>
+        </Row>
+      )}
       <Modal
         title="Add new"
         open={newTemplateModal}
