@@ -11,7 +11,7 @@ import {
   Space,
   Table,
   Typography,
-  Progress,
+  Progress
 } from "antd";
 import "ace-builds/src-noconflict/ace";
 import { useParams } from "react-router-dom";
@@ -25,7 +25,7 @@ import { SearchOutlined } from "@ant-design/icons";
 import Highlighter from "react-highlight-words";
 import { mapResponseError } from "../../utils/api/errors";
 
-const { Title } = Typography;
+const { Title, Text } = Typography;
 
 interface DataSourceType {
   name: string;
@@ -43,6 +43,9 @@ const NodeDetails = () => {
     name: String,
     pods: [],
     node: {
+      metadata: {
+        creationTimestamp: new Date().toISOString()
+      },
       status: {
         conditions: [],
       },
@@ -276,7 +279,7 @@ const NodeDetails = () => {
       axios
         .get(
           `https://stunning-space-computing-machine-wxxpjrpr4v5fgqv6-3000.app.github.dev/api/nodes/` +
-            nodeName,
+          nodeName,
         )
         .then((res) => {
           setNode(res.data);
@@ -392,6 +395,9 @@ const NodeDetails = () => {
       )}
       <Row>
         <Title>{nodeName}</Title>
+      </Row>
+      <Row>
+        <Text keyboard>Created On:- {new Date(node.node?.metadata?.creationTimestamp.toString()).toLocaleString()}</Text>
       </Row>
       <Row>
         <Divider
