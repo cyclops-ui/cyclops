@@ -54,7 +54,7 @@ const TemplateStore = () => {
 
   useEffect(() => {
     axios
-      .get(`https://stunning-space-computing-machine-wxxpjrpr4v5fgqv6-3000.app.github.dev//api/templates/store`)
+      .get(`/api/templates/store`)
       .then((res) => {
         setTemplates(res.data);
       })
