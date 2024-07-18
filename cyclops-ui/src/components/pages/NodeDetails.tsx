@@ -11,7 +11,7 @@ import {
   Space,
   Table,
   Typography,
-  Progress
+  Progress,
 } from "antd";
 import "ace-builds/src-noconflict/ace";
 import { useParams } from "react-router-dom";
@@ -44,7 +44,7 @@ const NodeDetails = () => {
     pods: [],
     node: {
       metadata: {
-        creationTimestamp: new Date().toISOString()
+        creationTimestamp: new Date().toISOString(),
       },
       status: {
         conditions: [],
@@ -277,10 +277,7 @@ const NodeDetails = () => {
   useEffect(() => {
     const fetchNodeData = () => {
       axios
-        .get(
-          `https://stunning-space-computing-machine-wxxpjrpr4v5fgqv6-3000.app.github.dev/api/nodes/` +
-          nodeName,
-        )
+        .get(`/api/nodes/` + nodeName)
         .then((res) => {
           setNode(res.data);
           setResources({
@@ -370,6 +367,9 @@ const NodeDetails = () => {
     return gaugeColors["50%"];
   };
 
+  /**
+   * Color pallete for statuses of resources
+   */
   const gaugeColors = {
     "0%": "#57F287",
     "50%": "#FEE75C",
@@ -397,7 +397,12 @@ const NodeDetails = () => {
         <Title>{nodeName}</Title>
       </Row>
       <Row>
-        <Text keyboard>Created On:- {new Date(node.node?.metadata?.creationTimestamp.toString()).toLocaleString()}</Text>
+        <Text keyboard>
+          Created On:-{" "}
+          {new Date(
+            node.node?.metadata?.creationTimestamp.toString(),
+          ).toLocaleString()}
+        </Text>
       </Row>
       <Row>
         <Divider
