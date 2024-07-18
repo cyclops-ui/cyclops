@@ -398,7 +398,7 @@ const NodeDetails = () => {
       </Row>
       <Row>
         <Text keyboard>
-          Created On:-{" "}
+          Created on:-{" "}
           {new Date(
             node.node?.metadata?.creationTimestamp.toString(),
           ).toLocaleString()}
@@ -434,10 +434,12 @@ const NodeDetails = () => {
               percent={resources.cpu * 100}
               strokeColor={gaugeColors}
             />
-            <h1>
+            <h1 style={{ marginBottom: "6px" }}>
               <strong>CPU</strong>
-              <br />({node.requested.cpu}m / {node.available.cpu}m)
             </h1>
+            <h3>
+              ({node.requested.cpu}m / {node.available.cpu}m)
+            </h3>
           </div>
         </Col>
         <Col span={8}>
@@ -449,11 +451,14 @@ const NodeDetails = () => {
               percent={resources.memory * 100}
               strokeColor={gaugeColors}
             />
-            <h1>
+            <h1 style={{ marginBottom: "6px" }}>
               <strong>Memory</strong>
-              <br />({formatBytes(node.requested.memory)} /{" "}
-              {formatBytes(node.available.memory)})
             </h1>
+            <h3>
+              ({formatBytes(node.requested.memory)}
+              {" / "}
+              {formatBytes(node.available.memory)})
+            </h3>
           </div>
         </Col>
         <Col span={8}>
@@ -465,10 +470,12 @@ const NodeDetails = () => {
               percent={resources.pod_count * 100}
               strokeColor={gaugeColors}
             />
-            <h1>
+            <h1 style={{ marginBottom: "6px" }}>
               <strong>Pods</strong>
-              <br />({node.requested.pod_count} / {node.available.pod_count})
             </h1>
+            <h3>
+              ({node.requested.pod_count} / {node.available.pod_count})
+            </h3>
           </div>
         </Col>
       </Row>
