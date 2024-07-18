@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import {
   Col,
   Table,
@@ -8,18 +8,24 @@ import {
   Modal,
   Form,
   Input,
+  Space,
   Divider,
   message,
   Spin,
+  InputRef,
 } from "antd";
 import axios from "axios";
 import Title from "antd/es/typography/Title";
+import { ColumnType } from "antd/lib/table";
+import type { FilterConfirmProps } from "antd/es/table/interface";
+import { SearchOutlined } from "@ant-design/icons";
 import {
   DeleteOutlined,
   EditOutlined,
   FileSyncOutlined,
 } from "@ant-design/icons";
 import classNames from "classnames";
+import Highlighter from "react-highlight-words";
 import styles from "./styles.module.css";
 import { mapResponseError } from "../../../utils/api/errors";
 import defaultTemplate from "../../../static/img/default-template-icon.png";
@@ -30,6 +36,9 @@ const TemplateStore = () => {
   const [confirmDeleteInput, setConfirmDeleteInput] = useState("");
   const [newTemplateModal, setNewTemplateModal] = useState(false);
   const [confirmLoading, setConfirmLoading] = useState(false);
+  const [searchText, setSearchText] = useState("");
+  const [searchedColumn, setSearchedColumn] = useState("");
+  const searchInput = useRef<InputRef>(null);
   const [editModal, setEditModal] = useState("");
   const [loadingTemplateName, setLoadingTemplateName] = useState("");
   const [requestStatus, setRequestStatus] = useState<{ [key: string]: string }>(
@@ -149,6 +158,116 @@ const TemplateStore = () => {
     setConfirmDelete("");
   };
 
+  const handleSearch = (
+    selectedKeys: string[],
+    confirm: (param?: FilterConfirmProps) => void,
+    dataIndex: DataIndex,
+  ) => {
+    confirm();
+    setSearchText(selectedKeys[0]);
+    setSearchedColumn(dataIndex);
+  };
+  const handleReset = (
+    clearFilters: () => void,
+    confirm: (param?: FilterConfirmProps) => void,
+  ) => {
+    clearFilters();
+    setSearchText("");
+    confirm();
+  };
+
+  const getColumnSearchProps = (
+    dataIndex: DataIndex,
+  ): ColumnType<DataSourceType> => ({
+    filterDropdown: ({
+      setSelectedKeys,
+      selectedKeys,
+      confirm,
+      clearFilters,
+      close,
+    }) => (
+      <div style={{ padding: 8 }} onKeyDown={(e) => e.stopPropagation()}>
+        <Input
+          ref={searchInput}
+          placeholder={`Search ${dataIndex}`}
+          value={selectedKeys[0]}
+          onChange={(e) =>
+            setSelectedKeys(e.target.value ? [e.target.value] : [])
+          }
+          onPressEnter={() =>
+            handleSearch(selectedKeys as string[], confirm, dataIndex)
+          }
+          style={{ marginBottom: 8, display: "block" }}
+        />
+        <Space>
+          <Button
+            type="primary"
+            onClick={() =>
+              handleSearch(selectedKeys as string[], confirm, dataIndex)
+            }
+            icon={<SearchOutlined />}
+            size="small"
+            style={{ width: 90 }}
+          >
+            Search
+          </Button>
+          <Button
+            onClick={() => clearFilters && handleReset(clearFilters, confirm)}
+            size="small"
+            style={{ width: 90 }}
+          >
+            Reset
+          </Button>
+          <Button
+            type="link"
+            size="small"
+            onClick={() => {
+              close();
+            }}
+          >
+            close
+          </Button>
+        </Space>
+      </div>
+    ),
+    filterIcon: (filtered: boolean) => (
+      <SearchOutlined style={{ color: filtered ? "#ff8803" : undefined }} />
+    ),
+    onFilter: (value, record) =>
+      record[dataIndex]
+        .toString()
+        .toLowerCase()
+        .includes((value as string).toLowerCase()),
+    onFilterDropdownOpenChange: (visible) => {
+      if (visible) {
+        setTimeout(() => searchInput.current?.select(), 100);
+      }
+    },
+    render: (text) =>
+      searchedColumn === dataIndex ? (
+        <Highlighter
+          highlightStyle={{ backgroundColor: "#ffc069", padding: 0 }}
+          searchWords={[searchText]}
+          autoEscape
+          textToHighlight={text ? text.toString() : ""}
+        />
+      ) : (
+        text
+      ),
+  });
+
+  interface DataSourceType {
+    iconURL: string;
+    name: string;
+    repo: string;
+    path: number;
+    version: string;
+    validate: string;
+    edit: string;
+    delete: string;
+  }
+  type DataIndex = keyof DataSourceType;
+
   return (
     <div>
       {error.message.length !== 0 && (
@@ -184,11 +303,25 @@ const TemplateStore = () => {
       </Row>
       <Col span={24} style={{ overflowX: "auto" }}>
         <Table dataSource={templates}>
-          <Table.Column
-            dataIndex="iconURL"
-            width={"3%"}
-            render={function (iconURL) {
-              if (!iconURL || iconURL.length === 0) {
+          <Table dataSource={templates}>
+            <Table.Column
+              dataIndex="iconURL"
+              width={"3%"}
+              render={function (iconURL) {
+                if (!iconURL || iconURL.length === 0) {
+                  return (
+                    <img
+                      alt=""
+                      style={{
+                        verticalAlign: "middle",
+                        margin: "-5px",
+                        maxHeight: "36px",
+                      }}
+                      src={defaultTemplate}
+                    />
+                  );
+                }
+
                 return (
                   <img
                     alt=""
@@ -197,113 +330,115 @@ const TemplateStore = () => {
                       margin: "-5px",
                       maxHeight: "36px",
                     }}
-                    src={defaultTemplate}
+                    src={iconURL}
                   />
                 );
-              }
-
-              return (
-                <img
-                  alt=""
-                  style={{
-                    verticalAlign: "middle",
-                    margin: "-5px",
-                    maxHeight: "36px",
-                  }}
-                  src={iconURL}
-                />
-              );
-            }}
-          />
-          <Table.Column title="Name" dataIndex="name" width={"20%"} />
-          <Table.Column
-            title="Repo"
-            dataIndex={["ref", "repo"]}
-            width={"30%"}
-          />
-          <Table.Column
-            title="Path"
-            dataIndex={["ref", "path"]}
-            width={"20%"}
-            render={function (value: any, record: any, index: number) {
-              if (!value.startsWith("/")) {
-                return "/" + value;
-              }
-              return value;
-            }}
-          />
-          <Table.Column
-            title="Version"
-            dataIndex={["ref", "version"]}
-            width={"10%"}
-            render={function (value: any, record: any, index: number) {
-              if (String(value).length === 0) {
-                return <span style={{ color: "#A0A0A0" }}>{"<default>"}</span>;
-              }
-              return value;
-            }}
-          />
-          <Table.Column
-            title="Validate"
-            width="5%"
-            render={(template) => (
-              <>
-                {loadingTemplateName === template.name ? (
-                  <Spin />
-                ) : (
-                  <FileSyncOutlined
-                    className={classNames(styles.statustemplate, {
-                      [styles.success]:
-                        requestStatus[template.name] === "success",
-                      [styles.error]: requestStatus[template.name] === "error",
-                    })}
+              }}
+            />
+            <Table.Column
+              title="Name"
+              dataIndex="name"
+              width={"20%"}
+              {...getColumnSearchProps("name")}
+            />
+            <Table.Column
+              title="Repo"
+              dataIndex={["ref", "repo"]}
+              width={"30%"}
+            />
+            <Table.Column
+              title="Path"
+              dataIndex={["ref", "path"]}
+              width={"20%"}
+              render={function (value: any, record: any, index: number) {
+                if (!value.startsWith("/")) {
+                  return "/" + value;
+                }
+                return value;
+              }}
+            />
+            <Table.Column
+              title="Version"
+              dataIndex={["ref", "version"]}
+              width={"10%"}
+              render={function (value: any, record: any, index: number) {
+                if (String(value).length === 0) {
+                  return (
+                    <span style={{ color: "#A0A0A0" }}>{"<default>"}</span>
+                  );
+                }
+                return value;
+              }}
+            />
+            <Table.Column
+              title="Validate"
+              width="5%"
+              render={(template) => (
+                <>
+                  {loadingTemplateName === template.name ? (
+                    <Spin />
+                  ) : (
+                    <FileSyncOutlined
+                      className={classNames(styles.statustemplate, {
+                        [styles.success]:
+                          requestStatus[template.name] === "success",
+                        [styles.error]:
+                          requestStatus[template.name] === "error",
+                      })}
+                      onClick={function () {
+                        checkTemplateReference(
+                          template.ref.repo,
+                          template.ref.path,
+                          template.ref.version,
+                          template.name,
+                        );
+                      }}
+                    />
+                  )}
+                </>
+              )}
+            />
+            <Table.Column
+              title="Edit"
+              width="5%"
+              render={(template) => (
+                <>
+                  <EditOutlined
+                    className={styles.edittemplate}
                     onClick={function () {
-                      checkTemplateReference(
+                      editForm.setFieldValue(
+                        ["ref", "repo"],
                         template.ref.repo,
-                        template.ref.path,
-                        template.ref.version,
-                        template.name,
                       );
+                      editForm.setFieldValue(
+                        ["ref", "path"],
+                        template.ref.path,
+                      );
+                      editForm.setFieldValue(
+                        ["ref", "version"],
+                        template.ref.version,
+                      );
+                      setEditModal(template.name);
                     }}
                   />
-                )}
-              </>
-            )}
-          />
-          <Table.Column
-            title="Edit"
-            width="5%"
-            render={(template) => (
-              <>
-                <EditOutlined
-                  className={styles.edittemplate}
-                  onClick={function () {
-                    editForm.setFieldValue(["ref", "repo"], template.ref.repo);
-                    editForm.setFieldValue(["ref", "path"], template.ref.path);
-                    editForm.setFieldValue(
-                      ["ref", "version"],
-                      template.ref.version,
-                    );
-                    setEditModal(template.name);
-                  }}
-                />
-              </>
-            )}
-          />
-          <Table.Column
-            title="Delete"
-            width="5%"
-            render={(template) => (
-              <>
-                <DeleteOutlined
-                  className={styles.deletetemplate}
-                  onClick={function () {
-                    setConfirmDelete(template.name);
-                  }}
-                />
-              </>
-            )}
-          />
+                </>
+              )}
+            />
+            <Table.Column
+              title="Delete"
+              width="5%"
+              render={(template) => (
+                <>
+                  <DeleteOutlined
+                    className={styles.deletetemplate}
+                    onClick={function () {
+                      setConfirmDelete(template.name);
+                    }}
+                  />
+                </>
+              )}
+            />
+          </Table>
         </Table>
       </Col>
       <Modal
