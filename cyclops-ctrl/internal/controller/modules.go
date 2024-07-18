@@ -137,14 +137,10 @@ func (m *Modules) Manifest(ctx *gin.Context) {
 		return
 	}
 
-	var name string
-	if request.Name != nil {
-		name = *request.Name
-	}
 
 	manifest, err := m.renderer.HelmTemplate(v1alpha1.Module{
 		ObjectMeta: metav1.ObjectMeta{
-			Name: name,
+			Name: ctx.Param("name"),
 		},
 		Spec: v1alpha1.ModuleSpec{
 			TemplateRef: v1alpha1.TemplateRef{
