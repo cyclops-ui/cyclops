@@ -185,7 +185,7 @@ func (r *ModuleReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctr
 // SetupWithManager sets up the controller with the Manager.
 func (r *ModuleReconciler) SetupWithManager(mgr ctrl.Manager) error {
 	rateLimiter := workqueue.NewMaxOfRateLimiter(
-		workqueue.NewItemExponentialFailureRateLimiter(2*time.Second, 64*time.Second),
+		workqueue.NewItemExponentialFailureRateLimiter(1*time.Second, 64*time.Second),
 	)
 
 	return ctrl.NewControllerManagedBy(mgr).
