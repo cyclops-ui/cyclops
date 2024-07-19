@@ -82,7 +82,7 @@ const config = {
             type: "html",
             position: "right",
             value:
-              '<a href="/docs/installation/install/manifest" style="background-color: #FF8803; margin-top: 0.75rem; margin-bottom: 0.75rem; color: #FFF; height: 30px; width: 150px; text-decoration: none; display: inline-flex; align-items: center; border-radius: 30px 30px 30px 30px"' +
+              '<a href="/docs/installation/install/manifest" style="background-color: #FF8803; color: #FFF; height: 30px; width: 150px; text-decoration: none; display: inline-flex; align-items: center; border-radius: 30px 30px 30px 30px"' +
               "onmouseover=\"this.style.backgroundColor='#FFA229';\"" +
               "onmouseout=\"this.style.backgroundColor='#FF8803';\">" +
               '<h3 style="margin: 0px auto;">' +
