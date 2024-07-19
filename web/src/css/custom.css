@@ -134,3 +134,8 @@
 .ant-card-meta-title {
   margin-bottom: 0;
 }
+
+.navbar-sidebar {
+  height: 100vh;
+  position: fixed;
+}
