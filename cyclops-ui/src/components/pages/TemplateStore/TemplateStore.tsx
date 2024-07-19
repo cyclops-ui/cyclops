@@ -11,6 +11,7 @@ import {
   Divider,
   message,
   Spin,
+  notification,
 } from "antd";
 import axios from "axios";
 import Title from "antd/es/typography/Title";
@@ -23,6 +24,10 @@ import classNames from "classnames";
 import styles from "./styles.module.css";
 import { mapResponseError } from "../../../utils/api/errors";
 import defaultTemplate from "../../../static/img/default-template-icon.png";
+import {
+  FeedbackError,
+  FormValidationErrors,
+} from "../../errors/FormValidationErrors";
 
 const TemplateStore = () => {
   const [templates, setTemplates] = useState([]);
@@ -42,6 +47,16 @@ const TemplateStore = () => {
 
   const [addForm] = Form.useForm();
   const [editForm] = Form.useForm();
+  const [notificationApi, contextHolder] = notification.useNotification();
+
+  const openNotification = (errors: FeedbackError[]) => {
+    notificationApi.error({
+      message: "Submit failed!",
+      description: <FormValidationErrors errors={errors} />,
+      placement: "topRight",
+      duration: 0,
+    });
+  };
 
   useEffect(() => {
     axios
@@ -53,6 +68,19 @@ const TemplateStore = () => {
         setError(mapResponseError(error));
       });
   }, []);
+
+  const onSubmitFailed = (
+    errors: Array<{ message: string; description: string }>,
+  ) => {
+    const errorMessages: FeedbackError[] = [];
+    errors.forEach(function (error: any) {
+      errorMessages.push({
+        key: error.message,
+        errors: error.description,
+      });
+    });
+    openNotification(errorMessages);
+  };
 
   const handleOKAdd = () => {
     addForm.submit();
@@ -67,14 +95,14 @@ const TemplateStore = () => {
 
     axios
       .put(`/api/templates/store`, values)
-      .then((res) => {
+      .then(() => {
         setNewTemplateModal(false);
         setConfirmLoading(false);
         window.location.href = "/templates";
       })
       .catch((error) => {
         setConfirmLoading(false);
-        setError(mapResponseError(error));
+        onSubmitFailed([error.response.data]);
       });
   };
 
@@ -85,14 +113,14 @@ const TemplateStore = () => {
 
     axios
       .post(`/api/templates/store/` + editModal, values)
-      .then((res) => {
+      .then(() => {
         setNewTemplateModal(false);
         setConfirmLoading(false);
         window.location.href = "/templates";
       })
       .catch((error) => {
         setConfirmLoading(false);
-        setError(mapResponseError(error));
+        onSubmitFailed([error.response.data]);
       });
   };
 
@@ -166,6 +194,7 @@ const TemplateStore = () => {
           style={{ marginBottom: "20px" }}
         />
       )}
+      {contextHolder}
       <Row gutter={[40, 0]}>
         <Col span={18}>
           <Title level={2}>Templates: {templates.length}</Title>
