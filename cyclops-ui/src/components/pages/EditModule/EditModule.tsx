@@ -1163,7 +1163,8 @@ const EditModule = () => {
             `/` +
             templateRef.path
           }
-          style={{ color: templateRefLock ? "gray" : "" }}
+          style={{ color: templateRefLock ? "#B8B8B8" : "" }}
+          className="linkToTemplate"
         >
           {templateRef.resolvedVersion.substring(0, 7)}
         </a>

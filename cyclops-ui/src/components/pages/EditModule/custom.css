@@ -27,6 +27,6 @@ code {
   }
 }
 
-a:hover {
+.linkToTemplate:hover {
   text-decoration: underline;
 }
