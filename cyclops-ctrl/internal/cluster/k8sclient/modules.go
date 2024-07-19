@@ -42,7 +42,7 @@ func (k *KubernetesClient) UpdateModule(module *cyclopsv1alpha1.Module) error {
 }
 
 func (k *KubernetesClient) UpdateModuleStatus(module *cyclopsv1alpha1.Module) (*cyclopsv1alpha1.Module, error) {
-	return k.moduleset.Modules(cyclopsNamespace).UpdateSubresource(module, "status")
+	return k.moduleset.Modules(cyclopsNamespace).PatchStatus(module)
 }
 
 func (k *KubernetesClient) DeleteModule(name string) error {

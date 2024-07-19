@@ -288,7 +288,10 @@ func (m *Modules) UpdateModule(ctx *gin.Context) {
 	module.SetResourceVersion(curr.GetResourceVersion())
 
 	module.Status.TemplateResolvedVersion = request.Template.ResolvedVersion
+	module.Status.ReconciliationStatus = curr.Status.ReconciliationStatus
+	module.Status.IconURL = curr.Status.IconURL
 	module.Status.ManagedGVRs = curr.Status.ManagedGVRs
+
 	result, err := m.kubernetesClient.UpdateModuleStatus(&module)
 	if err != nil {
 		fmt.Println(err)
