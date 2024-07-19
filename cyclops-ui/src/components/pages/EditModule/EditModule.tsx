@@ -1152,6 +1152,25 @@ const EditModule = () => {
     );
   };
 
+  const linkToTemplate = (templateRef: templateRef) => {
+    if (templateRef.repo.startsWith("https://github.com")) {
+      return (
+        <a
+          href={
+            templateRef.repo +
+            `/tree/` +
+            templateRef.resolvedVersion +
+            `/` +
+            templateRef.path
+          }
+          style={{ color: templateRefLock ? "#B8B8B8" : "" }}
+          className="linkToTemplate"
+        >
+          {templateRef.resolvedVersion.substring(0, 7)}
+        </a>
+      );
+    } else return templateRef.resolvedVersion.substring(0, 7);
+  };
   return (
     <div>
       {error.message.length !== 0 && (
@@ -1228,7 +1247,7 @@ const EditModule = () => {
               >
                 <Input
                   placeholder={"Version"}
-                  addonAfter={templateRef.resolvedVersion.substring(0, 7)}
+                  addonAfter={linkToTemplate(templateRef)}
                   disabled={templateRefLock}
                 />
               </Form.Item>
