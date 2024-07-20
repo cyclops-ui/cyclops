@@ -87,9 +87,9 @@ var (
 		Aliases: []string{"modules"},
 		Run: func(cmd *cobra.Command, args []string) {
 			// Custom validation:
-			// Either templateName or (repo and path) must be provided, if one is provided the other must be empty
-			if (templateName != "" && (repo != "" || path != "")) || (templateName == "" && (repo == "" || path == "")) {
-				log.Fatalf("Error: Either template or (repo and path) must be provided.")
+			// Either templateName or (repo, path and version) must be provided, if one is provided the other must be empty
+			if (templateName != "" && (repo != "" || path != "" || version != "")) || (templateName == "" && (repo == "" || path == "" || version == "")) {
+				log.Fatalf("Error: Either template or (repo, path and version) must be provided.")
 			}
 			createModule(kubeconfig.Moduleset, args[0], repo, path, version, namespace, valuesFile, templateName)
 		},
