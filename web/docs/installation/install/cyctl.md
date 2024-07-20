@@ -24,6 +24,8 @@ To install Cyclops into your cluster, run:
 cyctl init
 ```
 
+> _There are additional options when installing with cyctl which you can check out [here](../../cyctl/cyctl_init.md)_
+
 It will create a new namespace called `cyclops` and deploy everything you need for your Cyclops instance to run.
 
 To access Cyclops UI, use the following command:
