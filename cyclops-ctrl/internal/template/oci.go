@@ -320,7 +320,7 @@ func authorizeOCI(repo, chart, version string) (string, error) {
 	}
 
 	var ar struct {
-		Token string `json:"access_token"`
+		Token string `json:"token"`
 	}
 
 	if err := json.Unmarshal(responseBody, &ar); err != nil {

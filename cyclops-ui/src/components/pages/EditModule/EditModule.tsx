@@ -1207,6 +1207,20 @@ const EditModule = () => {
               onFinish={handleSubmitTemplateEdit}
               onFinishFailed={onFinishFailed}
               style={{ width: "100%" }}
+              requiredMark={(label, { required }) => (
+                <Row>
+                  <Col>
+                    {required ? (
+                      <span style={{ color: "red", paddingRight: "3px" }}>
+                        *
+                      </span>
+                    ) : (
+                      <></>
+                    )}
+                  </Col>
+                  <Col>{label}</Col>
+                </Row>
+              )}
             >
               {lockButton()}
               <Form.Item
