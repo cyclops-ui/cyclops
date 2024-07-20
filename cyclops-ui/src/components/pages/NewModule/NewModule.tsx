@@ -16,6 +16,7 @@ import {
   Modal,
   Spin,
   notification,
+  Tag,
 } from "antd";
 import axios from "axios";
 import { useNavigate } from "react-router";
@@ -1183,6 +1184,18 @@ const NewModule = () => {
             autoComplete={"off"}
             onFinish={handleSubmit}
             onFinishFailed={onFinishFailed}
+            requiredMark={(label, { required }) => (
+              <Row>
+                <Col>
+                  {required ? (
+                    <span style={{ color: "red", paddingRight: "3px" }}>*</span>
+                  ) : (
+                    <></>
+                  )}
+                </Col>
+                <Col>{label}</Col>
+              </Row>
+            )}
           >
             <Divider orientation="left" orientationMargin="0">
               Module template
