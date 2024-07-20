@@ -89,7 +89,7 @@ var (
 			// Custom validation:
 			// Either templateName or (repo and path) must be provided, if one is provided the other must be empty
 			if (templateName != "" && (repo != "" || path != "")) || (templateName == "" && (repo == "" || path == "")) {
-				log.Fatalf("Error: Either template or (repo and path) must be provided")
+				log.Fatalf("Error: Either template or (repo and path) must be provided.")
 			}
 			createModule(kubeconfig.Moduleset, args[0], repo, path, version, namespace, valuesFile, templateName)
 		},
@@ -102,6 +102,6 @@ func init() {
 	CreateModule.Flags().StringVarP(&path, "path", "p", "", "Path to the module charts")
 	CreateModule.Flags().StringVarP(&version, "version", "v", "", "Version of the module")
 	CreateModule.Flags().StringVarP(&valuesFile, "file", "f", "", "Path to the values.yaml file")
-	CreateModule.Flags().StringVarP(&templateName, "template", "t", "", "Path to the values.yaml file")
+	CreateModule.Flags().StringVarP(&templateName, "template", "t", "", "Name of the template to use for the module creation")
 	CreateModule.MarkFlagRequired("file")
 }
