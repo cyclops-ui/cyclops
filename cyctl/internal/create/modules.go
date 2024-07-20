@@ -27,7 +27,7 @@ var (
 )
 
 // createModule allows you to create module Custom Resource.
-func createModule(clientset *client.CyclopsV1Alpha1Client, moduleName, repo, path, version, namespace, valuesFile, tempName string) {
+func createModule(clientset *client.CyclopsV1Alpha1Client, moduleName, repo, path, version, namespace, valuesFile, templateName string) {
 
 	values, err := os.ReadFile(valuesFile)
 	if err != nil {
@@ -38,7 +38,7 @@ func createModule(clientset *client.CyclopsV1Alpha1Client, moduleName, repo, pat
 		log.Fatalf("Error converting values file to JSON: %v", err)
 	}
 
-	if tempName != "" && (repo == "" && path == "" && version == "") {
+	if templateName != "" && (repo == "" && path == "" && version == "") {
 		temp, err := clientset.TemplateStore("cyclops").Get(templateName)
 		if err != nil {
 			fmt.Printf("Error from server (Template NotFound): %v\n", err)
