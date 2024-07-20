@@ -31,6 +31,7 @@ import {
 
 const TemplateStore = () => {
   const [templates, setTemplates] = useState([]);
+  const [filteredTemplates, setFilteredTemplates] = useState([]);
   const [confirmDelete, setConfirmDelete] = useState("");
   const [confirmDeleteInput, setConfirmDeleteInput] = useState("");
   const [newTemplateModal, setNewTemplateModal] = useState(false);
@@ -63,11 +64,21 @@ const TemplateStore = () => {
       .get(`/api/templates/store`)
       .then((res) => {
         setTemplates(res.data);
+        setFilteredTemplates(res.data);
       })
       .catch((error) => {
         setError(mapResponseError(error));
       });
   }, []);
+
+  const handleSearch = (event: any) => {
+    const query = event.target.value;
+    var updatedList = [...templates];
+    updatedList = updatedList.filter((template: any) => {
+      return template.name.toLowerCase().indexOf(query.toLowerCase()) !== -1;
+    });
+    setFilteredTemplates(updatedList);
+  };
 
   const onSubmitFailed = (
     errors: Array<{ message: string; description: string }>,
@@ -197,7 +208,7 @@ const TemplateStore = () => {
       {contextHolder}
       <Row gutter={[40, 0]}>
         <Col span={18}>
-          <Title level={2}>Templates: {templates.length}</Title>
+          <Title level={2}>Templates: {filteredTemplates.length}</Title>
         </Col>
         <Col span={6}>
           <Button
@@ -211,8 +222,17 @@ const TemplateStore = () => {
           </Button>
         </Col>
       </Row>
+      <Row gutter={[40, 0]}>
+        <Col span={18}>
+          <Input
+            placeholder={"Search templates"}
+            style={{ width: "30%", marginBottom: "1rem" }}
+            onChange={handleSearch}
+          ></Input>
+        </Col>
+      </Row>
       <Col span={24} style={{ overflowX: "auto" }}>
-        <Table dataSource={templates}>
+        <Table dataSource={filteredTemplates}>
           <Table.Column
             dataIndex="iconURL"
             width={"3%"}
