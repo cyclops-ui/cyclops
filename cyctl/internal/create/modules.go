@@ -22,11 +22,12 @@ var (
 	--path '/path/to/charts' \
 	--version 'main'
 	`
-	valuesFile string
+	valuesFile   string
+	templateName string
 )
 
 // createModule allows you to create module Custom Resource.
-func createModule(clientset *client.CyclopsV1Alpha1Client, moduleName, repo, path, version, namespace, valuesFile string) {
+func createModule(clientset *client.CyclopsV1Alpha1Client, moduleName, repo, path, version, namespace, valuesFile, tempName string) {
 
 	values, err := os.ReadFile(valuesFile)
 	if err != nil {
@@ -35,6 +36,17 @@ func createModule(clientset *client.CyclopsV1Alpha1Client, moduleName, repo, pat
 	jsonValues, err := yaml.YAMLToJSON(values)
 	if err != nil {
 		log.Fatalf("Error converting values file to JSON: %v", err)
+	}
+
+	if tempName != "" && (repo == "" && path == "" && version == "") {
+		temp, err := clientset.TemplateStore("cyclops").Get(templateName)
+		if err != nil {
+			fmt.Printf("Error from server (Template NotFound): %v\n", err)
+			return
+		}
+		repo = temp.Spec.URL
+		path = temp.Spec.Path
+		version = temp.Spec.Version
 	}
 
 	// Define a new Module object
@@ -74,7 +86,7 @@ var (
 		Args:    cobra.ExactArgs(1),
 		Aliases: []string{"modules"},
 		Run: func(cmd *cobra.Command, args []string) {
-			createModule(kubeconfig.Moduleset, args[0], repo, path, version, namespace, valuesFile)
+			createModule(kubeconfig.Moduleset, args[0], repo, path, version, namespace, valuesFile, templateName)
 		},
 	}
 )
@@ -85,6 +97,7 @@ func init() {
 	CreateModule.Flags().StringVarP(&path, "path", "p", "", "Path to the module charts")
 	CreateModule.Flags().StringVarP(&version, "version", "v", "", "Version of the module")
 	CreateModule.Flags().StringVarP(&valuesFile, "file", "f", "", "Path to the values.yaml file")
+	CreateModule.Flags().StringVarP(&templateName, "template", "t", "", "Path to the values.yaml file")
 	CreateModule.MarkFlagRequired("repo")
 	CreateModule.MarkFlagRequired("path")
 	CreateModule.MarkFlagRequired("file")
