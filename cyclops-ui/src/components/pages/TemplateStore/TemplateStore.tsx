@@ -76,7 +76,7 @@ const TemplateStore = () => {
     errors.forEach(function (error: any) {
       errorMessages.push({
         key: error.message,
-        errors: error.description,
+        errors: [error.description],
       });
     });
     openNotification(errorMessages);
