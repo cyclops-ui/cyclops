@@ -215,6 +215,7 @@ const Modules = () => {
         </Col>
         <Col span={6}>
           <Button
+            type={"primary"}
             onClick={handleClick}
             block
             size={"large"}

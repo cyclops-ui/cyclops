@@ -819,6 +819,7 @@ const ModuleDetails = () => {
       <Row gutter={[40, 0]}>
         <Col>
           <Button
+            type={"primary"}
             onClick={function () {
               window.location.href = "/modules/" + moduleName + "/edit";
             }}
@@ -829,6 +830,7 @@ const ModuleDetails = () => {
         </Col>
         <Col>
           <Button
+            type={"primary"}
             onClick={function () {
               window.location.href = "/modules/" + moduleName + "/rollback";
             }}
@@ -839,6 +841,7 @@ const ModuleDetails = () => {
         </Col>
         <Col>
           <Button
+            type={"primary"}
             onClick={function () {
               setLoading(true);
             }}
