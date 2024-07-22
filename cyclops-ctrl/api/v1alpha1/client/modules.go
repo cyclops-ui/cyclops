@@ -4,7 +4,9 @@ import (
 	"context"
 	"time"
 
+	json "github.com/json-iterator/go"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/apimachinery/pkg/watch"
 	"k8s.io/client-go/rest"
 
@@ -18,7 +20,7 @@ type ModuleInterface interface {
 	Update(*cyclopsv1alpha1.Module) (*cyclopsv1alpha1.Module, error)
 	Watch(opts metav1.ListOptions) (watch.Interface, error)
 	Delete(name string) error
-	UpdateSubresource(module *cyclopsv1alpha1.Module, subresources ...string) (*cyclopsv1alpha1.Module, error)
+	PatchStatus(module *cyclopsv1alpha1.Module) (*cyclopsv1alpha1.Module, error)
 }
 
 type moduleClient struct {
@@ -101,15 +103,23 @@ func (c *moduleClient) Delete(name string) error {
 		Error()
 }
 
-func (c *moduleClient) UpdateSubresource(module *cyclopsv1alpha1.Module, subresources ...string) (*cyclopsv1alpha1.Module, error) {
+func (c *moduleClient) PatchStatus(module *cyclopsv1alpha1.Module) (*cyclopsv1alpha1.Module, error) {
 	result := &cyclopsv1alpha1.Module{}
 
-	err := c.restClient.Put().
+	patchData := map[string]interface{}{
+		"status": module.Status,
+	}
+	patchBytes, err := json.Marshal(patchData)
+	if err != nil {
+		return nil, err
+	}
+
+	err = c.restClient.Patch(types.MergePatchType).
 		Namespace(c.ns).
 		Resource("modules").
 		Name(module.Name).
-		SubResource(subresources...).
-		Body(module).
+		SubResource("status").
+		Body(patchBytes).
 		Do(context.TODO()).
 		Into(result)
 
