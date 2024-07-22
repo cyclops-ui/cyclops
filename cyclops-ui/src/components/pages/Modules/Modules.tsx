@@ -10,7 +10,8 @@ import {
   Alert,
   Empty,
   Spin,
-  Dropdown,
+  Popover,
+  Checkbox,
 } from "antd";
 import { useNavigate } from "react-router";
 import axios from "axios";
@@ -27,7 +28,13 @@ const Modules = () => {
   const [allData, setAllData] = useState([]);
   const [filteredData, setFilteredData] = useState([]);
   const [loadingModules, setLoadingModules] = useState(false);
-  const [displaymodule, setDisplayModule] = useState("ALL Modules");
+  const [displaymodule, setDisplayModule] = useState<string[]>([]);
+  const [resourceFilter, setResourceFilter] = useState<string[]>([
+    "ALL Modules",
+    "Healty",
+    "Unhealthy",
+    "Unknown",
+  ]);
   const [error, setError] = useState({
     message: "",
     description: "",
@@ -58,7 +65,27 @@ const Modules = () => {
     history("/modules/new");
   };
   const handleSelectItem = (key: any) => {
-    setDisplayModule(key.label);
+    let x = displaymodule.indexOf(key);
+    console.log(key, x);
+    if (x > -1) {
+      setDisplayModule(displaymodule.filter((item) => item !== key));
+    } else {
+      setDisplayModule([...displaymodule, key]);
+    }
+  };
+  const resourceFilterPopover = () => {
+    return resourceFilter.map((item, index) => (
+      <Checkbox.Group
+        key={index}
+        style={{ display: "block" }}
+        onChange={(checkedValues) => handleSelectItem(item)}
+        value={displaymodule}
+      >
+        <>
+          <Checkbox value={item}>{item}</Checkbox>
+        </>
+      </Checkbox.Group>
+    ));
   };
   const handleSearch = (event: any) => {
     const query = event.target.value;
@@ -105,7 +132,7 @@ const Modules = () => {
         </div>
       );
     }
-    if (displaymodule === "ALL Modules") {
+    if (displaymodule.includes("All Modules")) {
       return filteredData.map((module: any, index) => (
         <Col key={index} xs={24} sm={12} md={8} lg={8} xl={6}>
           <a href={"/modules/" + module.name}>
@@ -201,7 +228,11 @@ const Modules = () => {
       ));
     }
     return filteredData
-      .filter((module: any) => module.status === displaymodule)
+      .filter((module: any) =>
+        displaymodule
+          .map((status) => status.toLowerCase())
+          .includes(module.status.toLowerCase()),
+      )
       .map((module: any, index) => (
         <Col key={index} xs={24} sm={12} md={8} lg={8} xl={6}>
           <a href={"/modules/" + module.name}>
@@ -342,20 +373,9 @@ const Modules = () => {
           ></Input>
         </Col>
         <Col span={2}>
-          <Dropdown
-            menu={{
-              items: items
-                .filter((items: any) => items.label !== displaymodule)
-                .map((item) => ({
-                  key: item.key,
-                  label: item.label,
-                  onClick: () => handleSelectItem(item), // Handle item click
-                })),
-            }}
-            trigger={["click"]}
-          >
-            <Button>{displaymodule}</Button>
-          </Dropdown>
+          <Popover content={resourceFilterPopover()} trigger={["click"]}>
+            <Button>{"Module Type "}</Button>
+          </Popover>
         </Col>
       </Row>
       <Divider orientationMargin="0" />
