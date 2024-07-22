@@ -218,7 +218,6 @@ const Modules = () => {
             type={"primary"}
             onClick={handleClick}
             block
-            size={"large"}
             style={{
               fontWeight: "600",
             }}
