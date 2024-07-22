@@ -29,22 +29,11 @@ const Modules = () => {
   const [filteredData, setFilteredData] = useState([]);
   const [loadingModules, setLoadingModules] = useState(false);
   const [displaymodule, setDisplayModule] = useState<string[]>([]);
-  const [resourceFilter, setResourceFilter] = useState<string[]>([
-    "ALL Modules",
-    "Healty",
-    "Unhealthy",
-    "Unknown",
-  ]);
+  const resourceFilter = ["Healty", "Unhealthy", "Unknown"];
   const [error, setError] = useState({
     message: "",
     description: "",
   });
-  const items = [
-    { label: "ALL Modules", key: "0" },
-    { label: "Healthy", key: "1" },
-    { label: "Unhealthy", key: "2" },
-    { label: "Unknown", key: "3" },
-  ];
 
   useEffect(() => {
     setLoadingModules(true);
@@ -66,7 +55,6 @@ const Modules = () => {
   };
   const handleSelectItem = (key: any) => {
     let x = displaymodule.indexOf(key);
-    console.log(key, x);
     if (x > -1) {
       setDisplayModule(displaymodule.filter((item) => item !== key));
     } else {
@@ -132,7 +120,7 @@ const Modules = () => {
         </div>
       );
     }
-    if (displaymodule.includes("All Modules")) {
+    if (displaymodule.length === 0) {
       return filteredData.map((module: any, index) => (
         <Col key={index} xs={24} sm={12} md={8} lg={8} xl={6}>
           <a href={"/modules/" + module.name}>
