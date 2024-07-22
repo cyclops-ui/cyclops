@@ -52,7 +52,7 @@ Read more about it [here](#-templates)
 
 > _⚠️ Before installing Cyclops, make sure you have all the [prerequisites](https://cyclops-ui.com/docs/installation/prerequisites) ⚠️_
 
-Cyclops can either be installed manually by applying the latest manifest or with the [Glasskube Kubernetes Package Manager](https://github.com/glasskube/glasskube/).
+Cyclops can either be installed manually by applying the latest manifest, by using [cyctl](#cyctl), or with the [Glasskube Kubernetes Package Manager](https://github.com/glasskube/glasskube/).
 
 To install Cyclops using `kubectl` into your cluster, run the commands below:
 
