@@ -52,6 +52,7 @@ const sidebars = {
           items: [
             "installation/install/manifest",
             "installation/install/glasskube",
+            "installation/install/cyctl",
           ],
         },
         "installation/configuration",
@@ -101,7 +102,7 @@ const sidebars = {
         "cyctl/cyctl_init",
         "cyctl/cyctl_serve",
         "cyctl/cyctl_version",
-      ]
+      ],
     },
     {
       label: "Roadmap",

@@ -11,12 +11,12 @@ import {
   Space,
   Table,
   Typography,
+  Progress,
 } from "antd";
 import "ace-builds/src-noconflict/ace";
 import { useParams } from "react-router-dom";
 import axios from "axios";
 import "ace-builds/src-noconflict/mode-jsx";
-import GaugeComponent from "react-gauge-component";
 import type { InputRef } from "antd";
 import { formatBytes } from "../../utils/common";
 import { ColumnType } from "antd/lib/table";
@@ -25,7 +25,7 @@ import { SearchOutlined } from "@ant-design/icons";
 import Highlighter from "react-highlight-words";
 import { mapResponseError } from "../../utils/api/errors";
 
-const { Title } = Typography;
+const { Title, Text } = Typography;
 
 interface DataSourceType {
   name: string;
@@ -43,6 +43,9 @@ const NodeDetails = () => {
     name: String,
     pods: [],
     node: {
+      metadata: {
+        creationTimestamp: new Date().toISOString(),
+      },
       status: {
         conditions: [],
       },
@@ -340,20 +343,37 @@ const NodeDetails = () => {
       if (cond.type === type) {
         switch (type) {
           case "MemoryPressure":
-            return cond.status === "True" ? "#de3428" : "green";
+            return cond.status === "True"
+              ? gaugeColors["0%"]
+              : gaugeColors["100%"];
           case "DiskPressure":
-            return cond.status === "True" ? "#de3428" : "green";
+            return cond.status === "True"
+              ? gaugeColors["0%"]
+              : gaugeColors["100%"];
           case "PIDPressure":
-            return cond.status === "True" ? "#de3428" : "green";
+            return cond.status === "True"
+              ? gaugeColors["0%"]
+              : gaugeColors["100%"];
           case "Ready":
-            return cond.status === "True" ? "green" : "#de3428";
+            return cond.status === "True"
+              ? gaugeColors["100%"]
+              : gaugeColors["0%"];
           default:
             console.log("default", type);
         }
       }
     }
 
-    return "gray";
+    return gaugeColors["50%"];
+  };
+
+  /**
+   * Color pallete for statuses of resources
+   */
+  const gaugeColors = {
+    "0%": "#57F287",
+    "50%": "#FEE75C",
+    "100%": "#ED4245",
   };
 
   return (
@@ -375,6 +395,14 @@ const NodeDetails = () => {
       )}
       <Row>
         <Title>{nodeName}</Title>
+      </Row>
+      <Row>
+        <Text keyboard>
+          Created on: {" "}
+          {new Date(
+            node.node?.metadata?.creationTimestamp.toString(),
+          ).toLocaleString()}
+        </Text>
       </Row>
       <Row>
         <Divider
@@ -399,54 +427,55 @@ const NodeDetails = () => {
               width: "80%",
             }}
           >
-            <GaugeComponent
-              labels={{
-                valueLabel: {
-                  style: { fill: "#000", textShadow: "" },
-                  // formatTextValue: (value) => `CPU ${value}%`
-                },
-              }}
-              type={"grafana"}
-              value={resources.cpu * 100}
+            <Progress
+              type="dashboard"
+              strokeWidth={10}
+              status="normal"
+              percent={resources.cpu * 100}
+              strokeColor={gaugeColors}
             />
-            <h1>
-              CPU ({node.requested.cpu}m / {node.available.cpu}m)
+            <h1 style={{ marginBottom: "6px" }}>
+              <strong>CPU</strong>
             </h1>
+            <h3>
+              ({node.requested.cpu}m / {node.available.cpu}m)
+            </h3>
           </div>
         </Col>
         <Col span={8}>
           <div style={{ textAlign: "center", width: "80%" }}>
-            <GaugeComponent
-              labels={{
-                valueLabel: {
-                  style: { fill: "#000", textShadow: "" },
-                  // formatTextValue: (value) => `memory ${value}%`
-                },
-              }}
-              type={"grafana"}
-              value={resources.memory * 100}
+            <Progress
+              type="dashboard"
+              strokeWidth={10}
+              status="normal"
+              percent={resources.memory * 100}
+              strokeColor={gaugeColors}
             />
-            <h1>
-              Memory ({formatBytes(node.requested.memory)} /{" "}
+            <h1 style={{ marginBottom: "6px" }}>
+              <strong>Memory</strong>
+            </h1>
+            <h3>
+              ({formatBytes(node.requested.memory)}
+              {" / "}
               {formatBytes(node.available.memory)})
-            </h1>
+            </h3>
           </div>
         </Col>
         <Col span={8}>
           <div style={{ textAlign: "center", width: "80%" }}>
-            <GaugeComponent
-              labels={{
-                valueLabel: {
-                  style: { fill: "#000", textShadow: "" },
-                  // formatTextValue: (value) => `pods ${value}%`
-                },
-              }}
-              type={"grafana"}
-              value={resources.pod_count * 100}
+            <Progress
+              type="dashboard"
+              strokeWidth={10}
+              status="normal"
+              percent={resources.pod_count * 100}
+              strokeColor={gaugeColors}
             />
-            <h1>
-              Pods ({node.requested.pod_count} / {node.available.pod_count})
+            <h1 style={{ marginBottom: "6px" }}>
+              <strong>Pods</strong>
             </h1>
+            <h3>
+              ({node.requested.pod_count} / {node.available.pod_count})
+            </h3>
           </div>
         </Col>
       </Row>
@@ -469,14 +498,30 @@ const NodeDetails = () => {
           <Card
             style={{
               borderRadius: "10px",
-              backgroundColor: conditionColor("MemoryPressure"),
+              borderWidth: "5px",
+              backgroundColor: "#fff",
               width: "100%",
               margin: "5px",
               textAlign: "center",
-              color: "white",
+              color: "black",
             }}
           >
-            <h1 style={{ margin: "0" }}>MemoryPressure</h1>
+            <Progress
+              type="circle"
+              percent={100}
+              status={
+                conditionColor("MemoryPressure") === gaugeColors["100%"]
+                  ? "success"
+                  : "exception"
+              }
+              trailColor={conditionColor("MemoryPressure")}
+              strokeWidth={15}
+            />
+            <br />
+            <br />
+            <h3>
+              <strong>MemoryPressure</strong>
+            </h3>
           </Card>
         </Col>
         <Col
@@ -490,14 +535,30 @@ const NodeDetails = () => {
           <Card
             style={{
               borderRadius: "10px",
-              backgroundColor: conditionColor("DiskPressure"),
+              borderWidth: "5px",
+              backgroundColor: "#fff",
               width: "100%",
               margin: "5px",
               textAlign: "center",
-              color: "white",
+              color: "black",
             }}
           >
-            <h1 style={{ margin: "0" }}>DiskPressure</h1>
+            <Progress
+              type="circle"
+              percent={100}
+              status={
+                conditionColor("DiskPressure") === gaugeColors["100%"]
+                  ? "success"
+                  : "exception"
+              }
+              trailColor={conditionColor("DiskPressure")}
+              strokeWidth={15}
+            />
+            <br />
+            <br />
+            <h3>
+              <strong>DiskPressure</strong>
+            </h3>
           </Card>
         </Col>
         <Col
@@ -511,14 +572,30 @@ const NodeDetails = () => {
           <Card
             style={{
               borderRadius: "10px",
-              backgroundColor: conditionColor("PIDPressure"),
+              borderWidth: "5px",
+              backgroundColor: "#fff",
               width: "100%",
               margin: "5px",
               textAlign: "center",
-              color: "white",
+              color: "black",
             }}
           >
-            <h1 style={{ margin: "0" }}>PIDPressure</h1>
+            <Progress
+              type="circle"
+              percent={100}
+              status={
+                conditionColor("PIDPressure") === gaugeColors["100%"]
+                  ? "success"
+                  : "exception"
+              }
+              trailColor={conditionColor("PIDPressure")}
+              strokeWidth={15}
+            />
+            <br />
+            <br />
+            <h3>
+              <strong>PIDPressure</strong>
+            </h3>
           </Card>
         </Col>
         <Col
@@ -532,14 +609,30 @@ const NodeDetails = () => {
           <Card
             style={{
               borderRadius: "10px",
-              backgroundColor: conditionColor("Ready"),
+              borderWidth: "5px",
+              backgroundColor: "#fff",
               width: "100%",
               margin: "5px",
               textAlign: "center",
-              color: "white",
+              color: "black",
             }}
           >
-            <h1 style={{ margin: "0" }}>Ready</h1>
+            <Progress
+              type="circle"
+              percent={100}
+              status={
+                conditionColor("Ready") === gaugeColors["100%"]
+                  ? "success"
+                  : "exception"
+              }
+              trailColor={conditionColor("Ready")}
+              strokeWidth={15}
+            />
+            <br />
+            <br />
+            <h3>
+              <strong>Ready</strong>
+            </h3>
           </Card>
         </Col>
       </Row>

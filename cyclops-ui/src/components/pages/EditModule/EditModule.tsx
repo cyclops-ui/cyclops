@@ -1152,6 +1152,25 @@ const EditModule = () => {
     );
   };
 
+  const linkToTemplate = (templateRef: templateRef) => {
+    if (templateRef.repo.startsWith("https://github.com")) {
+      return (
+        <a
+          href={
+            templateRef.repo +
+            `/tree/` +
+            templateRef.resolvedVersion +
+            `/` +
+            templateRef.path
+          }
+          style={{ color: templateRefLock ? "#B8B8B8" : "" }}
+          className="linkToTemplate"
+        >
+          {templateRef.resolvedVersion.substring(0, 7)}
+        </a>
+      );
+    } else return templateRef.resolvedVersion.substring(0, 7);
+  };
   return (
     <div>
       {error.message.length !== 0 && (
@@ -1188,6 +1207,20 @@ const EditModule = () => {
               onFinish={handleSubmitTemplateEdit}
               onFinishFailed={onFinishFailed}
               style={{ width: "100%" }}
+              requiredMark={(label, { required }) => (
+                <Row>
+                  <Col>
+                    {required ? (
+                      <span style={{ color: "red", paddingRight: "3px" }}>
+                        *
+                      </span>
+                    ) : (
+                      <></>
+                    )}
+                  </Col>
+                  <Col>{label}</Col>
+                </Row>
+              )}
             >
               {lockButton()}
               <Form.Item
@@ -1228,7 +1261,7 @@ const EditModule = () => {
               >
                 <Input
                   placeholder={"Version"}
-                  addonAfter={templateRef.resolvedVersion.substring(0, 7)}
+                  addonAfter={linkToTemplate(templateRef)}
                   disabled={templateRefLock}
                 />
               </Form.Item>
