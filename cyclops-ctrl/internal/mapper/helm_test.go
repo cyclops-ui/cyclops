@@ -91,7 +91,21 @@ var _ = Describe("Helm mapper test", func() {
 					Type:       "what",
 					Properties: map[string]helm.Property{"nested": {Type: "string"}},
 				},
-				out: "what",
+				out: "object",
+			},
+			{
+				in: helm.Property{
+					Type:       "",
+					Properties: map[string]helm.Property{"nested": {Type: "string"}},
+				},
+				out: "object",
+			},
+			{
+				in: helm.Property{
+					Type:  "",
+					Items: &helm.Property{Type: "string"},
+				},
+				out: "array",
 			},
 		}
 
