@@ -60,7 +60,7 @@ func (h *Handler) Start() error {
 	// authentication
 	h.router.POST("/login", cerbos.Login(h.cerbosClient))
 
-	if os.Getenv("ENABLE_AUTHORIZATION") == "true" {
+	if os.Getenv("CYCLOPS_AUTHORIZATION") == "enabled" {
 		h.router.Use(cerbos.AuthMiddleware(h.cerbosClient))
 	}
 

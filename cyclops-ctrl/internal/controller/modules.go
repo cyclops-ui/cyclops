@@ -709,7 +709,7 @@ func getTargetGeneration(generation string, module *v1alpha1.Module) (*v1alpha1.
 }
 
 func (m *Modules) checkPermission(ctx *gin.Context, kind, resourceName, action string) bool {
-	if os.Getenv("ENABLE_AUTHORIZATION") == "false" {
+	if os.Getenv("CYCLOPS_AUTHORIZATION") == "disabled" {
 		return true
 	}
 	resource := cerbosSDK.NewResource(kind, "new").

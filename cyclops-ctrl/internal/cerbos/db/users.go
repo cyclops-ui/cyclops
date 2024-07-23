@@ -4,7 +4,6 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"log"
 	"strings"
 
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -92,7 +91,7 @@ func LookupUser(ctx context.Context, userName string) (*UserRecord, error) {
 
 	userRecord, err := userConf.loadUserConfig("cyclops", userName)
 	if err != nil {
-		log.Fatalf("Failed to load users: %v", err)
+		return nil, fmt.Errorf("failed to load users: %v", err)
 	}
 
 	if userRecord.Username == userName {

@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { Alert } from "antd";
 import axios from "axios";
 import { useAuth } from "../../../context/AuthContext";
 import Cookies from "js-cookie";
@@ -11,38 +12,59 @@ import {
 import { Input } from "antd";
 import styles from "./styles.module.css";
 
+interface LoginResponse {
+  error?: string;
+  token?: string;
+}
+
 const Login = () => {
   const [username, setUsername] = useState<string>("");
   const [password, setPassword] = useState<string>("");
-  const naviage = useNavigate();
+  const navigate = useNavigate();
   const { login } = useAuth();
+  const [error, setError] = useState({
+    message: "",
+    description: "",
+  });
 
   const handleUsernameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setUsername(e.target.value);
   };
 
   const handlePasswordChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    e.preventDefault();
     setPassword(e.target.value);
   };
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    await axios
-      .post("/api/login", {
+
+    try {
+      const response = await axios.post<LoginResponse>("/api/login", {
         username,
         password,
-      })
-      .then((response: any) => {
-        // response
-        // console.log("token", response.data.token);
+      });
+
+      if (response.data?.token) {
+        console.log("token", response.data.token);
         Cookies.set("_isAuthenticated", "true");
-      })
-      .catch((err) => console.error(err));
+        setUsername("");
+        setPassword("");
+        login();
+        navigate("/");
+      } else {
+        // console.log("Error:", );
+        setError({
+          message: "Authentication Failed",
+          description: `${response.data.error}`,
+        });
+        Cookies.set("_isAuthenticated", "false");
+      }
+    } catch (err) {
+      console.error(err);
+    }
     //
-    login();
-    setUsername("");
-    setPassword("");
-    return naviage("/");
+    // return navigate("/");
   };
 
   return (
@@ -69,6 +91,21 @@ const Login = () => {
               alt=""
             />
           </h2>
+          {error.message.length !== 0 && (
+            <Alert
+              message={error.message}
+              description={error.description}
+              type="error"
+              closable
+              afterClose={() => {
+                setError({
+                  message: "",
+                  description: "",
+                });
+              }}
+              style={{ marginBottom: "20px" }}
+            />
+          )}
           <div className={styles.field_container}>
             <Input
               size="large"

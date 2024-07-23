@@ -31,12 +31,12 @@ func Login(cerbosClient *CerbosSvc) gin.HandlerFunc {
 
 		userRecord, err := db.LookupUser(c.Request.Context(), credentials.Username)
 		if err != nil {
-			c.JSON(http.StatusBadRequest, gin.H{"error": "user does not exist."})
+			c.JSON(http.StatusOK, gin.H{"error": "user does not exist."})
 			return
 		}
 
 		if credentials.Password != userRecord.Password {
-			c.JSON(http.StatusBadRequest, gin.H{"error": "invalid credentials"})
+			c.JSON(http.StatusOK, gin.H{"error": "invalid credentials"})
 			return
 		}
 
