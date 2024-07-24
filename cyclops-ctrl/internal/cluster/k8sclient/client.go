@@ -355,6 +355,8 @@ func (k *KubernetesClient) GetResource(group, version, kind, name, namespace str
 		return k.mapCronJob(group, version, kind, name, namespace)
 	case isJob(group, version, kind):
 		return k.mapJob(group, version, kind, name, namespace)
+	case isRole(group, version, kind):
+		return k.mapRole(group, version, kind, name, namespace)
 	}
 
 	return nil, nil
@@ -877,6 +879,29 @@ func (k *KubernetesClient) isResourceNamespaced(gvk schema.GroupVersionKind) (bo
 	return false, errors.New(fmt.Sprintf("group version kind not found: %v", gvk.String()))
 }
 
+func (k *KubernetesClient) mapRole(group, version, kind, name, namespace string ) (*dto.Role, error){
+	 roleList, err := k.clientset.CoreV1().Role(namespace).Get(context.Background(), name, metav1.GetOptions{})
+	 if err != nil {
+		return nil, err
+	 }
+
+	 storage := ""
+
+	 if roleList.Spec.Resources.Requests != nil && roleList.Spec.Resources.Requests.Storage() != nil {
+		storage = roleList.Spec.Resources.Requests.Storage().String()
+	}
+
+	return &dto.Role{
+		Group:     	 group,
+		Version:   	 version,
+		Kind:      	 kind,
+		Name:      	 name,
+		Namespace: 	 namespace,
+		AccessModes: roleList.Spec.AccessModes,
+		Size: 		 storage,
+	}, nil
+}
+
 func isDeployment(group, version, kind string) bool {
 	return group == "apps" && version == "v1" && kind == "Deployment"
 }
@@ -915,4 +940,8 @@ func isSecret(group, version, kind string) bool {
 
 func isCronJob(group, version, kind string) bool {
 	return group == "batch" && version == "v1" && kind == "CronJob"
+}
+
+func isRole(group, version, kind string) bool {
+	return group == "" && version == "v1" && kind == "Role"
 }
