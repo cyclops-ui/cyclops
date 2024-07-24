@@ -21,6 +21,30 @@ const Blogs = () => {
         <Row gutter={[16, 16]}>
           <Col xs={{ span: 20, offset: 2 }} md={{ span: 6, offset: 3 }}>
             <Blog
+              title={"How we manage secrets, the Kubernetes way"}
+              description={
+                "In this article, I will showcase how Cyclops manages your secrets, the Kubernetes way..."
+              }
+              blogLink={
+                "https://cyclops-ui.com/blog/2024/07/24/how-we-manage-secrets"
+              }
+              avatar={"https://github.com/KaradzaJuraj.png"}
+              banner={"/img/2024-07-24-how-we-manage-secrets/cover.jpg"}
+            />
+          </Col>
+          <Col xs={{ span: 20, offset: 2 }} md={{ span: 6, offset: 0 }}>
+            <Blog
+              title={"What the Helm?!"}
+              description={
+                "Kubernetes applications rarely (if ever) consist of a single resource..."
+              }
+              blogLink={"https://cyclops-ui.com/blog/2024/07/05/what-the-helm"}
+              avatar={"https://github.com/KaradzaJuraj.png"}
+              banner={"/img/2024-07-05-what-the-helm/cover.jpg"}
+            />
+          </Col>
+          <Col xs={{ span: 20, offset: 2 }} md={{ span: 6, offset: 0 }}>
+            <Blog
               title={"Why CLIs are STILL important"}
               description={
                 "Command Line Interfaces (CLIs) seem old-fashioned in the age of graphical user interfaces (GUIs)..."
@@ -30,30 +54,6 @@ const Blogs = () => {
               }
               avatar={"https://github.com/KaradzaJuraj.png"}
               banner={"/img/2024-06-21-why-cli-important/cover-image.jpeg"}
-            />
-          </Col>
-          <Col xs={{ span: 20, offset: 2 }} md={{ span: 6, offset: 0 }}>
-            <Blog
-              title={"The Easiest Way to Get Started with Kubernetes"}
-              description={
-                "They say the first step is always the hardest. And when that step is in the direction of Kubernetes, it can feel even more intimidating..."
-              }
-              blogLink={"https://cyclops-ui.com/blog/2024/06/07/k8s-easy-start"}
-              avatar={"https://github.com/KaradzaJuraj.png"}
-              banner={"/img/2024-06-07-k8s-easy-start/k8s-easy-start-cover.png"}
-            />
-          </Col>
-          <Col xs={{ span: 20, offset: 2 }} md={{ span: 6, offset: 0 }}>
-            <Blog
-              title={"Is Kubernetes a database? CRDs explained in 5 minutes"}
-              description={
-                "When you touch on containerized apps today, Kubernetes usually comes up as their orchestrator"
-              }
-              blogLink={
-                "https://cyclops-ui.com/blog/2024/05/24/is-k8s-database"
-              }
-              avatar={"https://github.com/KaradzaJuraj.png"}
-              banner={"/img/2024-05-24-is-k8s-database/k8s-database-cover.png"}
             />
           </Col>
         </Row>

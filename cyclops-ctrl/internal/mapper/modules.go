@@ -43,6 +43,7 @@ func ModuleToDTO(module cyclopsv1alpha1.Module) (dto.Module, error) {
 		Version:   module.Spec.TemplateRef.Version,
 		Template:  k8sTemplateRefToDTO(module.Spec.TemplateRef, module.Status.TemplateResolvedVersion),
 		Values:    module.Spec.Values,
+		IconURL:   module.Status.IconURL,
 	}, nil
 }
 
@@ -57,6 +58,7 @@ func ModuleListToDTO(modules []cyclopsv1alpha1.Module) []dto.Module {
 			Version:   module.Spec.TemplateRef.Version,
 			Template:  k8sTemplateRefToDTO(module.Spec.TemplateRef, module.Status.TemplateResolvedVersion),
 			Values:    values,
+			IconURL:   module.Status.IconURL,
 		})
 	}
 

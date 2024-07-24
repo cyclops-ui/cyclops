@@ -2,17 +2,16 @@ import React, { useEffect, useState } from "react";
 import {
   Col,
   Table,
-  Typography,
   Alert,
   Row,
   Button,
-  Tabs,
   Modal,
   Form,
   Input,
   Divider,
   message,
   Spin,
+  notification,
 } from "antd";
 import axios from "axios";
 import Title from "antd/es/typography/Title";
@@ -24,9 +23,15 @@ import {
 import classNames from "classnames";
 import styles from "./styles.module.css";
 import { mapResponseError } from "../../../utils/api/errors";
+import defaultTemplate from "../../../static/img/default-template-icon.png";
+import {
+  FeedbackError,
+  FormValidationErrors,
+} from "../../errors/FormValidationErrors";
 
 const TemplateStore = () => {
   const [templates, setTemplates] = useState([]);
+  const [filteredTemplates, setFilteredTemplates] = useState([]);
   const [confirmDelete, setConfirmDelete] = useState("");
   const [confirmDeleteInput, setConfirmDeleteInput] = useState("");
   const [newTemplateModal, setNewTemplateModal] = useState(false);
@@ -43,17 +48,50 @@ const TemplateStore = () => {
 
   const [addForm] = Form.useForm();
   const [editForm] = Form.useForm();
+  const [notificationApi, contextHolder] = notification.useNotification();
+
+  const openNotification = (errors: FeedbackError[]) => {
+    notificationApi.error({
+      message: "Submit failed!",
+      description: <FormValidationErrors errors={errors} />,
+      placement: "topRight",
+      duration: 0,
+    });
+  };
 
   useEffect(() => {
     axios
       .get(`/api/templates/store`)
       .then((res) => {
         setTemplates(res.data);
+        setFilteredTemplates(res.data);
       })
       .catch((error) => {
         setError(mapResponseError(error));
       });
   }, []);
+
+  const handleSearch = (event: any) => {
+    const query = event.target.value;
+    var updatedList = [...templates];
+    updatedList = updatedList.filter((template: any) => {
+      return template.name.toLowerCase().indexOf(query.toLowerCase()) !== -1;
+    });
+    setFilteredTemplates(updatedList);
+  };
+
+  const onSubmitFailed = (
+    errors: Array<{ message: string; description: string }>,
+  ) => {
+    const errorMessages: FeedbackError[] = [];
+    errors.forEach(function (error: any) {
+      errorMessages.push({
+        key: error.message,
+        errors: [error.description],
+      });
+    });
+    openNotification(errorMessages);
+  };
 
   const handleOKAdd = () => {
     addForm.submit();
@@ -68,14 +106,14 @@ const TemplateStore = () => {
 
     axios
       .put(`/api/templates/store`, values)
-      .then((res) => {
+      .then(() => {
         setNewTemplateModal(false);
         setConfirmLoading(false);
         window.location.href = "/templates";
       })
       .catch((error) => {
         setConfirmLoading(false);
-        setError(mapResponseError(error));
+        onSubmitFailed([error.response.data]);
       });
   };
 
@@ -86,14 +124,14 @@ const TemplateStore = () => {
 
     axios
       .post(`/api/templates/store/` + editModal, values)
-      .then((res) => {
+      .then(() => {
         setNewTemplateModal(false);
         setConfirmLoading(false);
         window.location.href = "/templates";
       })
       .catch((error) => {
         setConfirmLoading(false);
-        setError(mapResponseError(error));
+        onSubmitFailed([error.response.data]);
       });
   };
 
@@ -167,9 +205,10 @@ const TemplateStore = () => {
           style={{ marginBottom: "20px" }}
         />
       )}
+      {contextHolder}
       <Row gutter={[40, 0]}>
         <Col span={18}>
-          <Title level={2}>Templates: {templates.length}</Title>
+          <Title level={2}>Templates: {filteredTemplates.length}</Title>
         </Col>
         <Col span={6}>
           <Button
@@ -183,9 +222,49 @@ const TemplateStore = () => {
           </Button>
         </Col>
       </Row>
+      <Row gutter={[40, 0]}>
+        <Col span={18}>
+          <Input
+            placeholder={"Search templates"}
+            style={{ width: "30%", marginBottom: "1rem" }}
+            onChange={handleSearch}
+          ></Input>
+        </Col>
+      </Row>
       <Col span={24} style={{ overflowX: "auto" }}>
-        <Table dataSource={templates}>
-          <Table.Column title="Name" dataIndex="name" width={"30%"} />
+        <Table dataSource={filteredTemplates}>
+          <Table.Column
+            dataIndex="iconURL"
+            width={"3%"}
+            render={function (iconURL) {
+              if (!iconURL || iconURL.length === 0) {
+                return (
+                  <img
+                    alt=""
+                    style={{
+                      verticalAlign: "middle",
+                      margin: "-5px",
+                      maxHeight: "36px",
+                    }}
+                    src={defaultTemplate}
+                  />
+                );
+              }
+
+              return (
+                <img
+                  alt=""
+                  style={{
+                    verticalAlign: "middle",
+                    margin: "-5px",
+                    maxHeight: "36px",
+                  }}
+                  src={iconURL}
+                />
+              );
+            }}
+          />
+          <Table.Column title="Name" dataIndex="name" width={"20%"} />
           <Table.Column
             title="Repo"
             dataIndex={["ref", "repo"]}
@@ -194,7 +273,7 @@ const TemplateStore = () => {
           <Table.Column
             title="Path"
             dataIndex={["ref", "path"]}
-            width={"10%"}
+            width={"20%"}
             render={function (value: any, record: any, index: number) {
               if (!value.startsWith("/")) {
                 return "/" + value;
@@ -223,7 +302,8 @@ const TemplateStore = () => {
                 ) : (
                   <FileSyncOutlined
                     className={classNames(styles.statustemplate, {
-                      [styles.success]: requestStatus[template.name] === "success",
+                      [styles.success]:
+                        requestStatus[template.name] === "success",
                       [styles.error]: requestStatus[template.name] === "error",
                     })}
                     onClick={function () {

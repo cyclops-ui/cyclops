@@ -49,7 +49,7 @@ export function findMaps(fields: any[], values: any, initialValues: any): any {
         }
         break;
       case "boolean":
-        if (values[field.name]) {
+        if (values[field.name] !== undefined && values[field.name] !== null) {
           out[field.name] = values[field.name];
         }
         break;
@@ -58,7 +58,7 @@ export function findMaps(fields: any[], values: any, initialValues: any): any {
           out[field.name] = findMaps(
             field.properties,
             values[field.name],
-            initialValues[field.name],
+            initialValues ? initialValues[field.name] : {},
           );
         }
         break;
@@ -71,7 +71,12 @@ export function findMaps(fields: any[], values: any, initialValues: any): any {
         }
 
         let objectArr: any[] = [];
-        valuesList.forEach((valueFromList) => {
+        valuesList.forEach((valueFromList, index) => {
+          if (field.items === null || field.items === undefined) {
+            objectArr.push(valueFromList);
+            return;
+          }
+
           switch (field.items.type) {
             case "string":
               objectArr.push(valueFromList);
@@ -81,7 +86,7 @@ export function findMaps(fields: any[], values: any, initialValues: any): any {
                 findMaps(
                   field.items.properties,
                   valueFromList,
-                  initialValues[field.name],
+                  getObjectArrayInitialValue(initialValues, field.name, index),
                 ),
               );
               break;
@@ -107,4 +112,27 @@ export function findMaps(fields: any[], values: any, initialValues: any): any {
   });
 
   return out;
+}
+
+function getObjectArrayInitialValue(
+  initialValue: any,
+  name: string,
+  index: number,
+): any | null {
+  if (initialValue === null || initialValue === undefined) {
+    return null;
+  }
+
+  if (initialValue[name] === null || initialValue[name] === undefined) {
+    return null;
+  }
+
+  if (
+    Array.isArray(initialValue[name]) &&
+    index >= 0 &&
+    index < initialValue[name].length
+  ) {
+    return initialValue[name][index];
+  }
+  return null;
 }

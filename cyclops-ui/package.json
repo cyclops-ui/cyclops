@@ -31,7 +31,6 @@
     "react-code-blocks": "^0.1.3",
     "react-diff-viewer": "^3.1.1",
     "react-dom": "^18.0.0",
-    "react-gauge-component": "^1.1.22",
     "react-highlight-words": "^0.17.0",
     "react-router-dom": "^6.21.1",
     "react-scripts": "^5.0.1",
@@ -45,7 +44,7 @@
     "yaml": "^2.3.2"
   },
   "scripts": {
-    "start": "REACT_APP_CYCLOPS_CTRL_HOST=http://localhost:8888 node_modules/.bin/react-scripts start",
+    "start": "node_modules/.bin/react-scripts start",
     "build": "node_modules/.bin/react-scripts build",
     "test": "node_modules/.bin/react-scripts test",
     "eject": "node_modules/.bin/react-scripts eject",
@@ -70,6 +69,7 @@
     ]
   },
   "devDependencies": {
+    "@babel/plugin-proposal-private-property-in-object": "^7.21.0",
     "@types/react-gauge-chart": "^0.4.3",
     "@types/react-highlight-words": "^0.16.7",
     "husky": "^9.0.11",

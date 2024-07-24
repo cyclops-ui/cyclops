@@ -14,6 +14,10 @@ func isValidVersion(v string) bool {
 }
 
 func resolveSemver(targetVersion string, versions []string) (string, error) {
+	// if targetVersion is empty, set it to a constraint that matches any version.
+	if targetVersion == "" {
+		targetVersion = "> 0.0.0"
+	}
 	contstraints, err := semver.NewConstraint(targetVersion)
 	if err != nil {
 		return "", nil

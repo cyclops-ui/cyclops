@@ -1,6 +1,7 @@
 package models
 
 import (
+	"github.com/cyclops-ui/cyclops/cyclops-ctrl/internal/models/helm"
 	"helm.sh/helm/v3/pkg/chart"
 
 	"github.com/cyclops-ui/cyclops/cyclops-ctrl/internal/models/dto"
@@ -17,24 +18,27 @@ type Template struct {
 	ResolvedVersion string       `json:"resolvedVersion"`
 	IconURL         string       `json:"iconURL"`
 
+	HelmChartMetadata *helm.Metadata `json:"helmChartMetadata"`
+
 	Files     []*chart.File `json:"files"`
 	Templates []*chart.File `json:"templates"`
+	CRDs      []*chart.File `json:"crds"`
 
 	Dependencies []*Template `json:"dependencies"`
 }
 
 type Field struct {
-	Name          string   `json:"name"`
-	Description   string   `json:"description"`
-	Type          string   `json:"type"`
-	DisplayName   string   `json:"display_name"`
-	ManifestKey   string   `json:"manifest_key"`
-	Value         string   `json:"value"`
-	Properties    []Field  `json:"properties"`
-	Items         *Field   `json:"items"`
-	Enum          []string `json:"enum"`
-	Required      []string `json:"required"`
-	FileExtension string   `json:"fileExtension"`
+	Name          string        `json:"name"`
+	Description   string        `json:"description"`
+	Type          string        `json:"type"`
+	DisplayName   string        `json:"display_name"`
+	ManifestKey   string        `json:"manifest_key"`
+	Value         string        `json:"value"`
+	Properties    []Field       `json:"properties"`
+	Items         *Field        `json:"items"`
+	Enum          []interface{} `json:"enum"`
+	Required      []string      `json:"required"`
+	FileExtension string        `json:"fileExtension"`
 
 	// number validation
 	Minimum          *float64 `json:"minimum"`

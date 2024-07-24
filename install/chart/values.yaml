@@ -10,15 +10,53 @@ ui:
   ctrlHost: http://cyclops-ctrl.cyclops:8080
 
 templateStore:
-  - name: demo-template
+  - name: demo
     repo: https://github.com/cyclops-ui/templates
     path: demo
     version: main
-  - name: demo-template-extended
+    iconURL: https://github.com/cyclops-ui/cyclops/blob/main/cyclops-ui/src/static/img/default-template-icon.png?raw=true
+  - name: app-template
     repo: https://github.com/cyclops-ui/templates
-    path: demo-extended
+    path: app-template
     version: main
-  - name: redis-demo
-    path: redis
+    iconURL: https://github.com/cyclops-ui/cyclops/blob/main/cyclops-ui/src/static/img/default-template-icon.png?raw=true
+  - name: jenkins
+    repo: https://github.com/bitnami/charts
+    path: bitnami/jenkins
+    version: main
+    iconURL: https://bitnami.com/assets/stacks/jenkins/img/jenkins-stack-220x234.png
+  - name: mariadb
+    repo: https://github.com/bitnami/charts
+    path: bitnami/mariadb
+    version: main
+    iconURL: https://bitnami.com/assets/stacks/mariadb/img/mariadb-stack-220x234.png
+  - name: metabase
     repo: https://github.com/cyclops-ui/templates
+    path: metabase
     version: main
+    iconURL: https://www.metabase.com/images/logo.svg
+  - name: mysql
+    repo: https://github.com/bitnami/charts
+    path: bitnami/mysql
+    version: main
+    iconURL: https://bitnami.com/assets/stacks/mysql/img/mysql-stack-220x234.png
+  - name: postgresql
+    repo: https://github.com/bitnami/charts
+    path: bitnami/postgresql
+    version: main
+    iconURL: https://bitnami.com/assets/stacks/postgresql/img/postgresql-stack-220x234.png
+  - name: prometheus
+    repo: https://github.com/bitnami/charts
+    path: bitnami/prometheus
+    version: main
+    iconURL: https://bitnami.com/assets/stacks/prometheus/img/prometheus-stack-220x234.png
+  - name: rabbitmq
+    repo: https://github.com/bitnami/charts
+    path: bitnami/rabbitmq
+    version: main
+    iconURL: https://bitnami.com/assets/stacks/rabbitmq/img/rabbitmq-stack-220x234.png
+  - name: redis
+    repo: https://github.com/bitnami/charts
+    path: bitnami/redis
+    version: main
+    iconURL: https://bitnami.com/assets/stacks/redis/img/redis-stack-220x234.png

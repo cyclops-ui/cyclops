@@ -1,5 +1,5 @@
 import axios from "axios";
-import { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { mapResponseError } from "../../utils/api/errors";
 import { Alert, Descriptions, Divider } from "antd";
 
@@ -78,7 +78,7 @@ const Secret = ({ name, namespace }: Props) => {
         Type: {secret.type}
       </Divider>
 
-      <Descriptions style={{ width: "100%" }} bordered>
+      <Descriptions style={{ width: "100%" }} bordered column={1}>
         {secret.dataKeys.map((key, index) => (
           <Descriptions.Item
             key={index}

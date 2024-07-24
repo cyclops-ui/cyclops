@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import {
   Alert,
   Button,
@@ -11,7 +11,6 @@ import {
   notification,
   Row,
   Select,
-  Space,
   Spin,
   Switch,
   Tooltip,
@@ -38,26 +37,25 @@ import "ace-builds/src-noconflict/mode-toml";
 import "ace-builds/src-noconflict/mode-javascript";
 import "ace-builds/src-noconflict/mode-typescript";
 import "ace-builds/src-noconflict/snippets/yaml";
-import { fileExtension, findMaps, flattenObjectKeys } from "../../utils/form";
-import "./custom.css";
-import { numberInputValidators } from "../../utils/validators/number";
-import { stringInputValidators } from "../../utils/validators/string";
 import {
-  moduleTemplateReferenceView,
-  templateRef,
-} from "../../utils/templateRef";
+  fileExtension,
+  findMaps,
+  flattenObjectKeys,
+} from "../../../utils/form";
+import "./custom.css";
+import { numberInputValidators } from "../../../utils/validators/number";
+import { stringInputValidators } from "../../../utils/validators/string";
+import { templateRef } from "../../../utils/templateRef";
 import {
   FeedbackError,
   FormValidationErrors,
-} from "../errors/FormValidationErrors";
-import { mapResponseError } from "../../utils/api/errors";
+} from "../../errors/FormValidationErrors";
+import { mapResponseError } from "../../../utils/api/errors";
 import {
   getTemplate,
   getTemplateInitialValues,
   Template,
-} from "../../utils/api/template";
-
-const { TextArea } = Input;
+} from "../../../utils/api/template";
 
 const { Title } = Typography;
 const layout = {
@@ -89,7 +87,6 @@ const EditModule = () => {
 
   const [initialValuesRaw, setInitialValuesRaw] = useState({});
 
-  const [allConfigs, setAllConfigs] = useState([]);
   const [values, setValues] = useState({});
   const [isChanged, setIsChanged] = useState(false);
   const [isTemplateChanged, setIsTemplateChanged] = useState(false);
@@ -138,7 +135,7 @@ const EditModule = () => {
 
   let { moduleName } = useParams();
 
-  const mapsToArray = (fields: any[], values: any): any => {
+  const mapsToArray = useCallback((fields: any[], values: any): any => {
     let out: any = {};
     fields.forEach((field) => {
       let valuesList: any[] = [];
@@ -158,10 +155,26 @@ const EditModule = () => {
           }
           break;
         case "array":
-          valuesList = values[field.name] as any[];
+          if (values[field.name] === undefined || values[field.name] === null) {
+            out[field.name] = [];
+            break;
+          }
+
+          valuesList = [];
+          if (Array.isArray(values[field.name])) {
+            valuesList = values[field.name];
+          } else if (typeof values[field.name] === "string") {
+            valuesList = [values[field.name]];
+          }
 
           let objectArr: any[] = [];
           valuesList.forEach((valueFromList) => {
+            // array items not defined
+            if (field.items === null || field.items === undefined) {
+              objectArr.push(valueFromList);
+              return;
+            }
+
             switch (field.items.type) {
               case "string":
                 objectArr.push(valueFromList);
@@ -179,7 +192,7 @@ const EditModule = () => {
           let object: any[] = [];
 
           if (values[field.name] === undefined || values[field.name] === null) {
-            out[field.name] = {};
+            out[field.name] = [];
             break;
           }
 
@@ -202,7 +215,7 @@ const EditModule = () => {
     });
 
     return out;
-  };
+  }, []);
 
   useEffect(() => {
     const fetchModuleData = async () => {
@@ -258,16 +271,11 @@ const EditModule = () => {
         });
     };
     fetchModuleData();
-  }, []);
+  }, [editTemplateForm, form, moduleName, mapsToArray]);
 
   useEffect(() => {
     form.validateFields(flattenObjectKeys(values));
-  }, [values]);
-
-  const configNames: {} | any = [];
-  allConfigs.map((c: any) => {
-    configNames.push(<Select.Option key={c.name}>{c.name}</Select.Option>);
-  });
+  }, [values, form]);
 
   const handleValuesChange = (changedValues: any, allValues: any) => {
     if (JSON.stringify(allValues) === JSON.stringify(values)) {
@@ -423,6 +431,10 @@ const EditModule = () => {
         {...arrayField}
         name={formItemName}
         rules={[{ required: isRequired }]}
+        style={{
+          paddingTop: "8px",
+          marginBottom: "12px",
+        }}
         label={
           <div>
             {field.display_name}
@@ -455,6 +467,10 @@ const EditModule = () => {
       <Form.Item
         {...arrayField}
         name={formItemName}
+        style={{
+          paddingTop: "8px",
+          marginBottom: "12px",
+        }}
         label={
           <div>
             {field.display_name}
@@ -490,50 +506,169 @@ const EditModule = () => {
   };
 
   const arrayInnerField = (
+    fieldName: string,
+    uniqueFieldName: string[],
+    formItemName: any,
     field: any,
-    parentFieldID: string[],
-    parent: string,
     level: number,
-    arrayField: any,
-    remove: Function,
+    header: React.JSX.Element,
   ) => {
-    switch (field.items.type) {
-      case "object":
-        return (
-          <div>
-            {mapFields(
-              field.items.properties,
-              parentFieldID,
-              "",
-              level + 1,
-              2,
-              arrayField,
-              field.items.required,
+    if (!field.items || field.items.type === "string") {
+      return (
+        <Form.Item
+          wrapperCol={{ span: level === 0 ? 16 : 24 }}
+          name={fieldName}
+          style={{
+            paddingTop: "0px",
+            marginBottom: "12px",
+          }}
+          label={
+            <div>
+              {field.display_name}
+              <p style={{ color: "#8b8e91", marginBottom: "0px" }}>
+                {field.description}
+              </p>
+            </div>
+          }
+        >
+          <Form.List name={formItemName}>
+            {(arrFields, { add, remove }) => (
+              <div
+                style={{
+                  border: "solid 1px #d3d3d3",
+                  borderRadius: "7px",
+                  padding: "12px",
+                  width: "100%",
+                  backgroundColor: "#fafafa",
+                }}
+              >
+                {arrFields.map((arrField, index) => (
+                  <Col key={arrField.key}>
+                    <Row>
+                      <Form.Item
+                        style={{
+                          paddingBottom: "8px",
+                          marginBottom: "0px",
+                          width: "80%",
+                        }}
+                        wrapperCol={{ span: 24 }}
+                        {...arrField}
+                        initialValue={field.initialValue}
+                        name={[arrField.name]}
+                      >
+                        <Input />
+                      </Form.Item>
+                      <MinusCircleOutlined
+                        style={{ fontSize: "16px", paddingLeft: "10px" }}
+                        onClick={() => remove(arrField.name)}
+                      />
+                    </Row>
+                    {arrFields !== null &&
+                    arrFields !== undefined &&
+                    index + 1 === arrFields.length ? (
+                      <Divider
+                        style={{ marginTop: "4px", marginBottom: "12px" }}
+                      />
+                    ) : (
+                      <></>
+                    )}
+                  </Col>
+                ))}
+                <Form.Item style={{ marginBottom: "0" }}>
+                  <Button
+                    type="dashed"
+                    onClick={() => add()}
+                    block
+                    icon={<PlusOutlined />}
+                  >
+                    Add
+                  </Button>
+                </Form.Item>
+              </div>
             )}
-            <MinusCircleOutlined
-              style={{ fontSize: "16px" }}
-              onClick={() => remove(arrayField.name)}
-            />
-          </div>
-        );
-      case "string":
-        return (
-          <Row>
+          </Form.List>
+        </Form.Item>
+      );
+    }
+    if (field.items.type === "object") {
+      return (
+        <Collapse
+          size={"small"}
+          bordered={false}
+          onChange={function (value: string | string[]) {
+            if (value.length === 0) {
+              updateActiveCollapses(uniqueFieldName, false);
+            } else {
+              updateActiveCollapses(uniqueFieldName, true);
+            }
+          }}
+        >
+          <Collapse.Panel
+            key={fieldName}
+            header={header}
+            style={{
+              borderRadius: "7px",
+              backgroundColor: getCollapseColor(uniqueFieldName.toString()),
+            }}
+            forceRender={true}
+          >
             <Form.Item
-              style={{ paddingBottom: "0px", marginBottom: "0px" }}
-              wrapperCol={24}
-              {...arrayField}
-              initialValue={field.initialValue}
-              name={[arrayField.name]}
+              wrapperCol={{ span: 16 }}
+              style={{
+                paddingTop: "8px",
+                marginBottom: "0",
+              }}
             >
-              <Input />
+              <Form.List name={formItemName}>
+                {(arrFields, { add, remove }) => (
+                  <>
+                    {arrFields.map((arrField) => (
+                      <Col
+                        key={arrField.key}
+                        style={{ padding: 0, paddingBottom: "12px" }}
+                      >
+                        <div
+                          style={{
+                            border: "solid 1.5px #c3c3c3",
+                            borderRadius: "7px",
+                            padding: "12px",
+                            width: "100%",
+                            backgroundColor: "#fafafa",
+                          }}
+                        >
+                          {mapFields(
+                            field.items.properties,
+                            [...uniqueFieldName, String(arrField.name)],
+                            "",
+                            level + 1,
+                            2,
+                            arrField,
+                            field.items.required,
+                          )}
+                          <MinusCircleOutlined
+                            style={{ fontSize: "16px" }}
+                            onClick={() => remove(arrField.name)}
+                          />
+                        </div>
+                      </Col>
+                    ))}
+                    <Form.Item style={{ marginBottom: "0" }}>
+                      <Button
+                        type="dashed"
+                        onClick={() => add()}
+                        block
+                        icon={<PlusOutlined />}
+                      >
+                        Add
+                      </Button>
+                    </Form.Item>
+                  </>
+                )}
+              </Form.List>
             </Form.Item>
-            <MinusCircleOutlined
-              style={{ fontSize: "16px", paddingLeft: "10px" }}
-              onClick={() => remove(arrayField.name)}
-            />
-          </Row>
-        );
+          </Collapse.Panel>
+        </Collapse>
+      );
     }
   };
 
@@ -590,6 +725,7 @@ const EditModule = () => {
         arrayIndexLifetime = arrayIndexLifetime - 1;
       }
 
+      var header;
       switch (field.type) {
         case "string":
           if (field.enum) {
@@ -612,6 +748,10 @@ const EditModule = () => {
             <Form.Item
               {...arrayField}
               name={formItemName}
+              style={{
+                paddingTop: "8px",
+                marginBottom: "12px",
+              }}
               label={
                 <div>
                   {field.display_name}
@@ -636,6 +776,10 @@ const EditModule = () => {
               {...arrayField}
               initialValue={field.initialValue}
               name={formItemName}
+              style={{
+                paddingTop: "8px",
+                marginBottom: "12px",
+              }}
               label={
                 <div>
                   {field.display_name}
@@ -674,6 +818,10 @@ const EditModule = () => {
               initialValue={field.initialValue}
               name={fieldName}
               id={fieldName}
+              style={{
+                paddingTop: "8px",
+                marginBottom: "12px",
+              }}
               label={
                 <div>
                   {field.display_name}
@@ -689,7 +837,7 @@ const EditModule = () => {
           );
           return;
         case "object":
-          var header = <Row>{field.name}</Row>;
+          header = <Row>{field.display_name}</Row>;
 
           if (field.description && field.description.length !== 0) {
             header = (
@@ -698,7 +846,7 @@ const EditModule = () => {
                   span={15}
                   style={{ display: "flex", justifyContent: "flex-start" }}
                 >
-                  {field.name}
+                  {field.display_name}
                 </Col>
                 <Col
                   span={9}
@@ -722,7 +870,8 @@ const EditModule = () => {
               span={level === 0 ? 16 : 24}
               offset={level === 0 ? 2 : 0}
               style={{
-                paddingBottom: "15px",
+                paddingTop: "8px",
+                paddingBottom: "8px",
                 paddingLeft: "0px",
                 paddingRight: "0px",
                 marginLeft: "0px",
@@ -731,6 +880,10 @@ const EditModule = () => {
             >
               <Collapse
                 size={"small"}
+                bordered={false}
+                style={{
+                  borderColor: "#d3d3d3",
+                }}
                 onChange={function (value: string | string[]) {
                   if (value.length === 0) {
                     updateActiveCollapses(uniqueFieldName, false);
@@ -743,6 +896,7 @@ const EditModule = () => {
                   key={fieldName}
                   header={header}
                   style={{
+                    borderRadius: "7px",
                     backgroundColor: getCollapseColor(
                       uniqueFieldName.toString(),
                     ),
@@ -770,7 +924,7 @@ const EditModule = () => {
           );
           return;
         case "array":
-          var header = <Row>{field.name}</Row>;
+          header = <Row>{field.name}</Row>;
 
           if (field.description && field.description.length !== 0) {
             header = (
@@ -803,73 +957,35 @@ const EditModule = () => {
               span={level === 0 ? 16 : 24}
               offset={level === 0 ? 2 : 0}
               style={{
-                paddingBottom: "15px",
-                marginLeft: "0px",
-                marginRight: "0px",
+                paddingTop: "8px",
+                paddingBottom: "8px",
                 paddingLeft: "0px",
                 paddingRight: "0px",
+                marginLeft: "0px",
+                marginRight: "0px",
               }}
             >
-              <Collapse
-                size={"small"}
-                onChange={function (value: string | string[]) {
-                  if (value.length === 0) {
-                    updateActiveCollapses(uniqueFieldName, false);
-                  } else {
-                    updateActiveCollapses(uniqueFieldName, true);
-                  }
-                }}
-              >
-                <Collapse.Panel
-                  key={fieldName}
-                  header={header}
-                  style={{
-                    backgroundColor: getCollapseColor(
-                      uniqueFieldName.toString(),
-                    ),
-                  }}
-                  forceRender={true}
-                >
-                  <Form.List name={formItemName}>
-                    {(arrFields, { add, remove }) => (
-                      <>
-                        {arrFields.map((arrField) => (
-                          <Col key={arrField.key}>
-                            {arrayInnerField(
-                              field,
-                              [...uniqueFieldName, String(arrField.name)],
-                              "",
-                              level + 1,
-                              arrField,
-                              remove,
-                            )}
-                            <Divider />
-                          </Col>
-                        ))}
-
-                        <Form.Item>
-                          <Button
-                            type="dashed"
-                            onClick={() => add()}
-                            block
-                            icon={<PlusOutlined />}
-                          >
-                            Add
-                          </Button>
-                        </Form.Item>
-                      </>
-                    )}
-                  </Form.List>
-                </Collapse.Panel>
-              </Collapse>
+              {arrayInnerField(
+                fieldName,
+                uniqueFieldName,
+                formItemName,
+                field,
+                level + 1,
+                header,
+              )}
             </Col>,
           );
           return;
         case "map":
           formFields.push(
             <Form.Item
+              wrapperCol={{ span: level === 0 ? 16 : 24 }}
               name={fieldName}
               rules={[{ required: isRequired }]}
+              style={{
+                paddingTop: "8px",
+                marginBottom: "12px",
+              }}
               label={
                 <div>
                   {field.display_name}
@@ -881,43 +997,75 @@ const EditModule = () => {
             >
               <Form.List name={formItemName}>
                 {(fields, { add, remove }) => (
-                  <>
-                    {fields.map((arrField) => (
-                      <Space
+                  <div
+                    style={{
+                      border: "solid 1px #d3d3d3",
+                      borderRadius: "7px",
+                      padding: "12px",
+                      width: "100%",
+                      backgroundColor: "#fafafa",
+                    }}
+                  >
+                    {fields.map((arrField, index) => (
+                      <Row
                         key={arrField.key}
-                        style={{ display: "flex", marginBottom: 8 }}
-                        align="baseline"
+                        style={{
+                          display: "flex",
+                          marginBottom: 8,
+                          width: "100%",
+                        }}
                       >
-                        <Form.Item
-                          {...arrField}
-                          name={[arrField.name, "key"]}
-                          rules={[{ required: true, message: "Missing key" }]}
-                        >
-                          <Input />
-                        </Form.Item>
-                        <Form.Item
-                          {...arrField}
-                          name={[arrField.name, "value"]}
-                          rules={[{ required: true, message: "Missing value" }]}
-                        >
-                          <Input />
-                        </Form.Item>
+                        <Col span={10}>
+                          <Form.Item
+                            {...arrField}
+                            name={[arrField.name, "key"]}
+                            rules={[{ required: true, message: "Missing key" }]}
+                            style={{ margin: 0, flex: 1, marginRight: "8px" }}
+                          >
+                            <Input style={{ margin: 0, width: "100%" }} />
+                          </Form.Item>
+                        </Col>
+                        <Col span={10}>
+                          <Form.Item
+                            {...arrField}
+                            name={[arrField.name, "value"]}
+                            rules={[
+                              { required: true, message: "Missing value" },
+                            ]}
+                            style={{ margin: 0, flex: 1, marginRight: "12px" }}
+                          >
+                            <Input style={{ margin: 0 }} />
+                          </Form.Item>
+                        </Col>
                         <MinusCircleOutlined
                           onClick={() => remove(arrField.name)}
                         />
-                      </Space>
+                        {fields !== null &&
+                        fields !== undefined &&
+                        index + 1 === fields.length ? (
+                          <Divider
+                            style={{ marginTop: "12px", marginBottom: "4px" }}
+                          />
+                        ) : (
+                          ""
+                        )}
+                      </Row>
                     ))}
-                    <Form.Item>
-                      <Button
-                        type="dashed"
-                        onClick={() => add()}
-                        block
-                        icon={<PlusOutlined />}
-                      >
-                        Add
-                      </Button>
-                    </Form.Item>
-                  </>
+                    <Col span={24}>
+                      <Form.Item style={{ marginBottom: "0" }}>
+                        <Button
+                          type="dashed"
+                          onClick={() => {
+                            add();
+                          }}
+                          block
+                          icon={<PlusOutlined />}
+                        >
+                          Add
+                        </Button>
+                      </Form.Item>
+                    </Col>
+                  </div>
                 )}
               </Form.List>
             </Form.Item>,
@@ -1004,6 +1152,25 @@ const EditModule = () => {
     );
   };
 
+  const linkToTemplate = (templateRef: templateRef) => {
+    if (templateRef.repo.startsWith("https://github.com")) {
+      return (
+        <a
+          href={
+            templateRef.repo +
+            `/tree/` +
+            templateRef.resolvedVersion +
+            `/` +
+            templateRef.path
+          }
+          style={{ color: templateRefLock ? "#B8B8B8" : "" }}
+          className="linkToTemplate"
+        >
+          {templateRef.resolvedVersion.substring(0, 7)}
+        </a>
+      );
+    } else return templateRef.resolvedVersion.substring(0, 7);
+  };
   return (
     <div>
       {error.message.length !== 0 && (
@@ -1040,6 +1207,20 @@ const EditModule = () => {
               onFinish={handleSubmitTemplateEdit}
               onFinishFailed={onFinishFailed}
               style={{ width: "100%" }}
+              requiredMark={(label, { required }) => (
+                <Row>
+                  <Col>
+                    {required ? (
+                      <span style={{ color: "red", paddingRight: "3px" }}>
+                        *
+                      </span>
+                    ) : (
+                      <></>
+                    )}
+                  </Col>
+                  <Col>{label}</Col>
+                </Row>
+              )}
             >
               {lockButton()}
               <Form.Item
@@ -1080,7 +1261,7 @@ const EditModule = () => {
               >
                 <Input
                   placeholder={"Version"}
-                  addonAfter={templateRef.resolvedVersion.substring(0, 7)}
+                  addonAfter={linkToTemplate(templateRef)}
                   disabled={templateRefLock}
                 />
               </Form.Item>
