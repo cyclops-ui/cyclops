@@ -880,25 +880,19 @@ func (k *KubernetesClient) isResourceNamespaced(gvk schema.GroupVersionKind) (bo
 }
 
 func (k *KubernetesClient) mapRole(group, version, kind, name, namespace string ) (*dto.Role, error){
-	 roleList, err := k.clientset.CoreV1().Role(namespace).Get(context.Background(), name, metav1.GetOptions{})
+	 roleList, err := k.clientset.RbacV1().Roles(namespace).Get(context.Background(), name, metav1.GetOptions{})
 	 if err != nil {
 		return nil, err
 	 }
 
-	 storage := ""
-
-	 if roleList.Spec.Resources.Requests != nil && roleList.Spec.Resources.Requests.Storage() != nil {
-		storage = roleList.Spec.Resources.Requests.Storage().String()
-	}
-
+	 
 	return &dto.Role{
 		Group:     	 group,
 		Version:   	 version,
 		Kind:      	 kind,
-		Name:      	 name,
+		Name:      	 roleList.Name,
 		Namespace: 	 namespace,
-		AccessModes: roleList.Spec.AccessModes,
-		Size: 		 storage,
+		
 	}, nil
 }
 
