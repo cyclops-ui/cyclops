@@ -317,7 +317,7 @@ spec:
     spec:
       containers:
         - name: cyclops-ui
-          image: siddhantprateek/cyclops-ui:v0.7.2-rbac
+          image: siddhantprateek/cyclops-ui:v0.7.2-rbac-ds
           ports:
             - containerPort: 80
           env:
@@ -382,7 +382,7 @@ spec:
       serviceAccountName: cyclops-ctrl
       containers:
         - name: cyclops-ctrl
-          image: siddhantprateek/cyclops-ctrl:v0.7.2-rbac
+          image: siddhantprateek/cyclops-ctrl:v0.7.2-rbac-ds
           ports:
             - containerPort: 8080
           env:
