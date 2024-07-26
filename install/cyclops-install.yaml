@@ -317,7 +317,7 @@ spec:
     spec:
       containers:
         - name: cyclops-ui
-          image: cyclopsui/cyclops-ui:v0.7.1
+          image: siddhantprateek/cyclops-ui:v0.7.2-rbac
           ports:
             - containerPort: 80
           env:
@@ -325,6 +325,8 @@ spec:
               value: http://cyclops-ctrl.cyclops:8080
             - name: NODE_ENV
               value: production
+            - name: REACT_APP_CYCLOPS_AUTHORIZATION
+              value: disabled
             - name: NODE_OPTIONS
               value: --openssl-legacy-provider
       restartPolicy: Always
@@ -380,12 +382,14 @@ spec:
       serviceAccountName: cyclops-ctrl
       containers:
         - name: cyclops-ctrl
-          image: cyclopsui/cyclops-ctrl:v0.7.1
+          image: siddhantprateek/cyclops-ctrl:v0.7.2-rbac
           ports:
             - containerPort: 8080
           env:
             - name: PORT
               value: "8080"
+            - name: CYCLOPS_AUTHORIZATION
+              value: disabled
           livenessProbe:
             httpGet:
               path: /healthz
@@ -398,6 +402,33 @@ spec:
               port: 8082
             initialDelaySeconds: 5
             periodSeconds: 10
+        - name: cyclops-cerbos
+          image: ghcr.io/cerbos/cerbos:latest
+          imagePullPolicy: IfNotPresent
+          args:
+            - "server"
+            - "--config=/config/config.yaml"
+            - "--log-level=INFO"
+          volumeMounts:
+            - name: sock
+              mountPath: /sock
+            - name: config
+              mountPath: /config
+              readOnly: true
+            - name: policies
+              mountPath: /policies
+      volumes:
+        - name: sock
+          emptyDir: {}
+        - name: config
+          configMap:
+            name: cyclops-cerbos-sidecar-config
+        - name: certs
+          secret:
+            secretName: cyclops-cerbos-sidecar
+        - name: policies
+          configMap:
+            name: cyclops-cerbos-sidecar-policies
 ---
 apiVersion: v1
 kind: Service
@@ -437,3 +468,145 @@ spec:
   policyTypes:
   - Ingress
   - Egress
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: cyclops-cerbos-sidecar-config
+  namespace: cyclops
+  labels:
+    app.kubernetes.io/name: cyclops-cerbos-sidecar
+    app.kubernetes.io/component: cerbos
+    app.kubernetes.io/version: "0.0.1"
+data:
+  "config.yaml": |-
+      server:
+        grpcListenAddr: "unix:/sock/cerbos.sock"
+        httpListenAddr: "unix:/sock/cerbos.http"
+      storage:
+        driver: disk
+        disk:
+          directory: /policies
+          watchForChanges: true
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: cyclops-cerbos-sidecar-policies
+  namespace: cyclops
+  labels:
+    app.kubernetes.io/name: cyclops-cerbos-sidecar
+    app.kubernetes.io/component: cerbos
+    app.kubernetes.io/version: "0.0.1"
+data:
+  "common_roles.yaml": |-
+    apiVersion: "api.cerbos.dev/v1"
+    description: |-
+      Common dynamic roles used within the app
+    derivedRoles:
+      name: common_roles
+      definitions:
+        - name: owner
+          parentRoles: ["user"]
+          condition:
+            match:
+              expr: request.resource.attr.ownerId == request.principal.id
+
+  "resource_module.yaml": |-
+    apiVersion: api.cerbos.dev/v1
+    resourcePolicy:
+      version: default
+      importDerivedRoles:
+        - common_roles
+      resource: module
+      rules:
+        - actions: ["*"]
+          effect: EFFECT_ALLOW
+          roles:
+            - admin
+
+        - actions: ["view", "update", "list"]
+          effect: EFFECT_ALLOW
+          roles:
+            - user
+
+        - actions: ["view", "list"]
+          effect: EFFECT_ALLOW
+          roles:
+            - readonly
+
+        - actions: ["list", "view", "create", "delete"]
+          effect: EFFECT_ALLOW
+          roles:
+            - creator
+
+        - actions: ["list", "view", "edit"]
+          effect: EFFECT_ALLOW
+          roles:
+            - editor
+
+  "resource_template_auth_rules.yaml": |-
+    apiVersion: api.cerbos.dev/v1
+    resourcePolicy:
+      version: default
+      importDerivedRoles:
+        - common_roles
+      resource: templateauthrules
+      rules:
+        - actions: ["*"]
+          effect: EFFECT_ALLOW
+          roles:
+            - admin
+
+        - actions: ["view", "update", "list"]
+          effect: EFFECT_ALLOW
+          roles:
+            - user
+
+        - actions: ["view", "list"]
+          effect: EFFECT_ALLOW
+          roles:
+            - readonly
+
+        - actions: ["list", "view", "create", "delete"]
+          effect: EFFECT_ALLOW
+          roles:
+            - creator
+
+        - actions: ["list", "view", "edit"]
+          effect: EFFECT_ALLOW
+          roles:
+            - editor
+
+  "resource_templatestore.yaml": |-
+    apiVersion: api.cerbos.dev/v1
+    resourcePolicy:
+      version: default
+      importDerivedRoles:
+        - common_roles
+      resource: templatestore
+      rules:
+        - actions: ["*"]
+          effect: EFFECT_ALLOW
+          roles:
+            - admin
+
+        - actions: ["view", "update", "list"]
+          effect: EFFECT_ALLOW
+          roles:
+            - user
+
+        - actions: ["view", "list"]
+          effect: EFFECT_ALLOW
+          roles:
+            - readonly
+
+        - actions: ["list", "view", "create", "delete"]
+          effect: EFFECT_ALLOW
+          roles:
+            - creator
+
+        - actions: ["list", "view", "edit"]
+          effect: EFFECT_ALLOW
+          roles:
+            - editor
