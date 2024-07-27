@@ -18,12 +18,21 @@ func update(clientset *client.CyclopsV1Alpha1Client, moduleName string) {
 }
 
 var (
-	updateModule = &cobra.Command{
+	UpdateModule = &cobra.Command{
 
 		Use:     "module",
 		Short:   "updates the module ",
 		Long:    "updates the module ",
 		Example: updateModuleExample,
 		Args:    cobra.MinimumNArgs(1),
+		Run: func(cmd *cobra.Command, args []string) {
+
+		},
 	}
 )
+
+func init() {
+
+	UpdateModule.Flags().StringP("key", "k", "", "")
+	UpdateModule.Flags().IntP("value", "v", 0, "")
+}
