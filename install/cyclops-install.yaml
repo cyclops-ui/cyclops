@@ -317,7 +317,7 @@ spec:
     spec:
       containers:
         - name: cyclops-ui
-          image: siddhantprateek/cyclops-ui:v0.7.2-rbac-ds
+          image: siddhantprateek/cyclops-ui:v0.7.7-rbac-ds
           ports:
             - containerPort: 80
           env:
@@ -326,7 +326,7 @@ spec:
             - name: NODE_ENV
               value: production
             - name: REACT_APP_CYCLOPS_AUTHORIZATION
-              value: disabled
+              value: enabled
             - name: NODE_OPTIONS
               value: --openssl-legacy-provider
       restartPolicy: Always
@@ -382,14 +382,16 @@ spec:
       serviceAccountName: cyclops-ctrl
       containers:
         - name: cyclops-ctrl
-          image: siddhantprateek/cyclops-ctrl:v0.7.4-rbac-ds
+          image: siddhantprateek/cyclops-ctrl:v0.7.5-rbac-ds
           ports:
             - containerPort: 8080
           env:
             - name: PORT
               value: "8080"
             - name: CYCLOPS_AUTHORIZATION
-              value: disabled
+              value: enabled
+            - name: CERBOS_URL
+              value: cyclops-cerbos.cyclops:3592
           livenessProbe:
             httpGet:
               path: /healthz
@@ -429,6 +431,19 @@ spec:
         - name: policies
           configMap:
             name: cyclops-cerbos-sidecar-policies
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: cyclops-cerbos
+  namespace: cyclops
+spec:
+  selector:
+    app: cyclops-ctrl
+  ports:
+    - protocol: TCP
+      port: 3592
+      targetPort: 3592
 ---
 apiVersion: v1
 kind: Service
@@ -481,8 +496,8 @@ metadata:
 data:
   "config.yaml": |-
       server:
-        grpcListenAddr: "unix:/sock/cerbos.sock"
-        httpListenAddr: "unix:/sock/cerbos.http"
+        httpListenAddr: ":3592"
+        grpcListenAddr: ":3593"
       storage:
         driver: disk
         disk:
