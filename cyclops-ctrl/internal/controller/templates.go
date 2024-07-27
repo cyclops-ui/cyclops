@@ -2,6 +2,7 @@ package controller
 
 import (
 	"fmt"
+	"log"
 	"net/http"
 	"os"
 	"strconv"
@@ -243,7 +244,7 @@ func (c *Templates) checkPermission(ctx *gin.Context, kind, resourceName, action
 
 	allowed, err := c.cerbos.IsAllowed(ctx.Request.Context(), resource, action)
 	if err != nil {
-		ctx.JSON(http.StatusInternalServerError, dto.NewError("Error checking permissions", err.Error()))
+		log.Println("Error checking permissions", err.Error())
 		return false
 	}
 	return allowed
