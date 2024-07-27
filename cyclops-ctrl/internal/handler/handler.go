@@ -53,6 +53,8 @@ func (h *Handler) Start() error {
 	modulesController := controller.NewModulesController(h.templatesRepo, h.k8sClient, h.renderer, h.telemetryClient, h.monitor, h.cerbosClient)
 	clusterController := controller.NewClusterController(h.k8sClient)
 
+	// _ = os.Getenv("CYCLOPS_AUTHORIZATION")
+
 	h.router = gin.New()
 
 	h.router.GET("/ping", h.pong())

@@ -3,6 +3,7 @@ package controller
 import (
 	"fmt"
 	"net/http"
+	"os"
 	"strconv"
 	"strings"
 
@@ -233,6 +234,9 @@ func (c *Templates) DeleteTemplatesStore(ctx *gin.Context) {
 }
 
 func (c *Templates) checkPermission(ctx *gin.Context, kind, resourceName, action string) bool {
+	if os.Getenv("CYCLOPS_AUTHORIZATION") == "disabled" {
+		return true
+	}
 	resource := cerbosSDK.NewResource(kind, "new").
 		WithAttr("name", resourceName).
 		WithAttr("action", action)
