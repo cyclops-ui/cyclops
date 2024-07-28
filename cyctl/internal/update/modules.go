@@ -54,7 +54,7 @@ func updateModule(clientset *client.CyclopsV1Alpha1Client, moduleName, key strin
 	module.Spec.Values = apiextensionv1.JSON{Raw: updatedSpecValues}
 	updatedModule, err := clientset.Modules("cyclops").Update(module)
 	if err != nil {
-		fmt.Println("failed to update module: ", err)
+		fmt.Println("failed to get value flag --value: ", err)
 	}
 	fmt.Printf("successfully updated %v", updatedModule.Name)
 }
