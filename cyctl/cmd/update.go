@@ -20,7 +20,7 @@ var (
 		Short:   "updates the given module",
 		Long:    "updates the given module",
 		Example: updateExample,
-		Args:    cobra.MinimumNArgs(1),
+		Args:    cobra.ExactArgs(1),
 	}
 )
 
