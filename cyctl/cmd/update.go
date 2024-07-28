@@ -7,10 +7,10 @@ import (
 
 var (
 	updateExample = `# updates the given module 
-cyctl update <module-name> --key=<key> --value=<value> 
+cyctl update module <module-name> --key=<key> --value=<value> 
 
 # to update replicas for a module named test,updates number of replicas to 3
-cyctl update <module-name> test --key="scaling.replicas" --value=3`
+cyctl update module <module-name> test --key="scaling.replicas" --value=3`
 )
 
 var (
@@ -20,7 +20,7 @@ var (
 		Short:   "updates the given module",
 		Long:    "updates the given module",
 		Example: updateExample,
-		Args:    cobra.ExactArgs(1),
+		Args:    cobra.NoArgs,
 	}
 )
 
