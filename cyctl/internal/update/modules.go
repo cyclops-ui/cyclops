@@ -74,7 +74,7 @@ var (
 			if err != nil {
 				fmt.Println("failed to get value of flag key: ", err)
 			}
-			value, err := cmd.Flags().GetInt("value")
+			value, err := cmd.Flags().GetString("value")
 			if err != nil {
 				fmt.Println("failed to get value of flag --value ")
 			}
@@ -86,7 +86,7 @@ var (
 
 func init() {
 	UpdateModule.Flags().StringP("key", "k", "", "the field to update")
-	UpdateModule.Flags().IntP("value", "v", 0, "field value")
+	UpdateModule.Flags().StringP("value", "v", 0, "field value")
 	UpdateModule.MarkFlagRequired("key")
 	UpdateModule.MarkFlagRequired("value")
 }
