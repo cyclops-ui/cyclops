@@ -63,10 +63,10 @@ var (
 	UpdateModule = &cobra.Command{
 
 		Use:     "module",
-		Short:   "updates the module,takes [module-name] as an argument with flags --key and --value",
-		Long:    "updates the module,takes [module-name] as an argument with flags --key and --value",
+		Short:   "updates the module,takes module-name as an argument with flags --key and --value",
+		Long:    "updates the module,takes module-name as an argument with flags --key and --value",
 		Example: updateModuleExample,
-		Args:    cobra.MinimumNArgs(1),
+		Args:    cobra.ExactArgs(1),
 		Run: func(cmd *cobra.Command, args []string) {
 
 			key, err := cmd.Flags().GetString("key")
