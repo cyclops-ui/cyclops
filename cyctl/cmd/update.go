@@ -17,16 +17,14 @@ var (
 	updateCMD = &cobra.Command{
 
 		Use:     "update",
-		Short:   "updates the given module",
-		Long:    "updates the given module",
+		Short:   "updates cyclops resources (currently supports only Modules)",
+		Long:    "updates cyclops resources (currently supports only Modules)",
 		Example: updateExample,
 		Args:    cobra.NoArgs,
 	}
 )
 
 func init() {
-
 	RootCmd.AddCommand(updateCMD)
 	updateCMD.AddCommand(update.UpdateModuleCMD)
-
 }
