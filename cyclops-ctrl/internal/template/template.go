@@ -6,6 +6,7 @@ import (
 	"github.com/cyclops-ui/cyclops/cyclops-ctrl/internal/auth"
 	"github.com/cyclops-ui/cyclops/cyclops-ctrl/internal/models"
 	"github.com/cyclops-ui/cyclops/cyclops-ctrl/internal/models/helm"
+	"github.com/dgraph-io/ristretto"
 )
 
 type Repo struct {
@@ -18,6 +19,7 @@ type templateCache interface {
 	SetTemplate(repo, path, version string, template *models.Template)
 	GetTemplateInitialValues(repo, path, version string) (map[string]interface{}, bool)
 	SetTemplateInitialValues(repo, path, version string, values map[string]interface{})
+	ReturnCache() *ristretto.Cache
 }
 
 func NewRepo(credResolver auth.TemplatesResolver, tc templateCache) *Repo {
@@ -105,4 +107,8 @@ func (r Repo) loadDependenciesInitialValues(metadata *helm.Metadata) (map[string
 	}
 
 	return initialValues, nil
+}
+
+func (r Repo) ReturnCache() *ristretto.Cache {
+	return r.cache.ReturnCache()
 }
