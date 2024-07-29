@@ -11,12 +11,12 @@ import (
 
 type Monitor struct {
 	ModulesDeployed  prometheus.Gauge
-	CacheHits        prometheus.Counter
-	CacheMisses      prometheus.Counter
-	CacheKeysAdded   prometheus.Counter
-	CacheCostAdded   prometheus.Counter
-	CacheKeysEvicted prometheus.Counter
-	CacheCostEvicted prometheus.Counter
+	CacheHits        prometheus.Gauge
+	CacheMisses      prometheus.Gauge
+	CacheKeysAdded   prometheus.Gauge
+	CacheCostAdded   prometheus.Gauge
+	CacheKeysEvicted prometheus.Gauge
+	CacheCostEvicted prometheus.Gauge
 }
 
 func NewMonitor(logger logr.Logger) (Monitor, error) {
@@ -27,32 +27,32 @@ func NewMonitor(logger logr.Logger) (Monitor, error) {
 			Help:      "No of modules Inc or Dec",
 			Namespace: "cyclops",
 		}),
-		CacheHits: prometheus.NewCounter(prometheus.CounterOpts{
+		CacheHits: prometheus.NewGauge(prometheus.GaugeOpts{
 			Name:      "cache_hits",
 			Help:      "No of cache hits",
 			Namespace: "cyclops",
 		}),
-		CacheMisses: prometheus.NewCounter(prometheus.CounterOpts{
+		CacheMisses: prometheus.NewGauge(prometheus.GaugeOpts{
 			Name:      "cache_misses",
 			Help:      "No of cache misses",
 			Namespace: "cyclops",
 		}),
-		CacheKeysAdded: prometheus.NewCounter(prometheus.CounterOpts{
+		CacheKeysAdded: prometheus.NewGauge(prometheus.GaugeOpts{
 			Name:      "cache_keys_added",
 			Help:      "No of cache keys added",
 			Namespace: "cyclops",
 		}),
-		CacheCostAdded: prometheus.NewCounter(prometheus.CounterOpts{
+		CacheCostAdded: prometheus.NewGauge(prometheus.GaugeOpts{
 			Name:      "cache_cost_added",
 			Help:      "No of cache cost added",
 			Namespace: "cyclops",
 		}),
-		CacheKeysEvicted: prometheus.NewCounter(prometheus.CounterOpts{
+		CacheKeysEvicted: prometheus.NewGauge(prometheus.GaugeOpts{
 			Name:      "cache_keys_evicted",
 			Help:      "No of cache keys evicted",
 			Namespace: "cyclops",
 		}),
-		CacheCostEvicted: prometheus.NewCounter(prometheus.CounterOpts{
+		CacheCostEvicted: prometheus.NewGauge(prometheus.GaugeOpts{
 			Name:      "cache_cost_evicted",
 			Help:      "No of cache cost evicted",
 			Namespace: "cyclops",
@@ -91,12 +91,12 @@ func (m *Monitor) DecModule() {
 func (m *Monitor) UpdateCacheMetrics(cache *ristretto.Cache) {
 	cacheMetrics := cache.Metrics
 
-	m.CacheHits.Add(float64(cacheMetrics.Hits()))
-	m.CacheMisses.Add(float64(cacheMetrics.Misses()))
-	m.CacheKeysAdded.Add(float64(cacheMetrics.KeysAdded()))
-	m.CacheCostAdded.Add(float64(cacheMetrics.CostAdded()))
-	m.CacheKeysEvicted.Add(float64(cacheMetrics.KeysEvicted()))
-	m.CacheCostEvicted.Add(float64(cacheMetrics.CostEvicted()))
+	m.CacheHits.Set(float64(cacheMetrics.Hits()))
+	m.CacheMisses.Set(float64(cacheMetrics.Misses()))
+	m.CacheKeysAdded.Set(float64(cacheMetrics.KeysAdded()))
+	m.CacheCostAdded.Set(float64(cacheMetrics.CostAdded()))
+	m.CacheKeysEvicted.Set(float64(cacheMetrics.KeysEvicted()))
+	m.CacheCostEvicted.Set(float64(cacheMetrics.CostEvicted()))
 }
 
 func StartCacheMetricsUpdater(m *Monitor, cache *ristretto.Cache, interval time.Duration, logger logr.Logger) {
