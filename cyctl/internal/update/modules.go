@@ -49,11 +49,13 @@ func updateModule(clientset *client.CyclopsV1Alpha1Client, moduleName, key strin
 	updatedSpecValues, err := json.Marshal(SpecValuesMap)
 	if err != nil {
 		fmt.Println("failed to encode to json: ", err)
+		return
 	}
 	module.Spec.Values = apiextensionv1.JSON{Raw: updatedSpecValues}
 	updatedModule, err := clientset.Modules("cyclops").Update(module)
 	if err != nil {
-		fmt.Println("failed to get value flag --value: ", err)
+		fmt.Println("failed to update module: ", err)
+		return
 	}
 	fmt.Printf("successfully updated %v", updatedModule.Name)
 }
@@ -74,7 +76,7 @@ var (
 			}
 			value, err := cmd.Flags().GetInt("value")
 			if err != nil {
-				fmt.Println("failed to get ")
+				fmt.Println("failed to get value of flag --value ")
 			}
 
 			updateModule(kubeconfig.Moduleset, args[0], key, value)
