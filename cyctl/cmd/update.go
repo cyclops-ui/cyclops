@@ -27,6 +27,6 @@ var (
 func init() {
 
 	RootCmd.AddCommand(updateCMD)
-	updateCMD.AddCommand(update.UpdateModule)
+	updateCMD.AddCommand(update.UpdateModuleCMD)
 
 }
