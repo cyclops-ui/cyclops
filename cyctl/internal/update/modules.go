@@ -86,7 +86,7 @@ var (
 
 func init() {
 	UpdateModule.Flags().StringP("key", "k", "", "the field to update")
-	UpdateModule.Flags().StringP("value", "v", 0, "field value")
+	UpdateModule.Flags().StringP("value", "v", "", "field value")
 	UpdateModule.MarkFlagRequired("key")
 	UpdateModule.MarkFlagRequired("value")
 }
