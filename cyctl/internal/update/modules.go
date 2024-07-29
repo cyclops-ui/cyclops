@@ -19,8 +19,7 @@ cyctl update module test --key="scaling.replicas" --value=3
 )
 
 // updates the given module from cyclops API
-// currently supports updating replica count for a module
-func updateModule(clientset *client.CyclopsV1Alpha1Client, moduleName, key string, value int) {
+func updateModule(clientset *client.CyclopsV1Alpha1Client, moduleName, key string, value interface{}) {
 
 	if key == "" {
 		fmt.Println("Error: key cannot be an empty string")
