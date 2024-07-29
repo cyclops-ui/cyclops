@@ -43,7 +43,7 @@ func updateModule(clientset *client.CyclopsV1Alpha1Client, moduleName, key strin
 		return
 
 	}
-	err = unstructured.SetNestedField(specValuesMap, value, strings.Split(key, "."))
+	err = unstructured.SetNestedField(specValuesMap, value, strings.Split(key, ".")...)
 	if err != nil {
 
 		fmt.Println(err)
@@ -68,7 +68,7 @@ func updateModule(clientset *client.CyclopsV1Alpha1Client, moduleName, key strin
 }
 
 var (
-	UpdateModule = &cobra.Command{
+	UpdateModuleCMD = &cobra.Command{
 
 		Use:     "module",
 		Short:   "updates the module,takes module-name as an argument with flags --key and --value",
@@ -92,8 +92,8 @@ var (
 )
 
 func init() {
-	UpdateModule.Flags().StringP("key", "k", "", "the field to update")
-	UpdateModule.Flags().StringP("value", "v", "", "field value")
-	UpdateModule.MarkFlagRequired("key")
-	UpdateModule.MarkFlagRequired("value")
+	UpdateModuleCMD.Flags().StringP("key", "k", "", "the field to update")
+	UpdateModuleCMD.Flags().StringP("value", "v", "", "field value")
+	UpdateModuleCMD.MarkFlagRequired("key")
+	UpdateModuleCMD.MarkFlagRequired("value")
 }
