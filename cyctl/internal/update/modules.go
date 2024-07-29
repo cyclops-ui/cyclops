@@ -59,7 +59,7 @@ func updateModule(clientset *client.CyclopsV1Alpha1Client, moduleName, key strin
 		APIVersion: "cyclops-ui.com/v1alpha1",
 		Kind:       "Module",
 	}
-	_, err := clientset.Modules("cyclops").Update(module)
+	_, err = clientset.Modules("cyclops").Update(module)
 	if err != nil {
 		fmt.Println("failed to update module: ", err)
 		return
