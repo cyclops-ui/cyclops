@@ -14,12 +14,11 @@ import (
 )
 
 var (
-	templateExample = `
- # List specific template(s) in ps output format
- cyctl get template TEMPLATE_NAME 
- 
- # List all templates available in template store in ps output format
- cyctl get templates`
+	templateExample = `# List specific template(s) in ps output format
+cyctl get template TEMPLATE_NAME 
+
+# List all templates available in template store in ps output format
+cyctl get templates`
 )
 
 // listTemplate retrieves and displays a list of templatestore from the Cyclops API.

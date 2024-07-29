@@ -19,6 +19,7 @@ import (
 	"github.com/cyclops-ui/cyclops/cyclops-ctrl/internal/telemetry"
 	"github.com/cyclops-ui/cyclops/cyclops-ctrl/internal/template"
 	"github.com/cyclops-ui/cyclops/cyclops-ctrl/internal/template/render"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
 type Modules struct {
@@ -182,7 +183,11 @@ func (m *Modules) Manifest(ctx *gin.Context) {
 		return
 	}
 
+
 	manifest, err := m.renderer.HelmTemplate(v1alpha1.Module{
+		ObjectMeta: metav1.ObjectMeta{
+			Name: ctx.Param("name"),
+		},
 		Spec: v1alpha1.ModuleSpec{
 			TemplateRef: v1alpha1.TemplateRef{
 				URL:     request.TemplateRef.URL,
@@ -374,6 +379,10 @@ func (m *Modules) UpdateModule(ctx *gin.Context) {
 	module.SetResourceVersion(curr.GetResourceVersion())
 
 	module.Status.TemplateResolvedVersion = request.Template.ResolvedVersion
+	module.Status.ReconciliationStatus = curr.Status.ReconciliationStatus
+	module.Status.IconURL = curr.Status.IconURL
+	module.Status.ManagedGVRs = curr.Status.ManagedGVRs
+
 	result, err := m.kubernetesClient.UpdateModuleStatus(&module)
 	if err != nil {
 		fmt.Println(err)
@@ -628,7 +637,7 @@ func (m *Modules) DownloadLogs(ctx *gin.Context) {
 	defer tempFile.Close()
 
 	for _, log := range logs {
-		_, err = tempFile.WriteString(log)
+		_, err = tempFile.WriteString(log + "\n")
 		if err != nil {
 			ctx.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to write to file"})
 			return
@@ -650,8 +659,9 @@ func (m *Modules) GetManifest(ctx *gin.Context) {
 	kind := ctx.Query("kind")
 	name := ctx.Query("name")
 	namespace := ctx.Query("namespace")
+	includeManagedFields := ctx.Query("includeManagedFields") == "true"
 
-	manifest, err := m.kubernetesClient.GetManifest(group, version, kind, name, namespace)
+	manifest, err := m.kubernetesClient.GetManifest(group, version, kind, name, namespace, includeManagedFields)
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, gin.H{
 			"error":  "Failed to fetch resource manifest",
@@ -661,6 +671,27 @@ func (m *Modules) GetManifest(ctx *gin.Context) {
 	}
 
 	ctx.String(http.StatusOK, manifest)
+}
+
+func (m *Modules) Restart(ctx *gin.Context) {
+	ctx.Header("Access-Control-Allow-Origin", "*")
+
+	group := ctx.Query("group")
+	version := ctx.Query("version")
+	kind := ctx.Query("kind")
+	name := ctx.Query("name")
+	namespace := ctx.Query("namespace")
+
+	err := m.kubernetesClient.Restart(group, version, kind, name, namespace)
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, gin.H{
+			"error":  "Failed to restart resource",
+			"reason": err.Error(),
+		})
+		return
+	}
+
+	ctx.String(http.StatusOK, "")
 }
 
 func (m *Modules) GetResource(ctx *gin.Context) {

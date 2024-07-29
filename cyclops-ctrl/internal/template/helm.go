@@ -14,7 +14,7 @@ import (
 	"strings"
 
 	json "github.com/json-iterator/go"
-	"gopkg.in/yaml.v2"
+	"gopkg.in/yaml.v3"
 	helmchart "helm.sh/helm/v3/pkg/chart"
 	"helm.sh/helm/v3/pkg/registry"
 
@@ -76,7 +76,7 @@ func (r Repo) LoadHelmChart(repo, chart, version string) (*models.Template, erro
 	return template, nil
 }
 
-func (r Repo) LoadHelmChartInitialValues(repo, chart, version string) (map[interface{}]interface{}, error) {
+func (r Repo) LoadHelmChartInitialValues(repo, chart, version string) (map[string]interface{}, error) {
 	var err error
 	strictVersion := version
 	if !isValidVersion(version) {
@@ -160,7 +160,10 @@ func (r Repo) mapHelmChart(chartName string, files map[string][]byte) (*models.T
 	metadataBytes := []byte{}
 	schemaBytes := []byte{}
 	chartFiles := make([]*helmchart.File, 0)
+
 	templateFiles := make([]*helmchart.File, 0)
+	crdFiles := make([]*helmchart.File, 0)
+
 	dependenciesFromChartsDir := make(map[string]map[string][]byte, 0)
 
 	for name, content := range files {
@@ -178,6 +181,14 @@ func (r Repo) mapHelmChart(chartName string, files map[string][]byte) (*models.T
 
 		if len(parts) > 2 && parts[1] == "templates" && (parts[2] != "Notes.txt" && parts[2] != "NOTES.txt") {
 			templateFiles = append(templateFiles, &helmchart.File{
+				Name: path.Join(parts[1:]...),
+				Data: content,
+			})
+			continue
+		}
+
+		if len(parts) > 2 && parts[1] == "crds" && (parts[2] != "Notes.txt" && parts[2] != "NOTES.txt") {
+			crdFiles = append(crdFiles, &helmchart.File{
 				Name: path.Join(parts[1:]...),
 				Data: content,
 			})
@@ -205,12 +216,14 @@ func (r Repo) mapHelmChart(chartName string, files map[string][]byte) (*models.T
 	// unmarshal values schema only if present
 	if len(schemaBytes) > 0 {
 		if err := json.Unmarshal(schemaBytes, &schema); err != nil {
+			fmt.Println("error on schema bytes", chartName)
 			return &models.Template{}, err
 		}
 	}
 
-	var metadata helmchart.Metadata
+	var metadata *helm.Metadata
 	if err := yaml.Unmarshal(metadataBytes, &metadata); err != nil {
+		fmt.Println("error on meta unm", chartName)
 		return &models.Template{}, err
 	}
 
@@ -235,16 +248,18 @@ func (r Repo) mapHelmChart(chartName string, files map[string][]byte) (*models.T
 	// endregion
 
 	return &models.Template{
-		Name:         chartName,
-		RootField:    mapper.HelmSchemaToFields("", schema, dependencies),
-		Files:        chartFiles,
-		Templates:    templateFiles,
-		Dependencies: dependencies,
-		IconURL:      metadata.Icon,
+		Name:              chartName,
+		RootField:         mapper.HelmSchemaToFields("", schema, schema.Definitions, dependencies),
+		Files:             chartFiles,
+		Templates:         templateFiles,
+		CRDs:              crdFiles,
+		Dependencies:      dependencies,
+		HelmChartMetadata: metadata,
+		IconURL:           metadata.Icon,
 	}, nil
 }
 
-func (r Repo) mapHelmChartInitialValues(files map[string][]byte) (map[interface{}]interface{}, error) {
+func (r Repo) mapHelmChartInitialValues(files map[string][]byte) (map[string]interface{}, error) {
 	metadataBytes := []byte{}
 	valuesBytes := []byte{}
 	dependenciesFromChartsDir := make(map[string]map[string][]byte, 0)
@@ -273,12 +288,12 @@ func (r Repo) mapHelmChartInitialValues(files map[string][]byte) (map[interface{
 		}
 	}
 
-	values := make(map[interface{}]interface{})
+	values := make(map[string]interface{})
 	if err := yaml.Unmarshal(valuesBytes, &values); err != nil {
 		return nil, err
 	}
 
-	var metadata helmchart.Metadata
+	var metadata *helm.Metadata
 	if err := yaml.Unmarshal(metadataBytes, &metadata); err != nil {
 		return nil, err
 	}
@@ -290,7 +305,7 @@ func (r Repo) mapHelmChartInitialValues(files map[string][]byte) (map[interface{
 			return nil, err
 		}
 
-		values[depName] = dep
+		values[depName] = overlayValues(values[depName], dep)
 	}
 
 	dependenciesFromMeta, err := r.loadDependenciesInitialValues(metadata)
@@ -299,11 +314,36 @@ func (r Repo) mapHelmChartInitialValues(files map[string][]byte) (map[interface{
 	}
 
 	for depName, depValues := range dependenciesFromMeta {
-		values[depName] = depValues
+		values[depName] = overlayValues(values[depName], depValues)
 	}
 	// endregion
 
 	return values, nil
+}
+
+func overlayValues(existing interface{}, overlay interface{}) interface{} {
+	existingMap, existingOk := existing.(map[string]interface{})
+	overlayMap, overlayOk := overlay.(map[string]interface{})
+
+	if !existingOk || !overlayOk {
+		return existing
+	}
+
+	for key, overlayValue := range overlayMap {
+		if existingValue, exists := existingMap[key]; exists {
+			switch existingValueTyped := existingValue.(type) {
+			case map[string]interface{}:
+				if overlayValueTyped, ok := overlayValue.(map[string]interface{}); ok {
+					existingMap[key] = overlayValues(existingValueTyped, overlayValueTyped)
+				} else {
+					existingMap[key] = overlayValue
+				}
+			}
+		} else {
+			existingMap[key] = overlayValue
+		}
+	}
+	return existingMap
 }
 
 func getTarUrl(repo, chart, version string) (string, error) {

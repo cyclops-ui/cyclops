@@ -11,12 +11,11 @@ import (
 )
 
 var (
-	describeTemplateExample = ` 
-	# Describe a single template
-	cyctl describe templates template1
- 
-	# Describe multiple templates
-	cyctl describe templates template1 template2 template3`
+	describeTemplateExample = `# Describe a single template
+cyctl describe templates template1
+
+# Describe multiple templates
+cyctl describe templates template1 template2 template3`
 )
 
 // describeTemplate descrbe a specified templatestore from the Cyclops API.

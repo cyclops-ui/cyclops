@@ -11,12 +11,11 @@ import (
 )
 
 var (
-	describeTemplateAuthRuleExample = ` 
-	# Describe a single templateauthrule
-	cyctl describe templateauthrule templateauthrule1
- 
-	# Describe multiple templateauthrule
-	cyctl describe templateauthrule templateauthrule1 templateauthrule2 templateauthrule3`
+	describeTemplateAuthRuleExample = `# Describe a single templateauthrule
+cyctl describe templateauthrule templateauthrule1
+
+# Describe multiple templateauthrule
+cyctl describe templateauthrule templateauthrule1 templateauthrule2 templateauthrule3`
 )
 
 // describeTemplateAuthRules describe a specified templateauthrules from the Cyclops API.

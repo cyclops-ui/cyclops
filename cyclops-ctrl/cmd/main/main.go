@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"os"
 	"strconv"
+	"time"
 
 	_ "github.com/joho/godotenv/autoload"
 	"k8s.io/apimachinery/pkg/runtime"
@@ -91,7 +92,9 @@ func main() {
 
 	renderer := render.NewRenderer(k8sClient)
 
-	handler, err := handler.New(templatesRepo, k8sClient, renderer, cerbosClient, telemetryClient, monitor)
+	prometheus.StartCacheMetricsUpdater(&monitor, templatesRepo.ReturnCache(), 10*time.Second, setupLog)
+
+  handler, err := handler.New(templatesRepo, k8sClient, renderer, cerbosClient, telemetryClient, monitor)
 	if err != nil {
 		panic(err)
 	}

@@ -42,7 +42,7 @@ func (k *KubernetesClient) UpdateModule(module *cyclopsv1alpha1.Module) error {
 }
 
 func (k *KubernetesClient) UpdateModuleStatus(module *cyclopsv1alpha1.Module) (*cyclopsv1alpha1.Module, error) {
-	return k.moduleset.Modules(cyclopsNamespace).UpdateSubresource(module, "status")
+	return k.moduleset.Modules(cyclopsNamespace).PatchStatus(module)
 }
 
 func (k *KubernetesClient) DeleteModule(name string) error {
@@ -56,39 +56,22 @@ func (k *KubernetesClient) GetModule(name string) (*cyclopsv1alpha1.Module, erro
 func (k *KubernetesClient) GetResourcesForModule(name string) ([]dto.Resource, error) {
 	out := make([]dto.Resource, 0, 0)
 
-	apiResources, err := k.clientset.Discovery().ServerPreferredResources()
+	managedGVRs, err := k.getManagedGVRs(name)
 	if err != nil {
 		return nil, err
 	}
 
 	other := make([]unstructured.Unstructured, 0)
-
-	for _, resource := range apiResources {
-		gvk, err := schema.ParseGroupVersion(resource.GroupVersion)
+	for _, gvr := range managedGVRs {
+		rs, err := k.Dynamic.Resource(gvr).List(context.Background(), metav1.ListOptions{
+			LabelSelector: "cyclops.module=" + name,
+		})
 		if err != nil {
 			continue
 		}
 
-		for _, apiResource := range resource.APIResources {
-			if gvk.Group == "discovery.k8s.io" && gvk.Version == "v1" && apiResource.Kind == "EndpointSlice" ||
-				gvk.Group == "" && gvk.Version == "v1" && apiResource.Kind == "Endpoints" {
-				continue
-			}
-
-			rs, err := k.Dynamic.Resource(schema.GroupVersionResource{
-				Group:    gvk.Group,
-				Version:  gvk.Version,
-				Resource: apiResource.Name,
-			}).List(context.Background(), metav1.ListOptions{
-				LabelSelector: "cyclops.module=" + name,
-			})
-			if err != nil {
-				continue
-			}
-
-			for _, item := range rs.Items {
-				other = append(other, item)
-			}
+		for _, item := range rs.Items {
+			other = append(other, item)
 		}
 	}
 
@@ -120,13 +103,58 @@ func (k *KubernetesClient) GetResourcesForModule(name string) ([]dto.Resource, e
 	return out, nil
 }
 
+func (k *KubernetesClient) getManagedGVRs(moduleName string) ([]schema.GroupVersionResource, error) {
+	module, _ := k.GetModule(moduleName)
+
+	if module != nil && len(module.Status.ManagedGVRs) != 0 {
+		existing := make([]schema.GroupVersionResource, 0, len(module.Status.ManagedGVRs))
+		for _, r := range module.Status.ManagedGVRs {
+			existing = append(existing, schema.GroupVersionResource{
+				Group:    r.Group,
+				Version:  r.Version,
+				Resource: r.Resource,
+			})
+		}
+
+		return existing, nil
+	}
+
+	apiResources, err := k.clientset.Discovery().ServerPreferredResources()
+	if err != nil {
+		return nil, err
+	}
+
+	gvrs := make([]schema.GroupVersionResource, 0)
+	for _, resource := range apiResources {
+		gvk, err := schema.ParseGroupVersion(resource.GroupVersion)
+		if err != nil {
+			continue
+		}
+
+		for _, apiResource := range resource.APIResources {
+			if gvk.Group == "discovery.k8s.io" && gvk.Version == "v1" && apiResource.Kind == "EndpointSlice" ||
+				gvk.Group == "" && gvk.Version == "v1" && apiResource.Kind == "Endpoints" {
+				continue
+			}
+
+			gvrs = append(gvrs, schema.GroupVersionResource{
+				Group:    gvk.Group,
+				Version:  gvk.Version,
+				Resource: apiResource.Name,
+			})
+		}
+	}
+
+	return gvrs, nil
+}
+
 func (k *KubernetesClient) GetDeletedResources(
 	resources []dto.Resource,
 	manifest string,
 ) ([]dto.Resource, error) {
 	resourcesFromTemplate := make(map[string][]dto.Resource, 0)
 
-	for _, s := range strings.Split(manifest, "---") {
+	for _, s := range strings.Split(manifest, "\n---\n") {
 		s := strings.TrimSpace(s)
 		if len(s) == 0 {
 			continue
@@ -187,12 +215,59 @@ func (k *KubernetesClient) GetModuleResourcesHealth(name string) (string, error)
 	resourcesWithHealth += len(deployments.Items)
 	for _, item := range deployments.Items {
 		if item.Generation != item.Status.ObservedGeneration ||
-			*item.Spec.Replicas != item.Status.UpdatedReplicas {
+			item.Status.Replicas != item.Status.UpdatedReplicas ||
+			item.Status.UnavailableReplicas != 0 {
 			return statusUnhealthy, nil
 		}
 	}
 
-	pods, err := k.clientset.CoreV1().Pods("default").List(context.Background(), metav1.ListOptions{
+	statefulsets, err := k.clientset.AppsV1().StatefulSets("").List(context.Background(), metav1.ListOptions{
+		LabelSelector: "cyclops.module=" + name,
+	})
+	if err != nil {
+		return statusUndefined, err
+	}
+
+	resourcesWithHealth += len(statefulsets.Items)
+	for _, item := range statefulsets.Items {
+		if item.Generation != item.Status.ObservedGeneration ||
+			item.Status.Replicas != item.Status.UpdatedReplicas ||
+			item.Status.Replicas != item.Status.AvailableReplicas {
+			return statusUnhealthy, nil
+		}
+	}
+
+	daemonsets, err := k.clientset.AppsV1().DaemonSets("").List(context.Background(), metav1.ListOptions{
+		LabelSelector: "cyclops.module=" + name,
+	})
+	if err != nil {
+		return statusUndefined, err
+	}
+
+	resourcesWithHealth += len(daemonsets.Items)
+	for _, item := range daemonsets.Items {
+		if item.Generation != item.Status.ObservedGeneration ||
+			item.Status.UpdatedNumberScheduled != item.Status.DesiredNumberScheduled ||
+			item.Status.NumberUnavailable != 0 {
+			return statusUnhealthy, nil
+		}
+	}
+
+	pvcs, err := k.clientset.CoreV1().PersistentVolumeClaims("").List(context.Background(), metav1.ListOptions{
+		LabelSelector: "cyclops.module=" + name,
+	})
+	if err != nil {
+		return statusUndefined, err
+	}
+
+	resourcesWithHealth += len(pvcs.Items)
+	for _, item := range pvcs.Items {
+		if item.Status.Phase != apiv1.ClaimBound {
+			return statusUnhealthy, nil
+		}
+	}
+
+	pods, err := k.clientset.CoreV1().Pods("").List(context.Background(), metav1.ListOptions{
 		LabelSelector: "cyclops.module=" + name,
 	})
 	if err != nil {
@@ -213,21 +288,6 @@ func (k *KubernetesClient) GetModuleResourcesHealth(name string) (string, error)
 			if !containerStatus(status).Running {
 				return statusUnhealthy, nil
 			}
-		}
-	}
-
-	statefulsets, err := k.clientset.AppsV1().StatefulSets("default").List(context.Background(), metav1.ListOptions{
-		LabelSelector: "cyclops.module=" + name,
-	})
-	if err != nil {
-		return statusUndefined, err
-	}
-
-	resourcesWithHealth += len(statefulsets.Items)
-	for _, item := range statefulsets.Items {
-		if item.Generation != item.Status.ObservedGeneration ||
-			*item.Spec.Replicas != item.Status.UpdatedReplicas {
-			return statusUnhealthy, nil
 		}
 	}
 
@@ -301,6 +361,34 @@ func (k *KubernetesClient) getResourceStatus(o unstructured.Unstructured) (strin
 		if statefulset.Generation == statefulset.Status.ObservedGeneration &&
 			statefulset.Status.Replicas == statefulset.Status.UpdatedReplicas &&
 			statefulset.Status.Replicas == statefulset.Status.AvailableReplicas {
+			return statusHealthy, nil
+		}
+
+		return statusUnhealthy, nil
+	}
+
+	if isDaemonSet(o.GroupVersionKind().Group, o.GroupVersionKind().Version, o.GetKind()) {
+		daemonset, err := k.clientset.AppsV1().DaemonSets(o.GetNamespace()).Get(context.Background(), o.GetName(), metav1.GetOptions{})
+		if err != nil {
+			return statusUndefined, err
+		}
+
+		if daemonset.Generation == daemonset.Status.ObservedGeneration &&
+			daemonset.Status.UpdatedNumberScheduled == daemonset.Status.DesiredNumberScheduled &&
+			daemonset.Status.NumberUnavailable == 0 {
+			return statusHealthy, nil
+		}
+
+		return statusUnhealthy, nil
+	}
+
+	if isPersistentVolumeClaims(o.GroupVersionKind().Group, o.GroupVersionKind().Version, o.GetKind()) {
+		pvc, err := k.clientset.CoreV1().PersistentVolumeClaims(o.GetNamespace()).Get(context.Background(), o.GetName(), metav1.GetOptions{})
+		if err != nil {
+			return statusUndefined, err
+		}
+
+		if pvc.Status.Phase == apiv1.ClaimBound {
 			return statusHealthy, nil
 		}
 
@@ -537,7 +625,6 @@ func (k *KubernetesClient) getPodsForCronJob(cronJob batchv1.CronJob) ([]dto.Pod
 }
 
 func (k *KubernetesClient) getPodsForJob(job batchv1.Job) ([]dto.Pod, error) {
-
 	pods, err := k.clientset.CoreV1().Pods(job.Namespace).List(context.Background(), metav1.ListOptions{
 		LabelSelector: labels.Set(job.Spec.Selector.MatchLabels).String(),
 	})

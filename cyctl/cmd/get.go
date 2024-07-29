@@ -6,15 +6,14 @@ import (
 )
 
 var (
-	getExample = `
-	# List all modules in ps output format
-	cyctl get modules 
- 
-	# List all templates available in template store in ps output format
-	cyctl get templates
- 
-	# List all template auth rules available in ps format
-	cyctl get templateauthrules`
+	getExample = `# List all modules in ps output format
+cyctl get modules 
+
+# List all templates available in template store in ps output format
+cyctl get templates
+
+# List all template auth rules available in ps format
+cyctl get templateauthrules`
 )
 
 var getCMD = &cobra.Command{

@@ -82,6 +82,23 @@ spec:
             status:
               description: ModuleStatus defines the observed state of Module
               properties:
+                iconURL:
+                  type: string
+                managedGVRs:
+                  items:
+                    properties:
+                      group:
+                        type: string
+                      resource:
+                        type: string
+                      version:
+                        type: string
+                    required:
+                      - group
+                      - resource
+                      - version
+                    type: object
+                  type: array
                 reconciliationStatus:
                   properties:
                     errors:
@@ -317,7 +334,7 @@ spec:
     spec:
       containers:
         - name: cyclops-ui
-          image: siddhantprateek/cyclops-ui:v0.7.7-rbac-ds
+          image: cyclopsui/cyclops-ui:v0.8.3
           ports:
             - containerPort: 80
           env:
@@ -382,7 +399,7 @@ spec:
       serviceAccountName: cyclops-ctrl
       containers:
         - name: cyclops-ctrl
-          image: siddhantprateek/cyclops-ctrl:v0.7.5-rbac-ds
+          image: cyclopsui/cyclops-ctrl:v0.8.3
           ports:
             - containerPort: 8080
           env:

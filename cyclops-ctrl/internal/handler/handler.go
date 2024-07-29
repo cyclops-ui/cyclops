@@ -97,6 +97,8 @@ func (h *Handler) Start() error {
 	h.router.GET("/manifest", modulesController.GetManifest)
 	h.router.GET("/resources", modulesController.GetResource)
 
+	h.router.POST("/resources/restart", modulesController.Restart)
+
 	h.router.GET("/nodes", clusterController.ListNodes)
 	h.router.GET("/nodes/:name", clusterController.GetNode)
 

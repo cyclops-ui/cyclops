@@ -2,35 +2,56 @@ package mapper
 
 import (
 	"sort"
+	"strings"
 
 	"github.com/cyclops-ui/cyclops/cyclops-ctrl/internal/models"
 	"github.com/cyclops-ui/cyclops/cyclops-ctrl/internal/models/helm"
 )
 
-func HelmSchemaToFields(name string, schema helm.Property, dependencies []*models.Template) models.Field {
+func HelmSchemaToFields(name string, schema helm.Property, defs map[string]helm.Property, dependencies []*models.Template) models.Field {
 	if schema.Type == "array" {
 		return models.Field{
 			Name:        name,
 			Description: schema.Description,
 			Type:        mapHelmPropertyTypeToFieldType(schema),
-			DisplayName: mapTitle(name, schema),
-			Items:       arrayItem(schema.Items),
+			DisplayName: mapTitle(name, schema.Title),
+			Items:       arrayItem(schema.Items, defs),
 		}
 	}
 
+	uniqueFieldNames := make(map[string]struct{})
 	fields := make([]models.Field, 0, len(schema.Properties))
 	for propertyName, property := range schema.Properties {
-		fields = append(fields, HelmSchemaToFields(propertyName, property, nil))
+		uniqueFieldNames[propertyName] = struct{}{}
+
+		if property.HasRef() {
+			key := strings.TrimPrefix(property.Reference, "#/$defs/")
+
+			fields = append(fields, HelmSchemaToFields(
+				propertyName,
+				resolveJSONSchemaRef(defs, strings.Split(key, "/")),
+				defs,
+				nil,
+			))
+			continue
+		}
+
+		fields = append(fields, HelmSchemaToFields(propertyName, property, defs, nil))
 	}
 
 	fields = sortFields(fields, schema.Order)
 
 	for _, dependency := range dependencies {
+		// if the dependency schema is already present in the root schema, skip using schema from dependency
+		if _, ok := uniqueFieldNames[dependency.Name]; ok {
+			continue
+		}
+
 		fields = append(fields, models.Field{
 			Name:             dependency.Name,
 			Description:      dependency.RootField.Description,
 			Type:             dependency.RootField.Type,
-			DisplayName:      dependency.RootField.DisplayName,
+			DisplayName:      mapTitle(dependency.Name, dependency.RootField.DisplayName),
 			ManifestKey:      dependency.RootField.ManifestKey,
 			Value:            dependency.RootField.Value,
 			Properties:       dependency.RootField.Properties,
@@ -53,7 +74,7 @@ func HelmSchemaToFields(name string, schema helm.Property, dependencies []*model
 		Name:             name,
 		Description:      schema.Description,
 		Type:             mapHelmPropertyTypeToFieldType(schema),
-		DisplayName:      mapTitle(name, schema),
+		DisplayName:      mapTitle(name, schema.Title),
 		ManifestKey:      name,
 		Properties:       fields,
 		Enum:             schema.Enum,
@@ -122,11 +143,19 @@ func mapHelmPropertyTypeToFieldType(property helm.Property) string {
 
 		return "object"
 	default:
-		return property.Type
+		if len(property.Properties) > 0 {
+			return "object"
+		}
+
+		if property.Items != nil {
+			return "array"
+		}
+
+		return string(property.Type)
 	}
 }
 
-func arrayItem(item *helm.Property) *models.Field {
+func arrayItem(item *helm.Property, defs map[string]helm.Property) *models.Field {
 	if item == nil {
 		return nil
 	}
@@ -137,7 +166,7 @@ func arrayItem(item *helm.Property) *models.Field {
 		}
 	}
 
-	field := HelmSchemaToFields("", *item, nil)
+	field := HelmSchemaToFields("", *item, defs, nil)
 	return &field
 }
 
@@ -149,10 +178,27 @@ func arrayRequired(item *helm.Property) []string {
 	return item.Required
 }
 
-func mapTitle(name string, field helm.Property) string {
-	if len(field.Title) != 0 {
-		return field.Title
+func mapTitle(name, displayName string) string {
+	if len(displayName) != 0 {
+		return displayName
 	}
 
 	return name
+}
+
+func resolveJSONSchemaRef(defs map[string]helm.Property, ref []string) helm.Property {
+	if len(ref) == 0 {
+		return helm.Property{}
+	}
+
+	def, ok := defs[ref[0]]
+	if !ok {
+		return helm.Property{}
+	}
+
+	if len(ref) == 1 {
+		return def
+	}
+
+	return resolveJSONSchemaRef(def.Properties, ref[1:])
 }

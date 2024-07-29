@@ -9,12 +9,11 @@ import (
 )
 
 var (
-	deleteTemplateExample = ` 
-	# Delete a single module
-	cyctl delete modules module1
- 
-	# Delete multiple modules
-	cyctl delete modules module1 module2 module3`
+	deleteTemplateExample = `# Delete a single module
+cyctl delete modules module1
+
+# Delete multiple modules
+cyctl delete modules module1 module2 module3`
 )
 
 // DeleteTemplates deletes a specified template from the TemplateStore Custom Resource.

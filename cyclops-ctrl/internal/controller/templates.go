@@ -10,6 +10,7 @@ import (
 
 	cerbosSDK "github.com/cerbos/cerbos-sdk-go/cerbos"
 	"github.com/gin-gonic/gin"
+	json "github.com/json-iterator/go"
 
 	"github.com/cyclops-ui/cyclops/cyclops-ctrl/internal/cerbos"
 	"github.com/cyclops-ui/cyclops/cyclops-ctrl/internal/cluster/k8sclient"
@@ -90,7 +91,14 @@ func (c *Templates) GetTemplateInitialValues(ctx *gin.Context) {
 		return
 	}
 
-	ctx.Data(http.StatusOK, gin.MIMEJSON, initial)
+	data, err := json.Marshal(initial)
+	if err != nil {
+		fmt.Println(err)
+		ctx.JSON(http.StatusBadRequest, dto.NewError("Error loading template initial values", err.Error()))
+		return
+	}
+
+	ctx.Data(http.StatusOK, gin.MIMEJSON, data)
 }
 
 func (c *Templates) ListTemplatesStore(ctx *gin.Context) {
@@ -146,14 +154,14 @@ func (c *Templates) CreateTemplatesStore(ctx *gin.Context) {
 		return
 	}
 
-	_, err := c.templatesRepo.GetTemplate(templateStore.TemplateRef.URL, templateStore.TemplateRef.Path, templateStore.TemplateRef.Version)
+	tmpl, err := c.templatesRepo.GetTemplate(templateStore.TemplateRef.URL, templateStore.TemplateRef.Path, templateStore.TemplateRef.Version)
 	if err != nil {
 		fmt.Println(err)
 		ctx.JSON(http.StatusBadRequest, dto.NewError("Error loading template", err.Error()))
 		return
 	}
 
-	k8sTemplateStore := mapper.DTOToTemplateStore(*templateStore)
+	k8sTemplateStore := mapper.DTOToTemplateStore(*templateStore, tmpl.IconURL)
 
 	if err := c.kubernetesClient.CreateTemplateStore(k8sTemplateStore); err != nil {
 		ctx.JSON(http.StatusInternalServerError, dto.NewError("Error creating module", err.Error()))
@@ -192,7 +200,7 @@ func (c *Templates) EditTemplatesStore(ctx *gin.Context) {
 		return
 	}
 
-	_, err := c.templatesRepo.GetTemplate(templateStore.TemplateRef.URL, templateStore.TemplateRef.Path, templateStore.TemplateRef.Version)
+	tmpl, err := c.templatesRepo.GetTemplate(templateStore.TemplateRef.URL, templateStore.TemplateRef.Path, templateStore.TemplateRef.Version)
 	if err != nil {
 		fmt.Println(err)
 		ctx.JSON(http.StatusBadRequest, dto.NewError("Error loading template", err.Error()))
@@ -201,7 +209,7 @@ func (c *Templates) EditTemplatesStore(ctx *gin.Context) {
 
 	templateStore.Name = ctx.Param("name")
 
-	k8sTemplateStore := mapper.DTOToTemplateStore(*templateStore)
+	k8sTemplateStore := mapper.DTOToTemplateStore(*templateStore, tmpl.IconURL)
 
 	if err := c.kubernetesClient.UpdateTemplateStore(k8sTemplateStore); err != nil {
 		ctx.JSON(http.StatusInternalServerError, dto.NewError("Error creating module", err.Error()))

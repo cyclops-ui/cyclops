@@ -19,6 +19,7 @@ func NewInMemoryTemplatesCache() Templates {
 		NumCounters: 1e7,     // number of keys to track frequency of (10M).
 		MaxCost:     1 << 30, // maximum cost of cache (1GB).
 		BufferItems: 64,      // number of keys per Get buffer.
+		Metrics:     true,
 	})
 	if err != nil {
 		panic(err)
@@ -58,13 +59,13 @@ func (t Templates) SetTemplate(repo, path, version string, template *models.Temp
 	t.cache.Wait()
 }
 
-func (t Templates) GetTemplateInitialValues(repo, path, version string) (map[interface{}]interface{}, bool) {
+func (t Templates) GetTemplateInitialValues(repo, path, version string) (map[string]interface{}, bool) {
 	data, found := t.cache.Get(initialValuesKey(repo, path, version))
 	if !found {
 		return nil, false
 	}
 
-	values, ok := data.(map[interface{}]interface{})
+	values, ok := data.(map[string]interface{})
 	if !ok {
 		return nil, false
 	}
@@ -72,7 +73,7 @@ func (t Templates) GetTemplateInitialValues(repo, path, version string) (map[int
 	return values, ok
 }
 
-func (t Templates) SetTemplateInitialValues(repo, path, version string, values map[interface{}]interface{}) {
+func (t Templates) SetTemplateInitialValues(repo, path, version string, values map[string]interface{}) {
 	data, err := json.Marshal(values)
 	if err != nil {
 		return
@@ -80,6 +81,10 @@ func (t Templates) SetTemplateInitialValues(repo, path, version string, values m
 
 	t.cache.SetWithTTL(initialValuesKey(repo, path, version), values, int64(len(data)), time.Minute*15)
 	t.cache.Wait()
+}
+
+func (t Templates) ReturnCache() *ristretto.Cache {
+	return t.cache
 }
 
 func templateKey(repo, path, version string) string {

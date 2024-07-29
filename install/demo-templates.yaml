@@ -1,7 +1,10 @@
+---
 apiVersion: cyclops-ui.com/v1alpha1
 kind: TemplateStore
 metadata:
-  name: demo-template
+  annotations:
+    cyclops-ui.com/icon: https://github.com/cyclops-ui/cyclops/blob/main/cyclops-ui/src/static/img/default-template-icon.png?raw=true
+  name: demo
   namespace: cyclops
 spec:
   path: demo
@@ -11,19 +14,119 @@ spec:
 apiVersion: cyclops-ui.com/v1alpha1
 kind: TemplateStore
 metadata:
-  name: demo-template-extended
+  annotations:
+    cyclops-ui.com/icon: https://github.com/cyclops-ui/cyclops/blob/main/cyclops-ui/src/static/img/default-template-icon.png?raw=true
+  name: app-template
   namespace: cyclops
 spec:
-  path: demo-extended
+  path: app-template
   repo: https://github.com/cyclops-ui/templates
   version: main
 ---
 apiVersion: cyclops-ui.com/v1alpha1
 kind: TemplateStore
 metadata:
-  name: redis-demo
+  annotations:
+    cyclops-ui.com/icon: https://bitnami.com/assets/stacks/jenkins/img/jenkins-stack-220x234.png
+  name: jenkins
   namespace: cyclops
 spec:
-  path: redis
+  path: bitnami/jenkins
+  repo: https://github.com/bitnami/charts
+  version: main
+---
+apiVersion: cyclops-ui.com/v1alpha1
+kind: TemplateStore
+metadata:
+  annotations:
+    cyclops-ui.com/icon: https://bitnami.com/assets/stacks/mariadb/img/mariadb-stack-220x234.png
+  name: mariadb
+  namespace: cyclops
+spec:
+  path: bitnami/mariadb
+  repo: https://github.com/bitnami/charts
+  version: main
+---
+apiVersion: cyclops-ui.com/v1alpha1
+kind: TemplateStore
+metadata:
+  annotations:
+    cyclops-ui.com/icon: https://www.metabase.com/images/logo.svg
+  name: metabase
+  namespace: cyclops
+spec:
+  path: metabase
   repo: https://github.com/cyclops-ui/templates
+  version: main
+---
+apiVersion: cyclops-ui.com/v1alpha1
+kind: TemplateStore
+metadata:
+  annotations:
+    cyclops-ui.com/icon: https://bitnami.com/assets/stacks/mysql/img/mysql-stack-220x234.png
+  name: mysql
+  namespace: cyclops
+spec:
+  path: bitnami/mysql
+  repo: https://github.com/bitnami/charts
+  version: main
+---
+apiVersion: cyclops-ui.com/v1alpha1
+kind: TemplateStore
+metadata:
+  annotations:
+    cyclops-ui.com/icon: https://bitnami.com/assets/stacks/postgresql/img/postgresql-stack-220x234.png
+  name: postgresql
+  namespace: cyclops
+spec:
+  path: bitnami/postgresql
+  repo: https://github.com/bitnami/charts
+  version: main
+---
+apiVersion: cyclops-ui.com/v1alpha1
+kind: TemplateStore
+metadata:
+  annotations:
+    cyclops-ui.com/icon: https://bitnami.com/assets/stacks/prometheus/img/prometheus-stack-220x234.png
+  name: prometheus
+  namespace: cyclops
+spec:
+  path: bitnami/prometheus
+  repo: https://github.com/bitnami/charts
+  version: main
+---
+apiVersion: cyclops-ui.com/v1alpha1
+kind: TemplateStore
+metadata:
+  annotations:
+    cyclops-ui.com/icon: https://bitnami.com/assets/stacks/rabbitmq/img/rabbitmq-stack-220x234.png
+  name: rabbitmq
+  namespace: cyclops
+spec:
+  path: bitnami/rabbitmq
+  repo: https://github.com/bitnami/charts
+  version: main
+---
+apiVersion: cyclops-ui.com/v1alpha1
+kind: TemplateStore
+metadata:
+  annotations:
+    cyclops-ui.com/icon: https://bitnami.com/assets/stacks/redis/img/redis-stack-220x234.png
+  name: redis
+  namespace: cyclops
+spec:
+  path: bitnami/redis
+  repo: https://github.com/bitnami/charts
+  version: main
+---
+apiVersion: cyclops-ui.com/v1alpha1
+kind: TemplateStore
+metadata:
+  annotations:
+    cyclops-ui.com/icon: https://download.cerbos.dev/helm-charts/cerbie.png
+  name: cerbos
+  namespace: cyclops
+spec:
+  path: deploy/charts/cerbos
+  repo: https://github.com/cerbos/cerbos
   version: main

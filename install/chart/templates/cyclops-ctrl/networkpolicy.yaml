@@ -1,0 +1,24 @@
+{{- if (.Values.global).enableNetworkPolicies -}}
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: cyclops-ctrl
+  namespace: cyclops
+spec:
+  podSelector:
+    matchLabels:
+      app: cyclops-ctrl
+  ingress:
+    - from:
+        - podSelector:
+            matchLabels:
+              app: cyclops-ui
+      ports:
+        - protocol: TCP
+          port: 8080
+  egress:
+    - {}
+  policyTypes:
+    - Ingress
+    - Egress
+{{- end }}

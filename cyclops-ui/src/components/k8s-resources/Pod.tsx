@@ -63,32 +63,32 @@ const Pod = ({ name, namespace }: Props) => {
   });
   const [logs, setLogs] = useState("");
 
-  function fetchPod() {
-    axios
-      .get(`/api/resources`, {
-        params: {
-          group: ``,
-          version: `v1`,
-          kind: `Pod`,
-          name: name,
-          namespace: namespace,
-        },
-      })
-      .then((res) => {
-        setPod(res.data);
-      })
-      .catch((error) => {
-        setError(mapResponseError(error));
-      });
-  }
-
   useEffect(() => {
+    function fetchPod() {
+      axios
+        .get(`/api/resources`, {
+          params: {
+            group: ``,
+            version: `v1`,
+            kind: `Pod`,
+            name: name,
+            namespace: namespace,
+          },
+        })
+        .then((res) => {
+          setPod(res.data);
+        })
+        .catch((error) => {
+          setError(mapResponseError(error));
+        });
+    }
+
     fetchPod();
     const interval = setInterval(() => fetchPod(), 15000);
     return () => {
       clearInterval(interval);
     };
-  }, []);
+  }, [name, namespace]);
 
   const handleCancelLogs = () => {
     setLogsModal({

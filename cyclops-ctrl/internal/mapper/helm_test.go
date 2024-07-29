@@ -91,7 +91,21 @@ var _ = Describe("Helm mapper test", func() {
 					Type:       "what",
 					Properties: map[string]helm.Property{"nested": {Type: "string"}},
 				},
-				out: "what",
+				out: "object",
+			},
+			{
+				in: helm.Property{
+					Type:       "",
+					Properties: map[string]helm.Property{"nested": {Type: "string"}},
+				},
+				out: "object",
+			},
+			{
+				in: helm.Property{
+					Type:  "",
+					Items: &helm.Property{Type: "string"},
+				},
+				out: "array",
 			},
 		}
 
@@ -109,7 +123,7 @@ var _ = Describe("Helm mapper test", func() {
 			name := "fieldName"
 			property := helm.Property{Title: "title"}
 
-			out := mapTitle(name, property)
+			out := mapTitle(name, property.Title)
 
 			It("return title override", func() {
 				Expect(out).To(BeEquivalentTo(property.Title))
@@ -120,7 +134,7 @@ var _ = Describe("Helm mapper test", func() {
 			name := "fieldName"
 			property := helm.Property{}
 
-			out := mapTitle(name, property)
+			out := mapTitle(name, property.Title)
 
 			It("return title override", func() {
 				Expect(out).To(BeEquivalentTo(name))

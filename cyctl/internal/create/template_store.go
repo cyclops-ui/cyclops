@@ -11,12 +11,11 @@ import (
 )
 
 var (
-	createTemplateExample = ` 
- # Create template
- cyctl create template NAME --repo='github.com/repo/a' --path='/path/to/charts'
- 
- # Create template sample command
- cyctl create template NAME --repo='https://github.com/cyclops-ui/templates' --path='/path' --version='main'`
+	createTemplateExample = `# Create template
+cyctl create template NAME --repo='github.com/repo/a' --path='/path/to/charts'
+
+# Create template sample command
+cyctl create template NAME --repo='https://github.com/cyclops-ui/templates' --path='/path' --version='main'`
 )
 
 var (
