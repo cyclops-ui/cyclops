@@ -1247,7 +1247,10 @@ const EditModule = () => {
                 name={"path"}
                 style={{ width: "20%", marginRight: "0" }}
               >
-                <Input placeholder={"Path"} disabled={templateRefLock} />
+                <Input
+                  placeholder={"Path"}
+                  disabled={templateRefLock || !loadTemplate}
+                />
               </Form.Item>
               <div
                 style={{
