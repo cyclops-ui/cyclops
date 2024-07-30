@@ -334,6 +334,69 @@ func (p *PersistentVolumeClaim) SetDeleted(deleted bool) {
 	p.Deleted = deleted
 }
 
+type PersistentVolume struct {
+	Group                 string                           `json:"group"`
+	Version               string                           `json:"version"`
+	Kind                  string                           `json:"kind"`
+	Name                  string                           `json:"name"`
+	Namespace             string                           `json:"namespace"`
+	AccessModes           []v1.PersistentVolumeAccessMode  `json:"accessmodes"`
+	Capacity              string                           `json:"capacity"`
+	PersistentVolumeClaim string                           `json:"persistentvolumeclaim"`
+	StorageClass          string                           `json:"storageclass"`
+	Status                v1.PersistentVolumeStatus        `json:"status"`
+	ReclaimPolicy         v1.PersistentVolumeReclaimPolicy `json:"reclaimpolicy"`
+	Deleted               bool                             `json:"deleted"`
+}
+
+func (p *PersistentVolume) GetGroupVersionKind() string {
+	return p.Group + "/" + p.Version + ", Kind=" + p.Kind
+}
+
+func (p *PersistentVolume) GetGroup() string {
+	return p.Group
+}
+
+func (p *PersistentVolume) GetVersion() string {
+	return p.Version
+}
+
+func (p *PersistentVolume) GetKind() string {
+	return p.Kind
+}
+
+func (p *PersistentVolume) GetName() string {
+	return p.Name
+}
+
+func (p *PersistentVolume) GetNamespace() string {
+	return p.Namespace
+}
+
+func (p *PersistentVolume) GetDeleted() bool {
+	return p.Deleted
+}
+
+func (p *PersistentVolume) GetCapacity() string {
+	return p.Capacity
+}
+
+func (p *PersistentVolume) GetPersistentVolumeClaim() string {
+	return p.PersistentVolumeClaim
+}
+
+func (p *PersistentVolume) GetStorageClass() string {
+	return p.StorageClass
+}
+
+func (p *PersistentVolume) GetStatus() v1.PersistentVolumeStatus {
+	return p.Status
+}
+
+func (p *PersistentVolume) SetDeleted(deleted bool) {
+	p.Deleted = deleted
+}
+
 type Secret struct {
 	Group     string   `json:"group"`
 	Version   string   `json:"version"`

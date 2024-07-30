@@ -347,6 +347,8 @@ func (k *KubernetesClient) GetResource(group, version, kind, name, namespace str
 		return k.mapPod(group, version, kind, name, namespace)
 	case isConfigMap(group, version, kind):
 		return k.mapConfigMap(group, version, kind, name, namespace)
+	case isPersistentVolume(group, version, kind):
+		return k.mapPersistentVolumes(group, version, kind, name, namespace)
 	case isPersistentVolumeClaims(group, version, kind):
 		return k.mapPersistentVolumeClaims(group, version, kind, name, namespace)
 	case isSecret(group, version, kind):
@@ -772,6 +774,37 @@ func (k *KubernetesClient) mapPersistentVolumeClaims(group, version, kind, name,
 	}, nil
 }
 
+func (k *KubernetesClient) mapPersistentVolumes(group, version, kind, name, namespace string) (*dto.PersistentVolume, error) {
+	persistentVolume, err := k.clientset.CoreV1().PersistentVolumes().Get(context.Background(), name, metav1.GetOptions{})
+	if err != nil {
+		return nil, err
+	}
+
+	capacity := ""
+	if persistentVolume.Spec.Capacity != nil && persistentVolume.Spec.Capacity.Storage() != nil {
+		capacity = persistentVolume.Spec.Capacity.Storage().String()
+	}
+
+	claimRef := ""
+	if persistentVolume.Spec.ClaimRef != nil && persistentVolume.Spec.ClaimRef.Name != "" {
+		claimRef = persistentVolume.Spec.ClaimRef.Name
+	}
+
+	return &dto.PersistentVolume{
+		Group:                 group,
+		Version:               version,
+		Kind:                  kind,
+		Name:                  name,
+		Namespace:             namespace,
+		AccessModes:           persistentVolume.Spec.AccessModes,
+		PersistentVolumeClaim: claimRef,
+		Capacity:              capacity,
+		ReclaimPolicy:         persistentVolume.Spec.PersistentVolumeReclaimPolicy,
+		StorageClass:          persistentVolume.Spec.StorageClassName,
+		Status:                persistentVolume.Status,
+	}, nil
+}
+
 func (k *KubernetesClient) mapSecret(group, version, kind, name, namespace string) (*dto.Secret, error) {
 	secret, err := k.clientset.CoreV1().Secrets(namespace).Get(context.Background(), name, metav1.GetOptions{})
 	if err != nil {
@@ -907,6 +940,10 @@ func isConfigMap(group, version, kind string) bool {
 
 func isPersistentVolumeClaims(group, version, kind string) bool {
 	return group == "" && version == "v1" && kind == "PersistentVolumeClaim"
+}
+
+func isPersistentVolume(group, version, kind string) bool {
+	return group == "" && version == "v1" && kind == "PersistentVolume"
 }
 
 func isSecret(group, version, kind string) bool {
