@@ -34,6 +34,15 @@ interface DataSourceType {
   memory: string;
 }
 
+interface NodeCondition {
+  type: string;
+  status: string;
+  lastHeartbeatTime: string;
+  lastTransitionTime: string;
+  reason: string;
+  message: string;
+}
+
 type DataIndex = keyof DataSourceType;
 
 const NodeDetails = () => {
@@ -47,7 +56,7 @@ const NodeDetails = () => {
         creationTimestamp: new Date().toISOString(),
       },
       status: {
-        conditions: [],
+        conditions: [] as NodeCondition[],
       },
     },
     available: {
@@ -60,6 +69,7 @@ const NodeDetails = () => {
       memory: 0,
       pod_count: 0,
     },
+
   });
 
   const [resources, setResources] = useState({
@@ -487,154 +497,70 @@ const NodeDetails = () => {
         >
           Conditions
         </Divider>
-        <Col
-          span={6}
-          style={{
-            display: "flex",
-            justifyContent: "center",
-            alignItems: "center",
-          }}
-        >
-          <Card
-            style={{
-              borderRadius: "10px",
-              borderWidth: "5px",
-              backgroundColor: "#fff",
-              width: "100%",
-              margin: "5px",
-              textAlign: "center",
-              color: "black",
-            }}
-          >
-            <Progress
-              type="circle"
-              percent={100}
-              status={
-                conditionColor("MemoryPressure") === gaugeColors["100%"]
-                  ? "success"
-                  : "exception"
-              }
-              trailColor={conditionColor("MemoryPressure")}
-              strokeWidth={15}
-            />
-            <br />
-            <br />
-            <h3>
-              <strong>MemoryPressure</strong>
-            </h3>
-          </Card>
-        </Col>
-        <Col
-          span={6}
-          style={{
-            display: "flex",
-            justifyContent: "center",
-            alignItems: "center",
-          }}
-        >
-          <Card
-            style={{
-              borderRadius: "10px",
-              borderWidth: "5px",
-              backgroundColor: "#fff",
-              width: "100%",
-              margin: "5px",
-              textAlign: "center",
-              color: "black",
-            }}
-          >
-            <Progress
-              type="circle"
-              percent={100}
-              status={
-                conditionColor("DiskPressure") === gaugeColors["100%"]
-                  ? "success"
-                  : "exception"
-              }
-              trailColor={conditionColor("DiskPressure")}
-              strokeWidth={15}
-            />
-            <br />
-            <br />
-            <h3>
-              <strong>DiskPressure</strong>
-            </h3>
-          </Card>
-        </Col>
-        <Col
-          span={6}
-          style={{
-            display: "flex",
-            justifyContent: "center",
-            alignItems: "center",
-          }}
-        >
-          <Card
-            style={{
-              borderRadius: "10px",
-              borderWidth: "5px",
-              backgroundColor: "#fff",
-              width: "100%",
-              margin: "5px",
-              textAlign: "center",
-              color: "black",
-            }}
-          >
-            <Progress
-              type="circle"
-              percent={100}
-              status={
-                conditionColor("PIDPressure") === gaugeColors["100%"]
-                  ? "success"
-                  : "exception"
-              }
-              trailColor={conditionColor("PIDPressure")}
-              strokeWidth={15}
-            />
-            <br />
-            <br />
-            <h3>
-              <strong>PIDPressure</strong>
-            </h3>
-          </Card>
-        </Col>
-        <Col
-          span={6}
-          style={{
-            display: "flex",
-            justifyContent: "center",
-            alignItems: "center",
-          }}
-        >
-          <Card
-            style={{
-              borderRadius: "10px",
-              borderWidth: "5px",
-              backgroundColor: "#fff",
-              width: "100%",
-              margin: "5px",
-              textAlign: "center",
-              color: "black",
-            }}
-          >
-            <Progress
-              type="circle"
-              percent={100}
-              status={
-                conditionColor("Ready") === gaugeColors["100%"]
-                  ? "success"
-                  : "exception"
-              }
-              trailColor={conditionColor("Ready")}
-              strokeWidth={15}
-            />
-            <br />
-            <br />
-            <h3>
-              <strong>Ready</strong>
-            </h3>
-          </Card>
-        </Col>
+        {
+            node.node.status.conditions.map(condition => (
+            <Col
+              key={condition.type}
+              span={6}
+              style={{
+                display: "flex",
+                justifyContent: "center",
+                alignItems: "center",
+              }}
+            >
+              <Card
+                style={{
+                  borderRadius: "10px",
+                  borderWidth: "5px",
+                  backgroundColor: "#fff",
+                  width: "100%",
+                  margin: "5px",
+                  textAlign: "center",
+                  color: "black",
+                }}
+              >
+                <Progress
+                  type="circle"
+                  percent={100}
+                  status={
+                    conditionColor(condition.type) === gaugeColors["100%"]
+                      ? "success"
+                      : "exception"
+                  }
+                  trailColor={conditionColor(condition.type)}
+                  strokeWidth={15}
+                />
+                <br />
+                <br />
+                <h3>
+                  <strong>{condition.type}</strong>
+                </h3>
+
+
+                <Text strong>Last Transition Time: </Text>
+                <br />
+                <Text code>
+                  {new Date(
+                    condition.lastTransitionTime.toString()).toLocaleString()
+                  }
+                </Text>
+                <br />
+                <Text strong>Last HeartBeat Time: </Text>
+                <br />
+                <Text code>
+                  {new Date(
+                    condition.lastHeartbeatTime.toString())
+                    .toLocaleString()
+                  }
+                </Text>
+                <br />
+                <Text strong>Message:</Text>
+                <br />
+                <Text>{condition.message}</Text>
+              </Card>
+            </Col>
+          ))
+        }
       </Row>
       <Divider
         style={{ fontSize: "120%" }}
