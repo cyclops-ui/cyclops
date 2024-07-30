@@ -90,6 +90,7 @@ const EditModule = () => {
   const [values, setValues] = useState({});
   const [isChanged, setIsChanged] = useState(false);
   const [isTemplateChanged, setIsTemplateChanged] = useState(false);
+  const [isTemplateLoading, setIsTemplateLoading] = useState(false);
   const [config, setConfig] = useState<Template>({
     name: "",
     resolvedVersion: "",
@@ -308,6 +309,7 @@ const EditModule = () => {
   };
 
   async function handleSubmitTemplateEdit(templateEditValues: any) {
+    setIsTemplateLoading(true);
     setLoadTemplate(false);
 
     let currentValues = form.getFieldsValue();
@@ -378,6 +380,7 @@ const EditModule = () => {
     setInitialValuesRaw(initialValuesResult.initialValues);
     form.setFieldsValue(mergedValuesMapped);
 
+    setIsTemplateLoading(false);
     setLoadTemplate(true);
   }
 
@@ -1077,7 +1080,7 @@ const EditModule = () => {
   }
 
   const formLoading = () => {
-    if (loadTemplate === false || loadValues === false) {
+    if (loadTemplate === false || loadValues === false || isTemplateLoading) {
       return (
         <Spin tip="Loading" size="large" style={{ alignContent: "center" }} />
       );
@@ -1099,13 +1102,14 @@ const EditModule = () => {
             type="primary"
             htmlType="submit"
             name="Save"
-            disabled={!isChanged && !isTemplateChanged}
+            disabled={(!isChanged && !isTemplateChanged) || isTemplateLoading}
           >
             Save
           </Button>{" "}
           <Button
             htmlType="button"
             onClick={() => history("/modules/" + moduleName)}
+            disabled={isTemplateLoading}
           >
             Back
           </Button>
@@ -1227,7 +1231,10 @@ const EditModule = () => {
                 name={"repo"}
                 style={{ width: "40%", marginRight: "0" }}
               >
-                <Input placeholder={"Repository"} disabled={templateRefLock} />
+                <Input
+                  placeholder={"Repository"}
+                  disabled={templateRefLock || isTemplateLoading}
+                />
               </Form.Item>
               <div
                 style={{
@@ -1262,7 +1269,7 @@ const EditModule = () => {
                 <Input
                   placeholder={"Version"}
                   addonAfter={linkToTemplate(templateRef)}
-                  disabled={templateRefLock}
+                  disabled={templateRefLock || isTemplateLoading}
                 />
               </Form.Item>
               <Form.Item style={{ paddingLeft: "10px", width: "5%" }}>
@@ -1270,7 +1277,7 @@ const EditModule = () => {
                   type="primary"
                   htmlType="submit"
                   loading={!loadTemplate}
-                  disabled={templateRefLock}
+                  disabled={templateRefLock || isTemplateLoading}
                 >
                   Load
                 </Button>
