@@ -1,4 +1,4 @@
-module github.com/cyclops-ui/cycops-cyctl
+module github.com/cyclops-ui/cyclops-cyctl
 
 go 1.22.0
 
