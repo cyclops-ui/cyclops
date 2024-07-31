@@ -1,0 +1,32 @@
+---
+apiVersion: api.cerbos.dev/v1
+resourcePolicy:
+  version: default
+  importDerivedRoles:
+    - common_roles
+  resource: templatestore
+  rules:
+    - actions: ["*"]
+      effect: EFFECT_ALLOW
+      roles:
+        - admin
+
+    - actions: ["view", "update", "list"]
+      effect: EFFECT_ALLOW
+      roles:
+        - user
+
+    - actions: ["view", "list"]
+      effect: EFFECT_ALLOW
+      roles:
+        - readonly
+
+    - actions: ["list", "view", "create", "delete"]
+      effect: EFFECT_ALLOW
+      roles:
+        - creator
+
+    - actions: ["list", "view", "edit"]
+      effect: EFFECT_ALLOW
+      roles:
+        - editor

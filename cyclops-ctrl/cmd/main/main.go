@@ -17,6 +17,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/log/zap"
 
 	"github.com/cyclops-ui/cyclops/cyclops-ctrl/internal/auth"
+	"github.com/cyclops-ui/cyclops/cyclops-ctrl/internal/cerbos"
 	"github.com/cyclops-ui/cyclops/cyclops-ctrl/internal/cluster/k8sclient"
 	"github.com/cyclops-ui/cyclops/cyclops-ctrl/internal/handler"
 	"github.com/cyclops-ui/cyclops/cyclops-ctrl/internal/modulecontroller"
@@ -74,6 +75,16 @@ func main() {
 		cache.NewInMemoryTemplatesCache(),
 	)
 
+	var cerbosAddr string
+	flag.StringVar(&cerbosAddr, "cerbos", os.Getenv("CERBOS_URL"), "Address of the Cerbos server")
+	flag.Parse()
+
+	cerbosClient, err := cerbos.New(cerbosAddr)
+	if err != nil {
+		setupLog.Info("unable to connect to cerbos server")
+	}
+	setupLog.Info("connected to cerbos server")
+
 	monitor, err := prometheus.NewMonitor(setupLog)
 	if err != nil {
 		setupLog.Error(err, "failed to set up prom monitor")
@@ -83,7 +94,7 @@ func main() {
 
 	prometheus.StartCacheMetricsUpdater(&monitor, templatesRepo.ReturnCache(), 10*time.Second, setupLog)
 
-	handler, err := handler.New(templatesRepo, k8sClient, renderer, telemetryClient, monitor)
+  handler, err := handler.New(templatesRepo, k8sClient, renderer, cerbosClient, telemetryClient, monitor)
 	if err != nil {
 		panic(err)
 	}

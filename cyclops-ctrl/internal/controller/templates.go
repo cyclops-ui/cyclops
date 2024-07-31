@@ -2,13 +2,17 @@ package controller
 
 import (
 	"fmt"
+	"log"
 	"net/http"
+	"os"
 	"strconv"
 	"strings"
 
+	cerbosSDK "github.com/cerbos/cerbos-sdk-go/cerbos"
 	"github.com/gin-gonic/gin"
 	json "github.com/json-iterator/go"
 
+	"github.com/cyclops-ui/cyclops/cyclops-ctrl/internal/cerbos"
 	"github.com/cyclops-ui/cyclops/cyclops-ctrl/internal/cluster/k8sclient"
 	"github.com/cyclops-ui/cyclops/cyclops-ctrl/internal/mapper"
 	"github.com/cyclops-ui/cyclops/cyclops-ctrl/internal/models/dto"
@@ -18,15 +22,18 @@ import (
 type Templates struct {
 	templatesRepo    *template.Repo
 	kubernetesClient *k8sclient.KubernetesClient
+	cerbos           *cerbos.CerbosSvc
 }
 
 func NewTemplatesController(
 	templatesRepo *template.Repo,
 	kubernetes *k8sclient.KubernetesClient,
+	cerbosSvc *cerbos.CerbosSvc,
 ) *Templates {
 	return &Templates{
 		templatesRepo:    templatesRepo,
 		kubernetesClient: kubernetes,
+		cerbos:           cerbosSvc,
 	}
 }
 
@@ -97,6 +104,16 @@ func (c *Templates) GetTemplateInitialValues(ctx *gin.Context) {
 func (c *Templates) ListTemplatesStore(ctx *gin.Context) {
 	ctx.Header("Access-Control-Allow-Origin", "*")
 
+	allowed := c.checkPermission(ctx, Resource.templatestore, "*", Action.list)
+	if !allowed {
+		errorMessage := fmt.Sprintf(
+			"User does not have permission to perform '%s' action on %s",
+			Action.list, Resource.templatestore,
+		)
+		ctx.JSON(http.StatusForbidden, dto.NewError("Permission Denied", errorMessage))
+		return
+	}
+
 	store, err := c.kubernetesClient.ListTemplateStore()
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, dto.NewError("Error fetching templates store", err.Error()))
@@ -110,6 +127,16 @@ func (c *Templates) ListTemplatesStore(ctx *gin.Context) {
 
 func (c *Templates) CreateTemplatesStore(ctx *gin.Context) {
 	ctx.Header("Access-Control-Allow-Origin", "*")
+
+	allowed := c.checkPermission(ctx, Resource.templatestore, "", Action.create)
+	if !allowed {
+		errorMessage := fmt.Sprintf(
+			"User does not have permission to perform '%s' action on %s",
+			Action.create, Resource.templatestore,
+		)
+		ctx.JSON(http.StatusForbidden, dto.NewError("Permission Denied", errorMessage))
+		return
+	}
 
 	var templateStore *dto.TemplateStore
 	if err := ctx.ShouldBind(&templateStore); err != nil {
@@ -146,6 +173,16 @@ func (c *Templates) CreateTemplatesStore(ctx *gin.Context) {
 
 func (c *Templates) EditTemplatesStore(ctx *gin.Context) {
 	ctx.Header("Access-Control-Allow-Origin", "*")
+
+	allowed := c.checkPermission(ctx, Resource.templatestore, ctx.Param("name"), Action.edit)
+	if !allowed {
+		errorMessage := fmt.Sprintf(
+			"User does not have permission to perform '%s' action on %s",
+			Action.edit, Resource.templatestore,
+		)
+		ctx.JSON(http.StatusForbidden, dto.NewError("Permission Denied", errorMessage))
+		return
+	}
 
 	var templateStore *dto.TemplateStore
 	if err := ctx.ShouldBind(&templateStore); err != nil {
@@ -185,6 +222,16 @@ func (c *Templates) EditTemplatesStore(ctx *gin.Context) {
 func (c *Templates) DeleteTemplatesStore(ctx *gin.Context) {
 	ctx.Header("Access-Control-Allow-Origin", "*")
 
+	allowed := c.checkPermission(ctx, Resource.templatestore, ctx.Param("name"), Action.delete)
+	if !allowed {
+		errorMessage := fmt.Sprintf(
+			"User does not have permission to perform '%s' action on %s",
+			Action.delete, Resource.templatestore,
+		)
+		ctx.JSON(http.StatusForbidden, dto.NewError("Permission Denied", errorMessage))
+		return
+	}
+
 	templateRefName := ctx.Param("name")
 
 	if err := c.kubernetesClient.DeleteTemplateStore(templateRefName); err != nil {
@@ -193,4 +240,20 @@ func (c *Templates) DeleteTemplatesStore(ctx *gin.Context) {
 	}
 
 	ctx.Status(http.StatusOK)
+}
+
+func (c *Templates) checkPermission(ctx *gin.Context, kind, resourceName, action string) bool {
+	if os.Getenv("CYCLOPS_AUTHORIZATION") == "disabled" {
+		return true
+	}
+	resource := cerbosSDK.NewResource(kind, "new").
+		WithAttr("name", resourceName).
+		WithAttr("action", action)
+
+	allowed, err := c.cerbos.IsAllowed(ctx.Request.Context(), resource, action)
+	if err != nil {
+		log.Println("Error checking permissions", err.Error())
+		return false
+	}
+	return allowed
 }
