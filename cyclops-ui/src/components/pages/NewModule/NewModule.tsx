@@ -1295,7 +1295,7 @@ const NewModule = () => {
                 }
                 htmlType="submit"
                 name="Save"
-                disabled={loadingTemplate}
+                disabled={loadingTemplate || loadingTemplateInitialValues}
               >
                 Save
               </Button>{" "}
