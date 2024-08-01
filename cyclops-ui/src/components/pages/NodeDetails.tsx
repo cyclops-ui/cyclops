@@ -69,7 +69,6 @@ const NodeDetails = () => {
       memory: 0,
       pod_count: 0,
     },
-
   });
 
   const [resources, setResources] = useState({
@@ -148,17 +147,6 @@ const NodeDetails = () => {
           >
             Reset
           </Button>
-          {/*<Button*/}
-          {/*    type="link"*/}
-          {/*    size="small"*/}
-          {/*    onClick={() => {*/}
-          {/*        confirm({ closeDropdown: false });*/}
-          {/*        setSearchText((selectedKeys as string[])[0]);*/}
-          {/*        setSearchedColumn(dataIndex);*/}
-          {/*    }}*/}
-          {/*>*/}
-          {/*    Filter*/}
-          {/*</Button>*/}
           <Button
             type="link"
             size="small"
@@ -408,7 +396,7 @@ const NodeDetails = () => {
       </Row>
       <Row>
         <Text keyboard>
-          Created on: {" "}
+          Created on:{" "}
           {new Date(
             node.node?.metadata?.creationTimestamp.toString(),
           ).toLocaleString()}
@@ -497,70 +485,66 @@ const NodeDetails = () => {
         >
           Conditions
         </Divider>
-        {
-            node.node.status.conditions.map(condition => (
-            <Col
-              key={condition.type}
-              span={6}
+        {node.node.status.conditions.map((condition) => (
+          <Col
+            key={condition.type}
+            span={6}
+            style={{
+              display: "flex",
+              justifyContent: "center",
+              alignItems: "center",
+            }}
+          >
+            <Card
               style={{
-                display: "flex",
-                justifyContent: "center",
-                alignItems: "center",
+                borderRadius: "10px",
+                borderWidth: "5px",
+                backgroundColor: "#fff",
+                width: "100%",
+                margin: "5px",
+                textAlign: "center",
+                color: "black",
               }}
             >
-              <Card
-                style={{
-                  borderRadius: "10px",
-                  borderWidth: "5px",
-                  backgroundColor: "#fff",
-                  width: "100%",
-                  margin: "5px",
-                  textAlign: "center",
-                  color: "black",
-                }}
-              >
-                <Progress
-                  type="circle"
-                  percent={100}
-                  status={
-                    conditionColor(condition.type) === gaugeColors["100%"]
-                      ? "success"
-                      : "exception"
-                  }
-                  trailColor={conditionColor(condition.type)}
-                  strokeWidth={15}
-                />
-                <br />
-                <br />
-                <h3>
-                  <strong>{condition.type}</strong>
-                </h3>
+              <Progress
+                type="circle"
+                percent={100}
+                status={
+                  conditionColor(condition.type) === gaugeColors["100%"]
+                    ? "success"
+                    : "exception"
+                }
+                trailColor={conditionColor(condition.type)}
+                strokeWidth={15}
+              />
+              <br />
+              <br />
+              <h3>
+                <strong>{condition.type}</strong>
+              </h3>
 
-
-                <Text strong>Last Transition Time: </Text>
-                <br />
-                <Text code>
-                  {new Date(
-                    condition.lastTransitionTime.toString()).toLocaleString()
-                  }
-                </Text>
-                <br />
-                <Text strong>Last HeartBeat Time: </Text>
-                <br />
-                <Text code>
-                  {new Date(
-                    condition.lastHeartbeatTime.toString())
-                    .toLocaleString()
-                  }
-                </Text>
-                <br />
-                <Text strong>Message:</Text>
-                <br />
-                <Text>{condition.message}</Text>
-              </Card>
-            </Col>
-          ))
-        }
+              <Text strong>Last Transition Time: </Text>
+              <br />
+              <Text code>
+                {new Date(
+                  condition.lastTransitionTime.toString(),
+                ).toLocaleString()}
+              </Text>
+              <br />
+              <Text strong>Last HeartBeat Time: </Text>
+              <br />
+              <Text code>
+                {new Date(
+                  condition.lastHeartbeatTime.toString(),
+                ).toLocaleString()}
+              </Text>
+              <br />
+              <Text strong>Message:</Text>
+              <br />
+              <Text>{condition.message}</Text>
+            </Card>
+          </Col>
+        ))}
       </Row>
       <Divider
         style={{ fontSize: "120%" }}
@@ -570,33 +554,7 @@ const NodeDetails = () => {
         Pods: {node.pods.length}
       </Divider>
       <Col span={24} style={{ overflowX: "auto" }}>
-        <Table dataSource={node.pods} columns={columns}>
-          {/*<Table.Column*/}
-          {/*    title='Name'*/}
-          {/*    dataIndex='name'*/}
-          {/*    ...getColumnSearchProps('name', 'Search by Name')*/}
-          {/*    width={"30%"}*/}
-          {/*/>*/}
-          {/*<Table.Column*/}
-          {/*    title='Namespace'*/}
-          {/*    dataIndex='namespace'*/}
-          {/*    width={"30%"}*/}
-          {/*/>*/}
-          {/*<Table.Column*/}
-          {/*    title='CPU'*/}
-          {/*    dataIndex='cpu'*/}
-          {/*    render={cpu => cpu + 'm'}*/}
-          {/*    sorter={(a: any, b: any) => a.cpu - b.cpu}*/}
-          {/*    sortDirections={['descend', 'ascend']}*/}
-          {/*/>*/}
-          {/*<Table.Column*/}
-          {/*    title='Memory'*/}
-          {/*    dataIndex='memory'*/}
-          {/*    render={memory => formatBytes(memory)}*/}
-          {/*    sorter={(a: any, b: any) => a.memory - b.memory}*/}
-          {/*    sortDirections={['descend', 'ascend']}*/}
-          {/*/>*/}
-        </Table>
+        <Table dataSource={node.pods} columns={columns} />
       </Col>
     </div>
   );
