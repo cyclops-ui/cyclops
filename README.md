@@ -6,8 +6,6 @@
 [![GitHub License](https://img.shields.io/github/license/cyclops-ui/cyclops?style=flat-square&link=https%3A%2F%2Fgithub.com%2Fcyclops-ui%2Fcyclops%2Fblob%2Fmain%2FLICENSE)](https://github.com/cyclops-ui/cyclops/blob/main/LICENSE)
 [![Discord](https://img.shields.io/discord/1103010228884209824?style=flat-square&logo=Discord&logoColor=white&label=Discord&color=%237289da)](https://discord.com/invite/8ErnK3qDb3)
 
-<hr/>
-
 <p align="center" width="100%">
     <img width="75%" src="./web/static/img/cyclops-simplistic.png">
 <p/>
