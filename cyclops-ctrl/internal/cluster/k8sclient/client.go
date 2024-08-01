@@ -879,21 +879,19 @@ func (k *KubernetesClient) isResourceNamespaced(gvk schema.GroupVersionKind) (bo
 	return false, errors.New(fmt.Sprintf("group version kind not found: %v", gvk.String()))
 }
 
-func (k *KubernetesClient) mapRole(group, version, kind, name, namespace string ) (*dto.Role, error){
-	 role, err := k.clientset.RbacV1().Roles(namespace).Get(context.Background(), name, metav1.GetOptions{})
-	 
-	 if err != nil {
-		return nil, err
-	 }
+func (k *KubernetesClient) mapRole(group, version, kind, name, namespace string) (*dto.Role, error) {
+	role, err := k.clientset.RbacV1().Roles(namespace).Get(context.Background(), name, metav1.GetOptions{})
 
-	 
+	if err != nil {
+		return nil, err
+	}
+
 	return &dto.Role{
-		Group:     	 group,
-		Version:   	 version,
-		Kind:      	 kind,
-		Name:      	 role.Name,
-		Namespace: 	 namespace,
-		
+		Group:     group,
+		Version:   version,
+		Kind:      kind,
+		Name:      role.Name,
+		Namespace: namespace,
 	}, nil
 }
 
