@@ -58,7 +58,7 @@ jobs:
         uses: docker/build-push-action@v6
         with:
           context: "{{defaultContext}}:cyclops-ui"
-          platforms: linux/amd64,linux/arm/v6,linux/arm/v7,linux/arm64
+          platforms: linux/amd64,linux/arm64
           build-args: |
             VERSION=${{ github.event.inputs.version }}
           push: true
@@ -92,7 +92,7 @@ jobs:
         uses: docker/build-push-action@v6
         with:
           context: "{{defaultContext}}:cyclops-ctrl"
-          platforms: linux/amd64,linux/arm/v6,linux/arm/v7,linux/arm64
+          platforms: linux/amd64,linux/arm64
           push: true
           tags: cyclopsui/cyclops-ctrl:${{ github.event.inputs.version }}
 
