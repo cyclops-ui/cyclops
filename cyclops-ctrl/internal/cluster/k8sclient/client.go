@@ -356,7 +356,7 @@ func (k *KubernetesClient) GetResource(group, version, kind, name, namespace str
 	case isJob(group, version, kind):
 		return k.mapJob(group, version, kind, name, namespace)
 	case isRole(group, version, kind):
-		return k.role(group, version, kind, name, namespace)
+		return k.mapRole(group, version, kind, name, namespace)
 	}
 
 	return nil, nil
@@ -879,8 +879,8 @@ func (k *KubernetesClient) isResourceNamespaced(gvk schema.GroupVersionKind) (bo
 	return false, errors.New(fmt.Sprintf("group version kind not found: %v", gvk.String()))
 }
 
-func (k *KubernetesClient) role(group, version, kind, name, namespace string ) (*dto.Role, error){
-	 roleList, err := k.clientset.RbacV1().Roles(namespace).Get(context.Background(), name, metav1.GetOptions{})
+func (k *KubernetesClient) mapRole(group, version, kind, name, namespace string ) (*dto.Role, error){
+	 role, err := k.clientset.RbacV1().Roles(namespace).Get(context.Background(), name, metav1.GetOptions{})
 	 
 	 if err != nil {
 		return nil, err
@@ -891,7 +891,7 @@ func (k *KubernetesClient) role(group, version, kind, name, namespace string ) (
 		Group:     	 group,
 		Version:   	 version,
 		Kind:      	 kind,
-		Name:      	 roleList.Name,
+		Name:      	 role.Name,
 		Namespace: 	 namespace,
 		
 	}, nil
