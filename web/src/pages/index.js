@@ -127,25 +127,6 @@ export default function Home() {
               </Button>
             </ConfigProvider>
           </Row>
-          <Row style={{ padding: "15px" }}>
-            <a
-              href={
-                "https://www.producthunt.com/posts/cyclops-2?embed=true&utm_source=badge-featured&utm_medium=badge&utm_souce=badge-cyclops&#0045;2"
-              }
-              target={"_blank"}
-              style={{ zIndex: "1" }}
-            >
-              <img
-                src={
-                  "https://api.producthunt.com/widgets/embed-image/v1/featured.svg?post_id=468704&theme=light"
-                }
-                alt="Cyclops - Developer&#0032;Friendly&#0032;Kubernetes | Product Hunt"
-                style={{ width: "250px", height: "54px" }}
-                width={"250"}
-                height={"54"}
-              />
-            </a>
-          </Row>
         </div>
         <Comparison />
         <div className={styles.backgroundcolor}>
