@@ -57,7 +57,7 @@ jobs:
       - name: Build and push
         uses: docker/build-push-action@v6
         with:
-          context: ./cyclops-ui
+          context: "{{defaultContext}}:cyclops-ui"
           build-args: |
             VERSION=${{ github.event.inputs.version }}
           push: true
@@ -90,7 +90,7 @@ jobs:
       - name: Build and push
         uses: docker/build-push-action@v6
         with:
-          context: ./cyclops-ctrl
+          context: "{{defaultContext}}:cyclops-ctrl"
           push: true
           tags: cyclopsui/cyclops-ctrl:${{ github.event.inputs.version }}
 
