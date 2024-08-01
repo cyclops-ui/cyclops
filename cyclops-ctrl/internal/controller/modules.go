@@ -654,23 +654,3 @@ func getTargetGeneration(generation string, module *v1alpha1.Module) (*v1alpha1.
 	}, true
 }
 
-func (m *Modules) GetRole(ctx *gin.Context) {
-	ctx.Header("Access-Control-Allow-Origin", "*")
-
-	group := ctx.Query("group")
-	version := ctx.Query("version")
-	kind := ctx.Query("kind")
-	name := ctx.Query("name")
-	namespace := ctx.Query("namespace")
-
-	resource, err := m.kubernetesClient.GetResource(group, version, kind, name, namespace)
-	if err != nil {
-		ctx.JSON(http.StatusInternalServerError, gin.H{
-			"error":  "Failed to fetch resource",
-			"reason": err.Error(),
-		})
-		return
-	}
-
-	ctx.JSON(http.StatusOK, resource)
-}
