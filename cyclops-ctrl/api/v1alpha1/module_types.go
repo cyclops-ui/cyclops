@@ -94,8 +94,11 @@ type HistoryEntry struct {
 	Values      apiextensionsv1.JSON `json:"values"`
 }
 
-//+kubebuilder:object:root=true
-//+kubebuilder:subresource:status
+// +kubebuilder:object:root=true
+// +kubebuilder:subresource:status
+// +kubebuilder:printercolumn:name="reconcilation-status",type=string,JSONpath=`.status.ReconcilationStatus.Status`
+// +kubebuilder:printercolumn:name="path",type=string,JSONpath=`.spec.template.path`
+// +kubebuilder:printercolumn:name="version",type=string,JSONpath=`.spec.template.version`
 
 // Module is the Schema for the modules API
 type Module struct {
