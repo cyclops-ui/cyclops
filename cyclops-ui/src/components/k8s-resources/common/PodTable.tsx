@@ -9,6 +9,7 @@ import {
   Tabs,
   Modal,
   Alert,
+  Tooltip,
 } from "antd";
 import axios from "axios";
 import { formatPodAge } from "../../../utils/pods";
@@ -181,13 +182,27 @@ const PodTable = ({ pods, namespace }: Props) => {
                 }
 
                 return (
-                  <Tag
-                    color={color}
-                    key={container.image}
-                    style={{ fontSize: "100%" }}
+                  <Tooltip
+                    key={container.name}
+                    title={
+                      <div>
+                        <div key={container.name}>
+                          <strong>{container.name}:</strong>{" "}
+                          {container.status.status}
+                          <br />
+                          <small>{container.status.message}</small>
+                        </div>
+                      </div>
+                    }
                   >
-                    {container.image}
-                  </Tag>
+                    <Tag
+                      color={color}
+                      key={container.image}
+                      style={{ fontSize: "100%" }}
+                    >
+                      {container.image}
+                    </Tag>
+                  </Tooltip>
                 );
               })}
             </>

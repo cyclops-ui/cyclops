@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"os"
 	"strconv"
+	"time"
 
 	_ "github.com/joho/godotenv/autoload"
 	"k8s.io/apimachinery/pkg/runtime"
@@ -14,6 +15,8 @@ import (
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/healthz"
 	"sigs.k8s.io/controller-runtime/pkg/log/zap"
+	metricsserver "sigs.k8s.io/controller-runtime/pkg/metrics/server"
+	"sigs.k8s.io/controller-runtime/pkg/webhook"
 
 	"github.com/cyclops-ui/cyclops/cyclops-ctrl/internal/auth"
 	"github.com/cyclops-ui/cyclops/cyclops-ctrl/internal/cluster/k8sclient"
@@ -80,6 +83,8 @@ func main() {
 
 	renderer := render.NewRenderer(k8sClient)
 
+	prometheus.StartCacheMetricsUpdater(&monitor, templatesRepo.ReturnCache(), 10*time.Second, setupLog)
+
 	handler, err := handler.New(templatesRepo, k8sClient, renderer, telemetryClient, monitor)
 	if err != nil {
 		panic(err)
@@ -89,11 +94,15 @@ func main() {
 
 	mgr, err := ctrl.NewManager(ctrl.GetConfigOrDie(), ctrl.Options{
 		Scheme:                 scheme,
-		MetricsBindAddress:     metricsAddr,
-		Port:                   9443,
 		HealthProbeBindAddress: probeAddr,
 		LeaderElection:         enableLeaderElection,
 		LeaderElectionID:       "f9d9f115.cyclops-ui.com",
+		Metrics: metricsserver.Options{
+			BindAddress: metricsAddr,
+		},
+		WebhookServer: webhook.NewServer(webhook.Options{
+			Port: 9443,
+		}),
 	})
 	if err != nil {
 		setupLog.Error(err, "unable to start manager")

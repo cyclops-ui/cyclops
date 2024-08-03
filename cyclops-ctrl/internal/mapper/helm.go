@@ -146,6 +146,14 @@ func mapHelmPropertyTypeToFieldType(property helm.Property) string {
 
 		return "object"
 	default:
+		if len(property.Properties) > 0 {
+			return "object"
+		}
+
+		if property.Items != nil {
+			return "array"
+		}
+
 		return string(property.Type)
 	}
 }

@@ -862,7 +862,6 @@ const ModuleDetails = () => {
           title="Filter resources"
           trigger="click"
         >
-          {/*<Button>Click me</Button>*/}
           <SearchOutlined />
         </Popover>
       </Divider>

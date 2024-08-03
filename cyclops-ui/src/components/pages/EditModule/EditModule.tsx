@@ -1106,13 +1106,14 @@ const EditModule = () => {
             type="primary"
             htmlType="submit"
             name="Save"
-            disabled={!isChanged && !isTemplateChanged}
+            disabled={(!isChanged && !isTemplateChanged) || !loadTemplate}
           >
             Save
           </Button>{" "}
           <Button
             htmlType="button"
             onClick={() => history("/modules/" + moduleName)}
+            disabled={!loadTemplate}
           >
             Back
           </Button>
@@ -1159,6 +1160,25 @@ const EditModule = () => {
     );
   };
 
+  const linkToTemplate = (templateRef: templateRef) => {
+    if (templateRef.repo.startsWith("https://github.com")) {
+      return (
+        <a
+          href={
+            templateRef.repo +
+            `/tree/` +
+            templateRef.resolvedVersion +
+            `/` +
+            templateRef.path
+          }
+          style={{ color: templateRefLock ? "#B8B8B8" : "" }}
+          className="linkToTemplate"
+        >
+          {templateRef.resolvedVersion.substring(0, 7)}
+        </a>
+      );
+    } else return templateRef.resolvedVersion.substring(0, 7);
+  };
   return (
     <div>
       {error.message.length !== 0 && (
@@ -1195,13 +1215,30 @@ const EditModule = () => {
               onFinish={handleSubmitTemplateEdit}
               onFinishFailed={onFinishFailed}
               style={{ width: "100%" }}
+              requiredMark={(label, { required }) => (
+                <Row>
+                  <Col>
+                    {required ? (
+                      <span style={{ color: "red", paddingRight: "3px" }}>
+                        *
+                      </span>
+                    ) : (
+                      <></>
+                    )}
+                  </Col>
+                  <Col>{label}</Col>
+                </Row>
+              )}
             >
               {lockButton()}
               <Form.Item
                 name={"repo"}
                 style={{ width: "40%", marginRight: "0" }}
               >
-                <Input placeholder={"Repository"} disabled={templateRefLock} />
+                <Input
+                  placeholder={"Repository"}
+                  disabled={templateRefLock || !loadTemplate}
+                />
               </Form.Item>
               <div
                 style={{
@@ -1217,7 +1254,10 @@ const EditModule = () => {
                 name={"path"}
                 style={{ width: "20%", marginRight: "0" }}
               >
-                <Input placeholder={"Path"} disabled={templateRefLock} />
+                <Input
+                  placeholder={"Path"}
+                  disabled={templateRefLock || !loadTemplate}
+                />
               </Form.Item>
               <div
                 style={{
@@ -1235,8 +1275,8 @@ const EditModule = () => {
               >
                 <Input
                   placeholder={"Version"}
-                  addonAfter={templateRef.resolvedVersion.substring(0, 7)}
-                  disabled={templateRefLock}
+                  addonAfter={linkToTemplate(templateRef)}
+                  disabled={templateRefLock || !loadTemplate}
                 />
               </Form.Item>
               <Form.Item style={{ paddingLeft: "10px", width: "5%" }}>
@@ -1244,7 +1284,7 @@ const EditModule = () => {
                   type="primary"
                   htmlType="submit"
                   loading={!loadTemplate}
-                  disabled={templateRefLock}
+                  disabled={templateRefLock || !loadTemplate}
                 >
                   Load
                 </Button>
