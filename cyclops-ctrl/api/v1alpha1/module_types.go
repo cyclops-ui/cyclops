@@ -96,7 +96,7 @@ type HistoryEntry struct {
 
 // +kubebuilder:object:root=true
 // +kubebuilder:subresource:status
-// +kubebuilder:printercolumn:name="reconcilation-status",type=string,JSONpath=`.status.ReconcilationStatus.Status`
+// +kubebuilder:printercolumn:name="reconcilation-status",type=string,JSONpath=`.status.reconcilationStatus.Status`
 // +kubebuilder:printercolumn:name="path",type=string,JSONpath=`.spec.template.path`
 // +kubebuilder:printercolumn:name="version",type=string,JSONpath=`.spec.template.version`
 
