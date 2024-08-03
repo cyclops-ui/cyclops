@@ -137,7 +137,6 @@ const EditModule = () => {
 
   const mapsToArray = useCallback((fields: any[], values: any): any => {
     let out: any = {};
-    console.log(fields);
     fields.forEach((field) => {
       let valuesList: any[] = [];
       switch (field.type) {
