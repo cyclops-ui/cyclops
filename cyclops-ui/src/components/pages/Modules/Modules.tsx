@@ -109,6 +109,16 @@ const Modules = () => {
     return version + " - " + resolvedVersion.substring(0, 7);
   };
 
+  const getLinkPath = (version: string, resolvedVersion: string) => {
+    if (resolvedVersion !== "") {
+      return resolvedVersion;
+    }
+    if(version !== ""){
+      return version;
+    }
+    return "main";
+  };
+
   const renderModulesCards = () => {
     if (loadingModules) {
       return <Spin size={"large"} />;
@@ -120,6 +130,7 @@ const Modules = () => {
         </div>
       );
     }
+
     if (displaymodule.length === 0) {
       return filteredData.map((module: any, index) => (
         <Col key={index} xs={24} sm={12} md={8} lg={8} xl={6}>
@@ -204,6 +215,7 @@ const Modules = () => {
                   <span style={{ color: "#1677ff" }}>
                     {" "}
                     {getTemplateVersion(
+
                       module.template.version,
                       module.template.resolvedVersion,
                     )}

@@ -6,14 +6,6 @@
 [![GitHub License](https://img.shields.io/github/license/cyclops-ui/cyclops?style=flat-square&link=https%3A%2F%2Fgithub.com%2Fcyclops-ui%2Fcyclops%2Fblob%2Fmain%2FLICENSE)](https://github.com/cyclops-ui/cyclops/blob/main/LICENSE)
 [![Discord](https://img.shields.io/discord/1103010228884209824?style=flat-square&logo=Discord&logoColor=white&label=Discord&color=%237289da)](https://discord.com/invite/8ErnK3qDb3)
 
-<p align="center">
-    <a href="https://www.producthunt.com/products/cyclops?utm_source=badge-follow&utm_medium=badge&utm_souce=badge-cyclops" target="_blank">
-        <img src="https://api.producthunt.com/widgets/embed-image/v1/follow.svg?product_id=566069&theme=light" alt="Cyclops - Developer&#0032;Friendly&#0032;Kubernetes | Product Hunt" style="width: 250px; height: 54px;" width="250" height="54" />
-    </a>
-</p>
-
-<hr>
-
 <p align="center" width="100%">
     <img width="75%" src="./web/static/img/cyclops-simplistic.png">
 <p/>
