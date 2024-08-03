@@ -2,6 +2,7 @@ package dto
 
 import (
 	v1 "k8s.io/api/core/v1"
+	rbacv1 "k8s.io/api/rbac/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
@@ -542,6 +543,7 @@ type Role struct {
 	Namespace string `json:"namespace"`
 	Status    string `json:"status"`
 	Deleted   bool   `json:"deleted"`
+	Rules	[]rbacv1.PolicyRule	`json:"rules"`
 }
 
 func (s *Role) GetGroupVersionKind() string {
