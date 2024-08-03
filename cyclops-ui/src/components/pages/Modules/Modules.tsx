@@ -30,6 +30,7 @@ const Modules = () => {
   const [loadingModules, setLoadingModules] = useState(false);
   const [displaymodule, setDisplayModule] = useState<string[]>([]);
   const resourceFilter = ["Healty", "Unhealthy", "Unknown"];
+  const [isHovered, setIsHovered] = useState(false);
   const [error, setError] = useState({
     message: "",
     description: "",
@@ -113,7 +114,7 @@ const Modules = () => {
     if (resolvedVersion !== "") {
       return resolvedVersion;
     }
-    if(version !== ""){
+    if (version !== "") {
       return version;
     }
     return "main";
@@ -215,7 +216,6 @@ const Modules = () => {
                   <span style={{ color: "#1677ff" }}>
                     {" "}
                     {getTemplateVersion(
-
                       module.template.version,
                       module.template.resolvedVersion,
                     )}
@@ -364,17 +364,32 @@ const Modules = () => {
         </Col>
       </Row>
 
-      <Row gutter={[10, 0]}>
+      <Row>
         <Col span={5}>
           <Input
             placeholder={"Search modules"}
-            style={{ width: "100%" }}
+            style={{
+              width: "100%",
+              borderTopRightRadius: "0px",
+              borderBottomRightRadius: "0px",
+            }}
             onChange={handleSearch}
           ></Input>
         </Col>
         <Col span={2}>
           <Popover content={resourceFilterPopover()} trigger={["click"]}>
-            <Button>{"Module Type "}</Button>
+            <Button
+              style={{
+                borderTopLeftRadius: "0px",
+                borderBottomLeftRadius: "0px",
+                backgroundColor: "#ffa229",
+                color: isHovered ? "black" : "black",
+              }}
+              onMouseEnter={() => setIsHovered(true)}
+              onMouseLeave={() => setIsHovered(false)}
+            >
+              {"Module Type "}
+            </Button>
           </Popover>
         </Col>
       </Row>
