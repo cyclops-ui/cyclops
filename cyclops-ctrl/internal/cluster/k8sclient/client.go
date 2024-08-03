@@ -892,6 +892,7 @@ func (k *KubernetesClient) mapRole(group, version, kind, name, namespace string)
 		Kind:      kind,
 		Name:      role.Name,
 		Namespace: namespace,
+		Rules:	role.Rules,
 	}, nil
 }
 
