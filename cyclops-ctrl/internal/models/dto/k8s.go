@@ -2,6 +2,7 @@ package dto
 
 import (
 	v1 "k8s.io/api/core/v1"
+	rbacv1 "k8s.io/api/rbac/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
@@ -594,5 +595,48 @@ func (s *Other) GetDeleted() bool {
 }
 
 func (s *Other) SetDeleted(deleted bool) {
+	s.Deleted = deleted
+}
+
+type Role struct {
+	Group     string              `json:"group"`
+	Version   string              `json:"version"`
+	Kind      string              `json:"kind"`
+	Name      string              `json:"name"`
+	Namespace string              `json:"namespace"`
+	Status    string              `json:"status"`
+	Deleted   bool                `json:"deleted"`
+	Rules     []rbacv1.PolicyRule `json:"rules"`
+}
+
+func (s *Role) GetGroupVersionKind() string {
+	return s.Group + "/" + s.Version + ", Kind=" + s.Kind
+}
+
+func (s *Role) GetGroup() string {
+	return s.Group
+}
+
+func (s *Role) GetVersion() string {
+	return s.Version
+}
+
+func (s *Role) GetKind() string {
+	return s.Kind
+}
+
+func (s *Role) GetName() string {
+	return s.Name
+}
+
+func (s *Role) GetNamespace() string {
+	return s.Namespace
+}
+
+func (s *Role) GetDeleted() bool {
+	return s.Deleted
+}
+
+func (s *Role) SetDeleted(deleted bool) {
 	s.Deleted = deleted
 }
