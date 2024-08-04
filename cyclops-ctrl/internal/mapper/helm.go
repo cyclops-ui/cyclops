@@ -90,7 +90,7 @@ func HelmSchemaToFields(name string, schema helm.Property, defs map[string]helm.
 		MinLength:        schema.MinLength,
 		MaxLength:        schema.MaxLength,
 		Pattern:          schema.Pattern,
-		Immutable         schema.Immutable,
+		Immutable:        schema.Immutable,
 	}
 }
 
