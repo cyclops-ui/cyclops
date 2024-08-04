@@ -30,7 +30,6 @@ const Modules = () => {
   const [loadingModules, setLoadingModules] = useState(false);
   const [displaymodule, setDisplayModule] = useState<string[]>([]);
   const resourceFilter = ["Healty", "Unhealthy", "Unknown"];
-  const [isHovered, setIsHovered] = useState(false);
   const [error, setError] = useState({
     message: "",
     description: "",
