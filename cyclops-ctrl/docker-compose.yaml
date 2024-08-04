@@ -4,4 +4,4 @@ services:
     container_name: redis
     image: redis
     ports:
-      - 8888:8888
+      - 6379:6379
