@@ -937,5 +937,5 @@ func isCronJob(group, version, kind string) bool {
 }
 
 func isRole(group, version, kind string) bool {
-	return group == "" && version == "v1" && kind == "Role"
+	return group == "rbac.authorization.k8s.io" && version == "v1" && kind == "Role"
 }
