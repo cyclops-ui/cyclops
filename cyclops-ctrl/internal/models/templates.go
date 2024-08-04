@@ -39,6 +39,7 @@ type Field struct {
 	Enum          []interface{} `json:"enum"`
 	Required      []string      `json:"required"`
 	FileExtension string        `json:"fileExtension"`
+	Immutable	  bool          `json:"immutable"`
 
 	// number validation
 	Minimum          *float64 `json:"minimum"`
