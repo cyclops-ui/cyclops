@@ -18,7 +18,7 @@ import axios from "axios";
 import Link from "antd/lib/typography/Link";
 
 import styles from "./styles.module.css";
-import { PlusCircleOutlined } from "@ant-design/icons";
+import { PlusCircleOutlined, FilterOutlined } from "@ant-design/icons";
 import { mapResponseError } from "../../../utils/api/errors";
 
 const { Title } = Typography;
@@ -374,24 +374,16 @@ const Modules = () => {
               borderBottomRightRadius: "0px",
             }}
             onChange={handleSearch}
+            addonAfter={
+              <>
+                <Popover content={resourceFilterPopover()} trigger="click">
+                  <FilterOutlined />
+                </Popover>
+              </>
+            }
           ></Input>
         </Col>
-        <Col span={2}>
-          <Popover content={resourceFilterPopover()} trigger={["click"]}>
-            <Button
-              style={{
-                borderTopLeftRadius: "0px",
-                borderBottomLeftRadius: "0px",
-                backgroundColor: "#ffa229",
-                color: isHovered ? "black" : "black",
-              }}
-              onMouseEnter={() => setIsHovered(true)}
-              onMouseLeave={() => setIsHovered(false)}
-            >
-              {"Module Type "}
-            </Button>
-          </Popover>
-        </Col>
+        <Col span={2}></Col>
       </Row>
       <Divider orientationMargin="0" />
       <Row gutter={[16, 16]}>{renderModulesCards()}</Row>
