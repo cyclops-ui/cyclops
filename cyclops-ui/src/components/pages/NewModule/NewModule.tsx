@@ -57,6 +57,8 @@ const layout = {
   wrapperCol: { span: 16 },
 };
 
+const { Panel } = Collapse;
+
 interface templateStoreOption {
   name: string;
   ref: {
@@ -70,6 +72,7 @@ const NewModule = () => {
   const [loading, setLoading] = useState(false);
   const [config, setConfig] = useState({
     name: "",
+    namespace: "",
     version: "",
     manifest: "",
     root: {
@@ -219,12 +222,14 @@ const NewModule = () => {
 
   const handleSubmit = (values: any) => {
     const moduleName = values["cyclops_module_name"];
+    var moduleNamespace = values["cyclops_module_namespace"];
 
     values = findMaps(config.root.properties, values, initialValuesRaw);
 
     axios
       .post(`/api/modules/new`, {
         name: moduleName,
+        namespace: moduleNamespace,
         values: values,
         template: {
           repo: template.repo,
@@ -233,7 +238,10 @@ const NewModule = () => {
         },
       })
       .then((res) => {
-        window.location.href = "/modules/" + moduleName;
+        if (moduleNamespace === "") {
+          moduleNamespace = "dafault";
+        }
+        window.location.href = "/modules/" + moduleNamespace + "/" + moduleName;
       })
       .catch((error) => {
         setLoading(false);
@@ -244,6 +252,7 @@ const NewModule = () => {
   const loadTemplate = async (repo: string, path: string, commit: string) => {
     setConfig({
       name: "",
+      namespace: "",
       version: "",
       manifest: "",
       root: {
@@ -1274,6 +1283,46 @@ const NewModule = () => {
             >
               <Input />
             </Form.Item>
+            <Row>
+              <Col span={16}>
+                <Collapse>
+                  <Panel header="Options" key="1">
+                    <Form.Item
+                      name="cyclops_module_namespace"
+                      id="cyclops_module_namespace"
+                      label={
+                        <div>
+                          Module namespace
+                          <p style={{ color: "#8b8e91", marginBottom: "0px" }}>
+                            Enter a unique module namespace
+                          </p>
+                        </div>
+                      }
+                      rules={[
+                        {
+                          required: false,
+                          message: "Module namespace is required",
+                        },
+                        {
+                          max: 63,
+                          message:
+                            "Module namespace must contain no more than 63 characters",
+                        },
+                        {
+                          pattern: /^[a-z0-9](?:[a-z0-9-]*[a-z0-9])?$/, // only alphanumeric characters and hyphens, cannot start or end with a hyphen and the alpha characters can only be lowercase
+                          message:
+                            "Module namespace must follow the Kubernetes naming convention",
+                        },
+                      ]}
+                      hasFeedback={true}
+                      validateDebounce={1000}
+                    >
+                      <Input />
+                    </Form.Item>
+                  </Panel>
+                </Collapse>
+              </Col>
+            </Row>
             <Divider orientation="left" orientationMargin="0">
               Define Module
             </Divider>
