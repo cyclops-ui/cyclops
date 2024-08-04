@@ -524,6 +524,47 @@ const ModuleDetails = () => {
       );
     }
 
+    if (resource.missing) {
+      resourceCollapses.push(
+        <Collapse.Panel
+          collapsible={"disabled"}
+          header={
+            <Popover
+              content={
+                "Try reconciling the module or applying the missing resource"
+              }
+              placement="topRight"
+              title={
+                "Missing resource " +
+                resource.kind +
+                " " +
+                resource.namespace +
+                "/" +
+                resource.name
+              }
+              trigger="hover"
+            >
+              {genExtra(resource, resource.status)}
+            </Popover>
+          }
+          key={collapseKey}
+          style={{
+            display: getResourceDisplay(
+              resource.group,
+              resource.version,
+              resource.kind,
+            ),
+            width: getCollapseWidth(collapseKey),
+            backgroundColor: "#fff",
+            marginBottom: "12px",
+            borderRadius: "10px",
+            border: "1px dashed #777",
+          }}
+        ></Collapse.Panel>,
+      );
+      return;
+    }
+
     resourceCollapses.push(
       <Collapse.Panel
         header={genExtra(resource, resource.status)}

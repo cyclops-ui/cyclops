@@ -152,7 +152,15 @@ func (k *KubernetesClient) GetDeletedResources(
 	resources []dto.Resource,
 	manifest string,
 ) ([]dto.Resource, error) {
-	resourcesFromTemplate := make(map[string][]dto.Resource, 0)
+	type resKey struct {
+		Group     string
+		Version   string
+		Kind      string
+		Name      string
+		Namespace string
+	}
+
+	resourcesFromTemplate := make(map[resKey]struct{}, 0)
 
 	for _, s := range strings.Split(manifest, "\n---\n") {
 		s := strings.TrimSpace(s)
@@ -167,36 +175,52 @@ func (k *KubernetesClient) GetDeletedResources(
 			panic(err)
 		}
 
-		objGVK := obj.GetObjectKind().GroupVersionKind().String()
-		resourcesFromTemplate[objGVK] = append(resourcesFromTemplate[objGVK], &dto.Service{
+		namespace := obj.GetNamespace()
+		if len(namespace) == 0 {
+			namespace = "default"
+		}
+
+		key := resKey{
+			Group:     obj.GroupVersionKind().Group,
+			Version:   obj.GroupVersionKind().Version,
+			Kind:      obj.GroupVersionKind().Kind,
 			Name:      obj.GetName(),
-			Namespace: obj.GetNamespace(),
-		})
+			Namespace: namespace,
+		}
+
+		resourcesFromTemplate[key] = struct{}{}
 	}
 
 	out := make([]dto.Resource, 0, len(resources))
 	for _, resource := range resources {
-		gvk := resource.GetGroupVersionKind()
-
-		if _, ok := resourcesFromTemplate[gvk]; !ok {
-			resource.SetDeleted(true)
-			out = append(out, resource)
-			continue
+		key := resKey{
+			Group:     resource.GetGroup(),
+			Version:   resource.GetVersion(),
+			Kind:      resource.GetKind(),
+			Name:      resource.GetName(),
+			Namespace: resource.GetNamespace(),
 		}
 
-		found := false
-		for _, rs := range resourcesFromTemplate[gvk] {
-			if resource.GetName() == rs.GetName() && (resource.GetNamespace() == rs.GetNamespace() || rs.GetNamespace() == "") {
-				found = true
-				break
-			}
-		}
-
+		_, found := resourcesFromTemplate[key]
 		if found == false {
 			resource.SetDeleted(true)
 		}
 
+		delete(resourcesFromTemplate, key)
+
 		out = append(out, resource)
+	}
+
+	// add missing resources
+	for missingResource, _ := range resourcesFromTemplate {
+		out = append([]dto.Resource{&dto.Other{
+			Group:     missingResource.Group,
+			Version:   missingResource.Version,
+			Kind:      missingResource.Kind,
+			Name:      missingResource.Name,
+			Namespace: missingResource.Namespace,
+			Missing:   true,
+		}}, out...)
 	}
 
 	return out, nil
