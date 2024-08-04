@@ -536,14 +536,14 @@ func (s *Other) SetDeleted(deleted bool) {
 }
 
 type Role struct {
-	Group     string `json:"group"`
-	Version   string `json:"version"`
-	Kind      string `json:"kind"`
-	Name      string `json:"name"`
-	Namespace string `json:"namespace"`
-	Status    string `json:"status"`
-	Deleted   bool   `json:"deleted"`
-	Rules	[]rbacv1.PolicyRule	`json:"rules"`
+	Group     string              `json:"group"`
+	Version   string              `json:"version"`
+	Kind      string              `json:"kind"`
+	Name      string              `json:"name"`
+	Namespace string              `json:"namespace"`
+	Status    string              `json:"status"`
+	Deleted   bool                `json:"deleted"`
+	Rules     []rbacv1.PolicyRule `json:"rules"`
 }
 
 func (s *Role) GetGroupVersionKind() string {

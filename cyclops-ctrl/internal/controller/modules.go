@@ -137,7 +137,6 @@ func (m *Modules) Manifest(ctx *gin.Context) {
 		return
 	}
 
-
 	manifest, err := m.renderer.HelmTemplate(v1alpha1.Module{
 		ObjectMeta: metav1.ObjectMeta{
 			Name: ctx.Param("name"),
@@ -653,4 +652,3 @@ func getTargetGeneration(generation string, module *v1alpha1.Module) (*v1alpha1.
 		Status:     module.Status,
 	}, true
 }
-
