@@ -13,6 +13,7 @@ import (
 	clientgoscheme "k8s.io/client-go/kubernetes/scheme"
 	_ "k8s.io/client-go/plugin/pkg/client/auth"
 	ctrl "sigs.k8s.io/controller-runtime"
+	ctrlCache "sigs.k8s.io/controller-runtime/pkg/cache"
 	"sigs.k8s.io/controller-runtime/pkg/healthz"
 	"sigs.k8s.io/controller-runtime/pkg/log/zap"
 	metricsserver "sigs.k8s.io/controller-runtime/pkg/metrics/server"
@@ -103,6 +104,11 @@ func main() {
 		WebhookServer: webhook.NewServer(webhook.Options{
 			Port: 9443,
 		}),
+		Cache: ctrlCache.Options{
+			DefaultNamespaces: map[string]ctrlCache.Config{
+				getWatchNamespace("WATCH_NAMESPACE"): {},
+			},
+		},
 	})
 	if err != nil {
 		setupLog.Error(err, "unable to start manager")
@@ -148,4 +154,12 @@ func getEnvBool(key string) bool {
 		return false
 	}
 	return b
+}
+
+func getWatchNamespace(key string) string {
+	value := os.Getenv(key)
+	if value == "" {
+		return "cyclops"
+	}
+	return value
 }
