@@ -82,33 +82,13 @@ const config = {
             type: "html",
             position: "right",
             value:
-              '<a href="/docs/installation/install/manifest" style="background-color: #FF8803; color: #FFF; height: 30px; width: 150px; text-decoration: none; display: inline-flex; align-items: center; border-radius: 30px 30px 30px 30px"' +
+              '<a href="/docs/installation/install/manifest" style="background-color: #FF8803; color: #FFF; height: 30px; width: 150px; text-decoration: none; display: flex; align-content: center; justify-content: center; border-radius: 30px 30px 30px 30px"' +
               "onmouseover=\"this.style.backgroundColor='#FFA229';\"" +
               "onmouseout=\"this.style.backgroundColor='#FF8803';\">" +
-              '<h3 style="margin: 0px auto;">' +
+              "<h3>" +
               "Get started" +
               "</h3>" +
               "</a>",
-          },
-          {
-            href: "https://github.com/cyclops-ui/cyclops",
-            position: "right",
-            className: "header-github-link",
-          },
-          {
-            href: "https://www.linkedin.com/company/cyclops-ui",
-            position: "right",
-            className: "header-linkedin-link",
-          },
-          {
-            href: "https://x.com/CyclopsUI",
-            position: "right",
-            className: "header-x-link",
-          },
-          {
-            href: "https://discord.com/invite/8ErnK3qDb3",
-            className: "header-discord-link",
-            position: "right",
           },
         ],
       },
@@ -218,16 +198,18 @@ const config = {
                 href: "https://www.linkedin.com/company/cyclops-ui/",
               },
               {
-                html: "info@cyclops-ui.com",
+                label: "info@cyclops-ui.com",
+                href: "mailto:info@cyclops-ui.com",
               },
             ],
           },
         ],
         copyright: `Copyright © ${new Date().getFullYear()} Cyclops UI`,
       },
+
       colorMode: {
         defaultMode: "light",
-        disableSwitch: true,
+        disableSwitch: false,
       },
     }),
 };
