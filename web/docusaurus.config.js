@@ -1,7 +1,7 @@
 // @ts-check
 // Note: type annotations allow type checking and IDEs autocompletion
 
-import { Button } from "antd";
+import { discord, github, linkedin, x } from "./social-icons";
 
 /** @type {import('@docusaurus/types').Config} */
 const config = {
@@ -82,13 +82,37 @@ const config = {
             type: "html",
             position: "right",
             value:
-              '<a href="/docs/installation/install/manifest" style="background-color: #FF8803; color: #FFF; height: 30px; width: 150px; text-decoration: none; display: flex; align-content: center; justify-content: center; border-radius: 30px 30px 30px 30px"' +
+              '<a href="/docs/installation/install/manifest" style="background-color: #FF8803; color: #FFF; height: 30px; width: 150px; text-decoration: none; display: inline-flex; align-items: center; border-radius: 30px 30px 30px 30px"' +
               "onmouseover=\"this.style.backgroundColor='#FFA229';\"" +
               "onmouseout=\"this.style.backgroundColor='#FF8803';\">" +
-              "<h3>" +
+              '<h3 style="margin: 0px auto;">' +
               "Get started" +
               "</h3>" +
               "</a>",
+          },
+          {
+            value: github("https://github.com/cyclops-ui/cyclops"),
+            type: "html",
+            position: "right",
+            className: "link center",
+          },
+          {
+            value: linkedin("https://www.linkedin.com/company/cyclops-ui"),
+            type: "html",
+            position: "right",
+            className: "link center",
+          },
+          {
+            value: x("https://x.com/CyclopsUI"),
+            type: "html",
+            position: "right",
+            className: "link center",
+          },
+          {
+            value: discord("https://discord.com/invite/8ErnK3qDb3"),
+            type: "html",
+            position: "right",
+            className: "link center",
           },
         ],
       },
