@@ -144,7 +144,7 @@ func (r *ModuleReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctr
 		return ctrl.Result{}, err
 	}
 
-	installErrors, childrenResources, err := r.moduleToResources(req.Name, template)
+	installErrors, childrenResources, err := r.moduleToResources(template, &module)
 	if err != nil {
 		r.logger.Error(err, "error on upsert module", "namespaced name", req.NamespacedName)
 
@@ -194,12 +194,7 @@ func (r *ModuleReconciler) SetupWithManager(mgr ctrl.Manager) error {
 		Complete(r)
 }
 
-func (r *ModuleReconciler) moduleToResources(name string, template *models.Template) ([]string, []cyclopsv1alpha1.GroupVersionResource, error) {
-	module, err := r.kubernetesClient.GetModule(name)
-	if err != nil {
-		return nil, nil, err
-	}
-
+func (r *ModuleReconciler) moduleToResources(template *models.Template, module *cyclopsv1alpha1.Module) ([]string, []cyclopsv1alpha1.GroupVersionResource, error) {
 	crdInstallErrors := r.applyCRDs(template)
 
 	installErrors, childrenGVRs, err := r.generateResources(r.kubernetesClient, *module, template)
