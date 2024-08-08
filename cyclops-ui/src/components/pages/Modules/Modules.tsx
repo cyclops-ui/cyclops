@@ -10,13 +10,15 @@ import {
   Alert,
   Empty,
   Spin,
+  Popover,
+  Checkbox,
 } from "antd";
 import { useNavigate } from "react-router";
 import axios from "axios";
 import Link from "antd/lib/typography/Link";
 
 import styles from "./styles.module.css";
-import { PlusCircleOutlined } from "@ant-design/icons";
+import { PlusCircleOutlined, FilterOutlined } from "@ant-design/icons";
 import { mapResponseError } from "../../../utils/api/errors";
 
 const { Title } = Typography;
@@ -26,6 +28,8 @@ const Modules = () => {
   const [allData, setAllData] = useState([]);
   const [filteredData, setFilteredData] = useState([]);
   const [loadingModules, setLoadingModules] = useState(false);
+  const [displaymodule, setDisplayModule] = useState<string[]>([]);
+  const resourceFilter = ["Healty", "Unhealthy", "Unknown"];
   const [error, setError] = useState({
     message: "",
     description: "",
@@ -49,7 +53,28 @@ const Modules = () => {
   const handleClick = () => {
     history("/modules/new");
   };
-
+  const handleSelectItem = (key: any) => {
+    let x = displaymodule.indexOf(key);
+    if (x > -1) {
+      setDisplayModule(displaymodule.filter((item) => item !== key));
+    } else {
+      setDisplayModule([...displaymodule, key]);
+    }
+  };
+  const resourceFilterPopover = () => {
+    return resourceFilter.map((item, index) => (
+      <Checkbox.Group
+        key={index}
+        style={{ display: "block" }}
+        onChange={(checkedValues) => handleSelectItem(item)}
+        value={displaymodule}
+      >
+        <>
+          <Checkbox value={item}>{item}</Checkbox>
+        </>
+      </Checkbox.Group>
+    ));
+  };
   const handleSearch = (event: any) => {
     const query = event.target.value;
     var updatedList = [...allData];
@@ -88,7 +113,7 @@ const Modules = () => {
     if (resolvedVersion !== "") {
       return resolvedVersion;
     }
-    if(version !== ""){
+    if (version !== "") {
       return version;
     }
     return "main";
@@ -98,7 +123,6 @@ const Modules = () => {
     if (loadingModules) {
       return <Spin size={"large"} />;
     }
-
     if (filteredData.length === 0) {
       return (
         <div style={{ width: "100%" }}>
@@ -107,103 +131,200 @@ const Modules = () => {
       );
     }
 
-    return filteredData.map((module: any, index) => (
-      <Col key={index} xs={24} sm={12} md={8} lg={8} xl={6}>
-        <a href={"/modules/" + module.name}>
-          <Card
-            title={
-              <div>
-                {module.iconURL ? (
-                  <img
-                    alt=""
-                    style={{ height: "2em", marginRight: "8px" }}
-                    src={module.iconURL}
-                  />
-                ) : (
-                  <></>
-                )}
-                {module.name}
-              </div>
-            }
-            style={{
-              borderLeft: "solid " + getStatusColor(module) + " 5px",
-              width: "100%",
-              maxWidth: "500px",
-            }}
-            className={styles.modulecard}
-          >
-            <Row gutter={[16, 16]}>
-              <Col
-                span={24}
-                style={{
-                  whiteSpace: "nowrap",
-                  overflow: "hidden",
-                  textOverflow: "ellipsis",
-                  display: "block",
-                }}
-              >
-                Repo:
-                <Link aria-level={3}
-                 href={module.template.repo}
-                 target="_blank"
-                 >
-                  {" " + module.template.repo}
-                </Link>
-              </Col>
-            </Row>
-            <Row gutter={[16, 16]}>
-              <Col
-                span={24}
-                style={{
-                  whiteSpace: "nowrap",
-                  overflow: "hidden",
-                  textOverflow: "ellipsis",
-                  display: "block",
-                }}
-              >
-                Path:
-                <Link
-                  aria-level={3}
-                  target="_blank"
-                  href={
-                    module.template.repo +
-                    `/tree/` +
-                    getLinkPath(
+    if (displaymodule.length === 0) {
+      return filteredData.map((module: any, index) => (
+        <Col key={index} xs={24} sm={12} md={8} lg={8} xl={6}>
+          <a href={"/modules/" + module.name}>
+            <Card
+              title={
+                <div>
+                  {module.iconURL ? (
+                    <img
+                      alt=""
+                      style={{ height: "2em", marginRight: "8px" }}
+                      src={module.iconURL}
+                    />
+                  ) : (
+                    <></>
+                  )}
+                  {module.name}
+                </div>
+              }
+              style={{
+                borderLeft: "solid " + getStatusColor(module) + " 5px",
+                width: "100%",
+                maxWidth: "500px",
+              }}
+              className={styles.modulecard}
+            >
+              <Row gutter={[16, 16]}>
+                <Col
+                  span={24}
+                  style={{
+                    whiteSpace: "nowrap",
+                    overflow: "hidden",
+                    textOverflow: "ellipsis",
+                    display: "block",
+                  }}
+                >
+                  Repo:
+                  <Link aria-level={3} href={module.template.repo}>
+                    {" " + module.template.repo}
+                  </Link>
+                </Col>
+              </Row>
+              <Row gutter={[16, 16]}>
+                <Col
+                  span={24}
+                  style={{
+                    whiteSpace: "nowrap",
+                    overflow: "hidden",
+                    textOverflow: "ellipsis",
+                    display: "block",
+                  }}
+                >
+                  Path:
+                  <Link
+                    aria-level={3}
+                    href={
+                      module.template.repo +
+                      `/tree/` +
+                      getTemplateVersion(
+                        module.template.version,
+                        module.template.resolvedVersion,
+                      ) +
+                      `/` +
+                      module.template.path
+                    }
+                  >
+                    {" " + module.template.path}
+                  </Link>
+                </Col>
+              </Row>
+              <Row gutter={[16, 16]}>
+                <Col
+                  span={24}
+                  style={{
+                    whiteSpace: "nowrap",
+                    overflow: "hidden",
+                    textOverflow: "ellipsis",
+                    display: "block",
+                  }}
+                >
+                  Version:
+                  <span style={{ color: "#1677ff" }}>
+                    {" "}
+                    {getTemplateVersion(
                       module.template.version,
                       module.template.resolvedVersion,
-                    ) +
-                    `/` +
-                    module.template.path
-                  }
-                >
-                  {" " + module.template.path}
-                </Link>
-              </Col>
-            </Row>
-            <Row gutter={[16, 16]}>
-              <Col
-                span={24}
-                style={{
-                  whiteSpace: "nowrap",
-                  overflow: "hidden",
-                  textOverflow: "ellipsis",
-                  display: "block",
-                }}
-              >
-                Version:
-                <span style={{ color: "#1677ff" }}>
-                  {" "}
-                  {getTemplateVersion(
-                    module.template.version,
-                    module.template.resolvedVersion,
+                    )}
+                  </span>
+                </Col>
+              </Row>
+            </Card>
+          </a>
+        </Col>
+      ));
+    }
+    return filteredData
+      .filter((module: any) =>
+        displaymodule
+          .map((status) => status.toLowerCase())
+          .includes(module.status.toLowerCase()),
+      )
+      .map((module: any, index) => (
+        <Col key={index} xs={24} sm={12} md={8} lg={8} xl={6}>
+          <a href={"/modules/" + module.name}>
+            <Card
+              title={
+                <div>
+                  {module.iconURL ? (
+                    <img
+                      alt=""
+                      style={{ height: "2em", marginRight: "8px" }}
+                      src={module.iconURL}
+                    />
+                  ) : (
+                    <></>
                   )}
-                </span>
-              </Col>
-            </Row>
-          </Card>
-        </a>
-      </Col>
-    ));
+                  {module.name}
+                </div>
+              }
+              style={{
+                borderLeft: "solid " + getStatusColor(module) + " 5px",
+                width: "100%",
+                maxWidth: "500px",
+              }}
+              className={styles.modulecard}
+            >
+              <Row gutter={[16, 16]}>
+                <Col
+                  span={24}
+                  style={{
+                    whiteSpace: "nowrap",
+                    overflow: "hidden",
+                    textOverflow: "ellipsis",
+                    display: "block",
+                  }}
+                >
+                  Repo:
+                  <Link aria-level={3} href={module.template.repo}>
+                    {" " + module.template.repo}
+                  </Link>
+                </Col>
+              </Row>
+              <Row gutter={[16, 16]}>
+                <Col
+                  span={24}
+                  style={{
+                    whiteSpace: "nowrap",
+                    overflow: "hidden",
+                    textOverflow: "ellipsis",
+                    display: "block",
+                  }}
+                >
+                  Path:
+                  <Link
+                    aria-level={3}
+                    href={
+                      module.template.repo +
+                      `/tree/` +
+                      getTemplateVersion(
+                        module.template.version,
+                        module.template.resolvedVersion,
+                      ) +
+                      `/` +
+                      module.template.path
+                    }
+                  >
+                    {" " + module.template.path}
+                  </Link>
+                </Col>
+              </Row>
+              <Row gutter={[16, 16]}>
+                <Col
+                  span={24}
+                  style={{
+                    whiteSpace: "nowrap",
+                    overflow: "hidden",
+                    textOverflow: "ellipsis",
+                    display: "block",
+                  }}
+                >
+                  Version:
+                  <span style={{ color: "#1677ff" }}>
+                    {" "}
+                    {getTemplateVersion(
+                      module.template.version,
+                      module.template.resolvedVersion,
+                    )}
+                  </span>
+                </Col>
+              </Row>
+            </Card>
+          </a>
+        </Col>
+      ));
   };
 
   return (
@@ -241,14 +362,27 @@ const Modules = () => {
           </Button>
         </Col>
       </Row>
-      <Row gutter={[40, 0]}>
-        <Col span={18}>
+
+      <Row>
+        <Col span={5}>
           <Input
             placeholder={"Search modules"}
-            style={{ width: "30%" }}
+            style={{
+              width: "100%",
+              borderTopRightRadius: "0px",
+              borderBottomRightRadius: "0px",
+            }}
             onChange={handleSearch}
+            addonAfter={
+              <>
+                <Popover content={resourceFilterPopover()} trigger="click">
+                  <FilterOutlined />
+                </Popover>
+              </>
+            }
           ></Input>
         </Col>
+        <Col span={2}></Col>
       </Row>
       <Divider orientationMargin="0" />
       <Row gutter={[16, 16]}>{renderModulesCards()}</Row>
