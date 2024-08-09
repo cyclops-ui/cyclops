@@ -167,7 +167,8 @@ const TemplateStore = () => {
           ...prevStatus,
           [templateName]: "error",
         }));
-        setError(mapResponseError(error));
+        message.error("Template reference is Invalid!");
+        //setError(mapResponseError(error));
       });
   };
 
