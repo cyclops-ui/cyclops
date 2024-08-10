@@ -168,7 +168,6 @@ const TemplateStore = () => {
           [templateName]: "error",
         }));
         message.error("Template reference is Invalid!");
-        //setError(mapResponseError(error));
       });
   };
 
