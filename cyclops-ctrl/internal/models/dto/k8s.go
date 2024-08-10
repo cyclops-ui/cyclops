@@ -4,6 +4,7 @@ import (
 	v1 "k8s.io/api/core/v1"
 	rbacv1 "k8s.io/api/rbac/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/util/intstr"
 )
 
 type Resource interface {
@@ -554,6 +555,74 @@ func (c *Job) GetCompletionTime() string {
 
 func (c *Job) GetStartTime() string {
 	return c.StartTime
+}
+
+type NetworkPolicy struct {
+	Group     string                     `json:"group"`
+	Version   string                     `json:"version"`
+	Kind      string                     `json:"kind"`
+	Name      string                     `json:"name"`
+	Namespace string                     `json:"namespace"`
+	Pods      []Pod                      `json:"pods"`
+	Ingress   []NetworkPolicyIngressRule `json:"ingress"`
+	Egress    []NetworkPolicyEgressRule  `json:"egress"`
+}
+
+func (n *NetworkPolicy) GetGroupVersionKind() string {
+	return n.Group + "/" + n.Version + ", Kind=" + n.Kind
+}
+
+func (n *NetworkPolicy) GetGroup() string {
+	return n.Group
+}
+
+func (n *NetworkPolicy) GetVersion() string {
+	return n.Version
+}
+
+func (n *NetworkPolicy) GetKind() string {
+	return n.Kind
+}
+
+func (n *NetworkPolicy) GetName() string {
+	return n.Name
+}
+
+func (n *NetworkPolicy) GetNamespace() string {
+	return n.Namespace
+}
+
+func (n *NetworkPolicy) GetIngress() []NetworkPolicyIngressRule {
+	return n.Ingress
+}
+
+func (n *NetworkPolicy) GetEgress() []NetworkPolicyEgressRule {
+	return n.Egress
+}
+
+type NetworkPolicyIngressRule struct {
+	Ports []NetworkPolicyPort `json:"ports"`
+	From  []NetworkPolicyPeer `json:"from"`
+}
+
+type NetworkPolicyEgressRule struct {
+	Ports []NetworkPolicyPort `json:"ports,"`
+	To    []NetworkPolicyPeer `json:"to"`
+}
+
+type NetworkPolicyPort struct {
+	Protocol string             `json:"protocol"`
+	Port     intstr.IntOrString `json:"port"`
+	EndPort  int32              `json:"endPort"`
+}
+
+type NetworkPolicyPeer struct {
+	IPBlock *IPBlock `json:"ipBlock"`
+}
+
+type IPBlock struct {
+	CIDR   string   `json:"cidr"`
+	Except []string `json:"except"`
 }
 
 type Other struct {

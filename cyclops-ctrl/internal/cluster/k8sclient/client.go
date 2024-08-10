@@ -7,6 +7,8 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	networkingv1 "k8s.io/api/networking/v1"
+	"k8s.io/apimachinery/pkg/util/intstr"
 	"os"
 	"os/exec"
 	"sort"
@@ -359,6 +361,8 @@ func (k *KubernetesClient) GetResource(group, version, kind, name, namespace str
 		return k.mapJob(group, version, kind, name, namespace)
 	case isRole(group, version, kind):
 		return k.mapRole(group, version, kind, name, namespace)
+	case isNetworkPolicy(group, version, kind):
+		return k.mapNetworkPolicy(group, version, kind, name, namespace)
 	}
 
 	return nil, nil
@@ -888,6 +892,99 @@ func (k *KubernetesClient) mapJob(group, version, kind, name, namespace string) 
 	}, nil
 }
 
+func (k *KubernetesClient) mapNetworkPolicy(group, version, kind, name, namespace string) (*dto.NetworkPolicy, error) {
+	networkPolicy, err := k.clientset.NetworkingV1().NetworkPolicies(namespace).Get(context.Background(), name, metav1.GetOptions{})
+	if err != nil {
+		return nil, err
+	}
+	pods, err := k.getPodsForNetworkPolicy(*networkPolicy)
+	if err != nil {
+		return nil, err
+	}
+
+	mappedPolicy := &dto.NetworkPolicy{
+		Group:     group,
+		Version:   version,
+		Kind:      kind,
+		Name:      networkPolicy.Name,
+		Namespace: networkPolicy.Namespace,
+		Pods:      pods,
+		Ingress:   mapNetworkPolicyIngressRules(networkPolicy.Spec.Ingress),
+		Egress:    mapNetworkPolicyEgressRules(networkPolicy.Spec.Egress),
+	}
+
+	return mappedPolicy, nil
+}
+
+func mapNetworkPolicyIngressRules(rules []networkingv1.NetworkPolicyIngressRule) []dto.NetworkPolicyIngressRule {
+	mapped := make([]dto.NetworkPolicyIngressRule, len(rules))
+	for i, rule := range rules {
+		mapped[i] = dto.NetworkPolicyIngressRule{
+			Ports: mapNetworkPolicyPorts(rule.Ports),
+			From:  mapNetworkPolicyPeers(rule.From),
+		}
+	}
+	return mapped
+}
+
+func mapNetworkPolicyEgressRules(rules []networkingv1.NetworkPolicyEgressRule) []dto.NetworkPolicyEgressRule {
+	mapped := make([]dto.NetworkPolicyEgressRule, len(rules))
+	for i, rule := range rules {
+		mapped[i] = dto.NetworkPolicyEgressRule{
+			Ports: mapNetworkPolicyPorts(rule.Ports),
+			To:    mapNetworkPolicyPeers(rule.To),
+		}
+	}
+	return mapped
+}
+
+func mapNetworkPolicyPorts(ports []networkingv1.NetworkPolicyPort) []dto.NetworkPolicyPort {
+	mapped := make([]dto.NetworkPolicyPort, len(ports))
+	for i, port := range ports {
+		protocol := ""
+		if port.Protocol != nil {
+			protocol = string(*port.Protocol)
+		}
+
+		portValue := intstr.IntOrString{}
+		if port.Port != nil {
+			portValue = *port.Port
+		}
+
+		var endPort int32
+		if port.EndPort != nil {
+			endPort = *port.EndPort
+		}
+
+		mapped[i] = dto.NetworkPolicyPort{
+			Protocol: protocol,
+			Port:     portValue,
+			EndPort:  endPort,
+		}
+	}
+	return mapped
+}
+
+func mapNetworkPolicyPeers(peers []networkingv1.NetworkPolicyPeer) []dto.NetworkPolicyPeer {
+	mapped := make([]dto.NetworkPolicyPeer, len(peers))
+	for i, peer := range peers {
+		mapped[i] = dto.NetworkPolicyPeer{
+			IPBlock: mapIPBlock(peer.IPBlock),
+		}
+	}
+	return mapped
+}
+
+func mapIPBlock(block *networkingv1.IPBlock) *dto.IPBlock {
+	if block == nil {
+		return nil
+	}
+	return &dto.IPBlock{
+		CIDR:   block.CIDR,
+		Except: block.Except,
+	}
+}
+
 func (k *KubernetesClient) isResourceNamespaced(gvk schema.GroupVersionKind) (bool, error) {
 	resourcesList, err := k.discovery.ServerPreferredResources()
 	if err != nil {
@@ -975,4 +1072,8 @@ func isCronJob(group, version, kind string) bool {
 
 func isRole(group, version, kind string) bool {
 	return group == "rbac.authorization.k8s.io" && version == "v1" && kind == "Role"
+}
+
+func isNetworkPolicy(group, version, kind string) bool {
+	return group == "networking.k8s.io" && version == "v1" && kind == "NetworkPolicy"
 }

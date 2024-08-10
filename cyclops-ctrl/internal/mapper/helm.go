@@ -16,6 +16,7 @@ func HelmSchemaToFields(name string, schema helm.Property, defs map[string]helm.
 			Type:        mapHelmPropertyTypeToFieldType(schema),
 			DisplayName: mapTitle(name, schema.Title),
 			Items:       arrayItem(schema.Items, defs),
+			Immutable:   schema.Immutable,
 		}
 	}
 
@@ -67,6 +68,7 @@ func HelmSchemaToFields(name string, schema helm.Property, defs map[string]helm.
 			MinLength:        dependency.RootField.MinLength,
 			MaxLength:        dependency.RootField.MaxLength,
 			Pattern:          dependency.RootField.Pattern,
+			Immutable:        dependency.RootField.Immutable,
 		})
 	}
 
@@ -88,6 +90,7 @@ func HelmSchemaToFields(name string, schema helm.Property, defs map[string]helm.
 		MinLength:        schema.MinLength,
 		MaxLength:        schema.MaxLength,
 		Pattern:          schema.Pattern,
+		Immutable:        schema.Immutable,
 	}
 }
 
