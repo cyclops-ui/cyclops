@@ -57,7 +57,6 @@ const Modules = () => {
           .includes(module.status.toLowerCase()),
       ),
     );
-    console.log("Modules are displayed");
   }, [displaymodule]);
 
   const handleClick = () => {
