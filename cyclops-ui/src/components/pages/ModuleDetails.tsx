@@ -142,6 +142,10 @@ const ModuleDetails = () => {
     namespace: "",
   });
 
+  const [loadingRenderedManifest, setLoadingRenderedManifest] = useState(false);
+  const [viewRenderedManifest, setViewRenderedManifest] = useState(false);
+  const [renderedManifest, setRenderedManifest] = useState("");
+
   const [resourceFilter, setResourceFilter] = useState<string[]>([]);
 
   const [activeCollapses, setActiveCollapses] = useState(new Map());
@@ -788,6 +792,51 @@ const ModuleDetails = () => {
     );
   };
 
+  const handleViewRenderedManifest = () => {
+    setLoadingRenderedManifest(true);
+    setViewRenderedManifest(true);
+
+    axios
+      .get(`/api/modules/` + moduleName + `/currentManifest`)
+      .then((res) => {
+        setRenderedManifest(res.data);
+        setLoadingRenderedManifest(false);
+      })
+      .catch((error) => {
+        setError(mapResponseError(error));
+        setLoadingRenderedManifest(false);
+      });
+  };
+
+  const renderedManifestModalContent = () => {
+    if (loadingRenderedManifest) {
+      return <Spin />;
+    }
+
+    return (
+      <ReactAce
+        mode={"sass"}
+        theme={"github"}
+        fontSize={12}
+        showPrintMargin={true}
+        showGutter={true}
+        highlightActiveLine={true}
+        setOptions={{
+          enableBasicAutocompletion: true,
+          enableLiveAutocompletion: true,
+          enableSnippets: false,
+          showLineNumbers: true,
+          tabSize: 4,
+          useWorker: false,
+        }}
+        style={{
+          width: "100%",
+        }}
+        value={renderedManifest}
+      />
+    );
+  };
+
   return (
     <div>
       {error.message.length !== 0 && (
@@ -816,7 +865,7 @@ const ModuleDetails = () => {
       >
         Actions
       </Divider>
-      <Row gutter={[40, 0]}>
+      <Row gutter={[20, 0]}>
         <Col>
           <Button
             onClick={function () {
@@ -835,6 +884,11 @@ const ModuleDetails = () => {
             block
           >
             Rollback
+          </Button>
+        </Col>
+        <Col>
+          <Button onClick={handleViewRenderedManifest} block>
+            View Manifest
           </Button>
         </Col>
         <Col>
@@ -952,6 +1006,16 @@ const ModuleDetails = () => {
           value={deleteResourceVerify}
           required
         />
+      </Modal>
+      <Modal
+        title="Rendered manifest"
+        open={viewRenderedManifest}
+        onOk={() => setViewRenderedManifest(false)}
+        onCancel={() => setViewRenderedManifest(false)}
+        cancelButtonProps={{ style: { display: "none" } }}
+        width={"60%"}
+      >
+        {renderedManifestModalContent()}
       </Modal>
     </div>
   );
