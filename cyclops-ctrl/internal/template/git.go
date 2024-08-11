@@ -5,12 +5,13 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	"github.com/pkg/errors"
-	"gopkg.in/yaml.v2"
 	"io"
 	path2 "path"
 	"path/filepath"
 	"strings"
+
+	"github.com/pkg/errors"
+	"gopkg.in/yaml.v2"
 
 	"github.com/go-git/go-billy/v5"
 	"github.com/go-git/go-billy/v5/memfs"
@@ -248,7 +249,7 @@ func resolveRef(repo, version string, creds *auth.Credentials) (string, error) {
 		Auth:          httpBasicAuthCredentials(creds),
 	})
 	if err != nil {
-		return "", errors.Wrap(err, fmt.Sprintf("repo %s was not cloned sucessfully; authentication might be required; check if repository exists and you referenced it correctly", repo))
+		return "", errors.Wrap(err, fmt.Sprintf("repo %s was not cloned successfully; authentication might be required; check if repository exists and you referenced it correctly", repo))
 	}
 
 	// Filters the references list and only keeps tags
@@ -273,7 +274,7 @@ func resolveDefaultBranchRef(repo string, creds *auth.Credentials) (string, erro
 		Auth:          httpBasicAuthCredentials(creds),
 	})
 	if err != nil {
-		return "", errors.Wrap(err, fmt.Sprintf("repo %s was not cloned sucessfully; authentication might be required; check if repository exists and you referenced it correctly", repo))
+		return "", errors.Wrap(err, fmt.Sprintf("repo %s was not cloned successfully; authentication might be required; check if repository exists and you referenced it correctly", repo))
 	}
 
 	// Filters the references list and only keeps tags
@@ -317,7 +318,7 @@ func clone(repoURL, commit string, creds *auth.Credentials) (billy.Filesystem, e
 		Auth: httpBasicAuthCredentials(creds),
 	})
 	if err != nil {
-		return nil, errors.Wrap(err, fmt.Sprintf("repo %s was not cloned sucessfully; authentication might be required; check if repository exists and you referenced it correctly", repoURL))
+		return nil, errors.Wrap(err, fmt.Sprintf("repo %s was not cloned successfully; authentication might be required; check if repository exists and you referenced it correctly", repoURL))
 	}
 
 	wt, err := repo.Worktree()
