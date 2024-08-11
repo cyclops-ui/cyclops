@@ -104,11 +104,11 @@ func (c *Templates) GetTemplateInitialValues(ctx *gin.Context) {
 func (c *Templates) ListTemplatesStore(ctx *gin.Context) {
 	ctx.Header("Access-Control-Allow-Origin", "*")
 
-	allowed := c.checkPermission(ctx, Resource.templatestore, "*", Action.list)
+	allowed := c.checkPermission(ctx, ResourceTemplateStore, "*", ActionList)
 	if !allowed {
 		errorMessage := fmt.Sprintf(
 			"User does not have permission to perform '%s' action on %s",
-			Action.list, Resource.templatestore,
+			ActionList, ResourceTemplateStore,
 		)
 		ctx.JSON(http.StatusForbidden, dto.NewError("Permission Denied", errorMessage))
 		return
@@ -128,11 +128,11 @@ func (c *Templates) ListTemplatesStore(ctx *gin.Context) {
 func (c *Templates) CreateTemplatesStore(ctx *gin.Context) {
 	ctx.Header("Access-Control-Allow-Origin", "*")
 
-	allowed := c.checkPermission(ctx, Resource.templatestore, "", Action.create)
+	allowed := c.checkPermission(ctx, ResourceTemplateStore, "", ActionCreate)
 	if !allowed {
 		errorMessage := fmt.Sprintf(
 			"User does not have permission to perform '%s' action on %s",
-			Action.create, Resource.templatestore,
+			ActionCreate, ResourceTemplateStore,
 		)
 		ctx.JSON(http.StatusForbidden, dto.NewError("Permission Denied", errorMessage))
 		return
@@ -174,11 +174,11 @@ func (c *Templates) CreateTemplatesStore(ctx *gin.Context) {
 func (c *Templates) EditTemplatesStore(ctx *gin.Context) {
 	ctx.Header("Access-Control-Allow-Origin", "*")
 
-	allowed := c.checkPermission(ctx, Resource.templatestore, ctx.Param("name"), Action.edit)
+	allowed := c.checkPermission(ctx, ResourceTemplateStore, ctx.Param("name"), ActionEdit)
 	if !allowed {
 		errorMessage := fmt.Sprintf(
 			"User does not have permission to perform '%s' action on %s",
-			Action.edit, Resource.templatestore,
+			ActionEdit, ResourceTemplateStore,
 		)
 		ctx.JSON(http.StatusForbidden, dto.NewError("Permission Denied", errorMessage))
 		return
@@ -222,11 +222,11 @@ func (c *Templates) EditTemplatesStore(ctx *gin.Context) {
 func (c *Templates) DeleteTemplatesStore(ctx *gin.Context) {
 	ctx.Header("Access-Control-Allow-Origin", "*")
 
-	allowed := c.checkPermission(ctx, Resource.templatestore, ctx.Param("name"), Action.delete)
+	allowed := c.checkPermission(ctx, ResourceTemplateStore, ctx.Param("name"), ActionDelete)
 	if !allowed {
 		errorMessage := fmt.Sprintf(
 			"User does not have permission to perform '%s' action on %s",
-			Action.delete, Resource.templatestore,
+			ActionDelete, ResourceTemplateStore,
 		)
 		ctx.JSON(http.StatusForbidden, dto.NewError("Permission Denied", errorMessage))
 		return

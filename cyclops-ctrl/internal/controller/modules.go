@@ -52,11 +52,11 @@ func NewModulesController(
 func (m *Modules) GetModule(ctx *gin.Context) {
 	ctx.Header("Access-Control-Allow-Origin", "*")
 
-	allowed := m.checkPermission(ctx, Resource.module, ctx.Param("name"), Action.list)
+	allowed := m.checkPermission(ctx, ResourceModule, ctx.Param("name"), ActionList)
 	if !allowed {
 		errorMessage := fmt.Sprintf(
 			"User does not have permission to perform '%s' action on %s named %s",
-			Action.list, Resource.module, ctx.Param("name"),
+			ActionList, ResourceModule, ctx.Param("name"),
 		)
 		ctx.JSON(http.StatusForbidden, dto.NewError("Permission Denied", errorMessage))
 		return
@@ -82,11 +82,11 @@ func (m *Modules) GetModule(ctx *gin.Context) {
 func (m *Modules) ListModules(ctx *gin.Context) {
 	ctx.Header("Access-Control-Allow-Origin", "*")
 
-	allowed := m.checkPermission(ctx, Resource.module, "*", Action.list)
+	allowed := m.checkPermission(ctx, ResourceModule, "*", ActionList)
 	if !allowed {
 		errorMessage := fmt.Sprintf(
 			"User does not have permission to perform '%s' action on %s named %s",
-			Action.list, Resource.module, ctx.Param("name"),
+			ActionList, ResourceModule, ctx.Param("name"),
 		)
 		ctx.JSON(http.StatusForbidden, dto.NewError("Permission Denied", errorMessage))
 		return
@@ -118,11 +118,11 @@ func (m *Modules) ListModules(ctx *gin.Context) {
 func (m *Modules) DeleteModule(ctx *gin.Context) {
 	ctx.Header("Access-Control-Allow-Origin", "*")
 
-	allowed := m.checkPermission(ctx, Resource.module, ctx.Param("name"), Action.delete)
+	allowed := m.checkPermission(ctx, ResourceModule, ctx.Param("name"), ActionDelete)
 	if !allowed {
 		errorMessage := fmt.Sprintf(
 			"User does not have permission to perform '%s' action on %s named %s",
-			Action.delete, Resource.module, ctx.Param("name"),
+			ActionDelete, ResourceModule, ctx.Param("name"),
 		)
 		ctx.JSON(http.StatusForbidden, dto.NewError("Permission Denied", errorMessage))
 		return
@@ -142,11 +142,11 @@ func (m *Modules) DeleteModule(ctx *gin.Context) {
 func (m *Modules) GetModuleHistory(ctx *gin.Context) {
 	ctx.Header("Access-Control-Allow-Origin", "*")
 
-	allowed := m.checkPermission(ctx, Resource.module, ctx.Param("name"), Action.list)
+	allowed := m.checkPermission(ctx, ResourceModule, ctx.Param("name"), ActionList)
 	if !allowed {
 		errorMessage := fmt.Sprintf(
 			"User does not have permission to perform '%s' action on %s named %s",
-			Action.list, Resource.module, ctx.Param("name"),
+			ActionList, ResourceModule, ctx.Param("name"),
 		)
 		ctx.JSON(http.StatusForbidden, dto.NewError("Permission Denied", errorMessage))
 		return
@@ -183,7 +183,6 @@ func (m *Modules) Manifest(ctx *gin.Context) {
 		return
 	}
 
-
 	manifest, err := m.renderer.HelmTemplate(v1alpha1.Module{
 		ObjectMeta: metav1.ObjectMeta{
 			Name: ctx.Param("name"),
@@ -212,11 +211,11 @@ func (m *Modules) Manifest(ctx *gin.Context) {
 func (m *Modules) CurrentManifest(ctx *gin.Context) {
 	ctx.Header("Access-Control-Allow-Origin", "*")
 
-	allowed := m.checkPermission(ctx, Resource.module, ctx.Param("name"), Action.list)
+	allowed := m.checkPermission(ctx, ResourceModule, ctx.Param("name"), ActionList)
 	if !allowed {
 		errorMessage := fmt.Sprintf(
 			"User does not have permission to perform '%s' action on %s named %s",
-			Action.list, Resource.module, ctx.Param("name"),
+			ActionList, ResourceModule, ctx.Param("name"),
 		)
 		ctx.JSON(http.StatusForbidden, dto.NewError("Permission Denied", errorMessage))
 		return
@@ -256,11 +255,11 @@ func (m *Modules) CurrentManifest(ctx *gin.Context) {
 func (m *Modules) DeleteModuleResource(ctx *gin.Context) {
 	ctx.Header("Access-Control-Allow-Origin", "*")
 
-	allowed := m.checkPermission(ctx, Resource.module, "", Action.delete)
+	allowed := m.checkPermission(ctx, ResourceModule, "", ActionDelete)
 	if !allowed {
 		errorMessage := fmt.Sprintf(
 			"User does not have permission to perform '%s' action on %s named %s",
-			Action.delete, Resource.module, ctx.Param("name"),
+			string(ActionDelete), ResourceModule, ctx.Param("name"),
 		)
 		ctx.JSON(http.StatusForbidden, dto.NewError("Permission Denied", errorMessage))
 		return
@@ -293,11 +292,11 @@ func (m *Modules) CreateModule(ctx *gin.Context) {
 		return
 	}
 
-	allowed := m.checkPermission(ctx, Resource.module, request.Name, Action.create)
+	allowed := m.checkPermission(ctx, ResourceModule, request.Name, ActionCreate)
 	if !allowed {
 		errorMessage := fmt.Sprintf(
 			"User does not have permission to perform '%s' action on %s named %s",
-			Action.create, Resource.module, request.Name,
+			ActionCreate, ResourceModule, request.Name,
 		)
 		ctx.JSON(http.StatusForbidden, dto.NewError("Permission Denied", errorMessage))
 		return
@@ -333,11 +332,11 @@ func (m *Modules) UpdateModule(ctx *gin.Context) {
 		return
 	}
 
-	allowed := m.checkPermission(ctx, Resource.module, request.Name, Action.edit)
+	allowed := m.checkPermission(ctx, ResourceModule, request.Name, ActionEdit)
 	if !allowed {
 		errorMessage := fmt.Sprintf(
 			"User does not have permission to perform '%s' action on %s named %s",
-			Action.edit, Resource.module, request.Name,
+			ActionEdit, ResourceModule, request.Name,
 		)
 		ctx.JSON(http.StatusForbidden, dto.NewError("Permission Denied", errorMessage))
 		return
