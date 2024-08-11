@@ -4,16 +4,19 @@ import {
   AppstoreAddOutlined,
   HddOutlined,
   BugFilled,
+  LogoutOutlined,
   SnippetsOutlined,
   GithubFilled,
 } from "@ant-design/icons";
 import { useLocation } from "react-router";
 import PathConstants from "../../routes/PathConstants";
 import { Link } from "react-router-dom";
+import { useAuth } from "../../context/AuthContext";
 import styles from "./styles.module.css";
 
 const SideNav = () => {
   const location = useLocation().pathname.split("/")[1];
+  const { logout } = useAuth();
 
   const sidebarItems: MenuProps["items"] = [
     {
@@ -42,9 +45,7 @@ const SideNav = () => {
   };
 
   return (
-    <div
-      style={{ display: "flex", flexDirection: "column", minHeight: "100vh" }}
-    >
+    <div style={{ display: "flex", flexDirection: "column", height: "100vh" }}>
       <a href={PathConstants.MODULES}>
         <div
           style={{
@@ -63,30 +64,35 @@ const SideNav = () => {
         selectedKeys={[location]}
         items={sidebarItems}
       />
-      <Button
-        ghost
-        style={{ margin: "auto 25px 25px 25px" }}
-        icon={<BugFilled />}
-        href={
-          "https://github.com/cyclops-ui/cyclops/issues/new?assignees=&labels=&projects=&template=bug_report.md&title="
-        }
-      >
-        <b>Report a Bug</b>
-      </Button>
-      <center
-        style={{
-          color: "#FFF",
-          margin: "25px",
-          marginTop: "0",
-        }}
-      >
-        <Link
-          className={styles.taglink}
-          to={tagChangelogLink(window.__RUNTIME_CONFIG__.REACT_APP_VERSION)}
+
+      <div style={{ marginTop: "auto" }}>
+        <Button
+          ghost
+          style={{ margin: "10px 25px", width: "calc(100% - 50px)" }}
+          icon={<LogoutOutlined />}
+          onClick={logout}
         >
-          <GithubFilled /> {window.__RUNTIME_CONFIG__.REACT_APP_VERSION}
-        </Link>
-      </center>
+          <b>Logout</b>
+        </Button>
+
+        <Button
+          ghost
+          style={{ margin: "10px 25px", width: "calc(100% - 50px)" }}
+          icon={<BugFilled />}
+          href="https://github.com/cyclops-ui/cyclops/issues/new?assignees=&labels=&projects=&template=bug_report.md&title="
+        >
+          <b>Report a Bug</b>
+        </Button>
+
+        <center style={{ color: "#FFF", margin: "15px 25px" }}>
+          <Link
+            className={styles.taglink}
+            to={tagChangelogLink(window.__RUNTIME_CONFIG__.REACT_APP_VERSION)}
+          >
+            <GithubFilled /> {window.__RUNTIME_CONFIG__.REACT_APP_VERSION}
+          </Link>
+        </center>
+      </div>
     </div>
   );
 };

@@ -42,6 +42,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({
   const logout = () => {
     Cookies.set("_isAuthenticated", "false");
     setIsAuthenticated(false);
+    window.location.reload();
   };
 
   return (
