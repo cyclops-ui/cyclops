@@ -54,7 +54,7 @@ const Modules = () => {
       });
   }, []);
   useEffect(() => {
-    const newfilteredData = filteredData.filter((module: any) =>
+    const newfilteredData = allData.filter((module: any) =>
       moduleHealthFilter
         .map((status) => status.toLowerCase())
         .includes(module.status.toLowerCase()),
