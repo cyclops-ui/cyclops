@@ -1298,7 +1298,7 @@ const NewModule = () => {
                 disabled={
                   loadingTemplate ||
                   loadingTemplateInitialValues ||
-                  !template.version
+                  !(template.version || template.path || template.repo)
                 }
               >
                 Save
