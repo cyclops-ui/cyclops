@@ -28,7 +28,7 @@ const Modules = () => {
   const [allData, setAllData] = useState([]);
   const [filteredData, setFilteredData] = useState([]);
   const [loadingModules, setLoadingModules] = useState(false);
-  const [displaymodule, setDisplayModule] = useState<string[]>([]);
+  const [moduleHealthFilter, setModuleHealthFilter] = useState<string[]>([]);
   const resourceFilter = ["Healty", "Unhealthy", "Unknown"];
   const [error, setError] = useState({
     message: "",
@@ -52,22 +52,22 @@ const Modules = () => {
   useEffect(() => {
     setFilteredData(
       filteredData.filter((module: any) =>
-        displaymodule
+        moduleHealthFilter
           .map((status) => status.toLowerCase())
           .includes(module.status.toLowerCase()),
       ),
     );
-  }, [displaymodule]);
+  }, [moduleHealthFilter]);
 
   const handleClick = () => {
     history("/modules/new");
   };
   const handleSelectItem = (key: any) => {
-    let x = displaymodule.indexOf(key);
+    let x = moduleHealthFilter.indexOf(key);
     if (x > -1) {
-      setDisplayModule(displaymodule.filter((item) => item !== key));
+      setModuleHealthFilter(moduleHealthFilter.filter((item) => item !== key));
     } else {
-      setDisplayModule([...displaymodule, key]);
+      setModuleHealthFilter([...moduleHealthFilter, key]);
     }
   };
   const resourceFilterPopover = () => {
@@ -76,7 +76,7 @@ const Modules = () => {
         key={index}
         style={{ display: "block" }}
         onChange={(checkedValues) => handleSelectItem(item)}
-        value={displaymodule}
+        value={moduleHealthFilter}
       >
         <>
           <Checkbox value={item}>{item}</Checkbox>
@@ -196,7 +196,7 @@ const Modules = () => {
                   href={
                     module.template.repo +
                     `/tree/` +
-                    getTemplateVersion(
+                    getLinkPath(
                       module.template.version,
                       module.template.resolvedVersion,
                     ) +
