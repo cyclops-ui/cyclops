@@ -57,6 +57,7 @@ const Modules = () => {
           .includes(module.status.toLowerCase()),
       ),
     );
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [moduleHealthFilter]);
 
   const handleClick = () => {
