@@ -62,27 +62,25 @@ const Modules = () => {
   const handleClick = () => {
     history("/modules/new");
   };
-  const handleSelectItem = (key: any) => {
-    let x = moduleHealthFilter.indexOf(key);
-    if (x > -1) {
-      setModuleHealthFilter(moduleHealthFilter.filter((item) => item !== key));
-    } else {
-      setModuleHealthFilter([...moduleHealthFilter, key]);
-    }
+  const handleSelectItem = (selectedItems: any[]) => {
+    console.log(selectedItems);
+    setModuleHealthFilter(selectedItems);
   };
+
   const resourceFilterPopover = () => {
-    return resourceFilter.map((item, index) => (
+    return (
       <Checkbox.Group
-        key={index}
         style={{ display: "block" }}
-        onChange={(checkedValues) => handleSelectItem(item)}
+        onChange={handleSelectItem}
         value={moduleHealthFilter}
       >
-        <>
-          <Checkbox value={item}>{item}</Checkbox>
-        </>
+        {resourceFilter.map((item, index) => (
+          <Checkbox key={index} value={item}>
+            {item}
+          </Checkbox>
+        ))}
       </Checkbox.Group>
-    ));
+    );
   };
   const handleSearch = (event: any) => {
     const query = event.target.value;
@@ -251,6 +249,7 @@ const Modules = () => {
           style={{ marginBottom: "20px" }}
         />
       )}
+
       <Row gutter={[40, 0]}>
         <Col span={18}>
           <Title level={2}>Deployed modules</Title>
