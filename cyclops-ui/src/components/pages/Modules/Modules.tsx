@@ -50,21 +50,21 @@ const Modules = () => {
       });
   }, []);
   useEffect(() => {
-    setFilteredData(
-      filteredData.filter((module: any) =>
-        moduleHealthFilter
-          .map((status) => status.toLowerCase())
-          .includes(module.status.toLowerCase()),
-      ),
+    const newfilteredData = filteredData.filter((module: any) =>
+      moduleHealthFilter
+        .map((status) => status.toLowerCase())
+        .includes(module.status.toLowerCase()),
     );
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [moduleHealthFilter]);
+
+    if (JSON.stringify(newfilteredData) !== JSON.stringify(filteredData)) {
+      setFilteredData(newfilteredData);
+    }
+  }, [moduleHealthFilter, filteredData]);
 
   const handleClick = () => {
     history("/modules/new");
   };
   const handleSelectItem = (selectedItems: any[]) => {
-    console.log(selectedItems);
     setModuleHealthFilter(selectedItems);
   };
 
