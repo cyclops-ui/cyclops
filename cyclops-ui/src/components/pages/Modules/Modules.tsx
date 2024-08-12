@@ -63,7 +63,7 @@ const Modules = () => {
     if (JSON.stringify(newfilteredData) !== JSON.stringify(filteredData)) {
       setFilteredData(newfilteredData);
     }
-  }, [moduleHealthFilter, filteredData]);
+  }, [moduleHealthFilter, filteredData, allData]);
 
   const handleClick = () => {
     history("/modules/new");
