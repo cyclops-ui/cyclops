@@ -958,12 +958,25 @@ const ModuleDetails = () => {
         cancelButtonProps={{ style: { display: "none" } }}
         width={"40%"}
       >
-        <div>
+        <div
+          style={{
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+          }}
+        >
           <Checkbox onChange={handleCheckboxChange} checked={showManagedFields}>
             Include Managed Fields
           </Checkbox>
-          <Divider style={{ marginTop: "12px", marginBottom: "12px" }} />
+          <Button
+            onClick={() => {
+              navigator.clipboard.writeText(manifestModal.manifest);
+            }}
+          >
+            Copy Manifest
+          </Button>
         </div>
+        <Divider style={{ marginTop: "12px", marginBottom: "12px" }} />
         <ReactAce
           style={{ width: "100%" }}
           mode={"sass"}
