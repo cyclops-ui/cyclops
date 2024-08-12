@@ -821,6 +821,7 @@ const ModuleDetails = () => {
         showPrintMargin={true}
         showGutter={true}
         highlightActiveLine={true}
+        readOnly={true}
         setOptions={{
           enableBasicAutocompletion: true,
           enableLiveAutocompletion: true,
