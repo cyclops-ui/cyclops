@@ -28,8 +28,12 @@ const Modules = () => {
   const [allData, setAllData] = useState([]);
   const [filteredData, setFilteredData] = useState([]);
   const [loadingModules, setLoadingModules] = useState(false);
-  const [moduleHealthFilter, setModuleHealthFilter] = useState<string[]>([]);
-  const resourceFilter = ["Healty", "Unhealthy", "Unknown"];
+  const [moduleHealthFilter, setModuleHealthFilter] = useState<string[]>([
+    "Healthy",
+    "Unhealthy",
+    "Unknown",
+  ]);
+  const resourceFilter = ["Healthy", "Unhealthy", "Unknown"];
   const [error, setError] = useState({
     message: "",
     description: "",
@@ -174,7 +178,11 @@ const Modules = () => {
                 }}
               >
                 Repo:
-                <Link aria-level={3} href={module.template.repo}>
+                <Link
+                  aria-level={3}
+                  href={module.template.repo}
+                  target="_blank"
+                >
                   {" " + module.template.repo}
                 </Link>
               </Col>
