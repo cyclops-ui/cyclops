@@ -1602,7 +1602,7 @@
         "allValue": ".*",
         "current": {
           "selected": true,
-           "text": [
+          "text": [
             "All"
           ],
           "value": [
