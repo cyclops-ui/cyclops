@@ -1390,16 +1390,6 @@
           "range": true,
           "refId": "B",
           "useBackend": false
-        },
-        {
-          "datasource": {
-            "type": "prometheus"
-          },
-          "expr": "",
-          "hide": false,
-          "instant": false,
-          "range": true,
-          "refId": "C"
         }
       ],
       "title": "cache cost added/evicted",
