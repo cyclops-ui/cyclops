@@ -1060,7 +1060,7 @@
             "type": "prometheus"
           },
           "editorMode": "code",
-          "expr": "sum(rate(rest_client_requests_total{code=~\"5..\"}[5m]))",
+          "expr": "sum(rate(rest_client_requests_total{code=~\"5..\"}[$interval]))",
           "hide": false,
           "instant": false,
           "legendFormat": "code - 5xx",
