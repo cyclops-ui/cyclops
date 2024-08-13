@@ -1564,7 +1564,7 @@
         "multi": true,
         "name": "pod",
         "options": [],
-        "query": "label_values(process_resident_memory_bytes, pod)",
+        "query": "label_values(cyclops_modules_deployed{namespace=\"$namespace\"},pod)",
         "refresh": 2,
         "regex": "",
         "skipUrlSync": false,
