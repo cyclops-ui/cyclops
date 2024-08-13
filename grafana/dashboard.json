@@ -1602,11 +1602,11 @@
         "allValue": ".*",
         "current": {
           "selected": true,
-          "text": [
-            "cyclops-ctrl-57846855dc-ls9v2"
+           "text": [
+            "All"
           ],
           "value": [
-            "cyclops-ctrl-57846855dc-ls9v2"
+            "$__all"
           ]
         },
         "datasource": {
