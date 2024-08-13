@@ -1273,7 +1273,7 @@
           "fullMetaSearch": false,
           "includeNullMetadata": true,
           "instant": false,
-          "legendFormat": "Count",
+          "legendFormat": "count",
           "range": true,
           "refId": "A",
           "useBackend": false
