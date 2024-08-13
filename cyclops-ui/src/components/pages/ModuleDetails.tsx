@@ -22,6 +22,7 @@ import {
   CaretRightOutlined,
   CheckCircleTwoTone,
   CloseSquareTwoTone,
+  CopyOutlined,
   SearchOutlined,
   WarningTwoTone,
 } from "@ant-design/icons";
@@ -958,18 +959,36 @@ const ModuleDetails = () => {
         cancelButtonProps={{ style: { display: "none" } }}
         width={"40%"}
       >
-        <div>
-          <Checkbox onChange={handleCheckboxChange} checked={showManagedFields}>
-            Include Managed Fields
-          </Checkbox>
-          <Divider style={{ marginTop: "12px", marginBottom: "12px" }} />
+        <Checkbox onChange={handleCheckboxChange} checked={showManagedFields}>
+          Include Managed Fields
+        </Checkbox>
+        <Divider style={{ marginTop: "12px", marginBottom: "12px" }} />
+        <div style={{ position: "relative" }}>
+          <ReactAce
+            style={{ width: "100%" }}
+            mode={"sass"}
+            value={manifestModal.manifest}
+            readOnly={true}
+          />
+          <Tooltip title={"Copy Manifest"} trigger="hover">
+            <Button
+              onClick={() => {
+                navigator.clipboard.writeText(manifestModal.manifest);
+              }}
+              style={{
+                position: "absolute",
+                right: "20px",
+                top: "10px",
+              }}
+            >
+              <CopyOutlined
+                style={{
+                  fontSize: "20px",
+                }}
+              />
+            </Button>
+          </Tooltip>
         </div>
-        <ReactAce
-          style={{ width: "100%" }}
-          mode={"sass"}
-          value={manifestModal.manifest}
-          readOnly={true}
-        />
       </Modal>
       <Modal
         title={
