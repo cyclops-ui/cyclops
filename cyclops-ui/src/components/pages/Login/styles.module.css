@@ -6,6 +6,7 @@
   background-color: rgb(6, 25, 61);
   background-image: url("https://cyclops-ui.com/assets/images/yaml_background-cc1699351922ead2cae5da1dbb75cbd8.png");
   background-position: 0 -10rem;
+  background-repeat: no-repeat;
   height: 100vh;
   width: 120%;
 }
