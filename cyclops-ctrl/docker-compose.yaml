@@ -1,12 +1,6 @@
 version: "3.8"
 
 services:
-  redis:
-    container_name: redis
-    image: redis
-    ports:
-      - 6379:6379
-
   cerbos:
     container_name: cerbos
     image: ghcr.io/cerbos/cerbos:latest
