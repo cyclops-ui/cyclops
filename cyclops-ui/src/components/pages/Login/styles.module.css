@@ -5,10 +5,14 @@
 .left_banner {
   background-color: rgb(6, 25, 61);
   background-image: url("https://cyclops-ui.com/assets/images/yaml_background-cc1699351922ead2cae5da1dbb75cbd8.png");
-  background-size: cover;
   background-position: 0 -10rem;
   height: 100vh;
-  width: 70vw;
+  width: 120%;
+}
+
+.right_banner {
+  height: 100vh;
+  width: 80%;
 }
 
 .cyclops_image_container {
@@ -18,10 +22,9 @@
 }
 
 .cyclops_brand_image {
-  height: 25rem;
+  width: 50%;
   position: fixed;
   bottom: 0;
-  /* width: 10rem; */
 }
 
 .login_header {
@@ -29,8 +32,8 @@
 }
 
 .cyclops_login_header_login {
-  height: 7rem;
-  margin-bottom: 4rem;
+  width: 80%;
+  margin-bottom: 16px;
 }
 
 .login_form {
@@ -38,36 +41,19 @@
 }
 
 .login_container {
-  width: 30vw;
+  width: 80%;
   padding: 0 5%;
+  margin: 0 10%;
 }
 
 .field_container {
   margin: 1rem 0;
+  width: 100%;
 }
 
-.submit_buttom {
-  background-color: #ffffff;
-  border: 1px solid rgb(209, 213, 219);
-  border-radius: 0.5rem;
-  box-sizing: border-box;
-  color: #111827;
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
-    "Helvetica Neue", Arial, "Noto Sans", sans-serif, "Apple Color Emoji",
-    "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
-  font-size: 0.875rem;
-  font-weight: 600;
-  line-height: 1.25rem;
-  padding: 0.75rem 1rem;
-  text-align: center;
-  text-decoration: none #d1d5db solid;
-  text-decoration-thickness: auto;
-  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
-  cursor: pointer;
-  user-select: none;
+.submit_button {
+  border: none;
   width: 100%;
-  -webkit-user-select: none;
-  touch-action: manipulation;
 }
 
 .submit_buttom:hover {

@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Alert } from "antd";
+import { Alert, Button, ConfigProvider, Form } from "antd";
 import axios from "axios";
 import { useAuth } from "../../../context/AuthContext";
 import Cookies from "js-cookie";
@@ -17,9 +17,12 @@ interface LoginResponse {
   token?: string;
 }
 
+interface LoginRequest {
+  username: string;
+  password: string;
+}
+
 const Login = () => {
-  const [username, setUsername] = useState<string>("");
-  const [password, setPassword] = useState<string>("");
   const navigate = useNavigate();
   const { login } = useAuth();
   const [error, setError] = useState({
@@ -27,33 +30,16 @@ const Login = () => {
     description: "",
   });
 
-  const handleUsernameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setUsername(e.target.value);
-  };
-
-  const handlePasswordChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    e.preventDefault();
-    setPassword(e.target.value);
-  };
-
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-
+  const handleSubmit = async (request: LoginRequest) => {
     try {
-      const response = await axios.post<LoginResponse>("/api/login", {
-        username,
-        password,
-      });
+      const response = await axios.post<LoginResponse>("/api/login", request);
 
       if (response.data?.token) {
         console.log("token", response.data.token);
         Cookies.set("_isAuthenticated", "true");
-        setUsername("");
-        setPassword("");
         login();
         navigate("/");
       } else {
-        // console.log("Error:", );
         setError({
           message: "Authentication Failed",
           description: `${response.data.error}`,
@@ -63,8 +49,6 @@ const Login = () => {
     } catch (err) {
       console.error(err);
     }
-    //
-    // return navigate("/");
   };
 
   return (
@@ -80,57 +64,68 @@ const Login = () => {
           />
         </div>
       </div>
-      <div className={styles.login_container}>
-        <form className={styles.login_form} onSubmit={handleSubmit}>
-          <h2 className={styles.login_header}>
-            <img
-              className={styles.cyclops_login_header_login}
-              src={
-                "https://github.com/cyclops-ui/cyclops-ui.github.io/blob/main/static/img/logo_black.png?raw=true"
-              }
-              alt=""
-            />
-          </h2>
-          {error.message.length !== 0 && (
-            <Alert
-              message={error.message}
-              description={error.description}
-              type="error"
-              closable
-              afterClose={() => {
-                setError({
-                  message: "",
-                  description: "",
-                });
-              }}
-              style={{ marginBottom: "20px" }}
-            />
-          )}
-          <div className={styles.field_container}>
-            <Input
-              size="large"
-              placeholder="Username"
-              value={username}
-              onChange={handleUsernameChange}
-              required
-              prefix={<UserOutlined />}
-            />
-          </div>
-          <div className={styles.field_container}>
-            <Input.Password
-              size="large"
-              placeholder="Password"
-              onChange={handlePasswordChange}
-              required
-              iconRender={(visible) =>
-                visible ? <EyeTwoTone /> : <EyeInvisibleOutlined />
-              }
-            />
-          </div>
-          <button className={styles.submit_buttom} type="submit">
-            Login
-          </button>
-        </form>
+      <div className={styles.right_banner}>
+        <div className={styles.login_container}>
+          <ConfigProvider
+            theme={{
+              token: {
+                colorPrimary: "#fe8801",
+              },
+            }}
+          >
+            <Form className={styles.login_form} onFinish={handleSubmit}>
+              <h2 className={styles.login_header}>
+                <img
+                  className={styles.cyclops_login_header_login}
+                  src={require("./cyclops-simplistic.png")}
+                  alt=""
+                />
+              </h2>
+              {error.message.length !== 0 && (
+                <Alert
+                  message={error.message}
+                  description={error.description}
+                  type="error"
+                  closable
+                  afterClose={() => {
+                    setError({
+                      message: "",
+                      description: "",
+                    });
+                  }}
+                  style={{ marginBottom: "20px" }}
+                />
+              )}
+              <Form.Item name="username" className={styles.field_container}>
+                <Input
+                  size="large"
+                  placeholder="Username"
+                  required
+                  prefix={<UserOutlined />}
+                />
+              </Form.Item>
+              <Form.Item name="password" className={styles.field_container}>
+                <Input.Password
+                  size="large"
+                  placeholder="Password"
+                  // onChange={handlePasswordChange}
+                  required
+                  iconRender={(visible) =>
+                    visible ? <EyeTwoTone /> : <EyeInvisibleOutlined />
+                  }
+                />
+              </Form.Item>
+              <Button
+                type="primary"
+                size="large"
+                htmlType="submit"
+                className={styles.submit_button}
+              >
+                Login
+              </Button>
+            </Form>
+          </ConfigProvider>
+        </div>
       </div>
     </div>
   );
