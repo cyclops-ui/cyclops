@@ -11,12 +11,12 @@ import {
   Space,
   Table,
   Typography,
+  Progress,
 } from "antd";
 import "ace-builds/src-noconflict/ace";
 import { useParams } from "react-router-dom";
 import axios from "axios";
 import "ace-builds/src-noconflict/mode-jsx";
-import GaugeComponent from "react-gauge-component";
 import type { InputRef } from "antd";
 import { formatBytes } from "../../utils/common";
 import { ColumnType } from "antd/lib/table";
@@ -25,13 +25,22 @@ import { SearchOutlined } from "@ant-design/icons";
 import Highlighter from "react-highlight-words";
 import { mapResponseError } from "../../utils/api/errors";
 
-const { Title } = Typography;
+const { Title, Text } = Typography;
 
 interface DataSourceType {
   name: string;
   namespace: string;
   cpu: number;
   memory: string;
+}
+
+interface NodeCondition {
+  type: string;
+  status: string;
+  lastHeartbeatTime: string;
+  lastTransitionTime: string;
+  reason: string;
+  message: string;
 }
 
 type DataIndex = keyof DataSourceType;
@@ -43,8 +52,11 @@ const NodeDetails = () => {
     name: String,
     pods: [],
     node: {
+      metadata: {
+        creationTimestamp: new Date().toISOString(),
+      },
       status: {
-        conditions: [],
+        conditions: [] as NodeCondition[],
       },
     },
     available: {
@@ -135,17 +147,6 @@ const NodeDetails = () => {
           >
             Reset
           </Button>
-          {/*<Button*/}
-          {/*    type="link"*/}
-          {/*    size="small"*/}
-          {/*    onClick={() => {*/}
-          {/*        confirm({ closeDropdown: false });*/}
-          {/*        setSearchText((selectedKeys as string[])[0]);*/}
-          {/*        setSearchedColumn(dataIndex);*/}
-          {/*    }}*/}
-          {/*>*/}
-          {/*    Filter*/}
-          {/*</Button>*/}
           <Button
             type="link"
             size="small"
@@ -340,20 +341,37 @@ const NodeDetails = () => {
       if (cond.type === type) {
         switch (type) {
           case "MemoryPressure":
-            return cond.status === "True" ? "#de3428" : "green";
+            return cond.status === "True"
+              ? gaugeColors["0%"]
+              : gaugeColors["100%"];
           case "DiskPressure":
-            return cond.status === "True" ? "#de3428" : "green";
+            return cond.status === "True"
+              ? gaugeColors["0%"]
+              : gaugeColors["100%"];
           case "PIDPressure":
-            return cond.status === "True" ? "#de3428" : "green";
+            return cond.status === "True"
+              ? gaugeColors["0%"]
+              : gaugeColors["100%"];
           case "Ready":
-            return cond.status === "True" ? "green" : "#de3428";
+            return cond.status === "True"
+              ? gaugeColors["100%"]
+              : gaugeColors["0%"];
           default:
             console.log("default", type);
         }
       }
     }
 
-    return "gray";
+    return gaugeColors["50%"];
+  };
+
+  /**
+   * Color pallete for statuses of resources
+   */
+  const gaugeColors = {
+    "0%": "#57F287",
+    "50%": "#FEE75C",
+    "100%": "#ED4245",
   };
 
   return (
@@ -375,6 +393,14 @@ const NodeDetails = () => {
       )}
       <Row>
         <Title>{nodeName}</Title>
+      </Row>
+      <Row>
+        <Text keyboard>
+          Created on:{" "}
+          {new Date(
+            node.node?.metadata?.creationTimestamp.toString(),
+          ).toLocaleString()}
+        </Text>
       </Row>
       <Row>
         <Divider
@@ -399,54 +425,55 @@ const NodeDetails = () => {
               width: "80%",
             }}
           >
-            <GaugeComponent
-              labels={{
-                valueLabel: {
-                  style: { fill: "#000", textShadow: "" },
-                  // formatTextValue: (value) => `CPU ${value}%`
-                },
-              }}
-              type={"grafana"}
-              value={resources.cpu * 100}
+            <Progress
+              type="dashboard"
+              strokeWidth={10}
+              status="normal"
+              percent={resources.cpu * 100}
+              strokeColor={gaugeColors}
             />
-            <h1>
-              CPU ({node.requested.cpu}m / {node.available.cpu}m)
+            <h1 style={{ marginBottom: "6px" }}>
+              <strong>CPU</strong>
             </h1>
+            <h3>
+              ({node.requested.cpu}m / {node.available.cpu}m)
+            </h3>
           </div>
         </Col>
         <Col span={8}>
           <div style={{ textAlign: "center", width: "80%" }}>
-            <GaugeComponent
-              labels={{
-                valueLabel: {
-                  style: { fill: "#000", textShadow: "" },
-                  // formatTextValue: (value) => `memory ${value}%`
-                },
-              }}
-              type={"grafana"}
-              value={resources.memory * 100}
+            <Progress
+              type="dashboard"
+              strokeWidth={10}
+              status="normal"
+              percent={resources.memory * 100}
+              strokeColor={gaugeColors}
             />
-            <h1>
-              Memory ({formatBytes(node.requested.memory)} /{" "}
+            <h1 style={{ marginBottom: "6px" }}>
+              <strong>Memory</strong>
+            </h1>
+            <h3>
+              ({formatBytes(node.requested.memory)}
+              {" / "}
               {formatBytes(node.available.memory)})
-            </h1>
+            </h3>
           </div>
         </Col>
         <Col span={8}>
           <div style={{ textAlign: "center", width: "80%" }}>
-            <GaugeComponent
-              labels={{
-                valueLabel: {
-                  style: { fill: "#000", textShadow: "" },
-                  // formatTextValue: (value) => `pods ${value}%`
-                },
-              }}
-              type={"grafana"}
-              value={resources.pod_count * 100}
+            <Progress
+              type="dashboard"
+              strokeWidth={10}
+              status="normal"
+              percent={resources.pod_count * 100}
+              strokeColor={gaugeColors}
             />
-            <h1>
-              Pods ({node.requested.pod_count} / {node.available.pod_count})
+            <h1 style={{ marginBottom: "6px" }}>
+              <strong>Pods</strong>
             </h1>
+            <h3>
+              ({node.requested.pod_count} / {node.available.pod_count})
+            </h3>
           </div>
         </Col>
       </Row>
@@ -458,90 +485,66 @@ const NodeDetails = () => {
         >
           Conditions
         </Divider>
-        <Col
-          span={6}
-          style={{
-            display: "flex",
-            justifyContent: "center",
-            alignItems: "center",
-          }}
-        >
-          <Card
+        {node.node.status.conditions.map((condition) => (
+          <Col
+            key={condition.type}
+            span={6}
             style={{
-              borderRadius: "10px",
-              backgroundColor: conditionColor("MemoryPressure"),
-              width: "100%",
-              margin: "5px",
-              textAlign: "center",
-              color: "white",
+              display: "flex",
+              justifyContent: "center",
+              alignItems: "center",
             }}
           >
-            <h1 style={{ margin: "0" }}>MemoryPressure</h1>
-          </Card>
-        </Col>
-        <Col
-          span={6}
-          style={{
-            display: "flex",
-            justifyContent: "center",
-            alignItems: "center",
-          }}
-        >
-          <Card
-            style={{
-              borderRadius: "10px",
-              backgroundColor: conditionColor("DiskPressure"),
-              width: "100%",
-              margin: "5px",
-              textAlign: "center",
-              color: "white",
-            }}
-          >
-            <h1 style={{ margin: "0" }}>DiskPressure</h1>
-          </Card>
-        </Col>
-        <Col
-          span={6}
-          style={{
-            display: "flex",
-            justifyContent: "center",
-            alignItems: "center",
-          }}
-        >
-          <Card
-            style={{
-              borderRadius: "10px",
-              backgroundColor: conditionColor("PIDPressure"),
-              width: "100%",
-              margin: "5px",
-              textAlign: "center",
-              color: "white",
-            }}
-          >
-            <h1 style={{ margin: "0" }}>PIDPressure</h1>
-          </Card>
-        </Col>
-        <Col
-          span={6}
-          style={{
-            display: "flex",
-            justifyContent: "center",
-            alignItems: "center",
-          }}
-        >
-          <Card
-            style={{
-              borderRadius: "10px",
-              backgroundColor: conditionColor("Ready"),
-              width: "100%",
-              margin: "5px",
-              textAlign: "center",
-              color: "white",
-            }}
-          >
-            <h1 style={{ margin: "0" }}>Ready</h1>
-          </Card>
-        </Col>
+            <Card
+              style={{
+                borderRadius: "10px",
+                borderWidth: "5px",
+                backgroundColor: "#fff",
+                width: "100%",
+                margin: "5px",
+                textAlign: "center",
+                color: "black",
+              }}
+            >
+              <Progress
+                type="circle"
+                percent={100}
+                status={
+                  conditionColor(condition.type) === gaugeColors["100%"]
+                    ? "success"
+                    : "exception"
+                }
+                trailColor={conditionColor(condition.type)}
+                strokeWidth={15}
+              />
+              <br />
+              <br />
+              <h3>
+                <strong>{condition.type}</strong>
+              </h3>
+
+              <Text strong>Last Transition Time: </Text>
+              <br />
+              <Text code>
+                {new Date(
+                  condition.lastTransitionTime.toString(),
+                ).toLocaleString()}
+              </Text>
+              <br />
+              <Text strong>Last HeartBeat Time: </Text>
+              <br />
+              <Text code>
+                {new Date(
+                  condition.lastHeartbeatTime.toString(),
+                ).toLocaleString()}
+              </Text>
+              <br />
+              <Text strong>Message:</Text>
+              <br />
+              <Text>{condition.message}</Text>
+            </Card>
+          </Col>
+        ))}
       </Row>
       <Divider
         style={{ fontSize: "120%" }}
@@ -551,33 +554,7 @@ const NodeDetails = () => {
         Pods: {node.pods.length}
       </Divider>
       <Col span={24} style={{ overflowX: "auto" }}>
-        <Table dataSource={node.pods} columns={columns}>
-          {/*<Table.Column*/}
-          {/*    title='Name'*/}
-          {/*    dataIndex='name'*/}
-          {/*    ...getColumnSearchProps('name', 'Search by Name')*/}
-          {/*    width={"30%"}*/}
-          {/*/>*/}
-          {/*<Table.Column*/}
-          {/*    title='Namespace'*/}
-          {/*    dataIndex='namespace'*/}
-          {/*    width={"30%"}*/}
-          {/*/>*/}
-          {/*<Table.Column*/}
-          {/*    title='CPU'*/}
-          {/*    dataIndex='cpu'*/}
-          {/*    render={cpu => cpu + 'm'}*/}
-          {/*    sorter={(a: any, b: any) => a.cpu - b.cpu}*/}
-          {/*    sortDirections={['descend', 'ascend']}*/}
-          {/*/>*/}
-          {/*<Table.Column*/}
-          {/*    title='Memory'*/}
-          {/*    dataIndex='memory'*/}
-          {/*    render={memory => formatBytes(memory)}*/}
-          {/*    sorter={(a: any, b: any) => a.memory - b.memory}*/}
-          {/*    sortDirections={['descend', 'ascend']}*/}
-          {/*/>*/}
-        </Table>
+        <Table dataSource={node.pods} columns={columns} />
       </Col>
     </div>
   );

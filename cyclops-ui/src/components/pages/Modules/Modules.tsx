@@ -84,6 +84,16 @@ const Modules = () => {
     return version + " - " + resolvedVersion.substring(0, 7);
   };
 
+  const getLinkPath = (version: string, resolvedVersion: string) => {
+    if (resolvedVersion !== "") {
+      return resolvedVersion;
+    }
+    if(version !== ""){
+      return version;
+    }
+    return "main";
+  };
+
   const renderModulesCards = () => {
     if (loadingModules) {
       return <Spin size={"large"} />;
@@ -133,7 +143,10 @@ const Modules = () => {
                 }}
               >
                 Repo:
-                <Link aria-level={3} href={module.template.repo}>
+                <Link aria-level={3}
+                 href={module.template.repo}
+                 target="_blank"
+                 >
                   {" " + module.template.repo}
                 </Link>
               </Col>
@@ -151,10 +164,11 @@ const Modules = () => {
                 Path:
                 <Link
                   aria-level={3}
+                  target="_blank"
                   href={
                     module.template.repo +
                     `/tree/` +
-                    getTemplateVersion(
+                    getLinkPath(
                       module.template.version,
                       module.template.resolvedVersion,
                     ) +
@@ -215,9 +229,9 @@ const Modules = () => {
         </Col>
         <Col span={6}>
           <Button
+            type={"primary"}
             onClick={handleClick}
             block
-            size={"large"}
             style={{
               fontWeight: "600",
             }}

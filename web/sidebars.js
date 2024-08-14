@@ -52,6 +52,7 @@ const sidebars = {
           items: [
             "installation/install/manifest",
             "installation/install/glasskube",
+            "installation/install/cyctl",
           ],
         },
         "installation/configuration",
@@ -84,6 +85,7 @@ const sidebars = {
       items: [
         "cyctl/cyctl",
         "cyctl/cyctl_create",
+        "cyctl/cyctl_create_module",
         "cyctl/cyctl_create_templateauthrules",
         "cyctl/cyctl_create_templates",
         "cyctl/cyctl_delete",
@@ -100,8 +102,10 @@ const sidebars = {
         "cyctl/cyctl_get_templates",
         "cyctl/cyctl_init",
         "cyctl/cyctl_serve",
+        "cyctl/cyctl_update",
+        "cyctl/cyctl_update_module",
         "cyctl/cyctl_version",
-      ]
+      ],
     },
     {
       label: "Roadmap",

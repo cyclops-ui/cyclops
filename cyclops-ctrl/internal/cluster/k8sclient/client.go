@@ -7,6 +7,8 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	networkingv1 "k8s.io/api/networking/v1"
+	"k8s.io/apimachinery/pkg/util/intstr"
 	"os"
 	"os/exec"
 	"sort"
@@ -347,6 +349,8 @@ func (k *KubernetesClient) GetResource(group, version, kind, name, namespace str
 		return k.mapPod(group, version, kind, name, namespace)
 	case isConfigMap(group, version, kind):
 		return k.mapConfigMap(group, version, kind, name, namespace)
+	case isPersistentVolume(group, version, kind):
+		return k.mapPersistentVolumes(group, version, kind, name, namespace)
 	case isPersistentVolumeClaims(group, version, kind):
 		return k.mapPersistentVolumeClaims(group, version, kind, name, namespace)
 	case isSecret(group, version, kind):
@@ -355,6 +359,10 @@ func (k *KubernetesClient) GetResource(group, version, kind, name, namespace str
 		return k.mapCronJob(group, version, kind, name, namespace)
 	case isJob(group, version, kind):
 		return k.mapJob(group, version, kind, name, namespace)
+	case isRole(group, version, kind):
+		return k.mapRole(group, version, kind, name, namespace)
+	case isNetworkPolicy(group, version, kind):
+		return k.mapNetworkPolicy(group, version, kind, name, namespace)
 	}
 
 	return nil, nil
@@ -772,6 +780,37 @@ func (k *KubernetesClient) mapPersistentVolumeClaims(group, version, kind, name,
 	}, nil
 }
 
+func (k *KubernetesClient) mapPersistentVolumes(group, version, kind, name, namespace string) (*dto.PersistentVolume, error) {
+	persistentVolume, err := k.clientset.CoreV1().PersistentVolumes().Get(context.Background(), name, metav1.GetOptions{})
+	if err != nil {
+		return nil, err
+	}
+
+	capacity := ""
+	if persistentVolume.Spec.Capacity != nil && persistentVolume.Spec.Capacity.Storage() != nil {
+		capacity = persistentVolume.Spec.Capacity.Storage().String()
+	}
+
+	claimRef := ""
+	if persistentVolume.Spec.ClaimRef != nil && persistentVolume.Spec.ClaimRef.Name != "" {
+		claimRef = persistentVolume.Spec.ClaimRef.Name
+	}
+
+	return &dto.PersistentVolume{
+		Group:                 group,
+		Version:               version,
+		Kind:                  kind,
+		Name:                  name,
+		Namespace:             namespace,
+		AccessModes:           persistentVolume.Spec.AccessModes,
+		PersistentVolumeClaim: claimRef,
+		Capacity:              capacity,
+		ReclaimPolicy:         persistentVolume.Spec.PersistentVolumeReclaimPolicy,
+		StorageClass:          persistentVolume.Spec.StorageClassName,
+		Status:                persistentVolume.Status,
+	}, nil
+}
+
 func (k *KubernetesClient) mapSecret(group, version, kind, name, namespace string) (*dto.Secret, error) {
 	secret, err := k.clientset.CoreV1().Secrets(namespace).Get(context.Background(), name, metav1.GetOptions{})
 	if err != nil {
@@ -853,6 +892,99 @@ func (k *KubernetesClient) mapJob(group, version, kind, name, namespace string) 
 	}, nil
 }
 
+func (k *KubernetesClient) mapNetworkPolicy(group, version, kind, name, namespace string) (*dto.NetworkPolicy, error) {
+	networkPolicy, err := k.clientset.NetworkingV1().NetworkPolicies(namespace).Get(context.Background(), name, metav1.GetOptions{})
+	if err != nil {
+		return nil, err
+	}
+	pods, err := k.getPodsForNetworkPolicy(*networkPolicy)
+	if err != nil {
+		return nil, err
+	}
+
+	mappedPolicy := &dto.NetworkPolicy{
+		Group:     group,
+		Version:   version,
+		Kind:      kind,
+		Name:      networkPolicy.Name,
+		Namespace: networkPolicy.Namespace,
+		Pods:      pods,
+		Ingress:   mapNetworkPolicyIngressRules(networkPolicy.Spec.Ingress),
+		Egress:    mapNetworkPolicyEgressRules(networkPolicy.Spec.Egress),
+	}
+
+	return mappedPolicy, nil
+}
+
+func mapNetworkPolicyIngressRules(rules []networkingv1.NetworkPolicyIngressRule) []dto.NetworkPolicyIngressRule {
+	mapped := make([]dto.NetworkPolicyIngressRule, len(rules))
+	for i, rule := range rules {
+		mapped[i] = dto.NetworkPolicyIngressRule{
+			Ports: mapNetworkPolicyPorts(rule.Ports),
+			From:  mapNetworkPolicyPeers(rule.From),
+		}
+	}
+	return mapped
+}
+
+func mapNetworkPolicyEgressRules(rules []networkingv1.NetworkPolicyEgressRule) []dto.NetworkPolicyEgressRule {
+	mapped := make([]dto.NetworkPolicyEgressRule, len(rules))
+	for i, rule := range rules {
+		mapped[i] = dto.NetworkPolicyEgressRule{
+			Ports: mapNetworkPolicyPorts(rule.Ports),
+			To:    mapNetworkPolicyPeers(rule.To),
+		}
+	}
+	return mapped
+}
+
+func mapNetworkPolicyPorts(ports []networkingv1.NetworkPolicyPort) []dto.NetworkPolicyPort {
+	mapped := make([]dto.NetworkPolicyPort, len(ports))
+	for i, port := range ports {
+		protocol := ""
+		if port.Protocol != nil {
+			protocol = string(*port.Protocol)
+		}
+
+		portValue := intstr.IntOrString{}
+		if port.Port != nil {
+			portValue = *port.Port
+		}
+
+		var endPort int32
+		if port.EndPort != nil {
+			endPort = *port.EndPort
+		}
+
+		mapped[i] = dto.NetworkPolicyPort{
+			Protocol: protocol,
+			Port:     portValue,
+			EndPort:  endPort,
+		}
+	}
+	return mapped
+}
+
+func mapNetworkPolicyPeers(peers []networkingv1.NetworkPolicyPeer) []dto.NetworkPolicyPeer {
+	mapped := make([]dto.NetworkPolicyPeer, len(peers))
+	for i, peer := range peers {
+		mapped[i] = dto.NetworkPolicyPeer{
+			IPBlock: mapIPBlock(peer.IPBlock),
+		}
+	}
+	return mapped
+}
+
+func mapIPBlock(block *networkingv1.IPBlock) *dto.IPBlock {
+	if block == nil {
+		return nil
+	}
+	return &dto.IPBlock{
+		CIDR:   block.CIDR,
+		Except: block.Except,
+	}
+}
+
 func (k *KubernetesClient) isResourceNamespaced(gvk schema.GroupVersionKind) (bool, error) {
 	resourcesList, err := k.discovery.ServerPreferredResources()
 	if err != nil {
@@ -875,6 +1007,23 @@ func (k *KubernetesClient) isResourceNamespaced(gvk schema.GroupVersionKind) (bo
 	}
 
 	return false, errors.New(fmt.Sprintf("group version kind not found: %v", gvk.String()))
+}
+
+func (k *KubernetesClient) mapRole(group, version, kind, name, namespace string) (*dto.Role, error) {
+	role, err := k.clientset.RbacV1().Roles(namespace).Get(context.Background(), name, metav1.GetOptions{})
+
+	if err != nil {
+		return nil, err
+	}
+
+	return &dto.Role{
+		Group:     group,
+		Version:   version,
+		Kind:      kind,
+		Name:      role.Name,
+		Namespace: namespace,
+		Rules:     role.Rules,
+	}, nil
 }
 
 func isDeployment(group, version, kind string) bool {
@@ -909,10 +1058,22 @@ func isPersistentVolumeClaims(group, version, kind string) bool {
 	return group == "" && version == "v1" && kind == "PersistentVolumeClaim"
 }
 
+func isPersistentVolume(group, version, kind string) bool {
+	return group == "" && version == "v1" && kind == "PersistentVolume"
+}
+
 func isSecret(group, version, kind string) bool {
 	return group == "" && version == "v1" && kind == "Secret"
 }
 
 func isCronJob(group, version, kind string) bool {
 	return group == "batch" && version == "v1" && kind == "CronJob"
+}
+
+func isRole(group, version, kind string) bool {
+	return group == "rbac.authorization.k8s.io" && version == "v1" && kind == "Role"
+}
+
+func isNetworkPolicy(group, version, kind string) bool {
+	return group == "networking.k8s.io" && version == "v1" && kind == "NetworkPolicy"
 }

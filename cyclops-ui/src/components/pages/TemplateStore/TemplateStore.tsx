@@ -11,6 +11,7 @@ import {
   Divider,
   message,
   Spin,
+  notification,
 } from "antd";
 import axios from "axios";
 import Title from "antd/es/typography/Title";
@@ -23,15 +24,22 @@ import classNames from "classnames";
 import styles from "./styles.module.css";
 import { mapResponseError } from "../../../utils/api/errors";
 import defaultTemplate from "../../../static/img/default-template-icon.png";
+import {
+  FeedbackError,
+  FormValidationErrors,
+} from "../../errors/FormValidationErrors";
 
 const TemplateStore = () => {
   const [templates, setTemplates] = useState([]);
+  const [filteredTemplates, setFilteredTemplates] = useState([]);
   const [confirmDelete, setConfirmDelete] = useState("");
   const [confirmDeleteInput, setConfirmDeleteInput] = useState("");
   const [newTemplateModal, setNewTemplateModal] = useState(false);
   const [confirmLoading, setConfirmLoading] = useState(false);
   const [editModal, setEditModal] = useState("");
-  const [loadingTemplateName, setLoadingTemplateName] = useState("");
+  const [loadingTemplateName, setLoadingTemplateName] = useState<{
+    [key: string]: boolean;
+  }>({});
   const [requestStatus, setRequestStatus] = useState<{ [key: string]: string }>(
     {},
   );
@@ -42,17 +50,50 @@ const TemplateStore = () => {
 
   const [addForm] = Form.useForm();
   const [editForm] = Form.useForm();
+  const [notificationApi, contextHolder] = notification.useNotification();
+
+  const openNotification = (errors: FeedbackError[]) => {
+    notificationApi.error({
+      message: "Submit failed!",
+      description: <FormValidationErrors errors={errors} />,
+      placement: "topRight",
+      duration: 0,
+    });
+  };
 
   useEffect(() => {
     axios
       .get(`/api/templates/store`)
       .then((res) => {
         setTemplates(res.data);
+        setFilteredTemplates(res.data);
       })
       .catch((error) => {
         setError(mapResponseError(error));
       });
   }, []);
+
+  const handleSearch = (event: any) => {
+    const query = event.target.value;
+    var updatedList = [...templates];
+    updatedList = updatedList.filter((template: any) => {
+      return template.name.toLowerCase().indexOf(query.toLowerCase()) !== -1;
+    });
+    setFilteredTemplates(updatedList);
+  };
+
+  const onSubmitFailed = (
+    errors: Array<{ message: string; description: string }>,
+  ) => {
+    const errorMessages: FeedbackError[] = [];
+    errors.forEach(function (error: any) {
+      errorMessages.push({
+        key: error.message,
+        errors: [error.description],
+      });
+    });
+    openNotification(errorMessages);
+  };
 
   const handleOKAdd = () => {
     addForm.submit();
@@ -67,14 +108,14 @@ const TemplateStore = () => {
 
     axios
       .put(`/api/templates/store`, values)
-      .then((res) => {
+      .then(() => {
         setNewTemplateModal(false);
         setConfirmLoading(false);
         window.location.href = "/templates";
       })
       .catch((error) => {
         setConfirmLoading(false);
-        setError(mapResponseError(error));
+        onSubmitFailed([error.response.data]);
       });
   };
 
@@ -85,14 +126,14 @@ const TemplateStore = () => {
 
     axios
       .post(`/api/templates/store/` + editModal, values)
-      .then((res) => {
+      .then(() => {
         setNewTemplateModal(false);
         setConfirmLoading(false);
         window.location.href = "/templates";
       })
       .catch((error) => {
         setConfirmLoading(false);
-        setError(mapResponseError(error));
+        onSubmitFailed([error.response.data]);
       });
   };
 
@@ -131,11 +172,15 @@ const TemplateStore = () => {
     version: string,
     templateName: string,
   ) => {
-    setLoadingTemplateName(templateName);
+    setLoadingTemplateName((prevState) => {
+      return { ...prevState, [templateName]: true };
+    });
     axios
       .get(`/api/templates?repo=${repo}&path=${path}&commit=${version}`)
-      .then(() => {
-        setLoadingTemplateName("");
+      .then((res) => {
+        setLoadingTemplateName((prevState) => {
+          return { ...prevState, [templateName]: false };
+        });
         setRequestStatus((prevStatus) => ({
           ...prevStatus,
           [templateName]: "success",
@@ -144,12 +189,14 @@ const TemplateStore = () => {
         setError({ message: "", description: "" });
       })
       .catch((error) => {
-        setLoadingTemplateName("");
+        setLoadingTemplateName((prevState) => {
+          return { ...prevState, [templateName]: false };
+        });
         setRequestStatus((prevStatus) => ({
           ...prevStatus,
           [templateName]: "error",
         }));
-        setError(mapResponseError(error));
+        message.error("Template reference is Invalid!");
       });
   };
 
@@ -195,9 +242,10 @@ const TemplateStore = () => {
           style={{ marginBottom: "20px" }}
         />
       )}
+      {contextHolder}
       <Row gutter={[40, 0]}>
         <Col span={18}>
-          <Title level={2}>Templates: {templates.length}</Title>
+          <Title level={2}>Templates: {filteredTemplates.length}</Title>
         </Col>
         <Col span={6}>
           <Button
@@ -211,8 +259,17 @@ const TemplateStore = () => {
           </Button>
         </Col>
       </Row>
+      <Row gutter={[40, 0]}>
+        <Col span={18}>
+          <Input
+            placeholder={"Search templates"}
+            style={{ width: "30%", marginBottom: "1rem" }}
+            onChange={handleSearch}
+          ></Input>
+        </Col>
+      </Row>
       <Col span={24} style={{ overflowX: "auto" }}>
-        <Table dataSource={templates}>
+        <Table dataSource={filteredTemplates}>
           <Table.Column
             dataIndex="iconURL"
             width={"3%"}
@@ -277,7 +334,7 @@ const TemplateStore = () => {
             width="5%"
             render={(template) => (
               <>
-                {loadingTemplateName === template.name ? (
+                {loadingTemplateName[template.name] === true ? (
                   <Spin />
                 ) : (
                   <FileSyncOutlined
