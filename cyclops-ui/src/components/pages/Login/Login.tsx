@@ -77,7 +77,7 @@ const Login = () => {
               <h2 className={styles.login_header}>
                 <img
                   className={styles.cyclops_login_header_login}
-                  src={require("./cyclops-simplistic.png")}
+                  src={require("./cyclops-logo.png")}
                   alt=""
                 />
               </h2>
