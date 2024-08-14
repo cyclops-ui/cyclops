@@ -88,7 +88,7 @@ const Modules = () => {
     if (resolvedVersion !== "") {
       return resolvedVersion;
     }
-    if(version !== ""){
+    if (version !== "") {
       return version;
     }
     return "main";
@@ -109,7 +109,11 @@ const Modules = () => {
 
     return filteredData.map((module: any, index) => (
       <Col key={index} xs={24} sm={12} md={8} lg={8} xl={6}>
-        <a href={"/modules/" + module.name}>
+        <div
+          onClick={() => {
+            history("/modules/" + module.name);
+          }}
+        >
           <Card
             title={
               <div>
@@ -143,10 +147,11 @@ const Modules = () => {
                 }}
               >
                 Repo:
-                <Link aria-level={3}
-                 href={module.template.repo}
-                 target="_blank"
-                 >
+                <Link
+                  aria-level={3}
+                  href={module.template.repo}
+                  target="_blank"
+                >
                   {" " + module.template.repo}
                 </Link>
               </Col>
@@ -201,7 +206,7 @@ const Modules = () => {
               </Col>
             </Row>
           </Card>
-        </a>
+        </div>
       </Col>
     ));
   };
