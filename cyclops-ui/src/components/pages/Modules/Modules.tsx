@@ -33,6 +33,7 @@ const Modules = () => {
     "Unhealthy",
     "Unknown",
   ]);
+  const [searchInputFilter, setsearchInputFilter] = useState("");
   const resourceFilter = ["Healthy", "Unhealthy", "Unknown"];
   const [error, setError] = useState({
     message: "",
@@ -54,7 +55,14 @@ const Modules = () => {
       });
   }, []);
   useEffect(() => {
-    const newfilteredData = allData.filter((module: any) =>
+    var updatedList = [...allData];
+    updatedList = updatedList.filter((module: any) => {
+      return (
+        module.name.toLowerCase().indexOf(searchInputFilter.toLowerCase()) !==
+        -1
+      );
+    });
+    const newfilteredData = updatedList.filter((module: any) =>
       moduleHealthFilter
         .map((status) => status.toLowerCase())
         .includes(module.status.toLowerCase()),
@@ -63,7 +71,7 @@ const Modules = () => {
     if (JSON.stringify(newfilteredData) !== JSON.stringify(filteredData)) {
       setFilteredData(newfilteredData);
     }
-  }, [moduleHealthFilter, filteredData, allData]);
+  }, [moduleHealthFilter, filteredData, allData, searchInputFilter]);
 
   const handleClick = () => {
     history("/modules/new");
@@ -89,11 +97,7 @@ const Modules = () => {
   };
   const handleSearch = (event: any) => {
     const query = event.target.value;
-    var updatedList = [...allData];
-    updatedList = updatedList.filter((module: any) => {
-      return module.name.toLowerCase().indexOf(query.toLowerCase()) !== -1;
-    });
-    setFilteredData(updatedList);
+    setsearchInputFilter(query);
   };
 
   const getStatusColor = (module: any) => {
@@ -200,6 +204,7 @@ const Modules = () => {
                 Path:
                 <Link
                   aria-level={3}
+                  target="_blank"
                   href={
                     module.template.repo +
                     `/tree/` +
