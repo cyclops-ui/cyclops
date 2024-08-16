@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Col, Divider, Row, Alert } from "antd";
+import { Col, Divider, Row, Alert, Button, notification } from "antd";
 import axios from "axios";
 import { mapResponseError } from "../../utils/api/errors";
 import PodTable from "./common/PodTable";
@@ -51,11 +51,19 @@ const DaemonSet = ({ name, namespace }: Props) => {
       .post(
         `/api/resources/restart?group=apps&version=v1&kind=Deployment&name=${name}&namespace=${namespace}`,
       )
-      .then((res) => {
-        // window.location.href = "/modules/" + moduleName;
+      .then(() => {
+        notification.success({
+          message: "Restart Successful",
+          description: "The DaemonSet has been restarted successfully.",
+          duration: 10,
+        });
       })
       .catch((error) => {
-        setError(mapResponseError(error));
+        notification.error({
+          message: "Restart Failed",
+          description: `${mapResponseError(error).description}`,
+          duration: 10,
+        });
       });
   };
 
@@ -77,6 +85,16 @@ const DaemonSet = ({ name, namespace }: Props) => {
         />
       )}
       <Row>
+        <Col>
+          <Button
+            style={{ marginTop: "10px" }}
+            onClick={() => {
+              handleRestart();
+            }}
+          >
+            Restart
+          </Button>
+        </Col>
         <Divider
           style={{ fontSize: "120%" }}
           orientationMargin="0"
