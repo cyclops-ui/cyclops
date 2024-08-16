@@ -73,7 +73,6 @@ func (h *Handler) Start() error {
 	h.router.POST("/modules/:name/manifest", modulesController.Manifest)
 	h.router.GET("/modules/:name/currentManifest", modulesController.CurrentManifest)
 	h.router.GET("/modules/:name/resources", modulesController.ResourcesForModule)
-	h.router.DELETE("/modules/:name/resources", modulesController.DeleteModuleResource)
 	h.router.GET("/modules/:name/template", modulesController.Template)
 	h.router.GET("/modules/:name/helm-template", modulesController.HelmTemplate)
 	//h.router.POST("/modules/resources", modulesController.ModuleToResources)
@@ -83,6 +82,7 @@ func (h *Handler) Start() error {
 
 	h.router.GET("/manifest", modulesController.GetManifest)
 	h.router.GET("/resources", modulesController.GetResource)
+	h.router.DELETE("/resources", modulesController.DeleteModuleResource)
 
 	h.router.POST("/resources/restart", modulesController.Restart)
 
