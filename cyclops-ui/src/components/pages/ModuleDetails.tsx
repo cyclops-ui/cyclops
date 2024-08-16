@@ -19,11 +19,16 @@ import "ace-builds/src-noconflict/ace";
 import { useParams } from "react-router-dom";
 import axios from "axios";
 import {
+  BookOutlined,
   CaretRightOutlined,
   CheckCircleTwoTone,
   CloseSquareTwoTone,
   CopyOutlined,
+  DeleteOutlined,
+  EditOutlined,
+  FileTextOutlined,
   SearchOutlined,
+  UndoOutlined,
   WarningTwoTone,
 } from "@ant-design/icons";
 import "./custom.css";
@@ -119,6 +124,8 @@ const ModuleDetails = () => {
   const [loading, setLoading] = useState(false);
   const [loadModule, setLoadModule] = useState(false);
   const [loadResources, setLoadResources] = useState(false);
+  const [loadingReconciliation, setLoadingReconciliation] = useState(false);
+
   const [deleteName, setDeleteName] = useState("");
   const [deleteResourceVerify, setDeleteResourceVerify] = useState("");
   const [resources, setResources] = useState([]);
@@ -809,6 +816,20 @@ const ModuleDetails = () => {
       });
   };
 
+  const submitReconcileModule = () => {
+    setLoadingReconciliation(true);
+
+    axios
+      .post(`/api/modules/` + moduleName + `/reconcile`)
+      .then((res) => {
+        setLoadingReconciliation(false);
+      })
+      .catch((error) => {
+        setError(mapResponseError(error));
+        setLoadingReconciliation(false);
+      });
+  };
+
   const renderedManifestModalContent = () => {
     if (loadingRenderedManifest) {
       return <Spin />;
@@ -875,7 +896,18 @@ const ModuleDetails = () => {
             }}
             block
           >
+            <EditOutlined />
             Edit
+          </Button>
+        </Col>
+        <Col>
+          <Button
+            onClick={submitReconcileModule}
+            block
+            loading={loadingReconciliation}
+          >
+            <UndoOutlined />
+            Reconcile
           </Button>
         </Col>
         <Col>
@@ -885,11 +917,13 @@ const ModuleDetails = () => {
             }}
             block
           >
+            <BookOutlined />
             Rollback
           </Button>
         </Col>
         <Col>
           <Button onClick={handleViewRenderedManifest} block>
+            <FileTextOutlined />
             View Manifest
           </Button>
         </Col>
@@ -902,6 +936,7 @@ const ModuleDetails = () => {
             block
             loading={loading}
           >
+            <DeleteOutlined />
             Delete
           </Button>
         </Col>
