@@ -27,8 +27,8 @@ const DaemonSet = ({ name, namespace }: Props) => {
             group: `apps`,
             version: `v1`,
             kind: `DaemonSet`,
-            name: name,
-            namespace: namespace,
+            name,
+            namespace,
           },
         })
         .then((res) => {
@@ -45,6 +45,19 @@ const DaemonSet = ({ name, namespace }: Props) => {
       clearInterval(interval);
     };
   }, [name, namespace]);
+
+  const handleRestart = () => {
+    axios
+      .post(
+        `/api/resources/restart?group=apps&version=v1&kind=Deployment&name=${name}&namespace=${namespace}`,
+      )
+      .then((res) => {
+        // window.location.href = "/modules/" + moduleName;
+      })
+      .catch((error) => {
+        setError(mapResponseError(error));
+      });
+  };
 
   return (
     <div>

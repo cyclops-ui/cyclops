@@ -33,8 +33,8 @@ const StatefulSet = ({ name, namespace }: Props) => {
             group: `apps`,
             version: `v1`,
             kind: `StatefulSet`,
-            name: name,
-            namespace: namespace,
+            name,
+            namespace,
           },
         })
         .then((res) => {
@@ -51,6 +51,19 @@ const StatefulSet = ({ name, namespace }: Props) => {
       clearInterval(interval);
     };
   }, [name, namespace]);
+
+  const handleRestart = () => {
+    axios
+      .post(
+        `/api/resources/restart?group=group=apps&version=v1&kind=Deployment&name=${name}&namespace=${namespace}`,
+      )
+      .then((res) => {
+        // window.location.href = "/modules/" + moduleName;
+      })
+      .catch((error) => {
+        setError(mapResponseError(error));
+      });
+  };
 
   return (
     <div>
