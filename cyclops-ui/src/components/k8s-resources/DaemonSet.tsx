@@ -49,7 +49,7 @@ const DaemonSet = ({ name, namespace }: Props) => {
   const handleRestart = () => {
     axios
       .post(
-        `/api/resources/restart?group=apps&version=v1&kind=Deployment&name=${name}&namespace=${namespace}`,
+        `/api/resources/restart?group=apps&version=v1&kind=DaemonSet&name=${name}&namespace=${namespace}`,
       )
       .then(() => {
         notification.success({
