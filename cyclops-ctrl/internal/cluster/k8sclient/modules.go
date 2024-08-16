@@ -194,12 +194,17 @@ func (k *KubernetesClient) GetDeletedResources(
 
 	out := make([]dto.Resource, 0, len(resources))
 	for _, resource := range resources {
+		namespace := resource.GetNamespace()
+		if len(namespace) == 0 {
+			namespace = "default"
+		}
+
 		key := resKey{
 			Group:     resource.GetGroup(),
 			Version:   resource.GetVersion(),
 			Kind:      resource.GetKind(),
 			Name:      resource.GetName(),
-			Namespace: resource.GetNamespace(),
+			Namespace: namespace,
 		}
 
 		_, found := resourcesFromTemplate[key]
@@ -213,7 +218,7 @@ func (k *KubernetesClient) GetDeletedResources(
 	}
 
 	// add missing resources
-	for missingResource, _ := range resourcesFromTemplate {
+	for missingResource := range resourcesFromTemplate {
 		out = append([]dto.Resource{&dto.Other{
 			Group:     missingResource.Group,
 			Version:   missingResource.Version,
