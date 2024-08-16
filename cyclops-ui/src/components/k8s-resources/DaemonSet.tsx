@@ -27,8 +27,8 @@ const DaemonSet = ({ name, namespace }: Props) => {
             group: `apps`,
             version: `v1`,
             kind: `DaemonSet`,
-            name,
-            namespace,
+            name: name,
+            namespace: namespace,
           },
         })
         .then((res) => {
@@ -86,12 +86,7 @@ const DaemonSet = ({ name, namespace }: Props) => {
       )}
       <Row>
         <Col>
-          <Button
-            style={{ marginTop: "10px" }}
-            onClick={() => {
-              handleRestart();
-            }}
-          >
+          <Button style={{ marginTop: "10px" }} onClick={handleRestart}>
             Restart
           </Button>
         </Col>

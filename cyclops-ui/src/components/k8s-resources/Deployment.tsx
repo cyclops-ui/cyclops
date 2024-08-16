@@ -27,8 +27,8 @@ const Deployment = ({ name, namespace }: Props) => {
             group: `apps`,
             version: `v1`,
             kind: `Deployment`,
-            name,
-            namespace,
+            name: name,
+            namespace: namespace,
           },
         })
         .then((res) => {
@@ -86,12 +86,7 @@ const Deployment = ({ name, namespace }: Props) => {
       )}
       <Row>
         <Col>
-          <Button
-            style={{ marginTop: "10px" }}
-            onClick={() => {
-              handleRestart();
-            }}
-          >
+          <Button style={{ marginTop: "10px" }} onClick={handleRestart}>
             Restart
           </Button>
         </Col>
