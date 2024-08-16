@@ -67,10 +67,7 @@ const Modules = () => {
         .map((status) => status.toLowerCase())
         .includes(module.status.toLowerCase()),
     );
-
-    if (JSON.stringify(newfilteredData) !== JSON.stringify(filteredData)) {
-      setFilteredData(newfilteredData);
-    }
+    setFilteredData(newfilteredData);
   }, [moduleHealthFilter, allData, searchInputFilter]);
 
   const handleClick = () => {
