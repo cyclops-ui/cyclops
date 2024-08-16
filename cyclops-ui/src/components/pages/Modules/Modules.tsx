@@ -10,13 +10,15 @@ import {
   Alert,
   Empty,
   Spin,
+  Popover,
+  Checkbox,
 } from "antd";
 import { useNavigate } from "react-router";
 import axios from "axios";
 import Link from "antd/lib/typography/Link";
 
 import styles from "./styles.module.css";
-import { PlusCircleOutlined } from "@ant-design/icons";
+import { PlusCircleOutlined, FilterOutlined } from "@ant-design/icons";
 import { mapResponseError } from "../../../utils/api/errors";
 
 const { Title } = Typography;
@@ -26,6 +28,13 @@ const Modules = () => {
   const [allData, setAllData] = useState([]);
   const [filteredData, setFilteredData] = useState([]);
   const [loadingModules, setLoadingModules] = useState(false);
+  const [moduleHealthFilter, setModuleHealthFilter] = useState<string[]>([
+    "Healthy",
+    "Unhealthy",
+    "Unknown",
+  ]);
+  const [searchInputFilter, setsearchInputFilter] = useState("");
+  const resourceFilter = ["Healthy", "Unhealthy", "Unknown"];
   const [error, setError] = useState({
     message: "",
     description: "",
@@ -45,18 +54,47 @@ const Modules = () => {
         setLoadingModules(false);
       });
   }, []);
+  useEffect(() => {
+    var updatedList = [...allData];
+    updatedList = updatedList.filter((module: any) => {
+      return (
+        module.name.toLowerCase().indexOf(searchInputFilter.toLowerCase()) !==
+        -1
+      );
+    });
+    const newfilteredData = updatedList.filter((module: any) =>
+      moduleHealthFilter
+        .map((status) => status.toLowerCase())
+        .includes(module.status.toLowerCase()),
+    );
+    setFilteredData(newfilteredData);
+  }, [moduleHealthFilter, allData, searchInputFilter]);
 
   const handleClick = () => {
     history("/modules/new");
   };
+  const handleSelectItem = (selectedItems: any[]) => {
+    setModuleHealthFilter(selectedItems);
+  };
 
+  const resourceFilterPopover = () => {
+    return (
+      <Checkbox.Group
+        style={{ display: "block" }}
+        onChange={handleSelectItem}
+        value={moduleHealthFilter}
+      >
+        {resourceFilter.map((item, index) => (
+          <Checkbox key={index} value={item}>
+            {item}
+          </Checkbox>
+        ))}
+      </Checkbox.Group>
+    );
+  };
   const handleSearch = (event: any) => {
     const query = event.target.value;
-    var updatedList = [...allData];
-    updatedList = updatedList.filter((module: any) => {
-      return module.name.toLowerCase().indexOf(query.toLowerCase()) !== -1;
-    });
-    setFilteredData(updatedList);
+    setsearchInputFilter(query);
   };
 
   const getStatusColor = (module: any) => {
@@ -88,7 +126,7 @@ const Modules = () => {
     if (resolvedVersion !== "") {
       return resolvedVersion;
     }
-    if(version !== ""){
+    if (version !== "") {
       return version;
     }
     return "main";
@@ -98,7 +136,6 @@ const Modules = () => {
     if (loadingModules) {
       return <Spin size={"large"} />;
     }
-
     if (filteredData.length === 0) {
       return (
         <div style={{ width: "100%" }}>
@@ -106,7 +143,6 @@ const Modules = () => {
         </div>
       );
     }
-
     return filteredData.map((module: any, index) => (
       <Col key={index} xs={24} sm={12} md={8} lg={8} xl={6}>
         <a href={"/modules/" + module.name}>
@@ -143,10 +179,11 @@ const Modules = () => {
                 }}
               >
                 Repo:
-                <Link aria-level={3}
-                 href={module.template.repo}
-                 target="_blank"
-                 >
+                <Link
+                  aria-level={3}
+                  href={module.template.repo}
+                  target="_blank"
+                >
                   {" " + module.template.repo}
                 </Link>
               </Col>
@@ -223,6 +260,7 @@ const Modules = () => {
           style={{ marginBottom: "20px" }}
         />
       )}
+
       <Row gutter={[40, 0]}>
         <Col span={18}>
           <Title level={2}>Deployed modules</Title>
@@ -241,12 +279,24 @@ const Modules = () => {
           </Button>
         </Col>
       </Row>
-      <Row gutter={[40, 0]}>
-        <Col span={18}>
+
+      <Row>
+        <Col span={5}>
           <Input
             placeholder={"Search modules"}
-            style={{ width: "30%" }}
+            style={{
+              width: "100%",
+              borderTopRightRadius: "0px",
+              borderBottomRightRadius: "0px",
+            }}
             onChange={handleSearch}
+            addonAfter={
+              <>
+                <Popover content={resourceFilterPopover()} trigger="click">
+                  <FilterOutlined />
+                </Popover>
+              </>
+            }
           ></Input>
         </Col>
       </Row>
