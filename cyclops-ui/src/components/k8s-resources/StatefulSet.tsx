@@ -55,7 +55,7 @@ const StatefulSet = ({ name, namespace }: Props) => {
   const handleRestart = () => {
     axios
       .post(
-        `/api/resources/restart?group=group=apps&version=v1&kind=Deployment&name=${name}&namespace=${namespace}`,
+        `/api/resources/restart?group=apps&version=v1&kind=StatefulSet&name=${name}&namespace=${namespace}`,
       )
       .then(() => {
         notification.success({
