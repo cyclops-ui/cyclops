@@ -71,7 +71,7 @@ const Modules = () => {
     if (JSON.stringify(newfilteredData) !== JSON.stringify(filteredData)) {
       setFilteredData(newfilteredData);
     }
-  }, [moduleHealthFilter, filteredData, allData, searchInputFilter]);
+  }, [moduleHealthFilter, allData, searchInputFilter]);
 
   const handleClick = () => {
     history("/modules/new");
