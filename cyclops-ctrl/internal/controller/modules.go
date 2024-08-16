@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"os"
 	"strings"
+	"time"
 
 	"github.com/gin-gonic/gin"
 
@@ -312,6 +313,39 @@ func (m *Modules) UpdateModule(ctx *gin.Context) {
 	}
 
 	ctx.Status(http.StatusOK)
+}
+
+func (m *Modules) ReconcileModule(ctx *gin.Context) {
+	ctx.Header("Access-Control-Allow-Origin", "*")
+
+	moduleName := ctx.Param("name")
+
+	module, err := m.kubernetesClient.GetModule(moduleName)
+	if err != nil {
+		fmt.Println(err)
+		ctx.JSON(http.StatusInternalServerError, dto.NewError("Error fetching module", err.Error()))
+		return
+	}
+
+	annotations := module.GetAnnotations()
+	if annotations == nil {
+		annotations = make(map[string]string)
+	}
+
+	annotations["cyclops/reconciled-at"] = time.Now().Format(time.RFC3339)
+	module.SetAnnotations(annotations)
+
+	module.Kind = "Module"
+	module.APIVersion = "cyclops-ui.com/v1alpha1"
+
+	err = m.kubernetesClient.UpdateModule(module)
+	if err != nil {
+		fmt.Println(err)
+		ctx.JSON(http.StatusInternalServerError, dto.NewError("Error updating module", err.Error()))
+		return
+	}
+
+	ctx.Status(http.StatusAccepted)
 }
 
 func (m *Modules) ResourcesForModule(ctx *gin.Context) {
