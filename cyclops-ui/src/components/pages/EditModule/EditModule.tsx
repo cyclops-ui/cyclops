@@ -556,7 +556,7 @@ const EditModule = () => {
                         initialValue={field.initialValue}
                         name={[arrField.name]}
                       >
-                        <Input />
+                        <Input disabled={field.immutable} />
                       </Form.Item>
                       <MinusCircleOutlined
                         style={{ fontSize: "16px", paddingLeft: "10px" }}
@@ -764,7 +764,7 @@ const EditModule = () => {
               validateDebounce={1000}
               rules={stringValidationRules}
             >
-              <Input />
+              <Input disabled={field.immutable} />
             </Form.Item>,
           );
           return;
@@ -792,7 +792,10 @@ const EditModule = () => {
               validateDebounce={1000}
               rules={numberValidationRules}
             >
-              <InputNumber style={{ width: "100%" }} />
+              <InputNumber
+                style={{ width: "100%" }}
+                disabled={field.immutable}
+              />
             </Form.Item>,
           );
           return;
@@ -832,7 +835,7 @@ const EditModule = () => {
               }
               valuePropName={checked}
             >
-              <Switch />
+              <Switch disabled={field.immutable} />
             </Form.Item>,
           );
           return;
@@ -1022,7 +1025,10 @@ const EditModule = () => {
                             rules={[{ required: true, message: "Missing key" }]}
                             style={{ margin: 0, flex: 1, marginRight: "8px" }}
                           >
-                            <Input style={{ margin: 0, width: "100%" }} />
+                            <Input
+                              style={{ margin: 0, width: "100%" }}
+                              disabled={field.immutable}
+                            />
                           </Form.Item>
                         </Col>
                         <Col span={10}>
@@ -1099,13 +1105,14 @@ const EditModule = () => {
             type="primary"
             htmlType="submit"
             name="Save"
-            disabled={!isChanged && !isTemplateChanged}
+            disabled={(!isChanged && !isTemplateChanged) || !loadTemplate}
           >
             Save
           </Button>{" "}
           <Button
             htmlType="button"
             onClick={() => history("/modules/" + moduleName)}
+            disabled={!loadTemplate}
           >
             Back
           </Button>
@@ -1227,7 +1234,10 @@ const EditModule = () => {
                 name={"repo"}
                 style={{ width: "40%", marginRight: "0" }}
               >
-                <Input placeholder={"Repository"} disabled={templateRefLock} />
+                <Input
+                  placeholder={"Repository"}
+                  disabled={templateRefLock || !loadTemplate}
+                />
               </Form.Item>
               <div
                 style={{
@@ -1243,7 +1253,10 @@ const EditModule = () => {
                 name={"path"}
                 style={{ width: "20%", marginRight: "0" }}
               >
-                <Input placeholder={"Path"} disabled={templateRefLock} />
+                <Input
+                  placeholder={"Path"}
+                  disabled={templateRefLock || !loadTemplate}
+                />
               </Form.Item>
               <div
                 style={{
@@ -1262,7 +1275,7 @@ const EditModule = () => {
                 <Input
                   placeholder={"Version"}
                   addonAfter={linkToTemplate(templateRef)}
-                  disabled={templateRefLock}
+                  disabled={templateRefLock || !loadTemplate}
                 />
               </Form.Item>
               <Form.Item style={{ paddingLeft: "10px", width: "5%" }}>
@@ -1270,7 +1283,7 @@ const EditModule = () => {
                   type="primary"
                   htmlType="submit"
                   loading={!loadTemplate}
-                  disabled={templateRefLock}
+                  disabled={templateRefLock || !loadTemplate}
                 >
                   Load
                 </Button>

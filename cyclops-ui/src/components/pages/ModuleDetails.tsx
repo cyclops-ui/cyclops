@@ -22,6 +22,7 @@ import {
   CaretRightOutlined,
   CheckCircleTwoTone,
   CloseSquareTwoTone,
+  CopyOutlined,
   SearchOutlined,
   WarningTwoTone,
 } from "@ant-design/icons";
@@ -141,6 +142,10 @@ const ModuleDetails = () => {
     name: "",
     namespace: "",
   });
+
+  const [loadingRenderedManifest, setLoadingRenderedManifest] = useState(false);
+  const [viewRenderedManifest, setViewRenderedManifest] = useState(false);
+  const [renderedManifest, setRenderedManifest] = useState("");
 
   const [resourceFilter, setResourceFilter] = useState<string[]>([]);
 
@@ -829,6 +834,52 @@ const ModuleDetails = () => {
     );
   };
 
+  const handleViewRenderedManifest = () => {
+    setLoadingRenderedManifest(true);
+    setViewRenderedManifest(true);
+
+    axios
+      .get(`/api/modules/` + moduleName + `/currentManifest`)
+      .then((res) => {
+        setRenderedManifest(res.data);
+        setLoadingRenderedManifest(false);
+      })
+      .catch((error) => {
+        setError(mapResponseError(error));
+        setLoadingRenderedManifest(false);
+      });
+  };
+
+  const renderedManifestModalContent = () => {
+    if (loadingRenderedManifest) {
+      return <Spin />;
+    }
+
+    return (
+      <ReactAce
+        mode={"sass"}
+        theme={"github"}
+        fontSize={12}
+        showPrintMargin={true}
+        showGutter={true}
+        highlightActiveLine={true}
+        readOnly={true}
+        setOptions={{
+          enableBasicAutocompletion: true,
+          enableLiveAutocompletion: true,
+          enableSnippets: false,
+          showLineNumbers: true,
+          tabSize: 4,
+          useWorker: false,
+        }}
+        style={{
+          width: "100%",
+        }}
+        value={renderedManifest}
+      />
+    );
+  };
+
   return (
     <div>
       {error.message.length !== 0 && (
@@ -857,7 +908,7 @@ const ModuleDetails = () => {
       >
         Actions
       </Divider>
-      <Row gutter={[40, 0]}>
+      <Row gutter={[20, 0]}>
         <Col>
           <Button
             onClick={function () {
@@ -876,6 +927,11 @@ const ModuleDetails = () => {
             block
           >
             Rollback
+          </Button>
+        </Col>
+        <Col>
+          <Button onClick={handleViewRenderedManifest} block>
+            View Manifest
           </Button>
         </Col>
         <Col>
@@ -903,7 +959,6 @@ const ModuleDetails = () => {
           title="Filter resources"
           trigger="click"
         >
-          {/*<Button>Click me</Button>*/}
           <SearchOutlined />
         </Popover>
       </Divider>
@@ -945,18 +1000,36 @@ const ModuleDetails = () => {
         cancelButtonProps={{ style: { display: "none" } }}
         width={"40%"}
       >
-        <div>
-          <Checkbox onChange={handleCheckboxChange} checked={showManagedFields}>
-            Include Managed Fields
-          </Checkbox>
-          <Divider style={{ marginTop: "12px", marginBottom: "12px" }} />
+        <Checkbox onChange={handleCheckboxChange} checked={showManagedFields}>
+          Include Managed Fields
+        </Checkbox>
+        <Divider style={{ marginTop: "12px", marginBottom: "12px" }} />
+        <div style={{ position: "relative" }}>
+          <ReactAce
+            style={{ width: "100%" }}
+            mode={"sass"}
+            value={manifestModal.manifest}
+            readOnly={true}
+          />
+          <Tooltip title={"Copy Manifest"} trigger="hover">
+            <Button
+              onClick={() => {
+                navigator.clipboard.writeText(manifestModal.manifest);
+              }}
+              style={{
+                position: "absolute",
+                right: "20px",
+                top: "10px",
+              }}
+            >
+              <CopyOutlined
+                style={{
+                  fontSize: "20px",
+                }}
+              />
+            </Button>
+          </Tooltip>
         </div>
-        <ReactAce
-          style={{ width: "100%" }}
-          mode={"sass"}
-          value={manifestModal.manifest}
-          readOnly={true}
-        />
       </Modal>
       <Modal
         title={
@@ -994,6 +1067,16 @@ const ModuleDetails = () => {
           value={deleteResourceVerify}
           required
         />
+      </Modal>
+      <Modal
+        title="Rendered manifest"
+        open={viewRenderedManifest}
+        onOk={() => setViewRenderedManifest(false)}
+        onCancel={() => setViewRenderedManifest(false)}
+        cancelButtonProps={{ style: { display: "none" } }}
+        width={"60%"}
+      >
+        {renderedManifestModalContent()}
       </Modal>
     </div>
   );

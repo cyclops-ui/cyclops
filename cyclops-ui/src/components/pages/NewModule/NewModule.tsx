@@ -1206,6 +1206,7 @@ const NewModule = () => {
                   onChange={onTemplateStoreSelected}
                   style={{ width: "100%" }}
                   placeholder="Select an option"
+                  disabled={loadingTemplate || loadingTemplateInitialValues}
                 >
                   {templateStore.map((option: any, index) => (
                     <Option key={option.name} value={option.name}>
@@ -1283,18 +1284,30 @@ const NewModule = () => {
                   setLoadingValuesModal(true);
                 }}
                 name="Save"
+                disabled={loadingTemplate || loadingTemplateInitialValues}
               >
                 Load values from file
               </Button>{" "}
               <Button
                 type="primary"
-                loading={loading}
+                loading={
+                  loading || loadingTemplate || loadingTemplateInitialValues
+                }
                 htmlType="submit"
                 name="Save"
+                disabled={
+                  loadingTemplate ||
+                  loadingTemplateInitialValues ||
+                  !(template.version || template.path || template.repo)
+                }
               >
                 Save
               </Button>{" "}
-              <Button htmlType="button" onClick={() => history("/")}>
+              <Button
+                htmlType="button"
+                onClick={() => history("/")}
+                disabled={loadingTemplate || loadingTemplateInitialValues}
+              >
                 Back
               </Button>
             </div>

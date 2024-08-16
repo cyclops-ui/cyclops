@@ -5,6 +5,8 @@ import axios from "axios";
 import { useParams } from "react-router-dom";
 import ReactDiffViewer from "react-diff-viewer";
 import ReactAce from "react-ace";
+import { mapResponseError } from "../../utils/api/errors";
+import Alert from "antd/lib/alert/Alert";
 
 const { Title } = Typography;
 
@@ -14,6 +16,11 @@ require(`ace-builds/src-noconflict/theme-github`);
 
 const ModuleHistory = () => {
   const history = useNavigate();
+  const [error, setError] = useState({
+    message: "",
+    description: "",
+  });
+
   const [diff, setDiff] = useState({
     curr: "",
     previous: "",
@@ -33,17 +40,26 @@ const ModuleHistory = () => {
 
   let { moduleName } = useParams();
   useEffect(() => {
-    axios.get(`/api/modules/` + moduleName + `/history`).then((res) => {
-      console.log(res.data);
-      setHistoryEntries(res.data);
-    });
-
-    axios.get(`/api/modules/` + moduleName + `/currentManifest`).then((res) => {
-      setDiff({
-        curr: res.data,
-        previous: diff.previous,
+    axios
+      .get(`/api/modules/` + moduleName + `/history`)
+      .then((res) => {
+        setHistoryEntries(res.data);
+      })
+      .catch((error) => {
+        setError(mapResponseError(error));
       });
-    });
+
+    axios
+      .get(`/api/modules/` + moduleName + `/currentManifest`)
+      .then((res) => {
+        setDiff({
+          curr: res.data,
+          previous: diff.previous,
+        });
+      })
+      .catch((error) => {
+        setError(mapResponseError(error));
+      });
   }, [diff.previous, moduleName]);
 
   const handleOk = () => {
@@ -69,15 +85,7 @@ const ModuleHistory = () => {
         window.location.href = "/modules/" + moduleName;
       })
       .catch((error) => {
-        // setLoading(false);
-        // if (error.response === undefined) {
-        //     setError({
-        //         message: String(error),
-        //         description: "Check if Cyclops backend is available on: " + window.__RUNTIME_CONFIG__.REACT_APP_CYCLOPS_CTRL_HOST
-        //     })
-        // } else {
-        //     setError(error.response.data);
-        // }
+        setError(mapResponseError(error));
       });
   };
 
@@ -115,7 +123,7 @@ const ModuleHistory = () => {
         });
       })
       .catch(function (error) {
-        console.log(error);
+        setError(mapResponseError(error));
       });
 
     setDiffModal({
@@ -141,7 +149,7 @@ const ModuleHistory = () => {
         setManifest(res.data);
       })
       .catch(function (error) {
-        console.log(error);
+        setError(mapResponseError(error));
       });
 
     setManifestModal({
@@ -152,6 +160,21 @@ const ModuleHistory = () => {
 
   return (
     <div>
+      {error.message.length !== 0 && (
+        <Alert
+          message={error.message}
+          description={error.description}
+          type="error"
+          closable
+          afterClose={() => {
+            setError({
+              message: "",
+              description: "",
+            });
+          }}
+          style={{ marginBottom: "20px" }}
+        />
+      )}
       <Row gutter={[40, 0]}>
         <Col span={18}>
           <Title level={2}>{moduleName} history</Title>
@@ -167,14 +190,6 @@ const ModuleHistory = () => {
               <Typography.Text>{generation}</Typography.Text>
             )}
           />
-          {/*<Table.Column*/}
-          {/*    title='Date'*/}
-          {/*    dataIndex='date'*/}
-          {/*    key='date'*/}
-          {/*    render={(date) => (*/}
-          {/*        <Text code style={{fontSize: '110%'}}>{date}</Text>*/}
-          {/*    )}*/}
-          {/*/>*/}
           <Table.Column
             dataIndex="Manifest"
             key="manifest"
@@ -201,21 +216,6 @@ const ModuleHistory = () => {
               </Button>
             )}
           />
-          {/*<Table.Column*/}
-          {/*    title='Success'*/}
-          {/*    dataIndex='success'*/}
-          {/*    key='success'*/}
-          {/*    render={success => (*/}
-          {/*        <Icon theme="twoTone" type={success === true ? 'check-circle' : 'close-square'}*/}
-          {/*              twoToneColor={success === true ? 'blue' : 'red'} style={{fontSize: '150%'}}/>*/}
-          {/*    )}*/}
-          {/*/>*/}
-          {/*<Table.Column*/}
-          {/*    width='15%'*/}
-          {/*    render={(text, record, index) =>*/}
-          {/*            <Button onClick={() => openModal(text, record, index)} block>Rollback</Button>*/}
-          {/*    }*/}
-          {/*/>*/}
         </Table>
       </Col>
       <Modal

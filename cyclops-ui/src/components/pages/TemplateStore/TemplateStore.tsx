@@ -37,7 +37,9 @@ const TemplateStore = () => {
   const [newTemplateModal, setNewTemplateModal] = useState(false);
   const [confirmLoading, setConfirmLoading] = useState(false);
   const [editModal, setEditModal] = useState("");
-  const [loadingTemplateName, setLoadingTemplateName] = useState("");
+  const [loadingTemplateName, setLoadingTemplateName] = useState<{
+    [key: string]: boolean;
+  }>({});
   const [requestStatus, setRequestStatus] = useState<{ [key: string]: string }>(
     {},
   );
@@ -141,11 +143,15 @@ const TemplateStore = () => {
     version: string,
     templateName: string,
   ) => {
-    setLoadingTemplateName(templateName);
+    setLoadingTemplateName((prevState) => {
+      return { ...prevState, [templateName]: true };
+    });
     axios
       .get(`/api/templates?repo=${repo}&path=${path}&commit=${version}`)
       .then((res) => {
-        setLoadingTemplateName("");
+        setLoadingTemplateName((prevState) => {
+          return { ...prevState, [templateName]: false };
+        });
         setRequestStatus((prevStatus) => ({
           ...prevStatus,
           [templateName]: "success",
@@ -154,12 +160,14 @@ const TemplateStore = () => {
         setError({ message: "", description: "" });
       })
       .catch((error) => {
-        setLoadingTemplateName("");
+        setLoadingTemplateName((prevState) => {
+          return { ...prevState, [templateName]: false };
+        });
         setRequestStatus((prevStatus) => ({
           ...prevStatus,
           [templateName]: "error",
         }));
-        setError(mapResponseError(error));
+        message.error("Template reference is Invalid!");
       });
   };
 
@@ -297,7 +305,7 @@ const TemplateStore = () => {
             width="5%"
             render={(template) => (
               <>
-                {loadingTemplateName === template.name ? (
+                {loadingTemplateName[template.name] === true ? (
                   <Spin />
                 ) : (
                   <FileSyncOutlined

@@ -2,7 +2,9 @@ package dto
 
 import (
 	v1 "k8s.io/api/core/v1"
+	rbacv1 "k8s.io/api/rbac/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/util/intstr"
 )
 
 type Resource interface {
@@ -336,6 +338,69 @@ func (p *PersistentVolumeClaim) SetDeleted(deleted bool) {
 	p.Deleted = deleted
 }
 
+type PersistentVolume struct {
+	Group                 string                           `json:"group"`
+	Version               string                           `json:"version"`
+	Kind                  string                           `json:"kind"`
+	Name                  string                           `json:"name"`
+	Namespace             string                           `json:"namespace"`
+	AccessModes           []v1.PersistentVolumeAccessMode  `json:"accessmodes"`
+	Capacity              string                           `json:"capacity"`
+	PersistentVolumeClaim string                           `json:"persistentvolumeclaim"`
+	StorageClass          string                           `json:"storageclass"`
+	Status                v1.PersistentVolumeStatus        `json:"status"`
+	ReclaimPolicy         v1.PersistentVolumeReclaimPolicy `json:"reclaimpolicy"`
+	Deleted               bool                             `json:"deleted"`
+}
+
+func (p *PersistentVolume) GetGroupVersionKind() string {
+	return p.Group + "/" + p.Version + ", Kind=" + p.Kind
+}
+
+func (p *PersistentVolume) GetGroup() string {
+	return p.Group
+}
+
+func (p *PersistentVolume) GetVersion() string {
+	return p.Version
+}
+
+func (p *PersistentVolume) GetKind() string {
+	return p.Kind
+}
+
+func (p *PersistentVolume) GetName() string {
+	return p.Name
+}
+
+func (p *PersistentVolume) GetNamespace() string {
+	return p.Namespace
+}
+
+func (p *PersistentVolume) GetDeleted() bool {
+	return p.Deleted
+}
+
+func (p *PersistentVolume) GetCapacity() string {
+	return p.Capacity
+}
+
+func (p *PersistentVolume) GetPersistentVolumeClaim() string {
+	return p.PersistentVolumeClaim
+}
+
+func (p *PersistentVolume) GetStorageClass() string {
+	return p.StorageClass
+}
+
+func (p *PersistentVolume) GetStatus() v1.PersistentVolumeStatus {
+	return p.Status
+}
+
+func (p *PersistentVolume) SetDeleted(deleted bool) {
+	p.Deleted = deleted
+}
+
 type Secret struct {
 	Group     string   `json:"group"`
 	Version   string   `json:"version"`
@@ -494,6 +559,74 @@ func (c *Job) GetStartTime() string {
 	return c.StartTime
 }
 
+type NetworkPolicy struct {
+	Group     string                     `json:"group"`
+	Version   string                     `json:"version"`
+	Kind      string                     `json:"kind"`
+	Name      string                     `json:"name"`
+	Namespace string                     `json:"namespace"`
+	Pods      []Pod                      `json:"pods"`
+	Ingress   []NetworkPolicyIngressRule `json:"ingress"`
+	Egress    []NetworkPolicyEgressRule  `json:"egress"`
+}
+
+func (n *NetworkPolicy) GetGroupVersionKind() string {
+	return n.Group + "/" + n.Version + ", Kind=" + n.Kind
+}
+
+func (n *NetworkPolicy) GetGroup() string {
+	return n.Group
+}
+
+func (n *NetworkPolicy) GetVersion() string {
+	return n.Version
+}
+
+func (n *NetworkPolicy) GetKind() string {
+	return n.Kind
+}
+
+func (n *NetworkPolicy) GetName() string {
+	return n.Name
+}
+
+func (n *NetworkPolicy) GetNamespace() string {
+	return n.Namespace
+}
+
+func (n *NetworkPolicy) GetIngress() []NetworkPolicyIngressRule {
+	return n.Ingress
+}
+
+func (n *NetworkPolicy) GetEgress() []NetworkPolicyEgressRule {
+	return n.Egress
+}
+
+type NetworkPolicyIngressRule struct {
+	Ports []NetworkPolicyPort `json:"ports"`
+	From  []NetworkPolicyPeer `json:"from"`
+}
+
+type NetworkPolicyEgressRule struct {
+	Ports []NetworkPolicyPort `json:"ports,"`
+	To    []NetworkPolicyPeer `json:"to"`
+}
+
+type NetworkPolicyPort struct {
+	Protocol string             `json:"protocol"`
+	Port     intstr.IntOrString `json:"port"`
+	EndPort  int32              `json:"endPort"`
+}
+
+type NetworkPolicyPeer struct {
+	IPBlock *IPBlock `json:"ipBlock"`
+}
+
+type IPBlock struct {
+	CIDR   string   `json:"cidr"`
+	Except []string `json:"except"`
+}
+
 type Other struct {
 	Group     string `json:"group"`
 	Version   string `json:"version"`
@@ -543,4 +676,47 @@ func (s *Other) IsMissing() bool {
 
 func (s *Other) SetMissing(missing bool) {
 	s.Missing = missing
+}
+
+type Role struct {
+	Group     string              `json:"group"`
+	Version   string              `json:"version"`
+	Kind      string              `json:"kind"`
+	Name      string              `json:"name"`
+	Namespace string              `json:"namespace"`
+	Status    string              `json:"status"`
+	Deleted   bool                `json:"deleted"`
+	Rules     []rbacv1.PolicyRule `json:"rules"`
+}
+
+func (s *Role) GetGroupVersionKind() string {
+	return s.Group + "/" + s.Version + ", Kind=" + s.Kind
+}
+
+func (s *Role) GetGroup() string {
+	return s.Group
+}
+
+func (s *Role) GetVersion() string {
+	return s.Version
+}
+
+func (s *Role) GetKind() string {
+	return s.Kind
+}
+
+func (s *Role) GetName() string {
+	return s.Name
+}
+
+func (s *Role) GetNamespace() string {
+	return s.Namespace
+}
+
+func (s *Role) GetDeleted() bool {
+	return s.Deleted
+}
+
+func (s *Role) SetDeleted(deleted bool) {
+	s.Deleted = deleted
 }

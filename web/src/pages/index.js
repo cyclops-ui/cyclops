@@ -118,33 +118,14 @@ export default function Home() {
                 className={styles.readTheDocs}
                 style={{
                   textDecoration: "none",
-                  display: "inline-flex",
-                  alignItems: "center",
+                  display: "flex",
+                  alignContent: "center",
                   color: "white",
                 }}
               >
-                <h3 style={{ margin: 0 }}>Get started</h3>
+                <h3>Get started</h3>
               </Button>
             </ConfigProvider>
-          </Row>
-          <Row style={{ padding: "15px" }}>
-            <a
-              href={
-                "https://www.producthunt.com/products/cyclops?utm_source=badge-follow&utm_medium=badge&utm_souce=badge-cyclops"
-              }
-              target={"_blank"}
-              style={{ zIndex: "1" }}
-            >
-              <img
-                src={
-                  "https://api.producthunt.com/widgets/embed-image/v1/follow.svg?product_id=566069&theme=light"
-                }
-                alt="Cyclops - Developer&#0032;Friendly&#0032;Kubernetes | Product Hunt"
-                style={{ width: "250px", height: "54px" }}
-                width={"250"}
-                height={"54"}
-              />
-            </a>
           </Row>
         </div>
         <Comparison />
