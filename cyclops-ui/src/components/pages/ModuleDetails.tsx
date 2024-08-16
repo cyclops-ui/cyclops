@@ -740,7 +740,7 @@ const ModuleDetails = () => {
 
   const deleteResource = () => {
     axios
-      .delete(`/api/modules/` + moduleName + `/resources`, {
+      .delete(`/api/resources`, {
         data: {
           group: deleteResourceRef.group,
           version: deleteResourceRef.version,
