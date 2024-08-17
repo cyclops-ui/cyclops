@@ -53,6 +53,10 @@ import { gvkString } from "../../utils/k8s/gvk";
 import { mapResponseError } from "../../utils/api/errors";
 import Secret from "../k8s-resources/Secret";
 import { CheckboxChangeEvent } from "antd/es/checkbox";
+import {
+  canRestart,
+  RestartButton,
+} from "../k8s-resources/common/RestartButton";
 
 const languages = [
   "javascript",
@@ -569,12 +573,23 @@ const ModuleDetails = () => {
         <Row>
           <Title level={4}>{resource.namespace}</Title>
         </Row>
-        <Row>
+        <Row gutter={[20, 0]}>
           <Col style={{ float: "right" }}>
             <Button onClick={() => handleManifestClick(resource)} block>
               View Manifest
             </Button>
           </Col>
+          {canRestart(resource.group, resource.version, resource.kind) && (
+            <Col style={{ float: "right" }}>
+              <RestartButton
+                group={resource.group}
+                version={resource.version}
+                kind={resource.kind}
+                name={resource.name}
+                namespace={resource.namespace}
+              />
+            </Col>
+          )}
         </Row>
         {resourceDetails}
       </Collapse.Panel>,
