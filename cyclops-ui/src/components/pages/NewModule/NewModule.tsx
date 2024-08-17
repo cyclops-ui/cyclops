@@ -376,6 +376,7 @@ const NewModule = () => {
         message: "Invalid values file",
         description: "Values file can't be empty",
       });
+      setLoadingValuesFile(false);
       return;
     }
 
