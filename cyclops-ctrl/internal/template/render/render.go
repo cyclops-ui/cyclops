@@ -1,6 +1,8 @@
 package render
 
 import (
+	"sort"
+
 	json "github.com/json-iterator/go"
 	helmchart "helm.sh/helm/v3/pkg/chart"
 	"helm.sh/helm/v3/pkg/chartutil"
@@ -80,9 +82,16 @@ func (r *Renderer) HelmTemplate(module cyclopsv1alpha1.Module, moduleTemplate *m
 		return "", err
 	}
 
+	filenames := make([]string, 0, len(out))
+	for filename := range out {
+		filenames = append(filenames, filename)
+	}
+
+	sort.Strings(filenames)
+
 	manifest := ""
-	for _, rendererManifest := range out {
-		manifest += rendererManifest
+	for _, filename := range filenames {
+		manifest += out[filename]
 		manifest += "\n---\n"
 	}
 
