@@ -144,7 +144,7 @@ const TemplateStore = () => {
       setLoadingTemplateName((prevState) => {
         return { ...prevState, [templateName]: true };
       });
-      axios
+      await axios
         .get(
           `/api/templates?repo=${templateInfo.repo}&path=${templateInfo.path}&commit=${templateInfo.version}`,
         )
