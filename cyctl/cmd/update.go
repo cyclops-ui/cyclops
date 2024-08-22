@@ -7,10 +7,10 @@ import (
 
 var (
 	updateExample = `# updates the given module 
-cyctl update module <module-name> --key=<key> --value=<value> 
+cyctl update module <module-name> --value="<key>=<value>" --value="<key>=<value>"
 
-# to update replicas for a module named test,updates number of replicas to 3
-cyctl update module <module-name> test --key="scaling.replicas" --value=3`
+# to update replicas and version for a module named test, with 3 replicas and version 1.27.1
+cyctl update module test --value="scaling.replicas=3" --value="general.version=1.27.1"`
 )
 
 var (

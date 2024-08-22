@@ -14,9 +14,9 @@ import (
 )
 
 var (
-	updateModuleExample = `# updates module values; takes module name as an argument with flags --key and --value
-# to update replicas for a module named test 
-cyctl update module test --key="scaling.replicas" --value=3
+	updateModuleExample = `# updates module values; takes module name as an argument with flag --value
+# to update replicas and version for a module named test
+cyctl update module test --value="scaling.replicas=3" --value="general.version=1.27.1"
 	`
 )
 
