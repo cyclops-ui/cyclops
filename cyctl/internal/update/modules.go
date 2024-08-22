@@ -82,7 +82,7 @@ var (
 		Run: func(cmd *cobra.Command, args []string) {
 			values, err := cmd.Flags().GetStringArray("value")
 			if err != nil {
-				fmt.Println("failed to get value of flag --value ")
+				fmt.Println("failed to get value of flag --value: ", err)
 				return
 			}
 
