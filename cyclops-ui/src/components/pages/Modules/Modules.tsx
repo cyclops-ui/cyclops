@@ -88,7 +88,7 @@ const Modules = () => {
     if (resolvedVersion !== "") {
       return resolvedVersion;
     }
-    if(version !== ""){
+    if (version !== "") {
       return version;
     }
     return "main";
@@ -143,10 +143,11 @@ const Modules = () => {
                 }}
               >
                 Repo:
-                <Link aria-level={3}
-                 href={module.template.repo}
-                 target="_blank"
-                 >
+                <Link
+                  aria-level={3}
+                  href={module.template.repo}
+                  target="_blank"
+                >
                   {" " + module.template.repo}
                 </Link>
               </Col>
