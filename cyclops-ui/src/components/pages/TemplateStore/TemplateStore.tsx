@@ -272,6 +272,19 @@ const TemplateStore = () => {
             onChange={handleSearch}
           ></Input>
         </Col>
+        <Col span={6}>
+          {filteredTemplates.length !== 0 && (
+            <Button
+              block
+              type={"primary"}
+              onClick={() => {
+                validateAllTemplates();
+              }}
+            >
+              Validate All Templates
+            </Button>
+          )}
+        </Col>
       </Row>
       <Col span={24} style={{ overflowX: "auto" }}>
         <Table dataSource={filteredTemplates}>
@@ -397,18 +410,6 @@ const TemplateStore = () => {
           />
         </Table>
       </Col>
-      {filteredTemplates.length !== 0 && (
-        <Row justify={"end"} style={{ marginTop: "0.5rem" }}>
-          <Button
-            type={"primary"}
-            onClick={() => {
-              validateAllTemplates();
-            }}
-          >
-            Validate All Templates
-          </Button>
-        </Row>
-      )}
       <Modal
         title="Add new"
         open={newTemplateModal}
