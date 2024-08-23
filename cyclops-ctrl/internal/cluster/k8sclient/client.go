@@ -916,3 +916,39 @@ func isSecret(group, version, kind string) bool {
 func isCronJob(group, version, kind string) bool {
 	return group == "batch" && version == "v1" && kind == "CronJob"
 }
+
+func WatchResource(clientset *kubernetes.Clientset, group, version, kind, name, namespace string) (<-chan watch.Event, error) {
+    // Create a channel to publish events
+    eventChannel := make(chan watch.Event)
+
+    // Define a context
+    ctx, cancel := context.WithCancel(context.Background())
+
+    // Create a dynamic client for the specified resource
+    dynamicClient, err := dynamic.NewForConfig(clientset.RESTConfig())
+    if err != nil {
+        return nil, err
+    }
+
+    resource := schema.GroupVersionResource{Group: group, Version: version, Resource: kind}
+
+    // Start the watch
+    watch, err := dynamicClient.Resource(resource).Namespace(namespace).Watch(ctx, metav1.ListOptions{
+        FieldSelector: "metadata.name=" + name,
+    })
+    if err != nil {
+        cancel()
+        return nil, err
+    }
+
+    // Goroutine to handle watch events
+    go func() {
+        defer close(eventChannel)
+        defer cancel()
+        for event := range watch.ResultChan() {
+            eventChannel <- event
+        }
+    }()
+
+    return eventChannel, nil
+}
