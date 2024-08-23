@@ -254,7 +254,7 @@ const TemplateStore = () => {
         </Col>
         <Col>
           <div style={{ display: "flex", gap: "0.5rem" }}>
-            {filteredTemplates.length == 0 && (
+            {filteredTemplates.length !== 0 && (
               <Button
                 block
                 onClick={() => {
