@@ -248,20 +248,32 @@ const TemplateStore = () => {
         />
       )}
       {contextHolder}
-      <Row gutter={[40, 0]}>
-        <Col span={18}>
+      <Row gutter={[40, 0]} style={{ justifyContent: "space-between" }}>
+        <Col>
           <Title level={2}>Templates: {filteredTemplates.length}</Title>
         </Col>
-        <Col span={6}>
-          <Button
-            type={"primary"}
-            block
-            onClick={() => {
-              setNewTemplateModal(true);
-            }}
-          >
-            Add template reference
-          </Button>
+        <Col>
+          <div style={{ display: "flex", gap: "0.5rem" }}>
+            {filteredTemplates.length == 0 && (
+              <Button
+                block
+                onClick={() => {
+                  validateAllTemplates();
+                }}
+              >
+                Validate All Templates
+              </Button>
+            )}
+            <Button
+              type={"primary"}
+              block
+              onClick={() => {
+                setNewTemplateModal(true);
+              }}
+            >
+              Add template reference
+            </Button>
+          </div>
         </Col>
       </Row>
       <Row gutter={[40, 0]}>
@@ -271,19 +283,6 @@ const TemplateStore = () => {
             style={{ width: "30%", marginBottom: "1rem" }}
             onChange={handleSearch}
           ></Input>
-        </Col>
-        <Col span={6}>
-          {filteredTemplates.length !== 0 && (
-            <Button
-              block
-              type={"primary"}
-              onClick={() => {
-                validateAllTemplates();
-              }}
-            >
-              Validate All Templates
-            </Button>
-          )}
         </Col>
       </Row>
       <Col span={24} style={{ overflowX: "auto" }}>
