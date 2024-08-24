@@ -25,13 +25,13 @@ func Login(cerbosClient *CerbosSvc) gin.HandlerFunc {
 		}
 
 		if err := c.ShouldBindJSON(&credentials); err != nil {
-			c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request"})
+			c.JSON(http.StatusBadRequest, gin.H{"error": "invalid credentials"})
 			return
 		}
 
 		userRecord, err := db.LookupUser(c.Request.Context(), credentials.Username)
 		if err != nil {
-			c.JSON(http.StatusOK, gin.H{"error": "user does not exist."})
+			c.JSON(http.StatusOK, gin.H{"error": "invalid credentials"})
 			return
 		}
 
@@ -42,7 +42,7 @@ func Login(cerbosClient *CerbosSvc) gin.HandlerFunc {
 
 		authCtx, err := buildAuthContext(credentials.Username, c, cerbosClient)
 		if err != nil {
-			c.JSON(http.StatusUnauthorized, gin.H{"error": "unauthorized"})
+			c.JSON(http.StatusUnauthorized, gin.H{"error": "invalid credentials"})
 			return
 		}
 		requestCtx := c.Request.Context()
@@ -70,5 +70,13 @@ func Login(cerbosClient *CerbosSvc) gin.HandlerFunc {
 
 		c.SetCookie("cyclops.token", tokenString, int(time.Until(time.Now()).Seconds()), "/", "", false, true)
 		c.JSON(http.StatusOK, gin.H{"token": tokenString})
+	}
+}
+
+func Logout() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		expirationTime := time.Now().Add(-time.Hour)
+		c.SetCookie("cyclops.token", "", int(expirationTime.Unix()), "/", "", false, true)
+		c.JSON(http.StatusOK, gin.H{"message": "Successfully logged out"})
 	}
 }
