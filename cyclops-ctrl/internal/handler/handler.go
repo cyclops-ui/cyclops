@@ -66,6 +66,8 @@ func (h *Handler) Start() error {
 		h.router.Use(cerbos.AuthMiddleware(h.cerbosClient))
 	}
 
+	h.router.POST("/logout", cerbos.Logout())
+
 	// templates
 	h.router.GET("/templates", templatesController.GetTemplate)
 	h.router.GET("/templates/initial", templatesController.GetTemplateInitialValues)

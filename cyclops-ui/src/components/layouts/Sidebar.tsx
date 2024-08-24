@@ -66,14 +66,17 @@ const SideNav = () => {
       />
 
       <div style={{ marginTop: "auto" }}>
-        <Button
-          ghost
-          style={{ margin: "10px 25px", width: "calc(100% - 50px)" }}
-          icon={<LogoutOutlined />}
-          onClick={logout}
-        >
-          <b>Logout</b>
-        </Button>
+        {window.__RUNTIME_CONFIG__.REACT_APP_CYCLOPS_AUTHORIZATION ===
+          "enabled" && (
+          <Button
+            ghost
+            style={{ margin: "10px 25px", width: "calc(100% - 50px)" }}
+            icon={<LogoutOutlined />}
+            onClick={logout}
+          >
+            <b>Logout</b>
+          </Button>
+        )}
 
         <Button
           ghost
