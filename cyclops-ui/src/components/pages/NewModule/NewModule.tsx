@@ -376,6 +376,7 @@ const NewModule = () => {
         message: "Invalid values file",
         description: "Values file can't be empty",
       });
+      setLoadingValuesFile(false);
       return;
     }
 
@@ -1295,7 +1296,11 @@ const NewModule = () => {
                 }
                 htmlType="submit"
                 name="Save"
-                disabled={loadingTemplate || loadingTemplateInitialValues}
+                disabled={
+                  loadingTemplate ||
+                  loadingTemplateInitialValues ||
+                  !(template.version || template.path || template.repo)
+                }
               >
                 Save
               </Button>{" "}

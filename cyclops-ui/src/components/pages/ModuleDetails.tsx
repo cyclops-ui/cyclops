@@ -19,10 +19,16 @@ import "ace-builds/src-noconflict/ace";
 import { useParams } from "react-router-dom";
 import axios from "axios";
 import {
+  BookOutlined,
   CaretRightOutlined,
   CheckCircleTwoTone,
   CloseSquareTwoTone,
+  CopyOutlined,
+  DeleteOutlined,
+  EditOutlined,
+  FileTextOutlined,
   SearchOutlined,
+  UndoOutlined,
   WarningTwoTone,
 } from "@ant-design/icons";
 import "./custom.css";
@@ -47,6 +53,10 @@ import { gvkString } from "../../utils/k8s/gvk";
 import { mapResponseError } from "../../utils/api/errors";
 import Secret from "../k8s-resources/Secret";
 import { CheckboxChangeEvent } from "antd/es/checkbox";
+import {
+  canRestart,
+  RestartButton,
+} from "../k8s-resources/common/RestartButton";
 
 const languages = [
   "javascript",
@@ -118,6 +128,8 @@ const ModuleDetails = () => {
   const [loading, setLoading] = useState(false);
   const [loadModule, setLoadModule] = useState(false);
   const [loadResources, setLoadResources] = useState(false);
+  const [loadingReconciliation, setLoadingReconciliation] = useState(false);
+
   const [deleteName, setDeleteName] = useState("");
   const [deleteResourceVerify, setDeleteResourceVerify] = useState("");
   const [resources, setResources] = useState([]);
@@ -141,6 +153,10 @@ const ModuleDetails = () => {
     name: "",
     namespace: "",
   });
+
+  const [loadingRenderedManifest, setLoadingRenderedManifest] = useState(false);
+  const [viewRenderedManifest, setViewRenderedManifest] = useState(false);
+  const [renderedManifest, setRenderedManifest] = useState("");
 
   const [resourceFilter, setResourceFilter] = useState<string[]>([]);
 
@@ -557,12 +573,23 @@ const ModuleDetails = () => {
         <Row>
           <Title level={4}>{resource.namespace}</Title>
         </Row>
-        <Row>
+        <Row gutter={[20, 0]}>
           <Col style={{ float: "right" }}>
             <Button onClick={() => handleManifestClick(resource)} block>
               View Manifest
             </Button>
           </Col>
+          {canRestart(resource.group, resource.version, resource.kind) && (
+            <Col style={{ float: "right" }}>
+              <RestartButton
+                group={resource.group}
+                version={resource.version}
+                kind={resource.kind}
+                name={resource.name}
+                namespace={resource.namespace}
+              />
+            </Col>
+          )}
         </Row>
         {resourceDetails}
       </Collapse.Panel>,
@@ -728,7 +755,7 @@ const ModuleDetails = () => {
 
   const deleteResource = () => {
     axios
-      .delete(`/api/modules/` + moduleName + `/resources`, {
+      .delete(`/api/resources`, {
         data: {
           group: deleteResourceRef.group,
           version: deleteResourceRef.version,
@@ -788,6 +815,66 @@ const ModuleDetails = () => {
     );
   };
 
+  const handleViewRenderedManifest = () => {
+    setLoadingRenderedManifest(true);
+    setViewRenderedManifest(true);
+
+    axios
+      .get(`/api/modules/` + moduleName + `/currentManifest`)
+      .then((res) => {
+        setRenderedManifest(res.data);
+        setLoadingRenderedManifest(false);
+      })
+      .catch((error) => {
+        setError(mapResponseError(error));
+        setLoadingRenderedManifest(false);
+      });
+  };
+
+  const submitReconcileModule = () => {
+    setLoadingReconciliation(true);
+
+    axios
+      .post(`/api/modules/` + moduleName + `/reconcile`)
+      .then((res) => {
+        setLoadingReconciliation(false);
+      })
+      .catch((error) => {
+        setError(mapResponseError(error));
+        setLoadingReconciliation(false);
+      });
+  };
+
+  const renderedManifestModalContent = () => {
+    if (loadingRenderedManifest) {
+      return <Spin />;
+    }
+
+    return (
+      <ReactAce
+        mode={"sass"}
+        theme={"github"}
+        fontSize={12}
+        showPrintMargin={true}
+        showGutter={true}
+        highlightActiveLine={true}
+        readOnly={true}
+        setOptions={{
+          enableBasicAutocompletion: true,
+          enableLiveAutocompletion: true,
+          enableSnippets: false,
+          showLineNumbers: true,
+          tabSize: 4,
+          useWorker: false,
+        }}
+        style={{
+          width: "100%",
+        }}
+        value={renderedManifest}
+      />
+    );
+  };
+
   return (
     <div>
       {error.message.length !== 0 && (
@@ -816,7 +903,7 @@ const ModuleDetails = () => {
       >
         Actions
       </Divider>
-      <Row gutter={[40, 0]}>
+      <Row gutter={[20, 0]}>
         <Col>
           <Button
             onClick={function () {
@@ -824,7 +911,18 @@ const ModuleDetails = () => {
             }}
             block
           >
+            <EditOutlined />
             Edit
+          </Button>
+        </Col>
+        <Col>
+          <Button
+            onClick={submitReconcileModule}
+            block
+            loading={loadingReconciliation}
+          >
+            <UndoOutlined />
+            Reconcile
           </Button>
         </Col>
         <Col>
@@ -834,7 +932,14 @@ const ModuleDetails = () => {
             }}
             block
           >
+            <BookOutlined />
             Rollback
+          </Button>
+        </Col>
+        <Col>
+          <Button onClick={handleViewRenderedManifest} block>
+            <FileTextOutlined />
+            View Manifest
           </Button>
         </Col>
         <Col>
@@ -846,6 +951,7 @@ const ModuleDetails = () => {
             block
             loading={loading}
           >
+            <DeleteOutlined />
             Delete
           </Button>
         </Col>
@@ -903,18 +1009,36 @@ const ModuleDetails = () => {
         cancelButtonProps={{ style: { display: "none" } }}
         width={"40%"}
       >
-        <div>
-          <Checkbox onChange={handleCheckboxChange} checked={showManagedFields}>
-            Include Managed Fields
-          </Checkbox>
-          <Divider style={{ marginTop: "12px", marginBottom: "12px" }} />
+        <Checkbox onChange={handleCheckboxChange} checked={showManagedFields}>
+          Include Managed Fields
+        </Checkbox>
+        <Divider style={{ marginTop: "12px", marginBottom: "12px" }} />
+        <div style={{ position: "relative" }}>
+          <ReactAce
+            style={{ width: "100%" }}
+            mode={"sass"}
+            value={manifestModal.manifest}
+            readOnly={true}
+          />
+          <Tooltip title={"Copy Manifest"} trigger="hover">
+            <Button
+              onClick={() => {
+                navigator.clipboard.writeText(manifestModal.manifest);
+              }}
+              style={{
+                position: "absolute",
+                right: "20px",
+                top: "10px",
+              }}
+            >
+              <CopyOutlined
+                style={{
+                  fontSize: "20px",
+                }}
+              />
+            </Button>
+          </Tooltip>
         </div>
-        <ReactAce
-          style={{ width: "100%" }}
-          mode={"sass"}
-          value={manifestModal.manifest}
-          readOnly={true}
-        />
       </Modal>
       <Modal
         title={
@@ -952,6 +1076,16 @@ const ModuleDetails = () => {
           value={deleteResourceVerify}
           required
         />
+      </Modal>
+      <Modal
+        title="Rendered manifest"
+        open={viewRenderedManifest}
+        onOk={() => setViewRenderedManifest(false)}
+        onCancel={() => setViewRenderedManifest(false)}
+        cancelButtonProps={{ style: { display: "none" } }}
+        width={"60%"}
+      >
+        {renderedManifestModalContent()}
       </Modal>
     </div>
   );

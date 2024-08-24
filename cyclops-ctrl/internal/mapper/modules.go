@@ -44,6 +44,11 @@ func ModuleToDTO(module cyclopsv1alpha1.Module) (dto.Module, error) {
 		Template:  k8sTemplateRefToDTO(module.Spec.TemplateRef, module.Status.TemplateResolvedVersion),
 		Values:    module.Spec.Values,
 		IconURL:   module.Status.IconURL,
+		ReconciliationStatus: dto.ReconciliationStatus{
+			Status: dto.ReconciliationStatusState(module.Status.ReconciliationStatus.Status),
+			Reason: module.Status.ReconciliationStatus.Reason,
+			Errors: module.Status.ReconciliationStatus.Errors,
+		},
 	}, nil
 }
 

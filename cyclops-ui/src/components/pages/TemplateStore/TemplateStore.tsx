@@ -137,6 +137,40 @@ const TemplateStore = () => {
       });
   };
 
+  const validateAllTemplates = async () => {
+    for (const templateToBeValidate of filteredTemplates) {
+      const templateInfo = (templateToBeValidate as any).ref;
+      const templateName = (templateToBeValidate as any).name;
+      setLoadingTemplateName((prevState) => {
+        return { ...prevState, [templateName]: true };
+      });
+      await axios
+        .get(
+          `/api/templates?repo=${templateInfo.repo}&path=${templateInfo.path}&commit=${templateInfo.version}`,
+        )
+        .then(() => {
+          setRequestStatus((prevStatus) => ({
+            ...prevStatus,
+            [templateName]: "success",
+          }));
+          message.success(templateName + " Template reference is valid!");
+          setError({ message: "", description: "" });
+        })
+        .catch((error) => {
+          setRequestStatus((prevStatus) => ({
+            ...prevStatus,
+            [templateName]: "error",
+          }));
+          setError(mapResponseError(error));
+        })
+        .finally(() => {
+          setLoadingTemplateName((prevState) => {
+            return { ...prevState, [templateName]: false };
+          });
+        });
+    }
+  };
+
   const checkTemplateReference = (
     repo: string,
     path: string,
@@ -167,7 +201,7 @@ const TemplateStore = () => {
           ...prevStatus,
           [templateName]: "error",
         }));
-        setError(mapResponseError(error));
+        message.error("Template reference is Invalid!");
       });
   };
 
@@ -214,20 +248,32 @@ const TemplateStore = () => {
         />
       )}
       {contextHolder}
-      <Row gutter={[40, 0]}>
-        <Col span={18}>
+      <Row gutter={[40, 0]} style={{ justifyContent: "space-between" }}>
+        <Col>
           <Title level={2}>Templates: {filteredTemplates.length}</Title>
         </Col>
-        <Col span={6}>
-          <Button
-            type={"primary"}
-            block
-            onClick={() => {
-              setNewTemplateModal(true);
-            }}
-          >
-            Add template reference
-          </Button>
+        <Col>
+          <div style={{ display: "flex", gap: "0.5rem" }}>
+            {filteredTemplates.length !== 0 && (
+              <Button
+                block
+                onClick={() => {
+                  validateAllTemplates();
+                }}
+              >
+                Validate All Templates
+              </Button>
+            )}
+            <Button
+              type={"primary"}
+              block
+              onClick={() => {
+                setNewTemplateModal(true);
+              }}
+            >
+              Add template reference
+            </Button>
+          </div>
         </Col>
       </Row>
       <Row gutter={[40, 0]}>

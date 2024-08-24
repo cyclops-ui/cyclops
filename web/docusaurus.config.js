@@ -1,7 +1,7 @@
 // @ts-check
 // Note: type annotations allow type checking and IDEs autocompletion
 
-import { Button } from "antd";
+import { discord, github, linkedin, x } from "./social-icons";
 
 /** @type {import('@docusaurus/types').Config} */
 const config = {
@@ -91,24 +91,28 @@ const config = {
               "</a>",
           },
           {
-            href: "https://github.com/cyclops-ui/cyclops",
+            value: github("https://github.com/cyclops-ui/cyclops"),
+            type: "html",
             position: "right",
-            className: "header-github-link",
+            className: "link center",
           },
           {
-            href: "https://www.linkedin.com/company/cyclops-ui",
+            value: linkedin("https://www.linkedin.com/company/cyclops-ui"),
+            type: "html",
             position: "right",
-            className: "header-linkedin-link",
+            className: "link center",
           },
           {
-            href: "https://x.com/CyclopsUI",
+            value: x("https://x.com/CyclopsUI"),
+            type: "html",
             position: "right",
-            className: "header-x-link",
+            className: "link center",
           },
           {
-            href: "https://discord.com/invite/8ErnK3qDb3",
-            className: "header-discord-link",
+            value: discord("https://discord.com/invite/8ErnK3qDb3"),
+            type: "html",
             position: "right",
+            className: "link center",
           },
         ],
       },
@@ -218,16 +222,18 @@ const config = {
                 href: "https://www.linkedin.com/company/cyclops-ui/",
               },
               {
-                html: "info@cyclops-ui.com",
+                label: "info@cyclops-ui.com",
+                href: "mailto:info@cyclops-ui.com",
               },
             ],
           },
         ],
         copyright: `Copyright © ${new Date().getFullYear()} Cyclops UI`,
       },
+
       colorMode: {
         defaultMode: "light",
-        disableSwitch: true,
+        disableSwitch: false,
       },
     }),
 };

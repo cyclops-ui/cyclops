@@ -1,13 +1,29 @@
 package dto
 
 type Module struct {
-	Name      string      `json:"name"`
-	Namespace string      `json:"namespace"`
-	Template  Template    `json:"template"`
-	Version   string      `json:"version"`
-	Values    interface{} `json:"values"`
-	Status    string      `json:"status"`
-	IconURL   string      `json:"iconURL"`
+	Name                 string               `json:"name"`
+	Namespace            string               `json:"namespace"`
+	Template             Template             `json:"template"`
+	Version              string               `json:"version"`
+	Values               interface{}          `json:"values"`
+	Status               string               `json:"status"`
+	IconURL              string               `json:"iconURL"`
+	ReconciliationStatus ReconciliationStatus `json:"reconciliationStatus"`
+}
+
+type ReconciliationStatusState string
+
+const (
+	Unknown   ReconciliationStatusState = "unknown"
+	Succeeded ReconciliationStatusState = "succeeded"
+	Failed    ReconciliationStatusState = "failed"
+)
+
+// ReconciliationStatus represents the status of the reconciliation process.
+type ReconciliationStatus struct {
+	Status ReconciliationStatusState `json:"status,omitempty"`
+	Reason string                    `json:"reason,omitempty"`
+	Errors []string                  `json:"errors,omitempty"`
 }
 
 type Template struct {
