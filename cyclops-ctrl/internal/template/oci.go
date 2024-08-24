@@ -11,13 +11,14 @@ import (
 	"github.com/pkg/errors"
 
 	"github.com/cyclops-ui/cyclops/cyclops-ctrl/internal/models"
+	"github.com/cyclops-ui/cyclops/cyclops-ctrl/internal/auth"
 )
 
-func (r Repo) LoadOCIHelmChart(repo, chart, version string) (*models.Template, error) {
+func (r Repo) LoadOCIHelmChart(repo, chart, version string, creds *auth.Credentials) (*models.Template, error) {
 	var err error
 	strictVersion := version
 	if !isValidVersion(version) {
-		strictVersion, err = getOCIStrictVersion(repo, chart, version)
+		strictVersion, err = getOCIStrictVersion(repo, chart, version, creds)
 		if err != nil {
 			return nil, err
 		}
@@ -29,7 +30,7 @@ func (r Repo) LoadOCIHelmChart(repo, chart, version string) (*models.Template, e
 	}
 
 	var tgzData []byte
-	tgzData, err = loadOCIHelmChartBytes(repo, chart, version)
+	tgzData, err = loadOCIHelmChartBytes(repo, chart, version, creds)
 	if err != nil {
 		return nil, err
 	}
@@ -52,11 +53,11 @@ func (r Repo) LoadOCIHelmChart(repo, chart, version string) (*models.Template, e
 	return template, nil
 }
 
-func (r Repo) LoadOCIHelmChartInitialValues(repo, chart, version string) (map[string]interface{}, error) {
+func (r Repo) LoadOCIHelmChartInitialValues(repo, chart, version string, creds *auth.Credentials ) (map[string]interface{}, error) {
 	var err error
 	strictVersion := version
 	if !isValidVersion(version) {
-		strictVersion, err = getOCIStrictVersion(repo, chart, version)
+		strictVersion, err = getOCIStrictVersion(repo, chart, version, creds)
 		if err != nil {
 			return nil, err
 		}
@@ -67,7 +68,7 @@ func (r Repo) LoadOCIHelmChartInitialValues(repo, chart, version string) (map[st
 		return cached, nil
 	}
 
-	tgzData, err := loadOCIHelmChartBytes(repo, chart, version)
+	tgzData, err := loadOCIHelmChartBytes(repo, chart, version, creds)
 	if err != nil {
 		return nil, err
 	}
@@ -87,34 +88,34 @@ func (r Repo) LoadOCIHelmChartInitialValues(repo, chart, version string) (map[st
 	return initial, nil
 }
 
-func loadOCIHelmChartBytes(repo, chart, version string) ([]byte, error) {
+func loadOCIHelmChartBytes(repo, chart, version string, creds *auth.Credentials) ([]byte, error) {
 	var err error
 	if !isValidVersion(version) {
-		version, err = getOCIStrictVersion(repo, chart, version)
+		version, err = getOCIStrictVersion(repo, chart, version, creds)
 		if err != nil {
 			return nil, err
 		}
 	}
 
-	token, err := authorizeOCI(repo, chart, version)
+	token, err := authorizeOCI(repo, chart, version, creds)
 	if err != nil {
 		return nil, err
 	}
 
-	digest, err := fetchDigest(repo, chart, version, token)
+	digest, err := fetchDigest(repo, chart, version, token, creds)
 	if err != nil {
 		return nil, err
 	}
 
-	contentDigest, err := fetchContentDigest(repo, chart, digest, token)
+	contentDigest, err := fetchContentDigest(repo, chart, digest, token, creds)
 	if err != nil {
 		return nil, err
 	}
 
-	return loadOCITar(repo, chart, contentDigest, token)
+	return loadOCITar(repo, chart, contentDigest, token, creds)
 }
 
-func loadOCITar(repo, chart, digest, token string) ([]byte, error) {
+func loadOCITar(repo, chart, digest, token string, creds *auth.Credentials) ([]byte, error) {
 	bURL, err := blobURL(repo, chart, digest)
 	if err != nil {
 		return nil, err
@@ -129,6 +130,8 @@ func loadOCITar(repo, chart, digest, token string) ([]byte, error) {
 	req.Header.Set("Accept", "application/vnd.cncf.helm.config.v1+json, */*")
 	if len(token) != 0 {
 		req.Header.Set("Authorization", fmt.Sprintf("Bearer %v", token))
+	} else if auth := httpBasicAuthCredentials(creds); auth != nil { // MODIFIED: Apply basic auth if no token
+		req.SetBasicAuth(auth.Username, auth.Password)
 	}
 
 	client := &http.Client{}
@@ -141,7 +144,7 @@ func loadOCITar(repo, chart, digest, token string) ([]byte, error) {
 	return ioutil.ReadAll(resp.Body)
 }
 
-func fetchContentDigest(repo, chart, digest, token string) (string, error) {
+func fetchContentDigest(repo, chart, digest, token string, creds *auth.Credentials) (string, error) {
 	dURL, err := contentDigestURL(repo, chart, digest)
 	if err != nil {
 		return "", err
@@ -156,6 +159,8 @@ func fetchContentDigest(repo, chart, digest, token string) (string, error) {
 	req.Header.Set("Accept", "application/vnd.oci.image.manifest.v1+json, */*")
 	if len(token) != 0 {
 		req.Header.Set("Authorization", fmt.Sprintf("Bearer %v", token))
+	} else if auth := httpBasicAuthCredentials(creds); auth != nil { // MODIFIED: Apply basic auth if no token
+		req.SetBasicAuth(auth.Username, auth.Password)
 	}
 
 	client := &http.Client{}
@@ -187,7 +192,7 @@ func fetchContentDigest(repo, chart, digest, token string) (string, error) {
 	return ct.Layers[0].Digest, nil
 }
 
-func fetchDigest(repo, chart, version, token string) (string, error) {
+func fetchDigest(repo, chart, version, token string, creds *auth.Credentials) (string, error) {
 	dURL, err := digestURL(repo, chart, version)
 	if err != nil {
 		return "", err
@@ -202,6 +207,8 @@ func fetchDigest(repo, chart, version, token string) (string, error) {
 	req.Header.Set("Accept", "application/vnd.docker.distribution.manifest.v2+json, application/vnd.docker.distribution.manifest.list.v2+json, application/vnd.oci.image.manifest.v1+json, application/vnd.oci.image.index.v1+json, */*")
 	if len(token) != 0 {
 		req.Header.Set("Authorization", fmt.Sprintf("Bearer %v", token))
+	} else if auth := httpBasicAuthCredentials(creds); auth != nil { // MODIFIED: Apply basic auth if no token
+		req.SetBasicAuth(auth.Username, auth.Password)
 	}
 
 	client := &http.Client{}
@@ -214,8 +221,8 @@ func fetchDigest(repo, chart, version, token string) (string, error) {
 	return resp.Header.Get("docker-content-digest"), nil
 }
 
-func getOCIStrictVersion(repo, chart, version string) (string, error) {
-	token, err := authorizeOCITags(repo, chart)
+func getOCIStrictVersion(repo, chart, version string, creds *auth.Credentials) (string, error) {
+	token, err := authorizeOCITags(repo, chart, creds)
 	if err != nil {
 		return "", err
 	}
@@ -233,6 +240,8 @@ func getOCIStrictVersion(repo, chart, version string) (string, error) {
 	req.Header.Set("User-Agent", "Helm/3.13.3")
 	if len(token) != 0 {
 		req.Header.Set("Authorization", fmt.Sprintf("Bearer %v", token))
+	} else if auth := httpBasicAuthCredentials(creds); auth != nil { // MODIFIED: Apply basic auth if no token
+		req.SetBasicAuth(auth.Username, auth.Password)
 	}
 
 	client := &http.Client{}
@@ -258,7 +267,7 @@ func getOCIStrictVersion(repo, chart, version string) (string, error) {
 	return resolveSemver(version, tagsResp.Tags)
 }
 
-func authorizeOCI(repo, chart, version string) (string, error) {
+func authorizeOCI(repo, chart, version string, creds *auth.Credentials) (string, error) {
 	// region head
 	dURL, err := digestURL(repo, chart, version)
 	if err != nil {
@@ -270,6 +279,10 @@ func authorizeOCI(repo, chart, version string) (string, error) {
 	req, err := http.NewRequest(http.MethodHead, dURL.String(), nil)
 	if err != nil {
 		return "", err
+	}
+
+	if auth := httpBasicAuthCredentials(creds); auth != nil { // MODIFIED: Apply basic auth
+		req.SetBasicAuth(auth.Username, auth.Password)
 	}
 
 	resp, err := client.Do(req)
@@ -332,7 +345,7 @@ func authorizeOCI(repo, chart, version string) (string, error) {
 	// endregion
 }
 
-func authorizeOCITags(repo, chart string) (string, error) {
+func authorizeOCITags(repo, chart string, creds *auth.Credentials) (string, error) {
 	// region head
 	tURL, err := tagsURL(repo, chart)
 	if err != nil {
@@ -344,6 +357,10 @@ func authorizeOCITags(repo, chart string) (string, error) {
 	req, err := http.NewRequest(http.MethodHead, tURL.String(), nil)
 	if err != nil {
 		return "", err
+	}
+
+	if auth := httpBasicAuthCredentials(creds); auth != nil { // MODIFIED: Apply basic auth
+		req.SetBasicAuth(auth.Username, auth.Password)
 	}
 
 	resp, err := client.Do(req)
@@ -480,4 +497,15 @@ func tagsURL(repo, chart string) (*url.URL, error) {
 		Host:   repoURL.Host,
 		Path:   fmt.Sprintf("v2/%v/%v/tags/list", repoURL.Path, chart),
 	}, nil
+}
+
+func httpBasicAuthCredentials(creds *auth.Credentials) *http.BasicAuth {
+	if creds == nil {
+		return nil
+	}
+
+	return &http.BasicAuth{
+		Username: creds.Username,
+		Password: creds.Password,
+	}
 }
