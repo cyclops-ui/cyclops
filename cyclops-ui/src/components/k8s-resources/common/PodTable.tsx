@@ -15,11 +15,7 @@ import axios from "axios";
 import { formatPodAge } from "../../../utils/pods";
 import ReactAce from "react-ace";
 import { mapResponseError } from "../../../utils/api/errors";
-
-interface Props {
-  namespace: string;
-  pods: any[];
-}
+import ExecModal from './ExecModal'; // Import the ExecModal component
 
 const PodTable = ({ pods, namespace }: Props) => {
   const [logs, setLogs] = useState("");
@@ -29,6 +25,11 @@ const PodTable = ({ pods, namespace }: Props) => {
     pod: "",
     containers: [],
     initContainers: [],
+  });
+  const [execModal, setExecModal] = useState({ // Added state for ExecModal
+    on: false,
+    podName: "",
+    containerName: "",
   });
   const [error, setError] = useState({
     message: "",
@@ -44,6 +45,14 @@ const PodTable = ({ pods, namespace }: Props) => {
       initContainers: [],
     });
     setLogs("");
+  };
+
+  const handleCancelExec = () => { // Added handler for closing ExecModal
+    setExecModal({
+      on: false,
+      podName: "",
+      containerName: "",
+    });
   };
 
   const downloadLogs = (container: string) => {
@@ -73,7 +82,6 @@ const PodTable = ({ pods, namespace }: Props) => {
             <Col>
               <Button
                 type="primary"
-                // icon={<DownloadOutlined />}
                 onClick={downloadLogs(container.name)}
                 disabled={logs === "No logs available"}
               >
@@ -101,7 +109,6 @@ const PodTable = ({ pods, namespace }: Props) => {
             <Col>
               <Button
                 type="primary"
-                // icon={<DownloadOutlined />}
                 onClick={downloadLogs(container.name)}
                 disabled={logs === "No logs available"}
               >
@@ -149,6 +156,14 @@ const PodTable = ({ pods, namespace }: Props) => {
       .catch((error) => {
         setError(mapResponseError(error));
       });
+  };
+
+  const openExecModal = (podName: string, containerName: string) => { // Added function to open ExecModal
+    setExecModal({
+      on: true,
+      podName: podName,
+      containerName: containerName,
+    });
   };
 
   return (
@@ -252,6 +267,14 @@ const PodTable = ({ pods, namespace }: Props) => {
               >
                 View Logs
               </Button>
+              <Button
+                type="primary"
+                onClick={() => openExecModal(pod.name, pod.containers[0].name)} // Added button for Exec
+                style={{ marginTop: '10px' }}
+                block
+              >
+                Exec
+              </Button>
             </>
           )}
         />
@@ -281,6 +304,13 @@ const PodTable = ({ pods, namespace }: Props) => {
         )}
         <Tabs items={getTabItems()} onChange={onLogsTabsChange} />
       </Modal>
+      <ExecModal // Added ExecModal component
+        visible={execModal.on}
+        onCancel={handleCancelExec}
+        podName={execModal.podName}
+        containerName={execModal.containerName}
+        namespace={namespace}
+      />
     </div>
   );
 };
