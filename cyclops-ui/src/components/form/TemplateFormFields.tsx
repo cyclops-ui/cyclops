@@ -1,25 +1,30 @@
 import React from "react";
-import SelectInput from "./fields/string/SelectInput";
-import File from "./fields/string/File";
-import { Boolean, getValueFromNestedObject } from "./fields/boolean/Boolean";
-import { Number } from "./fields/number/Number";
-import StringField from "./fields/string/String";
+import StringField from "./fields/string/StringField";
 import { ArrayField } from "./fields/array/ArrayField";
 import { ObjectField } from "./fields/object/ObjectField";
 import { MapField } from "./fields/map/MapField";
+import { SelectInputField } from "./fields/string/SelectInput";
+import { FileField } from "./fields/string/FileField";
+import { NumberField } from "./fields/number/Number";
+import {
+  BooleanField,
+  getValueFromNestedObject,
+} from "./fields/boolean/Boolean";
 
 interface Props {
+  isModuleEdit: boolean;
   fields: any[];
   parentFieldID: string[];
   parent: string;
   level: number;
   arrayIndexLifetime: number;
   arrayField?: any;
-  required?: string[];
-  initialFields: any;
+  required: string[];
+  initialValues: any;
 }
 
 export function mapFields(
+  isModuleEdit: boolean,
   fields: any[],
   initialValues: any,
   parentFieldID: string[],
@@ -64,7 +69,7 @@ export function mapFields(
       case "string":
         if (field.enum) {
           formFields.push(
-            <SelectInput
+            <SelectInputField
               field={field}
               formItemName={formItemName}
               arrayField={arrayField}
@@ -76,7 +81,7 @@ export function mapFields(
 
         if (field.fileExtension && field.fileExtension.length > 0) {
           formFields.push(
-            <File
+            <FileField
               field={field}
               formItemName={formItemName}
               arrayField={arrayField}
@@ -92,16 +97,18 @@ export function mapFields(
             formItemName={formItemName}
             arrayField={arrayField}
             isRequired={isRequired}
+            isModuleEdit={isModuleEdit}
           />,
         );
         return;
       case "number":
         formFields.push(
-          <Number
+          <NumberField
             field={field}
             arrayField={arrayField}
             formItemName={formItemName}
             isRequired={isRequired}
+            isModuleEdit={isModuleEdit}
           />,
         );
         return;
@@ -117,10 +124,11 @@ export function mapFields(
         k.push(fieldName);
 
         formFields.push(
-          <Boolean
+          <BooleanField
             field={field}
             fieldName={fieldName}
             value={getValueFromNestedObject(initialValues, k)}
+            isModuleEdit={isModuleEdit}
           />,
         );
         return;
@@ -135,6 +143,7 @@ export function mapFields(
             initialValues={initialValues}
             uniqueFieldName={uniqueFieldName}
             arrayIndexLifetime={arrayIndexLifetime}
+            isModuleEdit={isModuleEdit}
           />,
         );
         return;
@@ -147,6 +156,7 @@ export function mapFields(
             formItemName={formItemName}
             initialValues={initialValues}
             uniqueFieldName={uniqueFieldName}
+            isModuleEdit={isModuleEdit}
           />,
         );
         return;
@@ -167,8 +177,9 @@ export function mapFields(
 }
 
 const TemplateFormFields = ({
+  isModuleEdit,
   fields,
-  initialFields,
+  initialValues,
   parentFieldID,
   parent,
   level,
@@ -179,8 +190,9 @@ const TemplateFormFields = ({
   return (
     <div>
       {mapFields(
+        isModuleEdit,
         fields,
-        initialFields,
+        initialValues,
         parentFieldID,
         parent,
         level,

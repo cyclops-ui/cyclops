@@ -24,13 +24,6 @@ import YAML from "yaml";
 
 import AceEditor from "react-ace";
 
-import "ace-builds/src-noconflict/theme-github";
-
-import "ace-builds/src-noconflict/mode-yaml";
-import "ace-builds/src-noconflict/mode-toml";
-import "ace-builds/src-noconflict/mode-javascript";
-import "ace-builds/src-noconflict/mode-typescript";
-import "ace-builds/src-noconflict/snippets/yaml";
 import { Option } from "antd/es/mentions";
 import {
   FeedbackError,
@@ -201,8 +194,6 @@ const NewModule = () => {
   const handleSubmit = (values: any) => {
     const moduleName = values["cyclops_module_name"];
 
-    console.log("values", values);
-
     values = findMaps(config.root.properties, values, initialValuesRaw);
 
     axios
@@ -370,24 +361,16 @@ const NewModule = () => {
     if (!loadingTemplate && !loadingTemplateInitialValues) {
       return (
         <TemplateFormFields
+          isModuleEdit={false}
           fields={config.root.properties}
           parentFieldID={[]}
           parent={""}
           level={0}
           arrayIndexLifetime={0}
-          initialFields={initialValues}
+          initialValues={initialValues}
+          required={config.root.required}
         />
       );
-
-      // return mapFields(
-      //   config.root.properties,
-      //   [],
-      //   "",
-      //   0,
-      //   0,
-      //   undefined,
-      //   config.root.required,
-      // );
     }
 
     return <Spin size="large" />;

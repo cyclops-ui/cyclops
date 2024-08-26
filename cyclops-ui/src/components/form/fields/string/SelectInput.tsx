@@ -13,7 +13,7 @@ interface Props {
   isRequired: boolean;
 }
 
-const SelectInput = ({
+export const SelectInputField = ({
   field,
   formItemName,
   arrayField,
@@ -66,5 +66,3 @@ const SelectInput = ({
     </Form.Item>
   );
 };
-
-export default SelectInput;

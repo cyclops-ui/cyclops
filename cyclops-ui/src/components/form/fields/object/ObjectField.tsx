@@ -13,6 +13,7 @@ interface Props {
   initialValues: any;
   uniqueFieldName: string[];
   arrayIndexLifetime: number;
+  isModuleEdit: boolean;
 }
 
 export const ObjectField = ({
@@ -24,6 +25,7 @@ export const ObjectField = ({
   initialValues,
   uniqueFieldName,
   arrayIndexLifetime,
+  isModuleEdit,
 }: Props) => {
   const [open, setOpen] = useState(false);
 
@@ -80,6 +82,7 @@ export const ObjectField = ({
             {(arrFields, { add, remove }) => (
               <>
                 {mapFields(
+                  isModuleEdit,
                   field.properties,
                   initialValues,
                   uniqueFieldName,

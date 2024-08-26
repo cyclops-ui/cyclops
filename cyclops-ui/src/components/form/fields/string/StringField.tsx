@@ -7,6 +7,7 @@ interface Props {
   formItemName: string | string[];
   arrayField: any;
   isRequired: boolean;
+  isModuleEdit: boolean;
 }
 
 const StringField = ({
@@ -14,6 +15,7 @@ const StringField = ({
   formItemName,
   arrayField,
   isRequired,
+  isModuleEdit,
 }: Props) => {
   let stringValidationRules = stringInputValidators(field, isRequired);
 
@@ -37,7 +39,7 @@ const StringField = ({
       validateDebounce={1000}
       rules={stringValidationRules}
     >
-      <Input />
+      <Input disabled={field.immutable && isModuleEdit} />
     </Form.Item>
   );
 };

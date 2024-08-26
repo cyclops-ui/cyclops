@@ -7,13 +7,15 @@ interface Props {
   arrayField: any;
   formItemName: string;
   isRequired: boolean;
+  isModuleEdit: boolean;
 }
 
-export const Number = ({
+export const NumberField = ({
   field,
   arrayField,
   formItemName,
   isRequired,
+  isModuleEdit,
 }: Props) => {
   let numberValidationRules = numberInputValidators(field, isRequired);
 
@@ -38,7 +40,10 @@ export const Number = ({
       validateDebounce={1000}
       rules={numberValidationRules}
     >
-      <InputNumber style={{ width: "100%" }} />
+      <InputNumber
+        style={{ width: "100%" }}
+        disabled={field.immutable && isModuleEdit}
+      />
     </Form.Item>
   );
 };

@@ -5,6 +5,7 @@ interface Props {
   field: any;
   fieldName: string;
   value: any;
+  isModuleEdit: boolean;
 }
 
 export function getValueFromNestedObject(obj: any, keys: string[]): any {
@@ -25,7 +26,12 @@ export function getValueFromNestedObject(obj: any, keys: string[]): any {
   return currentObj;
 }
 
-export const Boolean = ({ field, fieldName, value }: Props) => {
+export const BooleanField = ({
+  field,
+  fieldName,
+  value,
+  isModuleEdit,
+}: Props) => {
   const mapValue = (v: any) => {
     return v === true ? "checked" : "unchecked";
   };
@@ -49,7 +55,7 @@ export const Boolean = ({ field, fieldName, value }: Props) => {
         </div>
       }
     >
-      <Switch />
+      <Switch disabled={field.immutable && isModuleEdit} />
     </Form.Item>
   );
 };

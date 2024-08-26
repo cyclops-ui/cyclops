@@ -4,6 +4,14 @@ import { stringInputValidators } from "../../../../utils/validators/string";
 import AceEditor from "react-ace";
 import { fileExtension } from "../../../../utils/form";
 
+import "ace-builds/src-noconflict/theme-github";
+
+import "ace-builds/src-noconflict/mode-yaml";
+import "ace-builds/src-noconflict/mode-toml";
+import "ace-builds/src-noconflict/mode-javascript";
+import "ace-builds/src-noconflict/mode-typescript";
+import "ace-builds/src-noconflict/snippets/yaml";
+
 interface Props {
   field: any;
   formItemName: string | string[];
@@ -11,7 +19,12 @@ interface Props {
   isRequired: boolean;
 }
 
-const File = ({ field, formItemName, arrayField, isRequired }: Props) => {
+export const FileField = ({
+  field,
+  formItemName,
+  arrayField,
+  isRequired,
+}: Props) => {
   return (
     <Form.Item
       {...arrayField}
@@ -53,5 +66,3 @@ const File = ({ field, formItemName, arrayField, isRequired }: Props) => {
     </Form.Item>
   );
 };
-
-export default File;

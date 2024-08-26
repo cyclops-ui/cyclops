@@ -24,6 +24,7 @@ interface Props {
   formItemName: string;
   initialValues: any;
   uniqueFieldName: string[];
+  isModuleEdit: boolean;
 }
 
 export const ArrayField = ({
@@ -33,6 +34,7 @@ export const ArrayField = ({
   formItemName,
   initialValues,
   uniqueFieldName,
+  isModuleEdit,
 }: Props) => {
   const [open, setOpen] = useState(false);
 
@@ -108,7 +110,7 @@ export const ArrayField = ({
                         initialValue={field.initialValue}
                         name={[arrField.name]}
                       >
-                        <Input />
+                        <Input disabled={field.immutable && isModuleEdit} />
                       </Form.Item>
                       <MinusCircleOutlined
                         style={{ fontSize: "16px", paddingLeft: "10px" }}
@@ -185,6 +187,7 @@ export const ArrayField = ({
                           }}
                         >
                           {mapFields(
+                            isModuleEdit,
                             field.items.properties,
                             initialFields,
                             [...uniqueFieldName, String("")],
