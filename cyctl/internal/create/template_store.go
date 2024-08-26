@@ -1,13 +1,16 @@
 package create
 
 import (
+	"encoding/json"
 	"fmt"
+	"log"
 
 	"github.com/cyclops-ui/cyclops/cyclops-ctrl/api/v1alpha1"
 	"github.com/cyclops-ui/cyclops/cyclops-ctrl/api/v1alpha1/client"
 	"github.com/cyclops-ui/cycops-cyctl/internal/kubeconfig"
 	"github.com/spf13/cobra"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"sigs.k8s.io/yaml"
 )
 
 var (
@@ -26,8 +29,7 @@ var (
 	version string
 )
 
-// DeleteTemplateAuthRule deletes a specified template auth rule from the TemplateAuthRule Custom Resource.
-func createTemplate(clientset *client.CyclopsV1Alpha1Client, templateName, path, version, namespace string) {
+func createTemplate(clientset *client.CyclopsV1Alpha1Client, templateName, path, version, namespace, outputFormat string) {
 	// Define a new TemplateStore object
 	newTemplate := v1alpha1.TemplateStore{
 		TypeMeta: v1.TypeMeta{
@@ -45,24 +47,47 @@ func createTemplate(clientset *client.CyclopsV1Alpha1Client, templateName, path,
 		},
 	}
 
-	template, err := clientset.TemplateStore(namespace).Create(&newTemplate)
-	if err != nil {
-		fmt.Printf("Error creating template: %v\n", err)
-		return
+	if outputFormat == "yaml" {
+		// Marshal the newTemplate object to JSON
+		jsonOutput, err := json.Marshal(newTemplate)
+		if err != nil {
+			log.Fatalf("Error marshalling template to JSON: %v", err)
+		}
+		// Convert JSON to YAML
+		yamlOutput, err := yaml.JSONToYAML(jsonOutput)
+		if err != nil {
+			log.Fatalf("Error converting template to YAML: %v", err)
+		}
+		fmt.Printf("---\n%s\n", yamlOutput)
+	} else if outputFormat == "json" {
+		output, err := json.MarshalIndent(newTemplate, "", "  ")
+		if err != nil {
+			log.Fatalf("Error converting template to JSON: %v", err)
+		}
+		fmt.Printf("%s\n", output)
+	} else if outputFormat == "" {
+		// Proceed with creation if no output format is specified
+		template, err := clientset.TemplateStore(namespace).Create(&newTemplate)
+		if err != nil {
+			fmt.Printf("Error creating template: %v\n", err)
+			return
+		}
+		fmt.Printf("%v created successfully.\n", template.Name)
+	} else {
+		log.Fatalf("Invalid output format: %s. Supported formats are 'yaml' and 'json'.", outputFormat)
 	}
-	fmt.Printf("%v created successfully.\n", template.Name)
 }
 
 var (
 	CreateTemplate = &cobra.Command{
-		Use:     "templates NAME --repo=repo --path=path --version=version",
+		Use:     "template NAME --repo=repo --path=path --version=version",
 		Short:   "Create template",
 		Long:    "The create template command allows you to create templatestore from the Cyclops API.",
 		Example: createTemplateExample,
 		Args:    cobra.ExactArgs(1),
-		Aliases: []string{"template"},
+		Aliases: []string{"templates"},
 		Run: func(cmd *cobra.Command, args []string) {
-			createTemplate(kubeconfig.Moduleset, args[0], path, version, namespace)
+			createTemplate(kubeconfig.Moduleset, args[0], path, version, namespace, outputFormat)
 		},
 	}
 )
@@ -72,4 +97,5 @@ func init() {
 	CreateTemplate.Flags().StringVarP(&path, "path", "p", "", "Path to the charts in the repository")
 	CreateTemplate.Flags().StringVarP(&version, "version", "v", "", "Version of the template")
 	CreateTemplate.Flags().StringVarP(&namespace, "namespace", "n", "cyclops", "Namespace where the template will be created")
+	CreateTemplate.Flags().StringVarP(&outputFormat, "output", "o", "", "Output format (yaml|json)")
 }

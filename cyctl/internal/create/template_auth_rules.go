@@ -1,7 +1,9 @@
 package create
 
 import (
+	"encoding/json"
 	"fmt"
+	"log"
 	"strings"
 
 	"github.com/cyclops-ui/cyclops/cyclops-ctrl/api/v1alpha1"
@@ -10,6 +12,7 @@ import (
 	"github.com/spf13/cobra"
 	v1Spec "k8s.io/api/core/v1"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"sigs.k8s.io/yaml"
 )
 
 var (
@@ -87,13 +90,35 @@ func createTemplateAuthRule(clientset *client.CyclopsV1Alpha1Client, templateAut
 		},
 	}
 
-	templateAuthRule, err := clientset.TemplateAuthRules(namespace).Create(&newTemplateAuthRule)
-	if err != nil {
-		fmt.Printf("Error creating templateauthrule: %v\n", err)
-		return
+	if outputFormat == "yaml" {
+		// Marshal the newTemplateAuthRule object to JSON
+		jsonOutput, err := json.Marshal(newTemplateAuthRule)
+		if err != nil {
+			log.Fatalf("Error marshalling templateauthrule to JSON: %v", err)
+		}
+		// Convert JSON to YAML
+		yamlOutput, err := yaml.JSONToYAML(jsonOutput)
+		if err != nil {
+			log.Fatalf("Error converting templateauthrule to YAML: %v", err)
+		}
+		fmt.Printf("---\n%s\n", yamlOutput)
+	} else if outputFormat == "json" {
+		output, err := json.MarshalIndent(newTemplateAuthRule, "", "  ")
+		if err != nil {
+			log.Fatalf("Error converting templateauthrule to JSON: %v", err)
+		}
+		fmt.Printf("%s\n", output)
+	} else if outputFormat == "" {
+		// Proceed with creation if no output format is specified
+		templateAuthRule, err := clientset.TemplateAuthRules(namespace).Create(&newTemplateAuthRule)
+		if err != nil {
+			fmt.Printf("Error creating templateauthrule: %v\n", err)
+			return
+		}
+		fmt.Printf("%v created successfully.\n", templateAuthRule.Name)
+	} else {
+		log.Fatalf("Invalid output format: %s. Supported formats are 'yaml' and 'json'.", outputFormat)
 	}
-	fmt.Printf("%v created successfully.\n", templateAuthRule.Name)
-
 }
 
 var (
@@ -115,4 +140,5 @@ func init() {
 	CreateTemplateAuthRule.Flags().StringVarP(&username, "username", "u", "", "Username in the format 'name:key'")
 	CreateTemplateAuthRule.Flags().StringVarP(&password, "password", "p", "", "Password in the format 'name:key'")
 	CreateTemplateAuthRule.Flags().StringVarP(&namespace, "namespace", "n", "cyclops", "Namespace where the templateauthrule will be created")
+	CreateTemplateAuthRule.Flags().StringVarP(&outputFormat, "output", "o", "", "Output format (yaml or json)")
 }
