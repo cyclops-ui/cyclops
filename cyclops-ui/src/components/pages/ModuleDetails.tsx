@@ -498,6 +498,12 @@ const ModuleDetails = () => {
           <Secret name={resource.name} namespace={resource.namespace} />
         );
         break;
+        
+      case "Roles":
+        resourceDetails = (
+          <Roles  name={resource.name} namespace={resource.namespace}/>
+        )
+        break;    
     }
 
     let deletedWarning = <p />;
