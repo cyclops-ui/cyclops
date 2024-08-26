@@ -6,7 +6,10 @@ These events include:
 
 **- `cyclops-instance-start`** - triggered once at the start of cyclops-ctrl pod  
 **- `module-creation`** - called by the UI each time you create a new module  
-**- `module-reconciliation`** - each time a Module CRD in the cluster is changed
+**- `module-reconciliation`** - each time a Module CRD in the cluster is changed  
+**- `template-creation`** - called each time a template is added in the `Templates` tab  
+**- `template-edit`** - called each time a template is edited in the `Templates` tab
+
 
 The metric collection is implemented using [posthog](https://posthog.com).
 
@@ -17,12 +20,16 @@ Each time one of the events above is triggered, Cyclops sends an HTTP request to
   "type": "capture",
   "timestamp": "2024-03-23T19:05:38.808279+01:00",
   "distinct_id": "f46d57f0-e93f-11ee-924c-8281c5d92ae4",
-  "event": "cyclops-instance-start"
+  "event": "cyclops-instance-start",
+  "properties": {
+    "version": "v0.10.0"
+  }
 }
 ```
 
 `distinct_id` - generated for each Cyclops instance using [NewUUID](https://pkg.go.dev/github.com/google/uuid#NewUUID) from google/uuid package  
-`event` - which event was triggered; see events above
+`event` - which event was triggered; see events above  
+`properties.version` - version of your Cyclops instance
 
 ## Turn off
 

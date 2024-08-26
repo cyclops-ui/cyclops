@@ -63,7 +63,11 @@ func main() {
 
 	setupLog.Info("starting handler")
 
-	telemetryClient, _ := telemetry.NewClient(getEnvBool("DISABLE_TELEMETRY"), setupLog)
+	telemetryClient, _ := telemetry.NewClient(
+		getEnvBool("DISABLE_TELEMETRY"),
+		os.Getenv("CYCLOPS_VERSION"),
+		setupLog,
+	)
 	telemetryClient.InstanceStart()
 
 	k8sClient, err := k8sclient.New()
