@@ -6,6 +6,24 @@ If you are up to the challenge of contributing to Cyclops, this document will he
 
 Please note we have a [code of conduct](./CODE_OF_CONDUCT.md); follow it in all your interactions with the project.
 
+## How to contribute
+
+- Pick an issue [here](https://github.com/cyclops-ui/cyclops/issues). If you have already contributed, we encourage you not to pick issues labeled with `good first issue` since those are useful to first-time contributors to onboard
+- Let us know you would like to solve the issue by leaving a comment on the issue or reaching out to us on Discord or some other way
+- [Fork the repository](https://github.com/cyclops-ui/cyclops/fork) and clone it locally
+- Create a new branch
+- Make your changes
+- Create a pull request back to the upstream repository (_Please make sure that your PR is up-to-date with the latest changes in main_)
+- Wait for a review and address any comments
+
+> ⚠️ **_IMPORTANT_** ⚠️
+>
+> It is highly discouraged to pick multiple issues at once. Resolving one issue at a time allows more people to contribute to the project and helps maintainers review your code.
+> 
+> If you want to pick another issue, let us know, and we will unassign you from your current issue and assign you to another.
+> 
+> The only exception here is if multiple issues are related and you think it would be easier to resolve them in a single PR. 
+
 ## The components that make Cyclops
 
 Cyclops is a mono-repo that contains both the frontend (`UI`) and the backend (`controller`) of the platform, as well as the code for our website and documentation (`web`).
@@ -119,12 +137,3 @@ and running the app
 ```zsh
 npm start
 ```
-
-## How to contribute
-
-- Pick an issue [here](https://github.com/cyclops-ui/cyclops/issues). If you have already contributed, we encourage you not to pick issues labeled with `good first issue` since those are useful to first-time contributors to onboard
-- [Fork the repository](https://github.com/cyclops-ui/cyclops/fork) and clone it locally
-- Create a new branch
-- Make your changes
-- Create a pull request back to the upstream repository (_Please make sure that your PR is up-to-date with the latest changes in main_)
-- Wait for a review and address any comments
