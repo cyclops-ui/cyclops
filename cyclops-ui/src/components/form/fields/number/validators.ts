@@ -1,5 +1,5 @@
 import type { Rule } from "rc-field-form/lib/interface";
-import { Validator, isFieldNullOrUndefined } from "./common";
+import { isFieldNullOrUndefined, Validator } from "../utils";
 
 export function numberInputValidators(
   field: any,

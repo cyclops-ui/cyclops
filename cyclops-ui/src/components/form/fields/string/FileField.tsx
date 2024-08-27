@@ -1,6 +1,6 @@
 import React from "react";
 import { Form } from "antd";
-import { stringInputValidators } from "../../../../utils/validators/string";
+import { stringInputValidators } from "./validators";
 import AceEditor from "react-ace";
 import { fileExtension } from "../../../../utils/form";
 

@@ -1,6 +1,6 @@
 import React from "react";
 import { Form, Input } from "antd";
-import { stringInputValidators } from "../../../../utils/validators/string";
+import { stringInputValidators } from "./validators";
 
 interface Props {
   field: any;
