@@ -13,6 +13,9 @@ RUN go build -o /build/bin ./...
 
 FROM alpine:3.20.0
 
+ARG VERSION
+ENV CYCLOPS_VERSION=$VERSION
+
 WORKDIR /app
 
 RUN mkdir /app/bin

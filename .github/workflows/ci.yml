@@ -86,6 +86,8 @@ jobs:
         with:
           context: "{{defaultContext}}:cyclops-ctrl"
           platforms: linux/amd64,linux/arm64
+          build-args: |
+            VERSION=${{ github.event.inputs.version }}
           push: true
           tags: cyclopsui/cyclops-ctrl:${{ github.event.inputs.version }}
 
