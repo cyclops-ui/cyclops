@@ -10,11 +10,15 @@ import {
   Modal,
   Alert,
   Tooltip,
+  Popover,
 } from "antd";
 import axios from "axios";
-import { formatPodAge } from "../../../utils/pods";
+import { formatPodAge } from "../../../../utils/pods";
 import ReactAce from "react-ace";
-import { mapResponseError } from "../../../utils/api/errors";
+import { mapResponseError } from "../../../../utils/api/errors";
+
+import styles from "./styles.module.css";
+import { EllipsisOutlined, ReadOutlined } from "@ant-design/icons";
 
 interface Props {
   namespace: string;
@@ -151,6 +155,58 @@ const PodTable = ({ pods, namespace }: Props) => {
       });
   };
 
+  const podActionsMenu = (pod: any) => {
+    return (
+      <div style={{ width: "400px" }}>
+        <h3>{pod.name} actions</h3>
+        <Divider style={{ margin: "8px" }} />
+        <Button
+          style={{ width: "60%", margin: "4px" }}
+          onClick={function () {
+            axios
+              .get(
+                "/api/resources/pods/" +
+                  namespace +
+                  "/" +
+                  pod.name +
+                  "/" +
+                  pod.containers[0].name +
+                  "/logs",
+              )
+              .then((res) => {
+                if (res.data) {
+                  let log = "";
+                  res.data.forEach((s: string) => {
+                    log += s;
+                    log += "\n";
+                  });
+                  setLogs(log);
+                } else {
+                  setLogs("No logs available");
+                }
+              })
+              .catch((error) => {
+                setError(mapResponseError(error));
+              });
+
+            setLogsModal({
+              on: true,
+              namespace: namespace,
+              pod: pod.name,
+              containers: pod.containers,
+              initContainers: pod.initContainers,
+            });
+          }}
+        >
+          <h4>
+            <ReadOutlined style={{ paddingRight: "5px" }} />
+            View Logs
+          </h4>
+        </Button>
+      </div>
+    );
+  };
+
   return (
     <div>
       <Table dataSource={pods}>
@@ -209,50 +265,25 @@ const PodTable = ({ pods, namespace }: Props) => {
           )}
         />
         <Table.Column
-          title="Logs"
-          width="15%"
+          title="Actions"
+          key="actions"
+          width="8%"
+          className={styles.actionsmenucol}
           render={(pod) => (
-            <>
-              <Button
-                onClick={function () {
-                  axios
-                    .get(
-                      "/api/resources/pods/" +
-                        namespace +
-                        "/" +
-                        pod.name +
-                        "/" +
-                        pod.containers[0].name +
-                        "/logs",
-                    )
-                    .then((res) => {
-                      if (res.data) {
-                        let log = "";
-                        res.data.forEach((s: string) => {
-                          log += s;
-                          log += "\n";
-                        });
-                        setLogs(log);
-                      } else {
-                        setLogs("No logs available");
-                      }
-                    })
-                    .catch((error) => {
-                      setError(mapResponseError(error));
-                    });
-                  setLogsModal({
-                    on: true,
-                    namespace: namespace,
-                    pod: pod.name,
-                    containers: pod.containers,
-                    initContainers: pod.initContainers,
-                  });
+            <Popover
+              placement={"topRight"}
+              content={podActionsMenu(pod)}
+              trigger="click"
+            >
+              <div
+                style={{
+                  display: "flex",
+                  justifyContent: "center",
                 }}
-                block
               >
-                View Logs
-              </Button>
-            </>
+                <EllipsisOutlined className={styles.actionsmenu} />
+              </div>
+            </Popover>
           )}
         />
       </Table>
