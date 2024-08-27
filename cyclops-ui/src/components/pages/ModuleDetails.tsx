@@ -52,6 +52,7 @@ import {
 import { gvkString } from "../../utils/k8s/gvk";
 import { mapResponseError } from "../../utils/api/errors";
 import Secret from "../k8s-resources/Secret";
+import Roles from "../k8s-resources/Roles";
 import { CheckboxChangeEvent } from "antd/es/checkbox";
 import {
   canRestart,
