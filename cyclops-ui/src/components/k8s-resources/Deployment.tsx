@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { Col, Divider, Row, Alert } from "antd";
 import axios from "axios";
 import { mapResponseError } from "../../utils/api/errors";
-import PodTable from "./common/PodTable";
+import PodTable from "./common/PodTable/PodTable";
 
 interface Props {
   name: string;
