@@ -3,6 +3,7 @@ package dto
 type Module struct {
 	Name                 string               `json:"name"`
 	Namespace            string               `json:"namespace"`
+	TargetNamespace      string               `json:"targetNamespace"`
 	Template             Template             `json:"template"`
 	Version              string               `json:"version"`
 	Values               interface{}          `json:"values"`

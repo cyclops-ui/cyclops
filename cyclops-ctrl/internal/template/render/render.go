@@ -61,7 +61,7 @@ func (r *Renderer) HelmTemplate(module cyclopsv1alpha1.Module, moduleTemplate *m
 	top["Values"] = values
 	top["Release"] = map[string]interface{}{
 		"Name":      module.Name,
-		"Namespace": "default",
+		"Namespace": mapTargetNamespace(module.Spec.TargetNamespace),
 	}
 
 	versionInfo, err := r.k8sClient.VersionInfo()
@@ -148,6 +148,14 @@ func mapMetadata(metadata *helm.Metadata) *helmchart.Metadata {
 		Dependencies: dependencies,
 		Type:         metadata.Type,
 	}
+}
+
+func mapTargetNamespace(namespace string) string {
+	if len(namespace) == 0 {
+		return "default"
+	}
+
+	return namespace
 }
 
 type CapabilitiesKubeVersion struct {

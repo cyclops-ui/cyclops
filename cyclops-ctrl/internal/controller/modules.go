@@ -386,7 +386,7 @@ func (m *Modules) ResourcesForModule(ctx *gin.Context) {
 		return
 	}
 
-	resources, err = m.kubernetesClient.GetDeletedResources(resources, manifest)
+	resources, err = m.kubernetesClient.GetDeletedResources(resources, manifest, module.Spec.TargetNamespace)
 	if err != nil {
 		fmt.Println(err)
 		ctx.JSON(http.StatusInternalServerError, dto.NewError("Error fetching deleted module resources", err.Error()))

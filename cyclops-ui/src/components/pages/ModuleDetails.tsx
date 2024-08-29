@@ -101,6 +101,7 @@ const { Title } = Typography;
 interface module {
   name: string;
   namespace: string;
+  targetNamespace: string;
   template: templateRef;
   iconURL: string;
 }
@@ -136,6 +137,7 @@ const ModuleDetails = () => {
   const [module, setModule] = useState<module>({
     name: "",
     namespace: "",
+    targetNamespace: "",
     template: {
       repo: "",
       path: "",
@@ -676,7 +678,7 @@ const ModuleDetails = () => {
               fontWeight: "550",
             }}
           >
-            {module.namespace}
+            {module.targetNamespace}
           </Descriptions.Item>
         </Descriptions>
         <Row gutter={[40, 0]} style={{ paddingTop: "8px" }}>
