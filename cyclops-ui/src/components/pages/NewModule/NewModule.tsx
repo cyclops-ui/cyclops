@@ -31,7 +31,6 @@ import {
 } from "../../errors/FormValidationErrors";
 import { mapResponseError } from "../../../utils/api/errors";
 import TemplateFormFields from "../../form/TemplateFormFields";
-import ModuleMeta from "../../form/Metadata";
 
 const { Title } = Typography;
 const layout = {
