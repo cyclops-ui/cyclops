@@ -9,6 +9,7 @@ import (
 	"io"
 	networkingv1 "k8s.io/api/networking/v1"
 	"k8s.io/apimachinery/pkg/util/intstr"
+	"k8s.io/apimachinery/pkg/watch"
 	"os"
 	"os/exec"
 	"sort"
@@ -1076,4 +1077,17 @@ func isRole(group, version, kind string) bool {
 
 func isNetworkPolicy(group, version, kind string) bool {
 	return group == "networking.k8s.io" && version == "v1" && kind == "NetworkPolicy"
+}
+
+func (k *KubernetesClient) WatchResource(group, version, resource, name, namespace string) (watch.Interface, error) {
+	gvr := schema.GroupVersionResource{
+		Group:    group,
+		Version:  version,
+		Resource: resource,
+	}
+
+	// Start the watch
+	return k.Dynamic.Resource(gvr).Namespace(namespace).Watch(context.Background(), metav1.ListOptions{
+		FieldSelector: "metadata.name=" + name,
+	})
 }
