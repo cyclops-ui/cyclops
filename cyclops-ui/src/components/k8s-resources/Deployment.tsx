@@ -3,6 +3,7 @@ import { Col, Divider, Row, Alert } from "antd";
 import axios from "axios";
 import { mapResponseError } from "../../utils/api/errors";
 import PodTable from "./common/PodTable/PodTable";
+import { fetchEventSource } from "@microsoft/fetch-event-source";
 
 interface Props {
   name: string;
@@ -18,6 +19,30 @@ const Deployment = ({ name, namespace }: Props) => {
     message: "",
     description: "",
   });
+
+  useEffect(() => {
+    console.log("sse start");
+
+    fetchEventSource(
+      `/api/stream/resources?group=apps&version=v1&kind=Deployment&name=${name}&namespace=${namespace}`,
+      {
+        method: "POST",
+        body: JSON.stringify({
+          group: `apps`,
+          version: `v1`,
+          kind: `Deployment`,
+          name: name,
+          namespace: namespace,
+        }),
+        onmessage(ev) {
+          console.log("sse", ev.data);
+          setDeployment(JSON.parse(ev.data));
+        },
+      },
+    ).then((r) => {
+      console.log("done");
+    });
+  }, []);
 
   useEffect(() => {
     function fetchDeployment() {
@@ -40,10 +65,10 @@ const Deployment = ({ name, namespace }: Props) => {
     }
 
     fetchDeployment();
-    const interval = setInterval(() => fetchDeployment(), 15000);
-    return () => {
-      clearInterval(interval);
-    };
+    // const interval = setInterval(() => fetchDeployment(), 15000);
+    // return () => {
+    //   clearInterval(interval);
+    // };
   }, [name, namespace]);
 
   return (

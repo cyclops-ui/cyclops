@@ -7,6 +7,7 @@
     "@ant-design/compatible": "^5.1.1",
     "@ant-design/icons": "^5.3.3",
     "@babel/preset-typescript": "^7.22.5",
+    "@microsoft/fetch-event-source": "^2.0.1",
     "@rmlio/matey": "^1.0.4",
     "@testing-library/jest-dom": "^5.16.2",
     "@testing-library/react": "^12.1.3",

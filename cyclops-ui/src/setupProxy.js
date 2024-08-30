@@ -9,6 +9,9 @@ module.exports = function (app) {
       pathRewrite: {
         "^/api": "",
       },
+      onProxyReq: (proxyRes, req, res) => {
+        res.on("close", () => proxyRes.destroy());
+      },
     }),
   );
 };
