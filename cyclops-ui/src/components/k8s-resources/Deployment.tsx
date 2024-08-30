@@ -42,7 +42,7 @@ const Deployment = ({ name, namespace }: Props) => {
     ).then((r) => {
       console.log("done");
     });
-  }, []);
+  }, [name, namespace]);
 
   useEffect(() => {
     function fetchDeployment() {

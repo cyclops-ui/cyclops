@@ -16,7 +16,6 @@ import {
 import { useNavigate } from "react-router";
 
 import axios from "axios";
-import { fetchEventSource } from "@microsoft/fetch-event-source";
 
 import Link from "antd/lib/typography/Link";
 
