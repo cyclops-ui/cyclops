@@ -19,6 +19,11 @@ const StatefulSet = ({ name, namespace }: Props) => {
     status: "",
     pods: [],
   });
+  const [triggerReload, setTriggerReload] = useState<boolean>(false);
+
+  const handleTriggerReloadUpdate = () => {
+    setTriggerReload(!triggerReload);
+  };
 
   const [error, setError] = useState({
     message: "",
@@ -27,6 +32,7 @@ const StatefulSet = ({ name, namespace }: Props) => {
 
   useEffect(() => {
     function fetchStatefulSet() {
+      console.log("fetchStatefulSet");
       axios
         .get(`/api/resources`, {
           params: {
@@ -50,7 +56,7 @@ const StatefulSet = ({ name, namespace }: Props) => {
     return () => {
       clearInterval(interval);
     };
-  }, [name, namespace]);
+  }, [name, namespace, triggerReload]);
 
   return (
     <div>
@@ -78,7 +84,11 @@ const StatefulSet = ({ name, namespace }: Props) => {
           Replicas: {statefulSet.pods.length}
         </Divider>
         <Col span={24} style={{ overflowX: "auto" }}>
-          <PodTable namespace={namespace} pods={statefulSet.pods} />
+          <PodTable
+            namespace={namespace}
+            pods={statefulSet.pods}
+            handleTriggerReloadUpdate={handleTriggerReloadUpdate}
+          />
         </Col>
       </Row>
     </div>

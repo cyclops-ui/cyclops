@@ -14,6 +14,12 @@ const DaemonSet = ({ name, namespace }: Props) => {
     status: "",
     pods: [],
   });
+  const [triggerReload, setTriggerReload] = useState<boolean>(false);
+
+  const handleTriggerReloadUpdate = () => {
+    setTriggerReload(!triggerReload);
+  };
+
   const [error, setError] = useState({
     message: "",
     description: "",
@@ -44,7 +50,7 @@ const DaemonSet = ({ name, namespace }: Props) => {
     return () => {
       clearInterval(interval);
     };
-  }, [name, namespace]);
+  }, [name, namespace, triggerReload]);
 
   return (
     <div>
@@ -72,7 +78,11 @@ const DaemonSet = ({ name, namespace }: Props) => {
           Pods: {daemonSet.pods.length}
         </Divider>
         <Col span={24} style={{ overflowX: "auto" }}>
-          <PodTable namespace={namespace} pods={daemonSet.pods} />
+          <PodTable
+            namespace={namespace}
+            pods={daemonSet.pods}
+            handleTriggerReloadUpdate={handleTriggerReloadUpdate}
+          />
         </Col>
       </Row>
     </div>

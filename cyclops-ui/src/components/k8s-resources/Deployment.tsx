@@ -18,6 +18,11 @@ const Deployment = ({ name, namespace }: Props) => {
     message: "",
     description: "",
   });
+  const [triggerReload, setTriggerReload] = useState<boolean>(false);
+
+  const handleTriggerReloadUpdate = () => {
+    setTriggerReload(!triggerReload);
+  };
 
   useEffect(() => {
     function fetchDeployment() {
@@ -44,7 +49,7 @@ const Deployment = ({ name, namespace }: Props) => {
     return () => {
       clearInterval(interval);
     };
-  }, [name, namespace]);
+  }, [name, namespace, triggerReload]);
 
   return (
     <div>
@@ -72,7 +77,11 @@ const Deployment = ({ name, namespace }: Props) => {
           Replicas: {deployment.pods.length}
         </Divider>
         <Col span={24} style={{ overflowX: "auto" }}>
-          <PodTable namespace={namespace} pods={deployment.pods} />
+          <PodTable
+            namespace={namespace}
+            pods={deployment.pods}
+            handleTriggerReloadUpdate={handleTriggerReloadUpdate}
+          />
         </Col>
       </Row>
     </div>

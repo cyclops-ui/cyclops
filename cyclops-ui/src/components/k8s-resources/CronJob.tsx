@@ -14,6 +14,11 @@ const CronJob = ({ name, namespace }: Props) => {
     status: "",
     pods: [],
   });
+  const [triggerReload, setTriggerReload] = useState<boolean>(false);
+
+  const handleTriggerReloadUpdate = () => {
+    setTriggerReload(!triggerReload);
+  };
 
   const [error, setError] = useState({
     message: "",
@@ -45,7 +50,7 @@ const CronJob = ({ name, namespace }: Props) => {
     return () => {
       clearInterval(interval);
     };
-  }, [name, namespace]);
+  }, [name, namespace, triggerReload]);
 
   return (
     <div>
@@ -73,7 +78,11 @@ const CronJob = ({ name, namespace }: Props) => {
           Pods: {cronjob.pods.length}
         </Divider>
         <Col span={24} style={{ overflowX: "auto" }}>
-          <PodTable namespace={namespace} pods={cronjob.pods} />
+          <PodTable
+            namespace={namespace}
+            pods={cronjob.pods}
+            handleTriggerReloadUpdate={handleTriggerReloadUpdate}
+          />
         </Col>
       </Row>
     </div>

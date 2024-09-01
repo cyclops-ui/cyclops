@@ -28,6 +28,7 @@ import {
 interface Props {
   namespace: string;
   pods: any[];
+  handleTriggerReloadUpdate: () => void;
 }
 
 interface Pod {
@@ -38,7 +39,7 @@ interface Pod {
   namespace: any;
 }
 
-const PodTable = ({ pods, namespace }: Props) => {
+const PodTable = ({ pods, namespace, handleTriggerReloadUpdate }: Props) => {
   const [logs, setLogs] = useState("");
   const [logsModal, setLogsModal] = useState({
     on: false,
@@ -103,6 +104,8 @@ const PodTable = ({ pods, namespace }: Props) => {
           namespace: deletePodRef.podDetails.namespace,
         },
       });
+
+      handleTriggerReloadUpdate();
 
       setDeletePodConfirmRef("");
       setDeletePodRef({
@@ -450,7 +453,7 @@ const PodTable = ({ pods, namespace }: Props) => {
             Delete
           </Button>
         }
-        width={"30%"}
+        width={"40%"}
         styles={{
           footer: {
             display: "flex",
@@ -459,7 +462,7 @@ const PodTable = ({ pods, namespace }: Props) => {
         }}
       >
         <p>
-          In order to confirm deleting this resource, type:{" "}
+          In order to confirm deleting this resource, type: <br />{" "}
           <code>{deletePodRef.podDetails.name}</code>
         </p>
         <Input
