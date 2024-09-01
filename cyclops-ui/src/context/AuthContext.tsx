@@ -21,20 +21,24 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({
   const [isAuthenticated, setIsAuthenticated] = useState(false);
 
   useEffect(() => {
-    // If authentication is disable pass the authentication check
-    if (
-      window.__RUNTIME_CONFIG__.REACT_APP_CYCLOPS_AUTHORIZATION === "disabled"
-    ) {
-      setIsAuthenticated(true);
-    }
+    const checkAuthentication = () => {
+      const isAuthorizationEnabled =
+        process.env.REACT_APP_CYCLOPS_AUTHORIZATION === "enabled";
+      const isAuthCookieSet = Cookies.get("_isAuthenticated") === "true";
 
-    // Check if the user is authenticated
-    if (
-      Cookies.get("_isAuthenticated") === "true" &&
-      window.__RUNTIME_CONFIG__.REACT_APP_CYCLOPS_AUTHORIZATION === "enabled"
-    ) {
-      setIsAuthenticated(true);
-    }
+      console.log("Authorization enabled:", isAuthorizationEnabled);
+      console.log("Auth cookie set:", isAuthCookieSet);
+
+      if (!isAuthorizationEnabled) {
+        setIsAuthenticated(true);
+      } else if (isAuthCookieSet) {
+        setIsAuthenticated(true);
+      } else {
+        setIsAuthenticated(false);
+      }
+    };
+
+    checkAuthentication();
   }, []);
 
   const login = async () => {
