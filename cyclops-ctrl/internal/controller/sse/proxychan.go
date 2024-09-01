@@ -2,9 +2,9 @@ package sse
 
 import (
 	"context"
-	"fmt"
-	"k8s.io/apimachinery/pkg/watch"
 	"time"
+
+	"k8s.io/apimachinery/pkg/watch"
 )
 
 type ProxyChan struct {
@@ -41,7 +41,6 @@ func NewProxyChan(ctx context.Context, input <-chan watch.Event, interval time.D
 				}
 				p.update = false
 			case <-ctx.Done():
-				fmt.Println("ctx.Done jesam")
 				return
 			}
 		}

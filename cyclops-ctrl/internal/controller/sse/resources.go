@@ -1,17 +1,13 @@
 package sse
 
 import (
-	"fmt"
-	"github.com/gin-gonic/gin"
-	json "github.com/json-iterator/go"
 	"io"
-	"k8s.io/apimachinery/pkg/runtime/schema"
-	"k8s.io/apimachinery/pkg/watch"
 	"net/http"
 	"time"
-)
 
-type k8sEvents chan watch.Event
+	"github.com/gin-gonic/gin"
+	"k8s.io/apimachinery/pkg/runtime/schema"
+)
 
 func (s *Server) Resources(ctx *gin.Context) {
 	type Ref struct {
@@ -47,7 +43,7 @@ func (s *Server) Resources(ctx *gin.Context) {
 	ctx.Stream(func(w io.Writer) bool {
 		for {
 			select {
-			case msg, ok := <-p.Events():
+			case _, ok := <-p.Events():
 				if !ok {
 					return false
 				}
@@ -59,18 +55,15 @@ func (s *Server) Resources(ctx *gin.Context) {
 					r.Name,
 					r.Namespace,
 				)
-
 				if err != nil {
 					continue
 				}
-
-				d, _ := json.Marshal(msg)
-				fmt.Println(string(d))
 
 				ctx.SSEvent("resource-update", res)
 				return true
 			case <-ctx.Request.Context().Done():
 				watchResource.Stop()
+				close(p.output)
 				return false
 			}
 		}
