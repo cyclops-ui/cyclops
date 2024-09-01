@@ -23,23 +23,19 @@ const Deployment = ({ name, namespace }: Props) => {
   useEffect(() => {
     console.log("sse start");
 
-    fetchEventSource(
-      `/api/stream/resources?group=apps&version=v1&kind=Deployment&name=${name}&namespace=${namespace}`,
-      {
-        method: "POST",
-        body: JSON.stringify({
-          group: `apps`,
-          version: `v1`,
-          kind: `Deployment`,
-          name: name,
-          namespace: namespace,
-        }),
-        onmessage(ev) {
-          console.log("sse", ev.data);
-          setDeployment(JSON.parse(ev.data));
-        },
+    fetchEventSource(`/api/stream/resources`, {
+      method: "POST",
+      body: JSON.stringify({
+        group: `apps`,
+        version: `v1`,
+        kind: `Deployment`,
+        name: name,
+        namespace: namespace,
+      }),
+      onmessage(ev) {
+        setDeployment(JSON.parse(ev.data));
       },
-    ).then((r) => {
+    }).then((r) => {
       console.log("done");
     });
   }, [name, namespace]);
