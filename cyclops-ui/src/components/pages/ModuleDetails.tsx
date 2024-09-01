@@ -9,6 +9,7 @@ import {
   Divider,
   Input,
   Modal,
+  notification,
   Popover,
   Row,
   Spin,
@@ -838,9 +839,18 @@ const ModuleDetails = () => {
       .post(`/api/modules/` + moduleName + `/reconcile`)
       .then((res) => {
         setLoadingReconciliation(false);
+        notification.success({
+          message: "Reconciliation triggered",
+          description: `${moduleName} has been queued for reconciliation. All the resources will be recreated`,
+          duration: 10,
+        });
       })
       .catch((error) => {
-        setError(mapResponseError(error));
+        notification.error({
+          message: "Reconciliation triggering failed",
+          description: `${mapResponseError(error).description}`,
+          duration: 10,
+        });
         setLoadingReconciliation(false);
       });
   };
