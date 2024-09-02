@@ -11,6 +11,7 @@ import {
   Alert,
   Tooltip,
   Popover,
+  Input,
 } from "antd";
 import axios from "axios";
 import { formatPodAge } from "../../../../utils/pods";
@@ -18,14 +19,27 @@ import ReactAce from "react-ace";
 import { mapResponseError } from "../../../../utils/api/errors";
 
 import styles from "./styles.module.css";
-import { EllipsisOutlined, ReadOutlined } from "@ant-design/icons";
+import {
+  EllipsisOutlined,
+  ReadOutlined,
+  DeleteOutlined,
+} from "@ant-design/icons";
 
 interface Props {
   namespace: string;
   pods: any[];
+  updateResourceData: () => void;
 }
 
-const PodTable = ({ pods, namespace }: Props) => {
+interface Pod {
+  group: any;
+  version: any;
+  kind: any;
+  name: string;
+  namespace: any;
+}
+
+const PodTable = ({ pods, namespace, updateResourceData }: Props) => {
   const [logs, setLogs] = useState("");
   const [logsModal, setLogsModal] = useState({
     on: false,
@@ -34,6 +48,22 @@ const PodTable = ({ pods, namespace }: Props) => {
     containers: [],
     initContainers: [],
   });
+
+  const [deletePodRef, setDeletePodRef] = useState<{
+    on: boolean;
+    podDetails: Pod;
+  }>({
+    on: false,
+    podDetails: {
+      group: "",
+      version: "",
+      kind: "",
+      name: "",
+      namespace: "",
+    },
+  });
+  const [deletePodConfirmRef, setDeletePodConfirmRef] = useState<string>("");
+
   const [error, setError] = useState({
     message: "",
     description: "",
@@ -48,6 +78,64 @@ const PodTable = ({ pods, namespace }: Props) => {
       initContainers: [],
     });
     setLogs("");
+  };
+
+  const handleCancelDeletePod = () => {
+    setDeletePodRef({
+      on: false,
+      podDetails: {
+        group: "",
+        version: "",
+        kind: "",
+        name: "",
+        namespace: "",
+      },
+    });
+  };
+
+  const handleDeletePodAction = async () => {
+    try {
+      await axios.delete(`/api/resources`, {
+        data: {
+          group: deletePodRef.podDetails.group,
+          version: deletePodRef.podDetails.version,
+          kind: deletePodRef.podDetails.kind,
+          name: deletePodRef.podDetails.name,
+          namespace: deletePodRef.podDetails.namespace,
+        },
+      });
+
+      updateResourceData();
+
+      setDeletePodConfirmRef("");
+      setDeletePodRef({
+        on: false,
+        podDetails: {
+          group: "",
+          version: "",
+          kind: "",
+          name: "",
+          namespace: "",
+        },
+      });
+    } catch (error) {
+      setError(mapResponseError(error));
+      setDeletePodConfirmRef("");
+      setDeletePodRef({
+        on: false,
+        podDetails: {
+          group: "",
+          version: "",
+          kind: "",
+          name: "",
+          namespace: "",
+        },
+      });
+    }
+  };
+
+  const handleDeletePodRefChange = (e: any) => {
+    setDeletePodConfirmRef(e.target.value);
   };
 
   const downloadLogs = (container: string) => {
@@ -203,6 +291,26 @@ const PodTable = ({ pods, namespace }: Props) => {
             View Logs
           </h4>
         </Button>
+        <Button
+          style={{ width: "60%", margin: "4px", color: "red " }}
+          onClick={function () {
+            setDeletePodRef({
+              on: true,
+              podDetails: {
+                group: ``,
+                version: `v1`,
+                kind: `Pod`,
+                name: pod.name,
+                namespace: namespace,
+              },
+            });
+          }}
+        >
+          <h4>
+            <DeleteOutlined style={{ paddingRight: "5px" }} />
+            Delete Pod
+          </h4>
+        </Button>
       </div>
     );
   };
@@ -311,6 +419,49 @@ const PodTable = ({ pods, namespace }: Props) => {
           />
         )}
         <Tabs items={getTabItems()} onChange={onLogsTabsChange} />
+      </Modal>
+      <Modal
+        title={
+          <div style={{ color: "red", marginBottom: "1rem" }}>
+            <DeleteOutlined style={{ paddingRight: "5px" }} />
+            Delete{" "}
+            <span style={{ fontWeight: "bolder" }}>
+              {" "}
+              {deletePodRef.podDetails.name}{" "}
+            </span>{" "}
+            pod ?
+          </div>
+        }
+        open={deletePodRef.on}
+        onCancel={handleCancelDeletePod}
+        footer={
+          <Button
+            danger
+            block
+            disabled={deletePodConfirmRef !== deletePodRef.podDetails.name}
+            onClick={handleDeletePodAction}
+          >
+            Delete
+          </Button>
+        }
+        width={"40%"}
+        styles={{
+          footer: {
+            display: "flex",
+            justifyContent: "center",
+          },
+        }}
+      >
+        <p>
+          In order to confirm deleting this resource, type: <br />{" "}
+          <code>{deletePodRef.podDetails.name}</code>
+        </p>
+        <Input
+          placeholder={deletePodRef.podDetails.name}
+          onChange={handleDeletePodRefChange}
+          value={deletePodConfirmRef}
+          required
+        />
       </Modal>
     </div>
   );
