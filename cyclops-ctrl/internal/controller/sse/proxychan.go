@@ -33,13 +33,17 @@ func NewProxyChan(ctx context.Context, input <-chan watch.Event, interval time.D
 					return
 				}
 				p.update = true
+
 			case <-ticker.C:
 				p.output <- true
+				p.update = false
+
 			case <-batcher.C:
 				if p.update {
 					p.output <- true
 				}
 				p.update = false
+
 			case <-ctx.Done():
 				return
 			}

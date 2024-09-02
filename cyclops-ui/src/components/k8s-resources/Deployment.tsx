@@ -3,10 +3,7 @@ import { Col, Divider, Row, Alert } from "antd";
 import axios from "axios";
 import { mapResponseError } from "../../utils/api/errors";
 import PodTable from "./common/PodTable/PodTable";
-import {
-  EventStreamContentType,
-  fetchEventSource,
-} from "@microsoft/fetch-event-source";
+import { resourceStream } from "../../utils/api/sse/resources";
 
 interface Props {
   name: string;
@@ -24,61 +21,9 @@ const Deployment = ({ name, namespace }: Props) => {
   });
 
   useEffect(() => {
-    console.log("sse start");
-
-    // const eventSource = new EventSource(`/api/stream/resources?group=apps&version=v1&kind=Deployment&name=${name}&namespace=${namespace}`);
-    //
-    // eventSource.onopen = function() {
-    //   console.log("sse otvorio onopen");
-    // };
-    //
-    // eventSource.onmessage = function(event) {
-    //   console.log("sse Received data: ", event);
-    // };
-    //
-    // eventSource.onerror = function(event) {
-    //   console.log("sse Connection lost. Retrying...");
-    // };
-
-    fetchEventSource(`/api/stream/resources`, {
-      method: "POST",
-      body: JSON.stringify({
-        group: `apps`,
-        version: `v1`,
-        kind: `Deployment`,
-        name: name,
-        namespace: namespace,
-      }),
-      onmessage(ev) {
-        setDeployment(JSON.parse(ev.data));
-      },
-      onerror: (err) => {
-        console.error("Error occurred:", err);
-      },
-      async onopen(response) {
-        if (
-          response.ok &&
-          response.headers.get("content-type") === EventStreamContentType
-        ) {
-          console.log("sse onopen all good");
-          return; // everything's good
-        } else if (
-          response.status >= 400 &&
-          response.status < 500 &&
-          response.status !== 429
-        ) {
-          // client-side errors are usually non-retriable:
-          console.log("sse error client-side errors are usually non-retriable");
-        } else {
-          console.log("sse error retry");
-        }
-      },
-      onclose: () => {
-        console.log("sse prekinuo");
-      },
-    })
-      .then((r) => console.log("sse THEN"))
-      .catch((r) => console.log("see CATCH"));
+    resourceStream(`apps`, `v1`, `Deployment`, name, namespace, (r: any) => {
+      setDeployment(r);
+    });
   }, [name, namespace]);
 
   useEffect(() => {
@@ -102,10 +47,6 @@ const Deployment = ({ name, namespace }: Props) => {
     }
 
     fetchDeployment();
-    // const interval = setInterval(() => fetchDeployment(), 15000);
-    // return () => {
-    //   clearInterval(interval);
-    // };
   }, [name, namespace]);
 
   return (
