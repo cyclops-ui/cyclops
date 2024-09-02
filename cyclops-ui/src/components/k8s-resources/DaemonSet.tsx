@@ -3,6 +3,7 @@ import { Col, Divider, Row, Alert } from "antd";
 import axios from "axios";
 import { mapResponseError } from "../../utils/api/errors";
 import PodTable from "./common/PodTable/PodTable";
+import { resourceStream } from "../../utils/api/sse/resources";
 
 interface Props {
   name: string;
@@ -19,6 +20,12 @@ const DaemonSet = ({ name, namespace }: Props) => {
     message: "",
     description: "",
   });
+
+  useEffect(() => {
+    resourceStream(`apps`, `v1`, `DaemonSet`, name, namespace, (r: any) => {
+      setDaemonSet(r);
+    });
+  }, [name, namespace]);
 
   const fetchDaemonSet = useCallback(() => {
     axios
@@ -41,10 +48,6 @@ const DaemonSet = ({ name, namespace }: Props) => {
 
   useEffect(() => {
     fetchDaemonSet();
-    const interval = setInterval(() => fetchDaemonSet(), 15000);
-    return () => {
-      clearInterval(interval);
-    };
   }, [fetchDaemonSet]);
 
   return (

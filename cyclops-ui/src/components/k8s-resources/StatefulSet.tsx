@@ -3,6 +3,7 @@ import { Col, Divider, Row, Alert } from "antd";
 import axios from "axios";
 import { mapResponseError } from "../../utils/api/errors";
 import PodTable from "./common/PodTable/PodTable";
+import { resourceStream } from "../../utils/api/sse/resources";
 
 interface Props {
   name: string;
@@ -25,6 +26,12 @@ const StatefulSet = ({ name, namespace }: Props) => {
     description: "",
   });
 
+  useEffect(() => {
+    resourceStream(`apps`, `v1`, `StatefulSet`, name, namespace, (r: any) => {
+      setStatefulSet(r);
+    });
+  }, [name, namespace]);
+
   const fetchStatefulSet = useCallback(() => {
     axios
       .get(`/api/resources`, {
@@ -46,10 +53,6 @@ const StatefulSet = ({ name, namespace }: Props) => {
 
   useEffect(() => {
     fetchStatefulSet();
-    const interval = setInterval(() => fetchStatefulSet(), 15000);
-    return () => {
-      clearInterval(interval);
-    };
   }, [fetchStatefulSet]);
 
   return (
