@@ -1,6 +1,7 @@
 package sse
 
 import (
+	"fmt"
 	"io"
 	"net/http"
 	"time"
@@ -11,11 +12,11 @@ import (
 
 func (s *Server) Resources(ctx *gin.Context) {
 	type Ref struct {
-		Group     string `json:"group"`
-		Version   string `json:"version"`
-		Kind      string `json:"kind"`
-		Name      string `json:"name"`
-		Namespace string `json:"namespace"`
+		Group     string `json:"group" form:"group"`
+		Version   string `json:"version" form:"version"`
+		Kind      string `json:"kind" form:"kind"`
+		Name      string `json:"name" form:"name"`
+		Namespace string `json:"namespace" form:"namespace"`
 	}
 
 	var r *Ref
@@ -64,6 +65,12 @@ func (s *Server) Resources(ctx *gin.Context) {
 			case <-ctx.Request.Context().Done():
 				watchResource.Stop()
 				close(p.output)
+				fmt.Println("ctx.Request.Context().Done()")
+				return false
+			case <-ctx.Done():
+				watchResource.Stop()
+				close(p.output)
+				fmt.Println("ctx.Done()")
 				return false
 			}
 		}
