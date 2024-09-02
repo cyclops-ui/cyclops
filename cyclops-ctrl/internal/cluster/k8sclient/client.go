@@ -1086,7 +1086,6 @@ func (k *KubernetesClient) WatchResource(group, version, resource, name, namespa
 		Resource: resource,
 	}
 
-	// Start the watch
 	return k.Dynamic.Resource(gvr).Namespace(namespace).Watch(context.Background(), metav1.ListOptions{
 		FieldSelector: "metadata.name=" + name,
 	})
