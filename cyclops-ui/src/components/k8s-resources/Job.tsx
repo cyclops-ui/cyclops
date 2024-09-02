@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { Col, Divider, Row, Alert } from "antd";
 import axios from "axios";
 import { mapResponseError } from "../../utils/api/errors";
@@ -20,32 +20,32 @@ const Job = ({ name, namespace }: Props) => {
     description: "",
   });
 
-  useEffect(() => {
-    function fetchJob() {
-      axios
-        .get(`/api/resources`, {
-          params: {
-            group: `batch`,
-            version: `v1`,
-            kind: `Job`,
-            name: name,
-            namespace: namespace,
-          },
-        })
-        .then((res) => {
-          setJob(res.data);
-        })
-        .catch((error) => {
-          setError(mapResponseError(error));
-        });
-    }
+  const fetchJob = useCallback(() => {
+    axios
+      .get(`/api/resources`, {
+        params: {
+          group: `batch`,
+          version: `v1`,
+          kind: `Job`,
+          name: name,
+          namespace: namespace,
+        },
+      })
+      .then((res) => {
+        setJob(res.data);
+      })
+      .catch((error) => {
+        setError(mapResponseError(error));
+      });
+  }, [name, namespace]);
 
+  useEffect(() => {
     fetchJob();
     const interval = setInterval(() => fetchJob(), 15000);
     return () => {
       clearInterval(interval);
     };
-  }, [name, namespace]);
+  }, [fetchJob]);
 
   return (
     <div>
@@ -73,7 +73,11 @@ const Job = ({ name, namespace }: Props) => {
           Pods: {job.pods.length}
         </Divider>
         <Col span={24} style={{ overflowX: "auto" }}>
-          <PodTable namespace={namespace} pods={job.pods} />
+          <PodTable
+            namespace={namespace}
+            pods={job.pods}
+            updateResourceData={fetchJob}
+          />
         </Col>
       </Row>
     </div>
