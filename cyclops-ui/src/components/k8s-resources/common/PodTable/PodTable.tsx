@@ -1,29 +1,24 @@
-import React, { useState } from "react";
+import { DeleteOutlined, EllipsisOutlined } from "@ant-design/icons";
 import {
+  Alert,
   Button,
   Col,
   Divider,
+  Input,
+  Modal,
+  Popover,
+  Row,
   Table,
   Tag,
-  TabsProps,
-  Tabs,
-  Modal,
-  Alert,
   Tooltip,
-  Popover,
-  Input,
 } from "antd";
 import axios from "axios";
-import { formatPodAge } from "../../../../utils/pods";
-import ReactAce from "react-ace";
+import { useState } from "react";
 import { mapResponseError } from "../../../../utils/api/errors";
-
+import { formatPodAge } from "../../../../utils/pods";
+import PodLogs from "./PodLogs";
+import PodManifest from "./PodManifest";
 import styles from "./styles.module.css";
-import {
-  EllipsisOutlined,
-  ReadOutlined,
-  DeleteOutlined,
-} from "@ant-design/icons";
 
 interface Props {
   namespace: string;
@@ -40,15 +35,6 @@ interface Pod {
 }
 
 const PodTable = ({ pods, namespace, updateResourceData }: Props) => {
-  const [logs, setLogs] = useState("");
-  const [logsModal, setLogsModal] = useState({
-    on: false,
-    namespace: "",
-    pod: "",
-    containers: [],
-    initContainers: [],
-  });
-
   const [deletePodRef, setDeletePodRef] = useState<{
     on: boolean;
     podDetails: Pod;
@@ -63,22 +49,10 @@ const PodTable = ({ pods, namespace, updateResourceData }: Props) => {
     },
   });
   const [deletePodConfirmRef, setDeletePodConfirmRef] = useState<string>("");
-
   const [error, setError] = useState({
     message: "",
     description: "",
   });
-
-  const handleCancelLogs = () => {
-    setLogsModal({
-      on: false,
-      namespace: "",
-      pod: "",
-      containers: [],
-      initContainers: [],
-    });
-    setLogs("");
-  };
 
   const handleCancelDeletePod = () => {
     setDeletePodRef({
@@ -120,17 +94,6 @@ const PodTable = ({ pods, namespace, updateResourceData }: Props) => {
       });
     } catch (error) {
       setError(mapResponseError(error));
-      setDeletePodConfirmRef("");
-      setDeletePodRef({
-        on: false,
-        podDetails: {
-          group: "",
-          version: "",
-          kind: "",
-          name: "",
-          namespace: "",
-        },
-      });
     }
   };
 
@@ -138,179 +101,38 @@ const PodTable = ({ pods, namespace, updateResourceData }: Props) => {
     setDeletePodConfirmRef(e.target.value);
   };
 
-  const downloadLogs = (container: string) => {
-    return function () {
-      window.location.href =
-        "/api/resources/pods/" +
-        logsModal.namespace +
-        "/" +
-        logsModal.pod +
-        "/" +
-        container +
-        "/logs/download";
-    };
-  };
-
-  const getTabItems = () => {
-    let items: TabsProps["items"] = [];
-
-    let container: any;
-
-    if (logsModal.containers !== null) {
-      for (container of logsModal.containers) {
-        items.push({
-          key: container.name,
-          label: container.name,
-          children: (
-            <Col>
-              <Button
-                type="primary"
-                // icon={<DownloadOutlined />}
-                onClick={downloadLogs(container.name)}
-                disabled={logs === "No logs available"}
-              >
-                Download
-              </Button>
-              <Divider style={{ marginTop: "16px", marginBottom: "16px" }} />
-              <ReactAce
-                style={{ width: "100%" }}
-                mode={"sass"}
-                value={logs}
-                readOnly={true}
-              />
-            </Col>
-          ),
-        });
-      }
-    }
-
-    if (logsModal.initContainers !== null) {
-      for (container of logsModal.initContainers) {
-        items.push({
-          key: container.name,
-          label: "(init container) " + container.name,
-          children: (
-            <Col>
-              <Button
-                type="primary"
-                // icon={<DownloadOutlined />}
-                onClick={downloadLogs(container.name)}
-                disabled={logs === "No logs available"}
-              >
-                Download
-              </Button>
-              <Divider style={{ marginTop: "16px", marginBottom: "16px" }} />
-              <ReactAce
-                style={{ width: "100%" }}
-                mode={"sass"}
-                value={logs}
-                readOnly={true}
-              />
-            </Col>
-          ),
-        });
-      }
-    }
-
-    return items;
-  };
-
-  const onLogsTabsChange = (container: string) => {
-    axios
-      .get(
-        "/api/resources/pods/" +
-          logsModal.namespace +
-          "/" +
-          logsModal.pod +
-          "/" +
-          container +
-          "/logs",
-      )
-      .then((res) => {
-        if (res.data) {
-          let log = "";
-          res.data.forEach((s: string) => {
-            log += s;
-            log += "\n";
-          });
-          setLogs(log);
-        } else {
-          setLogs("No logs available");
-        }
-      })
-      .catch((error) => {
-        setError(mapResponseError(error));
-      });
-  };
-
   const podActionsMenu = (pod: any) => {
     return (
       <div style={{ width: "400px" }}>
         <h3>{pod.name} actions</h3>
         <Divider style={{ margin: "8px" }} />
-        <Button
-          style={{ width: "60%", margin: "4px" }}
-          onClick={function () {
-            axios
-              .get(
-                "/api/resources/pods/" +
-                  namespace +
-                  "/" +
-                  pod.name +
-                  "/" +
-                  pod.containers[0].name +
-                  "/logs",
-              )
-              .then((res) => {
-                if (res.data) {
-                  let log = "";
-                  res.data.forEach((s: string) => {
-                    log += s;
-                    log += "\n";
-                  });
-                  setLogs(log);
-                } else {
-                  setLogs("No logs available");
-                }
-              })
-              .catch((error) => {
-                setError(mapResponseError(error));
-              });
-
-            setLogsModal({
-              on: true,
-              namespace: namespace,
-              pod: pod.name,
-              containers: pod.containers,
-              initContainers: pod.initContainers,
-            });
-          }}
-        >
-          <h4>
-            <ReadOutlined style={{ paddingRight: "5px" }} />
-            View Logs
-          </h4>
-        </Button>
-        <Button
-          style={{ width: "60%", margin: "4px", color: "red " }}
-          onClick={function () {
-            setDeletePodRef({
-              on: true,
-              podDetails: {
-                group: ``,
-                version: `v1`,
-                kind: `Pod`,
-                name: pod.name,
-                namespace: namespace,
-              },
-            });
-          }}
-        >
-          <h4>
-            <DeleteOutlined style={{ paddingRight: "5px" }} />
-            Delete Pod
-          </h4>
-        </Button>
+        <Row style={{ margin: 4 }}>
+          <PodLogs pod={{ ...pod, namespace }} />
+          <PodManifest pod={{ ...pod, namespace }} />
+          <Col span={12} style={{ paddingRight: 4, marginTop: 10 }}>
+            <Button
+              style={{ color: "red", width: "100%" }}
+              onClick={function () {
+                setError({ message: "", description: "" });
+                setDeletePodRef({
+                  on: true,
+                  podDetails: {
+                    group: ``,
+                    version: `v1`,
+                    kind: `Pod`,
+                    name: pod.name,
+                    namespace: namespace,
+                  },
+                });
+              }}
+            >
+              <h4>
+                <DeleteOutlined style={{ paddingRight: "5px" }} />
+                Delete Pod
+              </h4>
+            </Button>
+          </Col>
+        </Row>
       </div>
     );
   };
@@ -396,31 +218,6 @@ const PodTable = ({ pods, namespace, updateResourceData }: Props) => {
         />
       </Table>
       <Modal
-        title="Logs"
-        open={logsModal.on}
-        onOk={handleCancelLogs}
-        onCancel={handleCancelLogs}
-        cancelButtonProps={{ style: { display: "none" } }}
-        width={"60%"}
-      >
-        {error.message.length !== 0 && (
-          <Alert
-            message={error.message}
-            description={error.description}
-            type="error"
-            closable
-            afterClose={() => {
-              setError({
-                message: "",
-                description: "",
-              });
-            }}
-            style={{ paddingBottom: "20px" }}
-          />
-        )}
-        <Tabs items={getTabItems()} onChange={onLogsTabsChange} />
-      </Modal>
-      <Modal
         title={
           <div style={{ color: "red", marginBottom: "1rem" }}>
             <DeleteOutlined style={{ paddingRight: "5px" }} />
@@ -452,6 +249,21 @@ const PodTable = ({ pods, namespace, updateResourceData }: Props) => {
           },
         }}
       >
+        {error.message.length !== 0 && (
+          <Alert
+            message={error.message}
+            description={error.description}
+            type="error"
+            closable
+            afterClose={() => {
+              setError({
+                message: "",
+                description: "",
+              });
+            }}
+            style={{ paddingBottom: "20px" }}
+          />
+        )}
         <p>
           In order to confirm deleting this resource, type: <br />{" "}
           <code>{deletePodRef.podDetails.name}</code>
