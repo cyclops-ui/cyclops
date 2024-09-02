@@ -16,6 +16,8 @@ type Resource interface {
 	GetNamespace() string
 	GetDeleted() bool
 	SetDeleted(bool)
+	IsMissing() bool
+	SetMissing(bool)
 }
 
 type Deployment struct {
@@ -633,6 +635,7 @@ type Other struct {
 	Namespace string `json:"namespace"`
 	Status    string `json:"status"`
 	Deleted   bool   `json:"deleted"`
+	Missing   bool   `json:"missing"`
 }
 
 func (s *Other) GetGroupVersionKind() string {
@@ -665,6 +668,14 @@ func (s *Other) GetDeleted() bool {
 
 func (s *Other) SetDeleted(deleted bool) {
 	s.Deleted = deleted
+}
+
+func (s *Other) IsMissing() bool {
+	return s.Missing
+}
+
+func (s *Other) SetMissing(missing bool) {
+	s.Missing = missing
 }
 
 type Role struct {
