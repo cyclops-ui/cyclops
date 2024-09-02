@@ -9,7 +9,7 @@ const InstallCmd = () => {
       <h2 className={styles.commandDesc}>Install it with a single command</h2>
       <CodeBlockString language={"sh"}>
         {"kubectl apply -f https://raw.githubusercontent.com/cyclops-ui/cyclops/v0.10.0/install/cyclops-install.yaml && \n" +
-            "kubectl apply -f https://raw.githubusercontent.com/cyclops-ui/cyclops/v0.10.0/install/demo-templates.yaml"}
+          "kubectl apply -f https://raw.githubusercontent.com/cyclops-ui/cyclops/v0.10.0/install/demo-templates.yaml"}
       </CodeBlockString>
     </center>
   );
