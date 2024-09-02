@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { Col, Divider, Row, Alert } from "antd";
 import axios from "axios";
 import { mapResponseError } from "../../utils/api/errors";
@@ -14,43 +14,38 @@ const DaemonSet = ({ name, namespace }: Props) => {
     status: "",
     pods: [],
   });
-  const [triggerReload, setTriggerReload] = useState<boolean>(false);
-
-  const handleTriggerReloadUpdate = () => {
-    setTriggerReload(!triggerReload);
-  };
 
   const [error, setError] = useState({
     message: "",
     description: "",
   });
 
-  useEffect(() => {
-    function fetchDaemonSet() {
-      axios
-        .get(`/api/resources`, {
-          params: {
-            group: `apps`,
-            version: `v1`,
-            kind: `DaemonSet`,
-            name: name,
-            namespace: namespace,
-          },
-        })
-        .then((res) => {
-          setDaemonSet(res.data);
-        })
-        .catch((error) => {
-          setError(mapResponseError(error));
-        });
-    }
+  const fetchDaemonSet = useCallback(() => {
+    axios
+      .get(`/api/resources`, {
+        params: {
+          group: `apps`,
+          version: `v1`,
+          kind: `DaemonSet`,
+          name: name,
+          namespace: namespace,
+        },
+      })
+      .then((res) => {
+        setDaemonSet(res.data);
+      })
+      .catch((error) => {
+        setError(mapResponseError(error));
+      });
+  }, [name, namespace]);
 
+  useEffect(() => {
     fetchDaemonSet();
     const interval = setInterval(() => fetchDaemonSet(), 15000);
     return () => {
       clearInterval(interval);
     };
-  }, [name, namespace, triggerReload]);
+  }, [fetchDaemonSet]);
 
   return (
     <div>
@@ -81,7 +76,7 @@ const DaemonSet = ({ name, namespace }: Props) => {
           <PodTable
             namespace={namespace}
             pods={daemonSet.pods}
-            handleTriggerReloadUpdate={handleTriggerReloadUpdate}
+            updateResourceData={fetchDaemonSet}
           />
         </Col>
       </Row>

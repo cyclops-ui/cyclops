@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { Col, Divider, Row, Alert } from "antd";
 import axios from "axios";
 import { mapResponseError } from "../../utils/api/errors";
@@ -18,38 +18,33 @@ const Deployment = ({ name, namespace }: Props) => {
     message: "",
     description: "",
   });
-  const [triggerReload, setTriggerReload] = useState<boolean>(false);
 
-  const handleTriggerReloadUpdate = () => {
-    setTriggerReload(!triggerReload);
-  };
+  const fetchDeployment = useCallback(() => {
+    axios
+      .get(`/api/resources`, {
+        params: {
+          group: `apps`,
+          version: `v1`,
+          kind: `Deployment`,
+          name: name,
+          namespace: namespace,
+        },
+      })
+      .then((res) => {
+        setDeployment(res.data);
+      })
+      .catch((error) => {
+        setError(mapResponseError(error));
+      });
+  }, [name, namespace]);
 
   useEffect(() => {
-    function fetchDeployment() {
-      axios
-        .get(`/api/resources`, {
-          params: {
-            group: `apps`,
-            version: `v1`,
-            kind: `Deployment`,
-            name: name,
-            namespace: namespace,
-          },
-        })
-        .then((res) => {
-          setDeployment(res.data);
-        })
-        .catch((error) => {
-          setError(mapResponseError(error));
-        });
-    }
-
     fetchDeployment();
     const interval = setInterval(() => fetchDeployment(), 15000);
     return () => {
       clearInterval(interval);
     };
-  }, [name, namespace, triggerReload]);
+  }, [fetchDeployment]);
 
   return (
     <div>
@@ -80,7 +75,7 @@ const Deployment = ({ name, namespace }: Props) => {
           <PodTable
             namespace={namespace}
             pods={deployment.pods}
-            handleTriggerReloadUpdate={handleTriggerReloadUpdate}
+            updateResourceData={fetchDeployment}
           />
         </Col>
       </Row>

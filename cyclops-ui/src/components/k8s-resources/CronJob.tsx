@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { Col, Divider, Row, Alert } from "antd";
 import axios from "axios";
 import { mapResponseError } from "../../utils/api/errors";
@@ -14,43 +14,38 @@ const CronJob = ({ name, namespace }: Props) => {
     status: "",
     pods: [],
   });
-  const [triggerReload, setTriggerReload] = useState<boolean>(false);
-
-  const handleTriggerReloadUpdate = () => {
-    setTriggerReload(!triggerReload);
-  };
 
   const [error, setError] = useState({
     message: "",
     description: "",
   });
 
-  useEffect(() => {
-    function fetchCronJob() {
-      axios
-        .get(`/api/resources`, {
-          params: {
-            group: `batch`,
-            version: `v1`,
-            kind: `CronJob`,
-            name: name,
-            namespace: namespace,
-          },
-        })
-        .then((res) => {
-          setCronjob(res.data);
-        })
-        .catch((error) => {
-          setError(mapResponseError(error));
-        });
-    }
+  const fetchCronJob = useCallback(() => {
+    axios
+      .get(`/api/resources`, {
+        params: {
+          group: `batch`,
+          version: `v1`,
+          kind: `CronJob`,
+          name: name,
+          namespace: namespace,
+        },
+      })
+      .then((res) => {
+        setCronjob(res.data);
+      })
+      .catch((error) => {
+        setError(mapResponseError(error));
+      });
+  }, [name, namespace]);
 
+  useEffect(() => {
     fetchCronJob();
     const interval = setInterval(() => fetchCronJob(), 15000);
     return () => {
       clearInterval(interval);
     };
-  }, [name, namespace, triggerReload]);
+  }, [fetchCronJob]);
 
   return (
     <div>
@@ -81,7 +76,7 @@ const CronJob = ({ name, namespace }: Props) => {
           <PodTable
             namespace={namespace}
             pods={cronjob.pods}
-            handleTriggerReloadUpdate={handleTriggerReloadUpdate}
+            updateResourceData={fetchCronJob}
           />
         </Col>
       </Row>
