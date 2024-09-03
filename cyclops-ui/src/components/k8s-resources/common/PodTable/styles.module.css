@@ -12,4 +12,5 @@
 .actionsmenu:hover {
   color: #fe8801;
   transform: scale(1.2);
+  cursor: pointer;
 }
