@@ -34,9 +34,9 @@ code {
   border-radius: 0 0 7px 7px;
   transition: background-color 0.2s ease;
   display: flex;
-  justify-content: center; /* Center horizontally */
-  align-items: center; /* Center vertically */
-  text-align: center; /* Center text */
+  justify-content: center;
+  align-items: center;
+  text-align: center;
 }
 
 .expandadvanced:hover {
