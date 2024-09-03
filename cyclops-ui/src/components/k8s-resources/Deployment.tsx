@@ -4,6 +4,7 @@ import axios from "axios";
 import { mapResponseError } from "../../utils/api/errors";
 import PodTable from "./common/PodTable/PodTable";
 import { resourceStream } from "../../utils/api/sse/resources";
+import { isStreamingEnabled } from "../../utils/api/common";
 
 interface Props {
   name: string;
@@ -21,9 +22,11 @@ const Deployment = ({ name, namespace }: Props) => {
   });
 
   useEffect(() => {
-    resourceStream(`apps`, `v1`, `Deployment`, name, namespace, (r: any) => {
-      setDeployment(r);
-    });
+    if (isStreamingEnabled()) {
+      resourceStream(`apps`, `v1`, `Deployment`, name, namespace, (r: any) => {
+        setDeployment(r);
+      });
+    }
   }, [name, namespace]);
 
   const fetchDeployment = useCallback(() => {
@@ -47,6 +50,15 @@ const Deployment = ({ name, namespace }: Props) => {
 
   useEffect(() => {
     fetchDeployment();
+
+    if (isStreamingEnabled()) {
+      return () => {};
+    }
+
+    const interval = setInterval(() => fetchDeployment(), 15000);
+    return () => {
+      clearInterval(interval);
+    };
   }, [fetchDeployment]);
 
   return (

@@ -31,7 +31,7 @@ export function resourceStream(
         response.ok &&
         response.headers.get("content-type") === EventStreamContentType
       ) {
-        return; // everything's good
+        return;
       } else if (
         response.status >= 400 &&
         response.status < 500 &&
