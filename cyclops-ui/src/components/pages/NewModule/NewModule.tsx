@@ -13,10 +13,12 @@ import {
   Modal,
   Spin,
   notification,
+  Switch,
 } from "antd";
 import axios from "axios";
 import { useNavigate } from "react-router";
 import { findMaps, flattenObjectKeys } from "../../../utils/form";
+
 import "./custom.css";
 import defaultTemplate from "../../../static/img/default-template-icon.png";
 
@@ -31,6 +33,7 @@ import {
 } from "../../errors/FormValidationErrors";
 import { mapResponseError } from "../../../utils/api/errors";
 import TemplateFormFields from "../../form/TemplateFormFields";
+import { DownOutlined, UpOutlined } from "@ant-design/icons";
 
 const { Title } = Typography;
 const layout = {
@@ -98,6 +101,8 @@ const NewModule = () => {
       duration: 0,
     });
   };
+
+  const [isExpanded, setIsExpanded] = useState(false);
 
   const [form] = Form.useForm();
 
@@ -452,6 +457,10 @@ const NewModule = () => {
     openNotification(errorMessages);
   };
 
+  const toggleExpand = () => {
+    setIsExpanded(!isExpanded);
+  };
+
   return (
     <div>
       {error.message.length !== 0 && (
@@ -548,9 +557,8 @@ const NewModule = () => {
             <Col style={{ padding: "0px" }} span={16}>
               <div
                 style={{
-                  border: "solid 1.5px #c3c3c3",
+                  border: "solid 1.2px #c3c3c3",
                   borderRadius: "7px",
-                  padding: "12px",
                   width: "100%",
                   backgroundColor: "#fafafa",
                 }}
@@ -566,6 +574,7 @@ const NewModule = () => {
                       </p>
                     </div>
                   }
+                  style={{ padding: "12px 12px 0px 12px" }}
                   rules={[
                     {
                       required: true,
@@ -598,11 +607,33 @@ const NewModule = () => {
                       </p>
                     </div>
                   }
+                  style={{ padding: "0px 12px 0px 12px" }}
                   hasFeedback={true}
                   validateDebounce={1000}
                 >
                   <Input placeholder={"default"} />
                 </Form.Item>
+                {isExpanded && (
+                  <>
+                    <Switch />
+                    <Input placeholder="Field 3" style={{ marginBottom: 10 }} />
+                    <Input placeholder="Field 4" style={{ marginBottom: 10 }} />
+                  </>
+                )}
+
+                <div className={"expandadvanced"} onClick={toggleExpand}>
+                  {isExpanded ? (
+                    <div>
+                      Advanced
+                      <UpOutlined style={{ paddingLeft: "5px" }} />
+                    </div>
+                  ) : (
+                    <div>
+                      Advanced
+                      <DownOutlined style={{ paddingLeft: "5px" }} />
+                    </div>
+                  )}
+                </div>
               </div>
             </Col>
             <Divider
