@@ -1,5 +1,5 @@
-import { CopyOutlined } from "@ant-design/icons";
-import { Alert, Button, Checkbox, Col, Modal, Tooltip } from "antd";
+import { CopyOutlined, FileTextOutlined } from "@ant-design/icons";
+import { Alert, Button, Checkbox, Modal, Tooltip } from "antd";
 import { CheckboxChangeEvent } from "antd/es/checkbox";
 import axios from "axios";
 import { useCallback, useEffect, useState } from "react";
@@ -53,14 +53,17 @@ const PodManifest = ({ pod }: PodManifestProps) => {
   };
 
   return (
-    <Col span={12} style={{ paddingLeft: 4 }}>
+    <>
       <Button
         style={{ width: "100%" }}
         onClick={() => {
           setModal({ on: true });
         }}
       >
-        View Manifest
+        <h4>
+          <FileTextOutlined style={{ paddingRight: "5px" }} />
+          View Manifest
+        </h4>
       </Button>
       <Modal
         title={`Pod Manifest - ${pod.name}`}
@@ -132,7 +135,7 @@ const PodManifest = ({ pod }: PodManifestProps) => {
           </Button>
         </Tooltip>
       </Modal>
-    </Col>
+    </>
   );
 };
 export default PodManifest;

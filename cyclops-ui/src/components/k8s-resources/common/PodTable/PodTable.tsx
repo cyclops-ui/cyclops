@@ -2,7 +2,6 @@ import { DeleteOutlined, EllipsisOutlined } from "@ant-design/icons";
 import {
   Alert,
   Button,
-  Col,
   Divider,
   Input,
   Modal,
@@ -106,32 +105,30 @@ const PodTable = ({ pods, namespace, updateResourceData }: Props) => {
       <div style={{ width: "400px" }}>
         <h3>{pod.name} actions</h3>
         <Divider style={{ margin: "8px" }} />
-        <Row style={{ margin: 4 }}>
+        <Row style={{ margin: 4, gap: 8 }}>
           <PodLogs pod={{ ...pod, namespace }} />
           <PodManifest pod={{ ...pod, namespace }} />
-          <Col span={12} style={{ paddingRight: 4, marginTop: 10 }}>
-            <Button
-              style={{ color: "red", width: "100%" }}
-              onClick={function () {
-                setError({ message: "", description: "" });
-                setDeletePodRef({
-                  on: true,
-                  podDetails: {
-                    group: ``,
-                    version: `v1`,
-                    kind: `Pod`,
-                    name: pod.name,
-                    namespace: namespace,
-                  },
-                });
-              }}
-            >
-              <h4>
-                <DeleteOutlined style={{ paddingRight: "5px" }} />
-                Delete Pod
-              </h4>
-            </Button>
-          </Col>
+          <Button
+            style={{ color: "red", width: "100%" }}
+            onClick={function () {
+              setError({ message: "", description: "" });
+              setDeletePodRef({
+                on: true,
+                podDetails: {
+                  group: ``,
+                  version: `v1`,
+                  kind: `Pod`,
+                  name: pod.name,
+                  namespace: namespace,
+                },
+              });
+            }}
+          >
+            <h4>
+              <DeleteOutlined style={{ paddingRight: "5px" }} />
+              Delete Pod
+            </h4>
+          </Button>
         </Row>
       </div>
     );

@@ -2,8 +2,8 @@ import { ReadOutlined } from "@ant-design/icons";
 import { Alert, Button, Col, Divider, Modal, Tabs, TabsProps } from "antd";
 import axios from "axios";
 import { useState } from "react";
-import { mapResponseError } from "../../../../utils/api/errors";
 import ReactAce from "react-ace/lib/ace";
+import { mapResponseError } from "../../../../utils/api/errors";
 
 interface PodLogsProps {
   pod: any;
@@ -177,14 +177,12 @@ const PodLogs = ({ pod }: PodLogsProps) => {
 
   return (
     <>
-      <Col span={12} style={{ paddingRight: 4 }}>
-        <Button style={{ width: "100%" }} onClick={handleViewPodLogs}>
-          <h4>
-            <ReadOutlined style={{ paddingRight: "5px" }} />
-            View Logs
-          </h4>
-        </Button>
-      </Col>
+      <Button style={{ width: "100%" }} onClick={handleViewPodLogs}>
+        <h4>
+          <ReadOutlined style={{ paddingRight: "5px" }} />
+          View Logs
+        </h4>
+      </Button>
       <Modal
         title="Logs"
         open={logsModal.on}
