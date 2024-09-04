@@ -189,7 +189,8 @@ const PodLogs = ({ pod }: PodLogsProps) => {
         onOk={handleCancelLogs}
         onCancel={handleCancelLogs}
         cancelButtonProps={{ style: { display: "none" } }}
-        width={"60%"}
+        style={{ zIndex: 100 }}
+        width={"80%"}
       >
         {error.message.length !== 0 && (
           <Alert
