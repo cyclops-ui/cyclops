@@ -1,6 +1,7 @@
 import React from "react";
 import { Button, Col, Divider, Form, Input, Row } from "antd";
 import { MinusCircleOutlined, PlusOutlined } from "@ant-design/icons";
+import TextArea from "antd/es/input/TextArea";
 
 interface Props {
   field: any;
@@ -72,7 +73,7 @@ export const MapField = ({
                     rules={[{ required: true, message: "Missing value" }]}
                     style={{ margin: 0, flex: 1, marginRight: "12px" }}
                   >
-                    <Input style={{ margin: 0 }} />
+                    <TextArea style={{ margin: 0 }} rows={1} />
                   </Form.Item>
                 </Col>
                 <MinusCircleOutlined onClick={() => remove(arrField.name)} />

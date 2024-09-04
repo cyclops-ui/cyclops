@@ -171,6 +171,14 @@ const NewModule = () => {
           }
 
           Object.keys(values[field.name]).forEach((key) => {
+            if (typeof values[field.name][key] === "object") {
+              object.push({
+                key: key,
+                value: YAML.stringify(values[field.name][key], null, 4),
+              });
+              return;
+            }
+
             object.push({
               key: key,
               value: values[field.name][key],

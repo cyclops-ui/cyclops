@@ -1,3 +1,5 @@
+import YAML from "yaml";
+
 export function fileExtension(fileExt: string): string {
   switch (fileExt) {
     case "json":
@@ -104,7 +106,7 @@ export function findMaps(fields: any[], values: any, initialValues: any): any {
 
         let object: any = {};
         valuesList.forEach((valueFromList) => {
-          object[valueFromList.key] = valueFromList.value;
+          object[valueFromList.key] = YAML.parse(valueFromList.value);
         });
         out[field.name] = object;
         break;
