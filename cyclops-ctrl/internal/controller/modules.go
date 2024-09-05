@@ -693,7 +693,6 @@ func getTargetGeneration(generation string, module *v1alpha1.Module) (*v1alpha1.
 }
 
 func trimLogLine(logLine string) string {
-	// Split the line by the first space after the timestamp
 	parts := strings.SplitN(logLine, " ", 2)
 	if len(parts) > 1 {
 		return parts[1]
