@@ -2,6 +2,7 @@ package controller
 
 import (
 	"fmt"
+	"io"
 	"net/http"
 	"os"
 	"strings"
@@ -505,19 +506,43 @@ func (m *Modules) GetLogs(ctx *gin.Context) {
 	ctx.Header("Access-Control-Allow-Origin", "*")
 
 	logCount := int64(100)
-	logs, err := m.kubernetesClient.GetPodLogs(
-		ctx.Param("namespace"),
-		ctx.Param("container"),
-		ctx.Param("name"),
-		&logCount,
-	)
-	if err != nil {
-		fmt.Println(err)
-		ctx.JSON(http.StatusInternalServerError, dto.NewError("Error fetching logs", err.Error()))
-		return
-	}
 
-	ctx.JSON(http.StatusOK, logs)
+	// pass on a channel to the GetPodLogs function to allow for streaming
+	logChan := make(chan string)
+
+	go func() {
+		defer close(logChan)
+		err := m.kubernetesClient.GetStreamedPodLogs(
+			ctx.Param("namespace"),
+			ctx.Param("container"),
+			ctx.Param("name"),
+			&logCount,
+			logChan,
+		)
+		if err != nil {
+			ctx.JSON(http.StatusInternalServerError, dto.NewError("Error fetching logs", err.Error()))
+			return
+		}
+	}()
+
+	// stream logs to the client
+	ctx.Stream(func(w io.Writer) bool {
+		for {
+			select {
+			case log, ok := <-logChan:
+				if !ok {
+					return false
+				}
+
+				ctx.SSEvent("pod-log", log)
+				return true
+			case <-ctx.Request.Context().Done():
+				return false
+			case <-ctx.Done():
+				return false
+			}
+		}
+	})
 }
 
 func (m *Modules) GetDeploymentLogs(ctx *gin.Context) {
