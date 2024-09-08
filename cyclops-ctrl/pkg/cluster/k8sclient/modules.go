@@ -178,7 +178,7 @@ func (k *KubernetesClient) GetDeletedResources(
 
 		objNamespace := apiv1.NamespaceDefault
 		if len(strings.TrimSpace(targetNamespace)) != 0 {
-			obj.SetNamespace(strings.TrimSpace(targetNamespace))
+			objNamespace = strings.TrimSpace(targetNamespace)
 		}
 
 		if len(strings.TrimSpace(obj.GetNamespace())) != 0 {
