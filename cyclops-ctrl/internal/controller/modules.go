@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"net/http"
 	"os"
+	"sigs.k8s.io/yaml"
 	"strings"
 	"time"
 
@@ -62,6 +63,32 @@ func (m *Modules) GetModule(ctx *gin.Context) {
 	}
 
 	ctx.JSON(http.StatusOK, moduleDTO)
+}
+
+func (m *Modules) GetRawModuleManifest(ctx *gin.Context) {
+	ctx.Header("Access-Control-Allow-Origin", "*")
+
+	module, err := m.kubernetesClient.GetModule(ctx.Param("name"))
+	if err != nil {
+		fmt.Println(err)
+		ctx.Status(http.StatusInternalServerError)
+		return
+	}
+
+	module.History = []v1alpha1.HistoryEntry{}
+	module.ObjectMeta.ManagedFields = []metav1.ManagedFieldsEntry{}
+
+	module.Kind = "Module"
+	module.APIVersion = "cyclops-ui.com/v1alpha1"
+
+	data, err := yaml.Marshal(module)
+	if err != nil {
+		fmt.Println(err)
+		ctx.JSON(http.StatusInternalServerError, dto.NewError("Error marshaling module", err.Error()))
+		return
+	}
+
+	ctx.Data(http.StatusOK, gin.MIMEYAML, data)
 }
 
 func (m *Modules) ListModules(ctx *gin.Context) {

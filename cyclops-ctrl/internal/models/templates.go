@@ -19,6 +19,7 @@ type Template struct {
 	IconURL         string       `json:"iconURL"`
 
 	HelmChartMetadata *helm.Metadata `json:"helmChartMetadata"`
+	RawSchema         []byte         `json:"rawSchema"`
 
 	Files     []*chart.File `json:"files"`
 	Templates []*chart.File `json:"templates"`
@@ -39,7 +40,7 @@ type Field struct {
 	Enum          []interface{} `json:"enum"`
 	Required      []string      `json:"required"`
 	FileExtension string        `json:"fileExtension"`
-	Immutable	  bool          `json:"immutable"`
+	Immutable     bool          `json:"immutable"`
 
 	// number validation
 	Minimum          *float64 `json:"minimum"`
