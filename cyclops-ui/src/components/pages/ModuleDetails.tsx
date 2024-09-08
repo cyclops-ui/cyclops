@@ -875,8 +875,8 @@ const ModuleDetails = () => {
       });
   };
 
-  const moduleManifestContent = (content: string) => {
-    if (loadingRenderedManifest) {
+  const moduleManifestContent = (content: string, loading: boolean) => {
+    if (loading) {
       return <Spin />;
     }
 
@@ -1144,7 +1144,7 @@ const ModuleDetails = () => {
         cancelButtonProps={{ style: { display: "none" } }}
         width={"70%"}
       >
-        {moduleManifestContent(rawModuleManifest)}
+        {moduleManifestContent(rawModuleManifest, loadingRawManifest)}
       </Modal>
       <Modal
         title="Rendered manifest"
@@ -1154,7 +1154,7 @@ const ModuleDetails = () => {
         cancelButtonProps={{ style: { display: "none" } }}
         width={"70%"}
       >
-        {moduleManifestContent(rawModuleManifest)}
+        {moduleManifestContent(renderedManifest, loadingRenderedManifest)}
       </Modal>
     </div>
   );
