@@ -430,9 +430,7 @@ func (k *KubernetesClient) CreateDynamic(
 		Resource: resource.Resource,
 	}
 
-	var objNamespace string
-
-	objNamespace = apiv1.NamespaceDefault
+	objNamespace := apiv1.NamespaceDefault
 
 	if len(strings.TrimSpace(targetNamespace)) != 0 {
 		objNamespace = strings.TrimSpace(targetNamespace)
