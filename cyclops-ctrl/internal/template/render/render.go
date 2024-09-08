@@ -10,7 +10,7 @@ import (
 	"helm.sh/helm/v3/pkg/engine"
 
 	cyclopsv1alpha1 "github.com/cyclops-ui/cyclops/cyclops-ctrl/api/v1alpha1"
-	"github.com/cyclops-ui/cyclops/cyclops-ctrl/internal/cluster/k8sclient"
+	"github.com/cyclops-ui/cyclops/cyclops-ctrl/pkg/cluster/k8sclient"
 	"github.com/cyclops-ui/cyclops/cyclops-ctrl/internal/models"
 	"github.com/cyclops-ui/cyclops/cyclops-ctrl/internal/models/helm"
 )

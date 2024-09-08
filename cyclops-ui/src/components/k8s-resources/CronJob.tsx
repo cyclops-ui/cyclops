@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { Col, Divider, Row, Alert } from "antd";
 import axios from "axios";
 import { mapResponseError } from "../../utils/api/errors";
@@ -20,32 +20,32 @@ const CronJob = ({ name, namespace }: Props) => {
     description: "",
   });
 
-  useEffect(() => {
-    function fetchCronJob() {
-      axios
-        .get(`/api/resources`, {
-          params: {
-            group: `batch`,
-            version: `v1`,
-            kind: `CronJob`,
-            name: name,
-            namespace: namespace,
-          },
-        })
-        .then((res) => {
-          setCronjob(res.data);
-        })
-        .catch((error) => {
-          setError(mapResponseError(error));
-        });
-    }
+  const fetchCronJob = useCallback(() => {
+    axios
+      .get(`/api/resources`, {
+        params: {
+          group: `batch`,
+          version: `v1`,
+          kind: `CronJob`,
+          name: name,
+          namespace: namespace,
+        },
+      })
+      .then((res) => {
+        setCronjob(res.data);
+      })
+      .catch((error) => {
+        setError(mapResponseError(error));
+      });
+  }, [name, namespace]);
 
+  useEffect(() => {
     fetchCronJob();
     const interval = setInterval(() => fetchCronJob(), 15000);
     return () => {
       clearInterval(interval);
     };
-  }, [name, namespace]);
+  }, [fetchCronJob]);
 
   return (
     <div>
@@ -73,7 +73,11 @@ const CronJob = ({ name, namespace }: Props) => {
           Pods: {cronjob.pods.length}
         </Divider>
         <Col span={24} style={{ overflowX: "auto" }}>
-          <PodTable namespace={namespace} pods={cronjob.pods} />
+          <PodTable
+            namespace={namespace}
+            pods={cronjob.pods}
+            updateResourceData={fetchCronJob}
+          />
         </Col>
       </Row>
     </div>

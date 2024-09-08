@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { Col, Divider, Row, Alert } from "antd";
 import axios from "axios";
 import { mapResponseError } from "../../utils/api/errors";
@@ -25,32 +25,32 @@ const StatefulSet = ({ name, namespace }: Props) => {
     description: "",
   });
 
-  useEffect(() => {
-    function fetchStatefulSet() {
-      axios
-        .get(`/api/resources`, {
-          params: {
-            group: `apps`,
-            version: `v1`,
-            kind: `StatefulSet`,
-            name: name,
-            namespace: namespace,
-          },
-        })
-        .then((res) => {
-          setStatefulSet(res.data);
-        })
-        .catch((error) => {
-          setError(mapResponseError(error));
-        });
-    }
+  const fetchStatefulSet = useCallback(() => {
+    axios
+      .get(`/api/resources`, {
+        params: {
+          group: `apps`,
+          version: `v1`,
+          kind: `StatefulSet`,
+          name: name,
+          namespace: namespace,
+        },
+      })
+      .then((res) => {
+        setStatefulSet(res.data);
+      })
+      .catch((error) => {
+        setError(mapResponseError(error));
+      });
+  }, [name, namespace]);
 
+  useEffect(() => {
     fetchStatefulSet();
     const interval = setInterval(() => fetchStatefulSet(), 15000);
     return () => {
       clearInterval(interval);
     };
-  }, [name, namespace]);
+  }, [fetchStatefulSet]);
 
   return (
     <div>
@@ -78,7 +78,11 @@ const StatefulSet = ({ name, namespace }: Props) => {
           Replicas: {statefulSet.pods.length}
         </Divider>
         <Col span={24} style={{ overflowX: "auto" }}>
-          <PodTable namespace={namespace} pods={statefulSet.pods} />
+          <PodTable
+            namespace={namespace}
+            pods={statefulSet.pods}
+            updateResourceData={fetchStatefulSet}
+          />
         </Col>
       </Row>
     </div>

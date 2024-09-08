@@ -429,7 +429,7 @@ const NodeDetails = () => {
               type="dashboard"
               strokeWidth={10}
               status="normal"
-              percent={resources.cpu * 100}
+              percent={Math.round(resources.cpu * 10000) / 100}
               strokeColor={gaugeColors}
             />
             <h1 style={{ marginBottom: "6px" }}>
@@ -446,7 +446,7 @@ const NodeDetails = () => {
               type="dashboard"
               strokeWidth={10}
               status="normal"
-              percent={resources.memory * 100}
+              percent={Math.round(resources.memory * 10000) / 100}
               strokeColor={gaugeColors}
             />
             <h1 style={{ marginBottom: "6px" }}>
@@ -465,7 +465,7 @@ const NodeDetails = () => {
               type="dashboard"
               strokeWidth={10}
               status="normal"
-              percent={resources.pod_count * 100}
+              percent={Math.round(resources.pod_count * 10000) / 100}
               strokeColor={gaugeColors}
             />
             <h1 style={{ marginBottom: "6px" }}>
