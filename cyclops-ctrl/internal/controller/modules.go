@@ -408,7 +408,7 @@ func (m *Modules) ResourcesForModule(ctx *gin.Context) {
 
 	manifest, err := m.renderer.HelmTemplate(*module, t)
 	if err != nil {
-		fmt.Println(err)
+		fmt.Println("error rendering manifest", err)
 		ctx.JSON(http.StatusInternalServerError, dto.NewError("Error rendering Module manifest", err.Error()))
 		return
 	}
