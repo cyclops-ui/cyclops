@@ -24,6 +24,8 @@ import {
   ReadOutlined,
   DeleteOutlined,
 } from "@ant-design/icons";
+import { logStream } from "../../../../utils/api/sse/resources";
+import { isStreamingEnabled } from "../../../../utils/api/common";
 
 interface Props {
   namespace: string;
@@ -40,7 +42,7 @@ interface Pod {
 }
 
 const PodTable = ({ pods, namespace, updateResourceData }: Props) => {
-  const [logs, setLogs] = useState("");
+  const [logs, setLogs] = useState<string[]>([]);
   const [logsModal, setLogsModal] = useState({
     on: false,
     namespace: "",
@@ -48,6 +50,8 @@ const PodTable = ({ pods, namespace, updateResourceData }: Props) => {
     containers: [],
     initContainers: [],
   });
+  const [logsSignalController, setLogsSignalController] =
+    useState<AbortController | null>(null);
 
   const [deletePodRef, setDeletePodRef] = useState<{
     on: boolean;
@@ -77,7 +81,14 @@ const PodTable = ({ pods, namespace, updateResourceData }: Props) => {
       containers: [],
       initContainers: [],
     });
-    setLogs("");
+    setLogs([]);
+    setLogsSignalController((prevController) => {
+      if (prevController) {
+        prevController.abort();
+      }
+
+      return null;
+    });
   };
 
   const handleCancelDeletePod = () => {
@@ -167,7 +178,7 @@ const PodTable = ({ pods, namespace, updateResourceData }: Props) => {
                 type="primary"
                 // icon={<DownloadOutlined />}
                 onClick={downloadLogs(container.name)}
-                disabled={logs === "No logs available"}
+                disabled={logs.length === 0}
               >
                 Download
               </Button>
@@ -175,7 +186,9 @@ const PodTable = ({ pods, namespace, updateResourceData }: Props) => {
               <ReactAce
                 style={{ width: "100%" }}
                 mode={"sass"}
-                value={logs}
+                value={
+                  logs.length === 0 ? "No logs available" : logs.join("\n")
+                }
                 readOnly={true}
               />
             </Col>
@@ -195,7 +208,7 @@ const PodTable = ({ pods, namespace, updateResourceData }: Props) => {
                 type="primary"
                 // icon={<DownloadOutlined />}
                 onClick={downloadLogs(container.name)}
-                disabled={logs === "No logs available"}
+                disabled={logs.length === 0}
               >
                 Download
               </Button>
@@ -203,7 +216,9 @@ const PodTable = ({ pods, namespace, updateResourceData }: Props) => {
               <ReactAce
                 style={{ width: "100%" }}
                 mode={"sass"}
-                value={logs}
+                value={
+                  logs.length === 0 ? "No logs available" : logs.join("\n")
+                }
                 readOnly={true}
               />
             </Col>
@@ -216,31 +231,32 @@ const PodTable = ({ pods, namespace, updateResourceData }: Props) => {
   };
 
   const onLogsTabsChange = (container: string) => {
-    axios
-      .get(
-        "/api/resources/pods/" +
-          logsModal.namespace +
-          "/" +
-          logsModal.pod +
-          "/" +
-          container +
-          "/logs",
-      )
-      .then((res) => {
-        if (res.data) {
-          let log = "";
-          res.data.forEach((s: string) => {
-            log += s;
-            log += "\n";
+    setLogsSignalController((prevController) => {
+      if (prevController) {
+        prevController.abort();
+      }
+
+      const controller = new AbortController();
+      return controller;
+    });
+    setLogs(() => []); //this is to remove the previous pod's logs
+
+    if (isStreamingEnabled() && logsSignalController) {
+      logStream(
+        logsModal.pod,
+        logsModal.namespace,
+        container,
+        (log) => {
+          setLogs((prevLogs) => {
+            return [...prevLogs, log];
           });
-          setLogs(log);
-        } else {
-          setLogs("No logs available");
-        }
-      })
-      .catch((error) => {
-        setError(mapResponseError(error));
-      });
+        },
+        (err) => {
+          setError(mapResponseError(err));
+        },
+        logsSignalController,
+      );
+    }
   };
 
   const podActionsMenu = (pod: any) => {
@@ -251,31 +267,25 @@ const PodTable = ({ pods, namespace, updateResourceData }: Props) => {
         <Button
           style={{ width: "60%", margin: "4px" }}
           onClick={function () {
-            axios
-              .get(
-                "/api/resources/pods/" +
-                  namespace +
-                  "/" +
-                  pod.name +
-                  "/" +
-                  pod.containers[0].name +
-                  "/logs",
-              )
-              .then((res) => {
-                if (res.data) {
-                  let log = "";
-                  res.data.forEach((s: string) => {
-                    log += s;
-                    log += "\n";
+            if (isStreamingEnabled()) {
+              const controller = new AbortController();
+              setLogsSignalController((prev) => controller);
+
+              logStream(
+                pod.name,
+                namespace,
+                pod.containers[0].name,
+                (log) => {
+                  setLogs((prevLogs) => {
+                    return [...prevLogs, log];
                   });
-                  setLogs(log);
-                } else {
-                  setLogs("No logs available");
-                }
-              })
-              .catch((error) => {
-                setError(mapResponseError(error));
-              });
+                },
+                (err) => {
+                  setError(mapResponseError(err));
+                },
+                controller,
+              );
+            }
 
             setLogsModal({
               on: true,

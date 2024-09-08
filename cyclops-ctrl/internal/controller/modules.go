@@ -507,11 +507,11 @@ func (m *Modules) GetLogs(ctx *gin.Context) {
 
 	logCount := int64(100)
 
-	// pass on a channel to the GetPodLogs function to allow for streaming
 	logChan := make(chan string)
 
 	go func() {
 		defer close(logChan)
+
 		err := m.kubernetesClient.GetStreamedPodLogs(
 			ctx.Param("namespace"),
 			ctx.Param("container"),
