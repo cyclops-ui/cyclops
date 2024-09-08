@@ -296,6 +296,8 @@ func (m *Modules) UpdateModule(ctx *gin.Context) {
 	module.Status.ReconciliationStatus = curr.Status.ReconciliationStatus
 	module.Status.IconURL = curr.Status.IconURL
 	module.Status.ManagedGVRs = curr.Status.ManagedGVRs
+	
+	module.Spec.TargetNamespace = curr.Spec.TargetNamespace
 
 	result, err := m.kubernetesClient.UpdateModuleStatus(&module)
 	if err != nil {
