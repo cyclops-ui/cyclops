@@ -284,7 +284,7 @@ func (r *ModuleReconciler) generateResources(
 		}
 		childrenGVRs = append(childrenGVRs, gvr)
 
-		if err := kClient.CreateDynamic(gvr, &obj); err != nil {
+		if err := kClient.CreateDynamic(gvr, &obj, module.Spec.TargetNamespace); err != nil {
 			r.logger.Error(err, "could not apply resource",
 				"module namespaced name",
 				module.Name,

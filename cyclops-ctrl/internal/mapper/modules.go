@@ -27,7 +27,8 @@ func RequestToModule(req dto.Module) (cyclopsv1alpha1.Module, error) {
 			Name: req.Name,
 		},
 		Spec: cyclopsv1alpha1.ModuleSpec{
-			TemplateRef: DtoTemplateRefToK8s(req.Template),
+			TargetNamespace: req.Namespace,
+			TemplateRef:     DtoTemplateRefToK8s(req.Template),
 			Values: apiextensionsv1.JSON{
 				Raw: data,
 			},
@@ -38,12 +39,13 @@ func RequestToModule(req dto.Module) (cyclopsv1alpha1.Module, error) {
 
 func ModuleToDTO(module cyclopsv1alpha1.Module) (dto.Module, error) {
 	return dto.Module{
-		Name:      module.Name,
-		Namespace: module.Namespace,
-		Version:   module.Spec.TemplateRef.Version,
-		Template:  k8sTemplateRefToDTO(module.Spec.TemplateRef, module.Status.TemplateResolvedVersion),
-		Values:    module.Spec.Values,
-		IconURL:   module.Status.IconURL,
+		Name:            module.Name,
+		Namespace:       module.Namespace,
+		TargetNamespace: module.Spec.TargetNamespace,
+		Version:         module.Spec.TemplateRef.Version,
+		Template:        k8sTemplateRefToDTO(module.Spec.TemplateRef, module.Status.TemplateResolvedVersion),
+		Values:          module.Spec.Values,
+		IconURL:         module.Status.IconURL,
 		ReconciliationStatus: dto.ReconciliationStatus{
 			Status: dto.ReconciliationStatusState(module.Status.ReconciliationStatus.Status),
 			Reason: module.Status.ReconciliationStatus.Reason,
