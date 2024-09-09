@@ -1019,7 +1019,7 @@ const ModuleDetails = () => {
         onOk={handleCancelManifest}
         onCancel={handleCancelManifest}
         cancelButtonProps={{ style: { display: "none" } }}
-        width={"40%"}
+        width={"70%"}
       >
         <Checkbox onChange={handleCheckboxChange} checked={showManagedFields}>
           Include Managed Fields
