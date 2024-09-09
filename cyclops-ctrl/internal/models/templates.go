@@ -26,6 +26,7 @@ type Template struct {
 	CRDs      []*chart.File `json:"crds"`
 
 	Dependencies []*Template `json:"dependencies"`
+	Condition    string      `json:"condition"`
 }
 
 type Field struct {
