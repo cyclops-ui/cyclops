@@ -35,7 +35,7 @@ func (r *Renderer) HelmTemplate(module cyclopsv1alpha1.Module, moduleTemplate *m
 		Metadata:  mapMetadata(moduleTemplate.HelmChartMetadata),
 		Lock:      &helmchart.Lock{},
 		Values:    map[string]interface{}{},
-		Schema:    []byte{},
+		Schema:    moduleTemplate.RawSchema,
 		Files:     moduleTemplate.Files,
 		Templates: moduleTemplate.Templates,
 	}
@@ -55,7 +55,7 @@ func (r *Renderer) HelmTemplate(module cyclopsv1alpha1.Module, moduleTemplate *m
 			Metadata:  mapMetadata(dependency.HelmChartMetadata),
 			Lock:      &helmchart.Lock{},
 			Values:    map[string]interface{}{},
-			Schema:    []byte{},
+			Schema:    dependency.RawSchema,
 			Files:     dependency.Files,
 			Templates: dependency.Templates,
 		})
@@ -80,6 +80,12 @@ func (r *Renderer) HelmTemplate(module cyclopsv1alpha1.Module, moduleTemplate *m
 			Major:      versionInfo.Major,
 			GitVersion: versionInfo.GitVersion,
 		},
+	}
+
+	if len(chart.Schema) != 0 {
+		if err := chartutil.ValidateAgainstSchema(chart, values); err != nil {
+			return "", err
+		}
 	}
 
 	out, err := engine.Render(chart, top)

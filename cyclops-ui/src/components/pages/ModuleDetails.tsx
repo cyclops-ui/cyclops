@@ -157,6 +157,10 @@ const ModuleDetails = () => {
     namespace: "",
   });
 
+  const [loadingRawManifest, setLoadingRawManifest] = useState(false);
+  const [viewRawManifest, setViewRawManifest] = useState(false);
+  const [rawModuleManifest, setRawModuleManifest] = useState("");
+
   const [loadingRenderedManifest, setLoadingRenderedManifest] = useState(false);
   const [viewRenderedManifest, setViewRenderedManifest] = useState(false);
   const [renderedManifest, setRenderedManifest] = useState("");
@@ -818,6 +822,22 @@ const ModuleDetails = () => {
     );
   };
 
+  const handleViewRawModuleManifest = () => {
+    setLoadingRawManifest(true);
+    setViewRawManifest(true);
+
+    axios
+      .get(`/api/modules/` + moduleName + `/raw`)
+      .then((res) => {
+        setRawModuleManifest(res.data);
+        setLoadingRawManifest(false);
+      })
+      .catch((error) => {
+        setError(mapResponseError(error));
+        setLoadingRawManifest(false);
+      });
+  };
+
   const handleViewRenderedManifest = () => {
     setLoadingRenderedManifest(true);
     setViewRenderedManifest(true);
@@ -857,33 +877,56 @@ const ModuleDetails = () => {
       });
   };
 
-  const renderedManifestModalContent = () => {
-    if (loadingRenderedManifest) {
+  const moduleManifestContent = (content: string, loading: boolean) => {
+    if (loading) {
       return <Spin />;
     }
 
     return (
-      <ReactAce
-        mode={"sass"}
-        theme={"github"}
-        fontSize={12}
-        showPrintMargin={true}
-        showGutter={true}
-        highlightActiveLine={true}
-        readOnly={true}
-        setOptions={{
-          enableBasicAutocompletion: true,
-          enableLiveAutocompletion: true,
-          enableSnippets: false,
-          showLineNumbers: true,
-          tabSize: 4,
-          useWorker: false,
-        }}
-        style={{
-          width: "100%",
-        }}
-        value={renderedManifest}
-      />
+      <div>
+        <Divider />
+        <div style={{ position: "relative" }}>
+          <ReactAce
+            mode={"sass"}
+            theme={"github"}
+            fontSize={12}
+            showPrintMargin={true}
+            showGutter={true}
+            highlightActiveLine={true}
+            readOnly={true}
+            setOptions={{
+              enableBasicAutocompletion: true,
+              enableLiveAutocompletion: true,
+              enableSnippets: false,
+              showLineNumbers: true,
+              tabSize: 4,
+              useWorker: false,
+            }}
+            style={{
+              width: "100%",
+            }}
+            value={content}
+          />
+          <Tooltip title={"Copy manifest"} trigger="hover">
+            <Button
+              onClick={() => {
+                navigator.clipboard.writeText(content);
+              }}
+              style={{
+                position: "absolute",
+                right: "20px",
+                top: "10px",
+              }}
+            >
+              <CopyOutlined
+                style={{
+                  fontSize: "20px",
+                }}
+              />
+            </Button>
+          </Tooltip>
+        </div>
+      </div>
     );
   };
 
@@ -949,9 +992,15 @@ const ModuleDetails = () => {
           </Button>
         </Col>
         <Col>
+          <Button onClick={handleViewRawModuleManifest} block>
+            <FileTextOutlined />
+            Module manifest
+          </Button>
+        </Col>
+        <Col>
           <Button onClick={handleViewRenderedManifest} block>
             <FileTextOutlined />
-            View Manifest
+            Rendered manifest
           </Button>
         </Col>
         <Col>
@@ -1090,14 +1139,24 @@ const ModuleDetails = () => {
         />
       </Modal>
       <Modal
+        title="Module manifest"
+        open={viewRawManifest}
+        onOk={() => setViewRawManifest(false)}
+        onCancel={() => setViewRawManifest(false)}
+        cancelButtonProps={{ style: { display: "none" } }}
+        width={"70%"}
+      >
+        {moduleManifestContent(rawModuleManifest, loadingRawManifest)}
+      </Modal>
+      <Modal
         title="Rendered manifest"
         open={viewRenderedManifest}
         onOk={() => setViewRenderedManifest(false)}
         onCancel={() => setViewRenderedManifest(false)}
         cancelButtonProps={{ style: { display: "none" } }}
-        width={"60%"}
+        width={"70%"}
       >
-        {renderedManifestModalContent()}
+        {moduleManifestContent(renderedManifest, loadingRenderedManifest)}
       </Modal>
     </div>
   );
