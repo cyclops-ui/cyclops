@@ -152,8 +152,14 @@ func (k *KubernetesClient) getManagedGVRs(moduleName string) ([]schema.GroupVers
 func (k *KubernetesClient) GetDeletedResources(
 	resources []dto.Resource,
 	manifest string,
+	targetNamespace string,
 ) ([]dto.Resource, error) {
 	resourcesFromTemplate := make(map[string][]dto.Resource, 0)
+
+	ar, err := k.clusterApiResources()
+	if err != nil {
+		return nil, err
+	}
 
 	for _, s := range strings.Split(manifest, "\n---\n") {
 		s := strings.TrimSpace(s)
@@ -165,13 +171,32 @@ func (k *KubernetesClient) GetDeletedResources(
 
 		decoder := yaml2.NewYAMLOrJSONDecoder(strings.NewReader(s), len(s))
 		if err := decoder.Decode(&obj); err != nil {
-			panic(err)
+			return nil, err
 		}
 
 		objGVK := obj.GetObjectKind().GroupVersionKind().String()
-		resourcesFromTemplate[objGVK] = append(resourcesFromTemplate[objGVK], &dto.Service{
+
+		objNamespace := apiv1.NamespaceDefault
+		if len(strings.TrimSpace(targetNamespace)) != 0 {
+			objNamespace = strings.TrimSpace(targetNamespace)
+		}
+
+		if len(strings.TrimSpace(obj.GetNamespace())) != 0 {
+			objNamespace = obj.GetNamespace()
+		}
+
+		namespaced, err := ar.isResourceNamespaced(obj.GroupVersionKind())
+		if err != nil {
+			return nil, err
+		}
+
+		if !namespaced {
+			objNamespace = ""
+		}
+
+		resourcesFromTemplate[objGVK] = append(resourcesFromTemplate[objGVK], &dto.Other{
 			Name:      obj.GetName(),
-			Namespace: obj.GetNamespace(),
+			Namespace: objNamespace,
 		})
 	}
 

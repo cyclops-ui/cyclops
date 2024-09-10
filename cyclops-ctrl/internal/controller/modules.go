@@ -10,13 +10,13 @@ import (
 	"github.com/gin-gonic/gin"
 
 	"github.com/cyclops-ui/cyclops/cyclops-ctrl/api/v1alpha1"
-	"github.com/cyclops-ui/cyclops/cyclops-ctrl/internal/cluster/k8sclient"
 	"github.com/cyclops-ui/cyclops/cyclops-ctrl/internal/mapper"
 	"github.com/cyclops-ui/cyclops/cyclops-ctrl/internal/models/dto"
 	"github.com/cyclops-ui/cyclops/cyclops-ctrl/internal/prometheus"
 	"github.com/cyclops-ui/cyclops/cyclops-ctrl/internal/telemetry"
 	"github.com/cyclops-ui/cyclops/cyclops-ctrl/internal/template"
 	"github.com/cyclops-ui/cyclops/cyclops-ctrl/internal/template/render"
+	"github.com/cyclops-ui/cyclops/cyclops-ctrl/pkg/cluster/k8sclient"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
@@ -297,6 +297,8 @@ func (m *Modules) UpdateModule(ctx *gin.Context) {
 	module.Status.IconURL = curr.Status.IconURL
 	module.Status.ManagedGVRs = curr.Status.ManagedGVRs
 
+	module.Spec.TargetNamespace = curr.Spec.TargetNamespace
+
 	result, err := m.kubernetesClient.UpdateModuleStatus(&module)
 	if err != nil {
 		fmt.Println(err)
@@ -386,7 +388,7 @@ func (m *Modules) ResourcesForModule(ctx *gin.Context) {
 		return
 	}
 
-	resources, err = m.kubernetesClient.GetDeletedResources(resources, manifest)
+	resources, err = m.kubernetesClient.GetDeletedResources(resources, manifest, module.Spec.TargetNamespace)
 	if err != nil {
 		fmt.Println(err)
 		ctx.JSON(http.StatusInternalServerError, dto.NewError("Error fetching deleted module resources", err.Error()))
@@ -505,7 +507,7 @@ func (m *Modules) GetLogs(ctx *gin.Context) {
 	ctx.Header("Access-Control-Allow-Origin", "*")
 
 	logCount := int64(100)
-	logs, err := m.kubernetesClient.GetPodLogs(
+	rawLogs, err := m.kubernetesClient.GetPodLogs(
 		ctx.Param("namespace"),
 		ctx.Param("container"),
 		ctx.Param("name"),
@@ -515,6 +517,11 @@ func (m *Modules) GetLogs(ctx *gin.Context) {
 		fmt.Println(err)
 		ctx.JSON(http.StatusInternalServerError, dto.NewError("Error fetching logs", err.Error()))
 		return
+	}
+
+	logs := make([]string, 0, len(rawLogs))
+	for _, log := range rawLogs {
+		logs = append(logs, trimLogLine(log))
 	}
 
 	ctx.JSON(http.StatusOK, logs)
@@ -685,4 +692,12 @@ func getTargetGeneration(generation string, module *v1alpha1.Module) (*v1alpha1.
 		Spec:       module.Spec,
 		Status:     module.Status,
 	}, true
+}
+
+func trimLogLine(logLine string) string {
+	parts := strings.SplitN(logLine, " ", 2)
+	if len(parts) > 1 {
+		return parts[1]
+	}
+	return logLine
 }

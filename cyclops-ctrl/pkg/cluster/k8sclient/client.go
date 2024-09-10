@@ -420,17 +420,27 @@ func (k *KubernetesClient) Delete(resource dto.Resource) error {
 	)
 }
 
-func (k *KubernetesClient) CreateDynamic(resource v1alpha1.GroupVersionResource, obj *unstructured.Unstructured) error {
+func (k *KubernetesClient) CreateDynamic(
+	resource v1alpha1.GroupVersionResource,
+	obj *unstructured.Unstructured,
+	targetNamespace string,
+) error {
 	gvr := schema.GroupVersionResource{
 		Group:    resource.Group,
 		Version:  resource.Version,
 		Resource: resource.Resource,
 	}
 
-	objNamespace := obj.GetNamespace()
-	if len(strings.TrimSpace(objNamespace)) == 0 {
-		objNamespace = apiv1.NamespaceDefault
+	objNamespace := apiv1.NamespaceDefault
+
+	if len(strings.TrimSpace(targetNamespace)) != 0 {
+		objNamespace = strings.TrimSpace(targetNamespace)
 	}
+
+	if len(strings.TrimSpace(obj.GetNamespace())) != 0 {
+		objNamespace = obj.GetNamespace()
+	}
+	obj.SetNamespace(objNamespace)
 
 	isNamespaced, err := k.isResourceNamespaced(obj.GroupVersionKind())
 	if err != nil {
@@ -1008,6 +1018,15 @@ func (k *KubernetesClient) isResourceNamespaced(gvk schema.GroupVersionKind) (bo
 	}
 
 	return false, errors.New(fmt.Sprintf("group version kind not found: %v", gvk.String()))
+}
+
+func (k *KubernetesClient) clusterApiResources() (*apiResources, error) {
+	resourcesList, err := k.discovery.ServerPreferredResources()
+	if err != nil {
+		return nil, err
+	}
+
+	return &apiResources{resourcesList: resourcesList}, nil
 }
 
 func (k *KubernetesClient) mapRole(group, version, kind, name, namespace string) (*dto.Role, error) {

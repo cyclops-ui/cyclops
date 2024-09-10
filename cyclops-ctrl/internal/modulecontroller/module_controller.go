@@ -37,7 +37,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/log"
 
 	cyclopsv1alpha1 "github.com/cyclops-ui/cyclops/cyclops-ctrl/api/v1alpha1"
-	"github.com/cyclops-ui/cyclops/cyclops-ctrl/internal/cluster/k8sclient"
+	"github.com/cyclops-ui/cyclops/cyclops-ctrl/pkg/cluster/k8sclient"
 	"github.com/cyclops-ui/cyclops/cyclops-ctrl/internal/models"
 	"github.com/cyclops-ui/cyclops/cyclops-ctrl/internal/telemetry"
 	templaterepo "github.com/cyclops-ui/cyclops/cyclops-ctrl/internal/template"
@@ -284,7 +284,7 @@ func (r *ModuleReconciler) generateResources(
 		}
 		childrenGVRs = append(childrenGVRs, gvr)
 
-		if err := kClient.CreateDynamic(gvr, &obj); err != nil {
+		if err := kClient.CreateDynamic(gvr, &obj, module.Spec.TargetNamespace); err != nil {
 			r.logger.Error(err, "could not apply resource",
 				"module namespaced name",
 				module.Name,

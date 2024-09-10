@@ -102,6 +102,7 @@ const { Title } = Typography;
 interface module {
   name: string;
   namespace: string;
+  targetNamespace: string;
   template: templateRef;
   iconURL: string;
 }
@@ -137,6 +138,7 @@ const ModuleDetails = () => {
   const [module, setModule] = useState<module>({
     name: "",
     namespace: "",
+    targetNamespace: "",
     template: {
       repo: "",
       path: "",
@@ -677,7 +679,7 @@ const ModuleDetails = () => {
               fontWeight: "550",
             }}
           >
-            {module.namespace}
+            {module.targetNamespace}
           </Descriptions.Item>
         </Descriptions>
         <Row gutter={[40, 0]} style={{ paddingTop: "8px" }}>
@@ -1017,7 +1019,7 @@ const ModuleDetails = () => {
         onOk={handleCancelManifest}
         onCancel={handleCancelManifest}
         cancelButtonProps={{ style: { display: "none" } }}
-        width={"40%"}
+        width={"70%"}
       >
         <Checkbox onChange={handleCheckboxChange} checked={showManagedFields}>
           Include Managed Fields
