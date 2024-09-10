@@ -170,6 +170,29 @@ const NewModule = () => {
             break;
           }
 
+          if (typeof values[field.name] == "string") {
+            console.log("init yaml", field.name, values[field.name]);
+
+            let parsedYaml: any;
+            try {
+              parsedYaml = YAML.parse(values[field.name]);
+              console.log(parsedYaml);
+              console.log(Object.keys(parsedYaml));
+
+              Object.keys(parsedYaml).forEach((key) => {
+                object.push({
+                  key: key,
+                  value: YAML.stringify(parsedYaml[key]),
+                });
+              });
+            } catch (error) {
+              parsedYaml = [];
+            }
+
+            out[field.name] = object;
+            break;
+          }
+
           Object.keys(values[field.name]).forEach((key) => {
             if (typeof values[field.name][key] === "object") {
               object.push({
