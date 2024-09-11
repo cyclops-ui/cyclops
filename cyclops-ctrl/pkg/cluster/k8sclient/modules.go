@@ -2,7 +2,6 @@ package k8sclient
 
 import (
 	"context"
-	"fmt"
 	"sort"
 	"strings"
 
@@ -30,11 +29,7 @@ const (
 
 func (k *KubernetesClient) ListModules() ([]cyclopsv1alpha1.Module, error) {
 	moduleList, err := k.moduleset.Modules(cyclopsNamespace).List(metav1.ListOptions{})
-
-	for _, module := range moduleList {
-		fmt.Println("list", module.Name)
-	}
-
+	
 	return moduleList, err
 }
 
