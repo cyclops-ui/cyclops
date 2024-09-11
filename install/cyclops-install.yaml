@@ -347,6 +347,8 @@ spec:
           env:
             - name: REACT_APP_CYCLOPS_CTRL_HOST
               value: http://cyclops-ctrl.cyclops:8080
+            - name: REACT_APP_ENABLE_STREAMING
+              value: "true"
             - name: NODE_ENV
               value: production
             - name: NODE_OPTIONS
