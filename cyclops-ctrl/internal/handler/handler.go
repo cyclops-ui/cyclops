@@ -1,9 +1,9 @@
 package handler
 
 import (
-	"net/http"
-
+	"github.com/cyclops-ui/cyclops/cyclops-ctrl/internal/controller/sse"
 	"github.com/gin-gonic/gin"
+	"net/http"
 
 	"github.com/cyclops-ui/cyclops/cyclops-ctrl/internal/controller"
 	"github.com/cyclops-ui/cyclops/cyclops-ctrl/internal/prometheus"
@@ -49,6 +49,10 @@ func (h *Handler) Start() error {
 	clusterController := controller.NewClusterController(h.k8sClient)
 
 	h.router = gin.New()
+
+	server := sse.NewServer(h.k8sClient)
+
+	h.router.POST("/stream/resources", sse.HeadersMiddleware(), server.Resources)
 
 	h.router.GET("/ping", h.pong())
 
