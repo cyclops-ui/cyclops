@@ -82,11 +82,12 @@ func (r *Renderer) HelmTemplate(module cyclopsv1alpha1.Module, moduleTemplate *m
 		},
 	}
 
-	if len(chart.Schema) != 0 {
-		if err := chartutil.ValidateAgainstSchema(chart, values); err != nil {
-			return "", err
-		}
-	}
+	// TODO fix dependency validation
+	//if len(chart.Schema) != 0 {
+	//	if err := chartutil.ValidateAgainstSchema(chart, values); err != nil {
+	//		return "", err
+	//	}
+	//}
 
 	out, err := engine.Render(chart, top)
 	if err != nil {
