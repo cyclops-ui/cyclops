@@ -38,7 +38,7 @@ func (s *Server) Resources(ctx *gin.Context) {
 		return
 	}
 
-	p := NewProxyChan(ctx.Request.Context(), watchResource.ResultChan(), time.Second*15)
+	p := NewProxyChan(ctx.Request.Context(), watchResource.ResultChan(), time.Second*10)
 
 	ctx.Stream(func(w io.Writer) bool {
 		for {
