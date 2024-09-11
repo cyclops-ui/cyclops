@@ -211,7 +211,6 @@ func (r *ModuleReconciler) generateResources(
 	moduleTemplate *models.Template,
 ) ([]string, []cyclopsv1alpha1.GroupVersionResource, error) {
 	out, err := r.renderer.HelmTemplate(module, moduleTemplate)
-
 	if err != nil {
 		return nil, nil, err
 	}
