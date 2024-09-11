@@ -16,10 +16,6 @@ import (
 	"strings"
 	"time"
 
-	networkingv1 "k8s.io/api/networking/v1"
-	"k8s.io/apimachinery/pkg/util/intstr"
-	"k8s.io/apimachinery/pkg/watch"
-
 	"github.com/cyclops-ui/cyclops/cyclops-ctrl/api/v1alpha1"
 
 	"gopkg.in/yaml.v2"

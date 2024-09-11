@@ -18,13 +18,6 @@ import { formatPodAge } from "../../../../utils/pods";
 import PodLogs from "./PodLogs";
 import PodManifest from "./PodManifest";
 import styles from "./styles.module.css";
-import {
-  EllipsisOutlined,
-  ReadOutlined,
-  DeleteOutlined,
-} from "@ant-design/icons";
-import { logStream } from "../../../../utils/api/sse/resources";
-import { isStreamingEnabled } from "../../../../utils/api/common";
 
 interface Props {
   namespace: string;
@@ -41,17 +34,6 @@ interface Pod {
 }
 
 const PodTable = ({ pods, namespace, updateResourceData }: Props) => {
-  const [logs, setLogs] = useState<string[]>([]);
-  const [logsModal, setLogsModal] = useState({
-    on: false,
-    namespace: "",
-    pod: "",
-    containers: [],
-    initContainers: [],
-  });
-  const [logsSignalController, setLogsSignalController] =
-    useState<AbortController | null>(null);
-
   const [deletePodRef, setDeletePodRef] = useState<{
     on: boolean;
     podDetails: Pod;
@@ -70,24 +52,6 @@ const PodTable = ({ pods, namespace, updateResourceData }: Props) => {
     message: "",
     description: "",
   });
-
-  const handleCancelLogs = () => {
-    setLogsModal({
-      on: false,
-      namespace: "",
-      pod: "",
-      containers: [],
-      initContainers: [],
-    });
-    setLogs([]);
-    setLogsSignalController((prevController) => {
-      if (prevController) {
-        prevController.abort();
-      }
-
-      return null;
-    });
-  };
 
   const handleCancelDeletePod = () => {
     setDeletePodRef({
@@ -136,116 +100,6 @@ const PodTable = ({ pods, namespace, updateResourceData }: Props) => {
     setDeletePodConfirmRef(e.target.value);
   };
 
-  const downloadLogs = (container: string) => {
-    return function () {
-      window.location.href =
-        "/api/resources/pods/" +
-        logsModal.namespace +
-        "/" +
-        logsModal.pod +
-        "/" +
-        container +
-        "/logs/download";
-    };
-  };
-
-  const getTabItems = () => {
-    let items: TabsProps["items"] = [];
-
-    let container: any;
-
-    if (logsModal.containers !== null) {
-      for (container of logsModal.containers) {
-        items.push({
-          key: container.name,
-          label: container.name,
-          children: (
-            <Col>
-              <Button
-                type="primary"
-                // icon={<DownloadOutlined />}
-                onClick={downloadLogs(container.name)}
-                disabled={logs.length === 0}
-              >
-                Download
-              </Button>
-              <Divider style={{ marginTop: "16px", marginBottom: "16px" }} />
-              <ReactAce
-                style={{ width: "100%" }}
-                mode={"sass"}
-                value={
-                  logs.length === 0 ? "No logs available" : logs.join("\n")
-                }
-                readOnly={true}
-              />
-            </Col>
-          ),
-        });
-      }
-    }
-
-    if (logsModal.initContainers !== null) {
-      for (container of logsModal.initContainers) {
-        items.push({
-          key: container.name,
-          label: "(init container) " + container.name,
-          children: (
-            <Col>
-              <Button
-                type="primary"
-                // icon={<DownloadOutlined />}
-                onClick={downloadLogs(container.name)}
-                disabled={logs.length === 0}
-              >
-                Download
-              </Button>
-              <Divider style={{ marginTop: "16px", marginBottom: "16px" }} />
-              <ReactAce
-                style={{ width: "100%" }}
-                mode={"sass"}
-                value={
-                  logs.length === 0 ? "No logs available" : logs.join("\n")
-                }
-                readOnly={true}
-              />
-            </Col>
-          ),
-        });
-      }
-    }
-
-    return items;
-  };
-
-  const onLogsTabsChange = (container: string) => {
-    setLogsSignalController((prevController) => {
-      if (prevController) {
-        prevController.abort();
-      }
-
-      const controller = new AbortController();
-      return controller;
-    });
-    setLogs(() => []); //this is to remove the previous pod's logs
-
-    if (isStreamingEnabled() && logsSignalController) {
-      logStream(
-        logsModal.pod,
-        logsModal.namespace,
-        container,
-        (log) => {
-          setLogs((prevLogs) => {
-            return [...prevLogs, log];
-          });
-        },
-        (err) => {
-          setError(mapResponseError(err));
-        },
-        logsSignalController,
-      );
-    }
-  };
-
   const podActionsMenu = (pod: any) => {
     return (
       <div style={{ width: "400px" }}>
@@ -276,63 +130,6 @@ const PodTable = ({ pods, namespace, updateResourceData }: Props) => {
             </h4>
           </Button>
         </Row>
-        <Button
-          style={{ width: "60%", margin: "4px" }}
-          onClick={function () {
-            if (isStreamingEnabled()) {
-              const controller = new AbortController();
-              setLogsSignalController((prev) => controller);
-
-              logStream(
-                pod.name,
-                namespace,
-                pod.containers[0].name,
-                (log) => {
-                  setLogs((prevLogs) => {
-                    return [...prevLogs, log];
-                  });
-                },
-                (err) => {
-                  setError(mapResponseError(err));
-                },
-                controller,
-              );
-            }
-
-            setLogsModal({
-              on: true,
-              namespace: namespace,
-              pod: pod.name,
-              containers: pod.containers,
-              initContainers: pod.initContainers,
-            });
-          }}
-        >
-          <h4>
-            <ReadOutlined style={{ paddingRight: "5px" }} />
-            View Logs
-          </h4>
-        </Button>
-        <Button
-          style={{ width: "60%", margin: "4px", color: "red " }}
-          onClick={function () {
-            setDeletePodRef({
-              on: true,
-              podDetails: {
-                group: ``,
-                version: `v1`,
-                kind: `Pod`,
-                name: pod.name,
-                namespace: namespace,
-              },
-            });
-          }}
-        >
-          <h4>
-            <DeleteOutlined style={{ paddingRight: "5px" }} />
-            Delete Pod
-          </h4>
-        </Button>
       </div>
     );
   };
