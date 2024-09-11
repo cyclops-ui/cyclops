@@ -100,7 +100,7 @@ const Modules = () => {
   };
 
   const getStatusColor = (module: any) => {
-    if (module.status === "undefined") {
+    if (module.status === "unknown") {
       return "gray";
     }
 

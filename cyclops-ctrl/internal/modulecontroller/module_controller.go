@@ -210,7 +210,18 @@ func (r *ModuleReconciler) generateResources(
 	module cyclopsv1alpha1.Module,
 	moduleTemplate *models.Template,
 ) ([]string, []cyclopsv1alpha1.GroupVersionResource, error) {
+	fmt.Println()
+	fmt.Println(string(module.Spec.Values.Raw))
+	fmt.Println()
+
 	out, err := r.renderer.HelmTemplate(module, moduleTemplate)
+	for _, template := range moduleTemplate.Templates {
+		fmt.Println(template.Name)
+	}
+
+	fmt.Println(out)
+	fmt.Println(err)
+
 	if err != nil {
 		return nil, nil, err
 	}
