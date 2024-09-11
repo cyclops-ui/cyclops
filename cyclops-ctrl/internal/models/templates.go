@@ -19,6 +19,7 @@ type Template struct {
 	IconURL         string       `json:"iconURL"`
 
 	HelmChartMetadata *helm.Metadata `json:"helmChartMetadata"`
+	RawSchema         []byte         `json:"rawSchema"`
 
 	Files     []*chart.File `json:"files"`
 	Templates []*chart.File `json:"templates"`

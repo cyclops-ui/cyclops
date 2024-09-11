@@ -600,6 +600,20 @@ func (k *KubernetesClient) GetPodsForNode(nodeName string) ([]apiv1.Pod, error) 
 	return podList.Items, err
 }
 
+func (k *KubernetesClient) ListNamespaces() ([]string, error) {
+	namespaceList, err := k.clientset.CoreV1().Namespaces().List(context.TODO(), metav1.ListOptions{})
+	if err != nil {
+		return nil, err
+	}
+
+	namespaces := make([]string, 0, len(namespaceList.Items))
+	for _, item := range namespaceList.Items {
+		namespaces = append(namespaces, item.Name)
+	}
+
+	return namespaces, nil
+}
+
 func (k *KubernetesClient) mapDeployment(group, version, kind, name, namespace string) (*dto.Deployment, error) {
 	deployment, err := k.clientset.AppsV1().Deployments(namespace).Get(context.Background(), name, metav1.GetOptions{})
 	if err != nil {

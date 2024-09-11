@@ -87,6 +87,8 @@ const NewModule = () => {
 
   const [templateStore, setTemplateStore] = useState<templateStoreOption[]>([]);
 
+  const [namespaces, setNamespaces] = useState<string[]>([]);
+
   const history = useNavigate();
 
   const [notificationApi, contextHolder] = notification.useNotification();
@@ -103,6 +105,7 @@ const NewModule = () => {
 
   useEffect(() => {
     loadTemplateStore();
+    loadNamespaces();
   }, []);
 
   useEffect(() => {
@@ -319,6 +322,17 @@ const NewModule = () => {
       })
       .catch(function (error) {
         setLoadingTemplate(false);
+        setError(mapResponseError(error));
+      });
+  };
+
+  const loadNamespaces = async () => {
+    await axios
+      .get(`/api/namespaces`)
+      .then((res) => {
+        setNamespaces(res.data);
+      })
+      .catch(function (error) {
         setError(mapResponseError(error));
       });
   };
@@ -609,7 +623,20 @@ const NewModule = () => {
                   hasFeedback={true}
                   validateDebounce={1000}
                 >
-                  <Input placeholder={"default"} />
+                  <Select
+                    showSearch={true}
+                    onChange={onTemplateStoreSelected}
+                    style={{ width: "100%" }}
+                    placeholder="default"
+                    value="default"
+                    defaultValue="default"
+                  >
+                    {namespaces.map((namespace: string) => (
+                      <Option key={namespace} value={namespace}>
+                        {namespace}
+                      </Option>
+                    ))}
+                  </Select>
                 </Form.Item>
               </div>
             </Col>

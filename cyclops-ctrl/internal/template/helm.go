@@ -257,6 +257,7 @@ func (r Repo) mapHelmChart(chartName string, files map[string][]byte) (*models.T
 		CRDs:              crdFiles,
 		Dependencies:      dependencies,
 		HelmChartMetadata: metadata,
+		RawSchema:         schemaBytes,
 		IconURL:           metadata.Icon,
 	}, nil
 }
