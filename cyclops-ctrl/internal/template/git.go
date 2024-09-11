@@ -64,87 +64,106 @@ func (r Repo) LoadTemplate(repoURL, path, commit string) (*models.Template, erro
 		return nil, err
 	}
 
-	// load helm chart metadata
-	chartMetadata, err := fs.Open(path2.Join(path, "Chart.yaml"))
-	if err != nil {
-		return nil, errors.Wrap(err, "could not read 'Chart.yaml' file; it should be placed in the repo/path you provided; make sure you provided the correct path")
-	}
-
-	var chartMetadataBuffer bytes.Buffer
-	_, err = io.Copy(bufio.NewWriter(&chartMetadataBuffer), chartMetadata)
-	if err != nil {
-		return nil, err
-	}
-
-	var metadata *helm.Metadata
-	if err := yaml.Unmarshal(chartMetadataBuffer.Bytes(), &metadata); err != nil {
-		return nil, err
-	}
-	// endregion
-
-	// region read templates
-	templatesPath := path2.Join(path, "templates")
-
-	_, err = fs.ReadDir(templatesPath)
-	if err != nil {
-		return nil, errors.Wrap(err, "could not find 'templates' dir; it should be placed in the repo/path you provided; make sure 'templates' directory exists")
-	}
-
-	manifests, err := concatenateTemplates(templatesPath, fs)
-	if err != nil {
-		return nil, errors.Wrap(err, "failed to load template files")
-	}
-	// endregion
-
 	// region read files
 	filesFs, err := fs.Chroot(path)
 	if err != nil {
 		return nil, errors.Wrap(err, "could not find 'templates' dir; it should be placed in the repo/path you provided; make sure 'templates' directory exists")
 	}
 
-	chartFiles, err := readFiles("", filesFs)
+	files, err := readFiles("", filesFs)
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to read template files")
 	}
 	// endregion
 
-	// region read schema
-	schemaFile, err := fs.Open(path2.Join(path, "values.schema.json"))
-	if err != nil {
-		return nil, errors.Wrap(err, "could not read 'values.schema.json' file; it should be placed in the repo/path you provided; make sure 'templates' directory exists")
-	}
+	// region map files to template
+	metadataBytes := []byte{}
+	schemaBytes := []byte{}
+	chartFiles := make([]*chart.File, 0)
 
-	var schemaChartBuffer bytes.Buffer
-	_, err = io.Copy(bufio.NewWriter(&schemaChartBuffer), schemaFile)
-	if err != nil {
-		return nil, err
+	templateFiles := make([]*chart.File, 0)
+	crdFiles := make([]*chart.File, 0)
+
+	dependenciesFromChartsDir := make(map[string]map[string][]byte, 0)
+
+	for _, f := range files {
+		parts := strings.Split(f.Name, "/")
+
+		if len(parts) == 1 && parts[0] == "Chart.yaml" {
+			metadataBytes = f.Data
+			continue
+		}
+
+		if len(parts) == 1 && parts[0] == "values.schema.json" {
+			schemaBytes = f.Data
+			continue
+		}
+
+		if len(parts) > 1 && parts[0] == "templates" &&
+			(parts[1] != "Notes.txt" && parts[1] != "NOTES.txt" && parts[1] != "tests") {
+			templateFiles = append(templateFiles, f)
+			continue
+		}
+
+		if len(parts) > 1 && parts[0] == "crds" &&
+			(parts[1] != "Notes.txt" && parts[1] != "NOTES.txt") {
+			crdFiles = append(crdFiles, f)
+			continue
+		}
+
+		chartFiles = append(chartFiles, f)
+
 	}
 
 	var schema helm.Property
-	if err := json.Unmarshal(schemaChartBuffer.Bytes(), &schema); err != nil {
-		return nil, err
+	// unmarshal values schema only if present
+	if len(schemaBytes) > 0 {
+		if err := json.Unmarshal(schemaBytes, &schema); err != nil {
+			fmt.Println("error on schema bytes", repoURL, path)
+			return &models.Template{}, err
+		}
 	}
-	// endregion
+
+	var metadata *helm.Metadata
+	if err := yaml.Unmarshal(metadataBytes, &metadata); err != nil {
+		fmt.Println("error on meta unm", repoURL, path)
+		return &models.Template{}, err
+	}
 
 	// region load dependencies
 	dependencies, err := r.loadDependencies(metadata)
 	if err != nil {
-		return nil, err
+		return &models.Template{}, err
+	}
+
+	for depName, files := range dependenciesFromChartsDir {
+		if dependencyExists(depName, dependencies) {
+			continue
+		}
+
+		dep, err := r.mapHelmChart(depName, files)
+		if err != nil {
+			return nil, err
+		}
+
+		dependencies = append(dependencies, dep)
 	}
 	// endregion
 
 	template := &models.Template{
-		Name:              "",
-		Manifest:          strings.Join(manifests, "---\n"),
-		RootField:         mapper.HelmSchemaToFields("", schema, schema.Definitions, dependencies),
-		Created:           "",
-		Edited:            "",
-		Version:           commit,
+		Name:              path,
 		ResolvedVersion:   commitSHA,
+		Version:           commit,
+		RootField:         mapper.HelmSchemaToFields("", schema, schema.Definitions, dependencies),
 		Files:             chartFiles,
+		Templates:         templateFiles,
+		CRDs:              crdFiles,
 		Dependencies:      dependencies,
 		HelmChartMetadata: metadata,
+		RawSchema:         schemaBytes,
+		IconURL:           metadata.Icon,
 	}
+	// endregion
 
 	r.cache.SetTemplate(repoURL, path, commitSHA, template)
 
