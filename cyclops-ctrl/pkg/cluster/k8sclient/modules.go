@@ -22,13 +22,14 @@ import (
 )
 
 const (
-	statusUndefined = "undefined"
+	statusUnknown   = "unknown"
 	statusHealthy   = "healthy"
 	statusUnhealthy = "unhealthy"
 )
 
 func (k *KubernetesClient) ListModules() ([]cyclopsv1alpha1.Module, error) {
 	moduleList, err := k.moduleset.Modules(cyclopsNamespace).List(metav1.ListOptions{})
+	
 	return moduleList, err
 }
 
@@ -235,7 +236,7 @@ func (k *KubernetesClient) GetModuleResourcesHealth(name string) (string, error)
 		LabelSelector: "cyclops.module=" + name,
 	})
 	if err != nil {
-		return statusUndefined, err
+		return statusUnknown, err
 	}
 
 	resourcesWithHealth += len(deployments.Items)
@@ -251,7 +252,7 @@ func (k *KubernetesClient) GetModuleResourcesHealth(name string) (string, error)
 		LabelSelector: "cyclops.module=" + name,
 	})
 	if err != nil {
-		return statusUndefined, err
+		return statusUnknown, err
 	}
 
 	resourcesWithHealth += len(statefulsets.Items)
@@ -267,7 +268,7 @@ func (k *KubernetesClient) GetModuleResourcesHealth(name string) (string, error)
 		LabelSelector: "cyclops.module=" + name,
 	})
 	if err != nil {
-		return statusUndefined, err
+		return statusUnknown, err
 	}
 
 	resourcesWithHealth += len(daemonsets.Items)
@@ -283,7 +284,7 @@ func (k *KubernetesClient) GetModuleResourcesHealth(name string) (string, error)
 		LabelSelector: "cyclops.module=" + name,
 	})
 	if err != nil {
-		return statusUndefined, err
+		return statusUnknown, err
 	}
 
 	resourcesWithHealth += len(pvcs.Items)
@@ -297,7 +298,7 @@ func (k *KubernetesClient) GetModuleResourcesHealth(name string) (string, error)
 		LabelSelector: "cyclops.module=" + name,
 	})
 	if err != nil {
-		return statusUndefined, err
+		return statusUnknown, err
 	}
 
 	resourcesWithHealth += len(pods.Items)
@@ -318,7 +319,7 @@ func (k *KubernetesClient) GetModuleResourcesHealth(name string) (string, error)
 	}
 
 	if resourcesWithHealth == 0 {
-		return statusUndefined, nil
+		return statusUnknown, nil
 	}
 
 	return statusHealthy, nil
@@ -343,7 +344,7 @@ func (k *KubernetesClient) getResourceStatus(o unstructured.Unstructured) (strin
 	if isPod(o.GroupVersionKind().Group, o.GroupVersionKind().Version, o.GetKind()) {
 		pod, err := k.clientset.CoreV1().Pods(o.GetNamespace()).Get(context.Background(), o.GetName(), metav1.GetOptions{})
 		if err != nil {
-			return statusUndefined, err
+			return statusUnknown, err
 		}
 
 		for _, cnt := range pod.Spec.Containers {
@@ -366,7 +367,7 @@ func (k *KubernetesClient) getResourceStatus(o unstructured.Unstructured) (strin
 	if isDeployment(o.GroupVersionKind().Group, o.GroupVersionKind().Version, o.GetKind()) {
 		deployment, err := k.clientset.AppsV1().Deployments(o.GetNamespace()).Get(context.Background(), o.GetName(), metav1.GetOptions{})
 		if err != nil {
-			return statusUndefined, err
+			return statusUnknown, err
 		}
 
 		if deployment.Generation == deployment.Status.ObservedGeneration &&
@@ -381,7 +382,7 @@ func (k *KubernetesClient) getResourceStatus(o unstructured.Unstructured) (strin
 	if isStatefulSet(o.GroupVersionKind().Group, o.GroupVersionKind().Version, o.GetKind()) {
 		statefulset, err := k.clientset.AppsV1().StatefulSets(o.GetNamespace()).Get(context.Background(), o.GetName(), metav1.GetOptions{})
 		if err != nil {
-			return statusUndefined, err
+			return statusUnknown, err
 		}
 
 		if statefulset.Generation == statefulset.Status.ObservedGeneration &&
@@ -396,7 +397,7 @@ func (k *KubernetesClient) getResourceStatus(o unstructured.Unstructured) (strin
 	if isDaemonSet(o.GroupVersionKind().Group, o.GroupVersionKind().Version, o.GetKind()) {
 		daemonset, err := k.clientset.AppsV1().DaemonSets(o.GetNamespace()).Get(context.Background(), o.GetName(), metav1.GetOptions{})
 		if err != nil {
-			return statusUndefined, err
+			return statusUnknown, err
 		}
 
 		if daemonset.Generation == daemonset.Status.ObservedGeneration &&
@@ -411,7 +412,7 @@ func (k *KubernetesClient) getResourceStatus(o unstructured.Unstructured) (strin
 	if isPersistentVolumeClaims(o.GroupVersionKind().Group, o.GroupVersionKind().Version, o.GetKind()) {
 		pvc, err := k.clientset.CoreV1().PersistentVolumeClaims(o.GetNamespace()).Get(context.Background(), o.GetName(), metav1.GetOptions{})
 		if err != nil {
-			return statusUndefined, err
+			return statusUnknown, err
 		}
 
 		if pvc.Status.Phase == apiv1.ClaimBound {
@@ -421,7 +422,7 @@ func (k *KubernetesClient) getResourceStatus(o unstructured.Unstructured) (strin
 		return statusUnhealthy, nil
 	}
 
-	return statusUndefined, nil
+	return statusUnknown, nil
 }
 
 func (k *KubernetesClient) getPods(deployment appsv1.Deployment) ([]dto.Pod, error) {
