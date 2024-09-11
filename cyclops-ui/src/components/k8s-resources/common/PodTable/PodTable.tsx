@@ -1,23 +1,22 @@
-import React, { useState } from "react";
+import { DeleteOutlined, EllipsisOutlined } from "@ant-design/icons";
 import {
+  Alert,
   Button,
-  Col,
   Divider,
+  Input,
+  Modal,
+  Popover,
+  Row,
   Table,
   Tag,
-  TabsProps,
-  Tabs,
-  Modal,
-  Alert,
   Tooltip,
-  Popover,
-  Input,
 } from "antd";
 import axios from "axios";
-import { formatPodAge } from "../../../../utils/pods";
-import ReactAce from "react-ace";
+import { useState } from "react";
 import { mapResponseError } from "../../../../utils/api/errors";
-
+import { formatPodAge } from "../../../../utils/pods";
+import PodLogs from "./PodLogs";
+import PodManifest from "./PodManifest";
 import styles from "./styles.module.css";
 import {
   EllipsisOutlined,
@@ -67,7 +66,6 @@ const PodTable = ({ pods, namespace, updateResourceData }: Props) => {
     },
   });
   const [deletePodConfirmRef, setDeletePodConfirmRef] = useState<string>("");
-
   const [error, setError] = useState({
     message: "",
     description: "",
@@ -131,17 +129,6 @@ const PodTable = ({ pods, namespace, updateResourceData }: Props) => {
       });
     } catch (error) {
       setError(mapResponseError(error));
-      setDeletePodConfirmRef("");
-      setDeletePodRef({
-        on: false,
-        podDetails: {
-          group: "",
-          version: "",
-          kind: "",
-          name: "",
-          namespace: "",
-        },
-      });
     }
   };
 
@@ -264,6 +251,31 @@ const PodTable = ({ pods, namespace, updateResourceData }: Props) => {
       <div style={{ width: "400px" }}>
         <h3>{pod.name} actions</h3>
         <Divider style={{ margin: "8px" }} />
+        <Row style={{ margin: 4, gap: 8 }}>
+          <PodLogs pod={{ ...pod, namespace }} />
+          <PodManifest pod={{ ...pod, namespace }} />
+          <Button
+            style={{ color: "red", width: "100%" }}
+            onClick={function () {
+              setError({ message: "", description: "" });
+              setDeletePodRef({
+                on: true,
+                podDetails: {
+                  group: ``,
+                  version: `v1`,
+                  kind: `Pod`,
+                  name: pod.name,
+                  namespace: namespace,
+                },
+              });
+            }}
+          >
+            <h4>
+              <DeleteOutlined style={{ paddingRight: "5px" }} />
+              Delete Pod
+            </h4>
+          </Button>
+        </Row>
         <Button
           style={{ width: "60%", margin: "4px" }}
           onClick={function () {
@@ -406,31 +418,6 @@ const PodTable = ({ pods, namespace, updateResourceData }: Props) => {
         />
       </Table>
       <Modal
-        title="Logs"
-        open={logsModal.on}
-        onOk={handleCancelLogs}
-        onCancel={handleCancelLogs}
-        cancelButtonProps={{ style: { display: "none" } }}
-        width={"60%"}
-      >
-        {error.message.length !== 0 && (
-          <Alert
-            message={error.message}
-            description={error.description}
-            type="error"
-            closable
-            afterClose={() => {
-              setError({
-                message: "",
-                description: "",
-              });
-            }}
-            style={{ paddingBottom: "20px" }}
-          />
-        )}
-        <Tabs items={getTabItems()} onChange={onLogsTabsChange} />
-      </Modal>
-      <Modal
         title={
           <div style={{ color: "red", marginBottom: "1rem" }}>
             <DeleteOutlined style={{ paddingRight: "5px" }} />
@@ -462,6 +449,21 @@ const PodTable = ({ pods, namespace, updateResourceData }: Props) => {
           },
         }}
       >
+        {error.message.length !== 0 && (
+          <Alert
+            message={error.message}
+            description={error.description}
+            type="error"
+            closable
+            afterClose={() => {
+              setError({
+                message: "",
+                description: "",
+              });
+            }}
+            style={{ paddingBottom: "20px" }}
+          />
+        )}
         <p>
           In order to confirm deleting this resource, type: <br />{" "}
           <code>{deletePodRef.podDetails.name}</code>

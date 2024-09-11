@@ -26,8 +26,10 @@ import (
 
 // ModuleSpec defines the desired state of Module
 type ModuleSpec struct {
-	TemplateRef TemplateRef          `json:"template"`
-	Values      apiextensionsv1.JSON `json:"values"`
+	// +kubebuilder:validation:Optional
+	TargetNamespace string               `json:"targetNamespace"`
+	TemplateRef     TemplateRef          `json:"template"`
+	Values          apiextensionsv1.JSON `json:"values"`
 }
 
 type ModuleValue struct {

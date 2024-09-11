@@ -66,6 +66,8 @@ spec:
           spec:
             description: ModuleSpec defines the desired state of Module
             properties:
+              targetNamespace:
+                type: string
               template:
                 properties:
                   path:

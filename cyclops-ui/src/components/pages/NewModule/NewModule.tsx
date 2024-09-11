@@ -87,6 +87,8 @@ const NewModule = () => {
 
   const [templateStore, setTemplateStore] = useState<templateStoreOption[]>([]);
 
+  const [namespaces, setNamespaces] = useState<string[]>([]);
+
   const history = useNavigate();
 
   const [notificationApi, contextHolder] = notification.useNotification();
@@ -103,6 +105,7 @@ const NewModule = () => {
 
   useEffect(() => {
     loadTemplateStore();
+    loadNamespaces();
   }, []);
 
   useEffect(() => {
@@ -171,6 +174,14 @@ const NewModule = () => {
           }
 
           Object.keys(values[field.name]).forEach((key) => {
+            if (typeof values[field.name][key] === "object") {
+              object.push({
+                key: key,
+                value: YAML.stringify(values[field.name][key], null, 4),
+              });
+              return;
+            }
+
             object.push({
               key: key,
               value: values[field.name][key],
@@ -193,12 +204,14 @@ const NewModule = () => {
 
   const handleSubmit = (values: any) => {
     const moduleName = values["cyclops_module_name"];
+    const moduleNamespace = values["cyclops_module_namespace"];
 
     values = findMaps(config.root.properties, values, initialValuesRaw);
 
     axios
       .post(`/api/modules/new`, {
         name: moduleName,
+        namespace: moduleNamespace,
         values: values,
         template: {
           repo: template.repo,
@@ -309,6 +322,17 @@ const NewModule = () => {
       })
       .catch(function (error) {
         setLoadingTemplate(false);
+        setError(mapResponseError(error));
+      });
+  };
+
+  const loadNamespaces = async () => {
+    await axios
+      .get(`/api/namespaces`)
+      .then((res) => {
+        setNamespaces(res.data);
+      })
+      .catch(function (error) {
         setError(mapResponseError(error));
       });
   };
@@ -498,7 +522,7 @@ const NewModule = () => {
             )}
           >
             <Divider orientation="left" orientationMargin="0">
-              Module template
+              Template
             </Divider>
             <Row>
               <Col span={16}>
@@ -541,42 +565,87 @@ const NewModule = () => {
               </Col>
             </Row>
             <Divider orientation="left" orientationMargin="0">
-              Module name
+              Metadata
             </Divider>
-            <Form.Item
-              name="cyclops_module_name"
-              id="cyclops_module_name"
-              label={
-                <div>
-                  Module name
-                  <p style={{ color: "#8b8e91", marginBottom: "0px" }}>
-                    Enter a unique module name
-                  </p>
-                </div>
-              }
-              rules={[
-                {
-                  required: true,
-                  message: "Module name is required",
-                },
-                {
-                  max: 63,
-                  message:
-                    "Module name must contain no more than 63 characters",
-                },
-                {
-                  pattern: /^[a-z0-9](?:[a-z0-9-]*[a-z0-9])?$/, // only alphanumeric characters and hyphens, cannot start or end with a hyphen and the alpha characters can only be lowercase
-                  message:
-                    "Module name must follow the Kubernetes naming convention",
-                },
-              ]}
-              hasFeedback={true}
-              validateDebounce={1000}
+            <Col style={{ padding: "0px" }} span={16}>
+              <div
+                style={{
+                  border: "solid 1.5px #c3c3c3",
+                  borderRadius: "7px",
+                  padding: "12px",
+                  width: "100%",
+                  backgroundColor: "#fafafa",
+                }}
+              >
+                <Form.Item
+                  name="cyclops_module_name"
+                  id="cyclops_module_name"
+                  label={
+                    <div>
+                      Module name
+                      <p style={{ color: "#8b8e91", marginBottom: "0px" }}>
+                        Enter a unique module name
+                      </p>
+                    </div>
+                  }
+                  rules={[
+                    {
+                      required: true,
+                      message: "Module name is required",
+                    },
+                    {
+                      max: 63,
+                      message:
+                        "Module name must contain no more than 63 characters",
+                    },
+                    {
+                      pattern: /^[a-z0-9](?:[a-z0-9-]*[a-z0-9])?$/, // only alphanumeric characters and hyphens, cannot start or end with a hyphen and the alpha characters can only be lowercase
+                      message:
+                        "Module name must follow the Kubernetes naming convention",
+                    },
+                  ]}
+                  hasFeedback={true}
+                  validateDebounce={1000}
+                >
+                  <Input />
+                </Form.Item>
+                <Form.Item
+                  name="cyclops_module_namespace"
+                  id="cyclops_module_namespace"
+                  label={
+                    <div>
+                      Target namespace
+                      <p style={{ color: "#8b8e91", marginBottom: "0px" }}>
+                        Namespace used to deploy resources to
+                      </p>
+                    </div>
+                  }
+                  hasFeedback={true}
+                  validateDebounce={1000}
+                >
+                  <Select
+                    showSearch={true}
+                    onChange={onTemplateStoreSelected}
+                    style={{ width: "100%" }}
+                    placeholder="default"
+                    value="default"
+                    defaultValue="default"
+                  >
+                    {namespaces.map((namespace: string) => (
+                      <Option key={namespace} value={namespace}>
+                        {namespace}
+                      </Option>
+                    ))}
+                  </Select>
+                </Form.Item>
+              </div>
+            </Col>
+            <Divider
+              orientation="left"
+              orientationMargin="0"
+              style={{ borderColor: "#ccc" }}
             >
-              <Input />
-            </Form.Item>
-            <Divider orientation="left" orientationMargin="0">
-              Define Module
+              Configure
             </Divider>
             {renderFormFields()}
             <div style={{ textAlign: "right" }}>

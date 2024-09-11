@@ -7,9 +7,9 @@ import (
 	"github.com/gin-gonic/gin"
 	"k8s.io/apimachinery/pkg/api/errors"
 
-	"github.com/cyclops-ui/cyclops/cyclops-ctrl/internal/cluster/k8sclient"
 	"github.com/cyclops-ui/cyclops/cyclops-ctrl/internal/mapper"
 	"github.com/cyclops-ui/cyclops/cyclops-ctrl/internal/models/dto"
+	"github.com/cyclops-ui/cyclops/cyclops-ctrl/pkg/cluster/k8sclient"
 )
 
 type Cluster struct {
@@ -67,4 +67,17 @@ func (c *Cluster) GetNode(ctx *gin.Context) {
 	dto := mapper.MapNode(node, pods)
 
 	ctx.JSON(http.StatusOK, dto)
+}
+
+func (c *Cluster) ListNamespaces(ctx *gin.Context) {
+	ctx.Header("Access-Control-Allow-Origin", "*")
+
+	namespaces, err := c.kubernetesClient.ListNamespaces()
+	if err != nil {
+		fmt.Println(err)
+		ctx.Status(http.StatusInternalServerError)
+		return
+	}
+
+	ctx.JSON(http.StatusOK, namespaces)
 }

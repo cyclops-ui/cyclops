@@ -10,9 +10,9 @@ import (
 	"helm.sh/helm/v3/pkg/engine"
 
 	cyclopsv1alpha1 "github.com/cyclops-ui/cyclops/cyclops-ctrl/api/v1alpha1"
-	"github.com/cyclops-ui/cyclops/cyclops-ctrl/internal/cluster/k8sclient"
 	"github.com/cyclops-ui/cyclops/cyclops-ctrl/internal/models"
 	"github.com/cyclops-ui/cyclops/cyclops-ctrl/internal/models/helm"
+	"github.com/cyclops-ui/cyclops/cyclops-ctrl/pkg/cluster/k8sclient"
 )
 
 type Renderer struct {
@@ -35,21 +35,9 @@ func (r *Renderer) HelmTemplate(module cyclopsv1alpha1.Module, moduleTemplate *m
 		Metadata:  mapMetadata(moduleTemplate.HelmChartMetadata),
 		Lock:      &helmchart.Lock{},
 		Values:    map[string]interface{}{},
-		Schema:    []byte{},
+		Schema:    moduleTemplate.RawSchema,
 		Files:     moduleTemplate.Files,
 		Templates: moduleTemplate.Templates,
-	}
-
-	for _, dependency := range moduleTemplate.Dependencies {
-		chart.AddDependency(&helmchart.Chart{
-			Raw:       []*helmchart.File{},
-			Metadata:  mapMetadata(dependency.HelmChartMetadata),
-			Lock:      &helmchart.Lock{},
-			Values:    map[string]interface{}{},
-			Schema:    []byte{},
-			Files:     dependency.Files,
-			Templates: dependency.Templates,
-		})
 	}
 
 	values := make(chartutil.Values)
@@ -57,11 +45,27 @@ func (r *Renderer) HelmTemplate(module cyclopsv1alpha1.Module, moduleTemplate *m
 		return "", err
 	}
 
+	for _, dependency := range moduleTemplate.Dependencies {
+		if !evaluateDependencyCondition(dependency.Condition, values) {
+			continue
+		}
+
+		chart.AddDependency(&helmchart.Chart{
+			Raw:       []*helmchart.File{},
+			Metadata:  mapMetadata(dependency.HelmChartMetadata),
+			Lock:      &helmchart.Lock{},
+			Values:    map[string]interface{}{},
+			Schema:    dependency.RawSchema,
+			Files:     dependency.Files,
+			Templates: dependency.Templates,
+		})
+	}
+
 	top := make(chartutil.Values)
 	top["Values"] = values
 	top["Release"] = map[string]interface{}{
 		"Name":      module.Name,
-		"Namespace": "default",
+		"Namespace": mapTargetNamespace(module.Spec.TargetNamespace),
 	}
 
 	versionInfo, err := r.k8sClient.VersionInfo()
@@ -77,6 +81,13 @@ func (r *Renderer) HelmTemplate(module cyclopsv1alpha1.Module, moduleTemplate *m
 			GitVersion: versionInfo.GitVersion,
 		},
 	}
+
+	// TODO fix dependency validation
+	//if len(chart.Schema) != 0 {
+	//	if err := chartutil.ValidateAgainstSchema(chart, values); err != nil {
+	//		return "", err
+	//	}
+	//}
 
 	out, err := engine.Render(chart, top)
 	if err != nil {
@@ -148,6 +159,41 @@ func mapMetadata(metadata *helm.Metadata) *helmchart.Metadata {
 		Dependencies: dependencies,
 		Type:         metadata.Type,
 	}
+}
+
+func evaluateDependencyCondition(condition string, values map[string]interface{}) bool {
+	if len(condition) == 0 {
+		return true
+	}
+
+	keys := strings.Split(condition, ".")
+	var current interface{} = values
+
+	for _, key := range keys {
+		if m, ok := current.(map[string]interface{}); ok {
+			if val, exists := m[key]; exists {
+				current = val
+			} else {
+				return false
+			}
+		} else {
+			return false
+		}
+	}
+
+	if result, ok := current.(bool); ok {
+		return result
+	}
+
+	return false
+}
+
+func mapTargetNamespace(namespace string) string {
+	if len(namespace) == 0 {
+		return "default"
+	}
+
+	return namespace
 }
 
 type CapabilitiesKubeVersion struct {
