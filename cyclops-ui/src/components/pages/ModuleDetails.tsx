@@ -909,6 +909,7 @@ const ModuleDetails = () => {
 
     return (
       <div>
+        <Divider />
         <div style={{ position: "relative" }}>
           <ReactAce
             mode={"sass"}
