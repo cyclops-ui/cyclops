@@ -7,16 +7,18 @@ import (
 	"errors"
 	"fmt"
 	"io"
-	networkingv1 "k8s.io/api/networking/v1"
-	"k8s.io/apimachinery/pkg/util/intstr"
-	"k8s.io/apimachinery/pkg/watch"
 	"os"
 	"os/exec"
 	"sort"
 	"strings"
 	"time"
 
+	networkingv1 "k8s.io/api/networking/v1"
+	"k8s.io/apimachinery/pkg/util/intstr"
+	"k8s.io/apimachinery/pkg/watch"
+
 	"github.com/cyclops-ui/cyclops/cyclops-ctrl/api/v1alpha1"
+	"github.com/gin-gonic/gin"
 
 	"gopkg.in/yaml.v2"
 
@@ -169,7 +171,7 @@ func (k *KubernetesClient) GetPods(namespace, name string) ([]apiv1.Pod, error) 
 	return podList.Items, err
 }
 
-func (k *KubernetesClient) GetStreamedPodLogs(namespace, container, name string, logCount *int64, logChan chan<- string) error {
+func (k *KubernetesClient) GetStreamedPodLogs(ctx *gin.Context, namespace, container, name string, logCount *int64, logChan chan<- string) error {
 	podLogOptions := apiv1.PodLogOptions{
 		Container:  container,
 		TailLines:  logCount,
@@ -178,7 +180,7 @@ func (k *KubernetesClient) GetStreamedPodLogs(namespace, container, name string,
 	}
 
 	podClient := k.clientset.CoreV1().Pods(namespace).GetLogs(name, &podLogOptions)
-	stream, err := podClient.Stream(context.Background())
+	stream, err := podClient.Stream(ctx.Request.Context())
 	if err != nil {
 		return err
 	}

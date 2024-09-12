@@ -5,9 +5,10 @@ import (
 	"io"
 	"net/http"
 	"os"
-	"sigs.k8s.io/yaml"
 	"strings"
 	"time"
+
+	"sigs.k8s.io/yaml"
 
 	"github.com/gin-gonic/gin"
 
@@ -542,6 +543,7 @@ func (m *Modules) GetLogs(ctx *gin.Context) {
 		defer close(logChan)
 
 		err := m.kubernetesClient.GetStreamedPodLogs(
+			ctx, // we will have to pass the context for the k8s podClient - so it can stop the stream when the client disconnects
 			ctx.Param("namespace"),
 			ctx.Param("container"),
 			ctx.Param("name"),
@@ -549,7 +551,6 @@ func (m *Modules) GetLogs(ctx *gin.Context) {
 			logChan,
 		)
 		if err != nil {
-			ctx.JSON(http.StatusInternalServerError, dto.NewError("Error fetching logs", err.Error()))
 			return
 		}
 	}()
