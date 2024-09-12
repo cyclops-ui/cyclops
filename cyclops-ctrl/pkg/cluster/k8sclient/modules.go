@@ -22,14 +22,15 @@ import (
 )
 
 const (
-	statusUnknown   = "unknown"
-	statusHealthy   = "healthy"
-	statusUnhealthy = "unhealthy"
+	statusUnknown     = "unknown"
+	statusHealthy     = "healthy"
+	statusUnhealthy   = "unhealthy"
+	statusProgressing = "progressing"
 )
 
 func (k *KubernetesClient) ListModules() ([]cyclopsv1alpha1.Module, error) {
 	moduleList, err := k.moduleset.Modules(cyclopsNamespace).List(metav1.ListOptions{})
-	
+
 	return moduleList, err
 }
 
@@ -241,6 +242,10 @@ func (k *KubernetesClient) GetModuleResourcesHealth(name string) (string, error)
 
 	resourcesWithHealth += len(deployments.Items)
 	for _, item := range deployments.Items {
+		if isProgressing(item.Status.Conditions) {
+			return statusProgressing, nil
+		}
+
 		if item.Generation != item.Status.ObservedGeneration ||
 			item.Status.Replicas != item.Status.UpdatedReplicas ||
 			item.Status.UnavailableReplicas != 0 {
@@ -368,6 +373,10 @@ func (k *KubernetesClient) getResourceStatus(o unstructured.Unstructured) (strin
 		deployment, err := k.clientset.AppsV1().Deployments(o.GetNamespace()).Get(context.Background(), o.GetName(), metav1.GetOptions{})
 		if err != nil {
 			return statusUnknown, err
+		}
+
+		if isProgressing(deployment.Status.Conditions) {
+			return statusProgressing, nil
 		}
 
 		if deployment.Generation == deployment.Status.ObservedGeneration &&
@@ -805,4 +814,28 @@ func getPodStatus(containers []dto.Container) bool {
 	}
 
 	return true
+}
+
+func isProgressing(conditions []appsv1.DeploymentCondition) bool {
+	progressingReason := ""
+	availableReason := ""
+
+	for _, condition := range conditions {
+		if condition.Type == appsv1.DeploymentProgressing {
+			if condition.Status == "False" {
+				return false
+			}
+
+			progressingReason = condition.Reason
+		}
+
+		if condition.Type == appsv1.DeploymentAvailable {
+			availableReason = condition.Reason
+		}
+	}
+
+	return availableReason == "MinimumReplicasAvailable" &&
+		(progressingReason == "NewReplicaSetCreated" ||
+			progressingReason == "FoundNewReplicaSet" ||
+			progressingReason == "ReplicaSetUpdated")
 }

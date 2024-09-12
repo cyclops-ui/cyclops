@@ -23,6 +23,7 @@ import {
   BookOutlined,
   CaretRightOutlined,
   CheckCircleTwoTone,
+  ClockCircleTwoTone,
   CloseSquareTwoTone,
   CopyOutlined,
   DeleteOutlined,
@@ -276,7 +277,7 @@ const ModuleDetails = () => {
 
     fetchModule();
     fetchModuleResources();
-    const interval = setInterval(() => fetchModuleResources(), 15000);
+    const interval = setInterval(() => fetchModuleResources(), 2000);
     return () => {
       clearInterval(interval);
     };
@@ -369,6 +370,18 @@ const ModuleDetails = () => {
 
   const genExtra = (resource: any, status?: string) => {
     let statusIcon = <></>;
+    if (status === "progressing") {
+      statusIcon = (
+        <ClockCircleTwoTone
+          style={{
+            paddingLeft: "5px",
+            fontSize: "20px",
+            verticalAlign: "middle",
+          }}
+          twoToneColor={"#ffcc00"}
+        />
+      );
+    }
     if (status === "healthy") {
       statusIcon = (
         <CheckCircleTwoTone
@@ -711,7 +724,7 @@ const ModuleDetails = () => {
     }
 
     let resourcesWithStatus = 0;
-    let status = true;
+    let status = "";
     for (let i = resources.length - 1; i >= 0; i--) {
       let resource = resources[i] as any;
       if (resource.status === undefined) {
@@ -720,8 +733,13 @@ const ModuleDetails = () => {
 
       resourcesWithStatus++;
 
+      if (resource.status === "progressing") {
+        status = "progressing";
+        continue;
+      }
+
       if (resource.status === "unhealthy") {
-        status = false;
+        status = "unhealthy";
         break;
       }
     }
@@ -730,22 +748,24 @@ const ModuleDetails = () => {
       return <></>;
     }
 
-    let statusIcon = <></>;
-    if (status) {
-      statusIcon = (
-        <CheckCircleTwoTone
+    console.log("zanji", status);
+
+    if (status === "progressing") {
+      return (
+        <ClockCircleTwoTone
           style={{
             verticalAlign: "middle",
             height: "100%",
             marginBottom: "4px",
             fontSize: "150%",
           }}
-          twoToneColor={"#52c41a"}
+          twoToneColor={"#ffcc00"}
         />
       );
     }
-    if (!status) {
-      statusIcon = (
+
+    if (status === "unhealthy") {
+      return (
         <CloseSquareTwoTone
           style={{
             verticalAlign: "middle",
@@ -758,7 +778,17 @@ const ModuleDetails = () => {
       );
     }
 
-    return statusIcon;
+    return (
+      <CheckCircleTwoTone
+        style={{
+          verticalAlign: "middle",
+          height: "100%",
+          marginBottom: "4px",
+          fontSize: "150%",
+        }}
+        twoToneColor={"#52c41a"}
+      />
+    );
   };
 
   const deleteResource = () => {
