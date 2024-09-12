@@ -158,7 +158,7 @@ const PodLogs = ({ pod }: PodLogsProps) => {
   return (
     <>
       <Button
-        style={{ width: "100%", margin: "4px" }}
+        style={{ width: "100%" }}
         onClick={function () {
           if (isStreamingEnabled()) {
             const controller = new AbortController();
