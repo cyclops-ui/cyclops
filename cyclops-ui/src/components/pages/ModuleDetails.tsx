@@ -13,6 +13,7 @@ import {
   Popover,
   Row,
   Spin,
+  Switch,
   Tooltip,
   Typography,
 } from "antd";
@@ -58,6 +59,7 @@ import {
   canRestart,
   RestartButton,
 } from "../k8s-resources/common/RestartButton";
+import YAML from "yaml";
 
 const languages = [
   "javascript",
@@ -829,7 +831,30 @@ const ModuleDetails = () => {
     axios
       .get(`/api/modules/` + moduleName + `/raw`)
       .then((res) => {
-        setRawModuleManifest(res.data);
+        let m = YAML.parse(res.data);
+
+        if (m.status) {
+          delete m.status;
+        }
+        if (m.metadata) {
+          if (m.metadata.creationTimestamp) {
+            delete m.metadata.creationTimestamp;
+          }
+
+          if (m.metadata.generation) {
+            delete m.metadata.generation;
+          }
+
+          if (m.metadata.resourceVersion) {
+            delete m.metadata.resourceVersion;
+          }
+
+          if (m.metadata.uid) {
+            delete m.metadata.uid;
+          }
+        }
+
+        setRawModuleManifest(YAML.stringify(m));
         setLoadingRawManifest(false);
       })
       .catch((error) => {
@@ -884,7 +909,6 @@ const ModuleDetails = () => {
 
     return (
       <div>
-        <Divider />
         <div style={{ position: "relative" }}>
           <ReactAce
             mode={"sass"}

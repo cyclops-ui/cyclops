@@ -19,6 +19,7 @@ package modulecontroller
 import (
 	"context"
 	"fmt"
+	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"sort"
 	"strings"
 	"time"
@@ -215,6 +216,10 @@ func (r *ModuleReconciler) generateResources(
 		return nil, nil, err
 	}
 
+	fmt.Println()
+	fmt.Println("labels", module.ObjectMeta.Labels)
+	fmt.Println()
+
 	installErrors := make([]string, 0)
 	childrenGVRs := make([]cyclopsv1alpha1.GroupVersionResource, 0)
 
@@ -261,6 +266,15 @@ func (r *ModuleReconciler) generateResources(
 		labels["app.kubernetes.io/managed-by"] = "cyclops"
 		labels["cyclops.module"] = module.Name
 		obj.SetLabels(labels)
+
+		obj.SetOwnerReferences([]v1.OwnerReference{
+			{
+				APIVersion: "cyclops-ui.com/v1alpha1",
+				Kind:       "Module",
+				Name:       module.Name,
+				UID:        module.UID,
+			},
+		})
 
 		resourceName, err := kClient.GVKtoAPIResourceName(obj.GroupVersionKind().GroupVersion(), obj.GroupVersionKind().Kind)
 		if err != nil {
