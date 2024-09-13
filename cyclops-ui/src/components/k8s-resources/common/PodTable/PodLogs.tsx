@@ -4,7 +4,7 @@ import { useState } from "react";
 import ReactAce from "react-ace/lib/ace";
 import { mapResponseError } from "../../../../utils/api/errors";
 import { isStreamingEnabled } from "../../../../utils/api/common";
-import { logStream } from "../../../../utils/api/sse/resources";
+import { logStream } from "../../../../utils/api/sse/logs";
 
 interface PodLogsProps {
   pod: any;

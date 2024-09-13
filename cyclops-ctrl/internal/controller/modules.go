@@ -543,7 +543,7 @@ func (m *Modules) GetLogs(ctx *gin.Context) {
 		defer close(logChan)
 
 		err := m.kubernetesClient.GetStreamedPodLogs(
-			ctx, // we will have to pass the context for the k8s podClient - so it can stop the stream when the client disconnects
+			ctx.Request.Context(), // we will have to pass the context for the k8s podClient - so it can stop the stream when the client disconnects
 			ctx.Param("namespace"),
 			ctx.Param("container"),
 			ctx.Param("name"),
