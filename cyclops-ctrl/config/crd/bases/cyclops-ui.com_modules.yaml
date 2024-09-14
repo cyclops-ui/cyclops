@@ -29,6 +29,8 @@ spec:
           history:
             items:
               properties:
+                finishedAt:
+                  type: string
                 generation:
                   format: int64
                   type: integer
@@ -48,6 +50,7 @@ spec:
                 values:
                   x-kubernetes-preserve-unknown-fields: true
               required:
+              - finishedAt
               - generation
               - template
               - values
@@ -113,6 +116,8 @@ spec:
                     items:
                       type: string
                     type: array
+                  finishedAt:
+                    type: string
                   reason:
                     type: string
                   status:
@@ -122,6 +127,8 @@ spec:
                     - succeeded
                     - failed
                     type: string
+                required:
+                - finishedAt
                 type: object
               templateResolvedVersion:
                 type: string

@@ -19,6 +19,7 @@ package v1alpha1
 import (
 	apiextensionsv1 "k8s.io/apiextensions-apiserver/pkg/apis/apiextensions/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"time"
 )
 
 // EDIT THIS FILE!  THIS IS SCAFFOLDING FOR YOU TO OWN!
@@ -66,6 +67,7 @@ type ReconciliationStatus struct {
 	Reason string `json:"reason,omitempty"`
 	// +kubebuilder:validation:Optional
 	Errors []string `json:"errors"`
+	FinishedAt string `json:"finishedAt"`
 }
 
 type GroupVersionResource struct {
@@ -94,6 +96,7 @@ type HistoryEntry struct {
 	Generation  int64                `json:"generation"`
 	TemplateRef HistoryTemplateRef   `json:"template"`
 	Values      apiextensionsv1.JSON `json:"values"`
+	FinishedAt string `json:"finishedAt"`
 }
 
 //+kubebuilder:object:root=true

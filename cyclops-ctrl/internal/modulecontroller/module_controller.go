@@ -406,36 +406,67 @@ func (r *ModuleReconciler) mergeChildrenGVRs(existing, current []cyclopsv1alpha1
 }
 
 func (r *ModuleReconciler) setStatus(
-	ctx context.Context,
-	module cyclopsv1alpha1.Module,
-	namespacedName types.NamespacedName,
-	status cyclopsv1alpha1.ReconciliationStatusState,
-	templateResolvedVersion string,
-	reason string,
-	installErrors []string,
-	childrenResources []cyclopsv1alpha1.GroupVersionResource,
-	iconURL string,
+    ctx context.Context,
+    module cyclopsv1alpha1.Module,
+    namespacedName types.NamespacedName,
+    status cyclopsv1alpha1.ReconciliationStatusState,
+    templateResolvedVersion string,
+    reason string,
+    installErrors []string,
+    childrenResources []cyclopsv1alpha1.GroupVersionResource,
+    iconURL string,
 ) error {
-	trv := module.Status.TemplateResolvedVersion
-	if len(trv) == 0 {
-		trv = templateResolvedVersion
-	}
+    trv := module.Status.TemplateResolvedVersion
+    if len(trv) == 0 {
+        trv = templateResolvedVersion
+    }
 
-	module.Status = cyclopsv1alpha1.ModuleStatus{
-		ReconciliationStatus: cyclopsv1alpha1.ReconciliationStatus{
-			Status: status,
-			Reason: reason,
-			Errors: installErrors,
-		},
-		ManagedGVRs:             r.mergeChildrenGVRs(module.Status.ManagedGVRs, childrenResources),
-		TemplateResolvedVersion: templateResolvedVersion,
-		IconURL:                 iconURL,
-	}
+    module.Status = cyclopsv1alpha1.ModuleStatus{
+        ReconciliationStatus: cyclopsv1alpha1.ReconciliationStatus{
+            Status:       status,
+            Reason:       reason,
+            Errors:       installErrors,
+            FinishedAt:   time.Now().Format(time.RFC3339), // Convert time to string format
+        },
+        ManagedGVRs:             r.mergeChildrenGVRs(module.Status.ManagedGVRs, childrenResources),
+        TemplateResolvedVersion: templateResolvedVersion,
+        IconURL:                 iconURL,
+    }
 
-	if err := r.Status().Update(ctx, &module); err != nil {
-		r.logger.Error(err, "error updating module status", "namespaced name", namespacedName)
-		return err
-	}
+    if err := r.Status().Update(ctx, &module); err != nil {
+        r.logger.Error(err, "error updating module status", "namespaced name", namespacedName)
+        return err
+    }
 
-	return nil
+    return nil
+}
+func (r *ReconciliationStatus) UnmarshalJSON(data []byte) error {
+    type Alias ReconciliationStatus
+    aux := &struct {
+        FinishedAt string `json:"finishedAt"`
+        *Alias
+    }{
+        Alias: (*Alias)(r),
+    }
+    if err := json.Unmarshal(data, &aux); err != nil {
+        return err
+    }
+    // Parse the FinishedAt string to time.Time
+    finishedAt, err := time.Parse(time.RFC3339, aux.FinishedAt)
+    if err != nil {
+        return err
+    }
+    r.FinishedAt = finishedAt.Format(time.RFC3339) // Store as string
+    return nil
+}
+
+func (r *ReconciliationStatus) MarshalJSON() ([]byte, error) {
+    type Alias ReconciliationStatus
+    return json.Marshal(&struct {
+        FinishedAt string `json:"finishedAt"`
+        *Alias
+    }{
+        Alias: (*Alias)(r),
+        FinishedAt: r.FinishedAt,
+    })
 }
