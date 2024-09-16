@@ -5,7 +5,6 @@ import { mapResponseError } from "../../utils/api/errors";
 import PodTable from "./common/PodTable/PodTable";
 import { resourceStream } from "../../utils/api/sse/resources";
 import { isStreamingEnabled } from "../../utils/api/common";
-import { ResourceRef } from "../../utils/resourceRef";
 
 interface Props {
   name: string;
