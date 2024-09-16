@@ -623,6 +623,7 @@ const ModuleDetails = () => {
         <Row gutter={[20, 0]}>
           <Col style={{ float: "right" }}>
             <Button onClick={() => handleManifestClick(resource)} block>
+              <FileTextOutlined />
               View Manifest
             </Button>
           </Col>
