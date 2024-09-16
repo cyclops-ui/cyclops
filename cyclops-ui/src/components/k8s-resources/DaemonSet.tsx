@@ -9,10 +9,9 @@ import { isStreamingEnabled } from "../../utils/api/common";
 interface Props {
   name: string;
   namespace: string;
-  onStatusUpdate: (status: string) => void;
 }
 
-const DaemonSet = ({ name, namespace, onStatusUpdate }: Props) => {
+const DaemonSet = ({ name, namespace }: Props) => {
   const [daemonSet, setDaemonSet] = useState({
     status: "",
     pods: [],
@@ -27,7 +26,6 @@ const DaemonSet = ({ name, namespace, onStatusUpdate }: Props) => {
     if (isStreamingEnabled()) {
       resourceStream(`apps`, `v1`, `DaemonSet`, name, namespace, (r: any) => {
         setDaemonSet(r);
-        onStatusUpdate(r.status);
       });
     }
   }, [name, namespace]);

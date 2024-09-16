@@ -299,7 +299,7 @@ const ModuleDetails = () => {
 
     fetchModule();
     fetchModuleResources();
-    const interval = setInterval(() => fetchModuleResources(), 15000);
+    const interval = setInterval(() => fetchModuleResources(), 10000);
     return () => {
       clearInterval(interval);
     };
@@ -487,7 +487,7 @@ const ModuleDetails = () => {
     }
 
     if (deleted) {
-      return "#f3b21a";
+      return "#ff9f1a";
     }
 
     if (status === "progressing") {
@@ -510,11 +510,7 @@ const ModuleDetails = () => {
     switch (resource.kind) {
       case "Deployment":
         resourceDetails = (
-          <Deployment
-            name={resource.name}
-            namespace={resource.namespace}
-            onStatusUpdate={updateResourceStatus}
-          />
+          <Deployment name={resource.name} namespace={resource.namespace} />
         );
         break;
       case "CronJob":
@@ -529,24 +525,12 @@ const ModuleDetails = () => {
         break;
       case "DaemonSet":
         resourceDetails = (
-          <DaemonSet
-            name={resource.name}
-            namespace={resource.namespace}
-            onStatusUpdate={(status: string) => {
-              updateResourceStatus(resource, status);
-            }}
-          />
+          <DaemonSet name={resource.name} namespace={resource.namespace} />
         );
         break;
       case "StatefulSet":
         resourceDetails = (
-          <StatefulSet
-            name={resource.name}
-            namespace={resource.namespace}
-            onStatusUpdate={(status: string) => {
-              updateResourceStatus(resource, status);
-            }}
-          />
+          <StatefulSet name={resource.name} namespace={resource.namespace} />
         );
         break;
       case "Pod":
