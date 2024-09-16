@@ -5,11 +5,12 @@ import { mapResponseError } from "../../utils/api/errors";
 import PodTable from "./common/PodTable/PodTable";
 import { resourceStream } from "../../utils/api/sse/resources";
 import { isStreamingEnabled } from "../../utils/api/common";
+import { ResourceRef } from "../../utils/resourceRef";
 
 interface Props {
   name: string;
   namespace: string;
-  onStatusUpdate: (status: string) => void;
+  onStatusUpdate: (ref: ResourceRef, status: string) => void;
 }
 
 const Deployment = ({ name, namespace, onStatusUpdate }: Props) => {
@@ -22,14 +23,30 @@ const Deployment = ({ name, namespace, onStatusUpdate }: Props) => {
     description: "",
   });
 
+  const statusUpdateCallback = useCallback(
+    (ref: ResourceRef, status: string) => {
+      onStatusUpdate(ref, status);
+    },
+    [],
+  );
+
   useEffect(() => {
     if (isStreamingEnabled()) {
       resourceStream(`apps`, `v1`, `Deployment`, name, namespace, (r: any) => {
         setDeployment(r);
-        onStatusUpdate(r.status);
+        statusUpdateCallback(
+          {
+            group: `apps`,
+            version: `v1`,
+            kind: `Deployment`,
+            name: name,
+            namespace: namespace,
+          },
+          r.status,
+        );
       });
     }
-  }, [name, namespace]);
+  }, [name, namespace, statusUpdateCallback]);
 
   const fetchDeployment = useCallback(() => {
     axios

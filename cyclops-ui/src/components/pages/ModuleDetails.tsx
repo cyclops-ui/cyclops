@@ -144,6 +144,8 @@ const ModuleDetails = () => {
   function updateResourceStatus(ref: ResourceRef, status: string) {
     let k = resourceRefKey(ref);
 
+    console.log("update status", status, k);
+
     setResourcesStatus((prevState) => {
       const s = new Map(prevState);
       s.set(k, status);
@@ -511,9 +513,7 @@ const ModuleDetails = () => {
           <Deployment
             name={resource.name}
             namespace={resource.namespace}
-            onStatusUpdate={(status: string) => {
-              updateResourceStatus(resource, status);
-            }}
+            onStatusUpdate={updateResourceStatus}
           />
         );
         break;
