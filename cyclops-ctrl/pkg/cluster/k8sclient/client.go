@@ -633,7 +633,7 @@ func (k *KubernetesClient) mapDeployment(group, version, kind, name, namespace s
 		Namespace: deployment.Namespace,
 		Replicas:  int(*deployment.Spec.Replicas),
 		Pods:      pods,
-		Status:    getDeploymentStatus(pods),
+		Status:    getDeploymentStatus(deployment),
 	}, nil
 }
 
@@ -655,7 +655,7 @@ func (k *KubernetesClient) mapDaemonSet(group, version, kind, name, namespace st
 		Name:      daemonSet.Name,
 		Namespace: daemonSet.Namespace,
 		Pods:      pods,
-		Status:    getDaemonSetStatus(pods),
+		Status:    getDaemonSetStatus(daemonSet),
 	}, nil
 }
 
@@ -678,7 +678,7 @@ func (k *KubernetesClient) mapStatefulSet(group, version, kind, name, namespace 
 		Namespace: namespace,
 		Replicas:  int(*statefulset.Spec.Replicas),
 		Pods:      pods,
-		Status:    getDeploymentStatus(pods),
+		Status:    getStatefulSetStatus(statefulset),
 	}, nil
 }
 
@@ -1110,6 +1110,23 @@ func isRole(group, version, kind string) bool {
 
 func isNetworkPolicy(group, version, kind string) bool {
 	return group == "networking.k8s.io" && version == "v1" && kind == "NetworkPolicy"
+}
+
+func (k *KubernetesClient) WatchResources(moduleName string, gvrs []schema.GroupVersionResource) ([]watch.Interface, error) {
+	out := make([]watch.Interface, 0)
+
+	for _, gvr := range gvrs {
+		rs, err := k.Dynamic.Resource(gvr).Watch(context.Background(), metav1.ListOptions{
+			LabelSelector: "cyclops.module=" + moduleName,
+		})
+		if err != nil {
+			return nil, err
+		}
+
+		out = append(out, rs)
+	}
+
+	return out, nil
 }
 
 func (k *KubernetesClient) WatchResource(group, version, resource, name, namespace string) (watch.Interface, error) {

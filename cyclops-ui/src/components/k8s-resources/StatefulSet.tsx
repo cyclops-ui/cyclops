@@ -9,6 +9,7 @@ import { isStreamingEnabled } from "../../utils/api/common";
 interface Props {
   name: string;
   namespace: string;
+  onStatusUpdate: (status: string) => void;
 }
 
 interface Statefulset {
@@ -16,7 +17,7 @@ interface Statefulset {
   pods: any[];
 }
 
-const StatefulSet = ({ name, namespace }: Props) => {
+const StatefulSet = ({ name, namespace, onStatusUpdate }: Props) => {
   const [statefulSet, setStatefulSet] = useState<Statefulset>({
     status: "",
     pods: [],
@@ -31,6 +32,7 @@ const StatefulSet = ({ name, namespace }: Props) => {
     if (isStreamingEnabled()) {
       resourceStream(`apps`, `v1`, `StatefulSet`, name, namespace, (r: any) => {
         setStatefulSet(r);
+        onStatusUpdate(r.status);
       });
     }
   }, [name, namespace]);

@@ -60,6 +60,7 @@ import {
   RestartButton,
 } from "../k8s-resources/common/RestartButton";
 import YAML from "yaml";
+import { ResourceRef, resourceRefKey } from "../../utils/resourceRef";
 
 const languages = [
   "javascript",
@@ -109,14 +110,6 @@ interface module {
   iconURL: string;
 }
 
-interface resourceRef {
-  group: string;
-  version: string;
-  kind: string;
-  name: string;
-  namespace: string;
-}
-
 const ModuleDetails = () => {
   const [manifestModal, setManifestModal] = useState({
     on: false,
@@ -136,7 +129,28 @@ const ModuleDetails = () => {
 
   const [deleteName, setDeleteName] = useState("");
   const [deleteResourceVerify, setDeleteResourceVerify] = useState("");
-  const [resources, setResources] = useState([]);
+
+  const [resources, setResources] = useState<any[]>([]);
+  const [resourcesStatus, setResourcesStatus] = useState<Map<string, string>>(
+    new Map(),
+  );
+
+  function getResourceStatus(ref: ResourceRef): string {
+    let k = resourceRefKey(ref);
+
+    return resourcesStatus.get(k) || "unknown";
+  }
+
+  function updateResourceStatus(ref: ResourceRef, status: string) {
+    let k = resourceRefKey(ref);
+
+    setResourcesStatus((prevState) => {
+      const s = new Map(prevState);
+      s.set(k, status);
+      return s;
+    });
+  }
+
   const [module, setModule] = useState<module>({
     name: "",
     namespace: "",
@@ -151,7 +165,7 @@ const ModuleDetails = () => {
   });
 
   const [deleteResourceModal, setDeleteResourceModal] = useState(false);
-  const [deleteResourceRef, setDeleteResourceRef] = useState<resourceRef>({
+  const [deleteResourceRef, setDeleteResourceRef] = useState<ResourceRef>({
     group: "",
     version: "",
     kind: "",
@@ -252,6 +266,12 @@ const ModuleDetails = () => {
       .then((res) => {
         setResources(res.data);
         setLoadResources(true);
+
+        if (Array.isArray(res.data)) {
+          res.data.forEach((value) => {
+            updateResourceStatus(value, value.status);
+          });
+        }
       })
       .catch((error) => {
         setLoading(false);
@@ -277,7 +297,7 @@ const ModuleDetails = () => {
 
     fetchModule();
     fetchModuleResources();
-    const interval = setInterval(() => fetchModuleResources(), 2000);
+    const interval = setInterval(() => fetchModuleResources(), 15000);
     return () => {
       clearInterval(interval);
     };
@@ -288,9 +308,9 @@ const ModuleDetails = () => {
       activeCollapses.get(fieldName) &&
       activeCollapses.get(fieldName) === true
     ) {
-      return "#E3E3E3";
+      return "#EFEFEF";
     } else {
-      return "#F3F3F3";
+      return "#FAFAFA";
     }
   };
 
@@ -459,6 +479,26 @@ const ModuleDetails = () => {
     return "none";
   };
 
+  const getStatusColor = (status: string, deleted: boolean) => {
+    if (status === "unhealthy") {
+      return "#FF0000";
+    }
+
+    if (deleted) {
+      return "#f3b21a";
+    }
+
+    if (status === "progressing") {
+      return "#ffcc00";
+    }
+
+    if (status === "healthy" || status === "unknown") {
+      return "#27D507";
+    }
+
+    return "#FF0000";
+  };
+
   resources.forEach((resource: any, index) => {
     let collapseKey =
       resource.kind + "/" + resource.namespace + "/" + resource.name;
@@ -468,7 +508,13 @@ const ModuleDetails = () => {
     switch (resource.kind) {
       case "Deployment":
         resourceDetails = (
-          <Deployment name={resource.name} namespace={resource.namespace} />
+          <Deployment
+            name={resource.name}
+            namespace={resource.namespace}
+            onStatusUpdate={(status: string) => {
+              updateResourceStatus(resource, status);
+            }}
+          />
         );
         break;
       case "CronJob":
@@ -483,12 +529,24 @@ const ModuleDetails = () => {
         break;
       case "DaemonSet":
         resourceDetails = (
-          <DaemonSet name={resource.name} namespace={resource.namespace} />
+          <DaemonSet
+            name={resource.name}
+            namespace={resource.namespace}
+            onStatusUpdate={(status: string) => {
+              updateResourceStatus(resource, status);
+            }}
+          />
         );
         break;
       case "StatefulSet":
         resourceDetails = (
-          <StatefulSet name={resource.name} namespace={resource.namespace} />
+          <StatefulSet
+            name={resource.name}
+            namespace={resource.namespace}
+            onStatusUpdate={(status: string) => {
+              updateResourceStatus(resource, status);
+            }}
+          />
         );
         break;
       case "Pod":
@@ -561,9 +619,11 @@ const ModuleDetails = () => {
       );
     }
 
+    let resStatus = getResourceStatus(resource);
+
     resourceCollapses.push(
       <Collapse.Panel
-        header={genExtra(resource, resource.status)}
+        header={genExtra(resource, resStatus)}
         key={collapseKey}
         style={{
           display: getResourceDisplay(
@@ -576,6 +636,8 @@ const ModuleDetails = () => {
           marginBottom: "12px",
           borderRadius: "10px",
           border: "1px solid #E3E3E3",
+          borderLeft:
+            "solid " + getStatusColor(resStatus, resource.deleted) + " 4px",
         }}
       >
         <Row>
@@ -731,14 +793,16 @@ const ModuleDetails = () => {
         continue;
       }
 
+      let resourceStatus = getResourceStatus(resource);
+
       resourcesWithStatus++;
 
-      if (resource.status === "progressing") {
+      if (resourceStatus === "progressing") {
         status = "progressing";
         continue;
       }
 
-      if (resource.status === "unhealthy") {
+      if (resourceStatus === "unhealthy") {
         status = "unhealthy";
         break;
       }
@@ -747,8 +811,6 @@ const ModuleDetails = () => {
     if (resourcesWithStatus === 0) {
       return <></>;
     }
-
-    console.log("zanji", status);
 
     if (status === "progressing") {
       return (

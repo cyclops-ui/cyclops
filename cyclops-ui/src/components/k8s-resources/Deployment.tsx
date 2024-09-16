@@ -9,9 +9,10 @@ import { isStreamingEnabled } from "../../utils/api/common";
 interface Props {
   name: string;
   namespace: string;
+  onStatusUpdate: (status: string) => void;
 }
 
-const Deployment = ({ name, namespace }: Props) => {
+const Deployment = ({ name, namespace, onStatusUpdate }: Props) => {
   const [deployment, setDeployment] = useState({
     status: "",
     pods: [],
@@ -25,6 +26,7 @@ const Deployment = ({ name, namespace }: Props) => {
     if (isStreamingEnabled()) {
       resourceStream(`apps`, `v1`, `Deployment`, name, namespace, (r: any) => {
         setDeployment(r);
+        onStatusUpdate(r.status);
       });
     }
   }, [name, namespace]);

@@ -72,5 +72,4 @@ func (s *Server) Resources(ctx *gin.Context) {
 			}
 		}
 	})
-
 }
