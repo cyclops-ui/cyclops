@@ -21,7 +21,7 @@ const PodLogs = ({ pod }: PodLogsProps) => {
   });
 
   //
-  const [_, setLogsSignalController] = useState<AbortController | null>(null);
+  const [, setLogsSignalController] = useState<AbortController | null>(null);
 
   const [error, setError] = useState({
     message: "",
