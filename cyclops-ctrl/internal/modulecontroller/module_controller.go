@@ -440,33 +440,4 @@ func (r *ModuleReconciler) setStatus(
 
     return nil
 }
-func (r *ReconciliationStatus) UnmarshalJSON(data []byte) error {
-    type Alias ReconciliationStatus
-    aux := &struct {
-        FinishedAt string `json:"finishedAt"`
-        *Alias
-    }{
-        Alias: (*Alias)(r),
-    }
-    if err := json.Unmarshal(data, &aux); err != nil {
-        return err
-    }
-    // Parse the FinishedAt string to time.Time
-    finishedAt, err := time.Parse(time.RFC3339, aux.FinishedAt)
-    if err != nil {
-        return err
-    }
-    r.FinishedAt = finishedAt.Format(time.RFC3339) // Store as string
-    return nil
-}
 
-func (r *ReconciliationStatus) MarshalJSON() ([]byte, error) {
-    type Alias ReconciliationStatus
-    return json.Marshal(&struct {
-        FinishedAt string `json:"finishedAt"`
-        *Alias
-    }{
-        Alias: (*Alias)(r),
-        FinishedAt: r.FinishedAt,
-    })
-}
