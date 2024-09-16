@@ -114,17 +114,17 @@ const PodLogs = ({ pod }: PodLogsProps) => {
   };
 
   const onLogsTabsChange = (container: string) => {
+    const controller = new AbortController();
     setLogsSignalController((prevController) => {
       if (prevController) {
         prevController.abort();
       }
 
-      const controller = new AbortController();
       return controller;
     });
     setLogs(() => []); //this is to remove the previous pod's logs
 
-    if (isStreamingEnabled() && logsSignalController) {
+    if (isStreamingEnabled()) {
       logStream(
         logsModal.pod,
         logsModal.namespace,
@@ -137,7 +137,7 @@ const PodLogs = ({ pod }: PodLogsProps) => {
         (err) => {
           setError(mapResponseError(err));
         },
-        logsSignalController,
+        controller,
       );
     }
   };
