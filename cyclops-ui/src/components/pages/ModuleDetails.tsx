@@ -60,7 +60,6 @@ import {
   RestartButton,
 } from "../k8s-resources/common/RestartButton";
 import YAML from "yaml";
-import { ResourceRef, resourceRefKey } from "../../utils/resourceRef";
 
 const languages = [
   "javascript",
@@ -110,6 +109,14 @@ interface module {
   iconURL: string;
 }
 
+interface resourceRef {
+  group: string;
+  version: string;
+  kind: string;
+  name: string;
+  namespace: string;
+}
+
 const ModuleDetails = () => {
   const [manifestModal, setManifestModal] = useState({
     on: false,
@@ -131,27 +138,6 @@ const ModuleDetails = () => {
   const [deleteResourceVerify, setDeleteResourceVerify] = useState("");
 
   const [resources, setResources] = useState<any[]>([]);
-  const [resourcesStatus, setResourcesStatus] = useState<Map<string, string>>(
-    new Map(),
-  );
-
-  function getResourceStatus(ref: ResourceRef): string {
-    let k = resourceRefKey(ref);
-
-    return resourcesStatus.get(k) || "unknown";
-  }
-
-  function updateResourceStatus(ref: ResourceRef, status: string) {
-    let k = resourceRefKey(ref);
-
-    console.log("update status", status, k);
-
-    setResourcesStatus((prevState) => {
-      const s = new Map(prevState);
-      s.set(k, status);
-      return s;
-    });
-  }
 
   const [module, setModule] = useState<module>({
     name: "",
@@ -167,7 +153,7 @@ const ModuleDetails = () => {
   });
 
   const [deleteResourceModal, setDeleteResourceModal] = useState(false);
-  const [deleteResourceRef, setDeleteResourceRef] = useState<ResourceRef>({
+  const [deleteResourceRef, setDeleteResourceRef] = useState<resourceRef>({
     group: "",
     version: "",
     kind: "",
@@ -268,12 +254,6 @@ const ModuleDetails = () => {
       .then((res) => {
         setResources(res.data);
         setLoadResources(true);
-
-        if (Array.isArray(res.data)) {
-          res.data.forEach((value) => {
-            updateResourceStatus(value, value.status);
-          });
-        }
       })
       .catch((error) => {
         setLoading(false);
@@ -603,11 +583,9 @@ const ModuleDetails = () => {
       );
     }
 
-    let resStatus = getResourceStatus(resource);
-
     resourceCollapses.push(
       <Collapse.Panel
-        header={genExtra(resource, resStatus)}
+        header={genExtra(resource, resource.status)}
         key={collapseKey}
         style={{
           display: getResourceDisplay(
@@ -621,7 +599,9 @@ const ModuleDetails = () => {
           borderRadius: "10px",
           border: "1px solid #E3E3E3",
           borderLeft:
-            "solid " + getStatusColor(resStatus, resource.deleted) + " 4px",
+            "solid " +
+            getStatusColor(resource.status, resource.deleted) +
+            " 4px",
         }}
       >
         <Row>
@@ -777,16 +757,14 @@ const ModuleDetails = () => {
         continue;
       }
 
-      let resourceStatus = getResourceStatus(resource);
-
       resourcesWithStatus++;
 
-      if (resourceStatus === "progressing") {
+      if (resource.status === "progressing") {
         status = "progressing";
         continue;
       }
 
-      if (resourceStatus === "unhealthy") {
+      if (resource.status === "unhealthy") {
         status = "unhealthy";
         break;
       }
