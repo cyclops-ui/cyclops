@@ -262,6 +262,17 @@ func (r *ModuleReconciler) generateResources(
 		labels["cyclops.module"] = module.Name
 		obj.SetLabels(labels)
 
+		argoLabel := module.GetAnnotations()["argocd.argoproj.io/tracking-id"]
+		if len(argoLabel) > 0 {
+			annotations := obj.GetAnnotations()
+			if annotations == nil {
+				annotations = make(map[string]string)
+			}
+
+			annotations["argocd.argoproj.io/tracking-id"] = argoLabel
+			obj.SetAnnotations(annotations)
+		}
+
 		resourceName, err := kClient.GVKtoAPIResourceName(obj.GroupVersionKind().GroupVersion(), obj.GroupVersionKind().Kind)
 		if err != nil {
 			installErrors = append(installErrors, fmt.Sprintf(
