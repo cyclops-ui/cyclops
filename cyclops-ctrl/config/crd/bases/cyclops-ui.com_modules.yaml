@@ -50,7 +50,6 @@ spec:
                 values:
                   x-kubernetes-preserve-unknown-fields: true
               required:
-              - finishedAt
               - generation
               - template
               - values
@@ -128,8 +127,6 @@ spec:
                     - failed
                     type: string
                 required:
-                - finishedAt
-                type: object
               templateResolvedVersion:
                 type: string
             required:
