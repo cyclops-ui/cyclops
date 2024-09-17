@@ -22,14 +22,15 @@ import (
 )
 
 const (
-	statusUnknown   = "unknown"
-	statusHealthy   = "healthy"
-	statusUnhealthy = "unhealthy"
+	statusUnknown     = "unknown"
+	statusHealthy     = "healthy"
+	statusUnhealthy   = "unhealthy"
+	statusProgressing = "progressing"
 )
 
 func (k *KubernetesClient) ListModules() ([]cyclopsv1alpha1.Module, error) {
 	moduleList, err := k.moduleset.Modules(cyclopsNamespace).List(metav1.ListOptions{})
-	
+
 	return moduleList, err
 }
 
@@ -241,6 +242,10 @@ func (k *KubernetesClient) GetModuleResourcesHealth(name string) (string, error)
 
 	resourcesWithHealth += len(deployments.Items)
 	for _, item := range deployments.Items {
+		if isProgressing(item.Status.Conditions) {
+			return statusProgressing, nil
+		}
+
 		if item.Generation != item.Status.ObservedGeneration ||
 			item.Status.Replicas != item.Status.UpdatedReplicas ||
 			item.Status.UnavailableReplicas != 0 {
@@ -370,13 +375,7 @@ func (k *KubernetesClient) getResourceStatus(o unstructured.Unstructured) (strin
 			return statusUnknown, err
 		}
 
-		if deployment.Generation == deployment.Status.ObservedGeneration &&
-			deployment.Status.Replicas == deployment.Status.UpdatedReplicas &&
-			deployment.Status.UnavailableReplicas == 0 {
-			return statusHealthy, nil
-		}
-
-		return statusUnhealthy, nil
+		return getDeploymentStatus(deployment), nil
 	}
 
 	if isStatefulSet(o.GroupVersionKind().Group, o.GroupVersionKind().Version, o.GetKind()) {
@@ -385,13 +384,7 @@ func (k *KubernetesClient) getResourceStatus(o unstructured.Unstructured) (strin
 			return statusUnknown, err
 		}
 
-		if statefulset.Generation == statefulset.Status.ObservedGeneration &&
-			statefulset.Status.Replicas == statefulset.Status.UpdatedReplicas &&
-			statefulset.Status.Replicas == statefulset.Status.AvailableReplicas {
-			return statusHealthy, nil
-		}
-
-		return statusUnhealthy, nil
+		return getStatefulSetStatus(statefulset), nil
 	}
 
 	if isDaemonSet(o.GroupVersionKind().Group, o.GroupVersionKind().Version, o.GetKind()) {
@@ -400,13 +393,7 @@ func (k *KubernetesClient) getResourceStatus(o unstructured.Unstructured) (strin
 			return statusUnknown, err
 		}
 
-		if daemonset.Generation == daemonset.Status.ObservedGeneration &&
-			daemonset.Status.UpdatedNumberScheduled == daemonset.Status.DesiredNumberScheduled &&
-			daemonset.Status.NumberUnavailable == 0 {
-			return statusHealthy, nil
-		}
-
-		return statusUnhealthy, nil
+		return getDaemonSetStatus(daemonset), nil
 	}
 
 	if isPersistentVolumeClaims(o.GroupVersionKind().Group, o.GroupVersionKind().Version, o.GetKind()) {
@@ -769,32 +756,38 @@ func containerStatus(status apiv1.ContainerStatus) dto.ContainerStatus {
 	}
 }
 
-func getDeploymentStatus(pods []dto.Pod) bool {
-	for _, pod := range pods {
-		for _, container := range pod.Containers {
-			if !container.Status.Running {
-				return false
-			}
-		}
+func getDeploymentStatus(deployment *appsv1.Deployment) string {
+	if isProgressing(deployment.Status.Conditions) {
+		return statusProgressing
 	}
 
-	return true
+	if deployment.Generation == deployment.Status.ObservedGeneration &&
+		deployment.Status.Replicas == deployment.Status.UpdatedReplicas &&
+		deployment.Status.UnavailableReplicas == 0 {
+		return statusHealthy
+	}
+
+	return statusUnhealthy
 }
 
-func getDaemonSetStatus(pods []dto.Pod) bool {
-	if len(pods) == 0 {
-		return false
+func getStatefulSetStatus(statefulset *appsv1.StatefulSet) string {
+	if statefulset.Generation == statefulset.Status.ObservedGeneration &&
+		statefulset.Status.Replicas == statefulset.Status.UpdatedReplicas &&
+		statefulset.Status.Replicas == statefulset.Status.AvailableReplicas {
+		return statusHealthy
 	}
 
-	for _, pod := range pods {
-		for _, container := range pod.Containers {
-			if !container.Status.Running {
-				return false
-			}
-		}
+	return statusUnhealthy
+}
+
+func getDaemonSetStatus(daemonset *appsv1.DaemonSet) string {
+	if daemonset.Generation == daemonset.Status.ObservedGeneration &&
+		daemonset.Status.UpdatedNumberScheduled == daemonset.Status.DesiredNumberScheduled &&
+		daemonset.Status.NumberUnavailable == 0 {
+		return statusHealthy
 	}
 
-	return true
+	return statusUnhealthy
 }
 
 func getPodStatus(containers []dto.Container) bool {
@@ -805,4 +798,28 @@ func getPodStatus(containers []dto.Container) bool {
 	}
 
 	return true
+}
+
+func isProgressing(conditions []appsv1.DeploymentCondition) bool {
+	progressingReason := ""
+	availableReason := ""
+
+	for _, condition := range conditions {
+		if condition.Type == appsv1.DeploymentProgressing {
+			if condition.Status == "False" {
+				return false
+			}
+
+			progressingReason = condition.Reason
+		}
+
+		if condition.Type == appsv1.DeploymentAvailable {
+			availableReason = condition.Reason
+		}
+	}
+
+	return availableReason == "MinimumReplicasAvailable" &&
+		(progressingReason == "NewReplicaSetCreated" ||
+			progressingReason == "FoundNewReplicaSet" ||
+			progressingReason == "ReplicaSetUpdated")
 }

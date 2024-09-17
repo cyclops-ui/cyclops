@@ -20,7 +20,6 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/webhook"
 
 	"github.com/cyclops-ui/cyclops/cyclops-ctrl/internal/auth"
-	"github.com/cyclops-ui/cyclops/cyclops-ctrl/pkg/cluster/k8sclient"
 	"github.com/cyclops-ui/cyclops/cyclops-ctrl/internal/handler"
 	"github.com/cyclops-ui/cyclops/cyclops-ctrl/internal/modulecontroller"
 	"github.com/cyclops-ui/cyclops/cyclops-ctrl/internal/prometheus"
@@ -28,6 +27,7 @@ import (
 	"github.com/cyclops-ui/cyclops/cyclops-ctrl/internal/template"
 	"github.com/cyclops-ui/cyclops/cyclops-ctrl/internal/template/cache"
 	"github.com/cyclops-ui/cyclops/cyclops-ctrl/internal/template/render"
+	"github.com/cyclops-ui/cyclops/cyclops-ctrl/pkg/cluster/k8sclient"
 
 	cyclopsv1alpha1 "github.com/cyclops-ui/cyclops/cyclops-ctrl/api/v1alpha1"
 )
