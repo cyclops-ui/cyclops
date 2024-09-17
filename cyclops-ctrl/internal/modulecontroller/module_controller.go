@@ -406,38 +406,37 @@ func (r *ModuleReconciler) mergeChildrenGVRs(existing, current []cyclopsv1alpha1
 }
 
 func (r *ModuleReconciler) setStatus(
-    ctx context.Context,
-    module cyclopsv1alpha1.Module,
-    namespacedName types.NamespacedName,
-    status cyclopsv1alpha1.ReconciliationStatusState,
-    templateResolvedVersion string,
-    reason string,
-    installErrors []string,
-    childrenResources []cyclopsv1alpha1.GroupVersionResource,
-    iconURL string,
+	ctx context.Context,
+	module cyclopsv1alpha1.Module,
+	namespacedName types.NamespacedName,
+	status cyclopsv1alpha1.ReconciliationStatusState,
+	templateResolvedVersion string,
+	reason string,
+	installErrors []string,
+	childrenResources []cyclopsv1alpha1.GroupVersionResource,
+	iconURL string,
 ) error {
-    trv := module.Status.TemplateResolvedVersion
-    if len(trv) == 0 {
-        trv = templateResolvedVersion
-    }
+	trv := module.Status.TemplateResolvedVersion
+	if len(trv) == 0 {
+		trv = templateResolvedVersion
+	}
 
-    module.Status = cyclopsv1alpha1.ModuleStatus{
-        ReconciliationStatus: cyclopsv1alpha1.ReconciliationStatus{
-            Status:       status,
-            Reason:       reason,
-            Errors:       installErrors,
-            FinishedAt:   time.Now().Format(time.RFC3339), // Convert time to string format
-        },
-        ManagedGVRs:             r.mergeChildrenGVRs(module.Status.ManagedGVRs, childrenResources),
-        TemplateResolvedVersion: templateResolvedVersion,
-        IconURL:                 iconURL,
-    }
+	module.Status = cyclopsv1alpha1.ModuleStatus{
+		ReconciliationStatus: cyclopsv1alpha1.ReconciliationStatus{
+			Status:     status,
+			Reason:     reason,
+			Errors:     installErrors,
+			FinishedAt: time.Now().Format(time.RFC3339), // Convert time to string format
+		},
+		ManagedGVRs:             r.mergeChildrenGVRs(module.Status.ManagedGVRs, childrenResources),
+		TemplateResolvedVersion: templateResolvedVersion,
+		IconURL:                 iconURL,
+	}
 
-    if err := r.Status().Update(ctx, &module); err != nil {
-        r.logger.Error(err, "error updating module status", "namespaced name", namespacedName)
-        return err
-    }
+	if err := r.Status().Update(ctx, &module); err != nil {
+		r.logger.Error(err, "error updating module status", "namespaced name", namespacedName)
+		return err
+	}
 
-    return nil
+	return nil
 }
-
