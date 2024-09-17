@@ -33,10 +33,11 @@ const Modules = () => {
   const [moduleHealthFilter, setModuleHealthFilter] = useState<string[]>([
     "Healthy",
     "Unhealthy",
+    "Progressing",
     "Unknown",
   ]);
   const [searchInputFilter, setsearchInputFilter] = useState("");
-  const resourceFilter = ["Healthy", "Unhealthy", "Unknown"];
+  const resourceFilter = ["Healthy", "Unhealthy", "Progressing", "Unknown"];
   const [error, setError] = useState({
     message: "",
     description: "",
@@ -106,6 +107,10 @@ const Modules = () => {
 
     if (module.status === "healthy") {
       return "#27D507";
+    }
+
+    if (module.status === "progressing") {
+      return "#ffbf00";
     }
 
     return "#FF0000";
