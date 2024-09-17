@@ -442,6 +442,8 @@ func (k *KubernetesClient) CreateDynamic(
 	}
 	obj.SetNamespace(objNamespace)
 
+	fmt.Println(gvr, targetNamespace)
+
 	isNamespaced, err := k.isResourceNamespaced(obj.GroupVersionKind())
 	if err != nil {
 		return err

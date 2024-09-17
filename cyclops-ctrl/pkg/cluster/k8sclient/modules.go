@@ -29,7 +29,7 @@ const (
 )
 
 func (k *KubernetesClient) ListModules() ([]cyclopsv1alpha1.Module, error) {
-	moduleList, err := k.moduleset.Modules(cyclopsNamespace).List(metav1.ListOptions{})
+	moduleList, err := k.moduleset.Modules("").List(metav1.ListOptions{})
 
 	return moduleList, err
 }
@@ -40,26 +40,26 @@ func (k *KubernetesClient) CreateModule(module cyclopsv1alpha1.Module) error {
 }
 
 func (k *KubernetesClient) UpdateModule(module *cyclopsv1alpha1.Module) error {
-	_, err := k.moduleset.Modules(cyclopsNamespace).Update(module)
+	_, err := k.moduleset.Modules(module.Namespace).Update(module)
 	return err
 }
 
 func (k *KubernetesClient) UpdateModuleStatus(module *cyclopsv1alpha1.Module) (*cyclopsv1alpha1.Module, error) {
-	return k.moduleset.Modules(cyclopsNamespace).PatchStatus(module)
+	return k.moduleset.Modules(module.Namespace).PatchStatus(module)
 }
 
 func (k *KubernetesClient) DeleteModule(name string) error {
 	return k.moduleset.Modules(cyclopsNamespace).Delete(name)
 }
 
-func (k *KubernetesClient) GetModule(name string) (*cyclopsv1alpha1.Module, error) {
-	return k.moduleset.Modules(cyclopsNamespace).Get(name)
+func (k *KubernetesClient) GetModule(name, namespace string) (*cyclopsv1alpha1.Module, error) {
+	return k.moduleset.Modules(namespace).Get(name)
 }
 
-func (k *KubernetesClient) GetResourcesForModule(name string) ([]dto.Resource, error) {
+func (k *KubernetesClient) GetResourcesForModule(name, namespace string) ([]dto.Resource, error) {
 	out := make([]dto.Resource, 0, 0)
 
-	managedGVRs, err := k.getManagedGVRs(name)
+	managedGVRs, err := k.getManagedGVRs(name, namespace)
 	if err != nil {
 		return nil, err
 	}
@@ -106,8 +106,8 @@ func (k *KubernetesClient) GetResourcesForModule(name string) ([]dto.Resource, e
 	return out, nil
 }
 
-func (k *KubernetesClient) getManagedGVRs(moduleName string) ([]schema.GroupVersionResource, error) {
-	module, _ := k.GetModule(moduleName)
+func (k *KubernetesClient) getManagedGVRs(moduleName, moduleNamespace string) ([]schema.GroupVersionResource, error) {
+	module, _ := k.GetModule(moduleName, moduleNamespace)
 
 	if module != nil && len(module.Status.ManagedGVRs) != 0 {
 		existing := make([]schema.GroupVersionResource, 0, len(module.Status.ManagedGVRs))

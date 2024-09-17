@@ -110,7 +110,7 @@ func main() {
 		}),
 		Cache: ctrlCache.Options{
 			DefaultNamespaces: map[string]ctrlCache.Config{
-				getWatchNamespace("WATCH_NAMESPACE"): {},
+				getWatchNamespace(): {},
 			},
 		},
 	})
@@ -160,10 +160,11 @@ func getEnvBool(key string) bool {
 	return b
 }
 
-func getWatchNamespace(key string) string {
-	value := os.Getenv(key)
-	if value == "" {
-		return "cyclops"
+func getWatchNamespace() string {
+	watchNamespace, exists := os.LookupEnv("WATCH_NAMESPACE")
+	if !exists || watchNamespace == "" {
+		return ctrlCache.AllNamespaces
 	}
-	return value
+
+	return watchNamespace
 }

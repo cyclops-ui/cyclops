@@ -97,7 +97,7 @@ func (r *ModuleReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctr
 	err := r.Get(ctx, req.NamespacedName, &module)
 	if apierrors.IsNotFound(err) {
 		r.logger.Info("delete module", "namespaced name", req.NamespacedName)
-		resources, err := r.kubernetesClient.GetResourcesForModule(req.Name)
+		resources, err := r.kubernetesClient.GetResourcesForModule(req.Name, req.Namespace)
 		if err != nil {
 			r.logger.Error(err, "error on get module resources", "namespaced name", req.NamespacedName)
 			return ctrl.Result{}, err
@@ -284,7 +284,12 @@ func (r *ModuleReconciler) generateResources(
 		}
 		childrenGVRs = append(childrenGVRs, gvr)
 
-		if err := kClient.CreateDynamic(gvr, &obj, module.Spec.TargetNamespace); err != nil {
+		targetNamespace := module.Spec.TargetNamespace
+		if len(targetNamespace) == 0 {
+			targetNamespace = module.Namespace
+		}
+
+		if err := kClient.CreateDynamic(gvr, &obj, targetNamespace); err != nil {
 			r.logger.Error(err, "could not apply resource",
 				"module namespaced name",
 				module.Name,

@@ -178,7 +178,7 @@ const ModuleDetails = () => {
     description: "",
   });
 
-  let { moduleName } = useParams();
+  let { moduleNamespace, moduleName } = useParams();
 
   const [showManagedFields, setShowManagedFields] = useState(false);
 
@@ -250,7 +250,7 @@ const ModuleDetails = () => {
 
   const fetchModuleResources = useCallback(() => {
     axios
-      .get(`/api/modules/` + moduleName + `/resources`)
+      .get(`/api/modules/` + moduleNamespace + "/" + moduleName + `/resources`)
       .then((res) => {
         setResources(res.data);
         setLoadResources(true);
@@ -260,12 +260,12 @@ const ModuleDetails = () => {
         setLoadResources(true);
         setError(mapResponseError(error));
       });
-  }, [moduleName]);
+  }, [moduleName, moduleNamespace]);
 
   useEffect(() => {
     function fetchModule() {
       axios
-        .get(`/api/modules/` + moduleName)
+        .get(`/api/modules/` + moduleNamespace + "/" + moduleName)
         .then((res) => {
           setModule(res.data);
           setLoadModule(true);
@@ -283,7 +283,7 @@ const ModuleDetails = () => {
     return () => {
       clearInterval(interval);
     };
-  }, [moduleName, fetchModuleResources]);
+  }, [moduleName, moduleNamespace, fetchModuleResources]);
 
   const getCollapseColor = (fieldName: string) => {
     if (
@@ -340,7 +340,7 @@ const ModuleDetails = () => {
 
   const deleteDeployment = () => {
     axios
-      .delete(`/api/modules/` + moduleName)
+      .delete(`/api/modules/` + moduleNamespace + "/" + moduleName)
       .then(() => {
         window.location.href = "/modules";
       })
@@ -883,7 +883,7 @@ const ModuleDetails = () => {
     setViewRawManifest(true);
 
     axios
-      .get(`/api/modules/` + moduleName + `/raw`)
+      .get(`/api/modules/` + moduleNamespace + "/" + moduleName + `/raw`)
       .then((res) => {
         let m = YAML.parse(res.data);
 
@@ -922,7 +922,13 @@ const ModuleDetails = () => {
     setViewRenderedManifest(true);
 
     axios
-      .get(`/api/modules/` + moduleName + `/currentManifest`)
+      .get(
+        `/api/modules/` +
+          moduleNamespace +
+          "/" +
+          moduleName +
+          `/currentManifest`,
+      )
       .then((res) => {
         setRenderedManifest(res.data);
         setLoadingRenderedManifest(false);
@@ -937,7 +943,7 @@ const ModuleDetails = () => {
     setLoadingReconciliation(true);
 
     axios
-      .post(`/api/modules/` + moduleName + `/reconcile`)
+      .post(`/api/modules/` + moduleNamespace + "/" + moduleName + `/reconcile`)
       .then((res) => {
         setLoadingReconciliation(false);
         notification.success({
@@ -1041,7 +1047,8 @@ const ModuleDetails = () => {
         <Col>
           <Button
             onClick={function () {
-              window.location.href = "/modules/" + moduleName + "/edit";
+              window.location.href =
+                "/modules/" + moduleNamespace + "/" + moduleName + "/edit";
             }}
             block
           >
@@ -1062,7 +1069,8 @@ const ModuleDetails = () => {
         <Col>
           <Button
             onClick={function () {
-              window.location.href = "/modules/" + moduleName + "/rollback";
+              window.location.href =
+                "/modules/" + moduleNamespace + "/" + moduleName + "/rollback";
             }}
             block
           >
@@ -1113,7 +1121,7 @@ const ModuleDetails = () => {
       </Divider>
       {resourcesLoading()}
       <Modal
-        title={`Delete module ${moduleName}`}
+        title={`Delete module ${moduleNamespace + "/" + moduleName}`}
         open={loading}
         onCancel={handleCancel}
         width={"40%"}
@@ -1121,7 +1129,7 @@ const ModuleDetails = () => {
           <Button
             danger
             block
-            disabled={deleteName !== moduleName}
+            disabled={deleteName !== moduleNamespace + "/" + moduleName}
             onClick={deleteDeployment}
           >
             Delete
