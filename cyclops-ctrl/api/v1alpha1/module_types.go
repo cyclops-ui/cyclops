@@ -65,8 +65,8 @@ type ReconciliationStatus struct {
 	// +kubebuilder:validation:Optional
 	Reason string `json:"reason,omitempty"`
 	// +kubebuilder:validation:Optional
-	Errors []string `json:"errors"`
-	FinishedAt string `json:"finishedAt"`
+	Errors     []string `json:"errors"`
+	FinishedAt string   `json:"finishedAt,omitempty"`
 }
 
 type GroupVersionResource struct {
@@ -95,7 +95,7 @@ type HistoryEntry struct {
 	Generation  int64                `json:"generation"`
 	TemplateRef HistoryTemplateRef   `json:"template"`
 	Values      apiextensionsv1.JSON `json:"values"`
-	FinishedAt string `json:"finishedAt"`
+	FinishedAt  string               `json:"finishedAt,omitempty"`
 }
 
 //+kubebuilder:object:root=true
