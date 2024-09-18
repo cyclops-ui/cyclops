@@ -4,6 +4,7 @@ import (
 	"path/filepath"
 
 	"github.com/cyclops-ui/cyclops/cyclops-ctrl/api/v1alpha1/client"
+	"github.com/cyclops-ui/cyclops/cyclops-ctrl/pkg/cluster/k8sclient"
 
 	"github.com/spf13/cobra"
 	"k8s.io/client-go/kubernetes"
@@ -15,6 +16,7 @@ import (
 var Moduleset *client.CyclopsV1Alpha1Client
 var Clientset *kubernetes.Clientset
 var Config *rest.Config
+var K8sClient *k8sclient.KubernetesClient
 
 func GetKubeConfig() func(cmd *cobra.Command, args []string) {
 	return func(cmd *cobra.Command, args []string) {
@@ -37,6 +39,11 @@ func GetKubeConfig() func(cmd *cobra.Command, args []string) {
 		}
 
 		Clientset, err = kubernetes.NewForConfig(Config)
+		if err != nil {
+			panic(err.Error())
+		}
+
+		K8sClient, err = k8sclient.New()
 		if err != nil {
 			panic(err.Error())
 		}
