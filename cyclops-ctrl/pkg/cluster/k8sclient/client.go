@@ -633,7 +633,7 @@ func (k *KubernetesClient) mapDeployment(group, version, kind, name, namespace s
 		Namespace: deployment.Namespace,
 		Replicas:  int(*deployment.Spec.Replicas),
 		Pods:      pods,
-		Status:    getDeploymentStatus(pods),
+		Status:    getDeploymentStatus(deployment),
 	}, nil
 }
 
@@ -655,7 +655,7 @@ func (k *KubernetesClient) mapDaemonSet(group, version, kind, name, namespace st
 		Name:      daemonSet.Name,
 		Namespace: daemonSet.Namespace,
 		Pods:      pods,
-		Status:    getDaemonSetStatus(pods),
+		Status:    getDaemonSetStatus(daemonSet),
 	}, nil
 }
 
@@ -678,7 +678,7 @@ func (k *KubernetesClient) mapStatefulSet(group, version, kind, name, namespace 
 		Namespace: namespace,
 		Replicas:  int(*statefulset.Spec.Replicas),
 		Pods:      pods,
-		Status:    getDeploymentStatus(pods),
+		Status:    getStatefulSetStatus(statefulset),
 	}, nil
 }
 

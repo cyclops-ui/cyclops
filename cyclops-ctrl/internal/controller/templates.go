@@ -9,11 +9,11 @@ import (
 	"github.com/gin-gonic/gin"
 	json "github.com/json-iterator/go"
 
-	"github.com/cyclops-ui/cyclops/cyclops-ctrl/pkg/cluster/k8sclient"
 	"github.com/cyclops-ui/cyclops/cyclops-ctrl/internal/mapper"
 	"github.com/cyclops-ui/cyclops/cyclops-ctrl/internal/models/dto"
 	"github.com/cyclops-ui/cyclops/cyclops-ctrl/internal/telemetry"
 	"github.com/cyclops-ui/cyclops/cyclops-ctrl/internal/template"
+	"github.com/cyclops-ui/cyclops/cyclops-ctrl/pkg/cluster/k8sclient"
 )
 
 type Templates struct {
