@@ -63,11 +63,9 @@ const Modules = () => {
         .get(`/api/modules/list`)
         .then((res) => {
           setAllData(res.data);
-          setLoadingModules(false);
         })
         .catch((error) => {
           setError(mapResponseError(error));
-          setLoadingModules(false);
         });
     }
 
