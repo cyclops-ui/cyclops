@@ -26,6 +26,7 @@ var getCMD = &cobra.Command{
 
 func init() {
 	getCMD.AddCommand(get.ListModule)
+	getCMD.AddCommand(get.ListResources)
 	getCMD.AddCommand(get.ListTemplate)
 	getCMD.AddCommand(get.ListTemplateAuthRules)
 
