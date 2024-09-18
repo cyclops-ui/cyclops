@@ -14,26 +14,32 @@ import (
 
 	"github.com/cyclops-ui/cyclops/cyclops-ctrl/internal/cerbos"
 	"github.com/cyclops-ui/cyclops/cyclops-ctrl/internal/cluster/k8sclient"
+
 	"github.com/cyclops-ui/cyclops/cyclops-ctrl/internal/mapper"
 	"github.com/cyclops-ui/cyclops/cyclops-ctrl/internal/models/dto"
+	"github.com/cyclops-ui/cyclops/cyclops-ctrl/internal/telemetry"
 	"github.com/cyclops-ui/cyclops/cyclops-ctrl/internal/template"
+	"github.com/cyclops-ui/cyclops/cyclops-ctrl/pkg/cluster/k8sclient"
 )
 
 type Templates struct {
 	templatesRepo    *template.Repo
 	kubernetesClient *k8sclient.KubernetesClient
 	cerbos           *cerbos.CerbosSvc
+	telemetryClient  telemetry.Client
 }
 
 func NewTemplatesController(
 	templatesRepo *template.Repo,
 	kubernetes *k8sclient.KubernetesClient,
 	cerbosSvc *cerbos.CerbosSvc,
+	telemetryClient telemetry.Client,
 ) *Templates {
 	return &Templates{
 		templatesRepo:    templatesRepo,
 		kubernetesClient: kubernetes,
 		cerbos:           cerbosSvc,
+		telemetryClient:  telemetryClient,
 	}
 }
 
@@ -163,6 +169,8 @@ func (c *Templates) CreateTemplatesStore(ctx *gin.Context) {
 
 	k8sTemplateStore := mapper.DTOToTemplateStore(*templateStore, tmpl.IconURL)
 
+	c.telemetryClient.TemplateCreation()
+
 	if err := c.kubernetesClient.CreateTemplateStore(k8sTemplateStore); err != nil {
 		ctx.JSON(http.StatusInternalServerError, dto.NewError("Error creating module", err.Error()))
 		return
@@ -210,6 +218,8 @@ func (c *Templates) EditTemplatesStore(ctx *gin.Context) {
 	templateStore.Name = ctx.Param("name")
 
 	k8sTemplateStore := mapper.DTOToTemplateStore(*templateStore, tmpl.IconURL)
+
+	c.telemetryClient.TemplateEdit()
 
 	if err := c.kubernetesClient.UpdateTemplateStore(k8sTemplateStore); err != nil {
 		ctx.JSON(http.StatusInternalServerError, dto.NewError("Error creating module", err.Error()))

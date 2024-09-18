@@ -22,6 +22,7 @@ import (
 	"github.com/cyclops-ui/cyclops/cyclops-ctrl/internal/auth"
 	"github.com/cyclops-ui/cyclops/cyclops-ctrl/internal/cerbos"
 	"github.com/cyclops-ui/cyclops/cyclops-ctrl/internal/cluster/k8sclient"
+
 	"github.com/cyclops-ui/cyclops/cyclops-ctrl/internal/handler"
 	"github.com/cyclops-ui/cyclops/cyclops-ctrl/internal/modulecontroller"
 	"github.com/cyclops-ui/cyclops/cyclops-ctrl/internal/prometheus"
@@ -29,6 +30,7 @@ import (
 	"github.com/cyclops-ui/cyclops/cyclops-ctrl/internal/template"
 	"github.com/cyclops-ui/cyclops/cyclops-ctrl/internal/template/cache"
 	"github.com/cyclops-ui/cyclops/cyclops-ctrl/internal/template/render"
+	"github.com/cyclops-ui/cyclops/cyclops-ctrl/pkg/cluster/k8sclient"
 
 	cyclopsv1alpha1 "github.com/cyclops-ui/cyclops/cyclops-ctrl/api/v1alpha1"
 )
@@ -64,7 +66,11 @@ func main() {
 
 	setupLog.Info("starting handler")
 
-	telemetryClient, _ := telemetry.NewClient(getEnvBool("DISABLE_TELEMETRY"), setupLog)
+	telemetryClient, _ := telemetry.NewClient(
+		getEnvBool("DISABLE_TELEMETRY"),
+		os.Getenv("CYCLOPS_VERSION"),
+		setupLog,
+	)
 	telemetryClient.InstanceStart()
 
 	k8sClient, err := k8sclient.New()

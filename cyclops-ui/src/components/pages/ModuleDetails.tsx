@@ -9,6 +9,7 @@ import {
   Divider,
   Input,
   Modal,
+  notification,
   Popover,
   Row,
   Spin,
@@ -22,6 +23,7 @@ import {
   BookOutlined,
   CaretRightOutlined,
   CheckCircleTwoTone,
+  ClockCircleTwoTone,
   CloseSquareTwoTone,
   CopyOutlined,
   DeleteOutlined,
@@ -57,6 +59,7 @@ import {
   canRestart,
   RestartButton,
 } from "../k8s-resources/common/RestartButton";
+import YAML from "yaml";
 
 const languages = [
   "javascript",
@@ -101,6 +104,7 @@ const { Title } = Typography;
 interface module {
   name: string;
   namespace: string;
+  targetNamespace: string;
   template: templateRef;
   iconURL: string;
 }
@@ -132,10 +136,13 @@ const ModuleDetails = () => {
 
   const [deleteName, setDeleteName] = useState("");
   const [deleteResourceVerify, setDeleteResourceVerify] = useState("");
-  const [resources, setResources] = useState([]);
+
+  const [resources, setResources] = useState<any[]>([]);
+
   const [module, setModule] = useState<module>({
     name: "",
     namespace: "",
+    targetNamespace: "",
     template: {
       repo: "",
       path: "",
@@ -153,6 +160,10 @@ const ModuleDetails = () => {
     name: "",
     namespace: "",
   });
+
+  const [loadingRawManifest, setLoadingRawManifest] = useState(false);
+  const [viewRawManifest, setViewRawManifest] = useState(false);
+  const [rawModuleManifest, setRawModuleManifest] = useState("");
 
   const [loadingRenderedManifest, setLoadingRenderedManifest] = useState(false);
   const [viewRenderedManifest, setViewRenderedManifest] = useState(false);
@@ -268,7 +279,7 @@ const ModuleDetails = () => {
 
     fetchModule();
     fetchModuleResources();
-    const interval = setInterval(() => fetchModuleResources(), 15000);
+    const interval = setInterval(() => fetchModuleResources(), 10000);
     return () => {
       clearInterval(interval);
     };
@@ -279,9 +290,9 @@ const ModuleDetails = () => {
       activeCollapses.get(fieldName) &&
       activeCollapses.get(fieldName) === true
     ) {
-      return "#E3E3E3";
+      return "#EFEFEF";
     } else {
-      return "#F3F3F3";
+      return "#FAFAFA";
     }
   };
 
@@ -361,6 +372,18 @@ const ModuleDetails = () => {
 
   const genExtra = (resource: any, status?: string) => {
     let statusIcon = <></>;
+    if (status === "progressing") {
+      statusIcon = (
+        <ClockCircleTwoTone
+          style={{
+            paddingLeft: "5px",
+            fontSize: "20px",
+            verticalAlign: "middle",
+          }}
+          twoToneColor={"#ffcc00"}
+        />
+      );
+    }
     if (status === "healthy") {
       statusIcon = (
         <CheckCircleTwoTone
@@ -436,6 +459,26 @@ const ModuleDetails = () => {
     }
 
     return "none";
+  };
+
+  const getStatusColor = (status: string, deleted: boolean) => {
+    if (status === "unhealthy") {
+      return "#FF0000";
+    }
+
+    if (deleted) {
+      return "#ff9f1a";
+    }
+
+    if (status === "progressing") {
+      return "#ffcc00";
+    }
+
+    if (status === "healthy" || status === "unknown") {
+      return "#27D507";
+    }
+
+    return "#FF0000";
   };
 
   resources.forEach((resource: any, index) => {
@@ -555,6 +598,10 @@ const ModuleDetails = () => {
           marginBottom: "12px",
           borderRadius: "10px",
           border: "1px solid #E3E3E3",
+          borderLeft:
+            "solid " +
+            getStatusColor(resource.status, resource.deleted) +
+            " 4px",
         }}
       >
         <Row>
@@ -576,6 +623,7 @@ const ModuleDetails = () => {
         <Row gutter={[20, 0]}>
           <Col style={{ float: "right" }}>
             <Button onClick={() => handleManifestClick(resource)} block>
+              <FileTextOutlined />
               View Manifest
             </Button>
           </Col>
@@ -676,7 +724,7 @@ const ModuleDetails = () => {
               fontWeight: "550",
             }}
           >
-            {module.namespace}
+            {module.targetNamespace}
           </Descriptions.Item>
         </Descriptions>
         <Row gutter={[40, 0]} style={{ paddingTop: "8px" }}>
@@ -703,7 +751,7 @@ const ModuleDetails = () => {
     }
 
     let resourcesWithStatus = 0;
-    let status = true;
+    let status = "";
     for (let i = resources.length - 1; i >= 0; i--) {
       let resource = resources[i] as any;
       if (resource.status === undefined) {
@@ -712,8 +760,13 @@ const ModuleDetails = () => {
 
       resourcesWithStatus++;
 
+      if (resource.status === "progressing") {
+        status = "progressing";
+        continue;
+      }
+
       if (resource.status === "unhealthy") {
-        status = false;
+        status = "unhealthy";
         break;
       }
     }
@@ -722,22 +775,22 @@ const ModuleDetails = () => {
       return <></>;
     }
 
-    let statusIcon = <></>;
-    if (status) {
-      statusIcon = (
-        <CheckCircleTwoTone
+    if (status === "progressing") {
+      return (
+        <ClockCircleTwoTone
           style={{
             verticalAlign: "middle",
             height: "100%",
             marginBottom: "4px",
             fontSize: "150%",
           }}
-          twoToneColor={"#52c41a"}
+          twoToneColor={"#ffcc00"}
         />
       );
     }
-    if (!status) {
-      statusIcon = (
+
+    if (status === "unhealthy") {
+      return (
         <CloseSquareTwoTone
           style={{
             verticalAlign: "middle",
@@ -750,7 +803,17 @@ const ModuleDetails = () => {
       );
     }
 
-    return statusIcon;
+    return (
+      <CheckCircleTwoTone
+        style={{
+          verticalAlign: "middle",
+          height: "100%",
+          marginBottom: "4px",
+          fontSize: "150%",
+        }}
+        twoToneColor={"#52c41a"}
+      />
+    );
   };
 
   const deleteResource = () => {
@@ -815,6 +878,45 @@ const ModuleDetails = () => {
     );
   };
 
+  const handleViewRawModuleManifest = () => {
+    setLoadingRawManifest(true);
+    setViewRawManifest(true);
+
+    axios
+      .get(`/api/modules/` + moduleName + `/raw`)
+      .then((res) => {
+        let m = YAML.parse(res.data);
+
+        if (m.status) {
+          delete m.status;
+        }
+        if (m.metadata) {
+          if (m.metadata.creationTimestamp) {
+            delete m.metadata.creationTimestamp;
+          }
+
+          if (m.metadata.generation) {
+            delete m.metadata.generation;
+          }
+
+          if (m.metadata.resourceVersion) {
+            delete m.metadata.resourceVersion;
+          }
+
+          if (m.metadata.uid) {
+            delete m.metadata.uid;
+          }
+        }
+
+        setRawModuleManifest(YAML.stringify(m));
+        setLoadingRawManifest(false);
+      })
+      .catch((error) => {
+        setError(mapResponseError(error));
+        setLoadingRawManifest(false);
+      });
+  };
+
   const handleViewRenderedManifest = () => {
     setLoadingRenderedManifest(true);
     setViewRenderedManifest(true);
@@ -838,40 +940,72 @@ const ModuleDetails = () => {
       .post(`/api/modules/` + moduleName + `/reconcile`)
       .then((res) => {
         setLoadingReconciliation(false);
+        notification.success({
+          message: "Reconciliation triggered",
+          description: `${moduleName} has been queued for reconciliation. All the resources will be recreated`,
+          duration: 10,
+        });
       })
       .catch((error) => {
-        setError(mapResponseError(error));
+        notification.error({
+          message: "Reconciliation triggering failed",
+          description: `${mapResponseError(error).description}`,
+          duration: 10,
+        });
         setLoadingReconciliation(false);
       });
   };
 
-  const renderedManifestModalContent = () => {
-    if (loadingRenderedManifest) {
+  const moduleManifestContent = (content: string, loading: boolean) => {
+    if (loading) {
       return <Spin />;
     }
 
     return (
-      <ReactAce
-        mode={"sass"}
-        theme={"github"}
-        fontSize={12}
-        showPrintMargin={true}
-        showGutter={true}
-        highlightActiveLine={true}
-        readOnly={true}
-        setOptions={{
-          enableBasicAutocompletion: true,
-          enableLiveAutocompletion: true,
-          enableSnippets: false,
-          showLineNumbers: true,
-          tabSize: 4,
-          useWorker: false,
-        }}
-        style={{
-          width: "100%",
-        }}
-        value={renderedManifest}
-      />
+      <div>
+        <Divider />
+        <div style={{ position: "relative" }}>
+          <ReactAce
+            mode={"sass"}
+            theme={"github"}
+            fontSize={12}
+            showPrintMargin={true}
+            showGutter={true}
+            highlightActiveLine={true}
+            readOnly={true}
+            setOptions={{
+              enableBasicAutocompletion: true,
+              enableLiveAutocompletion: true,
+              enableSnippets: false,
+              showLineNumbers: true,
+              tabSize: 4,
+              useWorker: false,
+            }}
+            style={{
+              width: "100%",
+            }}
+            value={content}
+          />
+          <Tooltip title={"Copy manifest"} trigger="hover">
+            <Button
+              onClick={() => {
+                navigator.clipboard.writeText(content);
+              }}
+              style={{
+                position: "absolute",
+                right: "20px",
+                top: "10px",
+              }}
+            >
+              <CopyOutlined
+                style={{
+                  fontSize: "20px",
+                }}
+              />
+            </Button>
+          </Tooltip>
+        </div>
+      </div>
     );
   };
 
@@ -937,9 +1071,15 @@ const ModuleDetails = () => {
           </Button>
         </Col>
         <Col>
+          <Button onClick={handleViewRawModuleManifest} block>
+            <FileTextOutlined />
+            Module manifest
+          </Button>
+        </Col>
+        <Col>
           <Button onClick={handleViewRenderedManifest} block>
             <FileTextOutlined />
-            View Manifest
+            Rendered manifest
           </Button>
         </Col>
         <Col>
@@ -1007,7 +1147,7 @@ const ModuleDetails = () => {
         onOk={handleCancelManifest}
         onCancel={handleCancelManifest}
         cancelButtonProps={{ style: { display: "none" } }}
-        width={"40%"}
+        width={"70%"}
       >
         <Checkbox onChange={handleCheckboxChange} checked={showManagedFields}>
           Include Managed Fields
@@ -1078,14 +1218,24 @@ const ModuleDetails = () => {
         />
       </Modal>
       <Modal
+        title="Module manifest"
+        open={viewRawManifest}
+        onOk={() => setViewRawManifest(false)}
+        onCancel={() => setViewRawManifest(false)}
+        cancelButtonProps={{ style: { display: "none" } }}
+        width={"70%"}
+      >
+        {moduleManifestContent(rawModuleManifest, loadingRawManifest)}
+      </Modal>
+      <Modal
         title="Rendered manifest"
         open={viewRenderedManifest}
         onOk={() => setViewRenderedManifest(false)}
         onCancel={() => setViewRenderedManifest(false)}
         cancelButtonProps={{ style: { display: "none" } }}
-        width={"60%"}
+        width={"70%"}
       >
-        {renderedManifestModalContent()}
+        {moduleManifestContent(renderedManifest, loadingRenderedManifest)}
       </Modal>
     </div>
   );

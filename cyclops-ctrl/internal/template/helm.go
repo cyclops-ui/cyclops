@@ -179,7 +179,8 @@ func (r Repo) mapHelmChart(chartName string, files map[string][]byte) (*models.T
 			continue
 		}
 
-		if len(parts) > 2 && parts[1] == "templates" && (parts[2] != "Notes.txt" && parts[2] != "NOTES.txt") {
+		if len(parts) > 2 && parts[1] == "templates" &&
+			(parts[2] != "Notes.txt" && parts[2] != "NOTES.txt" && parts[2] != "tests") {
 			templateFiles = append(templateFiles, &helmchart.File{
 				Name: path.Join(parts[1:]...),
 				Data: content,
@@ -187,7 +188,8 @@ func (r Repo) mapHelmChart(chartName string, files map[string][]byte) (*models.T
 			continue
 		}
 
-		if len(parts) > 2 && parts[1] == "crds" && (parts[2] != "Notes.txt" && parts[2] != "NOTES.txt") {
+		if len(parts) > 2 && parts[1] == "crds" &&
+			(parts[2] != "Notes.txt" && parts[2] != "NOTES.txt" && parts[2] != "tests") {
 			crdFiles = append(crdFiles, &helmchart.File{
 				Name: path.Join(parts[1:]...),
 				Data: content,
@@ -255,6 +257,7 @@ func (r Repo) mapHelmChart(chartName string, files map[string][]byte) (*models.T
 		CRDs:              crdFiles,
 		Dependencies:      dependencies,
 		HelmChartMetadata: metadata,
+		RawSchema:         schemaBytes,
 		IconURL:           metadata.Icon,
 	}, nil
 }

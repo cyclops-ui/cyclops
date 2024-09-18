@@ -1,0 +1,16 @@
+.actionsmenucol {
+  padding: 9px !important;
+}
+
+.actionsmenu {
+  font-size: 28px;
+  transition:
+    transform 0.1s,
+    color 0.1s;
+}
+
+.actionsmenu:hover {
+  color: #fe8801;
+  transform: scale(1.2);
+  cursor: pointer;
+}

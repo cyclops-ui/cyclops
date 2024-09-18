@@ -20,17 +20,17 @@ const SideNav = () => {
 
   const sidebarItems: MenuProps["items"] = [
     {
-      label: <Link to={PathConstants.MODULES}> Modules</Link>,
+      label: <a href={PathConstants.MODULES}>Modules</a>,
       icon: <AppstoreAddOutlined />,
       key: "modules",
     },
     {
-      label: <Link to={PathConstants.NODES}> Nodes</Link>,
+      label: <a href={PathConstants.NODES}>Nodes</a>,
       icon: <HddOutlined />,
       key: "nodes",
     },
     {
-      label: <Link to={PathConstants.TEMPLATES}> Templates</Link>,
+      label: <a href={PathConstants.TEMPLATES}>Templates</a>,
       icon: <SnippetsOutlined />,
       key: "templates",
     },

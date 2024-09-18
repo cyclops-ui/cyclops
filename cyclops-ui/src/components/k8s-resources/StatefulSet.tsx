@@ -1,8 +1,10 @@
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { Col, Divider, Row, Alert } from "antd";
 import axios from "axios";
 import { mapResponseError } from "../../utils/api/errors";
-import PodTable from "./common/PodTable";
+import PodTable from "./common/PodTable/PodTable";
+import { resourceStream } from "../../utils/api/sse/resources";
+import { isStreamingEnabled } from "../../utils/api/common";
 
 interface Props {
   name: string;
@@ -26,31 +28,44 @@ const StatefulSet = ({ name, namespace }: Props) => {
   });
 
   useEffect(() => {
-    function fetchStatefulSet() {
-      axios
-        .get(`/api/resources`, {
-          params: {
-            group: `apps`,
-            version: `v1`,
-            kind: `StatefulSet`,
-            name: name,
-            namespace: namespace,
-          },
-        })
-        .then((res) => {
-          setStatefulSet(res.data);
-        })
-        .catch((error) => {
-          setError(mapResponseError(error));
-        });
+    if (isStreamingEnabled()) {
+      resourceStream(`apps`, `v1`, `StatefulSet`, name, namespace, (r: any) => {
+        setStatefulSet(r);
+      });
+    }
+  }, [name, namespace]);
+
+  const fetchStatefulSet = useCallback(() => {
+    axios
+      .get(`/api/resources`, {
+        params: {
+          group: `apps`,
+          version: `v1`,
+          kind: `StatefulSet`,
+          name: name,
+          namespace: namespace,
+        },
+      })
+      .then((res) => {
+        setStatefulSet(res.data);
+      })
+      .catch((error) => {
+        setError(mapResponseError(error));
+      });
+  }, [name, namespace]);
+
+  useEffect(() => {
+    fetchStatefulSet();
+
+    if (isStreamingEnabled()) {
+      return () => {};
     }
 
-    fetchStatefulSet();
     const interval = setInterval(() => fetchStatefulSet(), 15000);
     return () => {
       clearInterval(interval);
     };
-  }, [name, namespace]);
+  }, [fetchStatefulSet]);
 
   return (
     <div>
@@ -78,7 +93,11 @@ const StatefulSet = ({ name, namespace }: Props) => {
           Replicas: {statefulSet.pods.length}
         </Divider>
         <Col span={24} style={{ overflowX: "auto" }}>
-          <PodTable namespace={namespace} pods={statefulSet.pods} />
+          <PodTable
+            namespace={namespace}
+            pods={statefulSet.pods}
+            updateResourceData={fetchStatefulSet}
+          />
         </Col>
       </Row>
     </div>

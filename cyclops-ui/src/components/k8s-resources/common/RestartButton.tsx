@@ -2,6 +2,7 @@ import { Button, notification } from "antd";
 import axios from "axios";
 import React from "react";
 import { mapResponseError } from "../../../utils/api/errors";
+import { UndoOutlined } from "@ant-design/icons";
 
 interface Props {
   group: string;
@@ -51,6 +52,7 @@ export const RestartButton = ({
         handleRestart(group, version, kind, name, namespace);
       }}
     >
+      <UndoOutlined />
       Restart
     </Button>
   );

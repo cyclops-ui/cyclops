@@ -1,8 +1,10 @@
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { Col, Divider, Row, Alert } from "antd";
 import axios from "axios";
 import { mapResponseError } from "../../utils/api/errors";
-import PodTable from "./common/PodTable";
+import PodTable from "./common/PodTable/PodTable";
+import { resourceStream } from "../../utils/api/sse/resources";
+import { isStreamingEnabled } from "../../utils/api/common";
 
 interface Props {
   name: string;
@@ -20,31 +22,44 @@ const Deployment = ({ name, namespace }: Props) => {
   });
 
   useEffect(() => {
-    function fetchDeployment() {
-      axios
-        .get(`/api/resources`, {
-          params: {
-            group: `apps`,
-            version: `v1`,
-            kind: `Deployment`,
-            name: name,
-            namespace: namespace,
-          },
-        })
-        .then((res) => {
-          setDeployment(res.data);
-        })
-        .catch((error) => {
-          setError(mapResponseError(error));
-        });
+    if (isStreamingEnabled()) {
+      resourceStream(`apps`, `v1`, `Deployment`, name, namespace, (r: any) => {
+        setDeployment(r);
+      });
+    }
+  }, [name, namespace]);
+
+  const fetchDeployment = useCallback(() => {
+    axios
+      .get(`/api/resources`, {
+        params: {
+          group: `apps`,
+          version: `v1`,
+          kind: `Deployment`,
+          name: name,
+          namespace: namespace,
+        },
+      })
+      .then((res) => {
+        setDeployment(res.data);
+      })
+      .catch((error) => {
+        setError(mapResponseError(error));
+      });
+  }, [name, namespace]);
+
+  useEffect(() => {
+    fetchDeployment();
+
+    if (isStreamingEnabled()) {
+      return () => {};
     }
 
-    fetchDeployment();
     const interval = setInterval(() => fetchDeployment(), 15000);
     return () => {
       clearInterval(interval);
     };
-  }, [name, namespace]);
+  }, [fetchDeployment]);
 
   return (
     <div>
@@ -72,7 +87,11 @@ const Deployment = ({ name, namespace }: Props) => {
           Replicas: {deployment.pods.length}
         </Divider>
         <Col span={24} style={{ overflowX: "auto" }}>
-          <PodTable namespace={namespace} pods={deployment.pods} />
+          <PodTable
+            namespace={namespace}
+            pods={deployment.pods}
+            updateResourceData={fetchDeployment}
+          />
         </Col>
       </Row>
     </div>

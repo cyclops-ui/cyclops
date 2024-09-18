@@ -26,7 +26,7 @@ type Deployment struct {
 	Namespace string `json:"namespace"`
 	Replicas  int    `json:"replicas"`
 	Pods      []Pod  `json:"pods"`
-	Status    bool   `json:"status"`
+	Status    string `json:"status"`
 	Deleted   bool   `json:"deleted"`
 }
 
@@ -69,7 +69,7 @@ type DaemonSet struct {
 	Name      string `json:"name"`
 	Namespace string `json:"namespace"`
 	Pods      []Pod  `json:"pods"`
-	Status    bool   `json:"status"`
+	Status    string `json:"status"`
 	Deleted   bool   `json:"deleted"`
 }
 
@@ -257,7 +257,7 @@ type StatefulSet struct {
 	Namespace string `json:"namespace"`
 	Replicas  int    `json:"replicas"`
 	Pods      []Pod  `json:"pods"`
-	Status    bool   `json:"status"`
+	Status    string `json:"status"`
 	Deleted   bool   `json:"deleted"`
 }
 

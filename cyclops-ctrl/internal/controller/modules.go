@@ -5,6 +5,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"sigs.k8s.io/yaml"
 	"strings"
 	"time"
 
@@ -14,12 +15,14 @@ import (
 	"github.com/cyclops-ui/cyclops/cyclops-ctrl/api/v1alpha1"
 	"github.com/cyclops-ui/cyclops/cyclops-ctrl/internal/cerbos"
 	"github.com/cyclops-ui/cyclops/cyclops-ctrl/internal/cluster/k8sclient"
+
 	"github.com/cyclops-ui/cyclops/cyclops-ctrl/internal/mapper"
 	"github.com/cyclops-ui/cyclops/cyclops-ctrl/internal/models/dto"
 	"github.com/cyclops-ui/cyclops/cyclops-ctrl/internal/prometheus"
 	"github.com/cyclops-ui/cyclops/cyclops-ctrl/internal/telemetry"
 	"github.com/cyclops-ui/cyclops/cyclops-ctrl/internal/template"
 	"github.com/cyclops-ui/cyclops/cyclops-ctrl/internal/template/render"
+	"github.com/cyclops-ui/cyclops/cyclops-ctrl/pkg/cluster/k8sclient"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
@@ -78,6 +81,32 @@ func (m *Modules) GetModule(ctx *gin.Context) {
 	}
 
 	ctx.JSON(http.StatusOK, moduleDTO)
+}
+
+func (m *Modules) GetRawModuleManifest(ctx *gin.Context) {
+	ctx.Header("Access-Control-Allow-Origin", "*")
+
+	module, err := m.kubernetesClient.GetModule(ctx.Param("name"))
+	if err != nil {
+		fmt.Println(err)
+		ctx.Status(http.StatusInternalServerError)
+		return
+	}
+
+	module.History = []v1alpha1.HistoryEntry{}
+	module.ObjectMeta.ManagedFields = []metav1.ManagedFieldsEntry{}
+
+	module.Kind = "Module"
+	module.APIVersion = "cyclops-ui.com/v1alpha1"
+
+	data, err := yaml.Marshal(module)
+	if err != nil {
+		fmt.Println(err)
+		ctx.JSON(http.StatusInternalServerError, dto.NewError("Error marshaling module", err.Error()))
+		return
+	}
+
+	ctx.Data(http.StatusOK, gin.MIMEYAML, data)
 }
 
 func (m *Modules) ListModules(ctx *gin.Context) {
@@ -383,6 +412,9 @@ func (m *Modules) UpdateModule(ctx *gin.Context) {
 	module.Status.IconURL = curr.Status.IconURL
 	module.Status.ManagedGVRs = curr.Status.ManagedGVRs
 
+	module.Spec.TargetNamespace = curr.Spec.TargetNamespace
+	module.SetLabels(curr.GetLabels())
+
 	result, err := m.kubernetesClient.UpdateModuleStatus(&module)
 	if err != nil {
 		fmt.Println(err)
@@ -467,12 +499,12 @@ func (m *Modules) ResourcesForModule(ctx *gin.Context) {
 
 	manifest, err := m.renderer.HelmTemplate(*module, t)
 	if err != nil {
-		fmt.Println(err)
+		fmt.Println("error rendering manifest", err)
 		ctx.JSON(http.StatusInternalServerError, dto.NewError("Error rendering Module manifest", err.Error()))
 		return
 	}
 
-	resources, err = m.kubernetesClient.GetDeletedResources(resources, manifest)
+	resources, err = m.kubernetesClient.GetDeletedResources(resources, manifest, module.Spec.TargetNamespace)
 	if err != nil {
 		fmt.Println(err)
 		ctx.JSON(http.StatusInternalServerError, dto.NewError("Error fetching deleted module resources", err.Error()))
@@ -591,7 +623,7 @@ func (m *Modules) GetLogs(ctx *gin.Context) {
 	ctx.Header("Access-Control-Allow-Origin", "*")
 
 	logCount := int64(100)
-	logs, err := m.kubernetesClient.GetPodLogs(
+	rawLogs, err := m.kubernetesClient.GetPodLogs(
 		ctx.Param("namespace"),
 		ctx.Param("container"),
 		ctx.Param("name"),
@@ -601,6 +633,11 @@ func (m *Modules) GetLogs(ctx *gin.Context) {
 		fmt.Println(err)
 		ctx.JSON(http.StatusInternalServerError, dto.NewError("Error fetching logs", err.Error()))
 		return
+	}
+
+	logs := make([]string, 0, len(rawLogs))
+	for _, log := range rawLogs {
+		logs = append(logs, trimLogLine(log))
 	}
 
 	ctx.JSON(http.StatusOK, logs)
@@ -787,4 +824,12 @@ func (m *Modules) checkPermission(ctx *gin.Context, kind, resourceName, action s
 		return false
 	}
 	return allowed
+}
+
+func trimLogLine(logLine string) string {
+	parts := strings.SplitN(logLine, " ", 2)
+	if len(parts) > 1 {
+		return parts[1]
+	}
+	return logLine
 }

@@ -85,6 +85,8 @@ func (r Repo) loadDependencies(metadata *helm.Metadata) ([]*models.Template, err
 			return nil, err
 		}
 
+		dep.Condition = dependency.Condition
+
 		deps = append(deps, dep)
 	}
 

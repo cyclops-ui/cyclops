@@ -1,6 +1,7 @@
 package create
 
 import (
+	"encoding/json"
 	"fmt"
 	"log"
 	"os"
@@ -24,10 +25,11 @@ var (
 	`
 	valuesFile   string
 	templateName string
+	outputFormat string
 )
 
 // createModule allows you to create module Custom Resource.
-func createModule(clientset *client.CyclopsV1Alpha1Client, moduleName, repo, path, version, namespace, valuesFile, templateName string) {
+func createModule(clientset *client.CyclopsV1Alpha1Client, moduleName, repo, path, version, namespace, valuesFile, templateName, outputFormat string) {
 
 	values, err := os.ReadFile(valuesFile)
 	if err != nil {
@@ -69,12 +71,35 @@ func createModule(clientset *client.CyclopsV1Alpha1Client, moduleName, repo, pat
 		},
 	}
 
-	module, err := clientset.Modules(namespace).Create(&newModule)
-	if err != nil {
-		fmt.Printf("Error creating template: %v\n", err)
-		return
+	if outputFormat == "yaml" {
+		// Marshal the newModule object to JSON
+		jsonOutput, err := json.Marshal(newModule)
+		if err != nil {
+			log.Fatalf("Error marshalling module to JSON: %v", err)
+		}
+		// Convert JSON to YAML
+		yamlOutput, err := yaml.JSONToYAML(jsonOutput)
+		if err != nil {
+			log.Fatalf("Error converting module to YAML: %v", err)
+		}
+		fmt.Printf("---\n%s\n", yamlOutput)
+	} else if outputFormat == "json" {
+		output, err := json.MarshalIndent(newModule, "", "  ")
+		if err != nil {
+			log.Fatalf("Error converting module to JSON: %v", err)
+		}
+		fmt.Printf("%s\n", output)
+	} else if outputFormat == "" {
+		// Proceed with creation if no output format is specified
+		module, err := clientset.Modules(namespace).Create(&newModule)
+		if err != nil {
+			fmt.Printf("Error creating module: %v\n", err)
+			return
+		}
+		fmt.Printf("%v created successfully.\n", module.Name)
+	} else {
+		log.Fatalf("Invalid output format: %s. Supported formats are 'yaml' and 'json'.", outputFormat)
 	}
-	fmt.Printf("%v created successfully.\n", module.Name)
 }
 
 var (
@@ -91,7 +116,7 @@ var (
 			if (templateName != "" && (repo != "" || path != "" || version != "")) || (templateName == "" && (repo == "" || path == "" || version == "")) {
 				log.Fatalf("Error: Either template or (repo, path and version) must be provided.")
 			}
-			createModule(kubeconfig.Moduleset, args[0], repo, path, version, namespace, valuesFile, templateName)
+			createModule(kubeconfig.Moduleset, args[0], repo, path, version, namespace, valuesFile, templateName, outputFormat)
 		},
 	}
 )
@@ -103,5 +128,6 @@ func init() {
 	CreateModule.Flags().StringVarP(&version, "version", "v", "", "Version of the module")
 	CreateModule.Flags().StringVarP(&valuesFile, "file", "f", "", "Path to the values.yaml file")
 	CreateModule.Flags().StringVarP(&templateName, "template", "t", "", "Name of the template to use for the module creation")
+	CreateModule.Flags().StringVarP(&outputFormat, "output", "o", "", "Output format (yaml or json)")
 	CreateModule.MarkFlagRequired("file")
 }

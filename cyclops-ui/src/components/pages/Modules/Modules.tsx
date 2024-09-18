@@ -14,7 +14,9 @@ import {
   Checkbox,
 } from "antd";
 import { useNavigate } from "react-router";
+
 import axios from "axios";
+
 import Link from "antd/lib/typography/Link";
 
 import styles from "./styles.module.css";
@@ -31,10 +33,11 @@ const Modules = () => {
   const [moduleHealthFilter, setModuleHealthFilter] = useState<string[]>([
     "Healthy",
     "Unhealthy",
+    "Progressing",
     "Unknown",
   ]);
   const [searchInputFilter, setsearchInputFilter] = useState("");
-  const resourceFilter = ["Healthy", "Unhealthy", "Unknown"];
+  const resourceFilter = ["Healthy", "Unhealthy", "Progressing", "Unknown"];
   const [error, setError] = useState({
     message: "",
     description: "",
@@ -98,12 +101,16 @@ const Modules = () => {
   };
 
   const getStatusColor = (module: any) => {
-    if (module.status === "undefined") {
+    if (module.status === "unknown") {
       return "gray";
     }
 
     if (module.status === "healthy") {
       return "#27D507";
+    }
+
+    if (module.status === "progressing") {
+      return "#ffbf00";
     }
 
     return "#FF0000";

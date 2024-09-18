@@ -3,9 +3,10 @@ package handler
 import (
 	"net/http"
 	"os"
+	"github.com/cyclops-ui/cyclops/cyclops-ctrl/internal/controller/sse"
 
 	"github.com/gin-gonic/gin"
-
+	"net/http"
 	cerbos "github.com/cyclops-ui/cyclops/cyclops-ctrl/internal/cerbos"
 	"github.com/cyclops-ui/cyclops/cyclops-ctrl/internal/cluster/k8sclient"
 	"github.com/cyclops-ui/cyclops/cyclops-ctrl/internal/controller"
@@ -13,6 +14,7 @@ import (
 	"github.com/cyclops-ui/cyclops/cyclops-ctrl/internal/telemetry"
 	templaterepo "github.com/cyclops-ui/cyclops/cyclops-ctrl/internal/template"
 	"github.com/cyclops-ui/cyclops/cyclops-ctrl/internal/template/render"
+	"github.com/cyclops-ui/cyclops/cyclops-ctrl/pkg/cluster/k8sclient"
 )
 
 type Handler struct {
@@ -49,13 +51,17 @@ func New(
 func (h *Handler) Start() error {
 	gin.SetMode(gin.DebugMode)
 
-	templatesController := controller.NewTemplatesController(h.templatesRepo, h.k8sClient, h.cerbosClient)
+	templatesController := controller.NewTemplatesController(h.templatesRepo, h.k8sClient, h.cerbosClient, h.telemetryClient)
 	modulesController := controller.NewModulesController(h.templatesRepo, h.k8sClient, h.renderer, h.telemetryClient, h.monitor, h.cerbosClient)
 	clusterController := controller.NewClusterController(h.k8sClient)
 
 	// _ = os.Getenv("CYCLOPS_AUTHORIZATION")
 
 	h.router = gin.New()
+
+	server := sse.NewServer(h.k8sClient)
+
+	h.router.POST("/stream/resources", sse.HeadersMiddleware(), server.Resources)
 
 	h.router.GET("/ping", h.pong())
 
@@ -84,6 +90,7 @@ func (h *Handler) Start() error {
 	h.router.DELETE("/modules/:name", modulesController.DeleteModule)
 	h.router.POST("/modules/new", modulesController.CreateModule)
 	h.router.POST("/modules/update", modulesController.UpdateModule)
+	h.router.GET("/modules/:name/raw", modulesController.GetRawModuleManifest)
 	h.router.POST("/modules/:name/reconcile", modulesController.ReconcileModule)
 	h.router.GET("/modules/:name/history", modulesController.GetModuleHistory)
 	h.router.POST("/modules/:name/manifest", modulesController.Manifest)
@@ -104,6 +111,8 @@ func (h *Handler) Start() error {
 
 	h.router.GET("/nodes", clusterController.ListNodes)
 	h.router.GET("/nodes/:name", clusterController.GetNode)
+
+	h.router.GET("/namespaces", clusterController.ListNamespaces)
 
 	h.router.Use(h.options)
 

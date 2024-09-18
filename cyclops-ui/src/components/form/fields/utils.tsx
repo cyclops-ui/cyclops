@@ -16,3 +16,11 @@ export const isFieldNullOrUndefined = (
 ): boolean => {
   return !obj || obj[fieldName] === null || obj[fieldName] === undefined;
 };
+
+export function collapseColor(open: boolean): string {
+  if (open) {
+    return "#faca93";
+  } else {
+    return "#fae8d4";
+  }
+}

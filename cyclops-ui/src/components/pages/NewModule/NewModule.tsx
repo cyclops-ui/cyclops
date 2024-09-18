@@ -7,28 +7,16 @@ import {
   Divider,
   Form,
   Input,
-  InputNumber,
   Row,
   Select,
-  Switch,
   Typography,
-  Tooltip,
   Modal,
   Spin,
   notification,
 } from "antd";
 import axios from "axios";
 import { useNavigate } from "react-router";
-import {
-  MinusCircleOutlined,
-  PlusOutlined,
-  InfoCircleOutlined,
-} from "@ant-design/icons";
-import {
-  fileExtension,
-  findMaps,
-  flattenObjectKeys,
-} from "../../../utils/form";
+import { findMaps, flattenObjectKeys } from "../../../utils/form";
 import "./custom.css";
 import defaultTemplate from "../../../static/img/default-template-icon.png";
 
@@ -36,21 +24,13 @@ import YAML from "yaml";
 
 import AceEditor from "react-ace";
 
-import "ace-builds/src-noconflict/theme-github";
-
-import "ace-builds/src-noconflict/mode-yaml";
-import "ace-builds/src-noconflict/mode-toml";
-import "ace-builds/src-noconflict/mode-javascript";
-import "ace-builds/src-noconflict/mode-typescript";
-import "ace-builds/src-noconflict/snippets/yaml";
-import { numberInputValidators } from "../../../utils/validators/number";
-import { stringInputValidators } from "../../../utils/validators/string";
 import { Option } from "antd/es/mentions";
 import {
   FeedbackError,
   FormValidationErrors,
 } from "../../errors/FormValidationErrors";
 import { mapResponseError } from "../../../utils/api/errors";
+import TemplateFormFields from "../../form/TemplateFormFields";
 
 const { Title } = Typography;
 const layout = {
@@ -97,12 +77,6 @@ const NewModule = () => {
   const [loadingTemplateInitialValues, setLoadingTemplateInitialValues] =
     useState(false);
 
-  const [activeCollapses, setActiveCollapses] = useState(new Map());
-  const updateActiveCollapses = (k: string[], v: any) => {
-    let kk = new Array(k);
-    setActiveCollapses(new Map(activeCollapses.set(kk.join(""), v)));
-  };
-
   var initLoadedFrom: string[];
   initLoadedFrom = [];
   const [newFile, setNewFile] = useState("");
@@ -112,6 +86,8 @@ const NewModule = () => {
   const [loadingValuesModal, setLoadingValuesModal] = useState(false);
 
   const [templateStore, setTemplateStore] = useState<templateStoreOption[]>([]);
+
+  const [namespaces, setNamespaces] = useState<string[]>([]);
 
   const history = useNavigate();
 
@@ -129,6 +105,7 @@ const NewModule = () => {
 
   useEffect(() => {
     loadTemplateStore();
+    loadNamespaces();
   }, []);
 
   useEffect(() => {
@@ -197,6 +174,14 @@ const NewModule = () => {
           }
 
           Object.keys(values[field.name]).forEach((key) => {
+            if (typeof values[field.name][key] === "object") {
+              object.push({
+                key: key,
+                value: YAML.stringify(values[field.name][key], null, 4),
+              });
+              return;
+            }
+
             object.push({
               key: key,
               value: values[field.name][key],
@@ -219,12 +204,14 @@ const NewModule = () => {
 
   const handleSubmit = (values: any) => {
     const moduleName = values["cyclops_module_name"];
+    const moduleNamespace = values["cyclops_module_namespace"];
 
     values = findMaps(config.root.properties, values, initialValuesRaw);
 
     axios
       .post(`/api/modules/new`, {
         name: moduleName,
+        namespace: moduleNamespace,
         values: values,
         template: {
           repo: template.repo,
@@ -256,7 +243,6 @@ const NewModule = () => {
     setInitialValuesRaw({});
     setInitialValues({});
 
-    setActiveCollapses(new Map());
     setLoadingTemplate(true);
     setLoadingTemplateInitialValues(true);
 
@@ -326,8 +312,6 @@ const NewModule = () => {
         setLoadingTemplateInitialValues(false);
         setError(mapResponseError(error));
       });
-
-    setActiveCollapses(new Map());
   };
 
   const loadTemplateStore = async () => {
@@ -338,6 +322,17 @@ const NewModule = () => {
       })
       .catch(function (error) {
         setLoadingTemplate(false);
+        setError(mapResponseError(error));
+      });
+  };
+
+  const loadNamespaces = async () => {
+    await axios
+      .get(`/api/namespaces`)
+      .then((res) => {
+        setNamespaces(res.data);
+      })
+      .catch(function (error) {
         setError(mapResponseError(error));
       });
   };
@@ -386,690 +381,19 @@ const NewModule = () => {
     setLoadingValuesFile(false);
   };
 
-  const getCollapseColor = (fieldName: string) => {
-    let kk = new Array(fieldName);
-    let key = kk.join("");
-    if (activeCollapses.get(key) && activeCollapses.get(key) === true) {
-      return "#faca93";
-    } else {
-      return "#fae8d4";
-    }
-  };
-
-  const selectInputField = (
-    field: any,
-    formItemName: string | string[],
-    arrayField: any,
-    isRequired: boolean,
-  ) => {
-    let options: { value: string; label: string }[] = [];
-    field.enum.forEach((option: any) => {
-      options.push({
-        value: option,
-        label: option,
-      });
-    });
-
-    return (
-      <Form.Item
-        {...arrayField}
-        name={formItemName}
-        rules={[{ required: isRequired }]}
-        style={{
-          paddingTop: "8px",
-          marginBottom: "12px",
-        }}
-        label={
-          <div>
-            {field.display_name}
-            <p style={{ color: "#8b8e91", marginBottom: "0px" }}>
-              {field.description}
-            </p>
-          </div>
-        }
-      >
-        <Select
-          showSearch
-          placeholder={field.name}
-          optionFilterProp="children"
-          filterOption={(input, option) =>
-            (option?.label ?? "").toLowerCase().includes(input.toLowerCase())
-          }
-          options={options}
-        />
-      </Form.Item>
-    );
-  };
-
-  const fileField = (
-    field: any,
-    formItemName: string | string[],
-    arrayField: any,
-    isRequired: boolean,
-  ) => {
-    return (
-      <Form.Item
-        {...arrayField}
-        name={formItemName}
-        style={{
-          paddingTop: "8px",
-          marginBottom: "12px",
-        }}
-        label={
-          <div>
-            {field.display_name}
-            <p style={{ color: "#8b8e91", marginBottom: "0px" }}>
-              {field.description}
-            </p>
-          </div>
-        }
-        rules={stringInputValidators(field, isRequired)}
-      >
-        <AceEditor
-          mode={fileExtension(field.fileExtension)}
-          theme="github"
-          fontSize={12}
-          showPrintMargin={true}
-          showGutter={true}
-          highlightActiveLine={true}
-          setOptions={{
-            enableBasicAutocompletion: true,
-            enableLiveAutocompletion: true,
-            enableSnippets: false,
-            showLineNumbers: true,
-            tabSize: 4,
-            useWorker: false,
-          }}
-          style={{
-            height: "25em",
-            width: "100%",
-          }}
-        />
-      </Form.Item>
-    );
-  };
-
-  const arrayInnerField = (
-    fieldName: string,
-    uniqueFieldName: string[],
-    formItemName: any,
-    field: any,
-    level: number,
-    header: React.JSX.Element,
-  ) => {
-    if (!field.items || field.items.type === "string") {
-      return (
-        <Form.Item
-          wrapperCol={{ span: level === 0 ? 16 : 24 }}
-          name={fieldName}
-          style={{
-            paddingTop: "0px",
-            marginBottom: "12px",
-          }}
-          label={
-            <div>
-              {field.display_name}
-              <p style={{ color: "#8b8e91", marginBottom: "0px" }}>
-                {field.description}
-              </p>
-            </div>
-          }
-        >
-          <Form.List name={formItemName}>
-            {(arrFields, { add, remove }) => (
-              <div
-                style={{
-                  border: "solid 1px #d3d3d3",
-                  borderRadius: "7px",
-                  padding: "12px",
-                  width: "100%",
-                  backgroundColor: "#fafafa",
-                }}
-              >
-                {arrFields.map((arrField, index) => (
-                  <Col key={arrField.key}>
-                    <Row>
-                      <Form.Item
-                        style={{
-                          paddingBottom: "8px",
-                          marginBottom: "0px",
-                          width: "80%",
-                        }}
-                        wrapperCol={{ span: 24 }}
-                        {...arrField}
-                        initialValue={field.initialValue}
-                        name={[arrField.name]}
-                      >
-                        <Input />
-                      </Form.Item>
-                      <MinusCircleOutlined
-                        style={{ fontSize: "16px", paddingLeft: "10px" }}
-                        onClick={() => remove(arrField.name)}
-                      />
-                    </Row>
-                    {arrFields !== null &&
-                    arrFields !== undefined &&
-                    index + 1 === arrFields.length ? (
-                      <Divider
-                        style={{ marginTop: "4px", marginBottom: "12px" }}
-                      />
-                    ) : (
-                      <></>
-                    )}
-                  </Col>
-                ))}
-                <Form.Item style={{ marginBottom: "0" }}>
-                  <Button
-                    type="dashed"
-                    onClick={() => add()}
-                    block
-                    icon={<PlusOutlined />}
-                  >
-                    Add
-                  </Button>
-                </Form.Item>
-              </div>
-            )}
-          </Form.List>
-        </Form.Item>
-      );
-    }
-    if (field.items.type === "object") {
-      return (
-        <Collapse
-          size={"small"}
-          bordered={false}
-          onChange={function (value: string | string[]) {
-            if (value.length === 0) {
-              updateActiveCollapses(uniqueFieldName, false);
-            } else {
-              updateActiveCollapses(uniqueFieldName, true);
-            }
-          }}
-        >
-          <Collapse.Panel
-            key={fieldName}
-            header={header}
-            style={{
-              borderRadius: "7px",
-              backgroundColor: getCollapseColor(uniqueFieldName.toString()),
-            }}
-            forceRender={true}
-          >
-            <Form.Item
-              wrapperCol={{ span: 16 }}
-              style={{
-                paddingTop: "8px",
-                marginBottom: "0",
-              }}
-            >
-              <Form.List name={formItemName}>
-                {(arrFields, { add, remove }) => (
-                  <>
-                    {arrFields.map((arrField) => (
-                      <Col
-                        key={arrField.key}
-                        style={{ padding: 0, paddingBottom: "12px" }}
-                      >
-                        <div
-                          style={{
-                            border: "solid 1.5px #c3c3c3",
-                            borderRadius: "7px",
-                            padding: "12px",
-                            width: "100%",
-                            backgroundColor: "#fafafa",
-                          }}
-                        >
-                          {mapFields(
-                            field.items.properties,
-                            [...uniqueFieldName, String(arrField.name)],
-                            "",
-                            level + 1,
-                            2,
-                            arrField,
-                            field.items.required,
-                          )}
-                          <MinusCircleOutlined
-                            style={{ fontSize: "16px" }}
-                            onClick={() => remove(arrField.name)}
-                          />
-                        </div>
-                      </Col>
-                    ))}
-                    <Form.Item style={{ marginBottom: "0" }}>
-                      <Button
-                        type="dashed"
-                        onClick={() => add()}
-                        block
-                        icon={<PlusOutlined />}
-                      >
-                        Add
-                      </Button>
-                    </Form.Item>
-                  </>
-                )}
-              </Form.List>
-            </Form.Item>
-          </Collapse.Panel>
-        </Collapse>
-      );
-    }
-  };
-
-  function getValueFromNestedObject(obj: any, keys: string[]): any {
-    let currentObj = obj;
-
-    for (const key of keys) {
-      if (
-        typeof currentObj === "object" &&
-        currentObj !== null &&
-        key in currentObj
-      ) {
-        currentObj = currentObj[key];
-      } else {
-        return false;
-      }
-    }
-
-    return currentObj;
-  }
-
-  function mapFields(
-    fields: any[],
-    parentFieldID: string[],
-    parent: string,
-    level: number,
-    arrayIndexLifetime: number,
-    arrayField?: any,
-    required?: string[],
-  ) {
-    const formFields: {} | any = [];
-
-    if (!fields) {
-      return <></>;
-    }
-
-    fields.forEach((field: any) => {
-      let fieldName = field.name;
-
-      let formItemName = arrayField ? [arrayField.name, fieldName] : fieldName;
-
-      let uniqueFieldName: string[] =
-        parentFieldID.length === 0
-          ? [field.name]
-          : [...parentFieldID, field.name];
-
-      let isRequired = false;
-
-      if (required) {
-        for (let r of required) {
-          if (r === field.name) {
-            isRequired = true;
-            break;
-          }
-        }
-      }
-
-      if (arrayIndexLifetime > 0) {
-        arrayIndexLifetime = arrayIndexLifetime - 1;
-      }
-
-      var header;
-      switch (field.type) {
-        case "string":
-          if (field.enum) {
-            formFields.push(
-              selectInputField(field, formItemName, arrayField, isRequired),
-            );
-            return;
-          }
-
-          if (field.fileExtension && field.fileExtension.length > 0) {
-            formFields.push(
-              fileField(field, formItemName, arrayField, isRequired),
-            );
-            return;
-          }
-
-          let stringValidationRules = stringInputValidators(field, isRequired);
-
-          formFields.push(
-            <Form.Item
-              {...arrayField}
-              name={formItemName}
-              style={{
-                paddingTop: "8px",
-                marginBottom: "12px",
-              }}
-              label={
-                <div>
-                  {field.display_name}
-                  <p style={{ color: "#8b8e91", marginBottom: "0px" }}>
-                    {field.description}
-                  </p>
-                </div>
-              }
-              hasFeedback={stringValidationRules.length > 0}
-              validateDebounce={1000}
-              rules={stringValidationRules}
-            >
-              <Input />
-            </Form.Item>,
-          );
-          return;
-        case "number":
-          let numberValidationRules = numberInputValidators(field, isRequired);
-
-          formFields.push(
-            <Form.Item
-              {...arrayField}
-              initialValue={field.initialValue}
-              name={formItemName}
-              style={{
-                paddingTop: "8px",
-                marginBottom: "12px",
-              }}
-              label={
-                <div>
-                  {field.display_name}
-                  <p style={{ color: "#8b8e91", marginBottom: "0px" }}>
-                    {field.description}
-                  </p>
-                </div>
-              }
-              hasFeedback={numberValidationRules.length > 0}
-              validateDebounce={1000}
-              rules={numberValidationRules}
-            >
-              <InputNumber style={{ width: "100%" }} />
-            </Form.Item>,
-          );
-          return;
-        case "boolean":
-          let k = [];
-          for (const item of parentFieldID) {
-            if (item === "") {
-              continue;
-            }
-
-            k.push(item);
-          }
-          k.push(fieldName);
-
-          let checked =
-            getValueFromNestedObject(initialValues, k) === true
-              ? "checked"
-              : "unchecked";
-          formFields.push(
-            <Form.Item
-              initialValue={field.initialValue}
-              name={fieldName}
-              id={fieldName}
-              valuePropName={checked}
-              style={{
-                paddingTop: "8px",
-                marginBottom: "12px",
-              }}
-              label={
-                <div>
-                  {field.display_name}
-                  <p style={{ color: "#8b8e91", marginBottom: "0px" }}>
-                    {field.description}
-                  </p>
-                </div>
-              }
-            >
-              <Switch />
-            </Form.Item>,
-          );
-          return;
-        case "object":
-          header = <Row>{field.display_name}</Row>;
-
-          if (field.description && field.description.length !== 0) {
-            header = (
-              <Row gutter={[0, 8]}>
-                <Col
-                  span={15}
-                  style={{ display: "flex", justifyContent: "flex-start" }}
-                >
-                  {field.display_name}
-                </Col>
-                <Col
-                  span={9}
-                  style={{ display: "flex", justifyContent: "flex-end" }}
-                >
-                  <Tooltip
-                    title={field.description}
-                    trigger={["hover", "click"]}
-                  >
-                    <InfoCircleOutlined
-                      style={{ right: "0px", fontSize: "20px" }}
-                    />
-                  </Tooltip>
-                </Col>
-              </Row>
-            );
-          }
-
-          formFields.push(
-            <Col
-              span={level === 0 ? 16 : 24}
-              offset={level === 0 ? 2 : 0}
-              style={{
-                paddingTop: "8px",
-                paddingBottom: "8px",
-                marginLeft: "0px",
-                marginRight: "0px",
-                paddingLeft: "0px",
-                paddingRight: "0px",
-              }}
-            >
-              <Collapse
-                size={"small"}
-                bordered={false}
-                onChange={function (value: string | string[]) {
-                  if (value.length === 0) {
-                    updateActiveCollapses(uniqueFieldName, false);
-                  } else {
-                    updateActiveCollapses(uniqueFieldName, true);
-                  }
-                }}
-              >
-                <Collapse.Panel
-                  key={fieldName}
-                  header={header}
-                  style={{
-                    borderRadius: "7px",
-                    backgroundColor: getCollapseColor(
-                      uniqueFieldName.toString(),
-                    ),
-                  }}
-                  forceRender={true}
-                >
-                  <Form.List name={formItemName}>
-                    {(arrFields, { add, remove }) => (
-                      <>
-                        {mapFields(
-                          field.properties,
-                          uniqueFieldName,
-                          "",
-                          level + 1,
-                          arrayIndexLifetime,
-                          arrayIndexLifetime > 0 ? arrayField : undefined,
-                          field.required,
-                        )}
-                      </>
-                    )}
-                  </Form.List>
-                </Collapse.Panel>
-              </Collapse>
-            </Col>,
-          );
-          return;
-        case "array":
-          header = <Row>{field.name}</Row>;
-
-          if (field.description && field.description.length !== 0) {
-            header = (
-              <Row gutter={[0, 8]}>
-                <Col
-                  span={15}
-                  style={{ display: "flex", justifyContent: "flex-start" }}
-                >
-                  {field.name}
-                </Col>
-                <Col
-                  span={9}
-                  style={{ display: "flex", justifyContent: "flex-end" }}
-                >
-                  <Tooltip
-                    title={field.description}
-                    trigger={["hover", "click"]}
-                  >
-                    <InfoCircleOutlined
-                      style={{ right: "0px", fontSize: "20px" }}
-                    />
-                  </Tooltip>
-                </Col>
-              </Row>
-            );
-          }
-
-          formFields.push(
-            <Col
-              span={level === 0 ? 16 : 24}
-              offset={level === 0 ? 2 : 0}
-              style={{
-                paddingTop: "8px",
-                paddingBottom: "8px",
-                paddingLeft: "0px",
-                paddingRight: "0px",
-                marginLeft: "0px",
-                marginRight: "0px",
-              }}
-            >
-              {arrayInnerField(
-                fieldName,
-                uniqueFieldName,
-                formItemName,
-                field,
-                level + 1,
-                header,
-              )}
-            </Col>,
-          );
-          return;
-        case "map":
-          formFields.push(
-            <Form.Item
-              wrapperCol={{ span: level === 0 ? 16 : 24 }}
-              name={fieldName}
-              rules={[{ required: isRequired }]}
-              style={{
-                paddingTop: "8px",
-                marginBottom: "12px",
-              }}
-              label={
-                <div>
-                  {field.display_name}
-                  <p style={{ color: "#8b8e91", marginBottom: "0px" }}>
-                    {field.description}
-                  </p>
-                </div>
-              }
-            >
-              <Form.List name={formItemName} initialValue={[]}>
-                {(fields, { add, remove }) => (
-                  <div
-                    style={{
-                      border: "solid 1px #d3d3d3",
-                      borderRadius: "7px",
-                      padding: "12px",
-                      width: "100%",
-                      backgroundColor: "#fafafa",
-                    }}
-                  >
-                    {fields.map((arrField, index) => (
-                      <Row
-                        key={arrField.key}
-                        style={{
-                          display: "flex",
-                          marginBottom: 8,
-                          width: "100%",
-                        }}
-                      >
-                        <Col span={10}>
-                          <Form.Item
-                            {...arrField}
-                            name={[arrField.name, "key"]}
-                            rules={[{ required: true, message: "Missing key" }]}
-                            style={{ margin: 0, flex: 1, marginRight: "8px" }}
-                          >
-                            <Input style={{ margin: 0, width: "100%" }} />
-                          </Form.Item>
-                        </Col>
-                        <Col span={10}>
-                          <Form.Item
-                            {...arrField}
-                            name={[arrField.name, "value"]}
-                            rules={[
-                              { required: true, message: "Missing value" },
-                            ]}
-                            style={{ margin: 0, flex: 1, marginRight: "12px" }}
-                          >
-                            <Input style={{ margin: 0 }} />
-                          </Form.Item>
-                        </Col>
-                        <MinusCircleOutlined
-                          onClick={() => remove(arrField.name)}
-                        />
-                        {fields !== null &&
-                        fields !== undefined &&
-                        index + 1 === fields.length ? (
-                          <Divider
-                            style={{ marginTop: "12px", marginBottom: "4px" }}
-                          />
-                        ) : (
-                          ""
-                        )}
-                      </Row>
-                    ))}
-                    <Col span={24}>
-                      <Form.Item style={{ marginBottom: "0" }}>
-                        <Button
-                          type="dashed"
-                          onClick={() => {
-                            add();
-                          }}
-                          block
-                          icon={<PlusOutlined />}
-                        >
-                          Add
-                        </Button>
-                      </Form.Item>
-                    </Col>
-                  </div>
-                )}
-              </Form.List>
-            </Form.Item>,
-          );
-      }
-    });
-
-    return formFields;
-  }
-
   function renderFormFields() {
     if (!loadingTemplate && !loadingTemplateInitialValues) {
-      return mapFields(
-        config.root.properties,
-        [],
-        "",
-        0,
-        0,
-        undefined,
-        config.root.required,
+      return (
+        <TemplateFormFields
+          isModuleEdit={false}
+          fields={config.root.properties}
+          parentFieldID={[]}
+          parent={""}
+          level={0}
+          arrayIndexLifetime={0}
+          initialValues={initialValues}
+          required={config.root.required}
+        />
       );
     }
 
@@ -1198,7 +522,7 @@ const NewModule = () => {
             )}
           >
             <Divider orientation="left" orientationMargin="0">
-              Module template
+              Template
             </Divider>
             <Row>
               <Col span={16}>
@@ -1241,42 +565,87 @@ const NewModule = () => {
               </Col>
             </Row>
             <Divider orientation="left" orientationMargin="0">
-              Module name
+              Metadata
             </Divider>
-            <Form.Item
-              name="cyclops_module_name"
-              id="cyclops_module_name"
-              label={
-                <div>
-                  Module name
-                  <p style={{ color: "#8b8e91", marginBottom: "0px" }}>
-                    Enter a unique module name
-                  </p>
-                </div>
-              }
-              rules={[
-                {
-                  required: true,
-                  message: "Module name is required",
-                },
-                {
-                  max: 63,
-                  message:
-                    "Module name must contain no more than 63 characters",
-                },
-                {
-                  pattern: /^[a-z0-9](?:[a-z0-9-]*[a-z0-9])?$/, // only alphanumeric characters and hyphens, cannot start or end with a hyphen and the alpha characters can only be lowercase
-                  message:
-                    "Module name must follow the Kubernetes naming convention",
-                },
-              ]}
-              hasFeedback={true}
-              validateDebounce={1000}
+            <Col style={{ padding: "0px" }} span={16}>
+              <div
+                style={{
+                  border: "solid 1.5px #c3c3c3",
+                  borderRadius: "7px",
+                  padding: "12px",
+                  width: "100%",
+                  backgroundColor: "#fafafa",
+                }}
+              >
+                <Form.Item
+                  name="cyclops_module_name"
+                  id="cyclops_module_name"
+                  label={
+                    <div>
+                      Module name
+                      <p style={{ color: "#8b8e91", marginBottom: "0px" }}>
+                        Enter a unique module name
+                      </p>
+                    </div>
+                  }
+                  rules={[
+                    {
+                      required: true,
+                      message: "Module name is required",
+                    },
+                    {
+                      max: 63,
+                      message:
+                        "Module name must contain no more than 63 characters",
+                    },
+                    {
+                      pattern: /^[a-z0-9](?:[a-z0-9-]*[a-z0-9])?$/, // only alphanumeric characters and hyphens, cannot start or end with a hyphen and the alpha characters can only be lowercase
+                      message:
+                        "Module name must follow the Kubernetes naming convention",
+                    },
+                  ]}
+                  hasFeedback={true}
+                  validateDebounce={1000}
+                >
+                  <Input />
+                </Form.Item>
+                <Form.Item
+                  name="cyclops_module_namespace"
+                  id="cyclops_module_namespace"
+                  label={
+                    <div>
+                      Target namespace
+                      <p style={{ color: "#8b8e91", marginBottom: "0px" }}>
+                        Namespace used to deploy resources to
+                      </p>
+                    </div>
+                  }
+                  hasFeedback={true}
+                  validateDebounce={1000}
+                >
+                  <Select
+                    showSearch={true}
+                    onChange={onTemplateStoreSelected}
+                    style={{ width: "100%" }}
+                    placeholder="default"
+                    value="default"
+                    defaultValue="default"
+                  >
+                    {namespaces.map((namespace: string) => (
+                      <Option key={namespace} value={namespace}>
+                        {namespace}
+                      </Option>
+                    ))}
+                  </Select>
+                </Form.Item>
+              </div>
+            </Col>
+            <Divider
+              orientation="left"
+              orientationMargin="0"
+              style={{ borderColor: "#ccc" }}
             >
-              <Input />
-            </Form.Item>
-            <Divider orientation="left" orientationMargin="0">
-              Define Module
+              Configure
             </Divider>
             {renderFormFields()}
             <div style={{ textAlign: "right" }}>
