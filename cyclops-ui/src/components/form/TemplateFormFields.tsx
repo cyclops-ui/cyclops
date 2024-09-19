@@ -74,6 +74,7 @@ export function mapFields(
               formItemName={formItemName}
               arrayField={arrayField}
               isRequired={isRequired}
+              isModuleEdit={isModuleEdit}
             />,
           );
           return;

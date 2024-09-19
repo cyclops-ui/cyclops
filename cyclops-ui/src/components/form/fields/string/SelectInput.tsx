@@ -11,6 +11,7 @@ interface Props {
   formItemName: string | string[];
   arrayField: any;
   isRequired: boolean;
+  isModuleEdit: boolean;
 }
 
 export const SelectInputField = ({
@@ -18,6 +19,7 @@ export const SelectInputField = ({
   formItemName,
   arrayField,
   isRequired,
+  isModuleEdit,
 }: Props) => {
   const selectOptions = (field: any) => {
     let options: Option[] = [];
@@ -62,6 +64,7 @@ export const SelectInputField = ({
           (option?.label ?? "").toLowerCase().includes(input.toLowerCase())
         }
         options={selectOptions(field)}
+        disabled={field.immutable && isModuleEdit}
       />
     </Form.Item>
   );
