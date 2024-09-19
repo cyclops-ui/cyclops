@@ -23,6 +23,7 @@ import {
   BookOutlined,
   CaretRightOutlined,
   CheckCircleTwoTone,
+  ClockCircleTwoTone,
   CloseSquareTwoTone,
   CopyOutlined,
   DeleteOutlined,
@@ -58,6 +59,7 @@ import {
   canRestart,
   RestartButton,
 } from "../k8s-resources/common/RestartButton";
+import YAML from "yaml";
 
 const languages = [
   "javascript",
@@ -134,7 +136,9 @@ const ModuleDetails = () => {
 
   const [deleteName, setDeleteName] = useState("");
   const [deleteResourceVerify, setDeleteResourceVerify] = useState("");
-  const [resources, setResources] = useState([]);
+
+  const [resources, setResources] = useState<any[]>([]);
+
   const [module, setModule] = useState<module>({
     name: "",
     namespace: "",
@@ -275,7 +279,7 @@ const ModuleDetails = () => {
 
     fetchModule();
     fetchModuleResources();
-    const interval = setInterval(() => fetchModuleResources(), 15000);
+    const interval = setInterval(() => fetchModuleResources(), 10000);
     return () => {
       clearInterval(interval);
     };
@@ -286,9 +290,9 @@ const ModuleDetails = () => {
       activeCollapses.get(fieldName) &&
       activeCollapses.get(fieldName) === true
     ) {
-      return "#E3E3E3";
+      return "#EFEFEF";
     } else {
-      return "#F3F3F3";
+      return "#FAFAFA";
     }
   };
 
@@ -368,6 +372,18 @@ const ModuleDetails = () => {
 
   const genExtra = (resource: any, status?: string) => {
     let statusIcon = <></>;
+    if (status === "progressing") {
+      statusIcon = (
+        <ClockCircleTwoTone
+          style={{
+            paddingLeft: "5px",
+            fontSize: "20px",
+            verticalAlign: "middle",
+          }}
+          twoToneColor={"#ffcc00"}
+        />
+      );
+    }
     if (status === "healthy") {
       statusIcon = (
         <CheckCircleTwoTone
@@ -443,6 +459,26 @@ const ModuleDetails = () => {
     }
 
     return "none";
+  };
+
+  const getStatusColor = (status: string, deleted: boolean) => {
+    if (status === "unhealthy") {
+      return "#FF0000";
+    }
+
+    if (deleted) {
+      return "#ff9f1a";
+    }
+
+    if (status === "progressing") {
+      return "#ffcc00";
+    }
+
+    if (status === "healthy" || status === "unknown") {
+      return "#27D507";
+    }
+
+    return "#FF0000";
   };
 
   resources.forEach((resource: any, index) => {
@@ -562,6 +598,10 @@ const ModuleDetails = () => {
           marginBottom: "12px",
           borderRadius: "10px",
           border: "1px solid #E3E3E3",
+          borderLeft:
+            "solid " +
+            getStatusColor(resource.status, resource.deleted) +
+            " 4px",
         }}
       >
         <Row>
@@ -583,6 +623,7 @@ const ModuleDetails = () => {
         <Row gutter={[20, 0]}>
           <Col style={{ float: "right" }}>
             <Button onClick={() => handleManifestClick(resource)} block>
+              <FileTextOutlined />
               View Manifest
             </Button>
           </Col>
@@ -710,7 +751,7 @@ const ModuleDetails = () => {
     }
 
     let resourcesWithStatus = 0;
-    let status = true;
+    let status = "";
     for (let i = resources.length - 1; i >= 0; i--) {
       let resource = resources[i] as any;
       if (resource.status === undefined) {
@@ -719,8 +760,13 @@ const ModuleDetails = () => {
 
       resourcesWithStatus++;
 
+      if (resource.status === "progressing") {
+        status = "progressing";
+        continue;
+      }
+
       if (resource.status === "unhealthy") {
-        status = false;
+        status = "unhealthy";
         break;
       }
     }
@@ -729,22 +775,22 @@ const ModuleDetails = () => {
       return <></>;
     }
 
-    let statusIcon = <></>;
-    if (status) {
-      statusIcon = (
-        <CheckCircleTwoTone
+    if (status === "progressing") {
+      return (
+        <ClockCircleTwoTone
           style={{
             verticalAlign: "middle",
             height: "100%",
             marginBottom: "4px",
             fontSize: "150%",
           }}
-          twoToneColor={"#52c41a"}
+          twoToneColor={"#ffcc00"}
         />
       );
     }
-    if (!status) {
-      statusIcon = (
+
+    if (status === "unhealthy") {
+      return (
         <CloseSquareTwoTone
           style={{
             verticalAlign: "middle",
@@ -757,7 +803,17 @@ const ModuleDetails = () => {
       );
     }
 
-    return statusIcon;
+    return (
+      <CheckCircleTwoTone
+        style={{
+          verticalAlign: "middle",
+          height: "100%",
+          marginBottom: "4px",
+          fontSize: "150%",
+        }}
+        twoToneColor={"#52c41a"}
+      />
+    );
   };
 
   const deleteResource = () => {
@@ -829,7 +885,30 @@ const ModuleDetails = () => {
     axios
       .get(`/api/modules/` + moduleName + `/raw`)
       .then((res) => {
-        setRawModuleManifest(res.data);
+        let m = YAML.parse(res.data);
+
+        if (m.status) {
+          delete m.status;
+        }
+        if (m.metadata) {
+          if (m.metadata.creationTimestamp) {
+            delete m.metadata.creationTimestamp;
+          }
+
+          if (m.metadata.generation) {
+            delete m.metadata.generation;
+          }
+
+          if (m.metadata.resourceVersion) {
+            delete m.metadata.resourceVersion;
+          }
+
+          if (m.metadata.uid) {
+            delete m.metadata.uid;
+          }
+        }
+
+        setRawModuleManifest(YAML.stringify(m));
         setLoadingRawManifest(false);
       })
       .catch((error) => {

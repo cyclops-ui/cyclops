@@ -327,6 +327,7 @@ func (m *Modules) UpdateModule(ctx *gin.Context) {
 	module.Status.ManagedGVRs = curr.Status.ManagedGVRs
 
 	module.Spec.TargetNamespace = curr.Spec.TargetNamespace
+	module.SetLabels(curr.GetLabels())
 
 	result, err := m.kubernetesClient.UpdateModuleStatus(&module)
 	if err != nil {
