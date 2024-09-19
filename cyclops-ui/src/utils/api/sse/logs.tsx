@@ -57,6 +57,7 @@ export function logStream(
         setError(err);
         return 5000;
       },
+      openWhenHidden: true,
     },
   ).catch((r) => {
     setError(r);
