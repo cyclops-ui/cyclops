@@ -17,6 +17,8 @@ You can find a list of all the fields you can set below for each field type.
 In addition to the usual schema, we added more fields to help our users get as much from the UI as possible.
 
 | Name            | Type         | Description                                                                                                                                                                       | Valid input                                                      |
-| :-------------- | ------------ | :-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------- |
+|:----------------|--------------|:----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|------------------------------------------------------------------|
 | `order`         | string array | Defines the order of the fields in an object type property. <br/> Each time you use `properties`, you should also define the order of those properties                            | -                                                                |
 | `fileExtension` | string       | Sometimes, you would like your text field not just to be a field but also to get some highlighting based on the type of string you are saving. You can specify that in this field | `text`, `sh`, `json`, `yaml`, `toml`, `javascript`, `typescript` |
+| `immutable`     | boolean      | If `true`, the field can't be updated through the UI when __editing__ a module. Can be edited when the Module is first created or via manifest in the cluster.                    | `true`, `false` (`false` by default)                             |
+
