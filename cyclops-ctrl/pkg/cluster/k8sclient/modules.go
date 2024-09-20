@@ -262,7 +262,7 @@ func (k *KubernetesClient) GetModuleResourcesHealth(name string) (string, error)
 
 	resourcesWithHealth += len(statefulsets.Items)
 	for _, item := range statefulsets.Items {
-		if isStatefulSetProgressing(item.Status, item.Spec.Replicas) {
+		if isStatefulSetProgressing(item.Status, item.Spec.Replicas, item.Generation) {
 			return statusProgressing, nil
 		}
 
@@ -781,7 +781,7 @@ func getStatefulSetStatus(statefulset *appsv1.StatefulSet) string {
 		return statusHealthy
 	}
 
-	if isStatefulSetProgressing(statefulset.Status, statefulset.Spec.Replicas) {
+	if isStatefulSetProgressing(statefulset.Status, statefulset.Spec.Replicas, statefulset.Generation) {
 		return statusProgressing
 	}
 
@@ -832,7 +832,11 @@ func isDeploymentProgressing(conditions []appsv1.DeploymentCondition) bool {
 			progressingReason == "ReplicaSetUpdated")
 }
 
-func isStatefulSetProgressing(status appsv1.StatefulSetStatus, desiredReplicas *int32) bool {
+func isStatefulSetProgressing(status appsv1.StatefulSetStatus, desiredReplicas *int32, generation int64) bool {
+	if status.ObservedGeneration == 0 || generation > status.ObservedGeneration {
+		return true
+	}
+
 	if status.CurrentRevision != status.UpdateRevision {
 		return true
 	}
@@ -841,9 +845,5 @@ func isStatefulSetProgressing(status appsv1.StatefulSetStatus, desiredReplicas *
 		return false
 	}
 
-	if status.UpdatedReplicas < *desiredReplicas {
-		return true
-	}
-
-	return false
+	return status.ReadyReplicas < *desiredReplicas || status.UpdatedReplicas < *desiredReplicas
 }
