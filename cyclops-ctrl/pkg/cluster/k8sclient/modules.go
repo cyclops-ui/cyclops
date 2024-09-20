@@ -2,10 +2,10 @@ package k8sclient
 
 import (
 	"context"
+	"github.com/pkg/errors"
+	"regexp"
 	"sort"
 	"strings"
-
-	"github.com/pkg/errors"
 
 	appsv1 "k8s.io/api/apps/v1"
 	batchv1 "k8s.io/api/batch/v1"
@@ -420,9 +420,15 @@ func (k *KubernetesClient) getPods(deployment appsv1.Deployment) ([]dto.Pod, err
 		return nil, err
 	}
 
+	rs, singleRS := deploymentAvailableReplicaSet(deployment.Status.Conditions)
+
 	out := make([]dto.Pod, 0, len(pods.Items))
 	for _, item := range pods.Items {
 		containers := make([]dto.Container, 0, len(item.Spec.Containers))
+
+		if singleRS && len(rs) > 0 && !isPodOwner(item, rs) {
+			continue
+		}
 
 		for _, cnt := range item.Spec.Containers {
 			env := make(map[string]string)
@@ -798,6 +804,33 @@ func getPodStatus(containers []dto.Container) bool {
 	}
 
 	return true
+}
+
+func deploymentAvailableReplicaSet(conditions []appsv1.DeploymentCondition) (string, bool) {
+	replicaSetNamePattern := regexp.MustCompile(`ReplicaSet "(.+?)" has successfully progressed`)
+
+	for _, condition := range conditions {
+		if condition.Type == appsv1.DeploymentProgressing {
+			match := replicaSetNamePattern.FindStringSubmatch(condition.Message)
+			if len(match) > 1 {
+				return match[1], true
+			}
+		}
+	}
+
+	return "", false
+}
+
+func isPodOwner(pod apiv1.Pod, rsName string) bool {
+	for _, reference := range pod.OwnerReferences {
+		if reference.APIVersion == "apps/v1" &&
+			reference.Kind == "ReplicaSet" &&
+			reference.Name == rsName {
+			return true
+		}
+	}
+
+	return false
 }
 
 func isProgressing(conditions []appsv1.DeploymentCondition) bool {

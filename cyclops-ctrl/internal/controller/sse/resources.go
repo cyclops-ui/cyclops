@@ -7,9 +7,87 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"k8s.io/apimachinery/pkg/runtime/schema"
+
+	"github.com/cyclops-ui/cyclops/cyclops-ctrl/pkg/cluster/k8sclient"
 )
 
 func (s *Server) Resources(ctx *gin.Context) {
+	resources, err := s.k8sClient.GetResourcesForModule(ctx.Param("name"))
+	if err != nil {
+		ctx.String(http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	watchSpecs := make([]k8sclient.ResourceWatchSpec, 0, len(resources))
+	for _, resource := range resources {
+		if !k8sclient.IsWorkload(resource.GetGroup(), resource.GetVersion(), resource.GetKind()) {
+			continue
+		}
+
+		resourceName, err := s.k8sClient.GVKtoAPIResourceName(
+			schema.GroupVersion{
+				Group:   resource.GetGroup(),
+				Version: resource.GetVersion(),
+			},
+			resource.GetKind(),
+		)
+		if err != nil {
+			ctx.String(http.StatusInternalServerError, err.Error())
+			return
+		}
+
+		watchSpecs = append(watchSpecs, k8sclient.ResourceWatchSpec{
+			GVR: schema.GroupVersionResource{
+				Group:    resource.GetGroup(),
+				Version:  resource.GetVersion(),
+				Resource: resourceName,
+			},
+			Namespace: resource.GetNamespace(),
+			Name:      resource.GetName(),
+		})
+	}
+
+	stopCh := make(chan struct{})
+
+	watchResource, err := s.k8sClient.WatchKubernetesResources(watchSpecs, stopCh)
+	if err != nil {
+		ctx.String(http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	ctx.Stream(func(w io.Writer) bool {
+		for {
+			select {
+			case u, ok := <-watchResource:
+				if !ok {
+					return false
+				}
+
+				res, err := s.k8sClient.GetResource(
+					u.GroupVersionKind().Group,
+					u.GroupVersionKind().Version,
+					u.GroupVersionKind().Kind,
+					u.GetName(),
+					u.GetNamespace(),
+				)
+				if err != nil {
+					continue
+				}
+
+				ctx.SSEvent("resource-update", res)
+				return true
+			case <-ctx.Request.Context().Done():
+				close(stopCh)
+				return false
+			case <-ctx.Done():
+				close(stopCh)
+				return false
+			}
+		}
+	})
+}
+
+func (s *Server) SingleResource(ctx *gin.Context) {
 	type Ref struct {
 		Group     string `json:"group" form:"group"`
 		Version   string `json:"version" form:"version"`

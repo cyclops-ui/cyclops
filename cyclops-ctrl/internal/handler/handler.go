@@ -52,7 +52,8 @@ func (h *Handler) Start() error {
 
 	server := sse.NewServer(h.k8sClient)
 
-	h.router.POST("/stream/resources", sse.HeadersMiddleware(), server.Resources)
+	h.router.GET("/stream/resources/:name", sse.HeadersMiddleware(), server.Resources)
+	h.router.POST("/stream/resources", sse.HeadersMiddleware(), server.SingleResource)
 
 	h.router.GET("/ping", h.pong())
 

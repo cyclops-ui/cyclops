@@ -8,8 +8,10 @@ import (
 	"fmt"
 	"io"
 	networkingv1 "k8s.io/api/networking/v1"
+	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/util/intstr"
 	"k8s.io/apimachinery/pkg/watch"
+	"k8s.io/client-go/tools/cache"
 	"os"
 	"os/exec"
 	"sort"
@@ -1112,6 +1114,12 @@ func isNetworkPolicy(group, version, kind string) bool {
 	return group == "networking.k8s.io" && version == "v1" && kind == "NetworkPolicy"
 }
 
+func IsWorkload(group, version, kind string) bool {
+	return isDeployment(group, version, kind) ||
+		isStatefulSet(group, version, kind) ||
+		isDaemonSet(group, version, kind)
+}
+
 func (k *KubernetesClient) WatchResource(group, version, resource, name, namespace string) (watch.Interface, error) {
 	gvr := schema.GroupVersionResource{
 		Group:    group,
@@ -1122,4 +1130,55 @@ func (k *KubernetesClient) WatchResource(group, version, resource, name, namespa
 	return k.Dynamic.Resource(gvr).Namespace(namespace).Watch(context.Background(), metav1.ListOptions{
 		FieldSelector: "metadata.name=" + name,
 	})
+}
+
+type ResourceWatchSpec struct {
+	GVR       schema.GroupVersionResource
+	Namespace string
+	Name      string
+}
+
+func (k *KubernetesClient) WatchKubernetesResources(gvrs []ResourceWatchSpec, stopCh chan struct{}) (chan *unstructured.Unstructured, error) {
+	eventChan := make(chan *unstructured.Unstructured, 1)
+
+	startWatch := func(spec ResourceWatchSpec) {
+		go func() {
+			resourceClient := k.Dynamic.Resource(spec.GVR).Namespace(spec.Namespace)
+
+			informer := cache.NewSharedInformer(
+				&cache.ListWatch{
+					ListFunc: func(options metav1.ListOptions) (runtime.Object, error) {
+						options.FieldSelector = "metadata.name=" + spec.Name
+						return resourceClient.List(context.TODO(), options)
+					},
+					WatchFunc: func(options metav1.ListOptions) (watch.Interface, error) {
+						options.FieldSelector = "metadata.name=" + spec.Name
+						return resourceClient.Watch(context.TODO(), options)
+					},
+				},
+				&unstructured.Unstructured{},
+				0,
+			)
+
+			informer.AddEventHandler(cache.ResourceEventHandlerFuncs{
+				AddFunc: func(obj interface{}) {
+					eventChan <- obj.(*unstructured.Unstructured)
+				},
+				UpdateFunc: func(oldObj, newObj interface{}) {
+					eventChan <- newObj.(*unstructured.Unstructured)
+				},
+				DeleteFunc: func(obj interface{}) {
+					eventChan <- obj.(*unstructured.Unstructured)
+				},
+			})
+
+			informer.Run(stopCh)
+		}()
+	}
+
+	for _, gvr := range gvrs {
+		startWatch(gvr)
+	}
+
+	return eventChan, nil
 }

@@ -60,6 +60,13 @@ import {
   RestartButton,
 } from "../k8s-resources/common/RestartButton";
 import YAML from "yaml";
+import { isStreamingEnabled } from "../../utils/api/common";
+import { resourcesStream, resourceStream } from "../../utils/api/sse/resources";
+import {
+  isWorkload,
+  ResourceRef,
+  resourceRefKey,
+} from "../../utils/resourceRef";
 
 const languages = [
   "javascript",
@@ -109,12 +116,9 @@ interface module {
   iconURL: string;
 }
 
-interface resourceRef {
-  group: string;
-  version: string;
-  kind: string;
-  name: string;
-  namespace: string;
+interface workload {
+  status: string;
+  pods: any[];
 }
 
 const ModuleDetails = () => {
@@ -138,6 +142,23 @@ const ModuleDetails = () => {
   const [deleteResourceVerify, setDeleteResourceVerify] = useState("");
 
   const [resources, setResources] = useState<any[]>([]);
+  const [workloads, setWorkloads] = useState<Map<string, workload>>(new Map());
+
+  function getWorkload(ref: ResourceRef): workload | undefined {
+    let k = resourceRefKey(ref);
+
+    return workloads.get(k);
+  }
+
+  function putWorkload(ref: ResourceRef, workload: workload) {
+    let k = resourceRefKey(ref);
+
+    setWorkloads((prev) => {
+      const s = new Map(prev);
+      s.set(k, workload);
+      return s;
+    });
+  }
 
   const [module, setModule] = useState<module>({
     name: "",
@@ -153,7 +174,7 @@ const ModuleDetails = () => {
   });
 
   const [deleteResourceModal, setDeleteResourceModal] = useState(false);
-  const [deleteResourceRef, setDeleteResourceRef] = useState<resourceRef>({
+  const [deleteResourceRef, setDeleteResourceRef] = useState<ResourceRef>({
     group: "",
     version: "",
     kind: "",
@@ -284,6 +305,40 @@ const ModuleDetails = () => {
       clearInterval(interval);
     };
   }, [moduleName, fetchModuleResources]);
+
+  useEffect(() => {
+    if (isStreamingEnabled()) {
+      resourcesStream(moduleName, (r: any) => {
+        let resourceRef: ResourceRef = {
+          group: r.group,
+          version: r.version,
+          kind: r.kind,
+          name: r.name,
+          namespace: r.namespace,
+        };
+
+        putWorkload(resourceRef, r);
+
+        // setResources((prev) => {
+        //   const existingIndex = prev.findIndex(
+        //       (item) => item.group === r.group &&
+        //           item.version === r.version &&
+        //           item.kind === r.kind &&
+        //           item.name === r.name &&
+        //           item.namespace === r.namespace
+        //   );
+        //
+        //   if (existingIndex !== -1) {
+        //     const updatedData = [...prev];
+        //     updatedData[existingIndex] = r;
+        //     return updatedData;
+        //   }
+        //
+        //   return [...prev, r];
+        // });
+      });
+    }
+  }, [moduleName]);
 
   const getCollapseColor = (fieldName: string) => {
     if (
@@ -474,11 +529,7 @@ const ModuleDetails = () => {
       return "#ffcc00";
     }
 
-    if (status === "healthy" || status === "unknown") {
-      return "#27D507";
-    }
-
-    return "#FF0000";
+    return "#27D507";
   };
 
   resources.forEach((resource: any, index) => {
@@ -487,10 +538,22 @@ const ModuleDetails = () => {
 
     let resourceDetails = <p />;
 
+    let resourceRef: ResourceRef = {
+      group: resource.group,
+      version: resource.version,
+      kind: resource.kind,
+      name: resource.name,
+      namespace: resource.namespace,
+    };
+
     switch (resource.kind) {
       case "Deployment":
         resourceDetails = (
-          <Deployment name={resource.name} namespace={resource.namespace} />
+          <Deployment
+            name={resource.name}
+            namespace={resource.namespace}
+            workload={getWorkload(resourceRef)}
+          />
         );
         break;
       case "CronJob":
@@ -505,12 +568,20 @@ const ModuleDetails = () => {
         break;
       case "DaemonSet":
         resourceDetails = (
-          <DaemonSet name={resource.name} namespace={resource.namespace} />
+          <DaemonSet
+            name={resource.name}
+            namespace={resource.namespace}
+            workload={getWorkload(resourceRef)}
+          />
         );
         break;
       case "StatefulSet":
         resourceDetails = (
-          <StatefulSet name={resource.name} namespace={resource.namespace} />
+          <StatefulSet
+            name={resource.name}
+            namespace={resource.namespace}
+            workload={getWorkload(resourceRef)}
+          />
         );
         break;
       case "Pod":
@@ -583,9 +654,14 @@ const ModuleDetails = () => {
       );
     }
 
+    let resourceStatus = resource.status;
+    if (isWorkload(resourceRef)) {
+      resourceStatus = getWorkload(resourceRef)?.status;
+    }
+
     resourceCollapses.push(
       <Collapse.Panel
-        header={genExtra(resource, resource.status)}
+        header={genExtra(resource, resourceStatus)}
         key={collapseKey}
         style={{
           display: getResourceDisplay(
@@ -600,7 +676,7 @@ const ModuleDetails = () => {
           border: "1px solid #E3E3E3",
           borderLeft:
             "solid " +
-            getStatusColor(resource.status, resource.deleted) +
+            getStatusColor(resourceStatus, resource.deleted) +
             " 4px",
         }}
       >

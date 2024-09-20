@@ -9,9 +9,10 @@ import { isStreamingEnabled } from "../../utils/api/common";
 interface Props {
   name: string;
   namespace: string;
+  workload: any;
 }
 
-const DaemonSet = ({ name, namespace }: Props) => {
+const DaemonSet = ({ name, namespace, workload }: Props) => {
   const [daemonSet, setDaemonSet] = useState({
     status: "",
     pods: [],
@@ -21,14 +22,6 @@ const DaemonSet = ({ name, namespace }: Props) => {
     message: "",
     description: "",
   });
-
-  useEffect(() => {
-    if (isStreamingEnabled()) {
-      resourceStream(`apps`, `v1`, `DaemonSet`, name, namespace, (r: any) => {
-        setDaemonSet(r);
-      });
-    }
-  }, [name, namespace]);
 
   const fetchDaemonSet = useCallback(() => {
     axios
@@ -51,16 +44,25 @@ const DaemonSet = ({ name, namespace }: Props) => {
 
   useEffect(() => {
     fetchDaemonSet();
+  }, [fetchDaemonSet]);
 
-    if (isStreamingEnabled()) {
-      return () => {};
+  function getPods() {
+    if (workload) {
+      return workload.pods;
     }
 
-    const interval = setInterval(() => fetchDaemonSet(), 15000);
-    return () => {
-      clearInterval(interval);
-    };
-  }, [fetchDaemonSet]);
+    return daemonSet.pods;
+  }
+
+  function getPodsLength() {
+    let pods = getPods();
+
+    if (Array.isArray(pods)) {
+      return pods.length;
+    }
+
+    return 0;
+  }
 
   return (
     <div>
@@ -85,12 +87,12 @@ const DaemonSet = ({ name, namespace }: Props) => {
           orientationMargin="0"
           orientation={"left"}
         >
-          Pods: {daemonSet.pods.length}
+          Replicas: {getPodsLength()}
         </Divider>
         <Col span={24} style={{ overflowX: "auto" }}>
           <PodTable
             namespace={namespace}
-            pods={daemonSet.pods}
+            pods={getPods()}
             updateResourceData={fetchDaemonSet}
           />
         </Col>
