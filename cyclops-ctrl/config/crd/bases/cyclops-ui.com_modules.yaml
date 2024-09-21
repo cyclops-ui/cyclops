@@ -126,7 +126,7 @@ spec:
                     - succeeded
                     - failed
                     type: string
-                required:
+                type: object
               templateResolvedVersion:
                 type: string
             required:
