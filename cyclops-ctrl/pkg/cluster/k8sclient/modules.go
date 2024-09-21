@@ -2,10 +2,11 @@ package k8sclient
 
 import (
 	"context"
-	"github.com/pkg/errors"
 	"regexp"
 	"sort"
 	"strings"
+
+	"github.com/pkg/errors"
 
 	appsv1 "k8s.io/api/apps/v1"
 	batchv1 "k8s.io/api/batch/v1"
@@ -242,7 +243,7 @@ func (k *KubernetesClient) GetModuleResourcesHealth(name string) (string, error)
 
 	resourcesWithHealth += len(deployments.Items)
 	for _, item := range deployments.Items {
-		if isProgressing(item.Status.Conditions) {
+		if isDeploymentProgressing(item.Status.Conditions) {
 			return statusProgressing, nil
 		}
 
@@ -262,6 +263,10 @@ func (k *KubernetesClient) GetModuleResourcesHealth(name string) (string, error)
 
 	resourcesWithHealth += len(statefulsets.Items)
 	for _, item := range statefulsets.Items {
+		if isStatefulSetProgressing(item.Status, item.Spec.Replicas, item.Generation) {
+			return statusProgressing, nil
+		}
+
 		if item.Generation != item.Status.ObservedGeneration ||
 			item.Status.Replicas != item.Status.UpdatedReplicas ||
 			item.Status.Replicas != item.Status.AvailableReplicas {
@@ -763,7 +768,7 @@ func containerStatus(status apiv1.ContainerStatus) dto.ContainerStatus {
 }
 
 func getDeploymentStatus(deployment *appsv1.Deployment) string {
-	if isProgressing(deployment.Status.Conditions) {
+	if isDeploymentProgressing(deployment.Status.Conditions) {
 		return statusProgressing
 	}
 
@@ -781,6 +786,10 @@ func getStatefulSetStatus(statefulset *appsv1.StatefulSet) string {
 		statefulset.Status.Replicas == statefulset.Status.UpdatedReplicas &&
 		statefulset.Status.Replicas == statefulset.Status.AvailableReplicas {
 		return statusHealthy
+	}
+
+	if isStatefulSetProgressing(statefulset.Status, statefulset.Spec.Replicas, statefulset.Generation) {
+		return statusProgressing
 	}
 
 	return statusUnhealthy
@@ -833,7 +842,7 @@ func isPodOwner(pod apiv1.Pod, rsName string) bool {
 	return false
 }
 
-func isProgressing(conditions []appsv1.DeploymentCondition) bool {
+func isDeploymentProgressing(conditions []appsv1.DeploymentCondition) bool {
 	progressingReason := ""
 	availableReason := ""
 
@@ -855,4 +864,20 @@ func isProgressing(conditions []appsv1.DeploymentCondition) bool {
 		(progressingReason == "NewReplicaSetCreated" ||
 			progressingReason == "FoundNewReplicaSet" ||
 			progressingReason == "ReplicaSetUpdated")
+}
+
+func isStatefulSetProgressing(status appsv1.StatefulSetStatus, desiredReplicas *int32, generation int64) bool {
+	if status.ObservedGeneration == 0 || generation > status.ObservedGeneration {
+		return true
+	}
+
+	if status.CurrentRevision != status.UpdateRevision {
+		return true
+	}
+
+	if desiredReplicas == nil {
+		return false
+	}
+
+	return status.ReadyReplicas < *desiredReplicas || status.UpdatedReplicas < *desiredReplicas
 }
