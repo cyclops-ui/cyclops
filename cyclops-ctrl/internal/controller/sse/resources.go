@@ -5,6 +5,8 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/pkg/errors"
+
 	"github.com/gin-gonic/gin"
 	"k8s.io/apimachinery/pkg/runtime/schema"
 
@@ -24,13 +26,7 @@ func (s *Server) Resources(ctx *gin.Context) {
 			continue
 		}
 
-		resourceName, err := s.k8sClient.GVKtoAPIResourceName(
-			schema.GroupVersion{
-				Group:   resource.GetGroup(),
-				Version: resource.GetVersion(),
-			},
-			resource.GetKind(),
-		)
+		resourceName, err := kindToResource(resource.GetKind())
 		if err != nil {
 			ctx.String(http.StatusInternalServerError, err.Error())
 			return
@@ -150,4 +146,17 @@ func (s *Server) SingleResource(ctx *gin.Context) {
 			}
 		}
 	})
+}
+
+func kindToResource(kind string) (string, error) {
+	switch kind {
+	case "Deployment":
+		return "deployments", nil
+	case "StatefulSet":
+		return "statefulsets", nil
+	case "DaemonSet":
+		return "daemonsets", nil
+	default:
+		return "", errors.Errorf("kind %v is not a workload", kind)
+	}
 }
