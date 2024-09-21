@@ -3,7 +3,6 @@ import { Col, Divider, Row, Alert } from "antd";
 import axios from "axios";
 import { mapResponseError } from "../../utils/api/errors";
 import PodTable from "./common/PodTable/PodTable";
-import { resourceStream } from "../../utils/api/sse/resources";
 import { isStreamingEnabled } from "../../utils/api/common";
 
 interface Props {
@@ -44,10 +43,19 @@ const DaemonSet = ({ name, namespace, workload }: Props) => {
 
   useEffect(() => {
     fetchDaemonSet();
+
+    if (isStreamingEnabled()) {
+      return;
+    }
+
+    const interval = setInterval(() => fetchDaemonSet(), 15000);
+    return () => {
+      clearInterval(interval);
+    };
   }, [fetchDaemonSet]);
 
   function getPods() {
-    if (workload) {
+    if (workload && isStreamingEnabled()) {
       return workload.pods;
     }
 

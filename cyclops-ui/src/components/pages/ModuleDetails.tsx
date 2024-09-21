@@ -61,7 +61,7 @@ import {
 } from "../k8s-resources/common/RestartButton";
 import YAML from "yaml";
 import { isStreamingEnabled } from "../../utils/api/common";
-import { resourcesStream, resourceStream } from "../../utils/api/sse/resources";
+import { resourcesStream } from "../../utils/api/sse/resources";
 import {
   isWorkload,
   ResourceRef,
@@ -318,24 +318,6 @@ const ModuleDetails = () => {
         };
 
         putWorkload(resourceRef, r);
-
-        // setResources((prev) => {
-        //   const existingIndex = prev.findIndex(
-        //       (item) => item.group === r.group &&
-        //           item.version === r.version &&
-        //           item.kind === r.kind &&
-        //           item.name === r.name &&
-        //           item.namespace === r.namespace
-        //   );
-        //
-        //   if (existingIndex !== -1) {
-        //     const updatedData = [...prev];
-        //     updatedData[existingIndex] = r;
-        //     return updatedData;
-        //   }
-        //
-        //   return [...prev, r];
-        // });
       });
     }
   }, [moduleName]);
@@ -655,7 +637,7 @@ const ModuleDetails = () => {
     }
 
     let resourceStatus = resource.status;
-    if (isWorkload(resourceRef)) {
+    if (isStreamingEnabled() && isWorkload(resourceRef)) {
       resourceStatus = getWorkload(resourceRef)?.status;
     }
 
@@ -836,12 +818,17 @@ const ModuleDetails = () => {
 
       resourcesWithStatus++;
 
-      if (resource.status === "progressing") {
+      let resourceStatus = resource.status;
+      if (isStreamingEnabled() && isWorkload(resource)) {
+        resourceStatus = getWorkload(resource)?.status;
+      }
+
+      if (resourceStatus === "progressing") {
         status = "progressing";
         continue;
       }
 
-      if (resource.status === "unhealthy") {
+      if (resourceStatus === "unhealthy") {
         status = "unhealthy";
         break;
       }
