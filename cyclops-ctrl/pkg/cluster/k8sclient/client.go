@@ -1176,7 +1176,7 @@ func (k *KubernetesClient) WatchKubernetesResources(gvrs []ResourceWatchSpec, st
 				},
 			})
 
-			informer.Run(stopCh)q
+			informer.Run(stopCh)
 		}()
 	}
 
