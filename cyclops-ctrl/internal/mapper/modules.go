@@ -29,7 +29,7 @@ func RequestToModule(req dto.Module) (cyclopsv1alpha1.Module, error) {
 			Name: req.Name,
 		},
 		Spec: cyclopsv1alpha1.ModuleSpec{
-			TargetNamespace: req.Namespace,
+			TargetNamespace: mapTargetNamespace(req.Namespace),
 			TemplateRef:     DtoTemplateRefToK8s(req.Template),
 			Values: apiextensionsv1.JSON{
 				Raw: data,
