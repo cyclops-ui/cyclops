@@ -1139,6 +1139,10 @@ type ResourceWatchSpec struct {
 }
 
 func (k *KubernetesClient) WatchKubernetesResources(gvrs []ResourceWatchSpec, stopCh chan struct{}) (chan *unstructured.Unstructured, error) {
+	if len(gvrs) == 0 {
+		return nil, errors.New("no gvrs to watch")
+	}
+
 	eventChan := make(chan *unstructured.Unstructured, 1)
 
 	startWatch := func(spec ResourceWatchSpec) {
@@ -1172,7 +1176,7 @@ func (k *KubernetesClient) WatchKubernetesResources(gvrs []ResourceWatchSpec, st
 				},
 			})
 
-			informer.Run(stopCh)
+			informer.Run(stopCh)q
 		}()
 	}
 

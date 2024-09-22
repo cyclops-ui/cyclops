@@ -107,6 +107,63 @@ func (k *KubernetesClient) GetResourcesForModule(name string) ([]dto.Resource, e
 	return out, nil
 }
 
+func (k *KubernetesClient) GetWorkloadsForModule(name string) ([]dto.Resource, error) {
+	out := make([]dto.Resource, 0, 0)
+
+	deployments, err := k.clientset.AppsV1().Deployments("").List(context.Background(), metav1.ListOptions{
+		LabelSelector: "cyclops.module=" + name,
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	for _, item := range deployments.Items {
+		out = append(out, &dto.Other{
+			Group:     "apps",
+			Version:   "v1",
+			Kind:      "Deployment",
+			Name:      item.Name,
+			Namespace: item.Namespace,
+		})
+	}
+
+	statefulset, err := k.clientset.AppsV1().StatefulSets("").List(context.Background(), metav1.ListOptions{
+		LabelSelector: "cyclops.module=" + name,
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	for _, item := range statefulset.Items {
+		out = append(out, &dto.Other{
+			Group:     "apps",
+			Version:   "v1",
+			Kind:      "StatefulSet",
+			Name:      item.Name,
+			Namespace: item.Namespace,
+		})
+	}
+
+	daemonsets, err := k.clientset.AppsV1().DaemonSets("").List(context.Background(), metav1.ListOptions{
+		LabelSelector: "cyclops.module=" + name,
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	for _, item := range daemonsets.Items {
+		out = append(out, &dto.Other{
+			Group:     "apps",
+			Version:   "v1",
+			Kind:      "DaemonSet",
+			Name:      item.Name,
+			Namespace: item.Namespace,
+		})
+	}
+
+	return out, nil
+}
+
 func (k *KubernetesClient) getManagedGVRs(moduleName string) ([]schema.GroupVersionResource, error) {
 	module, _ := k.GetModule(moduleName)
 

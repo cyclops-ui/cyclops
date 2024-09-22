@@ -14,7 +14,7 @@ import (
 )
 
 func (s *Server) Resources(ctx *gin.Context) {
-	resources, err := s.k8sClient.GetResourcesForModule(ctx.Param("name"))
+	resources, err := s.k8sClient.GetWorkloadsForModule(ctx.Param("name"))
 	if err != nil {
 		ctx.String(http.StatusInternalServerError, err.Error())
 		return
