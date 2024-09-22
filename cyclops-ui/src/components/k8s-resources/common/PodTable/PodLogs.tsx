@@ -130,13 +130,24 @@ const PodLogs = ({ pod }: PodLogsProps) => {
         logsModal.pod,
         logsModal.namespace,
         container,
-        (log) => {
-          setLogs((prevLogs) => {
-            return [...prevLogs, log];
-          });
+        (log, isReset = false) => {
+          if (isReset) {
+            setLogs(() => []);
+          } else {
+            setLogs((prevLogs) => {
+              return [...prevLogs, log];
+            });
+          }
         },
-        (err) => {
-          setError(mapResponseError(err));
+        (err, isReset = false) => {
+          if (isReset) {
+            setError({
+              message: "",
+              description: "",
+            });
+          } else {
+            setError(mapResponseError(err));
+          }
         },
         controller,
       );
@@ -169,13 +180,24 @@ const PodLogs = ({ pod }: PodLogsProps) => {
               pod.name,
               pod.namespace,
               pod.containers[0].name,
-              (log) => {
-                setLogs((prevLogs) => {
-                  return [...prevLogs, log];
-                });
+              (log, isReset = false) => {
+                if (isReset) {
+                  setLogs(() => []);
+                } else {
+                  setLogs((prevLogs) => {
+                    return [...prevLogs, log];
+                  });
+                }
               },
-              (err) => {
-                setError(mapResponseError(err));
+              (err, isReset = false) => {
+                if (isReset) {
+                  setError({
+                    message: "",
+                    description: "",
+                  });
+                } else {
+                  setError(mapResponseError(err));
+                }
               },
               controller,
             );

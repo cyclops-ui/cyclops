@@ -10,8 +10,8 @@ export function logStream(
   name: string,
   namespace: string,
   container: string,
-  setLog: (log: string) => void,
-  setError: (err: Error) => void,
+  setLog: (log: string, isReset?: boolean) => void,
+  setError: (err: Error, isReset?: boolean) => void,
   signalController: AbortController,
 ) {
   fetchEventSource(
@@ -34,6 +34,9 @@ export function logStream(
           response.ok &&
           response.headers.get("content-type") === EventStreamContentType
         ) {
+          // here we have success - we need to remove the error and reset   the logs
+          setError(new Error(), true);
+          setLog("", true);
           return;
         } else if (
           response.status >= 400 &&
