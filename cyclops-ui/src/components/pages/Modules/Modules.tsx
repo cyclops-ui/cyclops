@@ -45,18 +45,27 @@ const Modules = () => {
 
   useEffect(() => {
     setLoadingModules(true);
-    axios
-      .get(`/api/modules/list`)
-      .then((res) => {
-        setAllData(res.data);
-        setFilteredData(res.data);
-        setLoadingModules(false);
-      })
-      .catch((error) => {
-        setError(mapResponseError(error));
-        setLoadingModules(false);
-      });
+
+    function fetchModules() {
+      axios
+        .get(`/api/modules/list`)
+        .then((res) => {
+          setAllData(res.data);
+          setLoadingModules(false);
+        })
+        .catch((error) => {
+          setError(mapResponseError(error));
+          setLoadingModules(false);
+        });
+    }
+
+    fetchModules();
+    const interval = setInterval(() => fetchModules(), 10000);
+    return () => {
+      clearInterval(interval);
+    };
   }, []);
+
   useEffect(() => {
     var updatedList = [...allData];
     updatedList = updatedList.filter((module: any) => {
