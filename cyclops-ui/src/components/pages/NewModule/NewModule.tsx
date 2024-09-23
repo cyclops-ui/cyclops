@@ -31,6 +31,7 @@ import {
 } from "../../errors/FormValidationErrors";
 import { mapResponseError } from "../../../utils/api/errors";
 import TemplateFormFields from "../../form/TemplateFormFields";
+import { DownOutlined, UpOutlined } from "@ant-design/icons";
 
 const { Title } = Typography;
 const layout = {
@@ -100,6 +101,8 @@ const NewModule = () => {
       duration: 0,
     });
   };
+
+  const [advancedOptionsExpanded, setAdvancedOptionsExpanded] = useState(false);
 
   const [form] = Form.useForm();
 
@@ -474,6 +477,10 @@ const NewModule = () => {
     openNotification(errorMessages);
   };
 
+  const toggleExpand = () => {
+    setAdvancedOptionsExpanded(!advancedOptionsExpanded);
+  };
+
   return (
     <div>
       {error.message.length !== 0 && (
@@ -572,7 +579,7 @@ const NewModule = () => {
                 style={{
                   border: "solid 1.5px #c3c3c3",
                   borderRadius: "7px",
-                  padding: "12px",
+                  padding: "0px",
                   width: "100%",
                   backgroundColor: "#fafafa",
                 }}
@@ -588,6 +595,7 @@ const NewModule = () => {
                       </p>
                     </div>
                   }
+                  style={{ padding: "12px 12px 0px 12px" }}
                   rules={[
                     {
                       required: true,
@@ -609,35 +617,54 @@ const NewModule = () => {
                 >
                   <Input />
                 </Form.Item>
-                <Form.Item
-                  name="cyclops_module_namespace"
-                  id="cyclops_module_namespace"
-                  label={
-                    <div>
-                      Target namespace
-                      <p style={{ color: "#8b8e91", marginBottom: "0px" }}>
-                        Namespace used to deploy resources to
-                      </p>
-                    </div>
-                  }
-                  hasFeedback={true}
-                  validateDebounce={1000}
-                >
-                  <Select
-                    showSearch={true}
-                    onChange={onTemplateStoreSelected}
-                    style={{ width: "100%" }}
-                    placeholder="default"
-                    value="default"
-                    defaultValue="default"
+                <div style={{ display: advancedOptionsExpanded ? "" : "none" }}>
+                  <Divider
+                    style={{ marginTop: "12px", marginBottom: "12px" }}
+                  />
+                  <Form.Item
+                    name="cyclops_module_namespace"
+                    id="cyclops_module_namespace"
+                    label={
+                      <div>
+                        Target namespace
+                        <p style={{ color: "#8b8e91", marginBottom: "0px" }}>
+                          Namespace used to deploy resources to
+                        </p>
+                      </div>
+                    }
+                    style={{ padding: "0px 12px 0px 12px" }}
+                    hasFeedback={true}
+                    validateDebounce={1000}
                   >
-                    {namespaces.map((namespace: string) => (
-                      <Option key={namespace} value={namespace}>
-                        {namespace}
-                      </Option>
-                    ))}
-                  </Select>
-                </Form.Item>
+                    <Select
+                      showSearch={true}
+                      onChange={onTemplateStoreSelected}
+                      style={{ width: "100%" }}
+                      placeholder="default"
+                      value="default"
+                      defaultValue="default"
+                    >
+                      {namespaces.map((namespace: string) => (
+                        <Option key={namespace} value={namespace}>
+                          {namespace}
+                        </Option>
+                      ))}
+                    </Select>
+                  </Form.Item>
+                </div>
+                <div className={"expandadvanced"} onClick={toggleExpand}>
+                  {advancedOptionsExpanded ? (
+                    <div>
+                      Advanced
+                      <UpOutlined style={{ paddingLeft: "5px" }} />
+                    </div>
+                  ) : (
+                    <div>
+                      Advanced
+                      <DownOutlined style={{ paddingLeft: "5px" }} />
+                    </div>
+                  )}
+                </div>
               </div>
             </Col>
             <Divider
