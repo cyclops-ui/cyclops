@@ -29,15 +29,20 @@ import (
 	"github.com/cyclops-ui/cyclops/cyclops-ctrl/internal/template/gitproviders"
 )
 
-func (r Repo) LoadTemplate(repoURL, path, commit string) (*models.Template, error) {
+func (r Repo) LoadTemplate(repoURL, path, commit, resolvedVersion string) (*models.Template, error) {
 	creds, err := r.credResolver.RepoAuthCredentials(repoURL)
 	if err != nil {
 		return nil, err
 	}
 
-	commitSHA, err := resolveRef(repoURL, commit, creds)
-	if err != nil {
-		return nil, err
+	commitSHA := resolvedVersion
+	if len(commitSHA) == 0 {
+		ref, err := resolveRef(repoURL, commit, creds)
+		if err != nil {
+			return nil, err
+		}
+
+		commitSHA = ref
 	}
 
 	cached, ok := r.cache.GetTemplate(repoURL, path, commitSHA)

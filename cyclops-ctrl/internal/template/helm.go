@@ -23,10 +23,12 @@ import (
 	"github.com/cyclops-ui/cyclops/cyclops-ctrl/internal/models/helm"
 )
 
-func (r Repo) LoadHelmChart(repo, chart, version string) (*models.Template, error) {
+func (r Repo) LoadHelmChart(repo, chart, version, resolvedVersion string) (*models.Template, error) {
 	var err error
 	strictVersion := version
-	if !isValidVersion(version) {
+	if len(resolvedVersion) > 0 {
+		strictVersion = resolvedVersion
+	} else if !isValidVersion(version) {
 		if registry.IsOCI(repo) {
 			strictVersion, err = getOCIStrictVersion(repo, chart, version)
 			if err != nil {
