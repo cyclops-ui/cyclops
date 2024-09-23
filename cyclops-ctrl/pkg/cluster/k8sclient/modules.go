@@ -2,6 +2,7 @@ package k8sclient
 
 import (
 	"context"
+	"regexp"
 	"sort"
 	"strings"
 
@@ -102,6 +103,63 @@ func (k *KubernetesClient) GetResourcesForModule(name string) ([]dto.Resource, e
 
 		return out[i].GetName() < out[j].GetName()
 	})
+
+	return out, nil
+}
+
+func (k *KubernetesClient) GetWorkloadsForModule(name string) ([]dto.Resource, error) {
+	out := make([]dto.Resource, 0, 0)
+
+	deployments, err := k.clientset.AppsV1().Deployments("").List(context.Background(), metav1.ListOptions{
+		LabelSelector: "cyclops.module=" + name,
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	for _, item := range deployments.Items {
+		out = append(out, &dto.Other{
+			Group:     "apps",
+			Version:   "v1",
+			Kind:      "Deployment",
+			Name:      item.Name,
+			Namespace: item.Namespace,
+		})
+	}
+
+	statefulset, err := k.clientset.AppsV1().StatefulSets("").List(context.Background(), metav1.ListOptions{
+		LabelSelector: "cyclops.module=" + name,
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	for _, item := range statefulset.Items {
+		out = append(out, &dto.Other{
+			Group:     "apps",
+			Version:   "v1",
+			Kind:      "StatefulSet",
+			Name:      item.Name,
+			Namespace: item.Namespace,
+		})
+	}
+
+	daemonsets, err := k.clientset.AppsV1().DaemonSets("").List(context.Background(), metav1.ListOptions{
+		LabelSelector: "cyclops.module=" + name,
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	for _, item := range daemonsets.Items {
+		out = append(out, &dto.Other{
+			Group:     "apps",
+			Version:   "v1",
+			Kind:      "DaemonSet",
+			Name:      item.Name,
+			Namespace: item.Namespace,
+		})
+	}
 
 	return out, nil
 }
@@ -424,9 +482,15 @@ func (k *KubernetesClient) getPods(deployment appsv1.Deployment) ([]dto.Pod, err
 		return nil, err
 	}
 
+	rs, singleRS := deploymentAvailableReplicaSet(deployment.Status.Conditions)
+
 	out := make([]dto.Pod, 0, len(pods.Items))
 	for _, item := range pods.Items {
 		containers := make([]dto.Container, 0, len(item.Spec.Containers))
+
+		if singleRS && len(rs) > 0 && !isPodOwner(item, rs) {
+			continue
+		}
 
 		for _, cnt := range item.Spec.Containers {
 			env := make(map[string]string)
@@ -806,6 +870,33 @@ func getPodStatus(containers []dto.Container) bool {
 	}
 
 	return true
+}
+
+func deploymentAvailableReplicaSet(conditions []appsv1.DeploymentCondition) (string, bool) {
+	replicaSetNamePattern := regexp.MustCompile(`ReplicaSet "(.+?)" has successfully progressed`)
+
+	for _, condition := range conditions {
+		if condition.Type == appsv1.DeploymentProgressing {
+			match := replicaSetNamePattern.FindStringSubmatch(condition.Message)
+			if len(match) > 1 {
+				return match[1], true
+			}
+		}
+	}
+
+	return "", false
+}
+
+func isPodOwner(pod apiv1.Pod, rsName string) bool {
+	for _, reference := range pod.OwnerReferences {
+		if reference.APIVersion == "apps/v1" &&
+			reference.Kind == "ReplicaSet" &&
+			reference.Name == rsName {
+			return true
+		}
+	}
+
+	return false
 }
 
 func isDeploymentProgressing(conditions []appsv1.DeploymentCondition) bool {

@@ -3,15 +3,15 @@ import { Col, Divider, Row, Alert } from "antd";
 import axios from "axios";
 import { mapResponseError } from "../../utils/api/errors";
 import PodTable from "./common/PodTable/PodTable";
-import { resourceStream } from "../../utils/api/sse/resources";
 import { isStreamingEnabled } from "../../utils/api/common";
 
 interface Props {
   name: string;
   namespace: string;
+  workload: any;
 }
 
-const DaemonSet = ({ name, namespace }: Props) => {
+const DaemonSet = ({ name, namespace, workload }: Props) => {
   const [daemonSet, setDaemonSet] = useState({
     status: "",
     pods: [],
@@ -21,14 +21,6 @@ const DaemonSet = ({ name, namespace }: Props) => {
     message: "",
     description: "",
   });
-
-  useEffect(() => {
-    if (isStreamingEnabled()) {
-      resourceStream(`apps`, `v1`, `DaemonSet`, name, namespace, (r: any) => {
-        setDaemonSet(r);
-      });
-    }
-  }, [name, namespace]);
 
   const fetchDaemonSet = useCallback(() => {
     axios
@@ -53,7 +45,7 @@ const DaemonSet = ({ name, namespace }: Props) => {
     fetchDaemonSet();
 
     if (isStreamingEnabled()) {
-      return () => {};
+      return;
     }
 
     const interval = setInterval(() => fetchDaemonSet(), 15000);
@@ -61,6 +53,24 @@ const DaemonSet = ({ name, namespace }: Props) => {
       clearInterval(interval);
     };
   }, [fetchDaemonSet]);
+
+  function getPods() {
+    if (workload && isStreamingEnabled()) {
+      return workload.pods;
+    }
+
+    return daemonSet.pods;
+  }
+
+  function getPodsLength() {
+    let pods = getPods();
+
+    if (Array.isArray(pods)) {
+      return pods.length;
+    }
+
+    return 0;
+  }
 
   return (
     <div>
@@ -85,12 +95,12 @@ const DaemonSet = ({ name, namespace }: Props) => {
           orientationMargin="0"
           orientation={"left"}
         >
-          Pods: {daemonSet.pods.length}
+          Replicas: {getPodsLength()}
         </Divider>
         <Col span={24} style={{ overflowX: "auto" }}>
           <PodTable
             namespace={namespace}
-            pods={daemonSet.pods}
+            pods={getPods()}
             updateResourceData={fetchDaemonSet}
           />
         </Col>
