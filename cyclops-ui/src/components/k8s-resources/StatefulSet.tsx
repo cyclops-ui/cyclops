@@ -3,21 +3,16 @@ import { Col, Divider, Row, Alert } from "antd";
 import axios from "axios";
 import { mapResponseError } from "../../utils/api/errors";
 import PodTable from "./common/PodTable/PodTable";
-import { resourceStream } from "../../utils/api/sse/resources";
 import { isStreamingEnabled } from "../../utils/api/common";
 
 interface Props {
   name: string;
   namespace: string;
+  workload: any;
 }
 
-interface Statefulset {
-  status: string;
-  pods: any[];
-}
-
-const StatefulSet = ({ name, namespace }: Props) => {
-  const [statefulSet, setStatefulSet] = useState<Statefulset>({
+const StatefulSet = ({ name, namespace, workload }: Props) => {
+  const [statefulSet, setStatefulSet] = useState({
     status: "",
     pods: [],
   });
@@ -26,14 +21,6 @@ const StatefulSet = ({ name, namespace }: Props) => {
     message: "",
     description: "",
   });
-
-  useEffect(() => {
-    if (isStreamingEnabled()) {
-      resourceStream(`apps`, `v1`, `StatefulSet`, name, namespace, (r: any) => {
-        setStatefulSet(r);
-      });
-    }
-  }, [name, namespace]);
 
   const fetchStatefulSet = useCallback(() => {
     axios
@@ -58,7 +45,7 @@ const StatefulSet = ({ name, namespace }: Props) => {
     fetchStatefulSet();
 
     if (isStreamingEnabled()) {
-      return () => {};
+      return;
     }
 
     const interval = setInterval(() => fetchStatefulSet(), 15000);
@@ -66,6 +53,24 @@ const StatefulSet = ({ name, namespace }: Props) => {
       clearInterval(interval);
     };
   }, [fetchStatefulSet]);
+
+  function getPods() {
+    if (workload && isStreamingEnabled()) {
+      return workload.pods;
+    }
+
+    return statefulSet.pods;
+  }
+
+  function getPodsLength() {
+    let pods = getPods();
+
+    if (Array.isArray(pods)) {
+      return pods.length;
+    }
+
+    return 0;
+  }
 
   return (
     <div>
@@ -90,13 +95,13 @@ const StatefulSet = ({ name, namespace }: Props) => {
           orientationMargin="0"
           orientation={"left"}
         >
-          Replicas: {statefulSet.pods.length}
+          Replicas: {getPodsLength()}
         </Divider>
         <Col span={24} style={{ overflowX: "auto" }}>
           <PodTable
             namespace={namespace}
-            pods={statefulSet.pods}
-            updateResourceData={fetchStatefulSet}
+            pods={getPods()}
+            updateResourceData={() => {}}
           />
         </Col>
       </Row>
