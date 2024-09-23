@@ -59,7 +59,7 @@ func (c *Templates) GetTemplate(ctx *gin.Context) {
 		return
 	}
 
-	t, err := c.templatesRepo.GetTemplate(repo, path, commit)
+	t, err := c.templatesRepo.GetTemplate(repo, path, commit, "")
 	if err != nil {
 		fmt.Println(err)
 		ctx.JSON(http.StatusBadRequest, dto.NewError("Error loading template", err.Error()))
@@ -131,7 +131,12 @@ func (c *Templates) CreateTemplatesStore(ctx *gin.Context) {
 		return
 	}
 
-	tmpl, err := c.templatesRepo.GetTemplate(templateStore.TemplateRef.URL, templateStore.TemplateRef.Path, templateStore.TemplateRef.Version)
+	tmpl, err := c.templatesRepo.GetTemplate(
+		templateStore.TemplateRef.URL,
+		templateStore.TemplateRef.Path,
+		templateStore.TemplateRef.Version,
+		"",
+	)
 	if err != nil {
 		fmt.Println(err)
 		ctx.JSON(http.StatusBadRequest, dto.NewError("Error loading template", err.Error()))
@@ -169,7 +174,12 @@ func (c *Templates) EditTemplatesStore(ctx *gin.Context) {
 		return
 	}
 
-	tmpl, err := c.templatesRepo.GetTemplate(templateStore.TemplateRef.URL, templateStore.TemplateRef.Path, templateStore.TemplateRef.Version)
+	tmpl, err := c.templatesRepo.GetTemplate(
+		templateStore.TemplateRef.URL,
+		templateStore.TemplateRef.Path,
+		templateStore.TemplateRef.Version,
+		"",
+	)
 	if err != nil {
 		fmt.Println(err)
 		ctx.JSON(http.StatusBadRequest, dto.NewError("Error loading template", err.Error()))

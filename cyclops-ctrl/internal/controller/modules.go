@@ -158,6 +158,7 @@ func (m *Modules) Manifest(ctx *gin.Context) {
 		request.TemplateRef.URL,
 		request.TemplateRef.Path,
 		request.TemplateRef.Version,
+		"",
 	)
 	if err != nil {
 		fmt.Println(err)
@@ -204,6 +205,7 @@ func (m *Modules) CurrentManifest(ctx *gin.Context) {
 		module.Spec.TemplateRef.URL,
 		module.Spec.TemplateRef.Path,
 		module.Spec.TemplateRef.Version,
+		module.Status.TemplateResolvedVersion,
 	)
 	if err != nil {
 		fmt.Println(err)
@@ -396,6 +398,7 @@ func (m *Modules) ResourcesForModule(ctx *gin.Context) {
 		module.Spec.TemplateRef.URL,
 		module.Spec.TemplateRef.Path,
 		templateVersion,
+		module.Status.TemplateResolvedVersion,
 	)
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, dto.NewError("Error fetching template", err.Error()))
@@ -440,6 +443,7 @@ func (m *Modules) Template(ctx *gin.Context) {
 		module.Spec.TemplateRef.URL,
 		module.Spec.TemplateRef.Path,
 		module.Spec.TemplateRef.Version,
+		module.Status.TemplateResolvedVersion,
 	)
 	if err != nil {
 		fmt.Println(err)
@@ -458,6 +462,7 @@ func (m *Modules) Template(ctx *gin.Context) {
 		module.Spec.TemplateRef.URL,
 		module.Spec.TemplateRef.Path,
 		module.Spec.TemplateRef.Version,
+		module.Status.TemplateResolvedVersion,
 	)
 	if err != nil {
 		fmt.Println(err)
@@ -494,6 +499,7 @@ func (m *Modules) HelmTemplate(ctx *gin.Context) {
 		module.Spec.TemplateRef.URL,
 		module.Spec.TemplateRef.Path,
 		module.Spec.TemplateRef.Version,
+		module.Status.TemplateResolvedVersion,
 	)
 	if err != nil {
 		fmt.Println(err)

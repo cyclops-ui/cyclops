@@ -133,6 +133,7 @@ func (r *ModuleReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctr
 		module.Spec.TemplateRef.URL,
 		module.Spec.TemplateRef.Path,
 		templateVersion,
+		module.Status.TemplateResolvedVersion,
 	)
 	if err != nil {
 		r.logger.Error(err, "error fetching module template", "namespaced name", req.NamespacedName)
