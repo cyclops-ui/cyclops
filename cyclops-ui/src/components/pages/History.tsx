@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from "react";
 import { Button, Col, Modal, Row, Table, Typography } from "antd";
-import { useNavigate } from "react-router";
 import axios from "axios";
 import { useParams } from "react-router-dom";
 import ReactDiffViewer from "react-diff-viewer";
@@ -15,7 +14,6 @@ require(`ace-builds/src-noconflict/snippets/sass`);
 require(`ace-builds/src-noconflict/theme-github`);
 
 const ModuleHistory = () => {
-  const history = useNavigate();
   const [error, setError] = useState({
     message: "",
     description: "",
@@ -266,7 +264,7 @@ const ModuleHistory = () => {
       <Button
         style={{ float: "right" }}
         htmlType="button"
-        onClick={() => history("/modules/" + moduleName)}
+        onClick={() => (window.location.href = "/modules/" + moduleName)}
       >
         Back
       </Button>
