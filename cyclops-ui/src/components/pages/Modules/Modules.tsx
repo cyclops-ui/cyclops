@@ -13,7 +13,6 @@ import {
   Popover,
   Checkbox,
 } from "antd";
-import { useNavigate } from "react-router";
 
 import axios from "axios";
 
@@ -26,7 +25,6 @@ import { mapResponseError } from "../../../utils/api/errors";
 const { Title } = Typography;
 
 const Modules = () => {
-  const history = useNavigate();
   const [allData, setAllData] = useState([]);
   const [filteredData, setFilteredData] = useState([]);
   const [loadingModules, setLoadingModules] = useState(false);
@@ -83,7 +81,7 @@ const Modules = () => {
   }, [moduleHealthFilter, allData, searchInputFilter]);
 
   const handleClick = () => {
-    history("/modules/new");
+    window.location.href = "/modules/new";
   };
   const handleSelectItem = (selectedItems: any[]) => {
     setModuleHealthFilter(selectedItems);
