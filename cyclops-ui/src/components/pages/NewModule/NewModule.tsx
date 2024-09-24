@@ -15,7 +15,6 @@ import {
   notification,
 } from "antd";
 import axios from "axios";
-import { useNavigate } from "react-router";
 import { findMaps, flattenObjectKeys } from "../../../utils/form";
 import "./custom.css";
 import defaultTemplate from "../../../static/img/default-template-icon.png";
@@ -89,8 +88,6 @@ const NewModule = () => {
   const [templateStore, setTemplateStore] = useState<templateStoreOption[]>([]);
 
   const [namespaces, setNamespaces] = useState<string[]>([]);
-
-  const history = useNavigate();
 
   const [notificationApi, contextHolder] = notification.useNotification();
   const openNotification = (errors: FeedbackError[]) => {
@@ -702,7 +699,7 @@ const NewModule = () => {
               </Button>{" "}
               <Button
                 htmlType="button"
-                onClick={() => history("/")}
+                onClick={() => (window.location.href = "/")}
                 disabled={loadingTemplate || loadingTemplateInitialValues}
               >
                 Back
