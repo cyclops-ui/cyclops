@@ -16,3 +16,7 @@ var reconcileCMD = &cobra.Command{
 	Example: reconcileExample,
 	//Run: func(cmd *cobra.Command, args []string){},
 }
+
+func init() {
+
+}
