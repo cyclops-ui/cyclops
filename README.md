@@ -49,7 +49,7 @@ Cyclops can either be installed manually by applying the latest manifest, by usi
 To install Cyclops using `kubectl` into your cluster, run the commands below:
 
 ```bash
-kubectl apply -f https://raw.githubusercontent.com/cyclops-ui/cyclops/v0.12.0/install/cyclops-install.yaml && kubectl apply -f https://raw.githubusercontent.com/cyclops-ui/cyclops/v0.12.0/install/demo-templates.yaml
+kubectl apply -f https://raw.githubusercontent.com/cyclops-ui/cyclops/v0.13.1/install/cyclops-install.yaml && kubectl apply -f https://raw.githubusercontent.com/cyclops-ui/cyclops/v0.13.1/install/demo-templates.yaml
 ```
 
 It will create a new namespace called `cyclops` and deploy everything you need for your Cyclops instance to run.
