@@ -2,6 +2,8 @@ package mapper
 
 import (
 	"fmt"
+	v1 "k8s.io/api/core/v1"
+	"strings"
 
 	json "github.com/json-iterator/go"
 	apiextensionsv1 "k8s.io/apiextensions-apiserver/pkg/apis/apiextensions/v1"
@@ -27,7 +29,7 @@ func RequestToModule(req dto.Module) (cyclopsv1alpha1.Module, error) {
 			Name: req.Name,
 		},
 		Spec: cyclopsv1alpha1.ModuleSpec{
-			TargetNamespace: req.Namespace,
+			TargetNamespace: mapTargetNamespace(req.Namespace),
 			TemplateRef:     DtoTemplateRefToK8s(req.Template),
 			Values: apiextensionsv1.JSON{
 				Raw: data,
@@ -41,7 +43,7 @@ func ModuleToDTO(module cyclopsv1alpha1.Module) (dto.Module, error) {
 	return dto.Module{
 		Name:            module.Name,
 		Namespace:       module.Namespace,
-		TargetNamespace: module.Spec.TargetNamespace,
+		TargetNamespace: mapTargetNamespace(module.Spec.TargetNamespace),
 		Version:         module.Spec.TemplateRef.Version,
 		Template:        k8sTemplateRefToDTO(module.Spec.TemplateRef, module.Status.TemplateResolvedVersion),
 		Values:          module.Spec.Values,
@@ -138,4 +140,12 @@ func setValuesRecursive(moduleValues map[string]interface{}, fields map[string]m
 	}
 
 	return values, nil
+}
+
+func mapTargetNamespace(targetNamespace string) string {
+	if len(strings.TrimSpace(targetNamespace)) == 0 {
+		return v1.NamespaceDefault
+	}
+
+	return targetNamespace
 }

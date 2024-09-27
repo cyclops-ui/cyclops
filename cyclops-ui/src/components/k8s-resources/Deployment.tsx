@@ -3,15 +3,15 @@ import { Col, Divider, Row, Alert } from "antd";
 import axios from "axios";
 import { mapResponseError } from "../../utils/api/errors";
 import PodTable from "./common/PodTable/PodTable";
-import { resourceStream } from "../../utils/api/sse/resources";
 import { isStreamingEnabled } from "../../utils/api/common";
 
 interface Props {
   name: string;
   namespace: string;
+  workload: any;
 }
 
-const Deployment = ({ name, namespace }: Props) => {
+const Deployment = ({ name, namespace, workload }: Props) => {
   const [deployment, setDeployment] = useState({
     status: "",
     pods: [],
@@ -20,14 +20,6 @@ const Deployment = ({ name, namespace }: Props) => {
     message: "",
     description: "",
   });
-
-  useEffect(() => {
-    if (isStreamingEnabled()) {
-      resourceStream(`apps`, `v1`, `Deployment`, name, namespace, (r: any) => {
-        setDeployment(r);
-      });
-    }
-  }, [name, namespace]);
 
   const fetchDeployment = useCallback(() => {
     axios
@@ -52,7 +44,7 @@ const Deployment = ({ name, namespace }: Props) => {
     fetchDeployment();
 
     if (isStreamingEnabled()) {
-      return () => {};
+      return;
     }
 
     const interval = setInterval(() => fetchDeployment(), 15000);
@@ -60,6 +52,24 @@ const Deployment = ({ name, namespace }: Props) => {
       clearInterval(interval);
     };
   }, [fetchDeployment]);
+
+  function getPods() {
+    if (workload && isStreamingEnabled()) {
+      return workload.pods;
+    }
+
+    return deployment.pods;
+  }
+
+  function getPodsLength() {
+    let pods = getPods();
+
+    if (Array.isArray(pods)) {
+      return pods.length;
+    }
+
+    return 0;
+  }
 
   return (
     <div>
@@ -84,13 +94,13 @@ const Deployment = ({ name, namespace }: Props) => {
           orientationMargin="0"
           orientation={"left"}
         >
-          Replicas: {deployment.pods.length}
+          Replicas: {getPodsLength()}
         </Divider>
         <Col span={24} style={{ overflowX: "auto" }}>
           <PodTable
             namespace={namespace}
-            pods={deployment.pods}
-            updateResourceData={fetchDeployment}
+            pods={getPods()}
+            updateResourceData={() => {}}
           />
         </Col>
       </Row>

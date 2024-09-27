@@ -13,10 +13,13 @@ import (
 	"github.com/cyclops-ui/cyclops/cyclops-ctrl/internal/models"
 )
 
-func (r Repo) LoadOCIHelmChart(repo, chart, version string) (*models.Template, error) {
+func (r Repo) LoadOCIHelmChart(repo, chart, version, resolvedVersion string) (*models.Template, error) {
 	var err error
 	strictVersion := version
-	if !isValidVersion(version) {
+
+	if len(resolvedVersion) > 0 {
+		strictVersion = resolvedVersion
+	} else if !isValidVersion(version) {
 		strictVersion, err = getOCIStrictVersion(repo, chart, version)
 		if err != nil {
 			return nil, err
