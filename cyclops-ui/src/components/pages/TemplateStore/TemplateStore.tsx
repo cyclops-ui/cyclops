@@ -12,6 +12,8 @@ import {
   message,
   Spin,
   notification,
+  Radio,
+  Flex,
 } from "antd";
 import axios from "axios";
 import Title from "antd/es/typography/Title";
@@ -28,6 +30,10 @@ import {
   FeedbackError,
   FormValidationErrors,
 } from "../../errors/FormValidationErrors";
+
+import gitLogo from "../../../static/img/git.png";
+import helmLogo from "../../../static/img/helm.png";
+import dockerLogo from "../../../static/img/docker-mark-blue.png";
 
 const TemplateStore = () => {
   const [templates, setTemplates] = useState([]);
@@ -104,6 +110,9 @@ const TemplateStore = () => {
   };
 
   const handleSubmit = (values: any) => {
+    console.log(values);
+    return;
+
     setConfirmLoading(true);
 
     axios
@@ -463,6 +472,39 @@ const TemplateStore = () => {
           </Form.Item>
 
           <Divider />
+
+          <Form.Item name="templateSource" label="Select template source">
+            <Radio.Group
+              optionType="button"
+              style={{ width: "100%" }}
+              className={styles.templatetypes}
+            >
+              <Radio value="git" className={styles.templatetype}>
+                <img
+                  src={gitLogo}
+                  alt="git"
+                  className={styles.templatetypeicon}
+                />
+                Git
+              </Radio>
+              <Radio value="helm" className={styles.templatetype}>
+                <img
+                  src={helmLogo}
+                  alt="helm"
+                  className={styles.templatetypeicon}
+                />
+                Helm repo
+              </Radio>
+              <Radio value="oci" className={styles.templatetype}>
+                <img
+                  src={dockerLogo}
+                  alt="docker"
+                  className={styles.templatetypeicon}
+                />
+                OCI registry
+              </Radio>
+            </Radio.Group>
+          </Form.Item>
 
           <Form.Item
             label="Repository URL"
