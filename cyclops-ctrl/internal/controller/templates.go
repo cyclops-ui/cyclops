@@ -9,6 +9,7 @@ import (
 	"github.com/gin-gonic/gin"
 	json "github.com/json-iterator/go"
 
+	cyclopsv1alpha1 "github.com/cyclops-ui/cyclops/cyclops-ctrl/api/v1alpha1"
 	"github.com/cyclops-ui/cyclops/cyclops-ctrl/internal/mapper"
 	"github.com/cyclops-ui/cyclops/cyclops-ctrl/internal/models/dto"
 	"github.com/cyclops-ui/cyclops/cyclops-ctrl/internal/telemetry"
@@ -59,7 +60,13 @@ func (c *Templates) GetTemplate(ctx *gin.Context) {
 		return
 	}
 
-	t, err := c.templatesRepo.GetTemplate(repo, path, commit, "")
+	t, err := c.templatesRepo.GetTemplate(
+		repo,
+		path,
+		commit,
+		"",
+		cyclopsv1alpha1.TemplateSource(""),
+	)
 	if err != nil {
 		fmt.Println(err)
 		ctx.JSON(http.StatusBadRequest, dto.NewError("Error loading template", err.Error()))
@@ -136,6 +143,7 @@ func (c *Templates) CreateTemplatesStore(ctx *gin.Context) {
 		templateStore.TemplateRef.Path,
 		templateStore.TemplateRef.Version,
 		"",
+		cyclopsv1alpha1.TemplateSource(templateStore.TemplateRef.TemplateSource),
 	)
 	if err != nil {
 		fmt.Println(err)
@@ -179,6 +187,7 @@ func (c *Templates) EditTemplatesStore(ctx *gin.Context) {
 		templateStore.TemplateRef.Path,
 		templateStore.TemplateRef.Version,
 		"",
+		cyclopsv1alpha1.TemplateSource(templateStore.TemplateRef.TemplateSource),
 	)
 	if err != nil {
 		fmt.Println(err)

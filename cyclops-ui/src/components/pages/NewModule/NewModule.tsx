@@ -43,6 +43,7 @@ interface templateStoreOption {
     repo: string;
     path: string;
     version: string;
+    templateSource: string;
   };
 }
 
@@ -63,6 +64,7 @@ const NewModule = () => {
     repo: "",
     path: "",
     version: "",
+    templateSource: "",
   });
 
   const [initialValues, setInitialValues] = useState({});
@@ -217,6 +219,7 @@ const NewModule = () => {
           repo: template.repo,
           path: template.path,
           version: template.version,
+          templateSource: template.templateSource,
         },
       })
       .then((res) => {
@@ -357,6 +360,7 @@ const NewModule = () => {
       repo: ts.ref.repo,
       path: ts.ref.path,
       version: ts.ref.version,
+      templateSource: ts.ref.templateSource,
     });
 
     loadTemplate(ts.ref.repo, ts.ref.path, ts.ref.version);

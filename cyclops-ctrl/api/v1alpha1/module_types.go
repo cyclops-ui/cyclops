@@ -37,10 +37,22 @@ type ModuleValue struct {
 	Value string `json:"value"`
 }
 
+type TemplateSource string
+
+const (
+	TemplateSourceGit  TemplateSource = "git"
+	TemplateSourceHelm TemplateSource = "helm"
+	TemplateSourceOCI  TemplateSource = "oci"
+)
+
 type TemplateRef struct {
 	URL     string `json:"repo"`
 	Path    string `json:"path"`
 	Version string `json:"version"`
+
+	// +kubebuilder:validation:Enum=git;helm;oci
+	// +kubebuilder:validation:Optional
+	TemplateSource TemplateSource `json:"templateSource,omitempty"`
 }
 
 type TemplateGitRef struct {
@@ -88,6 +100,10 @@ type HistoryTemplateRef struct {
 	URL     string `json:"repo"`
 	Path    string `json:"path"`
 	Version string `json:"version"`
+
+	// +kubebuilder:validation:Enum=git;helm;oci
+	// +kubebuilder:validation:Optional
+	TemplateSource TemplateSource `json:"templateSource,omitempty"`
 }
 
 type HistoryEntry struct {

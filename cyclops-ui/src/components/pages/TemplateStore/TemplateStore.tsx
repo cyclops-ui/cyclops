@@ -110,9 +110,6 @@ const TemplateStore = () => {
   };
 
   const handleSubmit = (values: any) => {
-    console.log(values);
-    return;
-
     setConfirmLoading(true);
 
     axios
@@ -473,7 +470,10 @@ const TemplateStore = () => {
 
           <Divider />
 
-          <Form.Item name="templateSource" label="Select template source">
+          <Form.Item
+            name={["ref", "templateSource"]}
+            label="Select template source"
+          >
             <Radio.Group
               optionType="button"
               style={{ width: "100%" }}
