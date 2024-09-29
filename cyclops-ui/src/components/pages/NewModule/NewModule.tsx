@@ -43,7 +43,7 @@ interface templateStoreOption {
     repo: string;
     path: string;
     version: string;
-    templateSource: string;
+    sourceType: string;
   };
 }
 
@@ -64,7 +64,7 @@ const NewModule = () => {
     repo: "",
     path: "",
     version: "",
-    templateSource: "",
+    sourceType: "",
   });
 
   const [initialValues, setInitialValues] = useState({});
@@ -219,7 +219,7 @@ const NewModule = () => {
           repo: template.repo,
           path: template.path,
           version: template.version,
-          templateSource: template.templateSource,
+          sourceType: template.sourceType,
         },
       })
       .then((res) => {
@@ -231,7 +231,12 @@ const NewModule = () => {
       });
   };
 
-  const loadTemplate = async (repo: string, path: string, commit: string) => {
+  const loadTemplate = async (
+    repo: string,
+    path: string,
+    commit: string,
+    sourceType: string,
+  ) => {
     setConfig({
       name: "",
       version: "",
@@ -268,7 +273,14 @@ const NewModule = () => {
 
     await axios
       .get(
-        `/api/templates?repo=` + repo + `&path=` + path + `&commit=` + commit,
+        `/api/templates?repo=` +
+          repo +
+          `&path=` +
+          path +
+          `&commit=` +
+          commit +
+          `&sourceType=` +
+          sourceType,
       )
       .then((templatesRes) => {
         setConfig(templatesRes.data);
@@ -292,7 +304,9 @@ const NewModule = () => {
           `&path=` +
           path +
           `&commit=` +
-          commit,
+          commit +
+          `&sourceType=` +
+          sourceType,
       )
       .then((res) => {
         let initialValuesMapped = mapsToArray(
@@ -360,10 +374,10 @@ const NewModule = () => {
       repo: ts.ref.repo,
       path: ts.ref.path,
       version: ts.ref.version,
-      templateSource: ts.ref.templateSource,
+      sourceType: ts.ref.sourceType,
     });
 
-    loadTemplate(ts.ref.repo, ts.ref.path, ts.ref.version);
+    loadTemplate(ts.ref.repo, ts.ref.path, ts.ref.version, ts.ref.sourceType);
   };
 
   const onLoadFromFile = () => {

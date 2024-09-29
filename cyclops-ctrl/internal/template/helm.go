@@ -13,14 +13,12 @@ import (
 	"path"
 	"strings"
 
-	json "github.com/json-iterator/go"
-	"gopkg.in/yaml.v3"
-	helmchart "helm.sh/helm/v3/pkg/chart"
-	"helm.sh/helm/v3/pkg/registry"
-
 	"github.com/cyclops-ui/cyclops/cyclops-ctrl/internal/mapper"
 	"github.com/cyclops-ui/cyclops/cyclops-ctrl/internal/models"
 	"github.com/cyclops-ui/cyclops/cyclops-ctrl/internal/models/helm"
+	json "github.com/json-iterator/go"
+	"gopkg.in/yaml.v3"
+	helmchart "helm.sh/helm/v3/pkg/chart"
 )
 
 func (r Repo) LoadHelmChart(repo, chart, version, resolvedVersion string) (*models.Template, error) {
@@ -29,16 +27,9 @@ func (r Repo) LoadHelmChart(repo, chart, version, resolvedVersion string) (*mode
 	if len(resolvedVersion) > 0 {
 		strictVersion = resolvedVersion
 	} else if !isValidVersion(version) {
-		if registry.IsOCI(repo) {
-			strictVersion, err = getOCIStrictVersion(repo, chart, version)
-			if err != nil {
-				return nil, err
-			}
-		} else {
-			strictVersion, err = getRepoStrictVersion(repo, chart, version)
-			if err != nil {
-				return nil, err
-			}
+		strictVersion, err = getRepoStrictVersion(repo, chart, version)
+		if err != nil {
+			return nil, err
 		}
 	}
 
@@ -47,17 +38,9 @@ func (r Repo) LoadHelmChart(repo, chart, version, resolvedVersion string) (*mode
 		return cached, nil
 	}
 
-	var tgzData []byte
-	if registry.IsOCI(repo) {
-		tgzData, err = loadOCIHelmChartBytes(repo, chart, version)
-		if err != nil {
-			return nil, err
-		}
-	} else {
-		tgzData, err = r.loadFromHelmChartRepo(repo, chart, version)
-		if err != nil {
-			return nil, err
-		}
+	tgzData, err := r.loadFromHelmChartRepo(repo, chart, version)
+	if err != nil {
+		return nil, err
 	}
 
 	extractedFiles, err := unpackTgzInMemory(tgzData)
@@ -82,16 +65,9 @@ func (r Repo) LoadHelmChartInitialValues(repo, chart, version string) (map[strin
 	var err error
 	strictVersion := version
 	if !isValidVersion(version) {
-		if registry.IsOCI(repo) {
-			strictVersion, err = getOCIStrictVersion(repo, chart, version)
-			if err != nil {
-				return nil, err
-			}
-		} else {
-			strictVersion, err = getRepoStrictVersion(repo, chart, version)
-			if err != nil {
-				return nil, err
-			}
+		strictVersion, err = getRepoStrictVersion(repo, chart, version)
+		if err != nil {
+			return nil, err
 		}
 	}
 
@@ -100,17 +76,9 @@ func (r Repo) LoadHelmChartInitialValues(repo, chart, version string) (map[strin
 		return cached, nil
 	}
 
-	var tgzData []byte
-	if registry.IsOCI(repo) {
-		tgzData, err = loadOCIHelmChartBytes(repo, chart, version)
-		if err != nil {
-			return nil, err
-		}
-	} else {
-		tgzData, err = r.loadFromHelmChartRepo(repo, chart, version)
-		if err != nil {
-			return nil, err
-		}
+	tgzData, err := r.loadFromHelmChartRepo(repo, chart, version)
+	if err != nil {
+		return nil, err
 	}
 
 	extractedFiles, err := unpackTgzInMemory(tgzData)
@@ -310,6 +278,10 @@ func (r Repo) mapHelmChartInitialValues(files map[string][]byte) (map[string]int
 			return nil, err
 		}
 
+		if values[depName] == nil {
+			values[depName] = map[string]interface{}{}
+		}
+
 		values[depName] = overlayValues(values[depName], dep)
 	}
 
@@ -319,6 +291,10 @@ func (r Repo) mapHelmChartInitialValues(files map[string][]byte) (map[string]int
 	}
 
 	for depName, depValues := range dependenciesFromMeta {
+		if values[depName] == nil {
+			values[depName] = map[string]interface{}{}
+		}
+
 		values[depName] = overlayValues(values[depName], depValues)
 	}
 	// endregion

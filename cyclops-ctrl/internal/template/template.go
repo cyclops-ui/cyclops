@@ -39,12 +39,11 @@ func (r Repo) GetTemplate(
 	path string,
 	version string,
 	resolvedVersion string,
-	source cyclopsv1alpha1.TemplateSource,
+	source cyclopsv1alpha1.TemplateSourceType,
 ) (*models.Template, error) {
 	var err error
-
 	if len(source) == 0 {
-		source, err = r.assumeTemplateSource(repo)
+		source, err = r.assumeTemplateSourceType(repo)
 		if err != nil {
 			return nil, err
 		}
@@ -58,40 +57,53 @@ func (r Repo) getTemplate(
 	path string,
 	version string,
 	resolvedVersion string,
-	source cyclopsv1alpha1.TemplateSource,
+	source cyclopsv1alpha1.TemplateSourceType,
 ) (*models.Template, error) {
 	switch source {
-	case cyclopsv1alpha1.TemplateSourceOCI:
+	case cyclopsv1alpha1.TemplateSourceTypeOCI:
 		return r.LoadOCIHelmChart(repo, path, version, resolvedVersion)
-	case cyclopsv1alpha1.TemplateSourceHelm:
+	case cyclopsv1alpha1.TemplateSourceTypeHelm:
 		return r.LoadHelmChart(repo, path, version, resolvedVersion)
-	case cyclopsv1alpha1.TemplateSourceGit:
+	case cyclopsv1alpha1.TemplateSourceTypeGit:
 		return r.LoadTemplate(repo, path, version, resolvedVersion)
 	default:
 		return nil, errors.New(fmt.Sprintf("unsupported template source: %v", source))
 	}
 }
 
-func (r Repo) GetTemplateInitialValues(repo, path, version string) (map[string]interface{}, error) {
-	// region load OCI chart
-	if registry.IsOCI(repo) {
+func (r Repo) GetTemplateInitialValues(
+	repo string,
+	path string,
+	version string,
+	source cyclopsv1alpha1.TemplateSourceType,
+) (map[string]interface{}, error) {
+	var err error
+	if len(source) == 0 {
+		source, err = r.assumeTemplateSourceType(repo)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	return r.getTemplateInitialValues(repo, path, version, source)
+}
+
+func (r Repo) getTemplateInitialValues(
+	repo string,
+	path string,
+	version string,
+	source cyclopsv1alpha1.TemplateSourceType,
+) (map[string]interface{}, error) {
+	switch source {
+	case cyclopsv1alpha1.TemplateSourceTypeOCI:
 		return r.LoadOCIHelmChartInitialValues(repo, path, version)
-	}
-	// endregion
-
-	// region load from Helm repo
-	isHelmRepo, err := IsHelmRepo(repo)
-	if err != nil {
-		return nil, err
-	}
-
-	if isHelmRepo {
+	case cyclopsv1alpha1.TemplateSourceTypeHelm:
 		return r.LoadHelmChartInitialValues(repo, path, version)
+	case cyclopsv1alpha1.TemplateSourceTypeGit:
+		return r.LoadInitialTemplateValues(repo, path, version)
+	default:
+		return nil, errors.New(fmt.Sprintf("unsupported template source: %v", source))
 	}
-	// endregion
-
-	// fallback to cloning from git
-	return r.LoadInitialTemplateValues(repo, path, version)
 }
 
 func (r Repo) loadDependencies(metadata *helm.Metadata) ([]*models.Template, error) {
@@ -121,7 +133,7 @@ func (r Repo) loadDependenciesInitialValues(metadata *helm.Metadata) (map[string
 			continue
 		}
 
-		depInitialValues, err := r.GetTemplateInitialValues(dependency.Repository, dependency.Name, dependency.Version)
+		depInitialValues, err := r.GetTemplateInitialValues(dependency.Repository, dependency.Name, dependency.Version, "")
 		if err != nil {
 			return nil, err
 		}
@@ -132,9 +144,9 @@ func (r Repo) loadDependenciesInitialValues(metadata *helm.Metadata) (map[string
 	return initialValues, nil
 }
 
-func (r Repo) assumeTemplateSource(repo string) (cyclopsv1alpha1.TemplateSource, error) {
+func (r Repo) assumeTemplateSourceType(repo string) (cyclopsv1alpha1.TemplateSourceType, error) {
 	if registry.IsOCI(repo) {
-		return cyclopsv1alpha1.TemplateSourceOCI, nil
+		return cyclopsv1alpha1.TemplateSourceTypeOCI, nil
 	}
 
 	isHelmRepo, err := IsHelmRepo(repo)
@@ -143,10 +155,10 @@ func (r Repo) assumeTemplateSource(repo string) (cyclopsv1alpha1.TemplateSource,
 	}
 
 	if isHelmRepo {
-		return cyclopsv1alpha1.TemplateSourceOCI, nil
+		return cyclopsv1alpha1.TemplateSourceTypeHelm, nil
 	}
 
-	return cyclopsv1alpha1.TemplateSourceGit, nil
+	return cyclopsv1alpha1.TemplateSourceTypeGit, nil
 }
 
 func (r Repo) ReturnCache() *ristretto.Cache {

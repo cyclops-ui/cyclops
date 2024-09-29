@@ -43,7 +43,7 @@ spec:
                 type: string
               repo:
                 type: string
-              templateSource:
+              sourceType:
                 enum:
                 - git
                 - helm

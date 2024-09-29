@@ -470,7 +470,7 @@ const TemplateStore = () => {
           <Divider />
 
           <Form.Item
-            name={["ref", "templateSource"]}
+            name={["ref", "sourceType"]}
             label="Select template source"
           >
             <Radio.Group

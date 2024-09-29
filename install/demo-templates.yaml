@@ -10,6 +10,7 @@ spec:
   path: demo
   repo: https://github.com/cyclops-ui/templates
   version: main
+  sourceType: git
 ---
 apiVersion: cyclops-ui.com/v1alpha1
 kind: TemplateStore
@@ -22,6 +23,7 @@ spec:
   path: app-template
   repo: https://github.com/cyclops-ui/templates
   version: main
+  sourceType: git
 ---
 apiVersion: cyclops-ui.com/v1alpha1
 kind: TemplateStore
@@ -34,6 +36,7 @@ spec:
   path: bitnami/jenkins
   repo: https://github.com/bitnami/charts
   version: main
+  sourceType: git
 ---
 apiVersion: cyclops-ui.com/v1alpha1
 kind: TemplateStore
@@ -46,6 +49,7 @@ spec:
   path: bitnami/mariadb
   repo: https://github.com/bitnami/charts
   version: main
+  sourceType: git
 ---
 apiVersion: cyclops-ui.com/v1alpha1
 kind: TemplateStore
@@ -58,6 +62,7 @@ spec:
   path: metabase
   repo: https://github.com/cyclops-ui/templates
   version: main
+  sourceType: git
 ---
 apiVersion: cyclops-ui.com/v1alpha1
 kind: TemplateStore
@@ -70,6 +75,7 @@ spec:
   path: bitnami/mysql
   repo: https://github.com/bitnami/charts
   version: main
+  sourceType: git
 ---
 apiVersion: cyclops-ui.com/v1alpha1
 kind: TemplateStore
@@ -82,6 +88,7 @@ spec:
   path: bitnami/postgresql
   repo: https://github.com/bitnami/charts
   version: main
+  sourceType: git
 ---
 apiVersion: cyclops-ui.com/v1alpha1
 kind: TemplateStore
@@ -94,6 +101,7 @@ spec:
   path: bitnami/prometheus
   repo: https://github.com/bitnami/charts
   version: main
+  sourceType: git
 ---
 apiVersion: cyclops-ui.com/v1alpha1
 kind: TemplateStore
@@ -106,6 +114,7 @@ spec:
   path: bitnami/rabbitmq
   repo: https://github.com/bitnami/charts
   version: main
+  sourceType: git
 ---
 apiVersion: cyclops-ui.com/v1alpha1
 kind: TemplateStore
@@ -118,6 +127,7 @@ spec:
   path: bitnami/redis
   repo: https://github.com/bitnami/charts
   version: main
+  sourceType: git
 ---
 apiVersion: cyclops-ui.com/v1alpha1
 kind: TemplateStore
@@ -130,6 +140,7 @@ spec:
   path: deploy/charts/cerbos
   repo: https://github.com/cerbos/cerbos
   version: main
+  sourceType: git
 ---
 apiVersion: cyclops-ui.com/v1alpha1
 kind: TemplateStore
@@ -142,6 +153,7 @@ spec:
   path: charts/k6-operator
   repo: https://github.com/grafana/k6-operator
   version: main
+  sourceType: git
 ---
 apiVersion: cyclops-ui.com/v1alpha1
 kind: TemplateStore
@@ -154,3 +166,4 @@ spec:
   path: bitnami/valkey
   repo: https://github.com/bitnami/charts
   version: main
+  sourceType: git

@@ -32,7 +32,7 @@ type Template struct {
 	Path            string `json:"path" binding:"required"`
 	Version         string `json:"version"`
 	ResolvedVersion string `json:"resolvedVersion"`
-	TemplateSource  string `json:"templateSource"`
+	SourceType      string `json:"sourceType"`
 }
 
 type TemplatesResponse struct {

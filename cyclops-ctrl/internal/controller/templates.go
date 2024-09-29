@@ -54,6 +54,7 @@ func (c *Templates) GetTemplate(ctx *gin.Context) {
 	repo := ctx.Query("repo")
 	path := ctx.Query("path")
 	commit := ctx.Query("commit")
+	sourceType := ctx.Query("sourceType")
 
 	if repo == "" {
 		ctx.String(http.StatusBadRequest, "set repo field")
@@ -65,7 +66,7 @@ func (c *Templates) GetTemplate(ctx *gin.Context) {
 		path,
 		commit,
 		"",
-		cyclopsv1alpha1.TemplateSource(""),
+		cyclopsv1alpha1.TemplateSourceType(sourceType),
 	)
 	if err != nil {
 		fmt.Println(err)
@@ -82,13 +83,19 @@ func (c *Templates) GetTemplateInitialValues(ctx *gin.Context) {
 	repo := ctx.Query("repo")
 	path := ctx.Query("path")
 	commit := ctx.Query("commit")
+	sourceType := ctx.Query("sourceType")
 
 	if repo == "" {
 		ctx.JSON(http.StatusBadRequest, dto.NewError("Specify repo field", "Repo not specified"))
 		return
 	}
 
-	initial, err := c.templatesRepo.GetTemplateInitialValues(repo, path, commit)
+	initial, err := c.templatesRepo.GetTemplateInitialValues(
+		repo,
+		path,
+		commit,
+		cyclopsv1alpha1.TemplateSourceType(sourceType),
+	)
 	if err != nil {
 		fmt.Println(err)
 		ctx.JSON(http.StatusBadRequest, dto.NewError("Error loading template initial values", err.Error()))
@@ -143,7 +150,7 @@ func (c *Templates) CreateTemplatesStore(ctx *gin.Context) {
 		templateStore.TemplateRef.Path,
 		templateStore.TemplateRef.Version,
 		"",
-		cyclopsv1alpha1.TemplateSource(templateStore.TemplateRef.TemplateSource),
+		cyclopsv1alpha1.TemplateSourceType(templateStore.TemplateRef.SourceType),
 	)
 	if err != nil {
 		fmt.Println(err)
@@ -187,7 +194,7 @@ func (c *Templates) EditTemplatesStore(ctx *gin.Context) {
 		templateStore.TemplateRef.Path,
 		templateStore.TemplateRef.Version,
 		"",
-		cyclopsv1alpha1.TemplateSource(templateStore.TemplateRef.TemplateSource),
+		cyclopsv1alpha1.TemplateSourceType(templateStore.TemplateRef.SourceType),
 	)
 	if err != nil {
 		fmt.Println(err)
