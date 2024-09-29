@@ -84,6 +84,7 @@ func (h *Handler) Start() error {
 	//h.router.POST("/modules/resources", modulesController.ModuleToResources)
 
 	h.router.GET("/resources/pods/:namespace/:name/:container/logs", modulesController.GetLogs)
+	h.router.GET("/resources/pods/:namespace/:name/:container/logs/stream", sse.HeadersMiddleware(), modulesController.GetLogsStream)
 	h.router.GET("/resources/pods/:namespace/:name/:container/logs/download", modulesController.DownloadLogs)
 
 	h.router.GET("/manifest", modulesController.GetManifest)

@@ -7,11 +7,13 @@ import (
 	"errors"
 	"fmt"
 	"io"
+
 	networkingv1 "k8s.io/api/networking/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/util/intstr"
 	"k8s.io/apimachinery/pkg/watch"
 	"k8s.io/client-go/tools/cache"
+
 	"os"
 	"os/exec"
 	"sort"
@@ -169,6 +171,34 @@ func (k *KubernetesClient) GetPods(namespace, name string) ([]apiv1.Pod, error) 
 	}
 
 	return podList.Items, err
+}
+
+func (k *KubernetesClient) GetStreamedPodLogs(ctx context.Context, namespace, container, name string, logCount *int64, logChan chan<- string) error {
+	podLogOptions := apiv1.PodLogOptions{
+		Container:  container,
+		TailLines:  logCount,
+		Timestamps: true,
+		Follow:     true,
+	}
+
+	podClient := k.clientset.CoreV1().Pods(namespace).GetLogs(name, &podLogOptions)
+	stream, err := podClient.Stream(ctx)
+	if err != nil {
+		return err
+	}
+	defer stream.Close()
+
+	scanner := bufio.NewScanner(stream)
+
+	for scanner.Scan() {
+		logChan <- scanner.Text()
+	}
+
+	if err := scanner.Err(); err != nil {
+		return err
+	}
+
+	return nil
 }
 
 func (k *KubernetesClient) GetPodLogs(namespace, container, name string, numLogs *int64) ([]string, error) {

@@ -1,16 +1,18 @@
 import { ReadOutlined } from "@ant-design/icons";
 import { Alert, Button, Col, Divider, Modal, Tabs, TabsProps } from "antd";
-import axios from "axios";
 import { useState } from "react";
 import ReactAce from "react-ace/lib/ace";
 import { mapResponseError } from "../../../../utils/api/errors";
+import { isStreamingEnabled } from "../../../../utils/api/common";
+import { logStream } from "../../../../utils/api/sse/logs";
+import axios from "axios";
 
 interface PodLogsProps {
   pod: any;
 }
 
 const PodLogs = ({ pod }: PodLogsProps) => {
-  const [logs, setLogs] = useState("");
+  const [logs, setLogs] = useState<string[]>([]);
   const [logsModal, setLogsModal] = useState({
     on: false,
     namespace: "",
@@ -18,6 +20,7 @@ const PodLogs = ({ pod }: PodLogsProps) => {
     containers: [],
     initContainers: [],
   });
+
   const [error, setError] = useState({
     message: "",
     description: "",
@@ -31,7 +34,7 @@ const PodLogs = ({ pod }: PodLogsProps) => {
       containers: [],
       initContainers: [],
     });
-    setLogs("");
+    setLogs([]);
   };
 
   const getTabItems = () => {
@@ -50,7 +53,7 @@ const PodLogs = ({ pod }: PodLogsProps) => {
                 type="primary"
                 // icon={<DownloadOutlined />}
                 onClick={downloadLogs(container.name)}
-                disabled={logs === "No logs available"}
+                disabled={logs.length === 0}
               >
                 Download
               </Button>
@@ -58,7 +61,9 @@ const PodLogs = ({ pod }: PodLogsProps) => {
               <ReactAce
                 style={{ width: "100%" }}
                 mode={"sass"}
-                value={logs}
+                value={
+                  logs.length === 0 ? "No logs available" : logs.join("\n")
+                }
                 readOnly={true}
               />
             </Col>
@@ -78,7 +83,7 @@ const PodLogs = ({ pod }: PodLogsProps) => {
                 type="primary"
                 // icon={<DownloadOutlined />}
                 onClick={downloadLogs(container.name)}
-                disabled={logs === "No logs available"}
+                disabled={logs.length === 0}
               >
                 Download
               </Button>
@@ -86,7 +91,9 @@ const PodLogs = ({ pod }: PodLogsProps) => {
               <ReactAce
                 style={{ width: "100%" }}
                 mode={"sass"}
-                value={logs}
+                value={
+                  logs.length === 0 ? "No logs available" : logs.join("\n")
+                }
                 readOnly={true}
               />
             </Col>
@@ -99,31 +106,57 @@ const PodLogs = ({ pod }: PodLogsProps) => {
   };
 
   const onLogsTabsChange = (container: string) => {
-    axios
-      .get(
-        "/api/resources/pods/" +
-          logsModal.namespace +
-          "/" +
-          logsModal.pod +
-          "/" +
-          container +
-          "/logs",
-      )
-      .then((res) => {
-        if (res.data) {
-          let log = "";
-          res.data.forEach((s: string) => {
-            log += s;
-            log += "\n";
-          });
-          setLogs(log);
-        } else {
-          setLogs("No logs available");
-        }
-      })
-      .catch((error) => {
-        setError(mapResponseError(error));
-      });
+    const controller = new AbortController();
+    setLogs(() => []);
+
+    if (isStreamingEnabled()) {
+      logStream(
+        logsModal.pod,
+        logsModal.namespace,
+        container,
+        (log, isReset = false) => {
+          if (isReset) {
+            setLogs(() => []);
+          } else {
+            setLogs((prevLogs) => {
+              return [...prevLogs, log];
+            });
+          }
+        },
+        (err, isReset = false) => {
+          if (isReset) {
+            setError({
+              message: "",
+              description: "",
+            });
+          } else {
+            setError(mapResponseError(err));
+          }
+        },
+        controller,
+      );
+    } else {
+      axios
+        .get(
+          "/api/resources/pods/" +
+            logsModal.namespace +
+            "/" +
+            logsModal.pod +
+            "/" +
+            container +
+            "/logs",
+        )
+        .then((res) => {
+          if (res.data) {
+            setLogs(res.data);
+          } else {
+            setLogs(() => []);
+          }
+        })
+        .catch((error) => {
+          setError(mapResponseError(error));
+        });
+    }
   };
 
   const downloadLogs = (container: string) => {
@@ -139,45 +172,70 @@ const PodLogs = ({ pod }: PodLogsProps) => {
     };
   };
 
-  const handleViewPodLogs = async () => {
-    axios
-      .get(
-        "/api/resources/pods/" +
-          pod.namespace +
-          "/" +
-          pod.name +
-          "/" +
-          pod.containers[0].name +
-          "/logs",
-      )
-      .then((res) => {
-        if (res.data) {
-          let log = "";
-          res.data.forEach((s: string) => {
-            log += s;
-            log += "\n";
-          });
-          setLogs(log);
-        } else {
-          setLogs("No logs available");
-        }
-      })
-      .catch((error) => {
-        setError(mapResponseError(error));
-      });
-
-    setLogsModal({
-      on: true,
-      namespace: pod.namespace,
-      pod: pod.name,
-      containers: pod.containers,
-      initContainers: pod.initContainers,
-    });
-  };
-
   return (
     <>
-      <Button style={{ width: "100%" }} onClick={handleViewPodLogs}>
+      <Button
+        style={{ width: "100%" }}
+        onClick={function () {
+          if (isStreamingEnabled()) {
+            const controller = new AbortController();
+            logStream(
+              pod.name,
+              pod.namespace,
+              pod.containers[0].name,
+              (log, isReset = false) => {
+                if (isReset) {
+                  setLogs(() => []);
+                } else {
+                  setLogs((prevLogs) => {
+                    return [...prevLogs, log];
+                  });
+                }
+              },
+              (err, isReset = false) => {
+                if (isReset) {
+                  setError({
+                    message: "",
+                    description: "",
+                  });
+                } else {
+                  setError(mapResponseError(err));
+                }
+              },
+              controller,
+            );
+          } else {
+            axios
+              .get(
+                "/api/resources/pods/" +
+                  pod.namespace +
+                  "/" +
+                  pod.name +
+                  "/" +
+                  pod.containers[0].name +
+                  "/logs",
+              )
+              .then((res) => {
+                if (res.data) {
+                  setLogs(res.data);
+                } else {
+                  setLogs(() => []);
+                }
+              })
+              .catch((error) => {
+                setError(mapResponseError(error));
+              });
+          }
+
+          setLogsModal({
+            on: true,
+            namespace: pod.namespace,
+            pod: pod.name,
+            containers: pod.containers,
+            initContainers: pod.initContainers,
+          });
+        }}
+      >
         <h4>
           <ReadOutlined style={{ paddingRight: "5px" }} />
           View Logs

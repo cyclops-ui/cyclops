@@ -2,11 +2,13 @@ package controller
 
 import (
 	"fmt"
+	"io"
 	"net/http"
 	"os"
-	"sigs.k8s.io/yaml"
 	"strings"
 	"time"
+
+	"sigs.k8s.io/yaml"
 
 	"github.com/gin-gonic/gin"
 
@@ -559,6 +561,49 @@ func (m *Modules) GetLogs(ctx *gin.Context) {
 	}
 
 	ctx.JSON(http.StatusOK, logs)
+}
+
+func (m *Modules) GetLogsStream(ctx *gin.Context) {
+	ctx.Header("Access-Control-Allow-Origin", "*")
+
+	logCount := int64(100)
+
+	logChan := make(chan string)
+
+	go func() {
+		defer close(logChan)
+
+		err := m.kubernetesClient.GetStreamedPodLogs(
+			ctx.Request.Context(), // we will have to pass the context for the k8s podClient - so it can stop the stream when the client disconnects
+			ctx.Param("namespace"),
+			ctx.Param("container"),
+			ctx.Param("name"),
+			&logCount,
+			logChan,
+		)
+		if err != nil {
+			return
+		}
+	}()
+
+	// stream logs to the client
+	ctx.Stream(func(w io.Writer) bool {
+		for {
+			select {
+			case log, ok := <-logChan:
+				if !ok {
+					return false
+				}
+
+				ctx.SSEvent("pod-log", trimLogLine(log))
+				return true
+			case <-ctx.Request.Context().Done():
+				return false
+			case <-ctx.Done():
+				return false
+			}
+		}
+	})
 }
 
 func (m *Modules) GetDeploymentLogs(ctx *gin.Context) {
