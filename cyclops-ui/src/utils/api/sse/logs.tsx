@@ -22,7 +22,7 @@ export function logStream(
       name +
       "/" +
       container +
-      "/logs",
+      "/logs/stream",
     {
       signal: signalController.signal,
       method: "GET",

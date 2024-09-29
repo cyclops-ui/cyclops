@@ -5,6 +5,7 @@ import ReactAce from "react-ace/lib/ace";
 import { mapResponseError } from "../../../../utils/api/errors";
 import { isStreamingEnabled } from "../../../../utils/api/common";
 import { logStream } from "../../../../utils/api/sse/logs";
+import axios from "axios";
 
 interface PodLogsProps {
   pod: any;
@@ -134,6 +135,27 @@ const PodLogs = ({ pod }: PodLogsProps) => {
         },
         controller,
       );
+    } else {
+      axios
+        .get(
+          "/api/resources/pods/" +
+            logsModal.namespace +
+            "/" +
+            logsModal.pod +
+            "/" +
+            container +
+            "/logs",
+        )
+        .then((res) => {
+          if (res.data) {
+            setLogs(res.data);
+          } else {
+            setLogs(() => []);
+          }
+        })
+        .catch((error) => {
+          setError(mapResponseError(error));
+        });
     }
   };
 
@@ -182,6 +204,27 @@ const PodLogs = ({ pod }: PodLogsProps) => {
               },
               controller,
             );
+          } else {
+            axios
+              .get(
+                "/api/resources/pods/" +
+                  pod.namespace +
+                  "/" +
+                  pod.name +
+                  "/" +
+                  pod.containers[0].name +
+                  "/logs",
+              )
+              .then((res) => {
+                if (res.data) {
+                  setLogs(res.data);
+                } else {
+                  setLogs(() => []);
+                }
+              })
+              .catch((error) => {
+                setError(mapResponseError(error));
+              });
           }
 
           setLogsModal({
