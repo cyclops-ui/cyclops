@@ -20,9 +20,6 @@ const PodLogs = ({ pod }: PodLogsProps) => {
     initContainers: [],
   });
 
-  //
-  const [, setLogsSignalController] = useState<AbortController | null>(null);
-
   const [error, setError] = useState({
     message: "",
     description: "",
@@ -37,13 +34,6 @@ const PodLogs = ({ pod }: PodLogsProps) => {
       initContainers: [],
     });
     setLogs([]);
-    setLogsSignalController((prevController) => {
-      if (prevController) {
-        prevController.abort();
-      }
-
-      return null;
-    });
   };
 
   const getTabItems = () => {
@@ -116,14 +106,7 @@ const PodLogs = ({ pod }: PodLogsProps) => {
 
   const onLogsTabsChange = (container: string) => {
     const controller = new AbortController();
-    setLogsSignalController((prevController) => {
-      if (prevController) {
-        prevController.abort();
-      }
-
-      return controller;
-    });
-    setLogs(() => []); //this is to remove the previous pod's logs
+    setLogs(() => []);
 
     if (isStreamingEnabled()) {
       logStream(
@@ -174,8 +157,6 @@ const PodLogs = ({ pod }: PodLogsProps) => {
         onClick={function () {
           if (isStreamingEnabled()) {
             const controller = new AbortController();
-            setLogsSignalController(() => controller);
-
             logStream(
               pod.name,
               pod.namespace,
