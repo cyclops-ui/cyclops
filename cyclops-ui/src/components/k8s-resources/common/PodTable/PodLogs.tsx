@@ -1,4 +1,4 @@
-import { DownloadOutlined, ReadOutlined } from "@ant-design/icons";
+import { ReadOutlined } from "@ant-design/icons";
 import { Alert, Button, Col, Divider, Modal, Tabs, TabsProps } from "antd";
 import { useState } from "react";
 import ReactAce from "react-ace/lib/ace";
