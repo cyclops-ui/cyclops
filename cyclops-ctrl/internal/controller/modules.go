@@ -543,6 +543,30 @@ func (m *Modules) GetLogs(ctx *gin.Context) {
 	ctx.Header("Access-Control-Allow-Origin", "*")
 
 	logCount := int64(100)
+	rawLogs, err := m.kubernetesClient.GetPodLogs(
+		ctx.Param("namespace"),
+		ctx.Param("container"),
+		ctx.Param("name"),
+		&logCount,
+	)
+	if err != nil {
+		fmt.Println(err)
+		ctx.JSON(http.StatusInternalServerError, dto.NewError("Error fetching logs", err.Error()))
+		return
+	}
+
+	logs := make([]string, 0, len(rawLogs))
+	for _, log := range rawLogs {
+		logs = append(logs, trimLogLine(log))
+	}
+
+	ctx.JSON(http.StatusOK, logs)
+}
+
+func (m *Modules) GetLogsStream(ctx *gin.Context) {
+	ctx.Header("Access-Control-Allow-Origin", "*")
+
+	logCount := int64(100)
 
 	logChan := make(chan string)
 
@@ -571,7 +595,7 @@ func (m *Modules) GetLogs(ctx *gin.Context) {
 					return false
 				}
 
-				ctx.SSEvent("pod-log", log)
+				ctx.SSEvent("pod-log", trimLogLine(log))
 				return true
 			case <-ctx.Request.Context().Done():
 				return false
