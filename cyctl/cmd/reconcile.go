@@ -32,19 +32,19 @@ func reconcileModule(clientset *client.CyclopsV1Alpha1Client, moduleName string)
 		fmt.Println("failed to update module: ", err)
 		return
 	}
-	fmt.Printf("successfully reconciled %v", moduleName)
+	fmt.Printf("successfully triggered reconcilation for module: %v", moduleName)
 
 }
 
 var (
-	reconcileExample = `# Reconcile the Module 
+	reconcileExample = `# Reconcile a Module 
 	cyctl reconcile <modulename>`
 )
 
 var reconcileCMD = &cobra.Command{
 	Use:     "reconcile",
-	Short:   "Will reconcile the Module and update the current TimeStamp",
-	Long:    "Will reconcile the Module and update the current TimeStamp",
+	Short:   "Trigger module reconciliation",
+	Long:    "Trigger module reconciliation",
 	Example: reconcileExample,
 	Args:    cobra.ExactArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
