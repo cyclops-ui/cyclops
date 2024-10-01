@@ -151,7 +151,7 @@ const TemplateStore = () => {
       });
       await axios
         .get(
-          `/api/templates?repo=${templateInfo.repo}&path=${templateInfo.path}&commit=${templateInfo.version}`,
+          `/api/templates?repo=${templateInfo.repo}&path=${templateInfo.path}&commit=${templateInfo.version}&sourceType=${templateInfo.sourceType}`,
         )
         .then(() => {
           setRequestStatus((prevStatus) => ({
@@ -181,12 +181,15 @@ const TemplateStore = () => {
     path: string,
     version: string,
     templateName: string,
+    sourceType: string,
   ) => {
     setLoadingTemplateName((prevState) => {
       return { ...prevState, [templateName]: true };
     });
     axios
-      .get(`/api/templates?repo=${repo}&path=${path}&commit=${version}`)
+      .get(
+        `/api/templates?repo=${repo}&path=${path}&commit=${version}&sourceType=${sourceType}`,
+      )
       .then((res) => {
         setLoadingTemplateName((prevState) => {
           return { ...prevState, [templateName]: false };
@@ -371,6 +374,7 @@ const TemplateStore = () => {
                         template.ref.path,
                         template.ref.version,
                         template.name,
+                        template.ref.sourceType,
                       );
                     }}
                   />
