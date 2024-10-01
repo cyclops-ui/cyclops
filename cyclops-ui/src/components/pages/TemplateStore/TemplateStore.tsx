@@ -390,6 +390,10 @@ const TemplateStore = () => {
                 <EditOutlined
                   className={styles.edittemplate}
                   onClick={function () {
+                    editForm.setFieldValue(
+                      ["ref", "sourceType"],
+                      template.ref.sourceType,
+                    );
                     editForm.setFieldValue(["ref", "repo"], template.ref.repo);
                     editForm.setFieldValue(["ref", "path"], template.ref.path);
                     editForm.setFieldValue(
@@ -565,6 +569,41 @@ const TemplateStore = () => {
           initialValues={{ remember: false }}
           labelCol={{ span: 6 }}
         >
+          <Form.Item
+            name={["ref", "sourceType"]}
+            label="Select template source"
+          >
+            <Radio.Group
+              optionType="button"
+              style={{ width: "100%" }}
+              className={styles.templatetypes}
+            >
+              <Radio value="git" className={styles.templatetype}>
+                <img
+                  src={gitLogo}
+                  alt="git"
+                  className={styles.templatetypeicon}
+                />
+                Git
+              </Radio>
+              <Radio value="helm" className={styles.templatetype}>
+                <img
+                  src={helmLogo}
+                  alt="helm"
+                  className={styles.templatetypeicon}
+                />
+                Helm repo
+              </Radio>
+              <Radio value="oci" className={styles.templatetype}>
+                <img
+                  src={dockerLogo}
+                  alt="docker"
+                  className={styles.templatetypeicon}
+                />
+                OCI registry
+              </Radio>
+            </Radio.Group>
+          </Form.Item>
           <Form.Item
             label="Repository URL"
             name={["ref", "repo"]}
