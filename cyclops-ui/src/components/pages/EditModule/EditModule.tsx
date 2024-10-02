@@ -52,6 +52,7 @@ const EditModule = () => {
       path: "",
       version: "",
       resolvedVersion: "",
+      sourceType: "",
     },
   });
 
@@ -79,6 +80,7 @@ const EditModule = () => {
     path: "",
     version: "",
     resolvedVersion: "",
+    sourceType: "",
   });
   const [templateRefLock, setTemplateRefLock] = useState(true);
 
@@ -209,12 +211,14 @@ const EditModule = () => {
             path: res.data.template.path,
             version: res.data.template.version,
             resolvedVersion: res.data.template.resolvedVersion,
+            sourceType: res.data.template.sourceType,
           });
 
           let result = await getTemplate(
             res.data.template.repo,
             res.data.template.path,
             res.data.template.resolvedVersion,
+            res.data.template.sourceType,
           );
 
           if (result.success) {
@@ -267,12 +271,14 @@ const EditModule = () => {
     path: string,
     version: string,
     resolvedVersion: string,
+    source: string,
   ) => {
     let newTemplate: templateRef = {
       repo: repo,
       path: path,
       version: version,
       resolvedVersion: resolvedVersion,
+      sourceType: templateRef.sourceType,
     };
 
     if (JSON.stringify(module.template) === JSON.stringify(newTemplate)) {
@@ -291,6 +297,7 @@ const EditModule = () => {
       templateEditValues.repo,
       templateEditValues.path,
       templateEditValues.version,
+      templateRef.sourceType,
     );
 
     if (!templateResult.success) {
@@ -327,12 +334,14 @@ const EditModule = () => {
       path: templateEditValues.path,
       version: templateEditValues.version,
       resolvedVersion: templateResult.template.resolvedVersion,
+      sourceType: templateRef.sourceType,
     });
     handleTemplateRefChange(
       templateEditValues.repo,
       templateEditValues.path,
       templateEditValues.version,
       templateResult.template.resolvedVersion,
+      templateRef.sourceType,
     );
 
     setConfig(templateResult.template);

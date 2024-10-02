@@ -89,6 +89,7 @@ func k8sTemplateRefToDTO(templateRef cyclopsv1alpha1.TemplateRef, templateResolv
 		Path:            templateRef.Path,
 		Version:         templateRef.Version,
 		ResolvedVersion: templateResolvedVersion,
+		SourceType:      string(templateRef.SourceType),
 	}
 }
 

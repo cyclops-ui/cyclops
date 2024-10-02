@@ -26,6 +26,7 @@ export async function getTemplate(
   repo: string,
   path: string,
   version: string,
+  sourceType: string,
 ): Promise<GetTemplateResult> {
   let responseError: ResponseError = {
     message: "",
@@ -41,7 +42,16 @@ export async function getTemplate(
   };
 
   await axios
-    .get(`/api/templates?repo=` + repo + `&path=` + path + `&commit=` + version)
+    .get(
+      `/api/templates?repo=` +
+        repo +
+        `&path=` +
+        path +
+        `&commit=` +
+        version +
+        `&sourceType=` +
+        sourceType,
+    )
     .then((templatesRes) => {
       template = templatesRes.data;
     })
