@@ -34,7 +34,7 @@ export function logStream(
           response.ok &&
           response.headers.get("content-type") === EventStreamContentType
         ) {
-          // here we have success - we need to remove the error and reset   the logs
+          // here we have success - we need to remove the error and reset the logs
           setError(new Error(), true);
           setLog("", true);
           return;
