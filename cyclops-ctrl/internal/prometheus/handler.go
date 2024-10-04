@@ -17,6 +17,11 @@ type Monitor struct {
 	CacheCostAdded   prometheus.Gauge
 	CacheKeysEvicted prometheus.Gauge
 	CacheCostEvicted prometheus.Gauge
+
+	// Reconciler Metrics
+	ReconcilerDuration   prometheus.Histogram
+	NoOfReconcilations   prometheus.Counter
+	FailedReconcilations prometheus.Counter
 }
 
 func NewMonitor(logger logr.Logger) (Monitor, error) {
@@ -57,6 +62,22 @@ func NewMonitor(logger logr.Logger) (Monitor, error) {
 			Help:      "No of cache cost evicted",
 			Namespace: "cyclops",
 		}),
+		ReconcilerDuration: prometheus.NewHistogram(prometheus.HistogramOpts{
+			Name:      "reconciler_duration_seconds",
+			Help:      "Duration of reconciler",
+			Namespace: "cyclops",
+			Buckets:   prometheus.DefBuckets,
+		}),
+		NoOfReconcilations: prometheus.NewCounter(prometheus.CounterOpts{
+			Name:      "no_of_reconcilations",
+			Help:      "No of reconcilations",
+			Namespace: "cyclops",
+		}),
+		FailedReconcilations: prometheus.NewCounter(prometheus.CounterOpts{
+			Name:      "failed_reconcilations",
+			Help:      "No of failed reconcilations",
+			Namespace: "cyclops",
+		}),
 	}
 
 	metricsList :=
@@ -68,6 +89,9 @@ func NewMonitor(logger logr.Logger) (Monitor, error) {
 			m.CacheCostAdded,
 			m.CacheKeysEvicted,
 			m.CacheCostEvicted,
+			m.ReconcilerDuration,
+			m.NoOfReconcilations,
+			m.FailedReconcilations,
 		}
 
 	for _, metric := range metricsList {
@@ -86,6 +110,18 @@ func (m *Monitor) IncModule() {
 
 func (m *Monitor) DecModule() {
 	m.ModulesDeployed.Dec()
+}
+
+func (m *Monitor) IncNoOfReconcilations() {
+	m.NoOfReconcilations.Inc()
+}
+
+func (m *Monitor) IncFailedReconcilations() {
+	m.FailedReconcilations.Inc()
+}
+
+func (m *Monitor) ObserveReconcilerDuration(duration float64) {
+	m.ReconcilerDuration.Observe(duration)
 }
 
 func (m *Monitor) UpdateCacheMetrics(cache *ristretto.Cache) {

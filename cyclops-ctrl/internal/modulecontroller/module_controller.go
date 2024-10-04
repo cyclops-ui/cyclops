@@ -38,6 +38,7 @@ import (
 
 	cyclopsv1alpha1 "github.com/cyclops-ui/cyclops/cyclops-ctrl/api/v1alpha1"
 	"github.com/cyclops-ui/cyclops/cyclops-ctrl/internal/models"
+	"github.com/cyclops-ui/cyclops/cyclops-ctrl/internal/prometheus"
 	"github.com/cyclops-ui/cyclops/cyclops-ctrl/internal/telemetry"
 	templaterepo "github.com/cyclops-ui/cyclops/cyclops-ctrl/internal/template"
 	"github.com/cyclops-ui/cyclops/cyclops-ctrl/internal/template/render"
@@ -54,6 +55,7 @@ type ModuleReconciler struct {
 	renderer         *render.Renderer
 
 	telemetryClient telemetry.Client
+	monitor         prometheus.Monitor
 	logger          logr.Logger
 }
 
@@ -64,6 +66,7 @@ func NewModuleReconciler(
 	kubernetesClient *k8sclient.KubernetesClient,
 	renderer *render.Renderer,
 	telemetryClient telemetry.Client,
+	monitor prometheus.Monitor,
 ) *ModuleReconciler {
 	return &ModuleReconciler{
 		Client:           client,
@@ -72,6 +75,7 @@ func NewModuleReconciler(
 		kubernetesClient: kubernetesClient,
 		renderer:         renderer,
 		telemetryClient:  telemetryClient,
+		monitor:          monitor,
 		logger:           ctrl.Log.WithName("reconciler"),
 	}
 }
@@ -92,6 +96,13 @@ func NewModuleReconciler(
 func (r *ModuleReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
 	_ = log.FromContext(ctx)
 	r.telemetryClient.ModuleReconciliation()
+	r.monitor.IncNoOfReconcilations()
+
+	startTime := time.Now()
+
+	defer func(startTime time.Time) {
+		r.monitor.ObserveReconcilerDuration(time.Since(startTime).Seconds())
+	}(startTime)
 
 	var module cyclopsv1alpha1.Module
 	err := r.Get(ctx, req.NamespacedName, &module)
@@ -100,6 +111,7 @@ func (r *ModuleReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctr
 		resources, err := r.kubernetesClient.GetResourcesForModule(req.Name)
 		if err != nil {
 			r.logger.Error(err, "error on get module resources", "namespaced name", req.NamespacedName)
+			r.monitor.IncFailedReconcilations()
 			return ctrl.Result{}, err
 		}
 
@@ -119,6 +131,7 @@ func (r *ModuleReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctr
 		return ctrl.Result{}, nil
 	}
 	if err != nil {
+		r.monitor.IncFailedReconcilations()
 		return ctrl.Result{}, err
 	}
 
@@ -142,6 +155,8 @@ func (r *ModuleReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctr
 			return ctrl.Result{}, err
 		}
 
+		r.monitor.IncFailedReconcilations()
+
 		return ctrl.Result{}, err
 	}
 
@@ -153,10 +168,13 @@ func (r *ModuleReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctr
 			return ctrl.Result{}, err
 		}
 
+		r.monitor.IncFailedReconcilations()
+
 		return ctrl.Result{}, err
 	}
 
 	if len(installErrors) != 0 {
+		r.monitor.IncFailedReconcilations()
 		return ctrl.Result{}, r.setStatus(
 			ctx,
 			module,
