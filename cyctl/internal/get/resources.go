@@ -40,11 +40,13 @@ func listResources(clientset *k8sclient.KubernetesClient, moduleNames []string) 
 	}
 
 	headerSpacing := 20
-	output := "KIND" + strings.Repeat(" ", 16) + " NAME\n"
+	output := "KIND" + strings.Repeat(" ", 16) + " NAME" + strings.Repeat(" ", 16) + " NAMESPACE\n"
 	fmt.Print(output)
 	for _, resource := range resources {
 		nameSpacing := max(0, headerSpacing-len(resource.GetKind()))
-		fmt.Printf("%s"+strings.Repeat(" ", nameSpacing)+" %s\n", resource.GetKind(), resource.GetName())
+		namespaceSpacing := max(0, headerSpacing-len(resource.GetName()))
+		fmt.Printf("%s"+strings.Repeat(" ", nameSpacing)+" %s"+strings.Repeat(" ", namespaceSpacing)+"%s\n",
+			resource.GetKind(), resource.GetName(), resource.GetNamespace())
 	}
 
 }
