@@ -1,6 +1,6 @@
 import { ReadOutlined } from "@ant-design/icons";
 import { Alert, Button, Col, Divider, Modal, Tabs, TabsProps } from "antd";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import ReactAce from "react-ace/lib/ace";
 import { mapResponseError } from "../../../../utils/api/errors";
 import { isStreamingEnabled } from "../../../../utils/api/common";
@@ -20,6 +20,7 @@ const PodLogs = ({ pod }: PodLogsProps) => {
     containers: [],
     initContainers: [],
   });
+  const logsSignalControllerRef = useRef<AbortController | null>(null);
 
   const [error, setError] = useState({
     message: "",
@@ -35,6 +36,11 @@ const PodLogs = ({ pod }: PodLogsProps) => {
       initContainers: [],
     });
     setLogs([]);
+
+    // send the abort signal
+    if (logsSignalControllerRef.current !== null) {
+      logsSignalControllerRef.current.abort();
+    }
   };
 
   const getTabItems = () => {
@@ -107,6 +113,10 @@ const PodLogs = ({ pod }: PodLogsProps) => {
 
   const onLogsTabsChange = (container: string) => {
     const controller = new AbortController();
+    if (logsSignalControllerRef.current !== null) {
+      logsSignalControllerRef.current.abort();
+    }
+    logsSignalControllerRef.current = controller; // store the controller to be able to abort the request
     setLogs(() => []);
 
     if (isStreamingEnabled()) {
@@ -179,6 +189,8 @@ const PodLogs = ({ pod }: PodLogsProps) => {
         onClick={function () {
           if (isStreamingEnabled()) {
             const controller = new AbortController();
+            logsSignalControllerRef.current = controller; // store the controller to be able to abort the request
+
             logStream(
               pod.name,
               pod.namespace,
