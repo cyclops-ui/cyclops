@@ -114,7 +114,7 @@ const PodLogs = ({ pod }: PodLogsProps) => {
   const onLogsTabsChange = (container: string) => {
     const controller = new AbortController();
     if (logsSignalControllerRef.current !== null) {
-      logsSignalControllerRef.current.abort(); //
+      logsSignalControllerRef.current.abort();
     }
     logsSignalControllerRef.current = controller; // store the controller to be able to abort the request
     setLogs(() => []);
