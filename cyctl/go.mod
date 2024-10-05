@@ -6,6 +6,7 @@ toolchain go1.22.2
 
 require (
 	github.com/cyclops-ui/cyclops/cyclops-ctrl v0.0.0-20240917130002-9f787d2ad567
+	github.com/manifoldco/promptui v0.9.0
 	github.com/spf13/cobra v1.8.0
 	k8s.io/api v0.30.1
 	k8s.io/apiextensions-apiserver v0.30.1
@@ -39,7 +40,6 @@ require (
 	github.com/josharian/intern v1.0.0 // indirect
 	github.com/json-iterator/go v1.1.12 // indirect
 	github.com/mailru/easyjson v0.7.7 // indirect
-	github.com/manifoldco/promptui v0.9.0 // indirect
 	github.com/matttproud/golang_protobuf_extensions v1.0.4 // indirect
 	github.com/moby/spdystream v0.2.0 // indirect
 	github.com/modern-go/concurrent v0.0.0-20180306012644-bacd9c7ef1dd // indirect

@@ -31,10 +31,8 @@ var (
 )
 
 func createTemplate(clientset *client.CyclopsV1Alpha1Client, templateName, path, version, namespace, outputFormat string) {
-
 	// Check wheter the flags --repo --path --version are defined
 	if path == "" && version == "" && repo == "" {
-
 		RepoPrompt := promptui.Prompt{
 			Label: "Repo",
 		}
@@ -64,8 +62,8 @@ func createTemplate(clientset *client.CyclopsV1Alpha1Client, templateName, path,
 			return
 		}
 		version = versionValue
-
 	}
+
 	// Define a new TemplateStore object
 	newTemplate := v1alpha1.TemplateStore{
 		TypeMeta: v1.TypeMeta{
