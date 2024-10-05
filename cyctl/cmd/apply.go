@@ -224,7 +224,7 @@ var applyCmd = &cobra.Command{
 
 func init() {
 	applyCmd.Flags().StringP("version", "v", "main", "specify cyclops version")
-	applyCmd.Flags().BoolP("disable-streaming", "s", false, "disable streaming resources when installing Cyclops")
+	applyCmd.Flags().BoolP("disable-streaming", "s", false, "turn off streaming of updates to the UI")
 	applyCmd.Flags().BoolP("disable-telemetry", "t", false, "disable emitting telemetry metrics from cyclops controller")
 	RootCmd.AddCommand(applyCmd)
 }
