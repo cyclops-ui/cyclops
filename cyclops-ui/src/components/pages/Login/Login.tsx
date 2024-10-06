@@ -27,7 +27,6 @@ interface DecodedToken {
   sub: string;
   exp: number;
   iat: number;
-  // Add other claims as needed
 }
 
 interface RoleResponse {
@@ -47,8 +46,6 @@ const Login = () => {
       const response = await axios.post<LoginResponse>("/api/login", request);
       if (response.data?.token) {
         const decodedToken = jwtDecode<DecodedToken>(response.data.token);
-        console.log("Decoded token:", decodedToken);
-
         Cookies.set("_isAuthenticated", "true");
         Cookies.set("token", response.data.token);
         const roleResponse = await axios.get<RoleResponse>("/api/getrole", {

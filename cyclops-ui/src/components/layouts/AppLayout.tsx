@@ -13,9 +13,7 @@ export default function AppLayout() {
   const { userName, userRole, logout } = useAuth();
 
   const handleLogout = () => {
-    // Implement logout logic here
     logout();
-    console.log("Logging out");
   };
 
   const dropdownMenu = (

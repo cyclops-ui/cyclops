@@ -21,7 +21,6 @@ interface DecodedToken {
   sub: string;
   exp: number;
   iat: number;
-  // Add other claims as needed
 }
 
 interface RoleResponse {
