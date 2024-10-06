@@ -61,7 +61,8 @@ func updateTemplate(clientset *client.CyclopsV1Alpha1Client, templateName, path,
 		return
 	}
 
-	fmt.Printf("successfully updated %v", templateName)
+	fmt.Printf("successfully updated %v \n", templateName)
+
 }
 
 var (
