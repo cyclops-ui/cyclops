@@ -8,6 +8,7 @@ import (
 	"github.com/cyclops-ui/cyclops/cyclops-ctrl/api/v1alpha1"
 	"github.com/cyclops-ui/cyclops/cyclops-ctrl/api/v1alpha1/client"
 	"github.com/cyclops-ui/cycops-cyctl/internal/kubeconfig"
+	"github.com/manifoldco/promptui"
 	"github.com/spf13/cobra"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"sigs.k8s.io/yaml"
@@ -30,6 +31,39 @@ var (
 )
 
 func createTemplate(clientset *client.CyclopsV1Alpha1Client, templateName, path, version, namespace, outputFormat string) {
+	// Check wheter the flags --repo --path --version are defined
+	if path == "" && version == "" && repo == "" {
+		RepoPrompt := promptui.Prompt{
+			Label: "Repo",
+		}
+		repoValue, err := RepoPrompt.Run()
+		if err != nil {
+			fmt.Printf("Prompt failed %v", err)
+			return
+		}
+		repo = repoValue
+
+		PathPrompt := promptui.Prompt{
+			Label: "Path",
+		}
+		pathValue, err := PathPrompt.Run()
+		if err != nil {
+			fmt.Printf("Prompt failed %v", err)
+			return
+		}
+		path = pathValue
+
+		VersionPrompt := promptui.Prompt{
+			Label: "Version",
+		}
+		versionValue, err := VersionPrompt.Run()
+		if err != nil {
+			fmt.Printf("Prompt failed %v", err)
+			return
+		}
+		version = versionValue
+	}
+
 	// Define a new TemplateStore object
 	newTemplate := v1alpha1.TemplateStore{
 		TypeMeta: v1.TypeMeta{

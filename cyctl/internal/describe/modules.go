@@ -50,6 +50,7 @@ func describeModules(clientset *client.CyclopsV1Alpha1Client, moduleNames []stri
 			d.Printf("  Repository:\t%s\n", module.Spec.TemplateRef.URL)
 			d.Printf("  Relative Path:\t%s\n", module.Spec.TemplateRef.Path)
 			d.Printf("  Branch:\t%s\n", module.Spec.TemplateRef.Version)
+			d.Printf("  Resolved Version:\t%s\n", module.Status.TemplateResolvedVersion)
 
 			d.Println()
 			if len(module.Spec.Values.Raw) > 0 {
