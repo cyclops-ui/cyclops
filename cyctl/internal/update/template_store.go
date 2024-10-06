@@ -67,8 +67,8 @@ func updateTemplate(clientset *client.CyclopsV1Alpha1Client, templateName, path,
 var (
 	UpdateTemplateStoreCMD = &cobra.Command{
 		Use:     "template",
-		Short:   " updates template values; takes template name as argument and updates values provided by flags",
-		Long:    " updates template values; takes template name as argument with flags --path=<path> --repo=<repo> --version=<version> --icon=<icon> ",
+		Short:   "updates template values; takes template name as argument and updates values provided by flags",
+		Long:    "updates template values; takes template name as argument with flags --path=<path> --repo=<repo> --version=<version> --icon=<icon> ",
 		Example: updateTemplateStoreExample,
 		Args:    cobra.ExactArgs(1),
 		Run: func(cmd *cobra.Command, args []string) {
