@@ -73,6 +73,7 @@ func (h *Handler) Start() error {
 	}
 
 	h.router.POST("/logout", cerbos.Logout())
+	h.router.GET("/getrole", cerbos.GetRole())
 
 	// templates
 	h.router.GET("/templates", templatesController.GetTemplate)
