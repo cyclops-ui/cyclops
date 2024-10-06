@@ -91,14 +91,14 @@ func GetRole() gin.HandlerFunc {
 		// Get the Authorization header
 		authHeader := c.GetHeader("Authorization")
 		if authHeader == "" {
-			c.JSON(http.StatusUnauthorized, gin.H{"error": "No token provided"})
+			c.JSON(http.StatusUnauthorized, gin.H{"error": "No token"})
 			return
 		}
 
 		// Check if the header starts with "Bearer "
 		bearerToken := strings.Split(authHeader, " ")
 		if len(bearerToken) != 2 || strings.ToLower(bearerToken[0]) != "bearer" {
-			c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid token format"})
+			c.JSON(http.StatusUnauthorized, gin.H{"error": "invalid token"})
 			return
 		}
 
@@ -115,7 +115,7 @@ func GetRole() gin.HandlerFunc {
 
 		if err != nil {
 			if err == jwt.ErrSignatureInvalid {
-				c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid token signature"})
+				c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid token"})
 				return
 			}
 			c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid token"})

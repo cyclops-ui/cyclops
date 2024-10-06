@@ -83,7 +83,7 @@ func AuthMiddleware(cerbosClient *CerbosSvc) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		accessToken, err := c.Cookie("cyclops.token")
 		if err != nil {
-			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "unauthorized access"})
+			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "unauthorized"})
 			return
 		}
 
