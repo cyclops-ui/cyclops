@@ -70,6 +70,7 @@ export async function getTemplateInitialValues(
   repo: string,
   path: string,
   version: string,
+  sourceType: string,
 ): Promise<GetTemplateInitialResult> {
   let responseError: ResponseError = {
     message: "",
@@ -84,7 +85,9 @@ export async function getTemplateInitialValues(
         `&path=` +
         path +
         `&commit=` +
-        version,
+        version +
+        `&sourceType=` +
+        sourceType,
     )
     .then((res) => {
       initialValues = res.data;

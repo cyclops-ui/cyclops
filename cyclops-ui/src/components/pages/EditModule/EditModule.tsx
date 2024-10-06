@@ -315,6 +315,7 @@ const EditModule = () => {
       templateEditValues.repo,
       templateEditValues.path,
       templateEditValues.version,
+      templateRef.sourceType,
     );
 
     if (!initialValuesResult.success) {
