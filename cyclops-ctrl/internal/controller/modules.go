@@ -2,21 +2,19 @@ package controller
 
 import (
 	"fmt"
-	"log"
 	"io"
+	"log"
 	"net/http"
 	"os"
 	"strings"
 	"time"
 
 	cerbosSDK "github.com/cerbos/cerbos-sdk-go/cerbos"
-	"sigs.k8s.io/yaml"
 	"github.com/gin-gonic/gin"
+	"sigs.k8s.io/yaml"
 
 	"github.com/cyclops-ui/cyclops/cyclops-ctrl/api/v1alpha1"
 	"github.com/cyclops-ui/cyclops/cyclops-ctrl/internal/cerbos"
-	"github.com/cyclops-ui/cyclops/cyclops-ctrl/internal/cluster/k8sclient"
-
 	"github.com/cyclops-ui/cyclops/cyclops-ctrl/internal/mapper"
 	"github.com/cyclops-ui/cyclops/cyclops-ctrl/internal/models/dto"
 	"github.com/cyclops-ui/cyclops/cyclops-ctrl/internal/prometheus"

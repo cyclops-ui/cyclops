@@ -21,7 +21,6 @@ import (
 
 	"github.com/cyclops-ui/cyclops/cyclops-ctrl/internal/auth"
 	"github.com/cyclops-ui/cyclops/cyclops-ctrl/internal/cerbos"
-	"github.com/cyclops-ui/cyclops/cyclops-ctrl/internal/cluster/k8sclient"
 
 	"github.com/cyclops-ui/cyclops/cyclops-ctrl/internal/handler"
 	"github.com/cyclops-ui/cyclops/cyclops-ctrl/internal/modulecontroller"
@@ -103,7 +102,7 @@ func main() {
 
 	prometheus.StartCacheMetricsUpdater(&monitor, templatesRepo.ReturnCache(), 10*time.Second, setupLog)
 
-  handler, err := handler.New(templatesRepo, k8sClient, renderer, cerbosClient, telemetryClient, monitor)
+	handler, err := handler.New(templatesRepo, k8sClient, renderer, cerbosClient, telemetryClient, monitor)
 	if err != nil {
 		panic(err)
 	}

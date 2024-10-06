@@ -3,18 +3,17 @@ package handler
 import (
 	"net/http"
 	"os"
+
 	"github.com/cyclops-ui/cyclops/cyclops-ctrl/internal/controller/sse"
 
-	"github.com/gin-gonic/gin"
-	"net/http"
 	cerbos "github.com/cyclops-ui/cyclops/cyclops-ctrl/internal/cerbos"
-	"github.com/cyclops-ui/cyclops/cyclops-ctrl/internal/cluster/k8sclient"
 	"github.com/cyclops-ui/cyclops/cyclops-ctrl/internal/controller"
 	"github.com/cyclops-ui/cyclops/cyclops-ctrl/internal/prometheus"
 	"github.com/cyclops-ui/cyclops/cyclops-ctrl/internal/telemetry"
 	templaterepo "github.com/cyclops-ui/cyclops/cyclops-ctrl/internal/template"
 	"github.com/cyclops-ui/cyclops/cyclops-ctrl/internal/template/render"
 	"github.com/cyclops-ui/cyclops/cyclops-ctrl/pkg/cluster/k8sclient"
+	"github.com/gin-gonic/gin"
 )
 
 type Handler struct {

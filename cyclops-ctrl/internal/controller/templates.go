@@ -13,7 +13,6 @@ import (
 	json "github.com/json-iterator/go"
 
 	"github.com/cyclops-ui/cyclops/cyclops-ctrl/internal/cerbos"
-	"github.com/cyclops-ui/cyclops/cyclops-ctrl/internal/cluster/k8sclient"
 
 	"github.com/cyclops-ui/cyclops/cyclops-ctrl/internal/mapper"
 	"github.com/cyclops-ui/cyclops/cyclops-ctrl/internal/models/dto"
