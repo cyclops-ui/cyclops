@@ -20,10 +20,10 @@ type Repo struct {
 }
 
 type templateCache interface {
-	GetTemplate(repo, path, version string) (*models.Template, bool)
-	SetTemplate(repo, path, version string, template *models.Template)
-	GetTemplateInitialValues(repo, path, version string) (map[string]interface{}, bool)
-	SetTemplateInitialValues(repo, path, version string, values map[string]interface{})
+	GetTemplate(repo, path, version, sourceType string) (*models.Template, bool)
+	SetTemplate(repo, path, version, sourceType string, template *models.Template)
+	GetTemplateInitialValues(repo, path, version, sourceType string) (map[string]interface{}, bool)
+	SetTemplateInitialValues(repo, path, version, sourceType string, values map[string]interface{})
 	ReturnCache() *ristretto.Cache
 }
 

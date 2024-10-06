@@ -13,12 +13,14 @@ import (
 	"path"
 	"strings"
 
-	"github.com/cyclops-ui/cyclops/cyclops-ctrl/internal/mapper"
-	"github.com/cyclops-ui/cyclops/cyclops-ctrl/internal/models"
-	"github.com/cyclops-ui/cyclops/cyclops-ctrl/internal/models/helm"
 	json "github.com/json-iterator/go"
 	"gopkg.in/yaml.v3"
 	helmchart "helm.sh/helm/v3/pkg/chart"
+
+	cyclopsv1alpha1 "github.com/cyclops-ui/cyclops/cyclops-ctrl/api/v1alpha1"
+	"github.com/cyclops-ui/cyclops/cyclops-ctrl/internal/mapper"
+	"github.com/cyclops-ui/cyclops/cyclops-ctrl/internal/models"
+	"github.com/cyclops-ui/cyclops/cyclops-ctrl/internal/models/helm"
 )
 
 func (r Repo) LoadHelmChart(repo, chart, version, resolvedVersion string) (*models.Template, error) {
@@ -33,7 +35,7 @@ func (r Repo) LoadHelmChart(repo, chart, version, resolvedVersion string) (*mode
 		}
 	}
 
-	cached, ok := r.cache.GetTemplate(repo, chart, strictVersion)
+	cached, ok := r.cache.GetTemplate(repo, chart, strictVersion, string(cyclopsv1alpha1.TemplateSourceTypeHelm))
 	if ok {
 		return cached, nil
 	}
@@ -56,7 +58,7 @@ func (r Repo) LoadHelmChart(repo, chart, version, resolvedVersion string) (*mode
 	template.Version = version
 	template.ResolvedVersion = strictVersion
 
-	r.cache.SetTemplate(repo, chart, strictVersion, template)
+	r.cache.SetTemplate(repo, chart, strictVersion, string(cyclopsv1alpha1.TemplateSourceTypeHelm), template)
 
 	return template, nil
 }
@@ -71,7 +73,7 @@ func (r Repo) LoadHelmChartInitialValues(repo, chart, version string) (map[strin
 		}
 	}
 
-	cached, ok := r.cache.GetTemplateInitialValues(repo, chart, strictVersion)
+	cached, ok := r.cache.GetTemplateInitialValues(repo, chart, strictVersion, string(cyclopsv1alpha1.TemplateSourceTypeHelm))
 	if ok {
 		return cached, nil
 	}
@@ -91,7 +93,7 @@ func (r Repo) LoadHelmChartInitialValues(repo, chart, version string) (map[strin
 		return nil, err
 	}
 
-	r.cache.SetTemplateInitialValues(repo, chart, strictVersion, initial)
+	r.cache.SetTemplateInitialValues(repo, chart, strictVersion, string(cyclopsv1alpha1.TemplateSourceTypeHelm), initial)
 
 	return initial, nil
 }
