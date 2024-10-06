@@ -11,6 +11,7 @@ import {
 } from "@ant-design/icons";
 import { Input } from "antd";
 import styles from "./styles.module.css";
+import { jwtDecode } from "jwt-decode";
 
 interface LoginResponse {
   error?: string;
@@ -20,6 +21,17 @@ interface LoginResponse {
 interface LoginRequest {
   username: string;
   password: string;
+}
+
+interface DecodedToken {
+  sub: string;
+  exp: number;
+  iat: number;
+  // Add other claims as needed
+}
+
+interface RoleResponse {
+  roles: string[];
 }
 
 const Login = () => {
@@ -33,11 +45,20 @@ const Login = () => {
   const handleSubmit = async (request: LoginRequest) => {
     try {
       const response = await axios.post<LoginResponse>("/api/login", request);
-
       if (response.data?.token) {
-        console.log("token", response.data.token);
+        const decodedToken = jwtDecode<DecodedToken>(response.data.token);
+        console.log("Decoded token:", decodedToken);
+
         Cookies.set("_isAuthenticated", "true");
-        login();
+        Cookies.set("token", response.data.token);
+        const roleResponse = await axios.get<RoleResponse>("/api/getrole", {
+          headers: {
+            Authorization: `Bearer ${response.data.token}`,
+          },
+        });
+        const userName = decodedToken.sub;
+        const userRole = roleResponse.data.roles[0];
+        login(userName, userRole);
         navigate("/");
       } else {
         setError({
@@ -48,6 +69,10 @@ const Login = () => {
       }
     } catch (err) {
       console.error(err);
+      setError({
+        message: "Login Error",
+        description: "An error occurred during login. Please try again.",
+      });
     }
   };
 

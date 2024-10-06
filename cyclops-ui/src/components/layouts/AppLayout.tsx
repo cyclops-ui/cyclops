@@ -1,11 +1,31 @@
+import React from "react";
 import { Outlet } from "react-router-dom";
 import SideNav from "./Sidebar";
 import { Suspense } from "react";
-import Sider from "antd/es/layout/Sider";
-import { Content, Header } from "antd/es/layout/layout";
-import { ConfigProvider, Layout } from "antd";
+import { Layout, ConfigProvider, Menu, Dropdown, Avatar, Space } from "antd";
+import { UserOutlined, LogoutOutlined } from "@ant-design/icons";
+import { useAuth } from "../../context/AuthContext";
+
+const { Sider, Content, Header } = Layout;
 
 export default function AppLayout() {
+  // Replace these with actual user data
+  const { userName, userRole, logout } = useAuth();
+
+  const handleLogout = () => {
+    // Implement logout logic here
+    logout();
+    console.log("Logging out");
+  };
+
+  const dropdownMenu = (
+    <Menu>
+      <Menu.Item key="logout" onClick={handleLogout} icon={<LogoutOutlined />}>
+        Logout
+      </Menu.Item>
+    </Menu>
+  );
+
   return (
     <Layout style={{ minHeight: "100vh" }}>
       <ConfigProvider
@@ -28,10 +48,25 @@ export default function AppLayout() {
           <Header
             style={{
               position: "fixed",
-              width: "100%",
+              width: "calc(100% - 200px)",
               zIndex: 1000,
+              padding: "0 24px",
+              display: "flex",
+              justifyContent: "flex-end",
+              alignItems: "center",
             }}
-          />
+          >
+            <Space style={{ color: "white" }}>
+              <span>{userName}</span>
+              <span>({userRole})</span>
+              <Dropdown overlay={dropdownMenu} placement="bottomRight">
+                <Avatar
+                  style={{ backgroundColor: "#fe8801" }}
+                  icon={<UserOutlined />}
+                />
+              </Dropdown>
+            </Space>
+          </Header>
           <Content
             style={{
               marginTop: 64,

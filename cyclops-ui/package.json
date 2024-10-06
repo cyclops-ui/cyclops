@@ -27,6 +27,7 @@
     "fetch-jsonp": "^1.2.1",
     "http-proxy-middleware": "^2.0.6",
     "js-cookie": "^3.0.5",
+    "jwt-decode": "^4.0.0",
     "react": "^18.0.0",
     "react-ace": "^10.1.0",
     "react-ace-editor": "^0.0.3",
