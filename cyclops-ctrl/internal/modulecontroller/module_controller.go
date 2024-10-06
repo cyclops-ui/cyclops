@@ -96,12 +96,12 @@ func NewModuleReconciler(
 func (r *ModuleReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
 	_ = log.FromContext(ctx)
 	r.telemetryClient.ModuleReconciliation()
-	r.monitor.IncNoOfReconciliations()
+	r.monitor.OnReconciliation()
 
 	startTime := time.Now()
 
 	defer func(startTime time.Time) {
-		r.monitor.ObserveReconcilerDuration(time.Since(startTime).Seconds())
+		r.monitor.ObserveReconciliationDuration(time.Since(startTime).Seconds())
 	}(startTime)
 
 	var module cyclopsv1alpha1.Module
@@ -111,7 +111,7 @@ func (r *ModuleReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctr
 		resources, err := r.kubernetesClient.GetResourcesForModule(req.Name)
 		if err != nil {
 			r.logger.Error(err, "error on get module resources", "namespaced name", req.NamespacedName)
-			r.monitor.IncFailedReconciliations()
+			r.monitor.OnFailedReconciliation()
 			return ctrl.Result{}, err
 		}
 
@@ -131,7 +131,7 @@ func (r *ModuleReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctr
 		return ctrl.Result{}, nil
 	}
 	if err != nil {
-		r.monitor.IncFailedReconciliations()
+		r.monitor.OnFailedReconciliation()
 		return ctrl.Result{}, err
 	}
 
@@ -155,7 +155,7 @@ func (r *ModuleReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctr
 			return ctrl.Result{}, err
 		}
 
-		r.monitor.IncFailedReconciliations()
+		r.monitor.OnFailedReconciliation()
 
 		return ctrl.Result{}, err
 	}
@@ -168,13 +168,13 @@ func (r *ModuleReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctr
 			return ctrl.Result{}, err
 		}
 
-		r.monitor.IncFailedReconciliations()
+		r.monitor.OnFailedReconciliation()
 
 		return ctrl.Result{}, err
 	}
 
 	if len(installErrors) != 0 {
-		r.monitor.IncFailedReconciliations()
+		r.monitor.OnFailedReconciliation()
 		return ctrl.Result{}, r.setStatus(
 			ctx,
 			module,

@@ -19,9 +19,9 @@ type Monitor struct {
 	CacheCostEvicted prometheus.Gauge
 
 	// Reconciler Metrics
-	ReconcilerDuration   prometheus.Histogram
-	NoOfReconciliations   prometheus.Counter
-	FailedReconciliations prometheus.Counter
+	ReconciliationDuration      prometheus.Histogram
+	ReconciliationCounter       prometheus.Counter
+	FailedReconciliationCounter prometheus.Counter
 }
 
 func NewMonitor(logger logr.Logger) (Monitor, error) {
@@ -62,18 +62,18 @@ func NewMonitor(logger logr.Logger) (Monitor, error) {
 			Help:      "No of cache cost evicted",
 			Namespace: "cyclops",
 		}),
-		ReconcilerDuration: prometheus.NewHistogram(prometheus.HistogramOpts{
-			Name:      "reconciler_duration_seconds",
+		ReconciliationDuration: prometheus.NewHistogram(prometheus.HistogramOpts{
+			Name:      "reconciliation_duration_seconds",
 			Help:      "Duration of reconciler",
 			Namespace: "cyclops",
 			Buckets:   prometheus.DefBuckets,
 		}),
-		NoOfReconciliations: prometheus.NewCounter(prometheus.CounterOpts{
+		ReconciliationCounter: prometheus.NewCounter(prometheus.CounterOpts{
 			Name:      "no_of_reconciliations",
 			Help:      "No of reconciliations",
 			Namespace: "cyclops",
 		}),
-		FailedReconciliations: prometheus.NewCounter(prometheus.CounterOpts{
+		FailedReconciliationCounter: prometheus.NewCounter(prometheus.CounterOpts{
 			Name:      "failed_reconciliations",
 			Help:      "No of failed reconciliations",
 			Namespace: "cyclops",
@@ -89,9 +89,9 @@ func NewMonitor(logger logr.Logger) (Monitor, error) {
 			m.CacheCostAdded,
 			m.CacheKeysEvicted,
 			m.CacheCostEvicted,
-			m.ReconcilerDuration,
-			m.NoOfReconciliations,
-			m.FailedReconciliations,
+			m.ReconciliationDuration,
+			m.ReconciliationCounter,
+			m.FailedReconciliationCounter,
 		}
 
 	for _, metric := range metricsList {
@@ -112,16 +112,16 @@ func (m *Monitor) DecModule() {
 	m.ModulesDeployed.Dec()
 }
 
-func (m *Monitor) IncNoOfReconciliations() {
-	m.NoOfReconciliations.Inc()
+func (m *Monitor) OnReconciliation() {
+	m.ReconciliationCounter.Inc()
 }
 
-func (m *Monitor) IncFailedReconciliations() {
-	m.FailedReconciliations.Inc()
+func (m *Monitor) OnFailedReconciliation() {
+	m.FailedReconciliationCounter.Inc()
 }
 
-func (m *Monitor) ObserveReconcilerDuration(duration float64) {
-	m.ReconcilerDuration.Observe(duration)
+func (m *Monitor) ObserveReconciliationDuration(duration float64) {
+	m.ReconciliationDuration.Observe(duration)
 }
 
 func (m *Monitor) UpdateCacheMetrics(cache *ristretto.Cache) {
