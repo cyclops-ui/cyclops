@@ -29,10 +29,10 @@ func NewRepo(credResolver auth.TemplatesResolver, tc templateCache) *Repo {
 	}
 }
 
-func (r Repo) GetTemplate(repo, path, version string) (*models.Template, error) {
+func (r Repo) GetTemplate(repo, path, version, resolvedVersion string) (*models.Template, error) {
 	// region load OCI chart
 	if registry.IsOCI(repo) {
-		return r.LoadOCIHelmChart(repo, path, version)
+		return r.LoadOCIHelmChart(repo, path, version, resolvedVersion)
 	}
 	// endregion
 
@@ -43,12 +43,12 @@ func (r Repo) GetTemplate(repo, path, version string) (*models.Template, error) 
 	}
 
 	if isHelmRepo {
-		return r.LoadHelmChart(repo, path, version)
+		return r.LoadHelmChart(repo, path, version, resolvedVersion)
 	}
 	// endregion
 
 	// fallback to cloning from git
-	return r.LoadTemplate(repo, path, version)
+	return r.LoadTemplate(repo, path, version, resolvedVersion)
 }
 
 func (r Repo) GetTemplateInitialValues(repo, path, version string) (map[string]interface{}, error) {
@@ -80,7 +80,7 @@ func (r Repo) loadDependencies(metadata *helm.Metadata) ([]*models.Template, err
 			continue
 		}
 
-		dep, err := r.GetTemplate(dependency.Repository, dependency.Name, dependency.Version)
+		dep, err := r.GetTemplate(dependency.Repository, dependency.Name, dependency.Version, "")
 		if err != nil {
 			return nil, err
 		}

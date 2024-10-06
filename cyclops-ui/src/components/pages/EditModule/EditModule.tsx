@@ -12,7 +12,6 @@ import {
   Typography,
 } from "antd";
 import axios from "axios";
-import { useNavigate } from "react-router";
 import { LockFilled, UnlockFilled } from "@ant-design/icons";
 
 import { useParams } from "react-router-dom";
@@ -100,8 +99,6 @@ const EditModule = () => {
 
   const [loadValues, setLoadValues] = useState(false);
   const [loadTemplate, setLoadTemplate] = useState(false);
-
-  const history = useNavigate();
 
   let { moduleName } = useParams();
 
@@ -410,7 +407,7 @@ const EditModule = () => {
           </Button>{" "}
           <Button
             htmlType="button"
-            onClick={() => history("/modules/" + moduleName)}
+            onClick={() => (window.location.href = "/modules/" + moduleName)}
             disabled={!loadTemplate}
           >
             Back

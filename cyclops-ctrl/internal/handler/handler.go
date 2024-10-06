@@ -61,7 +61,8 @@ func (h *Handler) Start() error {
 
 	server := sse.NewServer(h.k8sClient)
 
-	h.router.POST("/stream/resources", sse.HeadersMiddleware(), server.Resources)
+	h.router.GET("/stream/resources/:name", sse.HeadersMiddleware(), server.Resources)
+	h.router.POST("/stream/resources", sse.HeadersMiddleware(), server.SingleResource)
 
 	h.router.GET("/ping", h.pong())
 
@@ -101,6 +102,7 @@ func (h *Handler) Start() error {
 	//h.router.POST("/modules/resources", modulesController.ModuleToResources)
 
 	h.router.GET("/resources/pods/:namespace/:name/:container/logs", modulesController.GetLogs)
+	h.router.GET("/resources/pods/:namespace/:name/:container/logs/stream", sse.HeadersMiddleware(), modulesController.GetLogsStream)
 	h.router.GET("/resources/pods/:namespace/:name/:container/logs/download", modulesController.DownloadLogs)
 
 	h.router.GET("/manifest", modulesController.GetManifest)

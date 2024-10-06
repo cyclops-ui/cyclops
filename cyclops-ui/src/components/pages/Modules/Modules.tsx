@@ -13,7 +13,6 @@ import {
   Popover,
   Checkbox,
 } from "antd";
-import { useNavigate } from "react-router";
 
 import axios from "axios";
 
@@ -26,7 +25,6 @@ import { mapResponseError } from "../../../utils/api/errors";
 const { Title } = Typography;
 
 const Modules = () => {
-  const history = useNavigate();
   const [allData, setAllData] = useState([]);
   const [filteredData, setFilteredData] = useState([]);
   const [loadingModules, setLoadingModules] = useState(false);
@@ -45,18 +43,27 @@ const Modules = () => {
 
   useEffect(() => {
     setLoadingModules(true);
-    axios
-      .get(`/api/modules/list`)
-      .then((res) => {
-        setAllData(res.data);
-        setFilteredData(res.data);
-        setLoadingModules(false);
-      })
-      .catch((error) => {
-        setError(mapResponseError(error));
-        setLoadingModules(false);
-      });
+
+    function fetchModules() {
+      axios
+        .get(`/api/modules/list`)
+        .then((res) => {
+          setAllData(res.data);
+          setLoadingModules(false);
+        })
+        .catch((error) => {
+          setError(mapResponseError(error));
+          setLoadingModules(false);
+        });
+    }
+
+    fetchModules();
+    const interval = setInterval(() => fetchModules(), 10000);
+    return () => {
+      clearInterval(interval);
+    };
   }, []);
+
   useEffect(() => {
     var updatedList = [...allData];
     updatedList = updatedList.filter((module: any) => {
@@ -74,7 +81,7 @@ const Modules = () => {
   }, [moduleHealthFilter, allData, searchInputFilter]);
 
   const handleClick = () => {
-    history("/modules/new");
+    window.location.href = "/modules/new";
   };
   const handleSelectItem = (selectedItems: any[]) => {
     setModuleHealthFilter(selectedItems);

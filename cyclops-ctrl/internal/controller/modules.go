@@ -3,13 +3,14 @@ package controller
 import (
 	"fmt"
 	"log"
+	"io"
 	"net/http"
 	"os"
-	"sigs.k8s.io/yaml"
 	"strings"
 	"time"
 
 	cerbosSDK "github.com/cerbos/cerbos-sdk-go/cerbos"
+	"sigs.k8s.io/yaml"
 	"github.com/gin-gonic/gin"
 
 	"github.com/cyclops-ui/cyclops/cyclops-ctrl/api/v1alpha1"
@@ -206,6 +207,7 @@ func (m *Modules) Manifest(ctx *gin.Context) {
 		request.TemplateRef.URL,
 		request.TemplateRef.Path,
 		request.TemplateRef.Version,
+		"",
 	)
 	if err != nil {
 		fmt.Println(err)
@@ -262,6 +264,7 @@ func (m *Modules) CurrentManifest(ctx *gin.Context) {
 		module.Spec.TemplateRef.URL,
 		module.Spec.TemplateRef.Path,
 		module.Spec.TemplateRef.Version,
+		module.Status.TemplateResolvedVersion,
 	)
 	if err != nil {
 		fmt.Println(err)
@@ -484,6 +487,7 @@ func (m *Modules) ResourcesForModule(ctx *gin.Context) {
 		module.Spec.TemplateRef.URL,
 		module.Spec.TemplateRef.Path,
 		templateVersion,
+		module.Status.TemplateResolvedVersion,
 	)
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, dto.NewError("Error fetching template", err.Error()))
@@ -528,6 +532,7 @@ func (m *Modules) Template(ctx *gin.Context) {
 		module.Spec.TemplateRef.URL,
 		module.Spec.TemplateRef.Path,
 		module.Spec.TemplateRef.Version,
+		module.Status.TemplateResolvedVersion,
 	)
 	if err != nil {
 		fmt.Println(err)
@@ -546,6 +551,7 @@ func (m *Modules) Template(ctx *gin.Context) {
 		module.Spec.TemplateRef.URL,
 		module.Spec.TemplateRef.Path,
 		module.Spec.TemplateRef.Version,
+		module.Status.TemplateResolvedVersion,
 	)
 	if err != nil {
 		fmt.Println(err)
@@ -582,6 +588,7 @@ func (m *Modules) HelmTemplate(ctx *gin.Context) {
 		module.Spec.TemplateRef.URL,
 		module.Spec.TemplateRef.Path,
 		module.Spec.TemplateRef.Version,
+		module.Status.TemplateResolvedVersion,
 	)
 	if err != nil {
 		fmt.Println(err)
@@ -641,6 +648,49 @@ func (m *Modules) GetLogs(ctx *gin.Context) {
 	}
 
 	ctx.JSON(http.StatusOK, logs)
+}
+
+func (m *Modules) GetLogsStream(ctx *gin.Context) {
+	ctx.Header("Access-Control-Allow-Origin", "*")
+
+	logCount := int64(100)
+
+	logChan := make(chan string)
+
+	go func() {
+		defer close(logChan)
+
+		err := m.kubernetesClient.GetStreamedPodLogs(
+			ctx.Request.Context(), // we will have to pass the context for the k8s podClient - so it can stop the stream when the client disconnects
+			ctx.Param("namespace"),
+			ctx.Param("container"),
+			ctx.Param("name"),
+			&logCount,
+			logChan,
+		)
+		if err != nil {
+			return
+		}
+	}()
+
+	// stream logs to the client
+	ctx.Stream(func(w io.Writer) bool {
+		for {
+			select {
+			case log, ok := <-logChan:
+				if !ok {
+					return false
+				}
+
+				ctx.SSEvent("pod-log", trimLogLine(log))
+				return true
+			case <-ctx.Request.Context().Done():
+				return false
+			case <-ctx.Done():
+				return false
+			}
+		}
+	})
 }
 
 func (m *Modules) GetDeploymentLogs(ctx *gin.Context) {
