@@ -352,7 +352,7 @@ spec:
             - name: NODE_ENV
               value: production
             - name: REACT_APP_CYCLOPS_AUTHORIZATION
-              value: enabled
+              value: disabled
             - name: NODE_OPTIONS
               value: --openssl-legacy-provider
       restartPolicy: Always
@@ -415,7 +415,7 @@ spec:
             - name: PORT
               value: "8080"
             - name: CYCLOPS_AUTHORIZATION
-              value: enabled
+              value: disabled
             - name: CERBOS_URL
               value: localhost:3592
           livenessProbe:
