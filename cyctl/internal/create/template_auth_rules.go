@@ -200,7 +200,6 @@ func createTemplateAuthRule(clientset *client.CyclopsV1Alpha1Client, templateAut
 			fmt.Printf("Error creating templateauthrule: %v\n", err)
 			return
 		}
-		fmt.Printf("%v   %v  %v   %v  %v ", usernameName, usernameKey, passwordKey, passwordName, repo)
 		fmt.Printf("%v created successfully.\n", templateAuthRule.Name)
 	} else {
 		log.Fatalf("Invalid output format: %s. Supported formats are 'yaml' and 'json'.", outputFormat)
