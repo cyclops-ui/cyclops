@@ -1,13 +1,13 @@
-package update 
+package update
 
 import (
 	"fmt"
+	"log"
 
 	"github.com/cyclops-ui/cyclops/cyclops-ctrl/api/v1alpha1/client"
 	"github.com/cyclops-ui/cycops-cyctl/internal/kubeconfig"
 	"github.com/spf13/cobra"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	
 )
 
 var (
@@ -18,10 +18,10 @@ var (
 )
 
 var (
-	repo string
-	path string
-	icon string
-	version string 
+	repo    string
+	path    string
+	icon    string
+	version string
 )
 
 // updates he given template from cyclops API
@@ -29,7 +29,7 @@ func updateTemplate(clientset *client.CyclopsV1Alpha1Client, templateName, path,
 	// Fetch the existing template store
 	template, err := clientset.TemplateStore("cyclops").Get(templateName)
 	if err != nil {
-		fmt.Println("Failed to fetchtemplate store ", err)
+		log.Fatal("Failed to fetch template store:", err.Error())
 		return
 	}
 
@@ -51,15 +51,14 @@ func updateTemplate(clientset *client.CyclopsV1Alpha1Client, templateName, path,
 	}
 	template.TypeMeta = v1.TypeMeta{
 		APIVersion: "cyclops-ui.com/v1alpha1",
-		Kind: "TemplateStore",
-
+		Kind:       "TemplateStore",
 	}
 
 	// Update the template store in the cluster
-	_ , err = clientset.TemplateStore("cyclops").Update(template)
+	_, err = clientset.TemplateStore("cyclops").Update(template)
 	if err != nil {
 		fmt.Println("Failed to update template store ", err)
-		return 
+		return
 	}
 
 	fmt.Printf("successfully updated %v", templateName)
@@ -67,21 +66,19 @@ func updateTemplate(clientset *client.CyclopsV1Alpha1Client, templateName, path,
 
 var (
 	UpdateTemplateStoreCMD = &cobra.Command{
-		Use: "template",
-		Short: " updates template values; takes template name as an argument with flags for updation",
-		Long: " updates template values; takes template name as an argument with flags --path=<path> --repo=<repo> --version=<version> --icon=<icon> ",
+		Use:     "template",
+		Short:   " updates template values; takes template name as argument and updates values provided by flags",
+		Long:    " updates template values; takes template name as argument with flags --path=<path> --repo=<repo> --version=<version> --icon=<icon> ",
 		Example: updateTemplateStoreExample,
-		Args: cobra.ExactArgs(1),
-		Run: func(cmd *cobra.Command, args []string){
+		Args:    cobra.ExactArgs(1),
+		Run: func(cmd *cobra.Command, args []string) {
 			templateName := args[0]
 
 			if repo == "" && path == "" && version == "" && icon == "" {
-				fmt.Println("Error: At least one of --repo, --path, --version, or --icon must be provided.")
-				cmd.Usage() // Print usage information
-				return
+				log.Fatal("Error: At least on of --repo, --path, --version, or --icon must be provided.")
 			}
 
-			updateTemplate(kubeconfig.Moduleset, templateName, path, version, repo, icon )
+			updateTemplate(kubeconfig.Moduleset, templateName, path, version, repo, icon)
 		},
 	}
 )
