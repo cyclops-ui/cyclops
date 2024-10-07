@@ -15,6 +15,7 @@ interface AuthContextType {
   userRole: string | null;
   login: (userName: string, userRole: string) => void;
   logout: () => void;
+  checkAuthentication: () => Promise<void>;
 }
 
 interface DecodedToken {
@@ -36,49 +37,49 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({
   const [userName, setuserName] = useState<string | null>(null);
   const [userRole, setuserRole] = useState<string | null>(null);
 
-  useEffect(() => {
-    const checkAuthentication = () => {
-      const isAuthorizationEnabled =
-        process.env.REACT_APP_CYCLOPS_AUTHORIZATION === "enabled";
-      const token = Cookies.get("token");
+  const checkAuthentication = async () => {
+    const isAuthorizationEnabled =
+      process.env.REACT_APP_CYCLOPS_AUTHORIZATION === "enabled";
+    const token = Cookies.get("token");
 
-      if (!isAuthorizationEnabled) {
-        setIsAuthenticated(true);
-      } else if (token) {
-        try {
-          const decodedToken = jwtDecode<DecodedToken>(token);
-          if (decodedToken.exp * 1000 > Date.now()) {
-            setIsAuthenticated(true);
-            setuserName(decodedToken.sub);
-            const getuserRole = async () => {
-              try {
-                const roleResponse = await axios.get<RoleResponse>(
-                  "/api/getrole",
-                  {
-                    headers: {
-                      Authorization: `Bearer ${token}`,
-                    },
+    if (!isAuthorizationEnabled) {
+      setIsAuthenticated(true);
+    } else if (token) {
+      try {
+        const decodedToken = jwtDecode<DecodedToken>(token);
+        if (decodedToken.exp * 1000 > Date.now()) {
+          setIsAuthenticated(true);
+          setuserName(decodedToken.sub);
+          const getuserRole = async () => {
+            try {
+              const roleResponse = await axios.get<RoleResponse>(
+                "/api/getrole",
+                {
+                  headers: {
+                    Authorization: `Bearer ${token}`,
                   },
-                );
-                setuserRole(roleResponse.data.roles[0]);
-              } catch (err) {
-                console.log(err);
-              }
-            };
-            getuserRole();
-          } else {
-            // Token expired
-            logout();
-          }
-        } catch (error) {
-          console.error("Error decoding token:", error);
+                },
+              );
+              setuserRole(roleResponse.data.roles[0]);
+            } catch (err) {
+              console.log(err);
+            }
+          };
+          getuserRole();
+        } else {
+          // Token expired
           logout();
         }
-      } else {
-        setIsAuthenticated(false);
+      } catch (error) {
+        console.error("Error decoding token:", error);
+        logout();
       }
-    };
+    } else {
+      setIsAuthenticated(false);
+    }
+  };
 
+  useEffect(() => {
     checkAuthentication();
   }, []);
 
@@ -98,7 +99,14 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({
 
   return (
     <AuthContext.Provider
-      value={{ isAuthenticated, userName, userRole, login, logout }}
+      value={{
+        isAuthenticated,
+        userName,
+        userRole,
+        login,
+        logout,
+        checkAuthentication,
+      }}
     >
       {children}
     </AuthContext.Provider>
