@@ -10,6 +10,7 @@ import (
 	json "github.com/json-iterator/go"
 	"github.com/pkg/errors"
 
+	cyclopsv1alpha1 "github.com/cyclops-ui/cyclops/cyclops-ctrl/api/v1alpha1"
 	"github.com/cyclops-ui/cyclops/cyclops-ctrl/internal/models"
 )
 
@@ -26,7 +27,7 @@ func (r Repo) LoadOCIHelmChart(repo, chart, version, resolvedVersion string) (*m
 		}
 	}
 
-	cached, ok := r.cache.GetTemplate(repo, chart, strictVersion)
+	cached, ok := r.cache.GetTemplate(repo, chart, strictVersion, string(cyclopsv1alpha1.TemplateSourceTypeOCI))
 	if ok {
 		return cached, nil
 	}
@@ -50,7 +51,7 @@ func (r Repo) LoadOCIHelmChart(repo, chart, version, resolvedVersion string) (*m
 	template.Version = version
 	template.ResolvedVersion = strictVersion
 
-	r.cache.SetTemplate(repo, chart, strictVersion, template)
+	r.cache.SetTemplate(repo, chart, strictVersion, string(cyclopsv1alpha1.TemplateSourceTypeOCI), template)
 
 	return template, nil
 }
@@ -65,7 +66,7 @@ func (r Repo) LoadOCIHelmChartInitialValues(repo, chart, version string) (map[st
 		}
 	}
 
-	cached, ok := r.cache.GetTemplateInitialValues(repo, chart, strictVersion)
+	cached, ok := r.cache.GetTemplateInitialValues(repo, chart, strictVersion, string(cyclopsv1alpha1.TemplateSourceTypeOCI))
 	if ok {
 		return cached, nil
 	}
@@ -85,7 +86,7 @@ func (r Repo) LoadOCIHelmChartInitialValues(repo, chart, version string) (map[st
 		return nil, err
 	}
 
-	r.cache.SetTemplateInitialValues(repo, chart, strictVersion, initial)
+	r.cache.SetTemplateInitialValues(repo, chart, strictVersion, string(cyclopsv1alpha1.TemplateSourceTypeOCI), initial)
 
 	return initial, nil
 }

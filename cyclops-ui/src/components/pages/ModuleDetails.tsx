@@ -169,6 +169,7 @@ const ModuleDetails = () => {
       path: "",
       version: "",
       resolvedVersion: "",
+      sourceType: "",
     },
     iconURL: "",
   });

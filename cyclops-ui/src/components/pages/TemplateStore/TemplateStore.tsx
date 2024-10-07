@@ -12,6 +12,7 @@ import {
   message,
   Spin,
   notification,
+  Radio,
 } from "antd";
 import axios from "axios";
 import Title from "antd/es/typography/Title";
@@ -28,6 +29,10 @@ import {
   FeedbackError,
   FormValidationErrors,
 } from "../../errors/FormValidationErrors";
+
+import gitLogo from "../../../static/img/git.png";
+import helmLogo from "../../../static/img/helm.png";
+import dockerLogo from "../../../static/img/docker-mark-blue.png";
 
 const TemplateStore = () => {
   const [templates, setTemplates] = useState([]);
@@ -146,7 +151,7 @@ const TemplateStore = () => {
       });
       await axios
         .get(
-          `/api/templates?repo=${templateInfo.repo}&path=${templateInfo.path}&commit=${templateInfo.version}`,
+          `/api/templates?repo=${templateInfo.repo}&path=${templateInfo.path}&commit=${templateInfo.version}&sourceType=${templateInfo.sourceType}`,
         )
         .then(() => {
           setRequestStatus((prevStatus) => ({
@@ -176,12 +181,15 @@ const TemplateStore = () => {
     path: string,
     version: string,
     templateName: string,
+    sourceType: string,
   ) => {
     setLoadingTemplateName((prevState) => {
       return { ...prevState, [templateName]: true };
     });
     axios
-      .get(`/api/templates?repo=${repo}&path=${path}&commit=${version}`)
+      .get(
+        `/api/templates?repo=${repo}&path=${path}&commit=${version}&sourceType=${sourceType}`,
+      )
       .then((res) => {
         setLoadingTemplateName((prevState) => {
           return { ...prevState, [templateName]: false };
@@ -366,6 +374,7 @@ const TemplateStore = () => {
                         template.ref.path,
                         template.ref.version,
                         template.name,
+                        template.ref.sourceType,
                       );
                     }}
                   />
@@ -381,6 +390,10 @@ const TemplateStore = () => {
                 <EditOutlined
                   className={styles.edittemplate}
                   onClick={function () {
+                    editForm.setFieldValue(
+                      ["ref", "sourceType"],
+                      template.ref.sourceType,
+                    );
                     editForm.setFieldValue(["ref", "repo"], template.ref.repo);
                     editForm.setFieldValue(["ref", "path"], template.ref.path);
                     editForm.setFieldValue(
@@ -465,6 +478,42 @@ const TemplateStore = () => {
           <Divider />
 
           <Form.Item
+            name={["ref", "sourceType"]}
+            label="Select template source"
+          >
+            <Radio.Group
+              optionType="button"
+              style={{ width: "100%" }}
+              className={styles.templatetypes}
+            >
+              <Radio value="git" className={styles.templatetype}>
+                <img
+                  src={gitLogo}
+                  alt="git"
+                  className={styles.templatetypeicon}
+                />
+                Git
+              </Radio>
+              <Radio value="helm" className={styles.templatetype}>
+                <img
+                  src={helmLogo}
+                  alt="helm"
+                  className={styles.templatetypeicon}
+                />
+                Helm repo
+              </Radio>
+              <Radio value="oci" className={styles.templatetype}>
+                <img
+                  src={dockerLogo}
+                  alt="docker"
+                  className={styles.templatetypeicon}
+                />
+                OCI registry
+              </Radio>
+            </Radio.Group>
+          </Form.Item>
+
+          <Form.Item
             label="Repository URL"
             name={["ref", "repo"]}
             rules={[{ required: true, message: "Repo URL is required" }]}
@@ -520,6 +569,41 @@ const TemplateStore = () => {
           initialValues={{ remember: false }}
           labelCol={{ span: 6 }}
         >
+          <Form.Item
+            name={["ref", "sourceType"]}
+            label="Select template source"
+          >
+            <Radio.Group
+              optionType="button"
+              style={{ width: "100%" }}
+              className={styles.templatetypes}
+            >
+              <Radio value="git" className={styles.templatetype}>
+                <img
+                  src={gitLogo}
+                  alt="git"
+                  className={styles.templatetypeicon}
+                />
+                Git
+              </Radio>
+              <Radio value="helm" className={styles.templatetype}>
+                <img
+                  src={helmLogo}
+                  alt="helm"
+                  className={styles.templatetypeicon}
+                />
+                Helm repo
+              </Radio>
+              <Radio value="oci" className={styles.templatetype}>
+                <img
+                  src={dockerLogo}
+                  alt="docker"
+                  className={styles.templatetypeicon}
+                />
+                OCI registry
+              </Radio>
+            </Radio.Group>
+          </Form.Item>
           <Form.Item
             label="Repository URL"
             name={["ref", "repo"]}

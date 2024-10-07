@@ -9,6 +9,7 @@ import (
 	"github.com/gin-gonic/gin"
 	json "github.com/json-iterator/go"
 
+	cyclopsv1alpha1 "github.com/cyclops-ui/cyclops/cyclops-ctrl/api/v1alpha1"
 	"github.com/cyclops-ui/cyclops/cyclops-ctrl/internal/mapper"
 	"github.com/cyclops-ui/cyclops/cyclops-ctrl/internal/models/dto"
 	"github.com/cyclops-ui/cyclops/cyclops-ctrl/internal/telemetry"
@@ -53,13 +54,20 @@ func (c *Templates) GetTemplate(ctx *gin.Context) {
 	repo := ctx.Query("repo")
 	path := ctx.Query("path")
 	commit := ctx.Query("commit")
+	sourceType := ctx.Query("sourceType")
 
 	if repo == "" {
 		ctx.String(http.StatusBadRequest, "set repo field")
 		return
 	}
 
-	t, err := c.templatesRepo.GetTemplate(repo, path, commit, "")
+	t, err := c.templatesRepo.GetTemplate(
+		repo,
+		path,
+		commit,
+		"",
+		cyclopsv1alpha1.TemplateSourceType(sourceType),
+	)
 	if err != nil {
 		fmt.Println(err)
 		ctx.JSON(http.StatusBadRequest, dto.NewError("Error loading template", err.Error()))
@@ -75,13 +83,19 @@ func (c *Templates) GetTemplateInitialValues(ctx *gin.Context) {
 	repo := ctx.Query("repo")
 	path := ctx.Query("path")
 	commit := ctx.Query("commit")
+	sourceType := ctx.Query("sourceType")
 
 	if repo == "" {
 		ctx.JSON(http.StatusBadRequest, dto.NewError("Specify repo field", "Repo not specified"))
 		return
 	}
 
-	initial, err := c.templatesRepo.GetTemplateInitialValues(repo, path, commit)
+	initial, err := c.templatesRepo.GetTemplateInitialValues(
+		repo,
+		path,
+		commit,
+		cyclopsv1alpha1.TemplateSourceType(sourceType),
+	)
 	if err != nil {
 		fmt.Println(err)
 		ctx.JSON(http.StatusBadRequest, dto.NewError("Error loading template initial values", err.Error()))
@@ -136,6 +150,7 @@ func (c *Templates) CreateTemplatesStore(ctx *gin.Context) {
 		templateStore.TemplateRef.Path,
 		templateStore.TemplateRef.Version,
 		"",
+		cyclopsv1alpha1.TemplateSourceType(templateStore.TemplateRef.SourceType),
 	)
 	if err != nil {
 		fmt.Println(err)
@@ -179,6 +194,7 @@ func (c *Templates) EditTemplatesStore(ctx *gin.Context) {
 		templateStore.TemplateRef.Path,
 		templateStore.TemplateRef.Version,
 		"",
+		cyclopsv1alpha1.TemplateSourceType(templateStore.TemplateRef.SourceType),
 	)
 	if err != nil {
 		fmt.Println(err)

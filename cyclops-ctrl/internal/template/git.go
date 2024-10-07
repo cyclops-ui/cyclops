@@ -22,6 +22,7 @@ import (
 	"github.com/go-git/go-git/v5/storage/memory"
 	"helm.sh/helm/v3/pkg/chart"
 
+	cyclopsv1alpha1 "github.com/cyclops-ui/cyclops/cyclops-ctrl/api/v1alpha1"
 	"github.com/cyclops-ui/cyclops/cyclops-ctrl/internal/auth"
 	"github.com/cyclops-ui/cyclops/cyclops-ctrl/internal/mapper"
 	"github.com/cyclops-ui/cyclops/cyclops-ctrl/internal/models"
@@ -45,7 +46,7 @@ func (r Repo) LoadTemplate(repoURL, path, commit, resolvedVersion string) (*mode
 		commitSHA = ref
 	}
 
-	cached, ok := r.cache.GetTemplate(repoURL, path, commitSHA)
+	cached, ok := r.cache.GetTemplate(repoURL, path, commitSHA, string(cyclopsv1alpha1.TemplateSourceTypeGit))
 	if ok {
 		return cached, nil
 	}
@@ -59,7 +60,7 @@ func (r Repo) LoadTemplate(repoURL, path, commit, resolvedVersion string) (*mode
 		ghTemplate.Version = commit
 		ghTemplate.ResolvedVersion = commitSHA
 
-		r.cache.SetTemplate(repoURL, path, commitSHA, ghTemplate)
+		r.cache.SetTemplate(repoURL, path, commitSHA, string(cyclopsv1alpha1.TemplateSourceTypeGit), ghTemplate)
 
 		return ghTemplate, nil
 	}
@@ -151,7 +152,7 @@ func (r Repo) LoadTemplate(repoURL, path, commit, resolvedVersion string) (*mode
 		HelmChartMetadata: metadata,
 	}
 
-	r.cache.SetTemplate(repoURL, path, commitSHA, template)
+	r.cache.SetTemplate(repoURL, path, commitSHA, string(cyclopsv1alpha1.TemplateSourceTypeGit), template)
 
 	return template, err
 }
@@ -167,7 +168,7 @@ func (r Repo) LoadInitialTemplateValues(repoURL, path, commit string) (map[strin
 		return nil, err
 	}
 
-	cached, ok := r.cache.GetTemplateInitialValues(repoURL, path, commitSHA)
+	cached, ok := r.cache.GetTemplateInitialValues(repoURL, path, commitSHA, string(cyclopsv1alpha1.TemplateSourceTypeGit))
 	if ok {
 		return cached, nil
 	}
@@ -178,7 +179,7 @@ func (r Repo) LoadInitialTemplateValues(repoURL, path, commit string) (map[strin
 			return nil, err
 		}
 
-		r.cache.SetTemplateInitialValues(repoURL, path, commitSHA, ghInitialValues)
+		r.cache.SetTemplateInitialValues(repoURL, path, commitSHA, string(cyclopsv1alpha1.TemplateSourceTypeGit), ghInitialValues)
 
 		return ghInitialValues, nil
 	}
@@ -233,7 +234,7 @@ func (r Repo) LoadInitialTemplateValues(repoURL, path, commit string) (map[strin
 	}
 	// endregion
 
-	r.cache.SetTemplateInitialValues(repoURL, path, commitSHA, initialValues)
+	r.cache.SetTemplateInitialValues(repoURL, path, commitSHA, string(cyclopsv1alpha1.TemplateSourceTypeGit), initialValues)
 
 	return initialValues, nil
 }

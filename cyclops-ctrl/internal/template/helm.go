@@ -16,8 +16,8 @@ import (
 	json "github.com/json-iterator/go"
 	"gopkg.in/yaml.v3"
 	helmchart "helm.sh/helm/v3/pkg/chart"
-	"helm.sh/helm/v3/pkg/registry"
 
+	cyclopsv1alpha1 "github.com/cyclops-ui/cyclops/cyclops-ctrl/api/v1alpha1"
 	"github.com/cyclops-ui/cyclops/cyclops-ctrl/internal/mapper"
 	"github.com/cyclops-ui/cyclops/cyclops-ctrl/internal/models"
 	"github.com/cyclops-ui/cyclops/cyclops-ctrl/internal/models/helm"
@@ -29,35 +29,20 @@ func (r Repo) LoadHelmChart(repo, chart, version, resolvedVersion string) (*mode
 	if len(resolvedVersion) > 0 {
 		strictVersion = resolvedVersion
 	} else if !isValidVersion(version) {
-		if registry.IsOCI(repo) {
-			strictVersion, err = getOCIStrictVersion(repo, chart, version)
-			if err != nil {
-				return nil, err
-			}
-		} else {
-			strictVersion, err = getRepoStrictVersion(repo, chart, version)
-			if err != nil {
-				return nil, err
-			}
+		strictVersion, err = getRepoStrictVersion(repo, chart, version)
+		if err != nil {
+			return nil, err
 		}
 	}
 
-	cached, ok := r.cache.GetTemplate(repo, chart, strictVersion)
+	cached, ok := r.cache.GetTemplate(repo, chart, strictVersion, string(cyclopsv1alpha1.TemplateSourceTypeHelm))
 	if ok {
 		return cached, nil
 	}
 
-	var tgzData []byte
-	if registry.IsOCI(repo) {
-		tgzData, err = loadOCIHelmChartBytes(repo, chart, version)
-		if err != nil {
-			return nil, err
-		}
-	} else {
-		tgzData, err = r.loadFromHelmChartRepo(repo, chart, version)
-		if err != nil {
-			return nil, err
-		}
+	tgzData, err := r.loadFromHelmChartRepo(repo, chart, version)
+	if err != nil {
+		return nil, err
 	}
 
 	extractedFiles, err := unpackTgzInMemory(tgzData)
@@ -73,7 +58,7 @@ func (r Repo) LoadHelmChart(repo, chart, version, resolvedVersion string) (*mode
 	template.Version = version
 	template.ResolvedVersion = strictVersion
 
-	r.cache.SetTemplate(repo, chart, strictVersion, template)
+	r.cache.SetTemplate(repo, chart, strictVersion, string(cyclopsv1alpha1.TemplateSourceTypeHelm), template)
 
 	return template, nil
 }
@@ -82,35 +67,20 @@ func (r Repo) LoadHelmChartInitialValues(repo, chart, version string) (map[strin
 	var err error
 	strictVersion := version
 	if !isValidVersion(version) {
-		if registry.IsOCI(repo) {
-			strictVersion, err = getOCIStrictVersion(repo, chart, version)
-			if err != nil {
-				return nil, err
-			}
-		} else {
-			strictVersion, err = getRepoStrictVersion(repo, chart, version)
-			if err != nil {
-				return nil, err
-			}
+		strictVersion, err = getRepoStrictVersion(repo, chart, version)
+		if err != nil {
+			return nil, err
 		}
 	}
 
-	cached, ok := r.cache.GetTemplateInitialValues(repo, chart, strictVersion)
+	cached, ok := r.cache.GetTemplateInitialValues(repo, chart, strictVersion, string(cyclopsv1alpha1.TemplateSourceTypeHelm))
 	if ok {
 		return cached, nil
 	}
 
-	var tgzData []byte
-	if registry.IsOCI(repo) {
-		tgzData, err = loadOCIHelmChartBytes(repo, chart, version)
-		if err != nil {
-			return nil, err
-		}
-	} else {
-		tgzData, err = r.loadFromHelmChartRepo(repo, chart, version)
-		if err != nil {
-			return nil, err
-		}
+	tgzData, err := r.loadFromHelmChartRepo(repo, chart, version)
+	if err != nil {
+		return nil, err
 	}
 
 	extractedFiles, err := unpackTgzInMemory(tgzData)
@@ -123,7 +93,7 @@ func (r Repo) LoadHelmChartInitialValues(repo, chart, version string) (map[strin
 		return nil, err
 	}
 
-	r.cache.SetTemplateInitialValues(repo, chart, strictVersion, initial)
+	r.cache.SetTemplateInitialValues(repo, chart, strictVersion, string(cyclopsv1alpha1.TemplateSourceTypeHelm), initial)
 
 	return initial, nil
 }
@@ -310,6 +280,10 @@ func (r Repo) mapHelmChartInitialValues(files map[string][]byte) (map[string]int
 			return nil, err
 		}
 
+		if values[depName] == nil {
+			values[depName] = map[string]interface{}{}
+		}
+
 		values[depName] = overlayValues(values[depName], dep)
 	}
 
@@ -319,6 +293,10 @@ func (r Repo) mapHelmChartInitialValues(files map[string][]byte) (map[string]int
 	}
 
 	for depName, depValues := range dependenciesFromMeta {
+		if values[depName] == nil {
+			values[depName] = map[string]interface{}{}
+		}
+
 		values[depName] = overlayValues(values[depName], depValues)
 	}
 	// endregion
