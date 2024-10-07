@@ -1,0 +1,71 @@
+.login_page {
+  display: flex;
+}
+
+.left_banner {
+  background-color: rgb(6, 25, 61);
+  background-image: url("https://cyclops-ui.com/assets/images/yaml_background-cc1699351922ead2cae5da1dbb75cbd8.png");
+  background-position: 0 -10rem;
+  background-repeat: no-repeat;
+  height: 100vh;
+  width: 120%;
+}
+
+.right_banner {
+  height: 100vh;
+  width: 80%;
+}
+
+.cyclops_image_container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.cyclops_brand_image {
+  width: 50%;
+  position: fixed;
+  bottom: 0;
+}
+
+.login_header {
+  text-align: center;
+}
+
+.cyclops_login_header_login {
+  width: 80%;
+  margin-bottom: 16px;
+}
+
+.login_form {
+  margin-top: 25vh;
+}
+
+.login_container {
+  width: 80%;
+  padding: 0 5%;
+  margin: 0 10%;
+}
+
+.field_container {
+  margin: 1rem 0;
+  width: 100%;
+}
+
+.submit_button {
+  border: none;
+  width: 100%;
+}
+
+.submit_buttom:hover {
+  background-color: rgb(249, 250, 251);
+}
+
+.submit_buttom:focus {
+  outline: 2px solid transparent;
+  outline-offset: 2px;
+}
+
+.submit_buttom:focus-visible {
+  box-shadow: none;
+}

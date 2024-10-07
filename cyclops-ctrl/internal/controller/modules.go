@@ -3,16 +3,18 @@ package controller
 import (
 	"fmt"
 	"io"
+	"log"
 	"net/http"
 	"os"
 	"strings"
 	"time"
 
+	cerbosSDK "github.com/cerbos/cerbos-sdk-go/cerbos"
+	"github.com/gin-gonic/gin"
 	"sigs.k8s.io/yaml"
 
-	"github.com/gin-gonic/gin"
-
 	"github.com/cyclops-ui/cyclops/cyclops-ctrl/api/v1alpha1"
+	"github.com/cyclops-ui/cyclops/cyclops-ctrl/internal/cerbos"
 	"github.com/cyclops-ui/cyclops/cyclops-ctrl/internal/mapper"
 	"github.com/cyclops-ui/cyclops/cyclops-ctrl/internal/models/dto"
 	"github.com/cyclops-ui/cyclops/cyclops-ctrl/internal/prometheus"
@@ -29,6 +31,7 @@ type Modules struct {
 	renderer         *render.Renderer
 	telemetryClient  telemetry.Client
 	monitor          prometheus.Monitor
+	cerbos           *cerbos.CerbosSvc
 }
 
 func NewModulesController(
@@ -37,6 +40,7 @@ func NewModulesController(
 	renderer *render.Renderer,
 	telemetryClient telemetry.Client,
 	monitor prometheus.Monitor,
+	cerbosSvc *cerbos.CerbosSvc,
 ) *Modules {
 	return &Modules{
 		kubernetesClient: kubernetes,
@@ -44,11 +48,22 @@ func NewModulesController(
 		renderer:         renderer,
 		telemetryClient:  telemetryClient,
 		monitor:          monitor,
+		cerbos:           cerbosSvc,
 	}
 }
 
 func (m *Modules) GetModule(ctx *gin.Context) {
 	ctx.Header("Access-Control-Allow-Origin", "*")
+
+	allowed := m.checkPermission(ctx, ResourceModule, ctx.Param("name"), ActionList)
+	if !allowed {
+		errorMessage := fmt.Sprintf(
+			"User does not have permission to perform '%s' action on %s named %s",
+			ActionList, ResourceModule, ctx.Param("name"),
+		)
+		ctx.JSON(http.StatusForbidden, dto.NewError("Permission Denied", errorMessage))
+		return
+	}
 
 	module, err := m.kubernetesClient.GetModule(ctx.Param("name"))
 	if err != nil {
@@ -96,6 +111,16 @@ func (m *Modules) GetRawModuleManifest(ctx *gin.Context) {
 func (m *Modules) ListModules(ctx *gin.Context) {
 	ctx.Header("Access-Control-Allow-Origin", "*")
 
+	allowed := m.checkPermission(ctx, ResourceModule, "*", ActionList)
+	if !allowed {
+		errorMessage := fmt.Sprintf(
+			"User does not have permission to perform '%s' action on %s named %s",
+			ActionList, ResourceModule, ctx.Param("name"),
+		)
+		ctx.JSON(http.StatusForbidden, dto.NewError("Permission Denied", errorMessage))
+		return
+	}
+
 	modules, err := m.kubernetesClient.ListModules()
 	if err != nil {
 		fmt.Println(err)
@@ -122,6 +147,16 @@ func (m *Modules) ListModules(ctx *gin.Context) {
 func (m *Modules) DeleteModule(ctx *gin.Context) {
 	ctx.Header("Access-Control-Allow-Origin", "*")
 
+	allowed := m.checkPermission(ctx, ResourceModule, ctx.Param("name"), ActionDelete)
+	if !allowed {
+		errorMessage := fmt.Sprintf(
+			"User does not have permission to perform '%s' action on %s named %s",
+			ActionDelete, ResourceModule, ctx.Param("name"),
+		)
+		ctx.JSON(http.StatusForbidden, dto.NewError("Permission Denied", errorMessage))
+		return
+	}
+
 	err := m.kubernetesClient.DeleteModule(ctx.Param("name"))
 	if err != nil {
 		fmt.Println(err)
@@ -135,6 +170,16 @@ func (m *Modules) DeleteModule(ctx *gin.Context) {
 
 func (m *Modules) GetModuleHistory(ctx *gin.Context) {
 	ctx.Header("Access-Control-Allow-Origin", "*")
+
+	allowed := m.checkPermission(ctx, ResourceModule, ctx.Param("name"), ActionList)
+	if !allowed {
+		errorMessage := fmt.Sprintf(
+			"User does not have permission to perform '%s' action on %s named %s",
+			ActionList, ResourceModule, ctx.Param("name"),
+		)
+		ctx.JSON(http.StatusForbidden, dto.NewError("Permission Denied", errorMessage))
+		return
+	}
 
 	module, err := m.kubernetesClient.GetModule(ctx.Param("name"))
 	if err != nil {
@@ -196,6 +241,16 @@ func (m *Modules) Manifest(ctx *gin.Context) {
 func (m *Modules) CurrentManifest(ctx *gin.Context) {
 	ctx.Header("Access-Control-Allow-Origin", "*")
 
+	allowed := m.checkPermission(ctx, ResourceModule, ctx.Param("name"), ActionList)
+	if !allowed {
+		errorMessage := fmt.Sprintf(
+			"User does not have permission to perform '%s' action on %s named %s",
+			ActionList, ResourceModule, ctx.Param("name"),
+		)
+		ctx.JSON(http.StatusForbidden, dto.NewError("Permission Denied", errorMessage))
+		return
+	}
+
 	module, err := m.kubernetesClient.GetModule(ctx.Param("name"))
 	if err != nil {
 		fmt.Println(err)
@@ -231,6 +286,16 @@ func (m *Modules) CurrentManifest(ctx *gin.Context) {
 func (m *Modules) DeleteModuleResource(ctx *gin.Context) {
 	ctx.Header("Access-Control-Allow-Origin", "*")
 
+	allowed := m.checkPermission(ctx, ResourceModule, "", ActionDelete)
+	if !allowed {
+		errorMessage := fmt.Sprintf(
+			"User does not have permission to perform '%s' action on %s named %s",
+			string(ActionDelete), ResourceModule, ctx.Param("name"),
+		)
+		ctx.JSON(http.StatusForbidden, dto.NewError("Permission Denied", errorMessage))
+		return
+	}
+
 	var request dto.DeleteResource
 	if err := ctx.BindJSON(&request); err != nil {
 		fmt.Println(err)
@@ -255,6 +320,16 @@ func (m *Modules) CreateModule(ctx *gin.Context) {
 	if err := ctx.BindJSON(&request); err != nil {
 		fmt.Println("error binding request", request)
 		ctx.JSON(http.StatusBadRequest, dto.NewError("Error loading template", err.Error()))
+		return
+	}
+
+	allowed := m.checkPermission(ctx, ResourceModule, request.Name, ActionCreate)
+	if !allowed {
+		errorMessage := fmt.Sprintf(
+			"User does not have permission to perform '%s' action on %s named %s",
+			ActionCreate, ResourceModule, request.Name,
+		)
+		ctx.JSON(http.StatusForbidden, dto.NewError("Permission Denied", errorMessage))
 		return
 	}
 
@@ -285,6 +360,16 @@ func (m *Modules) UpdateModule(ctx *gin.Context) {
 	if err := ctx.BindJSON(&request); err != nil {
 		fmt.Println(err)
 		ctx.JSON(http.StatusBadRequest, dto.NewError("Error mapping module request", err.Error()))
+		return
+	}
+
+	allowed := m.checkPermission(ctx, ResourceModule, request.Name, ActionEdit)
+	if !allowed {
+		errorMessage := fmt.Sprintf(
+			"User does not have permission to perform '%s' action on %s named %s",
+			ActionEdit, ResourceModule, request.Name,
+		)
+		ctx.JSON(http.StatusForbidden, dto.NewError("Permission Denied", errorMessage))
 		return
 	}
 
@@ -771,6 +856,22 @@ func getTargetGeneration(generation string, module *v1alpha1.Module) (*v1alpha1.
 		Spec:       module.Spec,
 		Status:     module.Status,
 	}, true
+}
+
+func (m *Modules) checkPermission(ctx *gin.Context, kind, resourceName, action string) bool {
+	if os.Getenv("CYCLOPS_AUTHORIZATION") == "disabled" {
+		return true
+	}
+	resource := cerbosSDK.NewResource(kind, "new").
+		WithAttr("name", resourceName).
+		WithAttr("action", action)
+
+	allowed, err := m.cerbos.IsAllowed(ctx.Request.Context(), resource, action)
+	if err != nil {
+		log.Println("Error checking permissions", err.Error())
+		return false
+	}
+	return allowed
 }
 
 func trimLogLine(logLine string) string {
