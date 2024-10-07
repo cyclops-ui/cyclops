@@ -197,14 +197,17 @@ func (r *ModuleReconciler) SetupWithManager(mgr ctrl.Manager) error {
 }
 
 func (r *ModuleReconciler) moduleToResources(template *models.Template, module *cyclopsv1alpha1.Module) ([]string, []cyclopsv1alpha1.GroupVersionResource, error) {
-	crdInstallErrors := r.applyCRDs(template)
+    var crdInstallErrors []string
+    if !module.Spec.SkipCRDs {
+        crdInstallErrors = r.applyCRDs(template)
+    }
 
-	installErrors, childrenGVRs, err := r.generateResources(r.kubernetesClient, *module, template)
-	if err != nil {
-		return nil, nil, err
-	}
+    installErrors, childrenGVRs, err := r.generateResources(r.kubernetesClient, *module, template)
+    if err != nil {
+        return nil, nil, err
+    }
 
-	return append(crdInstallErrors, installErrors...), childrenGVRs, nil
+    return append(crdInstallErrors, installErrors...), childrenGVRs, nil
 }
 
 func (r *ModuleReconciler) generateResources(

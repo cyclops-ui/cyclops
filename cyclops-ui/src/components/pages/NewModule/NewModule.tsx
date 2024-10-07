@@ -13,6 +13,7 @@ import {
   Modal,
   Spin,
   notification,
+  Switch,
 } from "antd";
 import axios from "axios";
 import { findMaps, flattenObjectKeys } from "../../../utils/form";
@@ -207,6 +208,7 @@ const NewModule = () => {
   const handleSubmit = (values: any) => {
     const moduleName = values["cyclops_module_name"];
     const moduleNamespace = values["cyclops_module_namespace"];
+    const skipCRDs = values["skipCRDs"];
 
     values = findMaps(config.root.properties, values, initialValuesRaw);
 
@@ -215,6 +217,7 @@ const NewModule = () => {
         name: moduleName,
         namespace: moduleNamespace,
         values: values,
+        skipCRDs: skipCRDs,
         template: {
           repo: template.repo,
           path: template.path,
@@ -665,6 +668,21 @@ const NewModule = () => {
                         </Option>
                       ))}
                     </Select>
+                  </Form.Item>
+                  <Form.Item
+                    name="skipCRDs"
+                    valuePropName="checked"
+                    style={{ padding: "12px 12px 0px 12px" }}
+                    label={
+                      <div>
+                        Skip CRDs
+                        <p style={{ color: "#8b8e91", marginBottom: "0px" }}>
+                          Skip CRDs creation
+                        </p>
+                      </div>
+                    }
+                  >
+                    <Switch />
                   </Form.Item>
                 </div>
                 <div className={"expandadvanced"} onClick={toggleExpand}>
