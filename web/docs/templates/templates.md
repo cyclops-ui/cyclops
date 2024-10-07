@@ -12,7 +12,23 @@ The **`values.schema.json` is a necessary component** in your templates. This fi
 
 You can learn more about it and how to create one by following [Helm docs](https://helm.sh/docs/topics/charts/#schema-files). The schema is represented as a [JSON Schema](https://json-schema.org/)
 
-You can find a list of all the fields you can set below for each field type.
+## Generating Helm chart schema
+
+In case your Helm chart does not contain the `values.schema.json` file, you can generate it from your `values.yaml` file. One tool to help you with that is the [https://github.com/dadav/helm-schema](https://github.com/dadav/helm-schema) which can be installed and used as a CLI tool.
+
+You can install it using the following command:
+```shell
+go install github.com/dadav/helm-schema/cmd/helm-schema@latest
+```
+
+You can now generate your schema:
+```shell
+helm-schema --chart-search-root <path to your chart>
+```
+
+You can also add more properties to each value (type, validations, enums…) by adding annotations in the `values.yaml` comments. [Check here](https://github.com/dadav/helm-schema?tab=readme-ov-file#annotations)
+
+The tool will generate the `values.schema.json` which you can add to your chart and import the chart into Cyclops to get your fully functional Kubernetes UI.
 
 In addition to the usual schema, we added more fields to help our users get as much from the UI as possible.
 
