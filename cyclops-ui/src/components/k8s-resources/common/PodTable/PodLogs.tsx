@@ -6,6 +6,7 @@ import { mapResponseError } from "../../../../utils/api/errors";
 import { isStreamingEnabled } from "../../../../utils/api/common";
 import { logStream } from "../../../../utils/api/sse/logs";
 import axios from "axios";
+import "ace-builds/src-noconflict/ext-searchbox";
 
 interface PodLogsProps {
   pod: any;
@@ -71,6 +72,15 @@ const PodLogs = ({ pod }: PodLogsProps) => {
                   logs.length === 0 ? "No logs available" : logs.join("\n")
                 }
                 readOnly={true}
+                commands={[
+                  {
+                    name: "showSearchBox",
+                    bindKey: { win: "Ctrl-F", mac: "Command-F" },
+                    exec: function (editor) {
+                      editor.execCommand("showSearchBox");
+                    },
+                  },
+                ]}
               />
             </Col>
           ),
