@@ -159,11 +159,7 @@ const Modules = () => {
     }
     return filteredData.map((module: any, index) => (
       <Col key={index} xs={24} sm={12} md={8} lg={8} xl={6}>
-        <div
-        // onClick={() => {
-        //   history("/modules/" + module.name);
-        // }}
-        >
+        <a href={"/modules/" + module.name}>
           <Card
             title={
               <div>
@@ -256,7 +252,7 @@ const Modules = () => {
               </Col>
             </Row>
           </Card>
-        </div>
+        </a>
       </Col>
     ));
   };
