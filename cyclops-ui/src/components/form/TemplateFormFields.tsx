@@ -64,12 +64,25 @@ export function mapFields(
     if (arrayIndexLifetime > 0) {
       arrayIndexLifetime = arrayIndexLifetime - 1;
     }
-
     switch (field.type) {
       case "string":
         if (field.enum) {
           formFields.push(
             <SelectInputField
+              isSuggestionsField={false}
+              field={field}
+              formItemName={formItemName}
+              arrayField={arrayField}
+              isRequired={isRequired}
+              isModuleEdit={isModuleEdit}
+            />,
+          );
+          return;
+        }
+        if (field["x-suggestions"]) {
+          formFields.push(
+            <SelectInputField
+              isSuggestionsField={true}
               field={field}
               formItemName={formItemName}
               arrayField={arrayField}
