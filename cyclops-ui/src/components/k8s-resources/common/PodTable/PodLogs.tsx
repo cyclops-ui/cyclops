@@ -72,15 +72,6 @@ const PodLogs = ({ pod }: PodLogsProps) => {
                   logs.length === 0 ? "No logs available" : logs.join("\n")
                 }
                 readOnly={true}
-                commands={[
-                  {
-                    name: "showSearchBox",
-                    bindKey: { win: "Ctrl-F", mac: "Command-F" },
-                    exec: function (editor) {
-                      editor.execCommand("showSearchBox");
-                    },
-                  },
-                ]}
               />
             </Col>
           ),
