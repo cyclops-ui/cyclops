@@ -30,7 +30,6 @@ import {
   Template,
 } from "../../../utils/api/template";
 import TemplateFormFields from "../../form/TemplateFormFields";
-import YAML from "yaml";
 
 const { Title } = Typography;
 const layout = {

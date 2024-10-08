@@ -10,8 +10,9 @@ import {
   BooleanField,
   getValueFromNestedObject,
 } from "./fields/boolean/Boolean";
-import { Alert, Col, Row } from "antd";
+import { Alert, Row } from "antd";
 import { WarningTwoTone } from "@ant-design/icons";
+import Link from "antd/lib/typography/Link";
 
 interface Props {
   isModuleEdit: boolean;
@@ -182,7 +183,7 @@ export function mapFields(
 const NoFieldsAlert = () => {
   const valuesSchema = () => {
     return (
-      <a
+      <Link
         href={"https://helm.sh/docs/topics/charts/#schema-files"}
         target={"_blank"}
         style={{
@@ -193,13 +194,13 @@ const NoFieldsAlert = () => {
         <code style={{ backgroundColor: "#fff", color: "#555" }}>
           values.schema.json
         </code>
-      </a>
+      </Link>
     );
   };
 
   const generateSchemaDocs = () => {
     return (
-      <a
+      <Link
         href={
           "https://cyclops-ui.com/docs/templates/#generating-helm-chart-schema"
         }
@@ -210,7 +211,7 @@ const NoFieldsAlert = () => {
         }}
       >
         here.
-      </a>
+      </Link>
     );
   };
 
