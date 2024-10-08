@@ -10,6 +10,8 @@ import {
   BooleanField,
   getValueFromNestedObject,
 } from "./fields/boolean/Boolean";
+import { Alert, Col, Row } from "antd";
+import { WarningTwoTone } from "@ant-design/icons";
 
 interface Props {
   isModuleEdit: boolean;
@@ -177,6 +179,84 @@ export function mapFields(
   return formFields;
 }
 
+const NoFieldsAlert = () => {
+  const valuesSchema = () => {
+    return (
+      <a
+        href={"https://helm.sh/docs/topics/charts/#schema-files"}
+        target={"_blank"}
+        style={{
+          textDecoration: "underline",
+          textDecorationColor: "#555",
+        }}
+      >
+        <code style={{ backgroundColor: "#fff", color: "#555" }}>
+          values.schema.json
+        </code>
+      </a>
+    );
+  };
+
+  const generateSchemaDocs = () => {
+    return (
+      <a
+        href={
+          "https://cyclops-ui.com/docs/templates/#generating-helm-chart-schema"
+        }
+        target={"_blank"}
+        style={{
+          textDecoration: "underline",
+          textDecorationColor: "#555",
+        }}
+      >
+        here.
+      </a>
+    );
+  };
+
+  return (
+    <Alert
+      message={
+        <div>
+          <WarningTwoTone
+            twoToneColor="#f3801a"
+            style={{
+              paddingRight: "5px",
+              fontSize: "24px",
+              verticalAlign: "middle",
+            }}
+          />
+          No fields to render
+        </div>
+      }
+      closable={true}
+      description={
+        <div>
+          <Row>
+            <span>
+              Selected template contains no fields to render. You can still
+              install this Helm chart with it's default values, but in order to
+              update the values, make sure to add {valuesSchema()}.
+            </span>
+          </Row>
+          <Row>
+            <span>
+              You can generate your Helm chart schema and add it to your chart
+              by following our docs {generateSchemaDocs()}
+            </span>
+          </Row>
+        </div>
+      }
+      type="warning"
+      style={{
+        borderColor: "#ffc403",
+        borderWidth: "1.5px",
+        marginBottom: "16px",
+      }}
+    />
+  );
+};
+
 const TemplateFormFields = ({
   isModuleEdit,
   fields,
@@ -188,6 +268,10 @@ const TemplateFormFields = ({
   arrayField,
   required,
 }: Props) => {
+  if (!fields) {
+    return <NoFieldsAlert />;
+  }
+
   return (
     <div>
       {mapFields(
