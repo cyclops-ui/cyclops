@@ -606,7 +606,11 @@ const NewModule = () => {
                   setLoadingValuesModal(true);
                 }}
                 name="Save"
-                disabled={loadingTemplate || loadingTemplateInitialValues}
+                disabled={
+                  loadingTemplate ||
+                  loadingTemplateInitialValues ||
+                  !config.root.properties
+                }
               >
                 Load values from file
               </Button>{" "}
