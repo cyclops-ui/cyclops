@@ -27,4 +27,5 @@ var (
 func init() {
 	RootCmd.AddCommand(updateCMD)
 	updateCMD.AddCommand(update.UpdateModuleCMD)
+	updateCMD.AddCommand(update.UpdateTemplateStoreCMD)
 }
