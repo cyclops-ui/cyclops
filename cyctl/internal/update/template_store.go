@@ -71,6 +71,7 @@ var (
 		Short:   "updates template values; takes template name as argument and updates values provided by flags",
 		Long:    "updates template values; takes template name as argument with flags --path=<path> --repo=<repo> --version=<version> --icon=<icon> ",
 		Example: updateTemplateStoreExample,
+		Aliases: []string{"templates"},
 		Args:    cobra.ExactArgs(1),
 		Run: func(cmd *cobra.Command, args []string) {
 			templateName := args[0]
