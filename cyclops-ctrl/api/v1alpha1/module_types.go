@@ -30,6 +30,7 @@ type ModuleSpec struct {
 	TargetNamespace string               `json:"targetNamespace"`
 	TemplateRef     TemplateRef          `json:"template"`
 	Values          apiextensionsv1.JSON `json:"values"`
+	SkipCRDs 		bool 				 `json:"skipCRDs,omitempty"`
 }
 
 type ModuleValue struct {
