@@ -6,6 +6,7 @@ import { mapResponseError } from "../../../../utils/api/errors";
 import { isStreamingEnabled } from "../../../../utils/api/common";
 import { logStream } from "../../../../utils/api/sse/logs";
 import axios from "axios";
+import "ace-builds/src-noconflict/ext-searchbox";
 
 interface PodLogsProps {
   pod: any;
