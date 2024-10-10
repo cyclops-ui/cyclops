@@ -57,6 +57,19 @@ var _ = Describe("Templates resolver", func() {
 		},
 		{
 			Spec: v1alpha1.TemplateAuthRuleSpec{
+				Repo: "https://github.com/invalid-org/some))-other-team", // invalid regex should not break resolver
+				Username: apiv1.SecretKeySelector{
+					LocalObjectReference: apiv1.LocalObjectReference{Name: "wrong-secret"},
+					Key:                  "username",
+				},
+				Password: apiv1.SecretKeySelector{
+					LocalObjectReference: apiv1.LocalObjectReference{Name: "wrong-secret"},
+					Key:                  "token",
+				},
+			},
+		},
+		{
+			Spec: v1alpha1.TemplateAuthRuleSpec{
 				Repo: "https://github.com/my-org/my-team",
 				Username: apiv1.SecretKeySelector{
 					LocalObjectReference: apiv1.LocalObjectReference{Name: "secret-name"},
