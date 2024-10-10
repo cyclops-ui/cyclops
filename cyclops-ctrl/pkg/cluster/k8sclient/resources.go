@@ -3,9 +3,10 @@ package k8sclient
 import (
 	"context"
 	"fmt"
-	"github.com/pkg/errors"
 	"strings"
 	"time"
+
+	"github.com/pkg/errors"
 
 	"gopkg.in/yaml.v2"
 
