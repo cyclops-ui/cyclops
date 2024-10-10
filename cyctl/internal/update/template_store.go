@@ -11,7 +11,7 @@ import (
 )
 
 var (
-	updateTemplateStoreExample = `# updates template store; takes template name as an argument with flag --value
+	updateTemplateStoreExample = `# updates template store
 
 	# Update template sample command 
 	cyctl update template NAME --repo='https://github.com/cyclops-ui/templates' --path='/path' --version='main' --icon='icon'`
