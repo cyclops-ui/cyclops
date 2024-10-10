@@ -18,13 +18,13 @@ import (
 )
 
 type Templates struct {
-	templatesRepo    *template.Repo
+	templatesRepo    template.ITemplateRepo
 	kubernetesClient k8sclient.IKubernetesClient
 	telemetryClient  telemetry.Client
 }
 
 func NewTemplatesController(
-	templatesRepo *template.Repo,
+	templatesRepo template.ITemplateRepo,
 	kubernetes k8sclient.IKubernetesClient,
 	telemetryClient telemetry.Client,
 ) *Templates {

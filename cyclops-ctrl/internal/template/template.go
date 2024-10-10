@@ -14,6 +14,23 @@ import (
 	"github.com/cyclops-ui/cyclops/cyclops-ctrl/internal/models/helm"
 )
 
+type ITemplateRepo interface {
+	GetTemplate(
+		repo string,
+		path string,
+		version string,
+		resolvedVersion string,
+		source cyclopsv1alpha1.TemplateSourceType,
+	) (*models.Template, error)
+	GetTemplateInitialValues(
+		repo string,
+		path string,
+		version string,
+		source cyclopsv1alpha1.TemplateSourceType,
+	) (map[string]interface{}, error)
+	ReturnCache() *ristretto.Cache
+}
+
 type Repo struct {
 	credResolver auth.TemplatesResolver
 	cache        templateCache
@@ -27,7 +44,7 @@ type templateCache interface {
 	ReturnCache() *ristretto.Cache
 }
 
-func NewRepo(credResolver auth.TemplatesResolver, tc templateCache) *Repo {
+func NewRepo(credResolver auth.TemplatesResolver, tc templateCache) ITemplateRepo {
 	return &Repo{
 		credResolver: credResolver,
 		cache:        tc,

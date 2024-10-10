@@ -16,7 +16,7 @@ import (
 type Handler struct {
 	router *gin.Engine
 
-	templatesRepo *templaterepo.Repo
+	templatesRepo templaterepo.ITemplateRepo
 	k8sClient     k8sclient.IKubernetesClient
 	renderer      *render.Renderer
 
@@ -25,7 +25,7 @@ type Handler struct {
 }
 
 func New(
-	templatesRepo *templaterepo.Repo,
+	templatesRepo templaterepo.ITemplateRepo,
 	kubernetesClient k8sclient.IKubernetesClient,
 	renderer *render.Renderer,
 	telemetryClient telemetry.Client,
