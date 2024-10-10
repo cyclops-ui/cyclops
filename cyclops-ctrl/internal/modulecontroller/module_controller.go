@@ -50,7 +50,7 @@ type ModuleReconciler struct {
 	client.Client
 	Scheme *runtime.Scheme
 
-	templatesRepo    *templaterepo.Repo
+	templatesRepo    templaterepo.ITemplateRepo
 	kubernetesClient k8sclient.IKubernetesClient
 	renderer         *render.Renderer
 
@@ -62,7 +62,7 @@ type ModuleReconciler struct {
 func NewModuleReconciler(
 	client client.Client,
 	scheme *runtime.Scheme,
-	templatesRepo *templaterepo.Repo,
+	templatesRepo templaterepo.ITemplateRepo,
 	kubernetesClient k8sclient.IKubernetesClient,
 	renderer *render.Renderer,
 	telemetryClient telemetry.Client,
