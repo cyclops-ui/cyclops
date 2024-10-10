@@ -7,11 +7,11 @@ import (
 )
 
 type Server struct {
-	k8sClient *k8sclient.KubernetesClient
+	k8sClient k8sclient.IKubernetesClient
 }
 
 // Initialize event and Start procnteessing requests
-func NewServer(k8sClient *k8sclient.KubernetesClient) *Server {
+func NewServer(k8sClient k8sclient.IKubernetesClient) *Server {
 	server := &Server{
 		k8sClient: k8sClient,
 	}

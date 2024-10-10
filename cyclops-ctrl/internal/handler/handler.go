@@ -17,7 +17,7 @@ type Handler struct {
 	router *gin.Engine
 
 	templatesRepo *templaterepo.Repo
-	k8sClient     *k8sclient.KubernetesClient
+	k8sClient     k8sclient.IKubernetesClient
 	renderer      *render.Renderer
 
 	telemetryClient telemetry.Client
@@ -26,7 +26,7 @@ type Handler struct {
 
 func New(
 	templatesRepo *templaterepo.Repo,
-	kubernetesClient *k8sclient.KubernetesClient,
+	kubernetesClient k8sclient.IKubernetesClient,
 	renderer *render.Renderer,
 	telemetryClient telemetry.Client,
 	monitor prometheus.Monitor,

@@ -24,7 +24,7 @@ import (
 )
 
 type Modules struct {
-	kubernetesClient *k8sclient.KubernetesClient
+	kubernetesClient k8sclient.IKubernetesClient
 	templatesRepo    *template.Repo
 	renderer         *render.Renderer
 	telemetryClient  telemetry.Client
@@ -33,7 +33,7 @@ type Modules struct {
 
 func NewModulesController(
 	templatesRepo *template.Repo,
-	kubernetes *k8sclient.KubernetesClient,
+	kubernetes k8sclient.IKubernetesClient,
 	renderer *render.Renderer,
 	telemetryClient telemetry.Client,
 	monitor prometheus.Monitor,

@@ -13,10 +13,10 @@ import (
 )
 
 type Cluster struct {
-	kubernetesClient *k8sclient.KubernetesClient
+	kubernetesClient k8sclient.IKubernetesClient
 }
 
-func NewClusterController(kubernetes *k8sclient.KubernetesClient) *Cluster {
+func NewClusterController(kubernetes k8sclient.IKubernetesClient) *Cluster {
 	return &Cluster{
 		kubernetesClient: kubernetes,
 	}

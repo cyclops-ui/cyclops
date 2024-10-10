@@ -51,7 +51,7 @@ type ModuleReconciler struct {
 	Scheme *runtime.Scheme
 
 	templatesRepo    *templaterepo.Repo
-	kubernetesClient *k8sclient.KubernetesClient
+	kubernetesClient k8sclient.IKubernetesClient
 	renderer         *render.Renderer
 
 	telemetryClient telemetry.Client
@@ -63,7 +63,7 @@ func NewModuleReconciler(
 	client client.Client,
 	scheme *runtime.Scheme,
 	templatesRepo *templaterepo.Repo,
-	kubernetesClient *k8sclient.KubernetesClient,
+	kubernetesClient k8sclient.IKubernetesClient,
 	renderer *render.Renderer,
 	telemetryClient telemetry.Client,
 	monitor prometheus.Monitor,
@@ -226,7 +226,7 @@ func (r *ModuleReconciler) moduleToResources(template *models.Template, module *
 }
 
 func (r *ModuleReconciler) generateResources(
-	kClient *k8sclient.KubernetesClient,
+	kClient k8sclient.IKubernetesClient,
 	module cyclopsv1alpha1.Module,
 	moduleTemplate *models.Template,
 ) ([]string, []cyclopsv1alpha1.GroupVersionResource, error) {

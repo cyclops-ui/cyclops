@@ -3,10 +3,10 @@ package k8sclient
 import (
 	"context"
 	"fmt"
-	"github.com/cyclops-ui/cyclops/cyclops-ctrl/api/v1alpha1"
-	"github.com/pkg/errors"
 	"strings"
 	"time"
+
+	"github.com/pkg/errors"
 
 	"gopkg.in/yaml.v2"
 
@@ -20,6 +20,7 @@ import (
 	"k8s.io/apimachinery/pkg/watch"
 	"k8s.io/client-go/tools/cache"
 
+	"github.com/cyclops-ui/cyclops/cyclops-ctrl/api/v1alpha1"
 	"github.com/cyclops-ui/cyclops/cyclops-ctrl/internal/models/dto"
 )
 
