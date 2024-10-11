@@ -43,7 +43,7 @@ func getTeamplateAuthRulesFromPromt() (string, string, string, string, string, e
 		return "", "", "", "", "", fmt.Errorf("Prompt failed: %v", err)
 	}
 	usernameNamePrompt := promptui.Prompt{
-		Label: "Username: Name",
+		Label: "Username secret name",
 		Validate: func(input string) error {
 			if input == "" {
 				return errors.New("The username Name cannot be empty")
