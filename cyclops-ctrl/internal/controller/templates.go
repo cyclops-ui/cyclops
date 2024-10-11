@@ -3,7 +3,6 @@ package controller
 import (
 	"fmt"
 	"net/http"
-	"strconv"
 	"strings"
 
 	"github.com/gin-gonic/gin"
@@ -35,19 +34,6 @@ func NewTemplatesController(
 	}
 }
 
-// TODO kaj je ovo
-func semantic(current string) string {
-	if len(current) == 0 {
-		return "v1"
-	}
-
-	version, _ := strconv.Atoi(current[1:])
-
-	version++
-
-	return fmt.Sprintf("v%d", version)
-}
-
 func (c *Templates) GetTemplate(ctx *gin.Context) {
 	ctx.Header("Access-Control-Allow-Origin", "*")
 
@@ -69,7 +55,6 @@ func (c *Templates) GetTemplate(ctx *gin.Context) {
 		cyclopsv1alpha1.TemplateSourceType(sourceType),
 	)
 	if err != nil {
-		fmt.Println(err)
 		ctx.JSON(http.StatusBadRequest, dto.NewError("Error loading template", err.Error()))
 		return
 	}
@@ -97,14 +82,12 @@ func (c *Templates) GetTemplateInitialValues(ctx *gin.Context) {
 		cyclopsv1alpha1.TemplateSourceType(sourceType),
 	)
 	if err != nil {
-		fmt.Println(err)
 		ctx.JSON(http.StatusBadRequest, dto.NewError("Error loading template initial values", err.Error()))
 		return
 	}
 
 	data, err := json.Marshal(initial)
 	if err != nil {
-		fmt.Println(err)
 		ctx.JSON(http.StatusBadRequest, dto.NewError("Error loading template initial values", err.Error()))
 		return
 	}
