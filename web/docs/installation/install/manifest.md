@@ -7,7 +7,7 @@ sidebar_label: Using kubectl
 To install Cyclops in your cluster, run commands below:
 
 ```bash
-kubectl apply -f https://raw.githubusercontent.com/cyclops-ui/cyclops/v0.13.1/install/cyclops-install.yaml && kubectl apply -f https://raw.githubusercontent.com/cyclops-ui/cyclops/v0.13.1/install/demo-templates.yaml
+kubectl apply -f https://raw.githubusercontent.com/cyclops-ui/cyclops/v0.14.1/install/cyclops-install.yaml && kubectl apply -f https://raw.githubusercontent.com/cyclops-ui/cyclops/v0.14.1/install/demo-templates.yaml
 ```
 
 It will create a new namespace called `cyclops` and deploy everything you need for your Cyclops instance to run.
