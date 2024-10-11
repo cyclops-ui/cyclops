@@ -57,7 +57,7 @@ func getTeamplateAuthRulesFromPromt() (string, string, string, string, string, e
 	}
 
 	usernameKeyPrompt := promptui.Prompt{
-		Label: "Username: Key",
+		Label: "Username secret key",
 		Validate: func(input string) error {
 			if input == "" {
 				return errors.New("The username key cannot be empty")
