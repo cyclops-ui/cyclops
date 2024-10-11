@@ -108,10 +108,9 @@ func validateSecretKeySelector(username, password string) (string, string, strin
 
 	// Ensure both name and key are present
 	if usernameName == "" || usernameKey == "" || passwordName == "" || passwordKey == "" {
-
 		return "", "", "", "", fmt.Errorf("invalid format for username or password. Expected 'name:key'")
 	}
-
+	
 	return usernameName, usernameKey, passwordName, passwordKey, nil
 }
 
