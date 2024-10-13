@@ -8,8 +8,6 @@ import {
   Input,
   Row,
   Tooltip,
-  Checkbox,
-  InputNumber,
 } from "antd";
 import {
   InfoCircleOutlined,
@@ -119,9 +117,15 @@ export const ArrayField = ({
                         onClick={() => remove(arrField.name)}
                       />
                     </Row>
-                    {index + 1 === arrFields.length ? (
-                      <Divider style={{ marginTop: "4px", marginBottom: "12px" }} />
-                    ) : null}
+                    {arrFields !== null &&
+                    arrFields !== undefined &&
+                    index + 1 === arrFields.length ? (
+                      <Divider
+                        style={{ marginTop: "4px", marginBottom: "12px" }}
+                      />
+                    ) : (
+                      <></>
+                    )}
                   </Col>
                 ))}
                 <Form.Item style={{ marginBottom: "0" }}>
@@ -140,35 +144,6 @@ export const ArrayField = ({
         </Form.Item>
       );
     }
-
-    if (field.items.type === "number") {
-      return (
-        <Form.Item
-          wrapperCol={{ span: 16 }}
-          name={fieldName}
-          label={field.display_name}
-          style={{ marginBottom: "12px" }}
-        >
-          <InputNumber disabled={field.immutable && isModuleEdit} />
-        </Form.Item>
-      );
-    }
-
-    if (field.items.type === "boolean") {
-      return (
-        <Form.Item
-          wrapperCol={{ span: 16 }}
-          name={fieldName}
-          valuePropName="checked"
-          style={{ marginBottom: "12px" }}
-        >
-          <Checkbox disabled={field.immutable && isModuleEdit}>
-            {field.display_name}
-          </Checkbox>
-        </Form.Item>
-      );
-    }
-
     if (field.items.type === "object") {
       return (
         <Collapse
@@ -187,11 +162,11 @@ export const ArrayField = ({
             }}
             forceRender={true}
           >
-            <Form.Item 
-            wrapperCol={{ span: 16 }} 
-            style={{ 
-              paddingTop: "8px",
-              marginBottom: "0",
+            <Form.Item
+              wrapperCol={{ span: 16 }}
+              style={{
+                paddingTop: "8px",
+                marginBottom: "0",
               }}
             >
               <Form.List name={formItemName}>
