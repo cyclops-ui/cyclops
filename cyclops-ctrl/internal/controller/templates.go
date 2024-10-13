@@ -1,7 +1,6 @@
 package controller
 
 import (
-	"fmt"
 	"net/http"
 	"strings"
 
@@ -114,7 +113,6 @@ func (c *Templates) CreateTemplatesStore(ctx *gin.Context) {
 
 	var templateStore *dto.TemplateStore
 	if err := ctx.ShouldBind(&templateStore); err != nil {
-		fmt.Println("error binding request", templateStore)
 		ctx.JSON(http.StatusBadRequest, dto.NewError("Error binding request", err.Error()))
 		return
 	}
@@ -136,7 +134,6 @@ func (c *Templates) CreateTemplatesStore(ctx *gin.Context) {
 		cyclopsv1alpha1.TemplateSourceType(templateStore.TemplateRef.SourceType),
 	)
 	if err != nil {
-		fmt.Println(err)
 		ctx.JSON(http.StatusBadRequest, dto.NewError("Error loading template", err.Error()))
 		return
 	}
@@ -158,7 +155,6 @@ func (c *Templates) EditTemplatesStore(ctx *gin.Context) {
 
 	var templateStore *dto.TemplateStore
 	if err := ctx.ShouldBind(&templateStore); err != nil {
-		fmt.Println("error binding request", templateStore)
 		ctx.JSON(http.StatusBadRequest, dto.NewError("Error binding request", err.Error()))
 		return
 	}
@@ -180,7 +176,6 @@ func (c *Templates) EditTemplatesStore(ctx *gin.Context) {
 		cyclopsv1alpha1.TemplateSourceType(templateStore.TemplateRef.SourceType),
 	)
 	if err != nil {
-		fmt.Println(err)
 		ctx.JSON(http.StatusBadRequest, dto.NewError("Error loading template", err.Error()))
 		return
 	}
