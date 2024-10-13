@@ -1,0 +1,32 @@
+# user_activity_dashboard.yaml
+version: '1.0'
+title: User Activity Dashboard
+widgets:
+  - type: pie_chart
+    title: User Activity Distribution
+    dataSource: user_activity
+    chartType: pie
+    options:
+      labels:
+        - Active
+        - Inactive
+        - Idle
+  - type: line_chart
+    title: User Login Trends
+    dataSource: user_logins
+    chartType: line
+    options:
+      xAxis:
+        label: Date
+      yAxis:
+        label: Number of Logins
+  - type: table
+    title: Active Users
+    dataSource: active_users
+    columns:
+      - name: User ID
+        field: user_id
+      - name: Name
+        field: name
+      - name: Last Active
+        field: last_active

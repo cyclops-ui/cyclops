@@ -1,0 +1,8 @@
+# Get the list of pods
+kubectl get pods
+
+# Fetch logs for a specific pod
+kubectl logs <pod-name>
+
+# Example to get logs for a pod named 'nginx-abc123'
+kubectl logs nginx-abc123

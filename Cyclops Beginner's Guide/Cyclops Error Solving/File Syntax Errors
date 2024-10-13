@@ -1,0 +1,23 @@
+# Use a YAML validator to check syntax
+yamllint ~/.cyclops/config.yml
+
+# Correct any syntax errors identified
+nano ~/.cyclops/config.yml
+
+# Example of valid YAML syntax
+apiVersion: v1
+clusters:
+  - name: my-cluster
+    cluster:
+      server: https://api.my-cluster-url.com
+      certificate-authority-data: <base64-encoded-ca-cert>
+contexts:
+  - name: default
+    context:
+      cluster: my-cluster
+      user: default
+current-context: default
+users:
+  - name: default
+    user:
+      token: <your-authentication-token>

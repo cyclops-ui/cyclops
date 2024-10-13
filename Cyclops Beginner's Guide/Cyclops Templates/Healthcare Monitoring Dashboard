@@ -1,0 +1,42 @@
+# healthcare_monitoring_dashboard.yaml
+version: '1.0'
+title: Healthcare Monitoring Dashboard
+widgets:
+  - type: line_chart
+    title: Patient Heart Rate Trends
+    dataSource: heart_rate_trends
+    chartType: line
+    options:
+      xAxis:
+        label: Time
+      yAxis:
+        label: Heart Rate (bpm)
+  - type: gauge
+    title: Oxygen Saturation Levels
+    dataSource: oxygen_saturation_levels
+    gaugeType: radial
+    options:
+      minValue: 0
+      maxValue: 100
+      unit: Percentage
+  - type: bar_chart
+    title: Medication Adherence
+    dataSource: medication_adherence
+    chartType: bar
+    options:
+      xAxis:
+        label: Medication
+      yAxis:
+        label: Adherence Rate (%)
+  - type: table
+    title: Recent Patient Observations
+    dataSource: recent_patient_observations
+    columns:
+      - name: Timestamp
+        field: timestamp
+      - name: Patient ID
+        field: patient_id
+      - name: Observation
+        field: observation
+      - name: Notes
+        field: notes

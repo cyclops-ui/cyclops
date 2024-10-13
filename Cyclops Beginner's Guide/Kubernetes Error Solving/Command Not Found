@@ -1,0 +1,8 @@
+# Check if kubectl is in your PATH
+which kubectl
+
+# If not found, ensure it's installed correctly
+sudo apt-get install -y kubectl
+
+# Verify the installation
+kubectl version --client

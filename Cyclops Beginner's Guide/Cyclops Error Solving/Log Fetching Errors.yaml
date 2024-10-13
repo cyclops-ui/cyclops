@@ -1,0 +1,10 @@
+# Check if the application is running
+cyclops monitor <application-name>
+
+# Example to check 'sample-app'
+cyclops monitor sample-app
+
+# If the application is running, try fetching logs again
+cyclops logs sample-app
+
+# If logs are still not available, check application status and configurations

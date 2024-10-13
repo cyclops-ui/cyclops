@@ -1,0 +1,23 @@
+# Update package index and install dependencies
+sudo apt-get update && sudo apt-get install -y apt-transport-https ca-certificates curl
+
+# Download and add the Google Cloud public signing key
+curl -fsSL https://packages.cloud.google.com/apt/doc/apt-key.gpg | sudo apt-key add -
+
+# Add the Kubernetes APT repository
+sudo sh -c 'echo "deb http://apt.kubernetes.io/ kubernetes-xenial main" > /etc/apt/sources.list.d/kubernetes.list'
+
+# Update package index and install kubeadm, kubelet, and kubectl
+sudo apt-get update
+sudo apt-get install -y kubelet kubeadm kubectl
+
+# Initialize the Kubernetes master node
+sudo kubeadm init
+
+# Set up kubeconfig for kubectl
+mkdir -p $HOME/.kube
+sudo cp -i /etc/kubernetes/admin.conf $HOME/.kube/config
+sudo chown $(id -u):$(id -g) $HOME/.kube/config
+
+# Verify the installation
+kubectl get nodes

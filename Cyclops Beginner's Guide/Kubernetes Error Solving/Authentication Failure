@@ -1,0 +1,7 @@
+# Update the token or certificate in the kubeconfig file
+nano $HOME/.kube/config
+
+# Ensure the token is correct
+# Generate a new token if needed
+
+# Save and exit the editor

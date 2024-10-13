@@ -1,0 +1,28 @@
+# View deployment logs for errors
+cyclops logs <application-name>
+
+# Example to check logs for the 'sample-app'
+cyclops logs sample-app
+
+# Check if the application image and configuration are correct
+# Edit deployment configuration if necessary
+nano ~/.cyclops/deployments/sample-app.yml
+
+# Sample deployment configuration
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: sample-app
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: sample-app
+  template:
+    metadata:
+      labels:
+        app: sample-app
+    spec:
+      containers:
+      - name: sample-app
+        image: nginx:latest

@@ -1,0 +1,2 @@
+# Monitor the sample-app application
+cyclops monitor sample-app

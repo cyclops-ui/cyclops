@@ -1,0 +1,43 @@
+# project_management_dashboard.yaml
+version: '1.0'
+title: Project Management Dashboard
+widgets:
+  - type: gantt_chart
+    title: Project Timeline
+    dataSource: project_timeline
+    options:
+      xAxis:
+        label: Time
+      yAxis:
+        label: Project Phases
+  - type: pie_chart
+    title: Task Distribution
+    dataSource: task_distribution
+    chartType: pie
+    options:
+      labels:
+        - To Do
+        - In Progress
+        - Completed
+        - Blocked
+  - type: bar_chart
+    title: Task Completion by Team
+    dataSource: task_completion_by_team
+    chartType: bar
+    options:
+      xAxis:
+        label: Teams
+      yAxis:
+        label: Tasks Completed
+  - type: table
+    title: Recent Project Updates
+    dataSource: recent_project_updates
+    columns:
+      - name: Timestamp
+        field: timestamp
+      - name: Project
+        field: project_name
+      - name: Update
+        field: update
+      - name: Status
+        field: status

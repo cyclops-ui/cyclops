@@ -1,0 +1,5 @@
+# Set up kubectl to use your cluster configuration
+kubectl config view
+
+# View cluster information
+kubectl cluster-info

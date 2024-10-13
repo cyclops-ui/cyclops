@@ -1,0 +1,7 @@
+# Check the pod status
+kubectl get pods
+
+# Fetch logs for the pod
+kubectl logs <pod-name>
+
+# If logs are still unavailable, check pod and deployment status

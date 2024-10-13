@@ -1,0 +1,6 @@
+# Scale the Nginx deployment to 3 replicas
+kubectl scale deployment nginx --replicas=3
+
+# Verify the scaling
+kubectl get deployments
+kubectl get pods

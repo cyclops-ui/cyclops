@@ -1,0 +1,11 @@
+# Download the Cyclops tarball
+wget https://github.com/your-repo/cyclops/releases/download/v1.0.0/cyclops-v1.0.0.tar.gz
+
+# Extract the tarball
+tar -xzf cyclops-v1.0.0.tar.gz
+
+# Move the binary to /usr/local/bin
+sudo mv cyclops /usr/local/bin/
+
+# Verify the installation
+cyclops --version

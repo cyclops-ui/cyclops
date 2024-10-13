@@ -1,0 +1,11 @@
+# Check the API server URL in your configuration file
+nano ~/.cyclops/config.yml
+
+# Ensure URL is correctly formatted and reachable
+# Example URL format
+server: https://api.my-cluster-url.com
+
+# Test connectivity to the API server
+curl -k https://api.my-cluster-url.com
+
+# If connectivity fails, check your network or cluster status

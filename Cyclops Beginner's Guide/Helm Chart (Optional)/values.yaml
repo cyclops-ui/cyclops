@@ -1,0 +1,20 @@
+replicaCount: 1
+
+image:
+  repository: <your-dockerhub-username>/myapp
+  tag: latest
+  pullPolicy: IfNotPresent
+
+service:
+  type: ClusterIP
+  port: 80
+
+ingress:
+  enabled: false
+  name: ""
+  path: /
+  hosts:
+    - host: chart-example.local
+      paths:
+        - /
+  tls: []

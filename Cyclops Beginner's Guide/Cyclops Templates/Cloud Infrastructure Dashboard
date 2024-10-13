@@ -1,0 +1,44 @@
+# cloud_infrastructure_dashboard.yaml
+version: '1.0'
+title: Cloud Infrastructure Dashboard
+widgets:
+  - type: line_chart
+    title: Cloud Resource Utilization
+    dataSource: cloud_resource_utilization
+    chartType: line
+    options:
+      xAxis:
+        label: Time
+      yAxis:
+        label: Utilization (%)
+  - type: pie_chart
+    title: Resource Allocation
+    dataSource: resource_allocation
+    chartType: pie
+    options:
+      labels:
+        - CPU
+        - Memory
+        - Storage
+        - Network
+  - type: bar_chart
+    title: Instance Health
+    dataSource: instance_health
+    chartType: bar
+    options:
+      xAxis:
+        label: Instances
+      yAxis:
+        label: Health Status
+  - type: table
+    title: Cloud Resource Details
+    dataSource: cloud_resource_details
+    columns:
+      - name: Resource ID
+        field: resource_id
+      - name: Resource Type
+        field: resource_type
+      - name: Status
+        field: status
+      - name: Last Updated
+        field: last_updated

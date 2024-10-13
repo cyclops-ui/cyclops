@@ -1,0 +1,32 @@
+# docker_dashboard.yaml
+version: '1.0'
+title: Docker Container Dashboard
+widgets:
+  - type: pie_chart
+    title: Container Status Distribution
+    dataSource: container_status
+    chartType: pie
+    options:
+      labels:
+        - Running
+        - Stopped
+        - Paused
+  - type: bar_chart
+    title: Container Resource Usage
+    dataSource: container_resource_usage
+    chartType: bar
+    options:
+      xAxis:
+        label: Containers
+      yAxis:
+        label: Resource Usage (MB)
+  - type: table
+    title: Container Logs
+    dataSource: container_logs
+    columns:
+      - name: Timestamp
+        field: timestamp
+      - name: Container ID
+        field: container_id
+      - name: Log Message
+        field: log_message

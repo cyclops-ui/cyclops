@@ -1,0 +1,44 @@
+# ecommerce_analytics_dashboard.yaml
+version: '1.0'
+title: E-Commerce Analytics Dashboard
+widgets:
+  - type: line_chart
+    title: Sales Over Time
+    dataSource: sales_over_time
+    chartType: line
+    options:
+      xAxis:
+        label: Time
+      yAxis:
+        label: Sales (USD)
+  - type: bar_chart
+    title: Product Sales by Category
+    dataSource: product_sales_category
+    chartType: bar
+    options:
+      xAxis:
+        label: Categories
+      yAxis:
+        label: Sales (USD)
+  - type: pie_chart
+    title: Sales Distribution by Region
+    dataSource: sales_distribution_region
+    chartType: pie
+    options:
+      labels:
+        - North America
+        - Europe
+        - Asia
+        - South America
+  - type: table
+    title: Top Selling Products
+    dataSource: top_selling_products
+    columns:
+      - name: Product ID
+        field: product_id
+      - name: Product Name
+        field: product_name
+      - name: Total Sales
+        field: total_sales
+      - name: Units Sold
+        field: units_sold

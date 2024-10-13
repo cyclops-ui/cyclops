@@ -1,0 +1,40 @@
+# database_performance_dashboard.yaml
+version: '1.0'
+title: Database Performance Dashboard
+widgets:
+  - type: line_chart
+    title: Query Response Times
+    dataSource: query_response_times
+    chartType: line
+    options:
+      xAxis:
+        label: Time
+      yAxis:
+        label: Response Time (ms)
+  - type: bar_chart
+    title: Query Throughput
+    dataSource: query_throughput
+    chartType: bar
+    options:
+      xAxis:
+        label: Query Types
+      yAxis:
+        label: Queries per Second
+  - type: gauge
+    title: Connection Pool Utilization
+    dataSource: connection_pool_utilization
+    gaugeType: radial
+    options:
+      minValue: 0
+      maxValue: 100
+      unit: Percentage
+  - type: table
+    title: Slow Queries
+    dataSource: slow_queries
+    columns:
+      - name: Query
+        field: query
+      - name: Execution Time
+        field: execution_time
+      - name: Timestamp
+        field: timestamp

@@ -1,0 +1,41 @@
+# docker_helm_combined_dashboard.yaml
+version: '1.0'
+title: Docker and Helm Combined Dashboard
+widgets:
+  - type: pie_chart
+    title: Docker Container Status
+    dataSource: container_status
+    chartType: pie
+    options:
+      labels:
+        - Running
+        - Stopped
+        - Paused
+  - type: line_chart
+    title: Helm Deployment Trends
+    dataSource: helm_deployments
+    chartType: line
+    options:
+      xAxis:
+        label: Time
+      yAxis:
+        label: Number of Deployments
+  - type: bar_chart
+    title: Resource Utilization
+    dataSource: combined_resource_usage
+    chartType: bar
+    options:
+      xAxis:
+        label: Resources
+      yAxis:
+        label: Usage (MB)
+  - type: table
+    title: Combined Logs
+    dataSource: combined_logs
+    columns:
+      - name: Timestamp
+        field: timestamp
+      - name: Source
+        field: source
+      - name: Message
+        field: message

@@ -1,0 +1,44 @@
+# energy_consumption_dashboard.yaml
+version: '1.0'
+title: Energy Consumption Dashboard
+widgets:
+  - type: line_chart
+    title: Energy Consumption Over Time
+    dataSource: energy_consumption_time_series
+    chartType: line
+    options:
+      xAxis:
+        label: Time
+      yAxis:
+        label: Energy (kWh)
+  - type: bar_chart
+    title: Consumption by Device
+    dataSource: consumption_by_device
+    chartType: bar
+    options:
+      xAxis:
+        label: Devices
+      yAxis:
+        label: Energy Consumption (kWh)
+  - type: pie_chart
+    title: Energy Source Breakdown
+    dataSource: energy_source_breakdown
+    chartType: pie
+    options:
+      labels:
+        - Solar
+        - Wind
+        - Grid
+        - Other
+  - type: table
+    title: Recent Energy Usage Logs
+    dataSource: energy_usage_logs
+    columns:
+      - name: Timestamp
+        field: timestamp
+      - name: Device
+        field: device
+      - name: Consumption (kWh)
+        field: consumption
+      - name: Cost (USD)
+        field: cost

@@ -1,0 +1,8 @@
+# Scale the application
+cyclops scale <application-name> --replicas=<number>
+
+# Example to scale 'sample-app' to 5 replicas
+cyclops scale sample-app --replicas=5
+
+# Check the current status of the application
+cyclops monitor sample-app
