@@ -762,4 +762,70 @@ var _ = Describe("Templates controller test", func() {
 			})
 		}
 	})
+
+	Describe("DeleteTemplatesStore method", func() {
+		BeforeEach(func() {
+			r.DELETE("/templates/store/:name", templatesController.DeleteTemplatesStore)
+		})
+
+		type caseInput struct {
+			templateName string
+			mockCalls    func()
+		}
+
+		type caseOutput struct {
+			statusCode int
+		}
+
+		type testCase struct {
+			description string
+			in          caseInput
+			out         caseOutput
+		}
+
+		testCases := []testCase{
+			{
+				description: "fails deleting template",
+				in: caseInput{
+					templateName: "my-template",
+					mockCalls: func() {
+						k8sClient.On("DeleteTemplateStore", "my-template").Return(errors.New("some template error"))
+					},
+				},
+				out: caseOutput{
+					statusCode: http.StatusInternalServerError,
+				},
+			},
+			{
+				description: "successfully deleting template",
+				in: caseInput{
+					templateName: "my-template",
+					mockCalls: func() {
+						k8sClient.On("DeleteTemplateStore", "my-template").Return(nil)
+					},
+				},
+				out: caseOutput{
+					statusCode: http.StatusOK,
+				},
+			},
+		}
+
+		for _, t := range testCases {
+			Describe(t.description, func() {
+				BeforeEach(func() {
+					t.in.mockCalls()
+				})
+
+				It("returns correct template and status code", func() {
+					req, _ := http.NewRequest(http.MethodDelete, fmt.Sprintf("/templates/store/%v", t.in.templateName), nil)
+					req.Header.Set("Content-Type", "application/json")
+
+					ctx.Request = req
+					r.ServeHTTP(w, req)
+
+					Expect(w.Code).To(BeEquivalentTo(t.out.statusCode))
+				})
+			})
+		}
+	})
 })
