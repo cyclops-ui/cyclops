@@ -63,6 +63,9 @@ export function resourcesStream(
     return;
   }
 
+  let maxRetries = 3;
+  let retryCounter = 0;
+
   fetchEventSource(`/api/stream/resources/` + moduleName, {
     method: "GET",
     onmessage(ev) {
@@ -89,9 +92,14 @@ export function resourcesStream(
     },
     onerror: (err) => {
       if (err instanceof FatalError) {
-        throw err; // rethrow to stop the operation
+        throw err;
       }
 
+      if (retryCounter == maxRetries) {
+        throw err;
+      }
+
+      retryCounter++;
       return 5000;
     },
   }).catch((r) => console.error(r));
