@@ -63,8 +63,8 @@ export function resourcesStream(
     return;
   }
 
-  let maxRetries = 3;
-  let retryCounter = 0;
+  let maxRetries = 5;
+  let retryCounter = 1;
 
   fetchEventSource(`/api/stream/resources/` + moduleName, {
     method: "GET",
