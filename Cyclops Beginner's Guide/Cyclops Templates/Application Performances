@@ -1,0 +1,32 @@
+# app_performance.yaml
+version: '1.0'
+title: Application Performance
+widgets:
+  - type: bar_chart
+    title: Response Times
+    dataSource: response_times
+    chartType: bar
+    options:
+      xAxis:
+        label: Endpoints
+      yAxis:
+        label: Response Time (ms)
+  - type: line_chart
+    title: Request Rate
+    dataSource: request_rate
+    chartType: line
+    options:
+      xAxis:
+        label: Time
+      yAxis:
+        label: Requests per Second
+  - type: table
+    title: Error Logs
+    dataSource: error_logs
+    columns:
+      - name: Timestamp
+        field: timestamp
+      - name: Error Code
+        field: error_code
+      - name: Message
+        field: message

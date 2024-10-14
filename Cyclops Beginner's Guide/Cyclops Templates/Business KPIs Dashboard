@@ -1,0 +1,43 @@
+# business_kpis_dashboard.yaml
+version: '1.0'
+title: Business KPIs Dashboard
+widgets:
+  - type: gauge
+    title: Revenue Growth
+    dataSource: revenue_growth
+    gaugeType: radial
+    options:
+      minValue: 0
+      maxValue: 100
+      unit: Percentage
+  - type: line_chart
+    title: Sales Trend
+    dataSource: sales_trend
+    chartType: line
+    options:
+      xAxis:
+        label: Time
+      yAxis:
+        label: Sales (USD)
+  - type: pie_chart
+    title: Expense Breakdown
+    dataSource: expense_breakdown
+    chartType: pie
+    options:
+      labels:
+        - Marketing
+        - R&D
+        - Operations
+        - HR
+  - type: table
+    title: Top Customers
+    dataSource: top_customers
+    columns:
+      - name: Customer ID
+        field: customer_id
+      - name: Name
+        field: name
+      - name: Total Purchases
+        field: total_purchases
+      - name: Last Purchase
+        field: last_purchase

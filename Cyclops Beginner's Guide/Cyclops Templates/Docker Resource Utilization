@@ -1,0 +1,29 @@
+# docker_resource_utilization.yaml
+version: '1.0'
+title: Docker Resource Utilization
+widgets:
+  - type: gauge
+    title: CPU Usage
+    dataSource: docker_cpu_usage
+    gaugeType: radial
+    options:
+      minValue: 0
+      maxValue: 100
+      unit: Percentage
+  - type: gauge
+    title: Memory Usage
+    dataSource: docker_memory_usage
+    gaugeType: radial
+    options:
+      minValue: 0
+      maxValue: 100
+      unit: Percentage
+  - type: bar_chart
+    title: Network Throughput
+    dataSource: docker_network_throughput
+    chartType: bar
+    options:
+      xAxis:
+        label: Containers
+      yAxis:
+        label: Throughput (MB/s)

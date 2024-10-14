@@ -1,0 +1,23 @@
+# Open the kubeconfig file for editing
+nano $HOME/.kube/config
+
+# Sample kubeconfig file content
+apiVersion: v1
+clusters:
+  - cluster:
+      certificate-authority-data: <base64-encoded-ca-cert>
+      server: https://api-server-url
+    name: kubernetes
+contexts:
+  - context:
+      cluster: kubernetes
+      user: kubernetes-admin
+    name: kubernetes-admin@kubernetes
+current-context: kubernetes-admin@kubernetes
+kind: Config
+users:
+  - name: kubernetes-admin
+    user:
+      token: <authentication-token>
+
+# Save and exit the editor

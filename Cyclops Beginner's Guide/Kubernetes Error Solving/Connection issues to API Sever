@@ -1,0 +1,7 @@
+# Verify API server URL in kubeconfig
+nano $HOME/.kube/config
+
+# Test connectivity to the API server
+curl -k https://api-server-url
+
+# If connectivity fails, check network and cluster status

@@ -1,0 +1,6 @@
+apiVersion: v2
+name: myapp
+description: A Helm chart for Kubernetes
+
+# A version number for the chart
+version: 0.1.0

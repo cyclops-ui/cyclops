@@ -1,0 +1,5 @@
+# Use a YAML linter to check syntax
+yamllint $HOME/.kube/config
+
+# Correct any syntax errors identified
+nano $HOME/.kube/config

@@ -1,0 +1,42 @@
+# application_metrics_dashboard.yaml
+version: '1.0'
+title: Application Metrics Dashboard
+widgets:
+  - type: line_chart
+    title: API Response Times
+    dataSource: api_response_times
+    chartType: line
+    options:
+      xAxis:
+        label: Time
+      yAxis:
+        label: Response Time (ms)
+  - type: bar_chart
+    title: Error Rates
+    dataSource: error_rates
+    chartType: bar
+    options:
+      xAxis:
+        label: Error Types
+      yAxis:
+        label: Rate
+  - type: pie_chart
+    title: Request Distribution
+    dataSource: request_distribution
+    chartType: pie
+    options:
+      labels:
+        - GET
+        - POST
+        - PUT
+        - DELETE
+  - type: table
+    title: Recent Application Logs
+    dataSource: app_logs
+    columns:
+      - name: Timestamp
+        field: timestamp
+      - name: Log Level
+        field: log_level
+      - name: Message
+        field: message

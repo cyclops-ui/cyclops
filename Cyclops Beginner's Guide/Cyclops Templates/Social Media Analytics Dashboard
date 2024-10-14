@@ -1,0 +1,44 @@
+# social_media_analytics_dashboard.yaml
+version: '1.0'
+title: Social Media Analytics Dashboard
+widgets:
+  - type: line_chart
+    title: Follower Growth
+    dataSource: follower_growth
+    chartType: line
+    options:
+      xAxis:
+        label: Time
+      yAxis:
+        label: Number of Followers
+  - type: bar_chart
+    title: Engagement by Post Type
+    dataSource: engagement_by_post_type
+    chartType: bar
+    options:
+      xAxis:
+        label: Post Types
+      yAxis:
+        label: Engagement (Likes, Shares, Comments)
+  - type: pie_chart
+    title: Demographic Breakdown
+    dataSource: demographic_breakdown
+    chartType: pie
+    options:
+      labels:
+        - Age Group 18-24
+        - Age Group 25-34
+        - Age Group 35-44
+        - Age Group 45+
+  - type: table
+    title: Top Performing Posts
+    dataSource: top_performing_posts
+    columns:
+      - name: Post ID
+        field: post_id
+      - name: Post Content
+        field: post_content
+      - name: Engagement
+        field: engagement
+      - name: Date
+        field: date

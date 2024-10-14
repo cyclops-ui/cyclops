@@ -1,0 +1,44 @@
+# security_monitoring_dashboard.yaml
+version: '1.0'
+title: Security Monitoring Dashboard
+widgets:
+  - type: bar_chart
+    title: Intrusion Attempts
+    dataSource: intrusion_attempts
+    chartType: bar
+    options:
+      xAxis:
+        label: Time
+      yAxis:
+        label: Number of Attempts
+  - type: pie_chart
+    title: Attack Types
+    dataSource: attack_types
+    chartType: pie
+    options:
+      labels:
+        - SQL Injection
+        - XSS
+        - DDoS
+        - Phishing
+  - type: line_chart
+    title: Security Alerts
+    dataSource: security_alerts
+    chartType: line
+    options:
+      xAxis:
+        label: Time
+      yAxis:
+        label: Alerts
+  - type: table
+    title: Recent Security Events
+    dataSource: security_events
+    columns:
+      - name: Timestamp
+        field: timestamp
+      - name: Event Type
+        field: event_type
+      - name: Severity
+        field: severity
+      - name: Description
+        field: description

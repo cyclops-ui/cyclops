@@ -1,0 +1,8 @@
+# Check if cyclops is in your PATH
+which cyclops
+
+# If not found, move the cyclops binary to /usr/local/bin
+sudo mv /path/to/cyclops /usr/local/bin/
+
+# Verify the installation again
+cyclops --version

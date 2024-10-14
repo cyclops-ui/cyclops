@@ -1,0 +1,44 @@
+# customer_support_dashboard.yaml
+version: '1.0'
+title: Customer Support Dashboard
+widgets:
+  - type: line_chart
+    title: Ticket Resolution Time
+    dataSource: ticket_resolution_time
+    chartType: line
+    options:
+      xAxis:
+        label: Time
+      yAxis:
+        label: Resolution Time (hrs)
+  - type: bar_chart
+    title: Ticket Volume by Category
+    dataSource: ticket_volume_by_category
+    chartType: bar
+    options:
+      xAxis:
+        label: Categories
+      yAxis:
+        label: Number of Tickets
+  - type: pie_chart
+    title: Support Team Workload
+    dataSource: support_team_workload
+    chartType: pie
+    options:
+      labels:
+        - Team A
+        - Team B
+        - Team C
+        - Team D
+  - type: table
+    title: Recent High-Priority Tickets
+    dataSource: high_priority_tickets
+    columns:
+      - name: Ticket ID
+        field: ticket_id
+      - name: Customer Name
+        field: customer_name
+      - name: Priority
+        field: priority
+      - name: Status
+        field: status

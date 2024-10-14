@@ -1,0 +1,2 @@
+# Deploy a sample Nginx application
+cyclops deploy sample-app --image=nginx

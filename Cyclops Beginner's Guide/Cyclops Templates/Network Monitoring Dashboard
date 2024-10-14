@@ -1,0 +1,42 @@
+# network_monitoring_dashboard.yaml
+version: '1.0'
+title: Network Monitoring Dashboard
+widgets:
+  - type: line_chart
+    title: Network Latency
+    dataSource: network_latency
+    chartType: line
+    options:
+      xAxis:
+        label: Time
+      yAxis:
+        label: Latency (ms)
+  - type: bar_chart
+    title: Network Traffic
+    dataSource: network_traffic
+    chartType: bar
+    options:
+      xAxis:
+        label: Interfaces
+      yAxis:
+        label: Traffic (MB/s)
+  - type: gauge
+    title: Network Packet Loss
+    dataSource: packet_loss
+    gaugeType: radial
+    options:
+      minValue: 0
+      maxValue: 100
+      unit: Percentage
+  - type: table
+    title: Active Connections
+    dataSource: active_connections
+    columns:
+      - name: Source IP
+        field: source_ip
+      - name: Destination IP
+        field: destination_ip
+      - name: Protocol
+        field: protocol
+      - name: Status
+        field: status

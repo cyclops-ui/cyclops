@@ -1,0 +1,32 @@
+# system_health_monitoring.yaml
+version: '1.0'
+title: System Health Monitoring
+widgets:
+  - type: gauge
+    title: Disk Space Usage
+    dataSource: disk_metrics
+    gaugeType: radial
+    options:
+      minValue: 0
+      maxValue: 100
+      unit: Percentage
+  - type: line_chart
+    title: Network Traffic
+    dataSource: network_traffic
+    chartType: line
+    options:
+      xAxis:
+        label: Time
+      yAxis:
+        label: Traffic (Mbps)
+  - type: status
+    title: Service Status
+    dataSource: service_status
+    options:
+      services:
+        - name: Web Server
+          statusField: web_server_status
+        - name: Database
+          statusField: db_status
+        - name: Cache
+          statusField: cache_status

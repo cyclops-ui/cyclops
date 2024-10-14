@@ -1,0 +1,8 @@
+# Check deployment status
+kubectl get deployments
+
+# Describe the deployment for more details
+kubectl describe deployment nginx
+
+# View logs for the pods
+kubectl logs <pod-name>

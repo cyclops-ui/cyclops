@@ -1,0 +1,34 @@
+# helm_performance_monitoring.yaml
+version: '1.0'
+title: Helm Chart Performance Monitoring
+widgets:
+  - type: line_chart
+    title: Pod Resource Usage
+    dataSource: helm_pod_resource_usage
+    chartType: line
+    options:
+      xAxis:
+        label: Time
+      yAxis:
+        label: Resource Usage (MB)
+  - type: pie_chart
+    title: Pod Status Distribution
+    dataSource: helm_pod_status
+    chartType: pie
+    options:
+      labels:
+        - Running
+        - Pending
+        - Failed
+  - type: table
+    title: Pod Details
+    dataSource: helm_pod_details
+    columns:
+      - name: Pod Name
+        field: pod_name
+      - name: Status
+        field: status
+      - name: Restarts
+        field: restarts
+      - name: Age
+        field: age

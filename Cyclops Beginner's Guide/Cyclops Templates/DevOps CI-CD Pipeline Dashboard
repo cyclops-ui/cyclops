@@ -1,0 +1,43 @@
+# devops_cicd_pipeline_dashboard.yaml
+version: '1.0'
+title: DevOps CI/CD Pipeline Dashboard
+widgets:
+  - type: funnel_chart
+    title: Build Pipeline Stages
+    dataSource: build_pipeline_stages
+    options:
+      stages:
+        - name: Queued
+        - name: In Progress
+        - name: Successful
+        - name: Failed
+  - type: line_chart
+    title: Deployment Frequency
+    dataSource: deployment_frequency
+    chartType: line
+    options:
+      xAxis:
+        label: Time
+      yAxis:
+        label: Deployments
+  - type: bar_chart
+    title: Test Coverage
+    dataSource: test_coverage
+    chartType: bar
+    options:
+      xAxis:
+        label: Test Suites
+      yAxis:
+        label: Coverage (%)  
+  - type: table
+    title: Recent Pipeline Failures
+    dataSource: pipeline_failures
+    columns:
+      - name: Timestamp
+        field: timestamp
+      - name: Pipeline Name
+        field: pipeline_name
+      - name: Stage
+        field: stage
+      - name: Error Message
+        field: error_message

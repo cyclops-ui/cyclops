@@ -1,0 +1,42 @@
+# real_time_user_activity_dashboard.yaml
+version: '1.0'
+title: Real-Time User Activity Dashboard
+widgets:
+  - type: line_chart
+    title: Active Users Over Time
+    dataSource: active_users_time_series
+    chartType: line
+    options:
+      xAxis:
+        label: Time
+      yAxis:
+        label: Number of Active Users
+  - type: heatmap
+    title: User Activity Heatmap
+    dataSource: user_activity_heatmap
+    options:
+      xAxis:
+        label: Hour of Day
+      yAxis:
+        label: Day of Week
+  - type: bar_chart
+    title: User Engagement by Region
+    dataSource: user_engagement_region
+    chartType: bar
+    options:
+      xAxis:
+        label: Regions
+      yAxis:
+        label: Engagement Score
+  - type: table
+    title: Recent User Actions
+    dataSource: user_actions
+    columns:
+      - name: Timestamp
+        field: timestamp
+      - name: User ID
+        field: user_id
+      - name: Action
+        field: action
+      - name: Details
+        field: details

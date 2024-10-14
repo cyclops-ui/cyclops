@@ -1,0 +1,34 @@
+# helm_chart_dashboard.yaml
+version: '1.0'
+title: Helm Chart Deployment Dashboard
+widgets:
+  - type: line_chart
+    title: Helm Releases Over Time
+    dataSource: helm_releases
+    chartType: line
+    options:
+      xAxis:
+        label: Time
+      yAxis:
+        label: Number of Releases
+  - type: bar_chart
+    title: Deployment Status
+    dataSource: helm_deployments
+    chartType: bar
+    options:
+      xAxis:
+        label: Deployments
+      yAxis:
+        label: Status Count
+  - type: table
+    title: Helm Deployment Details
+    dataSource: helm_deployment_details
+    columns:
+      - name: Release Name
+        field: release_name
+      - name: Namespace
+        field: namespace
+      - name: Status
+        field: status
+      - name: Last Updated
+        field: last_updated

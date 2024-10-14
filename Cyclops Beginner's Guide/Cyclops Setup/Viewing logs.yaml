@@ -1,0 +1,3 @@
+# View logs for sample-app
+cyclops logs sample-app
+

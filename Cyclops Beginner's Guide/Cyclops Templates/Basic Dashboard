@@ -1,0 +1,32 @@
+# dashboard.yaml
+version: '1.0'
+title: Basic Dashboard
+widgets:
+  - type: chart
+    title: CPU Usage
+    dataSource: cpu_metrics
+    chartType: line
+    options:
+      xAxis:
+        label: Time
+      yAxis:
+        label: CPU Usage (%)
+  - type: chart
+    title: Memory Usage
+    dataSource: memory_metrics
+    chartType: bar
+    options:
+      xAxis:
+        label: Time
+      yAxis:
+        label: Memory Usage (MB)
+  - type: table
+    title: Recent Logs
+    dataSource: system_logs
+    columns:
+      - name: Timestamp
+        field: timestamp
+      - name: Log Level
+        field: level
+      - name: Message
+        field: message

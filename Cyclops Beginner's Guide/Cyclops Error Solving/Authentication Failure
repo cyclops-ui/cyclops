@@ -1,0 +1,9 @@
+# Edit your configuration file
+nano ~/.cyclops/config.yml
+
+# Ensure the token is correct
+# You might need to generate a new token if it has expired
+# Sample token placeholder
+token: <new-authentication-token>
+
+# Save and exit the editor

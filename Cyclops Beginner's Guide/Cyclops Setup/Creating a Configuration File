@@ -1,0 +1,24 @@
+# Create a new configuration file
+cyclops config create
+
+# Edit the configuration file
+nano ~/.cyclops/config.yml
+
+# Sample content for config.yml
+# Replace <your-cluster-name> and <your-api-server-url> with actual values
+apiVersion: v1
+clusters:
+  - name: <your-cluster-name>
+    cluster:
+      server: <your-api-server-url>
+      certificate-authority-data: <base64-encoded-ca-cert>
+contexts:
+  - name: default
+    context:
+      cluster: <your-cluster-name>
+      user: default
+current-context: default
+users:
+  - name: default
+    user:
+      token: <your-authentication-token>

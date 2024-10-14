@@ -1,0 +1,42 @@
+# iot_device_monitoring_dashboard.yaml
+version: '1.0'
+title: IoT Device Monitoring Dashboard
+widgets:
+  - type: line_chart
+    title: Device Temperature Trends
+    dataSource: device_temperature
+    chartType: line
+    options:
+      xAxis:
+        label: Time
+      yAxis:
+        label: Temperature (°C)
+  - type: scatter_plot
+    title: Device Location
+    dataSource: device_location
+    options:
+      xAxis:
+        label: Longitude
+      yAxis:
+        label: Latitude
+  - type: bar_chart
+    title: Battery Status by Device
+    dataSource: device_battery_status
+    chartType: bar
+    options:
+      xAxis:
+        label: Devices
+      yAxis:
+        label: Battery Level (%)
+  - type: table
+    title: Device Alerts
+    dataSource: device_alerts
+    columns:
+      - name: Timestamp
+        field: timestamp
+      - name: Device ID
+        field: device_id
+      - name: Alert Type
+        field: alert_type
+      - name: Message
+        field: message

@@ -1,0 +1,4 @@
+# Scale the sample-app to 5 replicas
+cyclops scale sample-app --replicas=5
+
+

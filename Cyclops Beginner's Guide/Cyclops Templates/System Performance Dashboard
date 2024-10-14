@@ -1,0 +1,42 @@
+# system_performance_dashboard.yaml
+version: '1.0'
+title: System Performance Dashboard
+widgets:
+  - type: line_chart
+    title: CPU Load Average
+    dataSource: cpu_load_average
+    chartType: line
+    options:
+      xAxis:
+        label: Time
+      yAxis:
+        label: Load Average
+  - type: line_chart
+    title: Disk I/O Throughput
+    dataSource: disk_io_throughput
+    chartType: line
+    options:
+      xAxis:
+        label: Time
+      yAxis:
+        label: Throughput (MB/s)
+  - type: gauge
+    title: Disk Space Utilization
+    dataSource: disk_space_utilization
+    gaugeType: radial
+    options:
+      minValue: 0
+      maxValue: 100
+      unit: Percentage
+  - type: table
+    title: Top Processes
+    dataSource: top_processes
+    columns:
+      - name: Process ID
+        field: pid
+      - name: Process Name
+        field: name
+      - name: CPU Usage
+        field: cpu_usage
+      - name: Memory Usage
+        field: memory_usage
