@@ -1,0 +1,18 @@
+quiet: False
+disable-version-string: True
+with-expecter: True
+mockname: "{{.InterfaceName}}"
+filename: "{{.MockName}}.go"
+outpkg: mocks
+dir: mocks
+packages:
+  github.com/cyclops-ui/cyclops/cyclops-ctrl/pkg/cluster/k8sclient:
+    interfaces:
+      IKubernetesClient:
+        config:
+          dir: pkg/mocks
+  github.com/cyclops-ui/cyclops/cyclops-ctrl/internal/template:
+    interfaces:
+      ITemplateRepo:
+        config:
+          dir: mocks

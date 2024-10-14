@@ -2,7 +2,6 @@ package get
 
 import (
 	"fmt"
-	"strings"
 
 	"github.com/cyclops-ui/cyclops/cyclops-ctrl/pkg/cluster/k8sclient"
 	"github.com/cyclops-ui/cycops-cyctl/internal/kubeconfig"
@@ -39,12 +38,37 @@ func listResources(clientset *k8sclient.KubernetesClient, moduleNames []string) 
 		return
 	}
 
-	headerSpacing := 20
-	output := "KIND" + strings.Repeat(" ", 16) + " NAME\n"
-	fmt.Print(output)
+	maxKindLen := len("KIND")
+	maxNameLen := len("NAME")
+	maxNamespaceLen := len("NAMESPACE")
+
 	for _, resource := range resources {
-		nameSpacing := max(0, headerSpacing-len(resource.GetKind()))
-		fmt.Printf("%s"+strings.Repeat(" ", nameSpacing)+" %s\n", resource.GetKind(), resource.GetName())
+		if len(resource.GetKind()) > maxKindLen {
+			maxKindLen = len(resource.GetKind())
+		}
+		if len(resource.GetName()) > maxNameLen {
+			maxNameLen = len(resource.GetName())
+		}
+		if len(resource.GetNamespace()) > maxNamespaceLen {
+			maxNamespaceLen = len(resource.GetNamespace())
+		}
+	}
+	maxKindLen = maxKindLen + 2
+	maxNameLen = maxNameLen + 2
+	maxNamespaceLen = maxNamespaceLen + 2
+
+	// Step 2: Print the header with proper spacing
+	header := fmt.Sprintf("%-*s %-*s %-*s\n",
+		maxKindLen, "KIND",
+		maxNamespaceLen, "NAMESPACE", maxNameLen, "NAME")
+	fmt.Print(header)
+
+	// Step 3: Print each resource with calculated spacing
+	for _, resource := range resources {
+		fmt.Printf("%-*s %-*s %-*s\n",
+			maxKindLen, resource.GetKind(),
+			maxNamespaceLen, resource.GetNamespace(), maxNameLen, resource.GetName(),
+		)
 	}
 
 }

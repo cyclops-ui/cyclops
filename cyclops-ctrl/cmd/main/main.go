@@ -126,6 +126,7 @@ func main() {
 		k8sClient,
 		renderer,
 		telemetryClient,
+		monitor,
 	)).SetupWithManager(mgr); err != nil {
 		setupLog.Error(err, "unable to create controller", "controller", "Module")
 		os.Exit(1)
