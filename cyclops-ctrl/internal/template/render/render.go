@@ -66,6 +66,7 @@ func (r *Renderer) HelmTemplate(module cyclopsv1alpha1.Module, moduleTemplate *m
 	top["Release"] = map[string]interface{}{
 		"Name":      module.Name,
 		"Namespace": mapTargetNamespace(module.Spec.TargetNamespace),
+		"Service":   "Helm",
 	}
 
 	versionInfo, err := r.k8sClient.VersionInfo()
