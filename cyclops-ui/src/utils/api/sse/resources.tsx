@@ -95,7 +95,7 @@ export function resourcesStream(
         throw err;
       }
 
-      if (retryCounter == maxRetries) {
+      if (retryCounter === maxRetries) {
         throw err;
       }
 
