@@ -2,6 +2,7 @@ package k8sclient
 
 import (
 	"context"
+	"fmt"
 
 	apiv1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
@@ -28,14 +29,10 @@ type KubernetesClient struct {
 	discovery *discovery.DiscoveryClient
 	moduleset *client.CyclopsV1Alpha1Client
 
-	parentLabels []string
+	childLabels map[string]string
 }
 
-func New() (*KubernetesClient, error) {
-	return createLocalClient()
-}
-
-func createLocalClient() (*KubernetesClient, error) {
+func New(childLabels map[string]string) (*KubernetesClient, error) {
 	config := ctrl.GetConfigOrDie()
 	clientset, err := kubernetes.NewForConfig(config)
 	if err != nil {
@@ -55,14 +52,19 @@ func createLocalClient() (*KubernetesClient, error) {
 	}
 
 	return &KubernetesClient{
-		Dynamic:   dynamic,
-		discovery: discovery,
-		clientset: clientset,
-		moduleset: moduleSet,
-		parentLabels: []string{
-			"cnpg.io/cluster",
-		},
+		Dynamic:     dynamic,
+		discovery:   discovery,
+		clientset:   clientset,
+		moduleset:   moduleSet,
+		childLabels: childLabels,
 	}, nil
+}
+
+func (k *KubernetesClient) getChildLabel(group, version, kind string) (string, bool) {
+	key := fmt.Sprintf("%s.%s/%s", kind, group, version)
+	label, exists := k.childLabels[key]
+
+	return label, exists
 }
 
 type IKubernetesClient interface {

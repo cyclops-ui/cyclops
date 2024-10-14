@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"os"
 	"strconv"
+	"strings"
 	"time"
 
 	_ "github.com/joho/godotenv/autoload"
@@ -70,7 +71,7 @@ func main() {
 	)
 	telemetryClient.InstanceStart()
 
-	k8sClient, err := k8sclient.New()
+	k8sClient, err := k8sclient.New(getCustomChildLabels())
 	if err != nil {
 		fmt.Println("error bootstrapping Kubernetes client", err)
 		panic(err)
@@ -167,4 +168,27 @@ func getWatchNamespace(key string) string {
 		return "cyclops"
 	}
 	return value
+}
+
+func getCustomChildLabels() map[string]string {
+	labels := make(map[string]string)
+
+	value := os.Getenv("CHILD_LABEL_SELECTOR")
+	if value == "" {
+		return labels
+	}
+
+	pairs := strings.Split(value, ";")
+
+	for _, pair := range pairs {
+		kv := strings.SplitN(pair, ":", 2)
+
+		if len(kv) == 2 {
+			key := kv[0]
+			value := kv[1]
+			labels[key] = value
+		}
+	}
+
+	return labels
 }
