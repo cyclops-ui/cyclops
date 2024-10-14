@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useState } from "react";
-import { Divider, Row, Alert } from "antd";
+import { Alert } from "antd";
 import axios from "axios";
 import { mapResponseError } from "../../utils/api/errors";
 import ResourceList from "./ResourceList/ResourceList";
@@ -59,7 +59,7 @@ const DefaultResource = ({
     return () => {
       clearInterval(interval);
     };
-  }, [fetchResource]);
+  }, [fetchResource, group, version, kind]);
 
   const resourceList = () => {
     if (resource.children) {
