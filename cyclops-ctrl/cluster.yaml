@@ -1,0 +1,51 @@
+apiVersion: postgresql.cnpg.io/v1
+kind: Cluster
+metadata:
+  name: moj-prvi-cluster
+  labels:
+    helm.sh/chart: cluster-0.0.11
+    app.kubernetes.io/name: cluster
+    app.kubernetes.io/instance: moj-prvi-cluster
+    app.kubernetes.io/part-of: cloudnative-pg
+    app.kubernetes.io/managed-by: Helm
+    cyclops.module: moj-prvi-cluster
+spec:
+  instances: 3
+
+  imageName: ghcr.io/cloudnative-pg/postgresql:16
+  imagePullPolicy: IfNotPresent
+  postgresUID: 26
+  postgresGID: 26
+  storage:
+    size: 8Gi
+    storageClass:
+  affinity:
+    topologyKey: topology.kubernetes.io/zone
+  priorityClassName:
+
+  primaryUpdateMethod: switchover
+  primaryUpdateStrategy: unsupervised
+  logLevel: info
+  enableSuperuserAccess: true
+  postgresql:
+    shared_preload_libraries:
+    pg_hba:
+      []
+    pg_ident:
+      []
+    parameters:
+      {}
+
+
+  managed:
+
+  monitoring:
+    enablePodMonitor: false
+
+
+  bootstrap:
+    initdb:
+      postInitApplicationSQL:
+
+
+

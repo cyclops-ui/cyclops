@@ -23,13 +23,12 @@ const (
 )
 
 type KubernetesClient struct {
-	Dynamic dynamic.Interface
-
+	Dynamic   dynamic.Interface
 	clientset *kubernetes.Clientset
-
 	discovery *discovery.DiscoveryClient
-
 	moduleset *client.CyclopsV1Alpha1Client
+
+	parentLabels []string
 }
 
 func New() (*KubernetesClient, error) {
@@ -60,6 +59,9 @@ func createLocalClient() (*KubernetesClient, error) {
 		discovery: discovery,
 		clientset: clientset,
 		moduleset: moduleSet,
+		parentLabels: []string{
+			"cnpg.io/cluster",
+		},
 	}, nil
 }
 

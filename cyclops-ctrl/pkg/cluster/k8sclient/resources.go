@@ -141,9 +141,27 @@ func (k *KubernetesClient) GetResource(group, version, kind, name, namespace str
 		return k.mapRole(group, version, kind, name, namespace)
 	case isNetworkPolicy(group, version, kind):
 		return k.mapNetworkPolicy(group, version, kind, name, namespace)
+	default:
+		return k.mapDefaultResource(group, version, kind, name, namespace)
 	}
 
 	return nil, nil
+}
+
+func (k *KubernetesClient) mapDefaultResource(group, version, kind, name, namespace string) (any, error) {
+	children, err := k.GetResourcesForCRD(k.parentLabels[0], name)
+	if err != nil {
+		return nil, err
+	}
+
+	return &dto.Other{
+		Group:     group,
+		Version:   version,
+		Kind:      kind,
+		Name:      name,
+		Namespace: namespace,
+		Children:  children,
+	}, nil
 }
 
 func (k *KubernetesClient) Delete(resource dto.Resource) error {

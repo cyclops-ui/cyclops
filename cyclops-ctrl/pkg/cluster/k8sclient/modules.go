@@ -107,6 +107,56 @@ func (k *KubernetesClient) GetResourcesForModule(name string) ([]dto.Resource, e
 	return out, nil
 }
 
+func (k *KubernetesClient) GetResourcesForCRD(label, name string) ([]dto.Resource, error) {
+	out := make([]dto.Resource, 0, 0)
+
+	managedGVRs, err := k.getManagedGVRs("")
+	if err != nil {
+		return nil, err
+	}
+
+	other := make([]unstructured.Unstructured, 0)
+	for _, gvr := range managedGVRs {
+		rs, err := k.Dynamic.Resource(gvr).List(context.Background(), metav1.ListOptions{
+			LabelSelector: label + "=" + name,
+		})
+		if err != nil {
+			continue
+		}
+
+		for _, item := range rs.Items {
+			other = append(other, item)
+		}
+	}
+
+	for _, o := range other {
+		status, err := k.getResourceStatus(o)
+		if err != nil {
+			return nil, err
+		}
+
+		out = append(out, &dto.Other{
+			Group:     o.GroupVersionKind().Group,
+			Version:   o.GroupVersionKind().Version,
+			Kind:      o.GroupVersionKind().Kind,
+			Name:      o.GetName(),
+			Namespace: o.GetNamespace(),
+			Status:    status,
+			Deleted:   false,
+		})
+	}
+
+	sort.Slice(out, func(i, j int) bool {
+		if out[i].GetGroupVersionKind() != out[j].GetGroupVersionKind() {
+			return out[i].GetGroupVersionKind() < out[j].GetGroupVersionKind()
+		}
+
+		return out[i].GetName() < out[j].GetName()
+	})
+
+	return out, nil
+}
+
 func (k *KubernetesClient) GetWorkloadsForModule(name string) ([]dto.Resource, error) {
 	out := make([]dto.Resource, 0, 0)
 

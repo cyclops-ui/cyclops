@@ -626,13 +626,14 @@ type IPBlock struct {
 }
 
 type Other struct {
-	Group     string `json:"group"`
-	Version   string `json:"version"`
-	Kind      string `json:"kind"`
-	Name      string `json:"name"`
-	Namespace string `json:"namespace"`
-	Status    string `json:"status"`
-	Deleted   bool   `json:"deleted"`
+	Group     string     `json:"group"`
+	Version   string     `json:"version"`
+	Kind      string     `json:"kind"`
+	Name      string     `json:"name"`
+	Namespace string     `json:"namespace"`
+	Status    string     `json:"status"`
+	Deleted   bool       `json:"deleted"`
+	Children  []Resource `json:"children"`
 }
 
 func (s *Other) GetGroupVersionKind() string {
