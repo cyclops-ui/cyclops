@@ -67,7 +67,7 @@ func doServerSideApply(ctx context.Context, cfg *rest.Config, obj *unstructured.
 	return err
 }
 
-func applyYaml(yamlFile []byte, config *rest.Config, disableTelemetry bool) error {
+func applyYaml(yamlFile []byte, config *rest.Config, disableTelemetry bool, disableStreaming bool) error {
 	multidocReader := utilyaml.NewYAMLReader(bufio.NewReader(bytes.NewReader(yamlFile)))
 
 	for {
@@ -85,6 +85,7 @@ func applyYaml(yamlFile []byte, config *rest.Config, disableTelemetry bool) erro
 			return err
 		}
 
+		// Disable telemetry
 		if disableTelemetry && obj.GetKind() == "Deployment" && obj.GetName() == "cyclops-ctrl" {
 			containers, _, _ := unstructured.NestedSlice(obj.Object, "spec", "template", "spec", "containers")
 			if len(containers) > 0 {
@@ -108,6 +109,34 @@ func applyYaml(yamlFile []byte, config *rest.Config, disableTelemetry bool) erro
 			}
 		}
 
+		// Disable streaming resources
+		if disableStreaming && obj.GetKind() == "Deployment" && obj.GetName() == "cyclops-ui" {
+			containers, _, _ := unstructured.NestedSlice(obj.Object, "spec", "template", "spec", "containers")
+			if len(containers) > 0 {
+				container := containers[0].(map[string]interface{})
+				env, _, _ := unstructured.NestedSlice(container, "env")
+
+				for i, e := range env {
+					soloEnvMap := e.(map[string]interface{})
+					if soloEnvMap["name"] == "REACT_APP_ENABLE_STREAMING" {
+						soloEnvMap["value"] = "false"
+						env[i] = soloEnvMap
+						break // update the value and break the loop
+					}
+				}
+				err := unstructured.SetNestedSlice(container, env, "env")
+				if err != nil {
+					log.Fatal(err)
+				}
+				containers[0] = container
+				err = unstructured.SetNestedSlice(obj.Object, containers, "spec", "template", "spec", "containers")
+				if err != nil {
+					log.Fatal(err)
+				}
+				fmt.Println("streaming resources are disabled")
+			}
+		}
+
 		err = doServerSideApply(context.TODO(), config, obj)
 		if err != nil {
 			return err
@@ -127,6 +156,11 @@ var applyCmd = &cobra.Command{
 		}
 
 		disableTelemetry, err := cmd.Flags().GetBool("disable-telemetry")
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		disableStreaming, err := cmd.Flags().GetBool("disable-streaming")
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -159,7 +193,8 @@ var applyCmd = &cobra.Command{
 
 		fmt.Println("initializing cyclops resources")
 
-		err = applyYaml(deployYamlFile, kubeconfig.Config, disableTelemetry)
+		// Apply cyclops resources with appropriate flags
+		err = applyYaml(deployYamlFile, kubeconfig.Config, disableTelemetry, disableStreaming)
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -180,7 +215,7 @@ var applyCmd = &cobra.Command{
 		}
 
 		fmt.Println("creating demo templates")
-		err = applyYaml(demoYamlFile, kubeconfig.Config, disableTelemetry)
+		err = applyYaml(demoYamlFile, kubeconfig.Config, disableTelemetry, disableStreaming)
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -190,5 +225,7 @@ var applyCmd = &cobra.Command{
 func init() {
 	applyCmd.Flags().StringP("version", "v", "main", "specify cyclops version")
 	applyCmd.Flags().BoolP("disable-telemetry", "t", false, "disable emitting telemetry metrics from cyclops controller")
+	applyCmd.Flags().BoolP("disable-streaming", "s", false, "disable streaming resources from cyclops controller")
+
 	RootCmd.AddCommand(applyCmd)
 }
