@@ -149,12 +149,30 @@ func (k *KubernetesClient) GetResource(group, version, kind, name, namespace str
 }
 
 func (k *KubernetesClient) mapDefaultResource(group, version, kind, name, namespace string) (any, error) {
-	var children []dto.Resource
-	var err error
+	apiResourceName, err := k.GVKtoAPIResourceName(schema.GroupVersion{Group: group, Version: version}, kind)
+	if err != nil {
+		return nil, err
+	}
 
-	childLabel, exists := k.getChildLabel(group, version, kind)
+	resource, err := k.Dynamic.Resource(schema.GroupVersionResource{
+		Group:    group,
+		Version:  version,
+		Resource: apiResourceName,
+	}).Namespace(namespace).Get(context.Background(), name, metav1.GetOptions{})
+	if err != nil {
+		return "", err
+	}
+
+	childLabels, exists, err := k.getChildLabel(group, version, kind, resource)
+	if err != nil {
+		return nil, err
+	}
+
+	fmt.Println("childLabels", childLabels)
+
+	var children []dto.Resource
 	if exists {
-		children, err = k.GetResourcesForCRD(childLabel, name)
+		children, err = k.GetResourcesForCRD(childLabels, name)
 		if err != nil {
 			return nil, err
 		}

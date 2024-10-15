@@ -1,0 +1,6 @@
+childLabels:
+  - group: postgresql.cnpg.io
+    version: v1
+    kind: Cluster
+    matchLabels:
+      cnpg.io/cluster: "{{ .metadata.name }}"

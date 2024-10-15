@@ -107,7 +107,7 @@ func (k *KubernetesClient) GetResourcesForModule(name string) ([]dto.Resource, e
 	return out, nil
 }
 
-func (k *KubernetesClient) GetResourcesForCRD(label, name string) ([]dto.Resource, error) {
+func (k *KubernetesClient) GetResourcesForCRD(childLabels map[string]string, name string) ([]dto.Resource, error) {
 	out := make([]dto.Resource, 0, 0)
 
 	managedGVRs, err := k.getManagedGVRs("")
@@ -118,7 +118,7 @@ func (k *KubernetesClient) GetResourcesForCRD(label, name string) ([]dto.Resourc
 	other := make([]unstructured.Unstructured, 0)
 	for _, gvr := range managedGVRs {
 		rs, err := k.Dynamic.Resource(gvr).List(context.Background(), metav1.ListOptions{
-			LabelSelector: label + "=" + name,
+			LabelSelector: labels.Set(childLabels).String(),
 		})
 		if err != nil {
 			continue
