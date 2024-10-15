@@ -50,7 +50,7 @@ const DefaultResource = ({
       .finally(() => {
         setLoadResources(true);
       });
-  }, [name, namespace]);
+  }, [name, namespace, group, version, kind]);
 
   useEffect(() => {
     fetchResource();
@@ -59,7 +59,7 @@ const DefaultResource = ({
     return () => {
       clearInterval(interval);
     };
-  }, [fetchResource, group, version, kind]);
+  }, [fetchResource]);
 
   const resourceList = () => {
     if (resource.children) {
