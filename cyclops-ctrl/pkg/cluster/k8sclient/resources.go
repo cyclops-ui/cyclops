@@ -235,6 +235,8 @@ func (k *KubernetesClient) createDynamicNamespaced(
 	}
 
 	obj.SetResourceVersion(current.GetResourceVersion())
+	obj.SetAnnotations(mergeAnnotations(current.GetAnnotations(), obj.GetAnnotations()))
+	obj.SetFinalizers(current.GetFinalizers())
 
 	_, err = k.Dynamic.Resource(gvr).Namespace(namespace).Update(
 		context.Background(),
@@ -264,6 +266,8 @@ func (k *KubernetesClient) createDynamicNonNamespaced(
 	}
 
 	obj.SetResourceVersion(current.GetResourceVersion())
+	obj.SetAnnotations(mergeAnnotations(current.GetAnnotations(), obj.GetAnnotations()))
+	obj.SetFinalizers(current.GetFinalizers())
 
 	_, err = k.Dynamic.Resource(gvr).Update(
 		context.Background(),
@@ -331,6 +335,20 @@ func mergePVCWithCurrent(current, obj *unstructured.Unstructured) error {
 	}
 
 	return unstructured.SetNestedMap(current.Object, requests, "spec", "resources", "requests")
+}
+
+func mergeAnnotations(existing, new map[string]string) map[string]string {
+	out := make(map[string]string)
+
+	for k, v := range existing {
+		out[k] = v
+	}
+
+	for k, v := range new {
+		out[k] = v
+	}
+
+	return out
 }
 
 func (k *KubernetesClient) ListNodes() ([]apiv1.Node, error) {
