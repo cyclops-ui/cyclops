@@ -118,7 +118,7 @@ const NewModule = () => {
   const handleSubmit = (values: any) => {
     const moduleName = values["cyclops_module_name"];
     const moduleNamespace = values["cyclops_module_namespace"];
-    const skipCRDs = values["skipCRDs"];
+    const skipCRDs = values["cyclops_module_skip_crds"];
 
     values = findMaps(config.root.properties, values, initialValuesRaw);
 
@@ -580,7 +580,7 @@ const NewModule = () => {
                     </Select>
                   </Form.Item>
                   <Form.Item
-                    name="skipCRDs"
+                    name="cyclops_module_skip_crds"
                     valuePropName="checked"
                     style={{ padding: "12px 12px 0px 12px" }}
                     label={
