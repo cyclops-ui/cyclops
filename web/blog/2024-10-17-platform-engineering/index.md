@@ -23,13 +23,13 @@ In this blog we will discuss what platform engineering is and what can you do to
 
 ## What is platform engineering?
 
-Platform engineering acts like an internal product team, but instead of serving external customers, its primary users are the company's own developers and internal teams. 
+Platform engineering acts like an internal product team, but instead of serving external customers, its primary users are the company's own developers and internal teams.
 
 The job of platform engineers is designing and building toolsets, infrastructure, and workflows that make it easier for developers to build, test, deploy, and manage software. The goal is to create a unified platform, often called an **Internal Developer Platform (IDP)**, which provides developers with self-service access to everything they need without depending on other teams, like operations or DevOps.
 
 ## Why platform engineering?
 
-> *“The goal of Platform Engineering is to allow as much speed as possible, with as much safety as possible” ~ Jason Warner, CEO @ poolside, former CTO @ GitHub ([source](*https://www.youtube.com/watch?v=4fHjAYZIxwQ*))*
+> *“The goal of Platform Engineering is to allow as much speed as possible, with as much safety as possible” ~ Jason Warner, CEO @ poolside, former CTO @ GitHub ([source](https://www.youtube.com/watch?v=4fHjAYZIxwQ))*
 >
 
 Platform engineering creates an abstraction layer that simplifies infrastructure management for developers. Instead of dealing with the complexities of infrastructure, developers can focus on writing code, leading to **quicker onboarding** and **faster time to market**.
