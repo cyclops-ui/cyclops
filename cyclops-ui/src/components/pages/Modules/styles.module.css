@@ -5,3 +5,23 @@
 .modulecard:hover {
   transform: scale(1.05);
 }
+
+.addmodulecard {
+  transition:
+    transform 0.2s,
+    color 0.2s;
+  border: 2px dashed #d3d3d3;
+  width: 100%;
+  height: 100%;
+  max-width: 500px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  color: #888;
+}
+
+.addmodulecard:hover {
+  transform: scale(1.05);
+  border-color: #fe8801;
+  color: #fe8801;
+}
