@@ -415,7 +415,9 @@ const EditModule = () => {
       {contextHolder}
       <Row gutter={[40, 0]}>
         <Col span={24}>
-          <Title level={2}>{moduleName}</Title>
+          <Title level={2}>
+            <span style={{ color: "#888" }}>Edit module</span> {moduleName}
+          </Title>
         </Col>
       </Row>
       <Row gutter={[40, 0]}>
