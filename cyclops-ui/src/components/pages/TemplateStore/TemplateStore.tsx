@@ -13,6 +13,8 @@ import {
   Spin,
   notification,
   Radio,
+  Popover,
+  Checkbox,
 } from "antd";
 import axios from "axios";
 import Title from "antd/es/typography/Title";
@@ -20,6 +22,7 @@ import {
   DeleteOutlined,
   EditOutlined,
   FileSyncOutlined,
+  FilterOutlined,
 } from "@ant-design/icons";
 import classNames from "classnames";
 import styles from "./styles.module.css";
@@ -52,6 +55,10 @@ const TemplateStore = () => {
     message: "",
     description: "",
   });
+
+  const sourceTypeFilter = ["git", "helm", "oci"];
+  const [templateSourceTypeFilter, setTemplateSourceTypeFilter] =
+    useState<string[]>(sourceTypeFilter);
 
   const [addForm] = Form.useForm();
   const [editForm] = Form.useForm();
@@ -238,6 +245,29 @@ const TemplateStore = () => {
     setConfirmDelete("");
   };
 
+  const templateFilterPopover = () => {
+    return (
+      <Checkbox.Group
+        style={{ display: "block" }}
+        onChange={(selectedItems: any[]) => {
+          setTemplateSourceTypeFilter(selectedItems);
+          var updatedList = [...templates];
+          updatedList = updatedList.filter((template: any) => {
+            return selectedItems.includes(template.ref.sourceType);
+          });
+          setFilteredTemplates(updatedList);
+        }}
+        value={templateSourceTypeFilter}
+      >
+        {sourceTypeFilter.map((item, index) => (
+          <Checkbox key={index} value={item}>
+            {item}
+          </Checkbox>
+        ))}
+      </Checkbox.Group>
+    );
+  };
+
   return (
     <div>
       {error.message.length !== 0 && (
@@ -290,6 +320,13 @@ const TemplateStore = () => {
             placeholder={"Search templates"}
             style={{ width: "30%", marginBottom: "1rem" }}
             onChange={handleSearch}
+            addonAfter={
+              <>
+                <Popover content={templateFilterPopover()} trigger="click">
+                  <FilterOutlined />
+                </Popover>
+              </>
+            }
           ></Input>
         </Col>
       </Row>
