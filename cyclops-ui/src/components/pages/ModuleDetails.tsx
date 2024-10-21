@@ -752,22 +752,24 @@ const ModuleDetails = () => {
                 <></>
               )}
               {module.name}
-              <Button
-                type="text"
-                onClick={() => {
-                  navigator.clipboard.writeText(module.name);
-                }}
-                style={{
-                  marginLeft: "4px",
-                  padding: "2px",
-                }}
-              >
-                <CopyOutlined
-                  style={{
-                    fontSize: "15px",
+              <Tooltip title={"Copy module name"} trigger="hover">
+                <Button
+                  type="text"
+                  onClick={() => {
+                    navigator.clipboard.writeText(module.name);
                   }}
-                />
-              </Button>
+                  style={{
+                    marginLeft: "4px",
+                    padding: "2px",
+                  }}
+                >
+                  <CopyOutlined
+                    style={{
+                      fontSize: "15px",
+                    }}
+                  />
+                </Button>
+              </Tooltip>
             </Title>
           </Col>
         </Row>
@@ -800,22 +802,24 @@ const ModuleDetails = () => {
             }}
           >
             {module.targetNamespace}
-            <Button
-              type="text"
-              onClick={() => {
-                navigator.clipboard.writeText(module.targetNamespace);
-              }}
-              style={{
-                marginLeft: "4px",
-                padding: "2px 1.5px",
-              }}
-            >
-              <CopyOutlined
-                style={{
-                  fontSize: "15px",
+            <Tooltip title={"Copy namespace"} trigger="hover">
+              <Button
+                type="text"
+                onClick={() => {
+                  navigator.clipboard.writeText(module.targetNamespace);
                 }}
-              />
-            </Button>
+                style={{
+                  marginLeft: "4px",
+                  padding: "2px 1.5px",
+                }}
+              >
+                <CopyOutlined
+                  style={{
+                    fontSize: "15px",
+                  }}
+                />
+              </Button>
+            </Tooltip>
           </Descriptions.Item>
         </Descriptions>
         <Row gutter={[40, 0]} style={{ paddingTop: "8px" }}>
