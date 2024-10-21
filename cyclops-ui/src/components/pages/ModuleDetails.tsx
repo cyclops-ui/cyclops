@@ -187,6 +187,8 @@ const ModuleDetails = () => {
   const [viewRawManifest, setViewRawManifest] = useState(false);
   const [rawModuleManifest, setRawModuleManifest] = useState("");
 
+  const [loadingResourceManifest, setLoadingResourceManifest] = useState(false);
+
   const [loadingRenderedManifest, setLoadingRenderedManifest] = useState(false);
   const [viewRenderedManifest, setViewRenderedManifest] = useState(false);
   const [renderedManifest, setRenderedManifest] = useState("");
@@ -246,6 +248,8 @@ const ModuleDetails = () => {
     name: string,
     showManagedFields: boolean,
   ) {
+    setLoadingResourceManifest(true);
+
     axios
       .get(`/api/manifest`, {
         params: {
@@ -264,9 +268,11 @@ const ModuleDetails = () => {
         }));
       })
       .catch((error) => {
-        setLoading(false);
-        setLoadModule(true);
+        console.error("Failed to fetch resource manifest:", error);
         setError(mapResponseError(error));
+      })
+      .finally(() => {
+        setLoadingResourceManifest(false);
       });
   }
 
@@ -1208,9 +1214,8 @@ const ModuleDetails = () => {
       <Modal
         title="Manifest"
         open={manifestModal.on}
-        onOk={handleCancelManifest}
         onCancel={handleCancelManifest}
-        cancelButtonProps={{ style: { display: "none" } }}
+        footer={null}
         width={"70%"}
       >
         <Checkbox onChange={handleCheckboxChange} checked={showManagedFields}>
