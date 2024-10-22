@@ -17,20 +17,27 @@ func (k *KubernetesClient) mapDeployment(group, version, kind, name, namespace s
 		return nil, err
 	}
 
+	// map replicaset here
+	replicaSets, err := k.getReplicaset(*deployment)
+	if err != nil {
+		return nil, err
+	}
+
 	pods, err := k.getPods(*deployment)
 	if err != nil {
 		return nil, err
 	}
 
 	return &dto.Deployment{
-		Group:     group,
-		Version:   version,
-		Kind:      kind,
-		Name:      deployment.Name,
-		Namespace: deployment.Namespace,
-		Replicas:  int(*deployment.Spec.Replicas),
-		Pods:      pods,
-		Status:    getDeploymentStatus(deployment),
+		Group:      group,
+		Version:    version,
+		Kind:       kind,
+		Name:       deployment.Name,
+		Namespace:  deployment.Namespace,
+		Replicas:   int(*deployment.Spec.Replicas),
+		ReplicaSet: replicaSets,
+		Pods:       pods,
+		Status:     getDeploymentStatus(deployment),
 	}, nil
 }
 

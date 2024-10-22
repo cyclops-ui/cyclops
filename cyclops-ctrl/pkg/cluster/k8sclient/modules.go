@@ -477,6 +477,39 @@ func (k *KubernetesClient) getResourceStatus(o unstructured.Unstructured) (strin
 	return statusUnknown, nil
 }
 
+func (k *KubernetesClient) getReplicaset(deployment appsv1.Deployment) ([]dto.ReplicaSet, error) {
+	rsList, err := k.clientset.AppsV1().ReplicaSets(deployment.Namespace).List(context.Background(),
+		metav1.ListOptions{
+			LabelSelector: labels.Set(deployment.Spec.Selector.MatchLabels).String(),
+		})
+	if err != nil {
+		return nil, err
+	}
+
+	if len(rsList.Items) == 0 {
+		return nil, nil
+	}
+
+	out := make([]dto.ReplicaSet, 0, len(rsList.Items))
+	for _, rs := range rsList.Items {
+		if metav1.IsControlledBy(&rs, &deployment) {
+			out = append(out, dto.ReplicaSet{
+				Group:                rs.GroupVersionKind().Group,
+				Version:              rs.GroupVersionKind().Version,
+				Kind:                 rs.GroupVersionKind().Kind,
+				Name:                 rs.GetName(),
+				Namespace:            rs.GetNamespace(),
+				Replicas:             rs.Status.Replicas,
+				AvailableReplicas:    rs.Status.AvailableReplicas,
+				ReadyReplicas:        rs.Status.ReadyReplicas,
+				FullyLabeledReplicas: rs.Status.FullyLabeledReplicas,
+			})
+		}
+	}
+
+	return out, nil
+}
+
 func (k *KubernetesClient) getPods(deployment appsv1.Deployment) ([]dto.Pod, error) {
 	pods, err := k.clientset.CoreV1().Pods(deployment.Namespace).List(context.Background(), metav1.ListOptions{
 		LabelSelector: labels.Set(deployment.Spec.Selector.MatchLabels).String(),
