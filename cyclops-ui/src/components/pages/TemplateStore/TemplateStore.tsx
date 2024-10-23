@@ -56,7 +56,7 @@ const TemplateStore = () => {
     description: "",
   });
 
-  const sourceTypeFilter = ["git", "helm", "oci", "none];
+  const sourceTypeFilter = ["git", "helm", "oci", "none"];
   const [templateSourceTypeFilter, setTemplateSourceTypeFilter] =
     useState<string[]>(sourceTypeFilter);
 
