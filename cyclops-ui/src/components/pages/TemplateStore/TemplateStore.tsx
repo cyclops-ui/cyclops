@@ -626,7 +626,12 @@ const TemplateStore = () => {
         </Form>
       </Modal>
       <Modal
-        title="Delete template ref"
+        title={
+          <>
+            Delete template reference{" "}
+            <span style={{ color: "red" }}>{confirmDelete}</span>
+          </>
+        }
         open={confirmDelete.length > 0}
         onCancel={handleCancelDeleteModal}
         width={"40%"}
