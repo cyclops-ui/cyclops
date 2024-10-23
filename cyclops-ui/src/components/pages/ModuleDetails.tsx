@@ -741,7 +741,13 @@ const ModuleDetails = () => {
       <div>
         <Row gutter={[40, 0]}>
           <Col>
-            <Title level={1}>
+            <Title
+              level={1}
+              style={{
+                display: "flex",
+                alignItems: "flex-start",
+              }}
+            >
               {module.iconURL ? (
                 <img
                   alt=""
@@ -765,6 +771,7 @@ const ModuleDetails = () => {
                 >
                   <CopyOutlined
                     style={{
+                      color: "gray",
                       fontSize: "15px",
                     }}
                   />
@@ -799,6 +806,8 @@ const ModuleDetails = () => {
             contentStyle={{
               fontSize: "24px",
               fontWeight: "550",
+              display: "flex",
+              alignItems: "flex-start",
             }}
           >
             {module.targetNamespace}
@@ -811,6 +820,7 @@ const ModuleDetails = () => {
                 style={{
                   marginLeft: "4px",
                   padding: "2px 1.5px",
+                  color: "gray",
                 }}
               >
                 <CopyOutlined
