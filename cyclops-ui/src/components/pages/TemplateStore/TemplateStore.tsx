@@ -56,7 +56,7 @@ const TemplateStore = () => {
     description: "",
   });
 
-  const sourceTypeFilter = ["git", "helm", "oci"];
+  const sourceTypeFilter = ["git", "helm", "oci", "none];
   const [templateSourceTypeFilter, setTemplateSourceTypeFilter] =
     useState<string[]>(sourceTypeFilter);
 
@@ -253,6 +253,7 @@ const TemplateStore = () => {
           setTemplateSourceTypeFilter(selectedItems);
           var updatedList = [...templates];
           updatedList = updatedList.filter((template: any) => {
+            if(!template.ref.sourceType && selectedItems.includes("none")) return true;
             return selectedItems.includes(template.ref.sourceType);
           });
           setFilteredTemplates(updatedList);
