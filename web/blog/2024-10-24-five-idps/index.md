@@ -45,6 +45,8 @@ Humanitec's product suite includes **The Portal**, which provides developers wit
 
 ![Qovery logo](../../static/img/2024-10-24-five-idps/qovery_logo.png)
 
+## Qovery
+
 > ***DevOps on Autopilot***
 
 [**Qovery**](https://www.qovery.com/) is a DevOps automation platform designed to eliminate the need for dedicated DevOps hires by providing a comprehensive self-service infrastructure for developers.
