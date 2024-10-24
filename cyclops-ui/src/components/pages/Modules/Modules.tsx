@@ -109,7 +109,7 @@ const Modules = () => {
 
   const getStatusColor = (module: any) => {
     if (module.status === "unknown") {
-      return "gray";
+      return "#d3d3d3";
     }
 
     if (module.status === "healthy") {
