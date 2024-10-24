@@ -13,6 +13,7 @@ import {
 import { Alert, Row } from "antd";
 import { WarningTwoTone } from "@ant-design/icons";
 import Link from "antd/lib/typography/Link";
+import "./custom.css";
 
 interface Props {
   isModuleEdit: boolean;

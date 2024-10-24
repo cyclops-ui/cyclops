@@ -105,14 +105,21 @@ func (d *DaemonSet) SetDeleted(deleted bool) {
 	d.Deleted = deleted
 }
 
+type ExternalIP struct {
+	IP       string `json:"ip"`
+	Hostname string `json:"hostname"`
+}
+
 type Service struct {
-	Group     string           `json:"group"`
-	Version   string           `json:"version"`
-	Kind      string           `json:"kind"`
-	Name      string           `json:"name"`
-	Namespace string           `json:"namespace"`
-	Ports     []v1.ServicePort `json:"ports"`
-	Deleted   bool             `json:"deleted"`
+	Group       string           `json:"group"`
+	Version     string           `json:"version"`
+	Kind        string           `json:"kind"`
+	Name        string           `json:"name"`
+	Namespace   string           `json:"namespace"`
+	Type        string           `json:"serviceType"`
+	ExternalIPs []*ExternalIP    `json:"externalIPs"`
+	Ports       []v1.ServicePort `json:"ports"`
+	Deleted     bool             `json:"deleted"`
 }
 
 func (s *Service) GetGroupVersionKind() string {

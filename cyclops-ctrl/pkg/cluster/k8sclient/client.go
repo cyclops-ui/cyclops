@@ -101,4 +101,6 @@ type IKubernetesClient interface {
 	CreateTemplateStore(ts *cyclopsv1alpha1.TemplateStore) error
 	UpdateTemplateStore(ts *cyclopsv1alpha1.TemplateStore) error
 	DeleteTemplateStore(name string) error
+	GetResourcesForRelease(release string) ([]dto.Resource, error)
+	GetWorkloadsForRelease(name string) ([]dto.Resource, error)
 }

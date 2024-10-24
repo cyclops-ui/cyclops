@@ -11,16 +11,6 @@ code {
   color: #000080;
 }
 
-.ant-collapse-content-box {
-  padding-top: 12px;
-  border: 1px solid #d3d3d3;
-  border-top: none;
-  border-left: 3px solid #faca93;
-  border-bottom-left-radius: 7px;
-  border-bottom-right-radius: 7px;
-  background-color: #ffffff;
-}
-
 .custom {
   .ant-collapse-content-box {
     padding: 0;
