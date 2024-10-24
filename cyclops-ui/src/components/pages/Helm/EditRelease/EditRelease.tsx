@@ -37,7 +37,7 @@ interface Field {
 }
 
 const EditRelease = () => {
-  let { releaseNamespace, releaseName, releaseVersion } = useParams();
+  let { releaseNamespace, releaseName } = useParams();
 
   const [form] = Form.useForm();
 
@@ -101,7 +101,7 @@ const EditRelease = () => {
       .finally(() => {
         setLoadValues(true);
       });
-  }, [releaseNamespace, releaseName]);
+  }, [releaseNamespace, releaseName, rootField]);
 
   useEffect(() => {
     let initialValuesMapped = mapsToArray(
@@ -113,7 +113,7 @@ const EditRelease = () => {
 
     form.setFieldsValue(initialValuesMapped);
     form.validateFields(flattenObjectKeys(initialValuesMapped));
-  }, [initialValuesRaw, form]);
+  }, [initialValuesRaw, form, rootField]);
 
   const handleValuesChange = (changedValues: any, allValues: any) => {
     if (JSON.stringify(allValues) === JSON.stringify(initialValues)) {

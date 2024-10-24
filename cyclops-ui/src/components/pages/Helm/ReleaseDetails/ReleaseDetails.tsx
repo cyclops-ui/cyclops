@@ -122,7 +122,7 @@ const ReleaseDetails = () => {
     description: "",
   });
 
-  let { releaseNamespace, releaseName, releaseVersion } = useParams();
+  let { releaseNamespace, releaseName } = useParams();
 
   useEffect(() => {
     function fetchRelease() {

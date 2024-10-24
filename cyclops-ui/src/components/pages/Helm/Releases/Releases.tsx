@@ -69,22 +69,6 @@ const HelmReleases = () => {
     setsearchInputFilter(query);
   };
 
-  const getStatusColor = (module: any) => {
-    if (module.status === "unknown") {
-      return "gray";
-    }
-
-    if (module.status === "healthy") {
-      return "#27D507";
-    }
-
-    if (module.status === "progressing") {
-      return "#ffbf00";
-    }
-
-    return "#FF0000";
-  };
-
   const renderReleasesCards = () => {
     if (loadingReleases) {
       return <Spin size={"large"} />;
