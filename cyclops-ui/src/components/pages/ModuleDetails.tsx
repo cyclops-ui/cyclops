@@ -616,7 +616,11 @@ const ModuleDetails = () => {
         onResourceDelete={fetchModuleResources}
       />
       <Modal
-        title={`Delete module ${moduleName}`}
+        title={
+          <>
+            Delete module <span style={{ color: "red" }}>{moduleName}</span>
+          </>
+        }
         open={loading}
         onCancel={handleCancel}
         width={"40%"}
