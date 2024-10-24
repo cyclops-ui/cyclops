@@ -70,42 +70,46 @@ const EditRelease = () => {
   const [loadingSubmitRequest, setLoadingSubmitRequest] = useState(false);
 
   useEffect(() => {
-    axios
-      .get(`/api/helm/releases/${releaseNamespace}/${releaseName}/fields`)
-      .then((res) => {
-        setRootField(res.data);
-      })
-      .catch((error) => {
-        setError(mapResponseError(error));
-      })
-      .finally(() => {
-        setLoadTemplate(true);
-      });
+    const fetchReleaseFields = async () => {
+      axios
+        .get(`/api/helm/releases/${releaseNamespace}/${releaseName}/fields`)
+        .then((fieldsResponse) => {
+          setRootField(fieldsResponse.data);
 
-    axios
-      .get(`/api/helm/releases/${releaseNamespace}/${releaseName}/values`)
-      .then((res) => {
-        setInitialValuesRaw(res.data);
-      })
-      .catch(function (error) {
-        setError(mapResponseError(error));
-      })
-      .finally(() => {
-        setLoadValues(true);
-      });
-  }, [releaseNamespace, releaseName]);
+          axios
+            .get(`/api/helm/releases/${releaseNamespace}/${releaseName}/values`)
+            .then((valuesRes) => {
+              setInitialValuesRaw(valuesRes.data);
+
+              let initialValuesMapped = mapsToArray(
+                fieldsResponse.data.properties,
+                valuesRes.data,
+              );
+
+              setInitialValues(initialValuesMapped);
+
+              form.setFieldsValue(initialValuesMapped);
+            })
+            .catch(function (error) {
+              setError(mapResponseError(error));
+            })
+            .finally(() => {
+              setLoadValues(true);
+            });
+        })
+        .catch((error) => {
+          setError(mapResponseError(error));
+        })
+        .finally(() => {
+          setLoadTemplate(true);
+        });
+    };
+    fetchReleaseFields();
+  }, [releaseNamespace, releaseName, form]);
 
   useEffect(() => {
-    let initialValuesMapped = mapsToArray(
-      rootField.properties,
-      initialValuesRaw,
-    );
-
-    setInitialValues(initialValuesMapped);
-
-    form.setFieldsValue(initialValuesMapped);
-    form.validateFields(flattenObjectKeys(initialValuesMapped));
-  }, [initialValuesRaw, form, rootField]);
+    form.validateFields(flattenObjectKeys(initialValues));
+  }, [initialValues, form]);
 
   const handleValuesChange = (changedValues: any, allValues: any) => {
     if (JSON.stringify(allValues) === JSON.stringify(initialValues)) {
