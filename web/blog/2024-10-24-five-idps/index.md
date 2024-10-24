@@ -1,5 +1,5 @@
 ---
-title: 5 Internal Developer Platforms you need to know about!
+title: 5 Internal Developer Platforms You Need to Know About!
 authors: [jurajk]
 ---
 
