@@ -136,6 +136,10 @@ func (h *Helm) GetReleaseSchema(ctx *gin.Context) {
 		return
 	}
 
+	if len(release.Chart.Schema) == 0 {
+		ctx.JSON(http.StatusOK, nil)
+	}
+
 	var root *helm2.Property
 	err = json.Unmarshal(release.Chart.Schema, &root)
 	if err != nil {
