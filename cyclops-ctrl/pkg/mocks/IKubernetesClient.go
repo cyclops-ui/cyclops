@@ -1010,6 +1010,64 @@ func (_c *IKubernetesClient_GetResourcesForModule_Call) RunAndReturn(run func(st
 	return _c
 }
 
+// GetResourcesForRelease provides a mock function with given fields: release
+func (_m *IKubernetesClient) GetResourcesForRelease(release string) ([]dto.Resource, error) {
+	ret := _m.Called(release)
+
+	if len(ret) == 0 {
+		panic("no return value specified for GetResourcesForRelease")
+	}
+
+	var r0 []dto.Resource
+	var r1 error
+	if rf, ok := ret.Get(0).(func(string) ([]dto.Resource, error)); ok {
+		return rf(release)
+	}
+	if rf, ok := ret.Get(0).(func(string) []dto.Resource); ok {
+		r0 = rf(release)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).([]dto.Resource)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(string) error); ok {
+		r1 = rf(release)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// IKubernetesClient_GetResourcesForRelease_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'GetResourcesForRelease'
+type IKubernetesClient_GetResourcesForRelease_Call struct {
+	*mock.Call
+}
+
+// GetResourcesForRelease is a helper method to define mock.On call
+//   - release string
+func (_e *IKubernetesClient_Expecter) GetResourcesForRelease(release interface{}) *IKubernetesClient_GetResourcesForRelease_Call {
+	return &IKubernetesClient_GetResourcesForRelease_Call{Call: _e.mock.On("GetResourcesForRelease", release)}
+}
+
+func (_c *IKubernetesClient_GetResourcesForRelease_Call) Run(run func(release string)) *IKubernetesClient_GetResourcesForRelease_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run(args[0].(string))
+	})
+	return _c
+}
+
+func (_c *IKubernetesClient_GetResourcesForRelease_Call) Return(_a0 []dto.Resource, _a1 error) *IKubernetesClient_GetResourcesForRelease_Call {
+	_c.Call.Return(_a0, _a1)
+	return _c
+}
+
+func (_c *IKubernetesClient_GetResourcesForRelease_Call) RunAndReturn(run func(string) ([]dto.Resource, error)) *IKubernetesClient_GetResourcesForRelease_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
 // GetStatefulSetsLogs provides a mock function with given fields: namespace, container, name, numLogs
 func (_m *IKubernetesClient) GetStatefulSetsLogs(namespace string, container string, name string, numLogs *int64) ([]string, error) {
 	ret := _m.Called(namespace, container, name, numLogs)
@@ -1233,6 +1291,64 @@ func (_c *IKubernetesClient_GetWorkloadsForModule_Call) Return(_a0 []dto.Resourc
 }
 
 func (_c *IKubernetesClient_GetWorkloadsForModule_Call) RunAndReturn(run func(string) ([]dto.Resource, error)) *IKubernetesClient_GetWorkloadsForModule_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
+// GetWorkloadsForRelease provides a mock function with given fields: name
+func (_m *IKubernetesClient) GetWorkloadsForRelease(name string) ([]dto.Resource, error) {
+	ret := _m.Called(name)
+
+	if len(ret) == 0 {
+		panic("no return value specified for GetWorkloadsForRelease")
+	}
+
+	var r0 []dto.Resource
+	var r1 error
+	if rf, ok := ret.Get(0).(func(string) ([]dto.Resource, error)); ok {
+		return rf(name)
+	}
+	if rf, ok := ret.Get(0).(func(string) []dto.Resource); ok {
+		r0 = rf(name)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).([]dto.Resource)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(string) error); ok {
+		r1 = rf(name)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// IKubernetesClient_GetWorkloadsForRelease_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'GetWorkloadsForRelease'
+type IKubernetesClient_GetWorkloadsForRelease_Call struct {
+	*mock.Call
+}
+
+// GetWorkloadsForRelease is a helper method to define mock.On call
+//   - name string
+func (_e *IKubernetesClient_Expecter) GetWorkloadsForRelease(name interface{}) *IKubernetesClient_GetWorkloadsForRelease_Call {
+	return &IKubernetesClient_GetWorkloadsForRelease_Call{Call: _e.mock.On("GetWorkloadsForRelease", name)}
+}
+
+func (_c *IKubernetesClient_GetWorkloadsForRelease_Call) Run(run func(name string)) *IKubernetesClient_GetWorkloadsForRelease_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run(args[0].(string))
+	})
+	return _c
+}
+
+func (_c *IKubernetesClient_GetWorkloadsForRelease_Call) Return(_a0 []dto.Resource, _a1 error) *IKubernetesClient_GetWorkloadsForRelease_Call {
+	_c.Call.Return(_a0, _a1)
+	return _c
+}
+
+func (_c *IKubernetesClient_GetWorkloadsForRelease_Call) RunAndReturn(run func(string) ([]dto.Resource, error)) *IKubernetesClient_GetWorkloadsForRelease_Call {
 	_c.Call.Return(run)
 	return _c
 }
