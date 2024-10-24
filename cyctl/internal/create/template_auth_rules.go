@@ -2,6 +2,7 @@ package create
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"log"
 	"strings"
@@ -9,6 +10,7 @@ import (
 	"github.com/cyclops-ui/cyclops/cyclops-ctrl/api/v1alpha1"
 	"github.com/cyclops-ui/cyclops/cyclops-ctrl/api/v1alpha1/client"
 	"github.com/cyclops-ui/cycops-cyctl/internal/kubeconfig"
+	"github.com/manifoldco/promptui"
 	"github.com/spf13/cobra"
 	v1Spec "k8s.io/api/core/v1"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -24,9 +26,81 @@ cyctl create templateauthrule demo-templateauthrule --repo='https://github.com/c
 )
 
 var (
-	username string
-	password string
+	username     string
+	password     string
+	usernameName string
+	passwordName string
+	usernameKey  string
+	passwordKey  string
 )
+
+func getTeamplateAuthRulesFromPromt() (string, string, string, string, string, error) {
+	RepoPrompt := promptui.Prompt{
+		Label: "repo",
+	}
+	repoValue, err := RepoPrompt.Run()
+	if err != nil {
+		return "", "", "", "", "", fmt.Errorf("Prompt failed: %v", err)
+	}
+	usernameNamePrompt := promptui.Prompt{
+		Label: "Username secret name",
+		Validate: func(input string) error {
+			if input == "" {
+				return errors.New("The username Name cannot be empty")
+			}
+			return nil
+		},
+	}
+	usernameName, err := usernameNamePrompt.Run()
+	if err != nil {
+		return "", "", "", "", "", fmt.Errorf("Prompt failed: %v", err)
+	}
+
+	usernameKeyPrompt := promptui.Prompt{
+		Label: "Username secret key",
+		Validate: func(input string) error {
+			if input == "" {
+				return errors.New("The username key cannot be empty")
+			}
+			return nil
+		},
+	}
+	usernameKey, err := usernameKeyPrompt.Run()
+	if err != nil {
+		return "", "", "", "", "", fmt.Errorf("Prompt failed: %v", err)
+	}
+
+	passwordNamePrompt := promptui.Prompt{
+		Label: "Password secret name",
+		Validate: func(input string) error {
+			if input == "" {
+				return errors.New("The password name cannot be empty")
+			}
+			return nil
+		},
+	}
+	passwordName, err := passwordNamePrompt.Run()
+	if err != nil {
+		return "", "", "", "", "", fmt.Errorf("Prompt failed: %v", err)
+	}
+
+	passwordKeyPrompt := promptui.Prompt{
+		Label: "Password secret key",
+		Validate: func(input string) error {
+			if input == "" {
+				return errors.New("The password key cannot be empty")
+			}
+			return nil
+		},
+	}
+	passwordKey, err := passwordKeyPrompt.Run()
+	if err != nil {
+		return "", "", "", "", "", fmt.Errorf("Prompt failed: %v", err)
+	}
+
+	return usernameName, usernameKey, passwordName, passwordKey, repoValue, nil
+
+}
 
 func validateSecretKeySelector(username, password string) (string, string, string, string, error) {
 	usernameName, usernameKey := splitNameKey(username)
@@ -36,7 +110,7 @@ func validateSecretKeySelector(username, password string) (string, string, strin
 	if usernameName == "" || usernameKey == "" || passwordName == "" || passwordKey == "" {
 		return "", "", "", "", fmt.Errorf("invalid format for username or password. Expected 'name:key'")
 	}
-
+	
 	return usernameName, usernameKey, passwordName, passwordKey, nil
 }
 
@@ -50,10 +124,20 @@ func splitNameKey(input string) (string, string) {
 
 // createTemplateAuthRule allows you to create TemplateAuthRule Custom Resource.
 func createTemplateAuthRule(clientset *client.CyclopsV1Alpha1Client, templateAuthRuleName string) {
-	usernameName, usernameKey, passwordName, passwordKey, err := validateSecretKeySelector(username, password)
-	if err != nil {
-		fmt.Println(err)
-		return
+	if username == "" && password == "" && repo == "" {
+		var err error
+		usernameName, usernameKey, passwordName, passwordKey, repo, err = getTeamplateAuthRulesFromPromt()
+		if err != nil {
+			fmt.Println(err)
+			return
+		}
+	} else {
+		var err error
+		usernameName, usernameKey, passwordName, passwordKey, err = validateSecretKeySelector(username, password)
+		if err != nil {
+			fmt.Println(err)
+			return
+		}
 	}
 
 	var localObjectNameRef, localObjectPasswordRef v1Spec.LocalObjectReference
