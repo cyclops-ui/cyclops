@@ -85,9 +85,6 @@ const EditRelease = () => {
     axios
       .get(`/api/helm/releases/${releaseNamespace}/${releaseName}/values`)
       .then((res) => {
-        let initialValuesMapped = mapsToArray(rootField.properties, res.data);
-
-        setInitialValues(initialValuesMapped);
         setInitialValuesRaw(res.data);
 
         setError({
@@ -101,7 +98,7 @@ const EditRelease = () => {
       .finally(() => {
         setLoadValues(true);
       });
-  }, [releaseNamespace, releaseName, rootField]);
+  }, [releaseNamespace, releaseName]);
 
   useEffect(() => {
     let initialValuesMapped = mapsToArray(
