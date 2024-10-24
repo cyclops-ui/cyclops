@@ -39,6 +39,7 @@ import dockerLogo from "../../../static/img/docker-mark-blue.png";
 
 const TemplateStore = () => {
   const [templates, setTemplates] = useState([]);
+  const [query, setQuery] = useState("");
   const [filteredTemplates, setFilteredTemplates] = useState([]);
   const [confirmDelete, setConfirmDelete] = useState("");
   const [confirmDeleteInput, setConfirmDeleteInput] = useState("");
@@ -56,7 +57,7 @@ const TemplateStore = () => {
     description: "",
   });
 
-  const sourceTypeFilter = ["git", "helm", "oci", "none"];
+  const sourceTypeFilter = ["git", "helm", "oci", "unknown"];
   const [templateSourceTypeFilter, setTemplateSourceTypeFilter] =
     useState<string[]>(sourceTypeFilter);
 
@@ -85,14 +86,24 @@ const TemplateStore = () => {
       });
   }, []);
 
-  const handleSearch = (event: any) => {
-    const query = event.target.value;
+  useEffect(() => {
     var updatedList = [...templates];
-    updatedList = updatedList.filter((template: any) => {
-      return template.name.toLowerCase().indexOf(query.toLowerCase()) !== -1;
-    });
+    updatedList = updatedList
+      .filter((template: any) => {
+        return (
+          template.name.toLowerCase().indexOf(query.toLowerCase().trim()) !== -1
+        );
+      })
+      .filter((template: any) => {
+        if (
+          !template.ref.sourceType &&
+          templateSourceTypeFilter.includes("unknown")
+        )
+          return true;
+        else return templateSourceTypeFilter.includes(template.ref.sourceType);
+      });
     setFilteredTemplates(updatedList);
-  };
+  }, [templateSourceTypeFilter, query, templates]);
 
   const onSubmitFailed = (
     errors: Array<{ message: string; description: string }>,
@@ -249,15 +260,9 @@ const TemplateStore = () => {
     return (
       <Checkbox.Group
         style={{ display: "block" }}
-        onChange={(selectedItems: any[]) => {
-          setTemplateSourceTypeFilter(selectedItems);
-          var updatedList = [...templates];
-          updatedList = updatedList.filter((template: any) => {
-            if(!template.ref.sourceType && selectedItems.includes("none")) return true;
-            return selectedItems.includes(template.ref.sourceType);
-          });
-          setFilteredTemplates(updatedList);
-        }}
+        onChange={(selectedItems: any[]) =>
+          setTemplateSourceTypeFilter(selectedItems)
+        }
         value={templateSourceTypeFilter}
       >
         {sourceTypeFilter.map((item, index) => (
@@ -320,7 +325,7 @@ const TemplateStore = () => {
           <Input
             placeholder={"Search templates"}
             style={{ width: "30%", marginBottom: "1rem" }}
-            onChange={handleSearch}
+            onChange={(event) => setQuery(event.target.value)}
             addonAfter={
               <>
                 <Popover content={templateFilterPopover()} trigger="click">
