@@ -179,33 +179,6 @@ const ModuleDetails = () => {
           setLoadModule(true);
           setError(mapResponseError(error));
         });
-      setModule({
-        name: "idk",
-        namespace: "cyclops",
-        targetNamespace: "default",
-        template: {
-          repo: "https://github.com/cyclops-ui/templates",
-          path: "app-template",
-          version: "main",
-          resolvedVersion: "e6d32bf4ada218c744ea19558d8e273d9bfe5bdd",
-          sourceType: "git",
-        },
-        version: "main",
-        values: {
-          general: {
-            environment: { ENVIRONMENT: "production" },
-            image: "nginx",
-            version: "1.14.2",
-          },
-          name: "my-app",
-          networking: { expose: true, port: 80, type: "ClusterIP" },
-          scaling: { replicas: 1 },
-        },
-        status: "",
-        iconURL:
-          "https://github.com/cyclops-ui/cyclops/blob/main/cyclops-ui/src/static/img/default-template-icon.png?raw=true",
-        reconciliationStatus: { status: "succeeded" },
-      });
     }
 
     fetchModule();
