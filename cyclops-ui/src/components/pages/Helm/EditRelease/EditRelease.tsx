@@ -86,11 +86,6 @@ const EditRelease = () => {
       .get(`/api/helm/releases/${releaseNamespace}/${releaseName}/values`)
       .then((res) => {
         setInitialValuesRaw(res.data);
-
-        setError({
-          message: "",
-          description: "",
-        });
       })
       .catch(function (error) {
         setError(mapResponseError(error));
