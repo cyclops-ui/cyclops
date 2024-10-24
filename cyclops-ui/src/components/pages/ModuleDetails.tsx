@@ -268,7 +268,7 @@ const ModuleDetails = () => {
                 >
                   {module.name}
                 </span>
-              </Tooltip>{" "}
+              </Tooltip>
             </Title>
           </Col>
         </Row>
@@ -301,7 +301,6 @@ const ModuleDetails = () => {
               fontWeight: "550",
             }}
           >
-            {" "}
             <Tooltip title={"Click to copy namespace"} trigger="hover">
               <span
                 onClick={() =>
@@ -310,7 +309,7 @@ const ModuleDetails = () => {
               >
                 {module.targetNamespace}
               </span>
-            </Tooltip>{" "}
+            </Tooltip>
           </Descriptions.Item>
         </Descriptions>
         <Row gutter={[40, 0]} style={{ paddingTop: "8px" }}>
