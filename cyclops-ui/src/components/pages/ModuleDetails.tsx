@@ -262,7 +262,13 @@ const ModuleDetails = () => {
               ) : (
                 <></>
               )}
-              {module.name}
+              <Tooltip title={"Copy module name to clipboard"} trigger="hover">
+                <span
+                  onClick={() => navigator.clipboard.writeText(module.name)}
+                >
+                  {module.name}
+                </span>
+              </Tooltip>
             </Title>
           </Col>
         </Row>
@@ -286,6 +292,7 @@ const ModuleDetails = () => {
           >
             {moduleStatusIcon()}
           </Descriptions.Item>
+
           <Descriptions.Item
             key={"namespace"}
             label={"namespace"}
@@ -294,7 +301,15 @@ const ModuleDetails = () => {
               fontWeight: "550",
             }}
           >
-            {module.targetNamespace}
+            <Tooltip title={"Copy namespace to clipboard"} trigger="hover">
+              <span
+                onClick={() =>
+                  navigator.clipboard.writeText(module.targetNamespace)
+                }
+              >
+                {module.targetNamespace}
+              </span>
+            </Tooltip>
           </Descriptions.Item>
         </Descriptions>
         <Row gutter={[40, 0]} style={{ paddingTop: "8px" }}>
