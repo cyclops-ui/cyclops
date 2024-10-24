@@ -55,18 +55,15 @@ export function resourceStream(
   }).catch((r) => console.error(r));
 }
 
-export function resourcesStream(
-  moduleName: string | undefined,
-  setResource: (r: any) => void,
-) {
-  if (!moduleName) {
+export function resourcesStream(path: string, setResource: (r: any) => void) {
+  if (!path) {
     return;
   }
 
   let maxRetries = 5;
   let retryCounter = 1;
 
-  fetchEventSource(`/api/stream/resources/` + moduleName, {
+  fetchEventSource(path, {
     method: "GET",
     onmessage(ev) {
       setResource(JSON.parse(ev.data));
