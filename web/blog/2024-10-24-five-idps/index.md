@@ -1,5 +1,5 @@
 ---
-title: 5 Internal Developer Platforms you need to know about!
+title: 5 Internal Developer Platforms You Need to Know About!
 authors: [jurajk]
 ---
 
@@ -44,6 +44,8 @@ Humanitec's product suite includes **The Portal**, which provides developers wit
 **What makes it special:** Humanitec's platform is highly modular, allowing organizations to build IDPs using its products as a whole or as building blocks in a larger platform. It easily integrates with existing infrastructure-as-code (IaC) setups, making Humanitec great for large teams looking to scale their operations efficiently.
 
 ![Qovery logo](../../static/img/2024-10-24-five-idps/qovery_logo.png)
+
+## Qovery
 
 > ***DevOps on Autopilot***
 
