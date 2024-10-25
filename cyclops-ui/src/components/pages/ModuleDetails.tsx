@@ -265,6 +265,7 @@ const ModuleDetails = () => {
               <Tooltip title={"Copy module name to clipboard"} trigger="hover">
                 <span
                   onClick={() => navigator.clipboard.writeText(module.name)}
+                  style={{ cursor: "pointer" }}
                 >
                   {module.name}
                 </span>
@@ -303,6 +304,7 @@ const ModuleDetails = () => {
           >
             <Tooltip title={"Copy namespace to clipboard"} trigger="hover">
               <span
+                style={{ cursor: "pointer" }}
                 onClick={() =>
                   navigator.clipboard.writeText(module.targetNamespace)
                 }
