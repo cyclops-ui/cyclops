@@ -13,6 +13,7 @@ import {
 import { Alert, Row } from "antd";
 import { WarningTwoTone } from "@ant-design/icons";
 import Link from "antd/lib/typography/Link";
+import { SuggestionInputField } from "./fields/string/SuggestionInput";
 
 interface Props {
   isModuleEdit: boolean;
@@ -72,7 +73,6 @@ export function mapFields(
         if (field.enum) {
           formFields.push(
             <SelectInputField
-              isSuggestionsField={false}
               field={field}
               formItemName={formItemName}
               arrayField={arrayField}
@@ -84,8 +84,7 @@ export function mapFields(
         }
         if (field["x-suggestions"]) {
           formFields.push(
-            <SelectInputField
-              isSuggestionsField={true}
+            <SuggestionInputField
               field={field}
               formItemName={formItemName}
               arrayField={arrayField}

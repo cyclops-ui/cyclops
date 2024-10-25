@@ -12,7 +12,6 @@ interface Props {
   arrayField: any;
   isRequired: boolean;
   isModuleEdit: boolean;
-  isSuggestionsField: boolean;
 }
 
 export const SelectInputField = ({
@@ -21,32 +20,20 @@ export const SelectInputField = ({
   arrayField,
   isRequired,
   isModuleEdit,
-  isSuggestionsField,
 }: Props) => {
   const selectOptions = (field: any) => {
     let options: Option[] = [];
 
-    if (!field) {
+    if (!field || !field.enum) {
       return options;
     }
 
-    if (isSuggestionsField && field["x-suggestions"]) {
-      field["x-suggestions"].forEach((option: any) => {
-        options.push({
-          value: option,
-          label: option,
-        });
+    field.enum.forEach((option: any) => {
+      options.push({
+        value: option,
+        label: option,
       });
-    }
-
-    if (field.enum) {
-      field.enum.forEach((option: any) => {
-        options.push({
-          value: option,
-          label: option,
-        });
-      });
-    }
+    });
 
     return options;
   };
@@ -70,7 +57,6 @@ export const SelectInputField = ({
       }
     >
       <Select
-        {...(isSuggestionsField ? { mode: "tags", maxCount: 1 } : {})}
         showSearch
         placeholder={field.name}
         optionFilterProp="children"
