@@ -1,4 +1,15 @@
-import React, { useEffect, useState, useCallback } from "react";
+import {
+  BookOutlined,
+  CheckCircleTwoTone,
+  ClockCircleTwoTone,
+  CloseSquareTwoTone,
+  CopyOutlined,
+  DeleteOutlined,
+  EditOutlined,
+  FileTextOutlined,
+  UndoOutlined,
+} from "@ant-design/icons";
+import "ace-builds/src-noconflict/ace";
 import {
   Alert,
   Button,
@@ -13,40 +24,29 @@ import {
   Tooltip,
   Typography,
 } from "antd";
-import "ace-builds/src-noconflict/ace";
-import { useParams } from "react-router-dom";
 import axios from "axios";
-import {
-  BookOutlined,
-  CheckCircleTwoTone,
-  ClockCircleTwoTone,
-  CloseSquareTwoTone,
-  CopyOutlined,
-  DeleteOutlined,
-  EditOutlined,
-  FileTextOutlined,
-  UndoOutlined,
-} from "@ant-design/icons";
+import { useCallback, useEffect, useState } from "react";
+import { useParams } from "react-router-dom";
 import "./custom.css";
 
 import "ace-builds/src-noconflict/mode-jsx";
 import ReactAce from "react-ace";
 
-import {
-  moduleTemplateReferenceView,
-  templateRef,
-} from "../../utils/templateRef";
-import { mapResponseError } from "../../utils/api/errors";
 import YAML from "yaml";
 import { isStreamingEnabled } from "../../utils/api/common";
+import { mapResponseError } from "../../utils/api/errors";
 import { resourcesStream } from "../../utils/api/sse/resources";
+import { Workload } from "../../utils/k8s/workload";
 import {
   isWorkload,
   ResourceRef,
   resourceRefKey,
 } from "../../utils/resourceRef";
+import {
+  moduleTemplateReferenceView,
+  templateRef,
+} from "../../utils/templateRef";
 import ResourceList from "../k8s-resources/ResourceList/ResourceList";
-import { Workload } from "../../utils/k8s/workload";
 
 const languages = [
   "javascript",

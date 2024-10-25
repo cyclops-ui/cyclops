@@ -486,11 +486,8 @@ func (k *KubernetesClient) getReplicaset(deployment appsv1.Deployment) ([]dto.Re
 		return nil, err
 	}
 
-	if len(rsList.Items) == 0 {
-		return nil, nil
-	}
+	out := []dto.ReplicaSet{}
 
-	out := make([]dto.ReplicaSet, 0, len(rsList.Items))
 	for _, rs := range rsList.Items {
 		if metav1.IsControlledBy(&rs, &deployment) {
 			out = append(out, dto.ReplicaSet{
@@ -503,6 +500,8 @@ func (k *KubernetesClient) getReplicaset(deployment appsv1.Deployment) ([]dto.Re
 				AvailableReplicas:    rs.Status.AvailableReplicas,
 				ReadyReplicas:        rs.Status.ReadyReplicas,
 				FullyLabeledReplicas: rs.Status.FullyLabeledReplicas,
+				Started:              rs.GetCreationTimestamp(),
+				Deleted:              isReplicaSetDeleted(rs),
 			})
 		}
 	}
@@ -973,4 +972,8 @@ func isStatefulSetProgressing(status appsv1.StatefulSetStatus, desiredReplicas *
 	}
 
 	return status.ReadyReplicas < *desiredReplicas || status.UpdatedReplicas < *desiredReplicas
+}
+
+func isReplicaSetDeleted(rs appsv1.ReplicaSet) bool {
+	return rs.DeletionTimestamp != nil
 }

@@ -19,16 +19,16 @@ type Resource interface {
 }
 
 type Deployment struct {
-	Group      string       `json:"group"`
-	Version    string       `json:"version"`
-	Kind       string       `json:"kind"`
-	Name       string       `json:"name"`
-	Namespace  string       `json:"namespace"`
-	Replicas   int          `json:"replicas"`
-	ReplicaSet []ReplicaSet `json:"replicaset"`
-	Pods       []Pod        `json:"pods"`
-	Status     string       `json:"status"`
-	Deleted    bool         `json:"deleted"`
+	Group       string       `json:"group"`
+	Version     string       `json:"version"`
+	Kind        string       `json:"kind"`
+	Name        string       `json:"name"`
+	Namespace   string       `json:"namespace"`
+	Replicas    int          `json:"replicas"`
+	ReplicaSets []ReplicaSet `json:"replicaSets"`
+	Pods        []Pod        `json:"pods"`
+	Status      string       `json:"status"`
+	Deleted     bool         `json:"deleted"`
 }
 
 func (d *Deployment) GetGroupVersionKind() string {
@@ -204,15 +204,17 @@ type ContainerStatus struct {
 }
 
 type ReplicaSet struct {
-	Group                string `json:"group"`
-	Version              string `json:"version"`
-	Kind                 string `json:"kind"`
-	Name                 string `json:"name"`
-	Namespace            string `json:"namespace"`
-	Replicas             int32  `json:"replicas"`
-	FullyLabeledReplicas int32  `json:"fullyLabeledReplicas"`
-	ReadyReplicas        int32  `json:"readyReplicas"`
-	AvailableReplicas    int32  `json:"availableReplicas"`
+	Group                string      `json:"group"`
+	Version              string      `json:"version"`
+	Kind                 string      `json:"kind"`
+	Name                 string      `json:"name"`
+	Namespace            string      `json:"namespace"`
+	Replicas             int32       `json:"replicas"`
+	FullyLabeledReplicas int32       `json:"fullyLabeledReplicas"`
+	ReadyReplicas        int32       `json:"readyReplicas"`
+	AvailableReplicas    int32       `json:"availableReplicas"`
+	Started              metav1.Time `json:"started"`
+	Deleted              bool        `json:"deleted"`
 }
 
 type Pod struct {

@@ -1,9 +1,10 @@
-import React, { useCallback, useEffect, useState } from "react";
-import { Col, Divider, Row, Alert } from "antd";
+import { Alert, Col, Divider, Row } from "antd";
 import axios from "axios";
+import { useCallback, useEffect, useState } from "react";
+import { isStreamingEnabled } from "../../utils/api/common";
 import { mapResponseError } from "../../utils/api/errors";
 import PodTable from "./common/PodTable/PodTable";
-import { isStreamingEnabled } from "../../utils/api/common";
+import ReplicaSet from "./ReplicaSet";
 
 interface Props {
   name: string;
@@ -15,6 +16,7 @@ const Deployment = ({ name, namespace, workload }: Props) => {
   const [deployment, setDeployment] = useState({
     status: "",
     pods: [],
+    replicaSets: [],
   });
   const [error, setError] = useState({
     message: "",
@@ -61,6 +63,24 @@ const Deployment = ({ name, namespace, workload }: Props) => {
     return deployment.pods;
   }
 
+  function getReplicaSets() {
+    if (workload && isStreamingEnabled()) {
+      return workload.replicaSets;
+    }
+
+    return deployment.replicaSets;
+  }
+
+  function sortReplicaSets(replicaSets: any[]) {
+    return replicaSets.sort((a, b) => {
+      if (a.replicas === b.replicas) {
+        return new Date(b.started).getTime() - new Date(a.started).getTime(); // descending on started time
+      }
+
+      return b.replicas - a.replicas; // descending on replicas
+    });
+  }
+
   function getPodsLength() {
     let pods = getPods();
 
@@ -89,6 +109,16 @@ const Deployment = ({ name, namespace, workload }: Props) => {
         />
       )}
       <Row>
+        <Divider
+          style={{ fontSize: "120%" }}
+          orientationMargin="0"
+          orientation={"left"}
+        >
+          Replica Sets: {getReplicaSets().length}
+        </Divider>
+        <Col span={24} style={{ overflowX: "auto" }}>
+          <ReplicaSet replicaSets={sortReplicaSets(getReplicaSets())} />
+        </Col>
         <Divider
           style={{ fontSize: "120%" }}
           orientationMargin="0"
