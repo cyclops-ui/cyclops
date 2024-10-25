@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Button, Col, Divider, Form, Input, Row, Select, Space } from "antd";
+import { Button, Col, Divider, Form, Input, Row, Select } from "antd";
 import { PlusOutlined } from "@ant-design/icons";
 
 interface Option {
@@ -24,7 +24,6 @@ export const SuggestionInputField = ({
 }: Props) => {
   const [suggestedOptions, setSuggestedOptions] = useState<Option[]>([]);
   const [newOption, setNewOption] = useState("");
-  const [options, setOptions] = useState<Option[]>([]);
 
   const selectOptions = (field: any) => {
     let options: Option[] = [];
