@@ -40,7 +40,7 @@ func (r *ReleaseClient) ListReleases() ([]*release.Release, error) {
 
 func (r *ReleaseClient) GetRelease(namespace, name string) (*release.Release, error) {
 	if namespace != r.namespace {
-		return nil, errors.New(fmt.Sprintf("invalida namespace provided: %v", namespace))
+		return nil, errors.New(fmt.Sprintf("invalid namespace provided: %v", namespace))
 	}
 
 	settings := cli.New()
