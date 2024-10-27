@@ -39,6 +39,7 @@ type Field struct {
 	Properties    []Field       `json:"properties"`
 	Items         *Field        `json:"items"`
 	Enum          []interface{} `json:"enum"`
+	Suggestions   []interface{} `json:"x-suggestions"`
 	Required      []string      `json:"required"`
 	FileExtension string        `json:"fileExtension"`
 	Immutable     bool          `json:"immutable"`
