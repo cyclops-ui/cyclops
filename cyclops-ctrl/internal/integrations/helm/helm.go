@@ -5,6 +5,7 @@ import (
 	"io"
 	"log"
 	"path"
+	"strings"
 
 	"github.com/pkg/errors"
 	"helm.sh/helm/v3/pkg/action"
@@ -15,17 +16,20 @@ import (
 )
 
 type ReleaseClient struct {
+	namespace string
 }
 
-func NewReleaseClient() *ReleaseClient {
-	return &ReleaseClient{}
+func NewReleaseClient(namespace string) *ReleaseClient {
+	return &ReleaseClient{
+		namespace: strings.TrimSpace(namespace),
+	}
 }
 
 func (r *ReleaseClient) ListReleases() ([]*release.Release, error) {
 	settings := cli.New()
 
 	actionConfig := new(action.Configuration)
-	if err := actionConfig.Init(settings.RESTClientGetter(), "", "", log.Printf); err != nil {
+	if err := actionConfig.Init(settings.RESTClientGetter(), r.namespace, "", log.Printf); err != nil {
 		return nil, err
 	}
 
@@ -35,6 +39,10 @@ func (r *ReleaseClient) ListReleases() ([]*release.Release, error) {
 }
 
 func (r *ReleaseClient) GetRelease(namespace, name string) (*release.Release, error) {
+	if namespace != r.namespace {
+		return nil, errors.New(fmt.Sprintf("invalida namespace provided: %v", namespace))
+	}
+
 	settings := cli.New()
 	settings.SetNamespace(namespace)
 
@@ -49,12 +57,16 @@ func (r *ReleaseClient) GetRelease(namespace, name string) (*release.Release, er
 }
 
 func (r *ReleaseClient) UninstallRelease(namespace, name string) error {
+	if namespace != r.namespace {
+		return errors.New(fmt.Sprintf("invalid namespace provided: %v", namespace))
+	}
+
 	settings := cli.New()
 	settings.SetNamespace(namespace)
 
 	actionConfig := new(action.Configuration)
 	if err := actionConfig.Init(settings.RESTClientGetter(), namespace, "", log.Printf); err != nil {
-		log.Fatalf("Failed to initialize Helm action configuration: %v", err)
+		return err
 	}
 
 	client := action.NewUninstall(actionConfig)
@@ -69,12 +81,16 @@ func (r *ReleaseClient) UpgradeRelease(
 	values map[string]interface{},
 	current *release.Release,
 ) error {
+	if namespace != r.namespace {
+		return errors.New(fmt.Sprintf("invalid namespace provided: %v", namespace))
+	}
+
 	settings := cli.New()
 	settings.SetNamespace(namespace)
 
 	actionConfig := new(action.Configuration)
 	if err := actionConfig.Init(settings.RESTClientGetter(), namespace, "", log.Printf); err != nil {
-		log.Fatalf("Failed to initialize Helm action configuration: %v", err)
+		return err
 	}
 
 	client := action.NewUpgrade(actionConfig)
@@ -82,7 +98,7 @@ func (r *ReleaseClient) UpgradeRelease(
 
 	registryClient, err := registry.NewClient(registry.ClientOptWriter(io.Discard))
 	if err != nil {
-		panic(err)
+		return err
 	}
 
 	client.SetRegistryClient(registryClient)

@@ -91,7 +91,9 @@ func main() {
 
 	prometheus.StartCacheMetricsUpdater(&monitor, templatesRepo.ReturnCache(), 10*time.Second, setupLog)
 
-	handler, err := handler.New(templatesRepo, k8sClient, helm.NewReleaseClient(), renderer, telemetryClient, monitor)
+	helmReleaseClient := helm.NewReleaseClient(getHelmWatchNamespace())
+
+	handler, err := handler.New(templatesRepo, k8sClient, helmReleaseClient, renderer, telemetryClient, monitor)
 	if err != nil {
 		panic(err)
 	}
@@ -111,7 +113,7 @@ func main() {
 		}),
 		Cache: ctrlCache.Options{
 			DefaultNamespaces: map[string]ctrlCache.Config{
-				getWatchNamespace("WATCH_NAMESPACE"): {},
+				getWatchNamespace(): {},
 			},
 		},
 	})
@@ -162,10 +164,18 @@ func getEnvBool(key string) bool {
 	return b
 }
 
-func getWatchNamespace(key string) string {
-	value := os.Getenv(key)
+func getWatchNamespace() string {
+	value := os.Getenv("WATCH_NAMESPACE")
 	if value == "" {
 		return "cyclops"
+	}
+	return value
+}
+
+func getHelmWatchNamespace() string {
+	value := os.Getenv("WATCH_NAMESPACE_HELM")
+	if value == "" {
+		return ""
 	}
 	return value
 }
