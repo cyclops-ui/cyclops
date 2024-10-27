@@ -111,8 +111,12 @@ export const SuggestionInputField = ({
                   placeholder="Enter New Option"
                   value={newOption}
                   onChange={(event) => setNewOption(event.target.value)}
-                  onKeyDown={(e) => e.stopPropagation()}
-                  onKeyPress={(e) => e.key === "Enter" && addOptionOnEnter()}
+                  onKeyDown={(e) => {
+                    e.stopPropagation();
+                    if (e.key === "Enter") {
+                      addOptionOnEnter();
+                    }
+                  }}
                 />
               </Col>
               <Col span={8}>
