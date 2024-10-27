@@ -28,10 +28,6 @@ spec:
             - name: DISABLE_TELEMETRY
               value: {{ ((.Values.global).disableTelemetry) | quote }}
             {{- end }}
-            {{- if ((.Values.global).enableStreaming) }}
-            - name: REACT_APP_ENABLE_STREAMING
-              value: {{ ((.Values.global).enableStreaming) | quote }}
-            {{- end }}
           livenessProbe:
             httpGet:
               path: /healthz
