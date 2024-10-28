@@ -48,6 +48,10 @@ func HelmSchemaToFields(name string, schema helm.Property, defs map[string]helm.
 			continue
 		}
 
+		if dependency.RootField.Type != "object" {
+			continue
+		}
+
 		fields = append(fields, models.Field{
 			Name:             dependency.Name,
 			Description:      dependency.RootField.Description,
