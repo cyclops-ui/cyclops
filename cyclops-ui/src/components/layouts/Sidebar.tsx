@@ -40,7 +40,7 @@ const SideNav = () => {
         </a>
       ),
       icon: <img alt="" style={{ height: "14px" }} src={helmLogo} />,
-      key: "migrator",
+      key: "helm",
     },
   ];
 
