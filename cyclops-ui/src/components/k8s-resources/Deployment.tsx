@@ -208,7 +208,7 @@ export const DeploymentLogsButton = ({ name, namespace, workload }: Props) => {
     return items;
   };
 
-  const onLogsTabsChange = (container: string) => {
+  const onLogsTabsChange = () => {
     const controller = new AbortController();
     if (logsSignalControllerRef.current !== null) {
       logsSignalControllerRef.current.abort();
@@ -367,7 +367,7 @@ export const DeploymentLogsButton = ({ name, namespace, workload }: Props) => {
                 description: "",
               });
             }}
-            style={{ paddingBottom: "20px" }}
+            style={{ marginBottom: "20px" }}
           />
         )}
         <Tabs items={getTabItems()} onChange={onLogsTabsChange} />
