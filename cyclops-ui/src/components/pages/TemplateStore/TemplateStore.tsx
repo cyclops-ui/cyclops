@@ -13,6 +13,8 @@ import {
   Spin,
   notification,
   Radio,
+  Popover,
+  Checkbox,
 } from "antd";
 import axios from "axios";
 import Title from "antd/es/typography/Title";
@@ -20,6 +22,7 @@ import {
   DeleteOutlined,
   EditOutlined,
   FileSyncOutlined,
+  FilterOutlined,
 } from "@ant-design/icons";
 import classNames from "classnames";
 import styles from "./styles.module.css";
@@ -36,6 +39,7 @@ import dockerLogo from "../../../static/img/docker-mark-blue.png";
 
 const TemplateStore = () => {
   const [templates, setTemplates] = useState([]);
+  const [query, setQuery] = useState("");
   const [filteredTemplates, setFilteredTemplates] = useState([]);
   const [confirmDelete, setConfirmDelete] = useState("");
   const [confirmDeleteInput, setConfirmDeleteInput] = useState("");
@@ -52,6 +56,10 @@ const TemplateStore = () => {
     message: "",
     description: "",
   });
+
+  const sourceTypeFilter = ["git", "helm", "oci", "unknown"];
+  const [templateSourceTypeFilter, setTemplateSourceTypeFilter] =
+    useState<string[]>(sourceTypeFilter);
 
   const [addForm] = Form.useForm();
   const [editForm] = Form.useForm();
@@ -78,14 +86,24 @@ const TemplateStore = () => {
       });
   }, []);
 
-  const handleSearch = (event: any) => {
-    const query = event.target.value;
+  useEffect(() => {
     var updatedList = [...templates];
-    updatedList = updatedList.filter((template: any) => {
-      return template.name.toLowerCase().indexOf(query.toLowerCase()) !== -1;
-    });
+    updatedList = updatedList
+      .filter((template: any) => {
+        return (
+          template.name.toLowerCase().indexOf(query.toLowerCase().trim()) !== -1
+        );
+      })
+      .filter((template: any) => {
+        if (
+          !template.ref.sourceType &&
+          templateSourceTypeFilter.includes("unknown")
+        )
+          return true;
+        else return templateSourceTypeFilter.includes(template.ref.sourceType);
+      });
     setFilteredTemplates(updatedList);
-  };
+  }, [templateSourceTypeFilter, query, templates]);
 
   const onSubmitFailed = (
     errors: Array<{ message: string; description: string }>,
@@ -238,6 +256,24 @@ const TemplateStore = () => {
     setConfirmDelete("");
   };
 
+  const templateFilterPopover = () => {
+    return (
+      <Checkbox.Group
+        style={{ display: "block" }}
+        onChange={(selectedItems: any[]) =>
+          setTemplateSourceTypeFilter(selectedItems)
+        }
+        value={templateSourceTypeFilter}
+      >
+        {sourceTypeFilter.map((item, index) => (
+          <Checkbox key={index} value={item}>
+            {item}
+          </Checkbox>
+        ))}
+      </Checkbox.Group>
+    );
+  };
+
   return (
     <div>
       {error.message.length !== 0 && (
@@ -289,7 +325,14 @@ const TemplateStore = () => {
           <Input
             placeholder={"Search templates"}
             style={{ width: "30%", marginBottom: "1rem" }}
-            onChange={handleSearch}
+            onChange={(event) => setQuery(event.target.value)}
+            addonAfter={
+              <>
+                <Popover content={templateFilterPopover()} trigger="click">
+                  <FilterOutlined />
+                </Popover>
+              </>
+            }
           ></Input>
         </Col>
       </Row>
@@ -626,7 +669,12 @@ const TemplateStore = () => {
         </Form>
       </Modal>
       <Modal
-        title="Delete template ref"
+        title={
+          <>
+            Delete template reference{" "}
+            <span style={{ color: "red" }}>{confirmDelete}</span>
+          </>
+        }
         open={confirmDelete.length > 0}
         onCancel={handleCancelDeleteModal}
         width={"40%"}

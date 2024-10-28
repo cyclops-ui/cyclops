@@ -21,6 +21,19 @@ const Blogs = () => {
         <Row gutter={[16, 16]}>
           <Col xs={{ span: 20, offset: 2 }} md={{ span: 6, offset: 3 }}>
             <Blog
+              title={"5 Internal Developer Platforms you need to know about!"}
+              description={
+                "Gartner predicts that by 2026, 80% of software companies will have established platform engineering teams..."
+              }
+              blogLink={
+                "https://cyclops-ui.com/blog/2024/10/24/five-idps"
+              }
+              avatar={"https://github.com/KaradzaJuraj.png"}
+              banner={"/img/2024-10-24-five-idps/cover.jpg"}
+            />
+          </Col>
+          <Col xs={{ span: 20, offset: 2 }} md={{ span: 6, offset: 0 }}>
+            <Blog
               title={"What is Platform Engineering?"}
               description={
                 "Modern software engineering is becoming more and more complicated, especially in cloud-native environments like Kubernetes..."
@@ -43,19 +56,6 @@ const Blogs = () => {
               }
               avatar={"https://github.com/KaradzaJuraj.png"}
               banner={"/img/2024-09-17-civo-x-cyclops/cover.jpeg"}
-            />
-          </Col>
-          <Col xs={{ span: 20, offset: 2 }} md={{ span: 6, offset: 0 }}>
-            <Blog
-              title={"How we manage secrets, the Kubernetes way"}
-              description={
-                "In this article, I will showcase how Cyclops manages your secrets, the Kubernetes way..."
-              }
-              blogLink={
-                "https://cyclops-ui.com/blog/2024/07/24/how-we-manage-secrets"
-              }
-              avatar={"https://github.com/KaradzaJuraj.png"}
-              banner={"/img/2024-07-24-how-we-manage-secrets/cover.jpg"}
             />
           </Col>
         </Row>
