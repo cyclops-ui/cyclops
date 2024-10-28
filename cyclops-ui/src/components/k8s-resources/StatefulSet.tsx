@@ -245,7 +245,7 @@ export const StatefulSetLogsButton = ({ name, namespace, workload }: Props) => {
     } else {
       axios
         .get(
-          "/api/resources/deployments/" +
+          "/api/resources/statefulsets/" +
             namespace +
             "/" +
             name +
@@ -316,7 +316,7 @@ export const StatefulSetLogsButton = ({ name, namespace, workload }: Props) => {
           } else {
             axios
               .get(
-                "/api/resources/deployments/" +
+                "/api/resources/statefulsets/" +
                   namespace +
                   "/" +
                   name +
