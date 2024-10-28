@@ -1,6 +1,7 @@
 global:
   disableTelemetry: false
   enableNetworkPolicies: false
+  enableStreaming: true
 
 ctrl:
   replicas: 1
@@ -15,48 +16,58 @@ templateStore:
     path: demo
     version: main
     iconURL: https://github.com/cyclops-ui/cyclops/blob/main/cyclops-ui/src/static/img/default-template-icon.png?raw=true
+    sourceType: git
   - name: app-template
     repo: https://github.com/cyclops-ui/templates
     path: app-template
     version: main
     iconURL: https://github.com/cyclops-ui/cyclops/blob/main/cyclops-ui/src/static/img/default-template-icon.png?raw=true
+    sourceType: git
   - name: jenkins
     repo: https://github.com/bitnami/charts
     path: bitnami/jenkins
     version: main
     iconURL: https://bitnami.com/assets/stacks/jenkins/img/jenkins-stack-220x234.png
+    sourceType: git
   - name: mariadb
     repo: https://github.com/bitnami/charts
     path: bitnami/mariadb
     version: main
     iconURL: https://bitnami.com/assets/stacks/mariadb/img/mariadb-stack-220x234.png
+    sourceType: git
   - name: metabase
     repo: https://github.com/cyclops-ui/templates
     path: metabase
     version: main
     iconURL: https://www.metabase.com/images/logo.svg
+    sourceType: git
   - name: mysql
     repo: https://github.com/bitnami/charts
     path: bitnami/mysql
     version: main
     iconURL: https://bitnami.com/assets/stacks/mysql/img/mysql-stack-220x234.png
+    sourceType: git
   - name: postgresql
     repo: https://github.com/bitnami/charts
     path: bitnami/postgresql
     version: main
     iconURL: https://bitnami.com/assets/stacks/postgresql/img/postgresql-stack-220x234.png
+    sourceType: git
   - name: prometheus
     repo: https://github.com/bitnami/charts
     path: bitnami/prometheus
     version: main
     iconURL: https://bitnami.com/assets/stacks/prometheus/img/prometheus-stack-220x234.png
+    sourceType: git
   - name: rabbitmq
     repo: https://github.com/bitnami/charts
     path: bitnami/rabbitmq
     version: main
     iconURL: https://bitnami.com/assets/stacks/rabbitmq/img/rabbitmq-stack-220x234.png
+    sourceType: git
   - name: redis
     repo: https://github.com/bitnami/charts
     path: bitnami/redis
     version: main
     iconURL: https://bitnami.com/assets/stacks/redis/img/redis-stack-220x234.png
+    sourceType: git

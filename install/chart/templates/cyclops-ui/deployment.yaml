@@ -17,12 +17,16 @@ spec:
     spec:
       containers:
         - name: cyclops-ui
-          image: cyclopsui/cyclops-ui:v0.8.2
+          image: cyclopsui/cyclops-ui:v0.14.3
           ports:
             - containerPort: 80
           env:
             - name: REACT_APP_CYCLOPS_CTRL_HOST
               value: {{ ((.Values.ui).ctrlHost) | default "http://cyclops-ctrl.cyclops:8080" | quote }}
+            {{- if ((.Values.global).enableStreaming) }}
+            - name: REACT_APP_ENABLE_STREAMING
+              value: {{ ((.Values.global).enableStreaming) | quote }}
+            {{- end }}
             - name: NODE_ENV
               value: production
             - name: NODE_OPTIONS
