@@ -332,7 +332,11 @@ const ReleaseDetails = () => {
       {/*    <h3>Coming soon</h3>*/}
       {/*</Modal>*/}
       <Modal
-        title={`Uninstall release ${releaseNamespace}/${releaseName}`}
+        title={
+          <>
+            Uninstall release <span style={{ color: "red" }}>{releaseNamespace}/{releaseName}</span>
+          </>
+        }
         open={confirmUninstall}
         onCancel={() => {
           setConfirmUninstall(false);
@@ -349,6 +353,21 @@ const ReleaseDetails = () => {
           </Button>
         }
       >
+        {error.message.length !== 0 && (
+          <Alert
+            message={error.message}
+            description={error.description}
+            type="error"
+            closable
+            afterClose={() => {
+              setError({
+                message: "",
+                description: "",
+              });
+            }}
+            style={{ marginBottom: "20px" }}
+          />
+        )}
         In order to uninstall this release and related resources, type the name
         of the release below
         <Input

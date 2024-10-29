@@ -671,8 +671,7 @@ const TemplateStore = () => {
       <Modal
         title={
           <>
-            Delete template reference{" "}
-            <span style={{ color: "red" }}>{confirmDelete}</span>
+            Delete template reference <span style={{ color: "red" }}>{confirmDelete}</span>
           </>
         }
         open={confirmDelete.length > 0}

@@ -98,6 +98,7 @@ const EditRelease = () => {
             });
         })
         .catch((error) => {
+          setLoadValues(true);
           setError(mapResponseError(error));
         })
         .finally(() => {

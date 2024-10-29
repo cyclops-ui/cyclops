@@ -24,14 +24,14 @@ const SideNav = () => {
       key: "modules",
     },
     {
-      label: <a href={PathConstants.NODES}>Nodes</a>,
-      icon: <HddOutlined />,
-      key: "nodes",
-    },
-    {
       label: <a href={PathConstants.TEMPLATES}>Templates</a>,
       icon: <SnippetsOutlined />,
       key: "templates",
+    },
+    {
+      label: <a href={PathConstants.NODES}>Nodes</a>,
+      icon: <HddOutlined />,
+      key: "nodes",
     },
     {
       label: (
