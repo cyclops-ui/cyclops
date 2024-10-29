@@ -6,6 +6,7 @@ import (
 	"github.com/cyclops-ui/cyclops/cyclops-ctrl/internal/mapper"
 	"github.com/cyclops-ui/cyclops/cyclops-ctrl/internal/models/dto"
 	helm2 "github.com/cyclops-ui/cyclops/cyclops-ctrl/internal/models/helm"
+	"github.com/cyclops-ui/cyclops/cyclops-ctrl/internal/telemetry"
 	json "github.com/json-iterator/go"
 	"helm.sh/helm/v3/pkg/chartutil"
 	"net/http"
@@ -18,12 +19,18 @@ import (
 type Helm struct {
 	kubernetesClient k8sclient.IKubernetesClient
 	releaseClient    *helm.ReleaseClient
+	telemetryClient  telemetry.Client
 }
 
-func NewHelmController(kubernetes k8sclient.IKubernetesClient, releaseClient *helm.ReleaseClient) *Helm {
+func NewHelmController(
+	kubernetes k8sclient.IKubernetesClient,
+	releaseClient *helm.ReleaseClient,
+	telemetryClient telemetry.Client,
+) *Helm {
 	return &Helm{
 		kubernetesClient: kubernetes,
 		releaseClient:    releaseClient,
+		telemetryClient:  telemetryClient,
 	}
 }
 
@@ -74,6 +81,8 @@ func (h *Helm) UpgradeRelease(ctx *gin.Context) {
 		ctx.JSON(http.StatusBadRequest, dto.NewError("Error binding values", err.Error()))
 		return
 	}
+
+	h.telemetryClient.ReleaseUpdate()
 
 	release, err := h.releaseClient.GetRelease(namespace, name)
 	if err != nil {

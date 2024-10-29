@@ -51,7 +51,7 @@ func (h *Handler) Start() error {
 	templatesController := controller.NewTemplatesController(h.templatesRepo, h.k8sClient, h.telemetryClient)
 	modulesController := controller.NewModulesController(h.templatesRepo, h.k8sClient, h.renderer, h.telemetryClient, h.monitor)
 	clusterController := controller.NewClusterController(h.k8sClient)
-	helmController := controller.NewHelmController(h.k8sClient, h.releaseClient)
+	helmController := controller.NewHelmController(h.k8sClient, h.releaseClient, h.telemetryClient)
 
 	h.router = gin.New()
 
