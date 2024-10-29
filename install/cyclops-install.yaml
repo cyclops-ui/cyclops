@@ -427,14 +427,14 @@ spec:
   policyTypes:
     - Ingress
     - Egress
-#---
-#apiVersion: v1
-#kind: ConfigMap
-#metadata:
-#  name: cyclops-ctrl
-#  namespace: cyclops
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: cyclops-ctrl
+  namespace: cyclops
 #data:
-#  config.yaml: |
+#  resource-relations: |
 #    childLabels:
 #      - group: postgresql.cnpg.io
 #        version: v1
@@ -482,16 +482,6 @@ spec:
               port: 8082
             initialDelaySeconds: 5
             periodSeconds: 10
-#          volumeMounts:
-#            - name: cyclops-ctrl-config
-#              mountPath: /etc/config
-#      volumes:
-#        - name: cyclops-ctrl-config
-#          configMap:
-#            name: cyclops-ctrl
-#            items:
-#              - key: config.yaml
-#                path: config.yaml
 ---
 apiVersion: v1
 kind: Service
