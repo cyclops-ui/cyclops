@@ -1,5 +1,5 @@
 [![CNCF Badge](https://img.shields.io/badge/CNCF%20Landscape-5699C6?style=flat-square&color=5699C6)](https://landscape.cncf.io/?item=app-definition-and-development--application-definition-image-build--cyclops)
-[![Docker Pulls](https://img.shields.io/docker/pulls/cyclopsui/cyclops-ui?style=flat-square&logo=docker&color=%230db7ed)](https://hub.docker.com/repository/docker/cyclopsui/cyclops-ui/general)
+[![Docker Pulls](https://img.shields.io/docker/pulls/cyclopsui/cyclops-ctrl?style=flat-square&logo=docker&color=%230db7ed)](https://hub.docker.com/repository/docker/cyclopsui/cyclops-ctrl/general)
 [![Go Report Card](https://goreportcard.com/badge/github.com/cyclops-ui/cyclops/cyclops-ctrl?style=flat-square)](https://goreportcard.com/report/github.com/cyclops-ui/cyclops/cyclops-ctrl)
 [![GitHub Actions CI](https://img.shields.io/github/actions/workflow/status/cyclops-ui/cyclops/ci.yml?style=flat-square&logo=github&logoColor=white&label=cyclops%20build)](https://github.com/cyclops-ui/cyclops/actions/workflows/ci.yml)
 [![GitHub Actions web](https://img.shields.io/github/actions/workflow/status/cyclops-ui/cyclops/web.yaml?style=flat-square&logo=github&logoColor=white&label=GitHub%20pages%20build)](https://github.com/cyclops-ui/cyclops/actions/workflows/web.yaml)
