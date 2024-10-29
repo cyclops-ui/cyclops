@@ -332,7 +332,14 @@ const ReleaseDetails = () => {
       {/*    <h3>Coming soon</h3>*/}
       {/*</Modal>*/}
       <Modal
-        title={`Uninstall release ${releaseNamespace}/${releaseName}`}
+        title={
+          <>
+            Uninstall release{" "}
+            <span style={{ color: "red" }}>
+              {releaseNamespace}/{releaseName}
+            </span>
+          </>
+        }
         open={confirmUninstall}
         onCancel={() => {
           setConfirmUninstall(false);
