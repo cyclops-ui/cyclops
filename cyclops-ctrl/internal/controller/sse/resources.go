@@ -1,6 +1,7 @@
 package sse
 
 import (
+	"github.com/cyclops-ui/cyclops/cyclops-ctrl/internal/models/dto"
 	"io"
 	"net/http"
 	"time"
@@ -20,6 +21,20 @@ func (s *Server) Resources(ctx *gin.Context) {
 		return
 	}
 
+	s.streamResources(ctx, resources)
+}
+
+func (s *Server) ReleaseResources(ctx *gin.Context) {
+	resources, err := s.k8sClient.GetWorkloadsForRelease(ctx.Param("name"))
+	if err != nil {
+		ctx.String(http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	s.streamResources(ctx, resources)
+}
+
+func (s *Server) streamResources(ctx *gin.Context, resources []dto.Resource) {
 	watchSpecs := make([]k8sclient.ResourceWatchSpec, 0, len(resources))
 	for _, resource := range resources {
 		if !k8sclient.IsWorkload(resource.GetGroup(), resource.GetVersion(), resource.GetKind()) {

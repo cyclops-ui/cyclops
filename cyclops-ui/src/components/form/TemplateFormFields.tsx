@@ -14,6 +14,7 @@ import { Alert, Row } from "antd";
 import { WarningTwoTone } from "@ant-design/icons";
 import Link from "antd/lib/typography/Link";
 import { SuggestionInputField } from "./fields/string/SuggestionInput";
+import "./custom.css";
 
 interface Props {
   isModuleEdit: boolean;
@@ -68,6 +69,7 @@ export function mapFields(
     if (arrayIndexLifetime > 0) {
       arrayIndexLifetime = arrayIndexLifetime - 1;
     }
+
     switch (field.type) {
       case "string":
         if (field.enum) {

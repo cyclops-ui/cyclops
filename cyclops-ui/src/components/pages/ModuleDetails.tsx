@@ -191,7 +191,7 @@ const ModuleDetails = () => {
 
   useEffect(() => {
     if (isStreamingEnabled()) {
-      resourcesStream(moduleName, (r: any) => {
+      resourcesStream(`/api/stream/resources/${moduleName}`, (r: any) => {
         let resourceRef: ResourceRef = {
           group: r.group,
           version: r.version,

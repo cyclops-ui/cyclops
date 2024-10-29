@@ -4,6 +4,7 @@ import (
 	"net/http"
 
 	"github.com/cyclops-ui/cyclops/cyclops-ctrl/internal/controller/sse"
+	"github.com/cyclops-ui/cyclops/cyclops-ctrl/internal/integrations/helm"
 	"github.com/gin-gonic/gin"
 
 	"github.com/cyclops-ui/cyclops/cyclops-ctrl/internal/controller"
@@ -19,6 +20,7 @@ type Handler struct {
 
 	templatesRepo templaterepo.ITemplateRepo
 	k8sClient     k8sclient.IKubernetesClient
+	releaseClient *helm.ReleaseClient
 	renderer      *render.Renderer
 
 	telemetryClient telemetry.Client
@@ -28,6 +30,7 @@ type Handler struct {
 func New(
 	templatesRepo templaterepo.ITemplateRepo,
 	kubernetesClient k8sclient.IKubernetesClient,
+	releaseClient *helm.ReleaseClient,
 	renderer *render.Renderer,
 	telemetryClient telemetry.Client,
 	monitor prometheus.Monitor,
@@ -36,6 +39,7 @@ func New(
 		templatesRepo:   templatesRepo,
 		k8sClient:       kubernetesClient,
 		renderer:        renderer,
+		releaseClient:   releaseClient,
 		telemetryClient: telemetryClient,
 		monitor:         monitor,
 		router:          gin.New(),
@@ -48,12 +52,14 @@ func (h *Handler) Start() error {
 	templatesController := controller.NewTemplatesController(h.templatesRepo, h.k8sClient, h.telemetryClient)
 	modulesController := controller.NewModulesController(h.templatesRepo, h.k8sClient, h.renderer, h.telemetryClient, h.monitor)
 	clusterController := controller.NewClusterController(h.k8sClient)
+	helmController := controller.NewHelmController(h.k8sClient, h.releaseClient, h.telemetryClient)
 
 	h.router = gin.New()
 
 	server := sse.NewServer(h.k8sClient)
 
 	h.router.GET("/stream/resources/:name", sse.HeadersMiddleware(), server.Resources)
+	h.router.GET("/stream/releases/resources/:name", sse.HeadersMiddleware(), server.ReleaseResources)
 	h.router.POST("/stream/resources", sse.HeadersMiddleware(), server.SingleResource)
 
 	h.router.GET("/ping", h.pong())
@@ -100,6 +106,16 @@ func (h *Handler) Start() error {
 	h.router.GET("/nodes/:name", clusterController.GetNode)
 
 	h.router.GET("/namespaces", clusterController.ListNamespaces)
+
+	// region helm migrator
+	h.router.GET("/helm/releases", helmController.ListReleases)
+	h.router.GET("/helm/releases/:namespace/:name", helmController.GetRelease)
+	h.router.POST("/helm/releases/:namespace/:name", helmController.UpgradeRelease)
+	h.router.DELETE("/helm/releases/:namespace/:name", helmController.UninstallRelease)
+	h.router.GET("/helm/releases/:namespace/:name/resources", helmController.GetReleaseResources)
+	h.router.GET("/helm/releases/:namespace/:name/fields", helmController.GetReleaseSchema)
+	h.router.GET("/helm/releases/:namespace/:name/values", helmController.GetReleaseValues)
+	// endregion
 
 	h.router.Use(h.options)
 
