@@ -39,7 +39,7 @@ func (r *ReleaseClient) ListReleases() ([]*release.Release, error) {
 }
 
 func (r *ReleaseClient) GetRelease(namespace, name string) (*release.Release, error) {
-	if namespace != r.namespace {
+	if len(r.namespace) > 0 && namespace != r.namespace {
 		return nil, errors.New(fmt.Sprintf("invalid namespace provided: %v", namespace))
 	}
 
@@ -57,7 +57,7 @@ func (r *ReleaseClient) GetRelease(namespace, name string) (*release.Release, er
 }
 
 func (r *ReleaseClient) UninstallRelease(namespace, name string) error {
-	if namespace != r.namespace {
+	if len(r.namespace) > 0 && namespace != r.namespace {
 		return errors.New(fmt.Sprintf("invalid namespace provided: %v", namespace))
 	}
 
@@ -81,7 +81,7 @@ func (r *ReleaseClient) UpgradeRelease(
 	values map[string]interface{},
 	current *release.Release,
 ) error {
-	if namespace != r.namespace {
+	if len(r.namespace) > 0 && namespace != r.namespace {
 		return errors.New(fmt.Sprintf("invalid namespace provided: %v", namespace))
 	}
 

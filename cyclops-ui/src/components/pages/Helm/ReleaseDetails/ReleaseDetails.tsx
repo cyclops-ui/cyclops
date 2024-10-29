@@ -349,6 +349,21 @@ const ReleaseDetails = () => {
           </Button>
         }
       >
+        {error.message.length !== 0 && (
+          <Alert
+            message={error.message}
+            description={error.description}
+            type="error"
+            closable
+            afterClose={() => {
+              setError({
+                message: "",
+                description: "",
+              });
+            }}
+            style={{ marginBottom: "20px" }}
+          />
+        )}
         In order to uninstall this release and related resources, type the name
         of the release below
         <Input
