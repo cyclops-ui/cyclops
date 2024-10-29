@@ -26,7 +26,7 @@ type KubernetesClient struct {
 	childLabels ChildLabels
 }
 
-func New(childLabels ChildLabels) (*KubernetesClient, error) {
+func New() (*KubernetesClient, error) {
 	config := ctrl.GetConfigOrDie()
 	clientset, err := kubernetes.NewForConfig(config)
 	if err != nil {
@@ -45,13 +45,16 @@ func New(childLabels ChildLabels) (*KubernetesClient, error) {
 		panic(err.Error())
 	}
 
-	return &KubernetesClient{
-		Dynamic:     dynamic,
-		discovery:   discovery,
-		clientset:   clientset,
-		moduleset:   moduleSet,
-		childLabels: childLabels,
-	}, nil
+	k := &KubernetesClient{
+		Dynamic:   dynamic,
+		discovery: discovery,
+		clientset: clientset,
+		moduleset: moduleSet,
+	}
+
+	k.loadResourceRelationsLabels()
+
+	return k, nil
 }
 
 type IKubernetesClient interface {

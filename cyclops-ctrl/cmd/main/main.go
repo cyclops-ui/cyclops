@@ -71,9 +71,7 @@ func main() {
 	)
 	telemetryClient.InstanceStart()
 
-	config := getConfig()
-
-	k8sClient, err := k8sclient.New(config.ChildLabels)
+	k8sClient, err := k8sclient.New()
 	if err != nil {
 		fmt.Println("error bootstrapping Kubernetes client", err)
 		panic(err)
