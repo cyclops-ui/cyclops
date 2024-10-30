@@ -18,6 +18,8 @@ import (
 	"github.com/go-git/go-git/v5"
 	"github.com/go-git/go-git/v5/config"
 	"github.com/go-git/go-git/v5/plumbing"
+	"github.com/go-git/go-git/v5/plumbing/protocol/packp/capability"
+	"github.com/go-git/go-git/v5/plumbing/transport"
 	"github.com/go-git/go-git/v5/plumbing/transport/http"
 	"github.com/go-git/go-git/v5/storage/memory"
 	"helm.sh/helm/v3/pkg/chart"
@@ -82,6 +84,10 @@ func (r Repo) LoadTemplate(repoURL, path, commit, resolvedVersion string) (*mode
 	}
 	// endregion
 
+	if len(files) == 0 {
+		return nil, errors.Errorf("no files found in repo %v on path %v; make sure the repo, path and version are correct", repoURL, path)
+	}
+
 	// region map files to template
 	metadataBytes := []byte{}
 	schemaBytes := []byte{}
@@ -112,13 +118,22 @@ func (r Repo) LoadTemplate(repoURL, path, commit, resolvedVersion string) (*mode
 		}
 
 		if len(parts) > 1 && parts[0] == "crds" &&
-			(parts[1] != "Notes.txt" && parts[1] != "NOTES.txt") {
+			(parts[1] != "Notes.txt" && parts[1] != "NOTES.txt" && parts[1] != "tests") {
 			crdFiles = append(crdFiles, f)
 			continue
 		}
 
-		chartFiles = append(chartFiles, f)
+		if len(parts) > 2 && parts[0] == "charts" {
+			depName := parts[1]
+			if _, ok := dependenciesFromChartsDir[depName]; !ok {
+				dependenciesFromChartsDir[depName] = make(map[string][]byte)
+			}
 
+			dependenciesFromChartsDir[depName][path2.Join(parts[1:]...)] = f.Data
+			continue
+		}
+
+		chartFiles = append(chartFiles, f)
 	}
 
 	var schema helm.Property
@@ -132,7 +147,7 @@ func (r Repo) LoadTemplate(repoURL, path, commit, resolvedVersion string) (*mode
 
 	var metadata *helm.Metadata
 	if err := yaml.Unmarshal(metadataBytes, &metadata); err != nil {
-		fmt.Println("error on meta unm", repoURL, path)
+		fmt.Println("error on meta unmarshal", repoURL, path)
 		return &models.Template{}, err
 	}
 
@@ -337,6 +352,12 @@ func readValuesFile(fs billy.Filesystem, path string) ([]byte, error) {
 
 func clone(repoURL, commit string, creds *auth.Credentials) (billy.Filesystem, error) {
 	// region clone from git
+	if gitproviders.IsAzureRepo(repoURL) {
+		transport.UnsupportedCapabilities = []capability.Capability{
+			capability.ThinPack,
+		}
+	}
+
 	repo, err := git.Clone(memory.NewStorage(), memfs.New(), &git.CloneOptions{
 		URL:  repoURL,
 		Tags: git.AllTags,
