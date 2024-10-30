@@ -1,14 +1,13 @@
 package controller
 
 import (
-	"fmt"
 	"net/http"
-	"strconv"
 	"strings"
 
 	"github.com/gin-gonic/gin"
 	json "github.com/json-iterator/go"
 
+	cyclopsv1alpha1 "github.com/cyclops-ui/cyclops/cyclops-ctrl/api/v1alpha1"
 	"github.com/cyclops-ui/cyclops/cyclops-ctrl/internal/mapper"
 	"github.com/cyclops-ui/cyclops/cyclops-ctrl/internal/models/dto"
 	"github.com/cyclops-ui/cyclops/cyclops-ctrl/internal/telemetry"
@@ -17,14 +16,14 @@ import (
 )
 
 type Templates struct {
-	templatesRepo    *template.Repo
-	kubernetesClient *k8sclient.KubernetesClient
+	templatesRepo    template.ITemplateRepo
+	kubernetesClient k8sclient.IKubernetesClient
 	telemetryClient  telemetry.Client
 }
 
 func NewTemplatesController(
-	templatesRepo *template.Repo,
-	kubernetes *k8sclient.KubernetesClient,
+	templatesRepo template.ITemplateRepo,
+	kubernetes k8sclient.IKubernetesClient,
 	telemetryClient telemetry.Client,
 ) *Templates {
 	return &Templates{
@@ -34,34 +33,27 @@ func NewTemplatesController(
 	}
 }
 
-// TODO kaj je ovo
-func semantic(current string) string {
-	if len(current) == 0 {
-		return "v1"
-	}
-
-	version, _ := strconv.Atoi(current[1:])
-
-	version++
-
-	return fmt.Sprintf("v%d", version)
-}
-
 func (c *Templates) GetTemplate(ctx *gin.Context) {
 	ctx.Header("Access-Control-Allow-Origin", "*")
 
 	repo := ctx.Query("repo")
 	path := ctx.Query("path")
 	commit := ctx.Query("commit")
+	sourceType := ctx.Query("sourceType")
 
 	if repo == "" {
 		ctx.String(http.StatusBadRequest, "set repo field")
 		return
 	}
 
-	t, err := c.templatesRepo.GetTemplate(repo, path, commit, "")
+	t, err := c.templatesRepo.GetTemplate(
+		repo,
+		path,
+		commit,
+		"",
+		cyclopsv1alpha1.TemplateSourceType(sourceType),
+	)
 	if err != nil {
-		fmt.Println(err)
 		ctx.JSON(http.StatusBadRequest, dto.NewError("Error loading template", err.Error()))
 		return
 	}
@@ -75,22 +67,26 @@ func (c *Templates) GetTemplateInitialValues(ctx *gin.Context) {
 	repo := ctx.Query("repo")
 	path := ctx.Query("path")
 	commit := ctx.Query("commit")
+	sourceType := ctx.Query("sourceType")
 
 	if repo == "" {
 		ctx.JSON(http.StatusBadRequest, dto.NewError("Specify repo field", "Repo not specified"))
 		return
 	}
 
-	initial, err := c.templatesRepo.GetTemplateInitialValues(repo, path, commit)
+	initial, err := c.templatesRepo.GetTemplateInitialValues(
+		repo,
+		path,
+		commit,
+		cyclopsv1alpha1.TemplateSourceType(sourceType),
+	)
 	if err != nil {
-		fmt.Println(err)
 		ctx.JSON(http.StatusBadRequest, dto.NewError("Error loading template initial values", err.Error()))
 		return
 	}
 
 	data, err := json.Marshal(initial)
 	if err != nil {
-		fmt.Println(err)
 		ctx.JSON(http.StatusBadRequest, dto.NewError("Error loading template initial values", err.Error()))
 		return
 	}
@@ -117,7 +113,6 @@ func (c *Templates) CreateTemplatesStore(ctx *gin.Context) {
 
 	var templateStore *dto.TemplateStore
 	if err := ctx.ShouldBind(&templateStore); err != nil {
-		fmt.Println("error binding request", templateStore)
 		ctx.JSON(http.StatusBadRequest, dto.NewError("Error binding request", err.Error()))
 		return
 	}
@@ -136,9 +131,9 @@ func (c *Templates) CreateTemplatesStore(ctx *gin.Context) {
 		templateStore.TemplateRef.Path,
 		templateStore.TemplateRef.Version,
 		"",
+		cyclopsv1alpha1.TemplateSourceType(templateStore.TemplateRef.SourceType),
 	)
 	if err != nil {
-		fmt.Println(err)
 		ctx.JSON(http.StatusBadRequest, dto.NewError("Error loading template", err.Error()))
 		return
 	}
@@ -160,7 +155,6 @@ func (c *Templates) EditTemplatesStore(ctx *gin.Context) {
 
 	var templateStore *dto.TemplateStore
 	if err := ctx.ShouldBind(&templateStore); err != nil {
-		fmt.Println("error binding request", templateStore)
 		ctx.JSON(http.StatusBadRequest, dto.NewError("Error binding request", err.Error()))
 		return
 	}
@@ -179,9 +173,9 @@ func (c *Templates) EditTemplatesStore(ctx *gin.Context) {
 		templateStore.TemplateRef.Path,
 		templateStore.TemplateRef.Version,
 		"",
+		cyclopsv1alpha1.TemplateSourceType(templateStore.TemplateRef.SourceType),
 	)
 	if err != nil {
-		fmt.Println(err)
 		ctx.JSON(http.StatusBadRequest, dto.NewError("Error loading template", err.Error()))
 		return
 	}

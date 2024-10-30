@@ -76,9 +76,10 @@ func ModuleListToDTO(modules []cyclopsv1alpha1.Module) []dto.Module {
 
 func DtoTemplateRefToK8s(dto dto.Template) cyclopsv1alpha1.TemplateRef {
 	return cyclopsv1alpha1.TemplateRef{
-		URL:     dto.URL,
-		Path:    dto.Path,
-		Version: dto.Version,
+		URL:        dto.URL,
+		Path:       dto.Path,
+		Version:    dto.Version,
+		SourceType: cyclopsv1alpha1.TemplateSourceType(dto.SourceType),
 	}
 }
 
@@ -88,6 +89,7 @@ func k8sTemplateRefToDTO(templateRef cyclopsv1alpha1.TemplateRef, templateResolv
 		Path:            templateRef.Path,
 		Version:         templateRef.Version,
 		ResolvedVersion: templateResolvedVersion,
+		SourceType:      string(templateRef.SourceType),
 	}
 }
 

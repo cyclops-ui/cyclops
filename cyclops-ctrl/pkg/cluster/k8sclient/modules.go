@@ -228,10 +228,13 @@ func (k *KubernetesClient) GetDeletedResources(
 		}
 
 		var obj unstructured.Unstructured
-
 		decoder := yaml2.NewYAMLOrJSONDecoder(strings.NewReader(s), len(s))
 		if err := decoder.Decode(&obj); err != nil {
 			return nil, err
+		}
+
+		if len(obj.UnstructuredContent()) == 0 {
+			continue
 		}
 
 		objGVK := obj.GetObjectKind().GroupVersionKind().String()

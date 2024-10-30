@@ -26,6 +26,7 @@ export async function getTemplate(
   repo: string,
   path: string,
   version: string,
+  sourceType: string,
 ): Promise<GetTemplateResult> {
   let responseError: ResponseError = {
     message: "",
@@ -41,7 +42,16 @@ export async function getTemplate(
   };
 
   await axios
-    .get(`/api/templates?repo=` + repo + `&path=` + path + `&commit=` + version)
+    .get(
+      `/api/templates?repo=` +
+        repo +
+        `&path=` +
+        path +
+        `&commit=` +
+        version +
+        `&sourceType=` +
+        sourceType,
+    )
     .then((templatesRes) => {
       template = templatesRes.data;
     })
@@ -60,6 +70,7 @@ export async function getTemplateInitialValues(
   repo: string,
   path: string,
   version: string,
+  sourceType: string,
 ): Promise<GetTemplateInitialResult> {
   let responseError: ResponseError = {
     message: "",
@@ -74,7 +85,9 @@ export async function getTemplateInitialValues(
         `&path=` +
         path +
         `&commit=` +
-        version,
+        version +
+        `&sourceType=` +
+        sourceType,
     )
     .then((res) => {
       initialValues = res.data;

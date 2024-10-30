@@ -6,11 +6,13 @@ import {
   BugFilled,
   SnippetsOutlined,
   GithubFilled,
+  ThunderboltFilled,
 } from "@ant-design/icons";
 import { useLocation } from "react-router";
 import PathConstants from "../../routes/PathConstants";
 import { Link } from "react-router-dom";
 import styles from "./styles.module.css";
+import helmLogo from "../../static/img/helm_white.png";
 
 const SideNav = () => {
   const location = useLocation().pathname.split("/")[1];
@@ -22,14 +24,23 @@ const SideNav = () => {
       key: "modules",
     },
     {
+      label: <a href={PathConstants.TEMPLATES}>Templates</a>,
+      icon: <SnippetsOutlined />,
+      key: "templates",
+    },
+    {
       label: <a href={PathConstants.NODES}>Nodes</a>,
       icon: <HddOutlined />,
       key: "nodes",
     },
     {
-      label: <a href={PathConstants.TEMPLATES}>Templates</a>,
-      icon: <SnippetsOutlined />,
-      key: "templates",
+      label: (
+        <a href={PathConstants.HELM_RELEASES}>
+          Helm releases <ThunderboltFilled style={{ color: "#ffcc66" }} />
+        </a>
+      ),
+      icon: <img alt="" style={{ height: "14px" }} src={helmLogo} />,
+      key: "helm",
     },
   ];
 

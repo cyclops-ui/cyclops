@@ -55,15 +55,15 @@ export function resourceStream(
   }).catch((r) => console.error(r));
 }
 
-export function resourcesStream(
-  moduleName: string | undefined,
-  setResource: (r: any) => void,
-) {
-  if (!moduleName) {
+export function resourcesStream(path: string, setResource: (r: any) => void) {
+  if (!path) {
     return;
   }
 
-  fetchEventSource(`/api/stream/resources/` + moduleName, {
+  let maxRetries = 5;
+  let retryCounter = 1;
+
+  fetchEventSource(path, {
     method: "GET",
     onmessage(ev) {
       setResource(JSON.parse(ev.data));
@@ -89,9 +89,14 @@ export function resourcesStream(
     },
     onerror: (err) => {
       if (err instanceof FatalError) {
-        throw err; // rethrow to stop the operation
+        throw err;
       }
 
+      if (retryCounter === maxRetries) {
+        throw err;
+      }
+
+      retryCounter++;
       return 5000;
     },
   }).catch((r) => console.error(r));

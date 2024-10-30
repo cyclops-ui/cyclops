@@ -31,3 +31,18 @@
 .error {
   color: red;
 }
+
+.templatetypes {
+  display: flex;
+}
+
+.templatetype {
+  flex: 1; /* Each button takes equal space */
+  text-align: center; /* Ensure the label text is centered */
+}
+
+.templatetypeicon {
+  height: 24px;
+  margin-right: 8px; /* Add space between the image and the text */
+  padding-bottom: 3px;
+}

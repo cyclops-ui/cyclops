@@ -11,4 +11,7 @@ spec:
   repo: {{ required "Template repo is required for each template" .repo | quote }}
   path: {{ required "Template path/name is required for each template" .path | quote }}
   version: {{ .version | default "" | quote }}
+  {{- if .sourceType }}
+  sourceType: {{ .sourceType | quote }}
+  {{- end }}
 {{- end }}

@@ -16,7 +16,7 @@ import { LockFilled, UnlockFilled } from "@ant-design/icons";
 
 import { useParams } from "react-router-dom";
 
-import { findMaps, flattenObjectKeys } from "../../../utils/form";
+import { findMaps, flattenObjectKeys, mapsToArray } from "../../../utils/form";
 import "./custom.css";
 import { templateRef } from "../../../utils/templateRef";
 import {
@@ -30,7 +30,6 @@ import {
   Template,
 } from "../../../utils/api/template";
 import TemplateFormFields from "../../form/TemplateFormFields";
-import YAML from "yaml";
 
 const { Title } = Typography;
 const layout = {
@@ -52,6 +51,7 @@ const EditModule = () => {
       path: "",
       version: "",
       resolvedVersion: "",
+      sourceType: "",
     },
   });
 
@@ -79,6 +79,7 @@ const EditModule = () => {
     path: "",
     version: "",
     resolvedVersion: "",
+    sourceType: "",
   });
   const [templateRefLock, setTemplateRefLock] = useState(true);
 
@@ -102,95 +103,7 @@ const EditModule = () => {
 
   let { moduleName } = useParams();
 
-  const mapsToArray = useCallback((fields: any[], values: any): any => {
-    let out: any = {};
-    fields.forEach((field) => {
-      let valuesList: any[] = [];
-      switch (field.type) {
-        case "string":
-          out[field.name] = values[field.name];
-          break;
-        case "number":
-          out[field.name] = values[field.name];
-          break;
-        case "boolean":
-          out[field.name] = values[field.name];
-          break;
-        case "object":
-          if (values[field.name]) {
-            out[field.name] = mapsToArray(field.properties, values[field.name]);
-          }
-          break;
-        case "array":
-          if (values[field.name] === undefined || values[field.name] === null) {
-            out[field.name] = [];
-            break;
-          }
-
-          valuesList = [];
-          if (Array.isArray(values[field.name])) {
-            valuesList = values[field.name];
-          } else if (typeof values[field.name] === "string") {
-            valuesList = [values[field.name]];
-          }
-
-          let objectArr: any[] = [];
-          valuesList.forEach((valueFromList) => {
-            // array items not defined
-            if (field.items === null || field.items === undefined) {
-              objectArr.push(valueFromList);
-              return;
-            }
-
-            switch (field.items.type) {
-              case "string":
-                objectArr.push(valueFromList);
-                break;
-              case "object":
-                objectArr.push(
-                  mapsToArray(field.items.properties, valueFromList),
-                );
-                break;
-            }
-          });
-          out[field.name] = objectArr;
-          break;
-        case "map":
-          let object: any[] = [];
-
-          if (values[field.name] === undefined || values[field.name] === null) {
-            out[field.name] = [];
-            break;
-          }
-
-          Object.keys(values[field.name]).forEach((key) => {
-            if (typeof values[field.name][key] === "object") {
-              object.push({
-                key: key,
-                value: YAML.stringify(values[field.name][key], null, 4),
-              });
-              return;
-            }
-
-            object.push({
-              key: key,
-              value: values[field.name][key],
-            });
-          });
-
-          out[field.name] = object;
-
-          // valuesList.forEach(valueFromList => {
-          //     // object.push({})
-          //     // object[valueFromList.key] = valueFromList.value
-          // })
-          // out[field.name] = object
-          break;
-      }
-    });
-
-    return out;
-  }, []);
+  const mapsToArrayCallback = useCallback(mapsToArray, []);
 
   useEffect(() => {
     const fetchModuleData = async () => {
@@ -209,17 +122,19 @@ const EditModule = () => {
             path: res.data.template.path,
             version: res.data.template.version,
             resolvedVersion: res.data.template.resolvedVersion,
+            sourceType: res.data.template.sourceType,
           });
 
           let result = await getTemplate(
             res.data.template.repo,
             res.data.template.path,
             res.data.template.resolvedVersion,
+            res.data.template.sourceType,
           );
 
           if (result.success) {
             setConfig(result.template);
-            let values = mapsToArray(
+            let values = mapsToArrayCallback(
               result.template.root.properties,
               res.data.values,
             );
@@ -246,7 +161,7 @@ const EditModule = () => {
         });
     };
     fetchModuleData();
-  }, [editTemplateForm, form, moduleName, mapsToArray]);
+  }, [editTemplateForm, form, moduleName, mapsToArrayCallback]);
 
   useEffect(() => {
     form.validateFields(flattenObjectKeys(values));
@@ -267,12 +182,14 @@ const EditModule = () => {
     path: string,
     version: string,
     resolvedVersion: string,
+    source: string,
   ) => {
     let newTemplate: templateRef = {
       repo: repo,
       path: path,
       version: version,
       resolvedVersion: resolvedVersion,
+      sourceType: templateRef.sourceType,
     };
 
     if (JSON.stringify(module.template) === JSON.stringify(newTemplate)) {
@@ -291,6 +208,7 @@ const EditModule = () => {
       templateEditValues.repo,
       templateEditValues.path,
       templateEditValues.version,
+      templateRef.sourceType,
     );
 
     if (!templateResult.success) {
@@ -308,6 +226,7 @@ const EditModule = () => {
       templateEditValues.repo,
       templateEditValues.path,
       templateEditValues.version,
+      templateRef.sourceType,
     );
 
     if (!initialValuesResult.success) {
@@ -327,12 +246,14 @@ const EditModule = () => {
       path: templateEditValues.path,
       version: templateEditValues.version,
       resolvedVersion: templateResult.template.resolvedVersion,
+      sourceType: templateRef.sourceType,
     });
     handleTemplateRefChange(
       templateEditValues.repo,
       templateEditValues.path,
       templateEditValues.version,
       templateResult.template.resolvedVersion,
+      templateRef.sourceType,
     );
 
     setConfig(templateResult.template);
@@ -343,7 +264,7 @@ const EditModule = () => {
       initialValuesResult.initialValues,
     );
 
-    let mergedValuesMapped = mapsToArray(
+    let mergedValuesMapped = mapsToArrayCallback(
       templateResult.template.root.properties,
       mergedValues,
     );
@@ -403,7 +324,7 @@ const EditModule = () => {
             name="Save"
             disabled={(!isChanged && !isTemplateChanged) || !loadTemplate}
           >
-            Save
+            Deploy
           </Button>{" "}
           <Button
             htmlType="button"
@@ -494,7 +415,9 @@ const EditModule = () => {
       {contextHolder}
       <Row gutter={[40, 0]}>
         <Col span={24}>
-          <Title level={2}>{moduleName}</Title>
+          <Title level={2}>
+            <span style={{ color: "#888" }}>Edit module</span> {moduleName}
+          </Title>
         </Col>
       </Row>
       <Row gutter={[40, 0]}>

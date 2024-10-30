@@ -19,6 +19,16 @@ const Templates = React.lazy(
   () => import("../components/pages/TemplateStore/TemplateStore"),
 );
 
+const HelmReleases = React.lazy(
+  () => import("../components/pages/Helm/Releases/Releases"),
+);
+const ReleaseDetails = React.lazy(
+  () => import("../components/pages/Helm/ReleaseDetails/ReleaseDetails"),
+);
+const EditRelease = React.lazy(
+  () => import("../components/pages/Helm/EditRelease/EditRelease"),
+);
+
 const routes = [
   { path: PathConstants.HOME, element: <Home /> },
   { path: PathConstants.MODULES, element: <Modules /> },
@@ -29,6 +39,9 @@ const routes = [
   { path: PathConstants.NODES, element: <Nodes /> },
   { path: PathConstants.NODE_GET, element: <NodeDetails /> },
   { path: PathConstants.TEMPLATES, element: <Templates /> },
+  { path: PathConstants.HELM_RELEASES, element: <HelmReleases /> },
+  { path: PathConstants.HELM_RELEASE, element: <ReleaseDetails /> },
+  { path: PathConstants.HELM_RELEASE_EDIT, element: <EditRelease /> },
 ];
 
 export default routes;

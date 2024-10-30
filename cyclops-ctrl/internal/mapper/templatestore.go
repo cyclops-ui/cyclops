@@ -20,9 +20,10 @@ func TemplateStoreListToDTO(store []v1alpha1.TemplateStore) []dto.TemplateStore 
 			Name:    templateStore.Name,
 			IconURL: iconURL,
 			TemplateRef: dto.Template{
-				URL:     templateStore.Spec.URL,
-				Path:    templateStore.Spec.Path,
-				Version: templateStore.Spec.Version,
+				URL:        templateStore.Spec.URL,
+				Path:       templateStore.Spec.Path,
+				Version:    templateStore.Spec.Version,
+				SourceType: string(templateStore.Spec.SourceType),
 			},
 		})
 	}
@@ -43,9 +44,10 @@ func DTOToTemplateStore(store dto.TemplateStore, iconURL string) *v1alpha1.Templ
 			},
 		},
 		Spec: v1alpha1.TemplateRef{
-			URL:     store.TemplateRef.URL,
-			Path:    store.TemplateRef.Path,
-			Version: store.TemplateRef.Version,
+			URL:        store.TemplateRef.URL,
+			Path:       store.TemplateRef.Path,
+			Version:    store.TemplateRef.Version,
+			SourceType: v1alpha1.TemplateSourceType(store.TemplateRef.SourceType),
 		},
 	}
 }
