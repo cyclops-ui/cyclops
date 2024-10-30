@@ -18,6 +18,8 @@ import (
 	"github.com/go-git/go-git/v5"
 	"github.com/go-git/go-git/v5/config"
 	"github.com/go-git/go-git/v5/plumbing"
+	"github.com/go-git/go-git/v5/plumbing/protocol/packp/capability"
+	"github.com/go-git/go-git/v5/plumbing/transport"
 	"github.com/go-git/go-git/v5/plumbing/transport/http"
 	"github.com/go-git/go-git/v5/storage/memory"
 	"helm.sh/helm/v3/pkg/chart"
@@ -337,6 +339,12 @@ func readValuesFile(fs billy.Filesystem, path string) ([]byte, error) {
 
 func clone(repoURL, commit string, creds *auth.Credentials) (billy.Filesystem, error) {
 	// region clone from git
+	if gitproviders.IsAzureRepo(repoURL) {
+		transport.UnsupportedCapabilities = []capability.Capability{
+			capability.ThinPack,
+		}
+	}
+
 	repo, err := git.Clone(memory.NewStorage(), memfs.New(), &git.CloneOptions{
 		URL:  repoURL,
 		Tags: git.AllTags,
