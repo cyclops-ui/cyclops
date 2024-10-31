@@ -141,6 +141,8 @@ func (k *KubernetesClient) GetResource(group, version, kind, name, namespace str
 		return k.mapRole(group, version, kind, name, namespace)
 	case isNetworkPolicy(group, version, kind):
 		return k.mapNetworkPolicy(group, version, kind, name, namespace)
+	case isClusterRole(group, version, kind):
+		return k.mapClusterRole(group, version, kind, name)
 	}
 
 	return nil, nil
@@ -464,6 +466,10 @@ func isRole(group, version, kind string) bool {
 
 func isNetworkPolicy(group, version, kind string) bool {
 	return group == "networking.k8s.io" && version == "v1" && kind == "NetworkPolicy"
+}
+
+func isClusterRole(group, version, kind string) bool {
+	return group == "rbac.authorization.k8s.io" && version == "v1" && kind == "ClusterRole"
 }
 
 func IsWorkload(group, version, kind string) bool {
