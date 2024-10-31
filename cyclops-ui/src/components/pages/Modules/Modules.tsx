@@ -24,9 +24,27 @@ import { mapResponseError } from "../../../utils/api/errors";
 
 const { Title } = Typography;
 
+interface ModuleInterface {
+  name: string;
+  namespace: string;
+  targetNamespace: string;
+  template: {
+    repo: string;
+    path: string;
+    version: string;
+    resolvedVersion: string;
+    sourceType: string;
+  };
+  version: string;
+  values: { [key: string]: any };
+  status: string;
+  iconURL: string;
+  reconciliationStatus: { [key: string]: any };
+}
+
 const Modules = () => {
-  const [allData, setAllData] = useState([]);
-  const [filteredData, setFilteredData] = useState([]);
+  const [allData, setAllData] = useState<ModuleInterface[]>([]);
+  const [filteredData, setFilteredData] = useState<ModuleInterface[]>([]);
   const [loadingModules, setLoadingModules] = useState(false);
   const [moduleHealthFilter, setModuleHealthFilter] = useState<string[]>([
     "Healthy",
@@ -34,8 +52,12 @@ const Modules = () => {
     "Progressing",
     "Unknown",
   ]);
+  const [moduleNamespaceFilter, setModuleNamespaceFilter] = useState<string[]>(
+    [],
+  );
   const [searchInputFilter, setsearchInputFilter] = useState("");
   const resourceFilter = ["Healthy", "Unhealthy", "Progressing", "Unknown"];
+  const [namespaceFilterData, setNamespaceFilterData] = useState<string[]>([]);
   const [error, setError] = useState({
     message: "",
     description: "",
@@ -49,6 +71,7 @@ const Modules = () => {
         .get(`/api/modules/list`)
         .then((res) => {
           setAllData(res.data);
+          populateNamespaceData(res.data);
           setLoadingModules(false);
         })
         .catch((error) => {
@@ -64,6 +87,16 @@ const Modules = () => {
     };
   }, []);
 
+  const populateNamespaceData = (allData: ModuleInterface[]) => {
+    const namespaceData = allData
+      .map((module) => module.targetNamespace)
+      .filter((targetNamespace, index, self) => {
+        return self.indexOf(targetNamespace) === index;
+      });
+    setNamespaceFilterData(namespaceData);
+    setModuleNamespaceFilter(namespaceData);
+  };
+
   useEffect(() => {
     var updatedList = [...allData];
     updatedList = updatedList.filter((module: any) => {
@@ -72,13 +105,17 @@ const Modules = () => {
         -1
       );
     });
-    const newfilteredData = updatedList.filter((module: any) =>
-      moduleHealthFilter
-        .map((status) => status.toLowerCase())
-        .includes(module.status.toLowerCase()),
+    const newfilteredData = updatedList.filter(
+      (module: any) =>
+        moduleHealthFilter
+          .map((status) => status.toLowerCase())
+          .includes(module.status.toLowerCase()) &&
+        moduleNamespaceFilter
+          .map((targetNamespace) => targetNamespace.toLowerCase())
+          .includes(module.targetNamespace.toLowerCase()),
     );
     setFilteredData(newfilteredData);
-  }, [moduleHealthFilter, allData, searchInputFilter]);
+  }, [moduleNamespaceFilter, moduleHealthFilter, allData, searchInputFilter]);
 
   const handleClick = () => {
     window.location.href = "/modules/new";
@@ -86,20 +123,40 @@ const Modules = () => {
   const handleSelectItem = (selectedItems: any[]) => {
     setModuleHealthFilter(selectedItems);
   };
+  const handleNamespaceSelectItem = (selectedItems: any[]) => {
+    setModuleNamespaceFilter(selectedItems);
+  };
 
   const resourceFilterPopover = () => {
     return (
-      <Checkbox.Group
-        style={{ display: "block" }}
-        onChange={handleSelectItem}
-        value={moduleHealthFilter}
-      >
-        {resourceFilter.map((item, index) => (
-          <Checkbox key={index} value={item}>
-            {item}
-          </Checkbox>
-        ))}
-      </Checkbox.Group>
+      <>
+        <Checkbox.Group
+          style={{ display: "block", margin: "5px 0px" }}
+          onChange={handleSelectItem}
+          value={moduleHealthFilter}
+        >
+          <b>Health</b>
+          <br />
+          {resourceFilter.map((item, index) => (
+            <Checkbox key={index} value={item}>
+              {item}
+            </Checkbox>
+          ))}
+        </Checkbox.Group>
+        <Checkbox.Group
+          style={{ display: "block", margin: "5px 0px" }}
+          onChange={handleNamespaceSelectItem}
+          value={moduleNamespaceFilter}
+        >
+          <b>Namespace</b>
+          <br />
+          {namespaceFilterData.map((item, index) => (
+            <Checkbox key={index} value={item}>
+              {item}
+            </Checkbox>
+          ))}
+        </Checkbox.Group>
+      </>
     );
   };
   const handleSearch = (event: any) => {
