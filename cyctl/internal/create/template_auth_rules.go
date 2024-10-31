@@ -26,12 +26,8 @@ cyctl create templateauthrule demo-templateauthrule --repo='https://github.com/c
 )
 
 var (
-	username     string
-	password     string
-	usernameName string
-	passwordName string
-	usernameKey  string
-	passwordKey  string
+	username string
+	password string
 )
 
 func getTeamplateAuthRulesFromPromt() (string, string, string, string, string, error) {
@@ -110,7 +106,7 @@ func validateSecretKeySelector(username, password string) (string, string, strin
 	if usernameName == "" || usernameKey == "" || passwordName == "" || passwordKey == "" {
 		return "", "", "", "", fmt.Errorf("invalid format for username or password. Expected 'name:key'")
 	}
-	
+
 	return usernameName, usernameKey, passwordName, passwordKey, nil
 }
 
@@ -124,6 +120,13 @@ func splitNameKey(input string) (string, string) {
 
 // createTemplateAuthRule allows you to create TemplateAuthRule Custom Resource.
 func createTemplateAuthRule(clientset *client.CyclopsV1Alpha1Client, templateAuthRuleName string) {
+	var (
+		usernameName string
+		passwordName string
+		usernameKey  string
+		passwordKey  string
+	)
+
 	if username == "" && password == "" && repo == "" {
 		var err error
 		usernameName, usernameKey, passwordName, passwordKey, repo, err = getTeamplateAuthRulesFromPromt()
