@@ -10,6 +10,11 @@ import {
   BooleanField,
   getValueFromNestedObject,
 } from "./fields/boolean/Boolean";
+import { Alert, Row } from "antd";
+import { WarningTwoTone } from "@ant-design/icons";
+import Link from "antd/lib/typography/Link";
+import { SuggestionInputField } from "./fields/string/SuggestionInput";
+import "./custom.css";
 
 interface Props {
   isModuleEdit: boolean;
@@ -70,6 +75,18 @@ export function mapFields(
         if (field.enum) {
           formFields.push(
             <SelectInputField
+              field={field}
+              formItemName={formItemName}
+              arrayField={arrayField}
+              isRequired={isRequired}
+              isModuleEdit={isModuleEdit}
+            />,
+          );
+          return;
+        }
+        if (field["x-suggestions"]) {
+          formFields.push(
+            <SuggestionInputField
               field={field}
               formItemName={formItemName}
               arrayField={arrayField}
@@ -177,6 +194,84 @@ export function mapFields(
   return formFields;
 }
 
+const NoFieldsAlert = () => {
+  const valuesSchema = () => {
+    return (
+      <Link
+        href={"https://helm.sh/docs/topics/charts/#schema-files"}
+        target={"_blank"}
+        style={{
+          textDecoration: "underline",
+          textDecorationColor: "#555",
+        }}
+      >
+        <code style={{ backgroundColor: "#fff", color: "#555" }}>
+          values.schema.json
+        </code>
+      </Link>
+    );
+  };
+
+  const generateSchemaDocs = () => {
+    return (
+      <Link
+        href={
+          "https://cyclops-ui.com/docs/templates/#generating-helm-chart-schema"
+        }
+        target={"_blank"}
+        style={{
+          textDecoration: "underline",
+          textDecorationColor: "#555",
+        }}
+      >
+        here.
+      </Link>
+    );
+  };
+
+  return (
+    <Alert
+      message={
+        <div>
+          <WarningTwoTone
+            twoToneColor="#f3801a"
+            style={{
+              paddingRight: "5px",
+              fontSize: "24px",
+              verticalAlign: "middle",
+            }}
+          />
+          No fields to render
+        </div>
+      }
+      closable={true}
+      description={
+        <div>
+          <Row>
+            <span>
+              Selected template contains no fields to render. You can still
+              install this Helm chart with it's default values, but in order to
+              update the values, make sure to add {valuesSchema()}.
+            </span>
+          </Row>
+          <Row>
+            <span>
+              You can generate your Helm chart schema and add it to your chart
+              by following our docs {generateSchemaDocs()}
+            </span>
+          </Row>
+        </div>
+      }
+      type="warning"
+      style={{
+        borderColor: "#ffc403",
+        borderWidth: "1.5px",
+        marginBottom: "16px",
+      }}
+    />
+  );
+};
+
 const TemplateFormFields = ({
   isModuleEdit,
   fields,
@@ -188,6 +283,10 @@ const TemplateFormFields = ({
   arrayField,
   required,
 }: Props) => {
+  if (!fields) {
+    return <NoFieldsAlert />;
+  }
+
   return (
     <div>
       {mapFields(

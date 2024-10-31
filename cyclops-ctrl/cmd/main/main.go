@@ -21,6 +21,7 @@ import (
 
 	"github.com/cyclops-ui/cyclops/cyclops-ctrl/internal/auth"
 	"github.com/cyclops-ui/cyclops/cyclops-ctrl/internal/handler"
+	"github.com/cyclops-ui/cyclops/cyclops-ctrl/internal/integrations/helm"
 	"github.com/cyclops-ui/cyclops/cyclops-ctrl/internal/modulecontroller"
 	"github.com/cyclops-ui/cyclops/cyclops-ctrl/internal/prometheus"
 	"github.com/cyclops-ui/cyclops/cyclops-ctrl/internal/telemetry"
@@ -90,7 +91,9 @@ func main() {
 
 	prometheus.StartCacheMetricsUpdater(&monitor, templatesRepo.ReturnCache(), 10*time.Second, setupLog)
 
-	handler, err := handler.New(templatesRepo, k8sClient, renderer, telemetryClient, monitor)
+	helmReleaseClient := helm.NewReleaseClient(getHelmWatchNamespace())
+
+	handler, err := handler.New(templatesRepo, k8sClient, helmReleaseClient, renderer, telemetryClient, monitor)
 	if err != nil {
 		panic(err)
 	}
@@ -110,7 +113,7 @@ func main() {
 		}),
 		Cache: ctrlCache.Options{
 			DefaultNamespaces: map[string]ctrlCache.Config{
-				getWatchNamespace("WATCH_NAMESPACE"): {},
+				getWatchNamespace(): {},
 			},
 		},
 	})
@@ -126,6 +129,7 @@ func main() {
 		k8sClient,
 		renderer,
 		telemetryClient,
+		monitor,
 	)).SetupWithManager(mgr); err != nil {
 		setupLog.Error(err, "unable to create controller", "controller", "Module")
 		os.Exit(1)
@@ -160,10 +164,18 @@ func getEnvBool(key string) bool {
 	return b
 }
 
-func getWatchNamespace(key string) string {
-	value := os.Getenv(key)
+func getWatchNamespace() string {
+	value := os.Getenv("WATCH_NAMESPACE")
 	if value == "" {
 		return "cyclops"
+	}
+	return value
+}
+
+func getHelmWatchNamespace() string {
+	value := os.Getenv("WATCH_NAMESPACE_HELM")
+	if value == "" {
+		return ""
 	}
 	return value
 }

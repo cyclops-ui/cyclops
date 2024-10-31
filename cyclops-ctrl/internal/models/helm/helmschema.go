@@ -13,6 +13,7 @@ type Property struct {
 	Properties    map[string]Property `json:"properties"`
 	Items         *Property           `json:"items"`
 	Enum          []interface{}       `json:"enum"`
+	Suggestions   []interface{}       `json:"x-suggestions"`
 	Required      []string            `json:"required"`
 	FileExtension string              `json:"fileExtension"`
 	Reference     string              `json:"$ref"`

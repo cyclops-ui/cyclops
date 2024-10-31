@@ -38,6 +38,12 @@ spec:
                       type: string
                     repo:
                       type: string
+                    sourceType:
+                      enum:
+                      - git
+                      - helm
+                      - oci
+                      type: string
                     version:
                       type: string
                   required:
@@ -73,6 +79,12 @@ spec:
                   path:
                     type: string
                   repo:
+                    type: string
+                  sourceType:
+                    enum:
+                    - git
+                    - helm
+                    - oci
                     type: string
                   version:
                     type: string

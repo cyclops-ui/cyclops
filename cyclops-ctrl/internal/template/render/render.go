@@ -16,10 +16,10 @@ import (
 )
 
 type Renderer struct {
-	k8sClient *k8sclient.KubernetesClient
+	k8sClient k8sclient.IKubernetesClient
 }
 
-func NewRenderer(kubernetesClient *k8sclient.KubernetesClient) *Renderer {
+func NewRenderer(kubernetesClient k8sclient.IKubernetesClient) *Renderer {
 	return &Renderer{
 		k8sClient: kubernetesClient,
 	}
@@ -66,6 +66,7 @@ func (r *Renderer) HelmTemplate(module cyclopsv1alpha1.Module, moduleTemplate *m
 	top["Release"] = map[string]interface{}{
 		"Name":      module.Name,
 		"Namespace": mapTargetNamespace(module.Spec.TargetNamespace),
+		"Service":   "Helm",
 	}
 
 	versionInfo, err := r.k8sClient.VersionInfo()

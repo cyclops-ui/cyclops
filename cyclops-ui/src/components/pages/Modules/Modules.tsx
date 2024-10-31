@@ -109,7 +109,7 @@ const Modules = () => {
 
   const getStatusColor = (module: any) => {
     if (module.status === "unknown") {
-      return "gray";
+      return "#d3d3d3";
     }
 
     if (module.status === "healthy") {
@@ -153,11 +153,40 @@ const Modules = () => {
     if (filteredData.length === 0) {
       return (
         <div style={{ width: "100%" }}>
+          <Col
+            key={filteredData.length + 1}
+            xs={24}
+            sm={12}
+            md={8}
+            lg={8}
+            xl={6}
+          >
+            <a href={"/modules/new"}>
+              <Card className={styles.addmodulecard}>
+                <Row
+                  style={{
+                    display: "flex",
+                    justifyContent: "center",
+                    alignItems: "center",
+                    height: "50px",
+                  }}
+                >
+                  <PlusCircleOutlined
+                    style={{ fontSize: "24px", paddingBottom: "8px" }}
+                  />
+                </Row>
+                <Row>
+                  <h3 style={{ margin: 0 }}>Add new module</h3>
+                </Row>
+              </Card>
+            </a>
+          </Col>
           <Empty description="No Modules Found"></Empty>
         </div>
       );
     }
-    return filteredData.map((module: any, index) => (
+
+    let moduleCards = filteredData.map((module: any, index) => (
       <Col key={index} xs={24} sm={12} md={8} lg={8} xl={6}>
         <a href={"/modules/" + module.name}>
           <Card
@@ -255,6 +284,32 @@ const Modules = () => {
         </a>
       </Col>
     ));
+
+    moduleCards.push(
+      <Col key={filteredData.length + 1} xs={24} sm={12} md={8} lg={8} xl={6}>
+        <a href={"/modules/new"}>
+          <Card className={styles.addmodulecard}>
+            <Row
+              style={{
+                display: "flex",
+                justifyContent: "center",
+                alignItems: "center",
+                height: "100%",
+              }}
+            >
+              <PlusCircleOutlined
+                style={{ fontSize: "24px", paddingBottom: "8px" }}
+              />
+            </Row>
+            <Row>
+              <h3>Add new module</h3>
+            </Row>
+          </Card>
+        </a>
+      </Col>,
+    );
+
+    return moduleCards;
   };
 
   return (

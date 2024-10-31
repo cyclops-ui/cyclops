@@ -15,7 +15,7 @@ import {
   notification,
 } from "antd";
 import axios from "axios";
-import { findMaps, flattenObjectKeys } from "../../../utils/form";
+import { findMaps, flattenObjectKeys, mapsToArray } from "../../../utils/form";
 import "./custom.css";
 import defaultTemplate from "../../../static/img/default-template-icon.png";
 
@@ -43,6 +43,7 @@ interface templateStoreOption {
     repo: string;
     path: string;
     version: string;
+    sourceType: string;
   };
 }
 
@@ -63,6 +64,7 @@ const NewModule = () => {
     repo: "",
     path: "",
     version: "",
+    sourceType: "",
   });
 
   const [initialValues, setInitialValues] = useState({});
@@ -112,96 +114,6 @@ const NewModule = () => {
     form.validateFields(flattenObjectKeys(initialValues));
   }, [initialValues, form]);
 
-  const mapsToArray = (fields: any[], values: any): any => {
-    let out: any = {};
-    fields.forEach((field) => {
-      let valuesList: any[] = [];
-      switch (field.type) {
-        case "string":
-          out[field.name] = values[field.name];
-          break;
-        case "number":
-          out[field.name] = values[field.name];
-          break;
-        case "boolean":
-          out[field.name] = values[field.name];
-          break;
-        case "object":
-          if (values[field.name]) {
-            out[field.name] = mapsToArray(field.properties, values[field.name]);
-          }
-          break;
-        case "array":
-          if (values[field.name] === undefined || values[field.name] === null) {
-            out[field.name] = [];
-            break;
-          }
-
-          valuesList = [];
-          if (Array.isArray(values[field.name])) {
-            valuesList = values[field.name];
-          } else if (typeof values[field.name] === "string") {
-            valuesList = [values[field.name]];
-          }
-
-          let objectArr: any[] = [];
-          valuesList.forEach((valueFromList) => {
-            // array items not defined
-            if (field.items === null || field.items === undefined) {
-              objectArr.push(valueFromList);
-              return;
-            }
-
-            switch (field.items.type) {
-              case "string":
-                objectArr.push(valueFromList);
-                break;
-              case "object":
-                objectArr.push(
-                  mapsToArray(field.items.properties, valueFromList),
-                );
-                break;
-            }
-          });
-          out[field.name] = objectArr;
-          break;
-        case "map":
-          let object: any[] = [];
-
-          if (values[field.name] === undefined || values[field.name] === null) {
-            out[field.name] = [];
-            break;
-          }
-
-          Object.keys(values[field.name]).forEach((key) => {
-            if (typeof values[field.name][key] === "object") {
-              object.push({
-                key: key,
-                value: YAML.stringify(values[field.name][key], null, 4),
-              });
-              return;
-            }
-
-            object.push({
-              key: key,
-              value: values[field.name][key],
-            });
-          });
-
-          out[field.name] = object;
-
-          // valuesList.forEach(valueFromList => {
-          //     // object.push({})
-          //     // object[valueFromList.key] = valueFromList.value
-          // })
-          // out[field.name] = object
-          break;
-      }
-    });
-
-    return out;
-  };
-
   const handleSubmit = (values: any) => {
     const moduleName = values["cyclops_module_name"];
     const moduleNamespace = values["cyclops_module_namespace"];
@@ -217,6 +129,7 @@ const NewModule = () => {
           repo: template.repo,
           path: template.path,
           version: template.version,
+          sourceType: template.sourceType,
         },
       })
       .then((res) => {
@@ -228,7 +141,12 @@ const NewModule = () => {
       });
   };
 
-  const loadTemplate = async (repo: string, path: string, commit: string) => {
+  const loadTemplate = async (
+    repo: string,
+    path: string,
+    commit: string,
+    sourceType: string,
+  ) => {
     setConfig({
       name: "",
       version: "",
@@ -265,7 +183,14 @@ const NewModule = () => {
 
     await axios
       .get(
-        `/api/templates?repo=` + repo + `&path=` + path + `&commit=` + commit,
+        `/api/templates?repo=` +
+          repo +
+          `&path=` +
+          path +
+          `&commit=` +
+          commit +
+          `&sourceType=` +
+          sourceType,
       )
       .then((templatesRes) => {
         setConfig(templatesRes.data);
@@ -289,7 +214,9 @@ const NewModule = () => {
           `&path=` +
           path +
           `&commit=` +
-          commit,
+          commit +
+          `&sourceType=` +
+          sourceType,
       )
       .then((res) => {
         let initialValuesMapped = mapsToArray(
@@ -357,9 +284,10 @@ const NewModule = () => {
       repo: ts.ref.repo,
       path: ts.ref.path,
       version: ts.ref.version,
+      sourceType: ts.ref.sourceType,
     });
 
-    loadTemplate(ts.ref.repo, ts.ref.path, ts.ref.version);
+    loadTemplate(ts.ref.repo, ts.ref.path, ts.ref.version, ts.ref.sourceType);
   };
 
   const onLoadFromFile = () => {
@@ -678,7 +606,11 @@ const NewModule = () => {
                   setLoadingValuesModal(true);
                 }}
                 name="Save"
-                disabled={loadingTemplate || loadingTemplateInitialValues}
+                disabled={
+                  loadingTemplate ||
+                  loadingTemplateInitialValues ||
+                  !config.root.properties
+                }
               >
                 Load values from file
               </Button>{" "}
@@ -695,7 +627,7 @@ const NewModule = () => {
                   !(template.version || template.path || template.repo)
                 }
               >
-                Save
+                Deploy
               </Button>{" "}
               <Button
                 htmlType="button"
