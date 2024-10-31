@@ -355,6 +355,21 @@ func (k *KubernetesClient) mapRole(group, version, kind, name, namespace string)
 	}, nil
 }
 
+func (k *KubernetesClient) mapClusterRole(group, version, kind, name string) (*dto.ClusterRole, error) {
+	clusterRole, err := k.clientset.RbacV1().ClusterRoles().Get(context.Background(), name, metav1.GetOptions{})
+	if err != nil {
+		return nil, err
+	}
+
+	return &dto.ClusterRole{
+		Group:   group,
+		Version: version,
+		Kind:    kind,
+		Name:    clusterRole.Name,
+		Rules:   clusterRole.Rules,
+	}, nil
+}
+
 func mapNetworkPolicyIngressRules(rules []networkingv1.NetworkPolicyIngressRule) []dto.NetworkPolicyIngressRule {
 	mapped := make([]dto.NetworkPolicyIngressRule, len(rules))
 	for i, rule := range rules {
