@@ -158,11 +158,11 @@ Once you deploy the Module, you will see your shiny new S3 bucket custom resourc
 
 ![S3 bucket testing setting](../../static/img/2024-10-31-custom-aws-cloud-platforms/aws-bucket-testing.png)
 
-Since the bucket above was created with the testing type, the bucket you created has a lifecycle rule for expiring objects like the one below.
+Since the bucket above was created with the `testing` type, the bucket you created has a lifecycle rule for expiring objects like the one below.
 
 ![S3 bucket production setting](../../static/img/2024-10-31-custom-aws-cloud-platforms/aws-bucket-production.png)
 
-You can now go back to your Cyclops console and edit the module you used to create your S3 bucket. Change the Bucket use case to production and check your buckets lifecycle rules. You can see that the rule is now called expire-prod and if you check its configuration, you will find it defines a completely different lifecycle which you never had to care about and somebody did for you.
+You can now go back to your Cyclops console and edit the module you used to create your S3 bucket. Change the Bucket use case to `production` and check your buckets lifecycle rules. You can see that the rule is now called `expire-prod` and if you check its configuration, you will find it defines a completely different lifecycle which you never had to care about and somebody did for you.
 
 ![Edit S3 bucket](../../static/img/2024-10-31-custom-aws-cloud-platforms/cyclops-edit-bucket.png)
 
