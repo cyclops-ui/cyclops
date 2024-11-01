@@ -2,8 +2,8 @@ apiVersion: v2
 name: cyclops-chart
 description: Cyclops Helm chart
 type: application
-version: "0.8.0"
-appVersion: "v0.8.2"
+version: "0.9.0"
+appVersion: "v0.14.3"
 home: https://cyclops-ui.com/
 keywords:
   - Devops
