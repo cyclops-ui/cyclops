@@ -15,6 +15,7 @@ import axios from "axios";
 import { useState } from "react";
 import { mapResponseError } from "../../../../utils/api/errors";
 import { formatPodAge } from "../../../../utils/pods";
+import ReplicaSetProgress from "../ReplicaSetProgress";
 import PodLogs from "./PodLogs";
 import PodManifest from "./PodManifest";
 import styles from "./styles.module.css";
@@ -22,6 +23,7 @@ import styles from "./styles.module.css";
 interface Props {
   namespace: string;
   pods: any[];
+  replicaSets?: any[];
   updateResourceData: () => void;
 }
 
@@ -33,7 +35,12 @@ interface Pod {
   namespace: any;
 }
 
-const PodTable = ({ pods, namespace, updateResourceData }: Props) => {
+const PodTable = ({
+  pods,
+  namespace,
+  replicaSets,
+  updateResourceData,
+}: Props) => {
   const [deletePodRef, setDeletePodRef] = useState<{
     on: boolean;
     podDetails: Pod;
@@ -136,6 +143,9 @@ const PodTable = ({ pods, namespace, updateResourceData }: Props) => {
 
   return (
     <div>
+      {replicaSets && replicaSets.length > 0 && (
+        <ReplicaSetProgress replicaSets={replicaSets} />
+      )}
       <Table dataSource={pods}>
         <Table.Column
           title="Name"

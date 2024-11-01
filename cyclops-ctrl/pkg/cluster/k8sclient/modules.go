@@ -491,17 +491,15 @@ func (k *KubernetesClient) getReplicaset(deployment appsv1.Deployment) ([]dto.Re
 	for _, rs := range rsList.Items {
 		if metav1.IsControlledBy(&rs, &deployment) {
 			out = append(out, dto.ReplicaSet{
-				Group:                rs.GroupVersionKind().Group,
-				Version:              rs.GroupVersionKind().Version,
-				Kind:                 rs.GroupVersionKind().Kind,
-				Name:                 rs.GetName(),
-				Namespace:            rs.GetNamespace(),
-				Replicas:             rs.Status.Replicas,
-				AvailableReplicas:    rs.Status.AvailableReplicas,
-				ReadyReplicas:        rs.Status.ReadyReplicas,
-				FullyLabeledReplicas: rs.Status.FullyLabeledReplicas,
-				Started:              rs.GetCreationTimestamp(),
-				Deleted:              isReplicaSetDeleted(rs),
+				Group:             rs.GroupVersionKind().Group,
+				Version:           rs.GroupVersionKind().Version,
+				Kind:              rs.GroupVersionKind().Kind,
+				Name:              rs.GetName(),
+				Namespace:         rs.GetNamespace(),
+				Replicas:          rs.Status.Replicas,
+				AvailableReplicas: rs.Status.AvailableReplicas,
+				Started:           rs.GetCreationTimestamp(),
+				Deleted:           isReplicaSetDeleted(rs),
 			})
 		}
 	}

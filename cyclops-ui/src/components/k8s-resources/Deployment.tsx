@@ -4,7 +4,6 @@ import { useCallback, useEffect, useState } from "react";
 import { isStreamingEnabled } from "../../utils/api/common";
 import { mapResponseError } from "../../utils/api/errors";
 import PodTable from "./common/PodTable/PodTable";
-import ReplicaSet from "./ReplicaSet";
 
 interface Props {
   name: string;
@@ -114,22 +113,13 @@ const Deployment = ({ name, namespace, workload }: Props) => {
           orientationMargin="0"
           orientation={"left"}
         >
-          Replica Sets: {getReplicaSets().length}
-        </Divider>
-        <Col span={24} style={{ overflowX: "auto" }}>
-          <ReplicaSet replicaSets={sortReplicaSets(getReplicaSets())} />
-        </Col>
-        <Divider
-          style={{ fontSize: "120%" }}
-          orientationMargin="0"
-          orientation={"left"}
-        >
           Replicas: {getPodsLength()}
         </Divider>
         <Col span={24} style={{ overflowX: "auto" }}>
           <PodTable
             namespace={namespace}
             pods={getPods()}
+            replicaSets={sortReplicaSets(getReplicaSets())}
             updateResourceData={() => {}}
           />
         </Col>
