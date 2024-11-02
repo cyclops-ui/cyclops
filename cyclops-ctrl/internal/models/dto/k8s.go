@@ -716,3 +716,45 @@ func (s *Role) GetDeleted() bool {
 func (s *Role) SetDeleted(deleted bool) {
 	s.Deleted = deleted
 }
+
+type ClusterRole struct {
+	Group     string              `json:"group"`
+	Version   string              `json:"version"`
+	Kind      string              `json:"kind"`
+	Name      string              `json:"name"`
+	Namespace string              `json:"namespace"`
+	Deleted   bool                `json:"deleted"`
+	Rules     []rbacv1.PolicyRule `json:"rules"`
+}
+
+func (s *ClusterRole) GetGroupVersionKind() string {
+	return s.Group + "/" + s.Version + ", Kind=" + s.Kind
+}
+
+func (s *ClusterRole) GetGroup() string {
+	return s.Group
+}
+
+func (s *ClusterRole) GetVersion() string {
+	return s.Version
+}
+
+func (s *ClusterRole) GetKind() string {
+	return s.Kind
+}
+
+func (s *ClusterRole) GetName() string {
+	return s.Name
+}
+
+func (s *ClusterRole) GetNamespace() string {
+	return s.Namespace
+}
+
+func (s *ClusterRole) GetDeleted() bool {
+	return s.Deleted
+}
+
+func (s *ClusterRole) SetDeleted(deleted bool) {
+	s.Deleted = deleted
+}

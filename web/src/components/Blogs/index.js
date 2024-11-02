@@ -21,6 +21,19 @@ const Blogs = () => {
         <Row gutter={[16, 16]}>
           <Col xs={{ span: 20, offset: 2 }} md={{ span: 6, offset: 3 }}>
             <Blog
+              title={"Custom AWS Cloud Platforms"}
+              description={
+                "But should we use Kubernetes as just a container orchestrator, or is there more to it..."
+              }
+              blogLink={
+                "https://cyclops-ui.com/blog/2024/10/31/custom-aws-cloud-platforms"
+              }
+              avatar={"https://github.com/petar-cvit.png"}
+              banner={"/img/2024-10-31-custom-aws-cloud-platforms/cover.jpeg"}
+            />
+          </Col>
+          <Col xs={{ span: 20, offset: 2 }} md={{ span: 6, offset: 0 }}>
+            <Blog
               title={"5 Internal Developer Platforms you need to know about!"}
               description={
                 "Gartner predicts that by 2026, 80% of software companies will have established platform engineering teams..."
@@ -43,19 +56,6 @@ const Blogs = () => {
               }
               avatar={"https://github.com/KaradzaJuraj.png"}
               banner={"/img/2024-10-17-platform-engineering/cover.jpeg"}
-            />
-          </Col>
-          <Col xs={{ span: 20, offset: 2 }} md={{ span: 6, offset: 0 }}>
-            <Blog
-              title={"A Kubernetes Setup Speedrun 🏃💨"}
-              description={
-                "Whether you are new to Kubernetes or maybe you're part of a startup that's always short on time, this guide is for you..."
-              }
-              blogLink={
-                "https://cyclops-ui.com/blog/2024/09/17/civo-x-cyclops"
-              }
-              avatar={"https://github.com/KaradzaJuraj.png"}
-              banner={"/img/2024-09-17-civo-x-cyclops/cover.jpeg"}
             />
           </Col>
         </Row>
