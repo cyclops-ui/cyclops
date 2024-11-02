@@ -22,29 +22,11 @@ import styles from "./styles.module.css";
 import { PlusCircleOutlined, FilterOutlined } from "@ant-design/icons";
 import { mapResponseError } from "../../../utils/api/errors";
 
-const { Title } = Typography;
-
-interface ModuleInterface {
-  name: string;
-  namespace: string;
-  targetNamespace: string;
-  template: {
-    repo: string;
-    path: string;
-    version: string;
-    resolvedVersion: string;
-    sourceType: string;
-  };
-  version: string;
-  values: { [key: string]: any };
-  status: string;
-  iconURL: string;
-  reconciliationStatus: { [key: string]: any };
-}
+const { Title, Text } = Typography;
 
 const Modules = () => {
-  const [allData, setAllData] = useState<ModuleInterface[]>([]);
-  const [filteredData, setFilteredData] = useState<ModuleInterface[]>([]);
+  const [allData, setAllData] = useState([]);
+  const [filteredData, setFilteredData] = useState([]);
   const [loadingModules, setLoadingModules] = useState(false);
   const [moduleHealthFilter, setModuleHealthFilter] = useState<string[]>([
     "Healthy",
@@ -66,12 +48,27 @@ const Modules = () => {
   useEffect(() => {
     setLoadingModules(true);
 
+    function populateNamespaceData() {
+      axios
+        .get(`/api/namespaces`)
+        .then((res) => {
+          setNamespaceFilterData(res.data);
+          setModuleNamespaceFilter(res.data);
+          setLoadingModules(false);
+        })
+        .catch((error) => {
+          setError(mapResponseError(error));
+          setLoadingModules(false);
+        });
+    }
+
+    populateNamespaceData();
+
     function fetchModules() {
       axios
         .get(`/api/modules/list`)
         .then((res) => {
           setAllData(res.data);
-          populateNamespaceData(res.data);
           setLoadingModules(false);
         })
         .catch((error) => {
@@ -86,16 +83,6 @@ const Modules = () => {
       clearInterval(interval);
     };
   }, []);
-
-  const populateNamespaceData = (allData: ModuleInterface[]) => {
-    const namespaceData = allData
-      .map((module) => module.targetNamespace)
-      .filter((targetNamespace, index, self) => {
-        return self.indexOf(targetNamespace) === index;
-      });
-    setNamespaceFilterData(namespaceData);
-    setModuleNamespaceFilter(namespaceData);
-  };
 
   useEffect(() => {
     var updatedList = [...allData];
@@ -135,7 +122,7 @@ const Modules = () => {
           onChange={handleSelectItem}
           value={moduleHealthFilter}
         >
-          <b>Health</b>
+          <Text strong>Health</Text>
           <br />
           {resourceFilter.map((item, index) => (
             <Checkbox key={index} value={item}>
@@ -148,7 +135,7 @@ const Modules = () => {
           onChange={handleNamespaceSelectItem}
           value={moduleNamespaceFilter}
         >
-          <b>Namespace</b>
+          <Text strong>Namespace</Text>
           <br />
           {namespaceFilterData.map((item, index) => (
             <Checkbox key={index} value={item}>
