@@ -36,13 +36,14 @@ func (k *KubernetesClient) GetResourcesForRelease(releaseName string) ([]dto.Res
 
 	other := make([]unstructured.Unstructured, 0)
 	for _, gvr := range managedGVRs {
-		rs, err := k.Dynamic.Resource(gvr).List(context.Background(), metav1.ListOptions{
+		rs, err := k.Dynamic.Resource(gvr).Namespace(k.helmReleaseNamespace).List(context.Background(), metav1.ListOptions{
 			LabelSelector: labels.Set(map[string]string{
 				"app.kubernetes.io/instance":   releaseName,
 				"app.kubernetes.io/managed-by": "Helm",
 			}).String(),
 		})
 		if err != nil {
+			k.logger.Error(err, "failed to list resources", "gvr", gvr, "namespace", k.helmReleaseNamespace)
 			continue
 		}
 

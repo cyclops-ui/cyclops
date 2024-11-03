@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"io"
 	"log"
-	"path"
 	"strings"
 
 	"github.com/pkg/errors"
@@ -104,7 +103,6 @@ func (r *ReleaseClient) UpgradeRelease(
 	client.SetRegistryClient(registryClient)
 
 	for _, dependency := range current.Chart.Metadata.Dependencies {
-		fmt.Println(dependency.Repository, dependency.Name, path.Join(dependency.Repository, dependency.Name))
 		fp, err := client.LocateChart(dependency.Repository+"/"+dependency.Name, cli.New())
 		if err != nil {
 			return errors.Wrap(err, "failed to locate dependency chart")
