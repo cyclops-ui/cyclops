@@ -122,12 +122,18 @@ func main() {
 		os.Exit(1)
 	}
 
+	disableReconciler := getEnvBool("DISABLE_RECONCILER")
+	if disableReconciler {
+		setupLog.Info("reconciler disabled")
+	}
+
 	if err = (modulecontroller.NewModuleReconciler(
 		mgr.GetClient(),
 		mgr.GetScheme(),
 		templatesRepo,
 		k8sClient,
 		renderer,
+		disableReconciler,
 		telemetryClient,
 		monitor,
 	)).SetupWithManager(mgr); err != nil {

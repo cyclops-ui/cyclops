@@ -50,9 +50,10 @@ type ModuleReconciler struct {
 	client.Client
 	Scheme *runtime.Scheme
 
-	templatesRepo    templaterepo.ITemplateRepo
-	kubernetesClient k8sclient.IKubernetesClient
-	renderer         *render.Renderer
+	templatesRepo      templaterepo.ITemplateRepo
+	kubernetesClient   k8sclient.IKubernetesClient
+	renderer           *render.Renderer
+	skipReconciliation bool
 
 	telemetryClient telemetry.Client
 	monitor         prometheus.Monitor
@@ -65,18 +66,20 @@ func NewModuleReconciler(
 	templatesRepo templaterepo.ITemplateRepo,
 	kubernetesClient k8sclient.IKubernetesClient,
 	renderer *render.Renderer,
+	skipReconciliation bool,
 	telemetryClient telemetry.Client,
 	monitor prometheus.Monitor,
 ) *ModuleReconciler {
 	return &ModuleReconciler{
-		Client:           client,
-		Scheme:           scheme,
-		templatesRepo:    templatesRepo,
-		kubernetesClient: kubernetesClient,
-		renderer:         renderer,
-		telemetryClient:  telemetryClient,
-		monitor:          monitor,
-		logger:           ctrl.Log.WithName("reconciler"),
+		Client:             client,
+		Scheme:             scheme,
+		templatesRepo:      templatesRepo,
+		kubernetesClient:   kubernetesClient,
+		renderer:           renderer,
+		telemetryClient:    telemetryClient,
+		monitor:            monitor,
+		skipReconciliation: skipReconciliation,
+		logger:             ctrl.Log.WithName("reconciler"),
 	}
 }
 
@@ -94,6 +97,11 @@ func NewModuleReconciler(
 // For more details, check Reconcile and its Result here:
 // - https://pkg.go.dev/sigs.k8s.io/controller-runtime@v0.14.4/pkg/reconcile
 func (r *ModuleReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
+	if r.skipReconciliation {
+		r.logger.Info("skipping reconciliation", "namespaced name", req.NamespacedName)
+		return ctrl.Result{}, nil
+	}
+
 	_ = log.FromContext(ctx)
 	r.telemetryClient.ModuleReconciliation()
 	r.monitor.OnReconciliation()
