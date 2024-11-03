@@ -122,7 +122,7 @@ func main() {
 		os.Exit(1)
 	}
 
-	disableReconciler := getEnvBool("DISABLE_RECONCILER")
+	disableReconciler := getEnvBool("DISABLE_MODULE_RECONCILER")
 	if disableReconciler {
 		setupLog.Info("reconciler disabled")
 	}
