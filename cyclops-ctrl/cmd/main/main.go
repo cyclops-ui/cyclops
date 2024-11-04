@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"os"
 	"strconv"
+	"strings"
 	"time"
 
 	_ "github.com/joho/godotenv/autoload"
@@ -74,7 +75,12 @@ func main() {
 	watchNamespace := getWatchNamespace()
 	helmWatchNamespace := getHelmWatchNamespace()
 
-	k8sClient, err := k8sclient.New(watchNamespace, helmWatchNamespace, zap.New(zap.UseFlagOptions(&opts)))
+	k8sClient, err := k8sclient.New(
+		watchNamespace,
+		helmWatchNamespace,
+		getModuleTargetNamespaces(),
+		zap.New(zap.UseFlagOptions(&opts)),
+	)
 	if err != nil {
 		fmt.Println("error bootstrapping Kubernetes client", err)
 		panic(err)
@@ -181,4 +187,14 @@ func getHelmWatchNamespace() string {
 		return ""
 	}
 	return value
+}
+
+func getModuleTargetNamespaces() []string {
+	envVar := os.Getenv("MODULE_TARGET_NAMESPACES")
+
+	if envVar == "" {
+		return []string{}
+	}
+
+	return strings.Split(envVar, ",")
 }
