@@ -1,17 +1,19 @@
 package handler
 
 import (
+	"context"
+	"github.com/cyclops-ui/cyclops/cyclops-ctrl/internal/controller"
 	"github.com/cyclops-ui/cyclops/cyclops-ctrl/internal/controller/sse"
 	"github.com/cyclops-ui/cyclops/cyclops-ctrl/internal/integrations/helm"
-	"github.com/gin-gonic/gin"
-	"net/http"
-
-	"github.com/cyclops-ui/cyclops/cyclops-ctrl/internal/controller"
 	"github.com/cyclops-ui/cyclops/cyclops-ctrl/internal/prometheus"
 	"github.com/cyclops-ui/cyclops/cyclops-ctrl/internal/telemetry"
 	templaterepo "github.com/cyclops-ui/cyclops/cyclops-ctrl/internal/template"
 	"github.com/cyclops-ui/cyclops/cyclops-ctrl/internal/template/render"
 	"github.com/cyclops-ui/cyclops/cyclops-ctrl/pkg/cluster/k8sclient"
+	"github.com/gin-gonic/gin"
+	"net/http"
+	"os/signal"
+	"syscall"
 )
 
 type Handler struct {
@@ -45,7 +47,7 @@ func New(
 	}, nil
 }
 
-func (h *Handler) Start() error {
+func (h *Handler) Start(ctx context.Context) {
 	gin.SetMode(gin.DebugMode)
 
 	templatesController := controller.NewTemplatesController(h.templatesRepo, h.k8sClient, h.telemetryClient)
@@ -56,6 +58,9 @@ func (h *Handler) Start() error {
 	h.router = gin.New()
 
 	server := sse.NewServer(h.k8sClient)
+
+	h.router.GET("/healthz", func(c *gin.Context) { c.String(http.StatusOK, "OK") })
+	h.router.GET("/readyz", func(c *gin.Context) { c.String(http.StatusOK, "OK") })
 
 	h.router.GET("/stream/resources/:name", sse.HeadersMiddleware(), server.Resources)
 	h.router.GET("/stream/releases/resources/:name", sse.HeadersMiddleware(), server.ReleaseResources)
@@ -116,7 +121,10 @@ func (h *Handler) Start() error {
 
 	h.router.Use(h.options)
 
-	return h.router.Run()
+	c, stop := signal.NotifyContext(ctx, syscall.SIGINT, syscall.SIGTERM)
+	go h.router.Run()
+	<-c.Done()
+	stop()
 }
 
 func (h *Handler) pong() func(ctx *gin.Context) {
