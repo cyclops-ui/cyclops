@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"os"
 	"strconv"
-	"strings"
 	"time"
 
 	_ "github.com/joho/godotenv/autoload"
@@ -74,11 +73,12 @@ func main() {
 
 	watchNamespace := getWatchNamespace()
 	helmWatchNamespace := getHelmWatchNamespace()
+	moduleTargetNamespace := getModuleTargetNamespace()
 
 	k8sClient, err := k8sclient.New(
 		watchNamespace,
 		helmWatchNamespace,
-		getModuleTargetNamespaces(),
+		moduleTargetNamespace,
 		zap.New(zap.UseFlagOptions(&opts)),
 	)
 	if err != nil {
@@ -102,7 +102,7 @@ func main() {
 
 	helmReleaseClient := helm.NewReleaseClient(helmWatchNamespace)
 
-	handler, err := handler.New(templatesRepo, k8sClient, helmReleaseClient, renderer, telemetryClient, monitor)
+	handler, err := handler.New(templatesRepo, k8sClient, helmReleaseClient, renderer, moduleTargetNamespace, telemetryClient, monitor)
 	if err != nil {
 		panic(err)
 	}
@@ -181,20 +181,14 @@ func getWatchNamespace() string {
 	return value
 }
 
+func getModuleTargetNamespace() string {
+	return os.Getenv("MODULE_TARGET_NAMESPACE")
+}
+
 func getHelmWatchNamespace() string {
 	value := os.Getenv("WATCH_NAMESPACE_HELM")
 	if value == "" {
 		return ""
 	}
 	return value
-}
-
-func getModuleTargetNamespaces() []string {
-	envVar := os.Getenv("MODULE_TARGET_NAMESPACES")
-
-	if envVar == "" {
-		return []string{}
-	}
-
-	return strings.Split(envVar, ",")
 }

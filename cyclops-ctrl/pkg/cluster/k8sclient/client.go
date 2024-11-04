@@ -25,9 +25,9 @@ type KubernetesClient struct {
 	discovery *discovery.DiscoveryClient
 	moduleset *client.CyclopsV1Alpha1Client
 
-	moduleNamespace        string
-	helmReleaseNamespace   string
-	moduleTargetNamespaces []string
+	moduleNamespace       string
+	helmReleaseNamespace  string
+	moduleTargetNamespace string
 
 	logger logr.Logger
 }
@@ -35,7 +35,7 @@ type KubernetesClient struct {
 func New(
 	moduleNamespace string,
 	helmReleaseNamespace string,
-	moduleTargetNamespaces []string,
+	moduleTargetNamespace string,
 	logger logr.Logger,
 ) (*KubernetesClient, error) {
 	config := ctrl.GetConfigOrDie()
@@ -57,14 +57,14 @@ func New(
 	}
 
 	return &KubernetesClient{
-		Dynamic:                dynamic,
-		discovery:              discovery,
-		clientset:              clientset,
-		moduleset:              moduleSet,
-		moduleNamespace:        moduleNamespace,
-		helmReleaseNamespace:   helmReleaseNamespace,
-		moduleTargetNamespaces: moduleTargetNamespaces,
-		logger:                 logger,
+		Dynamic:               dynamic,
+		discovery:             discovery,
+		clientset:             clientset,
+		moduleset:             moduleSet,
+		moduleNamespace:       moduleNamespace,
+		helmReleaseNamespace:  helmReleaseNamespace,
+		moduleTargetNamespace: moduleTargetNamespace,
+		logger:                logger,
 	}, nil
 }
 
