@@ -67,7 +67,7 @@ func (k *KubernetesClient) GetResourcesForModule(name string) ([]dto.Resource, e
 
 	other := make([]unstructured.Unstructured, 0)
 	for _, gvr := range managedGVRs {
-		rs, err := k.Dynamic.Resource(gvr).Namespace(k.moduleNamespace).List(context.Background(), metav1.ListOptions{
+		rs, err := k.Dynamic.Resource(gvr).List(context.Background(), metav1.ListOptions{
 			LabelSelector: "cyclops.module=" + name,
 		})
 		if err != nil {
