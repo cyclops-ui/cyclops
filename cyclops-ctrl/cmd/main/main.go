@@ -71,7 +71,9 @@ func main() {
 	)
 	telemetryClient.InstanceStart()
 
-	k8sClient, err := k8sclient.New()
+	watchNamespace := getWatchNamespace()
+
+	k8sClient, err := k8sclient.New(watchNamespace)
 	if err != nil {
 		fmt.Println("error bootstrapping Kubernetes client", err)
 		panic(err)
@@ -113,7 +115,7 @@ func main() {
 		}),
 		Cache: ctrlCache.Options{
 			DefaultNamespaces: map[string]ctrlCache.Config{
-				getWatchNamespace(): {},
+				watchNamespace: {},
 			},
 		},
 	})
