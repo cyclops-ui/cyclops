@@ -2,6 +2,12 @@ package handler
 
 import (
 	"context"
+	"net/http"
+	"os/signal"
+	"syscall"
+
+	"github.com/gin-gonic/gin"
+
 	"github.com/cyclops-ui/cyclops/cyclops-ctrl/internal/controller"
 	"github.com/cyclops-ui/cyclops/cyclops-ctrl/internal/controller/sse"
 	"github.com/cyclops-ui/cyclops/cyclops-ctrl/internal/integrations/helm"
@@ -10,10 +16,6 @@ import (
 	templaterepo "github.com/cyclops-ui/cyclops/cyclops-ctrl/internal/template"
 	"github.com/cyclops-ui/cyclops/cyclops-ctrl/internal/template/render"
 	"github.com/cyclops-ui/cyclops/cyclops-ctrl/pkg/cluster/k8sclient"
-	"github.com/gin-gonic/gin"
-	"net/http"
-	"os/signal"
-	"syscall"
 )
 
 type Handler struct {
