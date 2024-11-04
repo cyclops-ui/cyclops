@@ -71,6 +71,7 @@ func (k *KubernetesClient) GetResourcesForModule(name string) ([]dto.Resource, e
 			LabelSelector: "cyclops.module=" + name,
 		})
 		if err != nil {
+			k.logger.Error(err, "failed to list resources", "gvr", gvr, "namespace", k.helmReleaseNamespace)
 			continue
 		}
 
