@@ -30,31 +30,31 @@ const (
 )
 
 func (k *KubernetesClient) ListModules() ([]cyclopsv1alpha1.Module, error) {
-	moduleList, err := k.moduleset.Modules(cyclopsNamespace).List(metav1.ListOptions{})
+	moduleList, err := k.moduleset.Modules(k.moduleNamespace).List(metav1.ListOptions{})
 
 	return moduleList, err
 }
 
 func (k *KubernetesClient) CreateModule(module cyclopsv1alpha1.Module) error {
-	_, err := k.moduleset.Modules(cyclopsNamespace).Create(&module)
+	_, err := k.moduleset.Modules(k.moduleNamespace).Create(&module)
 	return err
 }
 
 func (k *KubernetesClient) UpdateModule(module *cyclopsv1alpha1.Module) error {
-	_, err := k.moduleset.Modules(cyclopsNamespace).Update(module)
+	_, err := k.moduleset.Modules(k.moduleNamespace).Update(module)
 	return err
 }
 
 func (k *KubernetesClient) UpdateModuleStatus(module *cyclopsv1alpha1.Module) (*cyclopsv1alpha1.Module, error) {
-	return k.moduleset.Modules(cyclopsNamespace).PatchStatus(module)
+	return k.moduleset.Modules(k.moduleNamespace).PatchStatus(module)
 }
 
 func (k *KubernetesClient) DeleteModule(name string) error {
-	return k.moduleset.Modules(cyclopsNamespace).Delete(name)
+	return k.moduleset.Modules(k.moduleNamespace).Delete(name)
 }
 
 func (k *KubernetesClient) GetModule(name string) (*cyclopsv1alpha1.Module, error) {
-	return k.moduleset.Modules(cyclopsNamespace).Get(name)
+	return k.moduleset.Modules(k.moduleNamespace).Get(name)
 }
 
 func (k *KubernetesClient) GetResourcesForModule(name string) ([]dto.Resource, error) {
@@ -71,6 +71,7 @@ func (k *KubernetesClient) GetResourcesForModule(name string) ([]dto.Resource, e
 			LabelSelector: "cyclops.module=" + name,
 		})
 		if err != nil {
+			k.logger.Error(err, "failed to list resources", "gvr", gvr, "namespace", k.helmReleaseNamespace)
 			continue
 		}
 

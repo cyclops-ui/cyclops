@@ -2,12 +2,15 @@ package k8sclient
 
 import (
 	"context"
-	"github.com/cyclops-ui/cyclops/cyclops-ctrl/internal/models/dto"
+	"sort"
+
+	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/labels"
 	"k8s.io/apimachinery/pkg/runtime/schema"
-	"sort"
+
+	"github.com/cyclops-ui/cyclops/cyclops-ctrl/internal/models/dto"
 )
 
 func (k *KubernetesClient) GetResourcesForRelease(releaseName string) ([]dto.Resource, error) {
@@ -36,13 +39,18 @@ func (k *KubernetesClient) GetResourcesForRelease(releaseName string) ([]dto.Res
 
 	other := make([]unstructured.Unstructured, 0)
 	for _, gvr := range managedGVRs {
-		rs, err := k.Dynamic.Resource(gvr).List(context.Background(), metav1.ListOptions{
+		rs, err := k.Dynamic.Resource(gvr).Namespace(k.helmReleaseNamespace).List(context.Background(), metav1.ListOptions{
 			LabelSelector: labels.Set(map[string]string{
 				"app.kubernetes.io/instance":   releaseName,
 				"app.kubernetes.io/managed-by": "Helm",
 			}).String(),
 		})
 		if err != nil {
+			if apierrors.IsNotFound(err) {
+				continue
+			}
+
+			k.logger.Error(err, "failed to list resources", "gvr", gvr, "namespace", k.helmReleaseNamespace)
 			continue
 		}
 
@@ -82,7 +90,7 @@ func (k *KubernetesClient) GetResourcesForRelease(releaseName string) ([]dto.Res
 func (k *KubernetesClient) GetWorkloadsForRelease(releaseName string) ([]dto.Resource, error) {
 	out := make([]dto.Resource, 0, 0)
 
-	deployments, err := k.clientset.AppsV1().Deployments("").List(context.Background(), metav1.ListOptions{
+	deployments, err := k.clientset.AppsV1().Deployments(k.helmReleaseNamespace).List(context.Background(), metav1.ListOptions{
 		LabelSelector: labels.Set(map[string]string{
 			"app.kubernetes.io/instance":   releaseName,
 			"app.kubernetes.io/managed-by": "Helm",
@@ -102,7 +110,7 @@ func (k *KubernetesClient) GetWorkloadsForRelease(releaseName string) ([]dto.Res
 		})
 	}
 
-	statefulset, err := k.clientset.AppsV1().StatefulSets("").List(context.Background(), metav1.ListOptions{
+	statefulset, err := k.clientset.AppsV1().StatefulSets(k.helmReleaseNamespace).List(context.Background(), metav1.ListOptions{
 		LabelSelector: labels.Set(map[string]string{
 			"app.kubernetes.io/instance":   releaseName,
 			"app.kubernetes.io/managed-by": "Helm",
@@ -122,7 +130,7 @@ func (k *KubernetesClient) GetWorkloadsForRelease(releaseName string) ([]dto.Res
 		})
 	}
 
-	daemonsets, err := k.clientset.AppsV1().DaemonSets("").List(context.Background(), metav1.ListOptions{
+	daemonsets, err := k.clientset.AppsV1().DaemonSets(k.helmReleaseNamespace).List(context.Background(), metav1.ListOptions{
 		LabelSelector: labels.Set(map[string]string{
 			"app.kubernetes.io/instance":   releaseName,
 			"app.kubernetes.io/managed-by": "Helm",
