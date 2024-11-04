@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"flag"
 	"fmt"
 	"os"
@@ -55,7 +56,7 @@ func main() {
 		"Enable leader election for controller manager. "+
 			"Enabling this will ensure there is only one active controller manager.")
 	opts := zap.Options{
-		Development: true,
+		Development: false,
 	}
 	opts.BindFlags(flag.CommandLine)
 	flag.Parse()
@@ -101,58 +102,67 @@ func main() {
 		panic(err)
 	}
 
-	go handler.Start()
+	disableReconciler := getEnvBool("DISABLE_MODULE_RECONCILER")
+	if disableReconciler {
+		setupLog.Info("reconciler disabled")
+	}
 
-	mgr, err := ctrl.NewManager(ctrl.GetConfigOrDie(), ctrl.Options{
-		Scheme:                 scheme,
-		HealthProbeBindAddress: probeAddr,
-		LeaderElection:         enableLeaderElection,
-		LeaderElectionID:       "f9d9f115.cyclops-ui.com",
-		Metrics: metricsserver.Options{
-			BindAddress: metricsAddr,
-		},
-		WebhookServer: webhook.NewServer(webhook.Options{
-			Port: 9443,
-		}),
-		Cache: ctrlCache.Options{
-			DefaultNamespaces: map[string]ctrlCache.Config{
-				watchNamespace: {},
+	if !disableReconciler {
+		mgr, err := ctrl.NewManager(ctrl.GetConfigOrDie(), ctrl.Options{
+			Scheme:                 scheme,
+			HealthProbeBindAddress: probeAddr,
+			LeaderElection:         enableLeaderElection,
+			LeaderElectionID:       "f9d9f115.cyclops-ui.com",
+			Metrics: metricsserver.Options{
+				BindAddress: metricsAddr,
 			},
-		},
-	})
-	if err != nil {
-		setupLog.Error(err, "unable to start manager")
-		os.Exit(1)
+			WebhookServer: webhook.NewServer(webhook.Options{
+				Port: 9443,
+			}),
+			Cache: ctrlCache.Options{
+				DefaultNamespaces: map[string]ctrlCache.Config{
+					watchNamespace: {},
+				},
+			},
+		})
+		if err != nil {
+			setupLog.Error(err, "unable to start manager")
+			os.Exit(1)
+		}
+
+		if err = (modulecontroller.NewModuleReconciler(
+			mgr.GetClient(),
+			mgr.GetScheme(),
+			templatesRepo,
+			k8sClient,
+			renderer,
+			telemetryClient,
+			monitor,
+		)).SetupWithManager(mgr); err != nil {
+			setupLog.Error(err, "unable to create controller", "controller", "Module")
+			os.Exit(1)
+		}
+		//+kubebuilder:scaffold:builder
+
+		if err := mgr.AddHealthzCheck("healthz", healthz.Ping); err != nil {
+			setupLog.Error(err, "unable to set up health check")
+			os.Exit(1)
+		}
+		if err := mgr.AddReadyzCheck("readyz", healthz.Ping); err != nil {
+			setupLog.Error(err, "unable to set up ready check")
+			os.Exit(1)
+		}
+
+		go func() {
+			setupLog.Info("starting manager")
+			if err := mgr.Start(ctrl.SetupSignalHandler()); err != nil {
+				setupLog.Error(err, "problem running manager")
+				os.Exit(1)
+			}
+		}()
 	}
 
-	if err = (modulecontroller.NewModuleReconciler(
-		mgr.GetClient(),
-		mgr.GetScheme(),
-		templatesRepo,
-		k8sClient,
-		renderer,
-		telemetryClient,
-		monitor,
-	)).SetupWithManager(mgr); err != nil {
-		setupLog.Error(err, "unable to create controller", "controller", "Module")
-		os.Exit(1)
-	}
-	//+kubebuilder:scaffold:builder
-
-	if err := mgr.AddHealthzCheck("healthz", healthz.Ping); err != nil {
-		setupLog.Error(err, "unable to set up health check")
-		os.Exit(1)
-	}
-	if err := mgr.AddReadyzCheck("readyz", healthz.Ping); err != nil {
-		setupLog.Error(err, "unable to set up ready check")
-		os.Exit(1)
-	}
-
-	setupLog.Info("starting manager")
-	if err := mgr.Start(ctrl.SetupSignalHandler()); err != nil {
-		setupLog.Error(err, "problem running manager")
-		os.Exit(1)
-	}
+	handler.Start(context.Background())
 }
 
 func getEnvBool(key string) bool {
