@@ -12,6 +12,7 @@ import (
 	batchv1 "k8s.io/api/batch/v1"
 	apiv1 "k8s.io/api/core/v1"
 	networkingv1 "k8s.io/api/networking/v1"
+	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/labels"
@@ -79,7 +80,11 @@ func (k *KubernetesClient) GetResourcesForModule(name string) ([]dto.Resource, e
 		}
 
 		if err != nil {
-			k.logger.Error(err, "failed to list resources", "gvr", gvr, "namespace", k.helmReleaseNamespace)
+			if apierrors.IsNotFound(err) {
+				continue
+			}
+
+			k.logger.Info("error fetching resource", "gvr", gvr, "namespace", k.helmReleaseNamespace)
 			continue
 		}
 

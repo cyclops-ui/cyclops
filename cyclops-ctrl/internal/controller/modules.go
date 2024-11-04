@@ -58,7 +58,7 @@ func (m *Modules) GetModule(ctx *gin.Context) {
 	module, err := m.kubernetesClient.GetModule(ctx.Param("name"))
 	if err != nil {
 		fmt.Println(err)
-		ctx.Status(http.StatusInternalServerError)
+		ctx.JSON(http.StatusInternalServerError, dto.NewError("Error fetching module", err.Error()))
 		return
 	}
 
