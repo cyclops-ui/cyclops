@@ -18,7 +18,7 @@ spec:
       serviceAccountName: cyclops-ctrl
       containers:
         - name: cyclops-ctrl
-          image: cyclopsui/cyclops-ctrl:v0.14.3
+          image: cyclopsui/cyclops-ctrl:v0.15.2
           ports:
             - containerPort: 8080
           env:
@@ -28,14 +28,9 @@ spec:
             - name: DISABLE_TELEMETRY
               value: {{ ((.Values.global).disableTelemetry) | quote }}
             {{- end }}
-            {{- if eq ((.Values.global).singleNamespaceScope).enabled true }}
-            - name: WATCH_NAMESPACE
-              value: {{ include "cyclops.namespace" . | quote }}
-            - name: WATCH_NAMESPACE_HELM
-              value: {{ include "cyclops.namespace" . | quote }}
-            - name: MODULE_TARGET_NAMESPACE
-              value: {{ include "cyclops.namespace" . | quote }}
-            {{- end }}
+            {{- include "cyclops-ctrl.watchNamespace" . | nindent 12 }}
+            {{- include "cyclops-ctrl.moduleTargetNamespace" . | nindent 12 }}
+            {{- include "cyclops-ctrl.watchNamespaceHelm" . | nindent 12 }}
           livenessProbe:
             httpGet:
               path: /healthz
