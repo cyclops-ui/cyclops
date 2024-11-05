@@ -20,17 +20,24 @@ import (
 )
 
 type KubernetesClient struct {
-	Dynamic              dynamic.Interface
-	clientset            *kubernetes.Clientset
-	discovery            *discovery.DiscoveryClient
-	moduleset            *client.CyclopsV1Alpha1Client
-	moduleNamespace      string
-	helmReleaseNamespace string
+	Dynamic   dynamic.Interface
+	clientset *kubernetes.Clientset
+	discovery *discovery.DiscoveryClient
+	moduleset *client.CyclopsV1Alpha1Client
+
+	moduleNamespace       string
+	helmReleaseNamespace  string
+	moduleTargetNamespace string
 
 	logger logr.Logger
 }
 
-func New(moduleNamespace, helmReleaseNamespace string, logger logr.Logger) (*KubernetesClient, error) {
+func New(
+	moduleNamespace string,
+	helmReleaseNamespace string,
+	moduleTargetNamespace string,
+	logger logr.Logger,
+) (*KubernetesClient, error) {
 	config := ctrl.GetConfigOrDie()
 	clientset, err := kubernetes.NewForConfig(config)
 	if err != nil {
@@ -50,13 +57,14 @@ func New(moduleNamespace, helmReleaseNamespace string, logger logr.Logger) (*Kub
 	}
 
 	return &KubernetesClient{
-		Dynamic:              dynamic,
-		discovery:            discovery,
-		clientset:            clientset,
-		moduleset:            moduleSet,
-		moduleNamespace:      moduleNamespace,
-		helmReleaseNamespace: helmReleaseNamespace,
-		logger:               logger,
+		Dynamic:               dynamic,
+		discovery:             discovery,
+		clientset:             clientset,
+		moduleset:             moduleSet,
+		moduleNamespace:       moduleNamespace,
+		helmReleaseNamespace:  helmReleaseNamespace,
+		moduleTargetNamespace: moduleTargetNamespace,
+		logger:                logger,
 	}, nil
 }
 
