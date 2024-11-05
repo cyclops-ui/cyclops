@@ -27,23 +27,28 @@ type Modules struct {
 	kubernetesClient k8sclient.IKubernetesClient
 	templatesRepo    template.ITemplateRepo
 	renderer         *render.Renderer
-	telemetryClient  telemetry.Client
-	monitor          prometheus.Monitor
+
+	moduleTargetNamespace string
+
+	telemetryClient telemetry.Client
+	monitor         prometheus.Monitor
 }
 
 func NewModulesController(
 	templatesRepo template.ITemplateRepo,
 	kubernetes k8sclient.IKubernetesClient,
 	renderer *render.Renderer,
+	moduleTargetNamespace string,
 	telemetryClient telemetry.Client,
 	monitor prometheus.Monitor,
 ) *Modules {
 	return &Modules{
-		kubernetesClient: kubernetes,
-		templatesRepo:    templatesRepo,
-		renderer:         renderer,
-		telemetryClient:  telemetryClient,
-		monitor:          monitor,
+		kubernetesClient:      kubernetes,
+		templatesRepo:         templatesRepo,
+		renderer:              renderer,
+		moduleTargetNamespace: moduleTargetNamespace,
+		telemetryClient:       telemetryClient,
+		monitor:               monitor,
 	}
 }
 
@@ -53,7 +58,7 @@ func (m *Modules) GetModule(ctx *gin.Context) {
 	module, err := m.kubernetesClient.GetModule(ctx.Param("name"))
 	if err != nil {
 		fmt.Println(err)
-		ctx.Status(http.StatusInternalServerError)
+		ctx.JSON(http.StatusInternalServerError, dto.NewError("Error fetching module", err.Error()))
 		return
 	}
 
@@ -266,6 +271,10 @@ func (m *Modules) CreateModule(ctx *gin.Context) {
 		fmt.Println(err)
 		ctx.JSON(http.StatusInternalServerError, dto.NewError("Error mapping module", err.Error()))
 		return
+	}
+
+	if len(m.moduleTargetNamespace) > 0 {
+		module.Spec.TargetNamespace = m.moduleTargetNamespace
 	}
 
 	m.telemetryClient.ModuleCreation()

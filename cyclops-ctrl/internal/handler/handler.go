@@ -23,6 +23,8 @@ type Handler struct {
 	releaseClient *helm.ReleaseClient
 	renderer      *render.Renderer
 
+	moduleTargetNamespace string
+
 	telemetryClient telemetry.Client
 	monitor         prometheus.Monitor
 }
@@ -32,17 +34,19 @@ func New(
 	kubernetesClient k8sclient.IKubernetesClient,
 	releaseClient *helm.ReleaseClient,
 	renderer *render.Renderer,
+	moduleTargetNamespace string,
 	telemetryClient telemetry.Client,
 	monitor prometheus.Monitor,
 ) (*Handler, error) {
 	return &Handler{
-		templatesRepo:   templatesRepo,
-		k8sClient:       kubernetesClient,
-		renderer:        renderer,
-		releaseClient:   releaseClient,
-		telemetryClient: telemetryClient,
-		monitor:         monitor,
-		router:          gin.New(),
+		templatesRepo:         templatesRepo,
+		k8sClient:             kubernetesClient,
+		renderer:              renderer,
+		releaseClient:         releaseClient,
+		moduleTargetNamespace: moduleTargetNamespace,
+		telemetryClient:       telemetryClient,
+		monitor:               monitor,
+		router:                gin.New(),
 	}, nil
 }
 
@@ -50,7 +54,7 @@ func (h *Handler) Start() error {
 	gin.SetMode(gin.DebugMode)
 
 	templatesController := controller.NewTemplatesController(h.templatesRepo, h.k8sClient, h.telemetryClient)
-	modulesController := controller.NewModulesController(h.templatesRepo, h.k8sClient, h.renderer, h.telemetryClient, h.monitor)
+	modulesController := controller.NewModulesController(h.templatesRepo, h.k8sClient, h.renderer, h.moduleTargetNamespace, h.telemetryClient, h.monitor)
 	clusterController := controller.NewClusterController(h.k8sClient)
 	helmController := controller.NewHelmController(h.k8sClient, h.releaseClient, h.telemetryClient)
 

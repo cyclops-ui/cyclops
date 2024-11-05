@@ -71,7 +71,16 @@ func main() {
 	)
 	telemetryClient.InstanceStart()
 
-	k8sClient, err := k8sclient.New()
+	watchNamespace := getWatchNamespace()
+	helmWatchNamespace := getHelmWatchNamespace()
+	moduleTargetNamespace := getModuleTargetNamespace()
+
+	k8sClient, err := k8sclient.New(
+		watchNamespace,
+		helmWatchNamespace,
+		moduleTargetNamespace,
+		zap.New(zap.UseFlagOptions(&opts)),
+	)
 	if err != nil {
 		fmt.Println("error bootstrapping Kubernetes client", err)
 		panic(err)
@@ -91,9 +100,9 @@ func main() {
 
 	prometheus.StartCacheMetricsUpdater(&monitor, templatesRepo.ReturnCache(), 10*time.Second, setupLog)
 
-	helmReleaseClient := helm.NewReleaseClient(getHelmWatchNamespace())
+	helmReleaseClient := helm.NewReleaseClient(helmWatchNamespace)
 
-	handler, err := handler.New(templatesRepo, k8sClient, helmReleaseClient, renderer, telemetryClient, monitor)
+	handler, err := handler.New(templatesRepo, k8sClient, helmReleaseClient, renderer, moduleTargetNamespace, telemetryClient, monitor)
 	if err != nil {
 		panic(err)
 	}
@@ -113,7 +122,7 @@ func main() {
 		}),
 		Cache: ctrlCache.Options{
 			DefaultNamespaces: map[string]ctrlCache.Config{
-				getWatchNamespace(): {},
+				watchNamespace: {},
 			},
 		},
 	})
@@ -170,6 +179,10 @@ func getWatchNamespace() string {
 		return "cyclops"
 	}
 	return value
+}
+
+func getModuleTargetNamespace() string {
+	return os.Getenv("MODULE_TARGET_NAMESPACE")
 }
 
 func getHelmWatchNamespace() string {
