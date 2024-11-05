@@ -105,3 +105,9 @@ Start your contributing journey at our [CONTRIBUTING.md](./CONTRIBUTING.md) and 
 - **Support for Kustomize** -> currently, only Helm is supported for creating templates
 - **`cyctl` for Windows** -> Chocolatey
 - **Customizable Module details page** -> create custom views of resources that your module uses
+
+## 👁️ Share your feedback
+
+**Are you using Cyclops at your company?** We'd love to hear directly from you about how you're using (or planning to use) Cyclops! Chat with us for **30 minutes** about your use case, we'll send you a **50$ Amazon Gift Card** as a thank-you for your time. Please fill in this [form](https://forms.gle/Phu3R1i2gTBM1iAm8), and we will get in touch with you!
+
+Your input will directly influence the direction of Cyclops, and we appreciate every bit of feedback. Thank you for helping us build something great! 🧡
