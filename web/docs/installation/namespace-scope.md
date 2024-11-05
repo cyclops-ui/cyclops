@@ -30,11 +30,15 @@ You can generate all resources for a Cyclops installation with the following com
 
 ```bash
 helm template oci://registry-1.docker.io/cyclopsui/cyclops-chart \
---namespace <your-namespace>
---include-crds
---set global.singleNamespaceScope.enabled=true
+--namespace <your-namespace> \
+--include-crds \
+--set global.singleNamespaceScope.enabled=true \
 --set global.singleNamespaceScope.namespace=<your-namespace>
 ```
+
+:::info
+If `global.singleNamespaceScope.enabled` is set to `true`, `global.singleNamespaceScope.namespace` needs to be set as well 
+:::
 
 This will produce a YAML manifest similar to the one in the installation manifest but with a couple of differences:
 
