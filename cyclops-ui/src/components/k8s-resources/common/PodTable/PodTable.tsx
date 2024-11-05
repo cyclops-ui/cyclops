@@ -24,6 +24,7 @@ interface Props {
   namespace: string;
   pods: any[];
   replicaSets?: any[];
+  activeReplicaSet?: string;
   updateResourceData: () => void;
 }
 
@@ -39,6 +40,7 @@ const PodTable = ({
   pods,
   namespace,
   replicaSets,
+  activeReplicaSet,
   updateResourceData,
 }: Props) => {
   const [deletePodRef, setDeletePodRef] = useState<{
@@ -143,8 +145,11 @@ const PodTable = ({
 
   return (
     <div>
-      {replicaSets && replicaSets.length > 0 && (
-        <ReplicaSetProgress replicaSets={replicaSets} />
+      {replicaSets && activeReplicaSet && replicaSets.length > 0 && (
+        <ReplicaSetProgress
+          replicaSets={replicaSets}
+          activeReplicaSet={activeReplicaSet}
+        />
       )}
       <Table dataSource={pods}>
         <Table.Column

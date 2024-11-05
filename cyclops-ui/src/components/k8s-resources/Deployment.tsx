@@ -16,6 +16,7 @@ const Deployment = ({ name, namespace, workload }: Props) => {
     status: "",
     pods: [],
     replicaSets: [],
+    activeReplicaSet: "",
   });
   const [error, setError] = useState({
     message: "",
@@ -70,14 +71,12 @@ const Deployment = ({ name, namespace, workload }: Props) => {
     return deployment.replicaSets;
   }
 
-  function sortReplicaSets(replicaSets: any[]) {
-    return replicaSets.sort((a, b) => {
-      if (a.replicas === b.replicas) {
-        return new Date(b.started).getTime() - new Date(a.started).getTime(); // descending on started time
-      }
+  function getActiveReplicaSet() {
+    if (workload && isStreamingEnabled()) {
+      return workload.activeReplicaSet;
+    }
 
-      return b.replicas - a.replicas; // descending on replicas
-    });
+    return deployment.activeReplicaSet;
   }
 
   function getPodsLength() {
@@ -119,7 +118,8 @@ const Deployment = ({ name, namespace, workload }: Props) => {
           <PodTable
             namespace={namespace}
             pods={getPods()}
-            replicaSets={sortReplicaSets(getReplicaSets())}
+            replicaSets={getReplicaSets()}
+            activeReplicaSet={getActiveReplicaSet()}
             updateResourceData={() => {}}
           />
         </Col>

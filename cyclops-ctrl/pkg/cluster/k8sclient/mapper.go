@@ -2,6 +2,9 @@ package k8sclient
 
 import (
 	"context"
+	"strings"
+
+	appsv1 "k8s.io/api/apps/v1"
 	apiv1 "k8s.io/api/core/v1"
 	networkingv1 "k8s.io/api/networking/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -28,15 +31,16 @@ func (k *KubernetesClient) mapDeployment(group, version, kind, name, namespace s
 	}
 
 	return &dto.Deployment{
-		Group:       group,
-		Version:     version,
-		Kind:        kind,
-		Name:        deployment.Name,
-		Namespace:   deployment.Namespace,
-		Replicas:    int(*deployment.Spec.Replicas),
-		ReplicaSets: replicaSets,
-		Pods:        pods,
-		Status:      getDeploymentStatus(deployment),
+		Group:            group,
+		Version:          version,
+		Kind:             kind,
+		Name:             deployment.Name,
+		Namespace:        deployment.Namespace,
+		Replicas:         int(*deployment.Spec.Replicas),
+		ReplicaSets:      replicaSets,
+		Pods:             pods,
+		Status:           getDeploymentStatus(deployment),
+		ActiveReplicaSet: getActiveReplicaSet(deployment.Status.Conditions),
 	}, nil
 }
 
@@ -461,4 +465,27 @@ func mapIPBlock(block *networkingv1.IPBlock) *dto.IPBlock {
 		CIDR:   block.CIDR,
 		Except: block.Except,
 	}
+}
+
+func getActiveReplicaSet(conditions []appsv1.DeploymentCondition) string {
+	var latestProgressingCondition *appsv1.DeploymentCondition
+
+	for _, condition := range conditions {
+		if condition.Type == appsv1.DeploymentProgressing {
+			if latestProgressingCondition == nil || condition.LastTransitionTime.After(latestProgressingCondition.LastTransitionTime.Time) {
+				latestProgressingCondition = &condition
+			}
+		}
+	}
+
+	if latestProgressingCondition != nil {
+		if strings.Contains(latestProgressingCondition.Message, "ReplicaSet") {
+			parts := strings.Split(latestProgressingCondition.Message, "\"")
+			if len(parts) > 1 {
+				return parts[1] // ReplicaSet \".+\" is progressing. status: Progressing
+			}
+		}
+	}
+
+	return ""
 }

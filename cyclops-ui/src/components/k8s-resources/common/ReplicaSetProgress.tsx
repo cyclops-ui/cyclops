@@ -1,19 +1,25 @@
+import { CheckCircleOutlined, SyncOutlined } from "@ant-design/icons";
 import { Progress, Tooltip } from "antd";
 
 interface ReplicaSetType {
   replicaSets: any[];
+  activeReplicaSet: string;
 }
 
-const ReplicaSetProgress = ({ replicaSets }: ReplicaSetType) => {
+const ReplicaSetProgress = ({
+  replicaSets,
+  activeReplicaSet,
+}: ReplicaSetType) => {
   // Active replicas / Total Replicas
   const totalAvailableReplicas = replicaSets.reduce((acc, rs) => {
-    return acc + rs.replicas;
+    return acc + rs.availableReplicas;
   }, 0);
 
-  const activeAvailableReplicas = replicaSets[0]?.replicas || 0;
+  const activeAvailableReplicas = replicaSets.filter(
+    (rs) => rs.name === activeReplicaSet,
+  )[0].availableReplicas;
   const activeAvailableReplicasPercent =
     (activeAvailableReplicas / totalAvailableReplicas) * 100;
-  const remainingReplicasPercent = 100 - activeAvailableReplicasPercent;
 
   return (
     <div
@@ -26,11 +32,15 @@ const ReplicaSetProgress = ({ replicaSets }: ReplicaSetType) => {
         title={`${activeAvailableReplicas} active / ${totalAvailableReplicas - activeAvailableReplicas} non-active / ${totalAvailableReplicas} total`}
       >
         <Progress
-          percent={activeAvailableReplicasPercent + remainingReplicasPercent}
+          percent={100}
           success={{ percent: activeAvailableReplicasPercent }}
-          format={() =>
-            `${activeAvailableReplicas} / ${totalAvailableReplicas}`
-          }
+          format={() => {
+            return activeAvailableReplicasPercent === 100 ? (
+              <CheckCircleOutlined />
+            ) : (
+              <SyncOutlined spin />
+            );
+          }}
         />
       </Tooltip>
     </div>
