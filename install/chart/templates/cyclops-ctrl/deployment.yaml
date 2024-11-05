@@ -2,7 +2,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: cyclops-ctrl
-  namespace: cyclops
+  namespace: {{ include "cyclops.namespace" . | quote }}
   labels:
     app: cyclops-ctrl
 spec:
@@ -18,7 +18,7 @@ spec:
       serviceAccountName: cyclops-ctrl
       containers:
         - name: cyclops-ctrl
-          image: cyclopsui/cyclops-ctrl:v0.14.3
+          image: cyclopsui/cyclops-ctrl:v0.15.2
           ports:
             - containerPort: 8080
           env:
@@ -28,6 +28,9 @@ spec:
             - name: DISABLE_TELEMETRY
               value: {{ ((.Values.global).disableTelemetry) | quote }}
             {{- end }}
+            {{- include "cyclops-ctrl.watchNamespace" . | nindent 12 }}
+            {{- include "cyclops-ctrl.moduleTargetNamespace" . | nindent 12 }}
+            {{- include "cyclops-ctrl.watchNamespaceHelm" . | nindent 12 }}
           livenessProbe:
             httpGet:
               path: /healthz
