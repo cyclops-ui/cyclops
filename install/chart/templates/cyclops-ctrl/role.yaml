@@ -15,8 +15,4 @@ rules:
       - '*'
     verbs:
       - '*'
-  - nonResourceURLs:
-      - '*'
-    verbs:
-      - '*'
 {{- end }}
