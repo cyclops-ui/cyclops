@@ -2,7 +2,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: cyclops-ctrl
-  namespace: cyclops
+  namespace: {{ include "cyclops.namespace" . | quote }}
   labels:
     app: cyclops-ctrl
 spec:
@@ -27,6 +27,14 @@ spec:
             {{- if ((.Values.global).disableTelemetry) }}
             - name: DISABLE_TELEMETRY
               value: {{ ((.Values.global).disableTelemetry) | quote }}
+            {{- end }}
+            {{- if eq ((.Values.global).singleNamespaceScope).enabled true }}
+            - name: WATCH_NAMESPACE
+              value: {{ include "cyclops.namespace" . | quote }}
+            - name: WATCH_NAMESPACE_HELM
+              value: {{ include "cyclops.namespace" . | quote }}
+            - name: MODULE_TARGET_NAMESPACE
+              value: {{ include "cyclops.namespace" . | quote }}
             {{- end }}
           livenessProbe:
             httpGet:

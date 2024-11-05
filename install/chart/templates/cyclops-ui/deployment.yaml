@@ -2,7 +2,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: cyclops-ui
-  namespace: cyclops
+  namespace: {{ include "cyclops.namespace" . | quote }}
   labels:
     app: cyclops-ui
 spec:
@@ -22,7 +22,7 @@ spec:
             - containerPort: 80
           env:
             - name: REACT_APP_CYCLOPS_CTRL_HOST
-              value: {{ ((.Values.ui).ctrlHost) | default "http://cyclops-ctrl.cyclops:8080" | quote }}
+              value: {{ include "cyclops-ctrl.host" . }}
             {{- if ((.Values.global).enableStreaming) }}
             - name: REACT_APP_ENABLE_STREAMING
               value: {{ ((.Values.global).enableStreaming) | quote }}
