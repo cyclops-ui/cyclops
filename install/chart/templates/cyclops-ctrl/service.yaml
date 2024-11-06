@@ -2,7 +2,7 @@ apiVersion: v1
 kind: Service
 metadata:
   name: cyclops-ctrl
-  namespace: cyclops
+  namespace: {{ include "cyclops.namespace" . | quote }}
   labels:
     app: cyclops-ctrl
 spec:

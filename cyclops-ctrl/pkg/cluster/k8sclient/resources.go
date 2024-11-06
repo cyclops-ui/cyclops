@@ -370,6 +370,10 @@ func (k *KubernetesClient) GetPodsForNode(nodeName string) ([]apiv1.Pod, error) 
 }
 
 func (k *KubernetesClient) ListNamespaces() ([]string, error) {
+	if len(k.moduleTargetNamespace) > 0 {
+		return []string{k.moduleTargetNamespace}, nil
+	}
+
 	namespaceList, err := k.clientset.CoreV1().Namespaces().List(context.TODO(), metav1.ListOptions{})
 	if err != nil {
 		return nil, err
