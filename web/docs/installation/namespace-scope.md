@@ -26,21 +26,23 @@ If you want to limit your Cyclops installation to a single namespace, you need t
 
 You can change your installation resources manually by editing the [installation manifest](https://github.com/cyclops-ui/cyclops/blob/main/install/cyclops-install.yaml) or using our Helm chart.
 
-You can generate all resources for a Cyclops installation with the following command:
+You can generate all resources for a Cyclops installation with the following command and edit your Cyclops configuration manually from there:
 
 ```bash
-helm template oci://registry-1.docker.io/cyclopsui/cyclops-chart \
+helm template cyclops oci://registry-1.docker.io/cyclopsui/cyclops-chart \
 --namespace <your-namespace> \
 --include-crds \
 --set global.singleNamespaceScope.enabled=true \
 --set global.singleNamespaceScope.namespace=<your-namespace>
 ```
 
+Alternatively, you can install Cyclops with `helm install`, but be aware that the Cyclops Helm release will be visible in the Cyclops UI under the Helm releases tab, which is something you might want to avoid. Because of this, we encourage you to generate resources using the `helm template` and apply them without using `helm install`.
+
 :::info
 If `global.singleNamespaceScope.enabled` is set to `true`, `global.singleNamespaceScope.namespace` needs to be set as well 
 :::
 
-This will produce a YAML manifest similar to the one in the installation manifest but with a couple of differences:
+The `helm template` command will produce a YAML manifest similar to the one in the installation manifest but with a couple of differences:
 
 - All resources have the namespace set to the one you provided as `<your-namespace>`
 - Instead of ClusterRole and ClusterRoleBindings, you can find a Role and a RoleBinding. The Role has all of the permissions but only within that namespace.
