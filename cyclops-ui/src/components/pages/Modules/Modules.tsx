@@ -48,21 +48,15 @@ const Modules = () => {
   useEffect(() => {
     setLoadingModules(true);
 
-    function populateNamespaceData() {
-      axios
-        .get(`/api/namespaces`)
-        .then((res) => {
-          setNamespaceFilterData(res.data);
-          setModuleNamespaceFilter(res.data);
-          setLoadingModules(false);
-        })
-        .catch((error) => {
-          setError(mapResponseError(error));
-          setLoadingModules(false);
-        });
-    }
-
-    populateNamespaceData();
+    axios
+      .get(`/api/namespaces`)
+      .then((res) => {
+        setNamespaceFilterData(res.data);
+        setModuleNamespaceFilter(res.data);
+      })
+      .catch((error) => {
+        setError(mapResponseError(error));
+      });
 
     function fetchModules() {
       axios
