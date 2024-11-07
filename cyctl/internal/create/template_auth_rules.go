@@ -30,72 +30,72 @@ var (
 	password string
 )
 
-func getTeamplateAuthRulesFromPromt() (string, string, string, string, string, error) {
+func getTemplateAuthRulesFromPrompt() (string, string, string, string, string, error) {
 	RepoPrompt := promptui.Prompt{
 		Label: "repo",
 	}
 	repoValue, err := RepoPrompt.Run()
 	if err != nil {
-		return "", "", "", "", "", fmt.Errorf("Prompt failed: %v", err)
+		return "", "", "", "", "", err
 	}
+
 	usernameNamePrompt := promptui.Prompt{
 		Label: "Username secret name",
 		Validate: func(input string) error {
 			if input == "" {
-				return errors.New("The username Name cannot be empty")
+				return errors.New("username secret name cannot be empty")
 			}
 			return nil
 		},
 	}
 	usernameName, err := usernameNamePrompt.Run()
 	if err != nil {
-		return "", "", "", "", "", fmt.Errorf("Prompt failed: %v", err)
+		return "", "", "", "", "", err
 	}
 
 	usernameKeyPrompt := promptui.Prompt{
 		Label: "Username secret key",
 		Validate: func(input string) error {
 			if input == "" {
-				return errors.New("The username key cannot be empty")
+				return errors.New("the username secret key cannot be empty")
 			}
 			return nil
 		},
 	}
 	usernameKey, err := usernameKeyPrompt.Run()
 	if err != nil {
-		return "", "", "", "", "", fmt.Errorf("Prompt failed: %v", err)
+		return "", "", "", "", "", err
 	}
 
 	passwordNamePrompt := promptui.Prompt{
 		Label: "Password secret name",
 		Validate: func(input string) error {
 			if input == "" {
-				return errors.New("The password name cannot be empty")
+				return errors.New("the password secret name cannot be empty")
 			}
 			return nil
 		},
 	}
 	passwordName, err := passwordNamePrompt.Run()
 	if err != nil {
-		return "", "", "", "", "", fmt.Errorf("Prompt failed: %v", err)
+		return "", "", "", "", "", err
 	}
 
 	passwordKeyPrompt := promptui.Prompt{
 		Label: "Password secret key",
 		Validate: func(input string) error {
 			if input == "" {
-				return errors.New("The password key cannot be empty")
+				return errors.New("password secret key cannot be empty")
 			}
 			return nil
 		},
 	}
 	passwordKey, err := passwordKeyPrompt.Run()
 	if err != nil {
-		return "", "", "", "", "", fmt.Errorf("Prompt failed: %v", err)
+		return "", "", "", "", "", err
 	}
 
 	return usernameName, usernameKey, passwordName, passwordKey, repoValue, nil
-
 }
 
 func validateSecretKeySelector(username, password string) (string, string, string, string, error) {
@@ -129,16 +129,16 @@ func createTemplateAuthRule(clientset *client.CyclopsV1Alpha1Client, templateAut
 
 	if username == "" && password == "" && repo == "" {
 		var err error
-		usernameName, usernameKey, passwordName, passwordKey, repo, err = getTeamplateAuthRulesFromPromt()
+		usernameName, usernameKey, passwordName, passwordKey, repo, err = getTemplateAuthRulesFromPrompt()
 		if err != nil {
-			fmt.Println(err)
+			log.Fatal(err)
 			return
 		}
 	} else {
 		var err error
 		usernameName, usernameKey, passwordName, passwordKey, err = validateSecretKeySelector(username, password)
 		if err != nil {
-			fmt.Println(err)
+			log.Fatal(err)
 			return
 		}
 	}
