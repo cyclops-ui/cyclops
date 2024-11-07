@@ -1,7 +1,6 @@
 package controller
 
 import (
-	"fmt"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -27,7 +26,7 @@ func (c *Cluster) ListNodes(ctx *gin.Context) {
 
 	nodes, err := c.kubernetesClient.ListNodes()
 	if err != nil {
-		ctx.Status(http.StatusInternalServerError)
+		ctx.JSON(http.StatusInternalServerError, dto.NewError("Error fetching nodes", err.Error()))
 		return
 	}
 
@@ -48,15 +47,13 @@ func (c *Cluster) GetNode(ctx *gin.Context) {
 		return
 	}
 	if err != nil {
-		ctx.Status(http.StatusInternalServerError)
+		ctx.JSON(http.StatusInternalServerError, dto.NewError("Error fetching node", err.Error()))
 		return
 	}
 
 	pods, err := c.kubernetesClient.GetPodsForNode(nodeName)
 	if err != nil {
-		ctx.JSON(http.StatusInternalServerError, dto.Error{
-			Message: fmt.Sprintf("Error listing pods for node: %v", nodeName),
-		})
+		ctx.JSON(http.StatusInternalServerError, dto.NewError("Error fetching pod nodes", err.Error()))
 		return
 	}
 
@@ -70,7 +67,7 @@ func (c *Cluster) ListNamespaces(ctx *gin.Context) {
 
 	namespaces, err := c.kubernetesClient.ListNamespaces()
 	if err != nil {
-		ctx.Status(http.StatusInternalServerError)
+		ctx.JSON(http.StatusInternalServerError, dto.NewError("Error fetching namespaces", err.Error()))
 		return
 	}
 

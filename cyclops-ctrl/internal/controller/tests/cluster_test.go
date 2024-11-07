@@ -172,8 +172,8 @@ var _ = Describe("Cluster controller test", func() {
 
 				Expect(err).To(BeNil())
 				Expect(w.Code).To(BeEquivalentTo(http.StatusInternalServerError))
-				Expect(e.Message).To(BeEquivalentTo("Error listing pods for node: my-node"))
-				Expect(e.Description).To(BeEquivalentTo(""))
+				Expect(e.Message).To(BeEquivalentTo("Error fetching pod nodes"))
+				Expect(e.Description).To(BeEquivalentTo("nodes \"whereisit\" not found"))
 			})
 		})
 

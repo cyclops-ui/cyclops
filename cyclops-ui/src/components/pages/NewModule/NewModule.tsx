@@ -565,9 +565,6 @@ const NewModule = () => {
                       showSearch={true}
                       onChange={onTemplateStoreSelected}
                       style={{ width: "100%" }}
-                      placeholder="default"
-                      value="default"
-                      defaultValue="default"
                     >
                       {namespaces.map((namespace: string) => (
                         <Option key={namespace} value={namespace}>

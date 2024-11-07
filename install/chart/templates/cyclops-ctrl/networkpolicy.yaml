@@ -3,7 +3,7 @@ apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
 metadata:
   name: cyclops-ctrl
-  namespace: cyclops
+  namespace: {{ include "cyclops.namespace" . | quote }}
 spec:
   podSelector:
     matchLabels:

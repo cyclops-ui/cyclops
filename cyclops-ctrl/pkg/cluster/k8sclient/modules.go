@@ -12,6 +12,7 @@ import (
 	batchv1 "k8s.io/api/batch/v1"
 	apiv1 "k8s.io/api/core/v1"
 	networkingv1 "k8s.io/api/networking/v1"
+	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/labels"
@@ -67,11 +68,23 @@ func (k *KubernetesClient) GetResourcesForModule(name string) ([]dto.Resource, e
 
 	other := make([]unstructured.Unstructured, 0)
 	for _, gvr := range managedGVRs {
-		rs, err := k.Dynamic.Resource(gvr).List(context.Background(), metav1.ListOptions{
-			LabelSelector: "cyclops.module=" + name,
-		})
+		var rs *unstructured.UnstructuredList
+		if len(k.moduleTargetNamespace) > 0 {
+			rs, err = k.Dynamic.Resource(gvr).Namespace(k.moduleTargetNamespace).List(context.Background(), metav1.ListOptions{
+				LabelSelector: "cyclops.module=" + name,
+			})
+		} else {
+			rs, err = k.Dynamic.Resource(gvr).List(context.Background(), metav1.ListOptions{
+				LabelSelector: "cyclops.module=" + name,
+			})
+		}
+
 		if err != nil {
-			k.logger.Error(err, "failed to list resources", "gvr", gvr, "namespace", k.helmReleaseNamespace)
+			if apierrors.IsNotFound(err) {
+				continue
+			}
+
+			k.logger.Info("error fetching resource", "gvr", gvr, "namespace", k.helmReleaseNamespace)
 			continue
 		}
 
@@ -111,7 +124,7 @@ func (k *KubernetesClient) GetResourcesForModule(name string) ([]dto.Resource, e
 func (k *KubernetesClient) GetWorkloadsForModule(name string) ([]dto.Resource, error) {
 	out := make([]dto.Resource, 0, 0)
 
-	deployments, err := k.clientset.AppsV1().Deployments("").List(context.Background(), metav1.ListOptions{
+	deployments, err := k.clientset.AppsV1().Deployments(k.moduleTargetNamespace).List(context.Background(), metav1.ListOptions{
 		LabelSelector: "cyclops.module=" + name,
 	})
 	if err != nil {
@@ -128,7 +141,7 @@ func (k *KubernetesClient) GetWorkloadsForModule(name string) ([]dto.Resource, e
 		})
 	}
 
-	statefulset, err := k.clientset.AppsV1().StatefulSets("").List(context.Background(), metav1.ListOptions{
+	statefulset, err := k.clientset.AppsV1().StatefulSets(k.moduleTargetNamespace).List(context.Background(), metav1.ListOptions{
 		LabelSelector: "cyclops.module=" + name,
 	})
 	if err != nil {
@@ -145,7 +158,7 @@ func (k *KubernetesClient) GetWorkloadsForModule(name string) ([]dto.Resource, e
 		})
 	}
 
-	daemonsets, err := k.clientset.AppsV1().DaemonSets("").List(context.Background(), metav1.ListOptions{
+	daemonsets, err := k.clientset.AppsV1().DaemonSets(k.moduleTargetNamespace).List(context.Background(), metav1.ListOptions{
 		LabelSelector: "cyclops.module=" + name,
 	})
 	if err != nil {
@@ -295,7 +308,7 @@ func (k *KubernetesClient) GetDeletedResources(
 func (k *KubernetesClient) GetModuleResourcesHealth(name string) (string, error) {
 	resourcesWithHealth := 0
 
-	deployments, err := k.clientset.AppsV1().Deployments("").List(context.Background(), metav1.ListOptions{
+	deployments, err := k.clientset.AppsV1().Deployments(k.moduleTargetNamespace).List(context.Background(), metav1.ListOptions{
 		LabelSelector: "cyclops.module=" + name,
 	})
 	if err != nil {
@@ -315,7 +328,7 @@ func (k *KubernetesClient) GetModuleResourcesHealth(name string) (string, error)
 		}
 	}
 
-	statefulsets, err := k.clientset.AppsV1().StatefulSets("").List(context.Background(), metav1.ListOptions{
+	statefulsets, err := k.clientset.AppsV1().StatefulSets(k.moduleTargetNamespace).List(context.Background(), metav1.ListOptions{
 		LabelSelector: "cyclops.module=" + name,
 	})
 	if err != nil {
@@ -335,7 +348,7 @@ func (k *KubernetesClient) GetModuleResourcesHealth(name string) (string, error)
 		}
 	}
 
-	daemonsets, err := k.clientset.AppsV1().DaemonSets("").List(context.Background(), metav1.ListOptions{
+	daemonsets, err := k.clientset.AppsV1().DaemonSets(k.moduleTargetNamespace).List(context.Background(), metav1.ListOptions{
 		LabelSelector: "cyclops.module=" + name,
 	})
 	if err != nil {
@@ -351,7 +364,7 @@ func (k *KubernetesClient) GetModuleResourcesHealth(name string) (string, error)
 		}
 	}
 
-	pvcs, err := k.clientset.CoreV1().PersistentVolumeClaims("").List(context.Background(), metav1.ListOptions{
+	pvcs, err := k.clientset.CoreV1().PersistentVolumeClaims(k.moduleTargetNamespace).List(context.Background(), metav1.ListOptions{
 		LabelSelector: "cyclops.module=" + name,
 	})
 	if err != nil {
@@ -365,7 +378,7 @@ func (k *KubernetesClient) GetModuleResourcesHealth(name string) (string, error)
 		}
 	}
 
-	pods, err := k.clientset.CoreV1().Pods("").List(context.Background(), metav1.ListOptions{
+	pods, err := k.clientset.CoreV1().Pods(k.moduleTargetNamespace).List(context.Background(), metav1.ListOptions{
 		LabelSelector: "cyclops.module=" + name,
 	})
 	if err != nil {
