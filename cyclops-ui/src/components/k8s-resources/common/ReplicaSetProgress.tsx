@@ -2,24 +2,31 @@ import { CheckCircleOutlined, SyncOutlined } from "@ant-design/icons";
 import { Progress, Tooltip } from "antd";
 
 interface ReplicaSetType {
-  replicaSets: any[];
+  pods: any[];
+  replicas: number;
   activeReplicaSet: string;
 }
 
 const ReplicaSetProgress = ({
-  replicaSets,
+  pods,
+  replicas,
   activeReplicaSet,
 }: ReplicaSetType) => {
-  // Active replicas / Total Replicas
-  const totalAvailableReplicas = replicaSets.reduce((acc, rs) => {
-    return acc + rs.availableReplicas;
-  }, 0);
+  // Healthy Replicas (matching replicasets pods) / Total Replicas (defined in the deployment)
+  const totalReplicas = replicas;
 
-  const activeAvailableReplicas = replicaSets.filter(
-    (rs) => rs.name === activeReplicaSet,
-  )[0].availableReplicas;
-  const activeAvailableReplicasPercent =
-    (activeAvailableReplicas / totalAvailableReplicas) * 100;
+  const healthyReplicas = pods.filter((elem) => {
+    return elem.podPhase === "Running" && elem.replicaSet === activeReplicaSet;
+  }).length;
+
+  const healthyReplicasPercent = (healthyReplicas / totalReplicas) * 100;
+
+  console.log(
+    activeReplicaSet,
+    healthyReplicas,
+    totalReplicas,
+    healthyReplicasPercent,
+  );
 
   return (
     <div
@@ -28,14 +35,12 @@ const ReplicaSetProgress = ({
         paddingBottom: "1rem",
       }}
     >
-      <Tooltip
-        title={`${activeAvailableReplicas} active / ${totalAvailableReplicas - activeAvailableReplicas} non-active / ${totalAvailableReplicas} total`}
-      >
+      <Tooltip title={`${healthyReplicas} healthy / ${totalReplicas} total`}>
         <Progress
           percent={100}
-          success={{ percent: activeAvailableReplicasPercent }}
+          success={{ percent: healthyReplicasPercent }}
           format={() => {
-            return activeAvailableReplicasPercent === 100 ? (
+            return healthyReplicasPercent === 100 ? (
               <CheckCircleOutlined />
             ) : (
               <SyncOutlined spin />

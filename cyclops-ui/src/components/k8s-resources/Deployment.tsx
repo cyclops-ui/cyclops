@@ -15,7 +15,7 @@ const Deployment = ({ name, namespace, workload }: Props) => {
   const [deployment, setDeployment] = useState({
     status: "",
     pods: [],
-    replicaSets: [],
+    replicas: 0,
     activeReplicaSet: "",
   });
   const [error, setError] = useState({
@@ -63,14 +63,13 @@ const Deployment = ({ name, namespace, workload }: Props) => {
     return deployment.pods;
   }
 
-  function getReplicaSets() {
+  function getNoOfReplicas() {
     if (workload && isStreamingEnabled()) {
-      return workload.replicaSets;
+      return workload.replicas;
     }
 
-    return deployment.replicaSets;
+    return deployment.replicas;
   }
-
   function getActiveReplicaSet() {
     if (workload && isStreamingEnabled()) {
       return workload.activeReplicaSet;
@@ -117,8 +116,8 @@ const Deployment = ({ name, namespace, workload }: Props) => {
         <Col span={24} style={{ overflowX: "auto" }}>
           <PodTable
             namespace={namespace}
+            replicas={getNoOfReplicas()}
             pods={getPods()}
-            replicaSets={getReplicaSets()}
             activeReplicaSet={getActiveReplicaSet()}
             updateResourceData={() => {}}
           />

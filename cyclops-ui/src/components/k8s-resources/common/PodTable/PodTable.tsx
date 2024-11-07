@@ -23,7 +23,7 @@ import styles from "./styles.module.css";
 interface Props {
   namespace: string;
   pods: any[];
-  replicaSets?: any[];
+  replicas?: number;
   activeReplicaSet?: string;
   updateResourceData: () => void;
 }
@@ -39,7 +39,7 @@ interface Pod {
 const PodTable = ({
   pods,
   namespace,
-  replicaSets,
+  replicas,
   activeReplicaSet,
   updateResourceData,
 }: Props) => {
@@ -145,9 +145,10 @@ const PodTable = ({
 
   return (
     <div>
-      {replicaSets && activeReplicaSet && replicaSets.length > 0 && (
+      {replicas && activeReplicaSet && (
         <ReplicaSetProgress
-          replicaSets={replicaSets}
+          pods={pods}
+          replicas={replicas}
           activeReplicaSet={activeReplicaSet}
         />
       )}

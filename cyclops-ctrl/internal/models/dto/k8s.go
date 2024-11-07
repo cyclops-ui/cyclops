@@ -19,17 +19,16 @@ type Resource interface {
 }
 
 type Deployment struct {
-	Group            string       `json:"group"`
-	Version          string       `json:"version"`
-	Kind             string       `json:"kind"`
-	Name             string       `json:"name"`
-	Namespace        string       `json:"namespace"`
-	Replicas         int          `json:"replicas"`
-	ReplicaSets      []ReplicaSet `json:"replicaSets"`
-	Pods             []Pod        `json:"pods"`
-	Status           string       `json:"status"`
-	Deleted          bool         `json:"deleted"`
-	ActiveReplicaSet string       `json:"activeReplicaSet"`
+	Group            string `json:"group"`
+	Version          string `json:"version"`
+	Kind             string `json:"kind"`
+	Name             string `json:"name"`
+	Namespace        string `json:"namespace"`
+	Replicas         int    `json:"replicas"`
+	Pods             []Pod  `json:"pods"`
+	Status           string `json:"status"`
+	Deleted          bool   `json:"deleted"`
+	ActiveReplicaSet string `json:"activeReplicaSet"`
 }
 
 func (d *Deployment) GetGroupVersionKind() string {
@@ -211,18 +210,6 @@ type ContainerStatus struct {
 	Running bool   `json:"running"`
 }
 
-type ReplicaSet struct {
-	Group             string      `json:"group"`
-	Version           string      `json:"version"`
-	Kind              string      `json:"kind"`
-	Name              string      `json:"name"`
-	Namespace         string      `json:"namespace"`
-	Replicas          int32       `json:"replicas"`
-	AvailableReplicas int32       `json:"availableReplicas"`
-	Started           metav1.Time `json:"started"`
-	Deleted           bool        `json:"deleted"`
-}
-
 type Pod struct {
 	Group          string       `json:"group"`
 	Version        string       `json:"version"`
@@ -236,6 +223,7 @@ type Pod struct {
 	Status         bool         `json:"status"`
 	Started        *metav1.Time `json:"started"`
 	Deleted        bool         `json:"deleted"`
+	ReplicaSet     string       `json:"replicaSet"`
 }
 
 func (p *Pod) GetGroupVersionKind() string {
