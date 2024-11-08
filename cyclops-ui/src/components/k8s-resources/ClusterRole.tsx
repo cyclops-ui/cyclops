@@ -66,9 +66,9 @@ const ClusterRole = ({ name }: Props) => {
       title: "API Groups",
       dataIndex: "apiGroups",
       key: "apiGroups",
-      render: (apiGroups: string[]) => (
+      render: (apiGroups?: string[]) => (
         <>
-          {apiGroups.map((group) => (
+          {apiGroups?.map((group) => (
             <Tag key={group} color="blue">
               {group || "*"}
             </Tag>
@@ -80,9 +80,9 @@ const ClusterRole = ({ name }: Props) => {
       title: "Resources",
       dataIndex: "resources",
       key: "resources",
-      render: (resources: string[]) => (
+      render: (resources?: string[]) => (
         <>
-          {resources.map((resource) => (
+          {resources?.map((resource) => (
             <Tag key={resource} color="green">
               {resource}
             </Tag>
@@ -94,9 +94,9 @@ const ClusterRole = ({ name }: Props) => {
       title: "Verbs",
       dataIndex: "verbs",
       key: "verbs",
-      render: (verbs: string[]) => (
+      render: (verbs?: string[]) => (
         <>
-          {verbs.map((verb) => (
+          {verbs?.map((verb) => (
             <Tag key={verb} color="orange">
               {verb}
             </Tag>
@@ -132,13 +132,7 @@ const ClusterRole = ({ name }: Props) => {
       </Divider>
       <Row>
         <Col span={24} style={{ overflowX: "auto" }}>
-          <Table
-            dataSource={clusterRole.rules}
-            columns={columns}
-            rowKey={(record) =>
-              `${record.apiGroups.join()}-${record.resources.join()}-${record.verbs.join()}`
-            }
-          />
+          <Table dataSource={clusterRole.rules} columns={columns} />
         </Col>
       </Row>
     </div>
