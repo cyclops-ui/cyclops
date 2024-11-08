@@ -120,7 +120,9 @@ export const ArrayField = ({
                       />
                     </Row>
                     {index + 1 === arrFields.length ? (
-                      <Divider style={{ marginTop: "4px", marginBottom: "12px" }} />
+                      <Divider
+                        style={{ marginTop: "4px", marginBottom: "12px" }}
+                      />
                     ) : null}
                   </Col>
                 ))}
@@ -149,7 +151,59 @@ export const ArrayField = ({
           label={field.display_name}
           style={{ marginBottom: "12px" }}
         >
-          <InputNumber disabled={field.immutable && isModuleEdit} />
+          <Form.List name={formItemName}>
+            {(arrFields, { add, remove }) => (
+              <div
+                style={{
+                  border: "solid 1px #d3d3d3",
+                  borderRadius: "7px",
+                  padding: "12px",
+                  width: "100%",
+                  backgroundColor: "#fafafa",
+                }}
+              >
+                {arrFields.map((arrField, index) => (
+                  <Col key={arrField.key}>
+                    <Row>
+                      <Form.Item
+                        style={{
+                          paddingBottom: "8px",
+                          marginBottom: "0px",
+                          width: "80%",
+                        }}
+                        wrapperCol={{ span: 24 }}
+                        {...arrField}
+                        name={[arrField.name]}
+                      >
+                        <InputNumber
+                          disabled={field.immutable && isModuleEdit}
+                        />
+                      </Form.Item>
+                      <MinusCircleOutlined
+                        style={{ fontSize: "16px", paddingLeft: "10px" }}
+                        onClick={() => remove(arrField.name)}
+                      />
+                    </Row>
+                    {index + 1 === arrFields.length ? (
+                      <Divider
+                        style={{ marginTop: "4px", marginBottom: "12px" }}
+                      />
+                    ) : null}
+                  </Col>
+                ))}
+                <Form.Item style={{ marginBottom: "0" }}>
+                  <Button
+                    type="dashed"
+                    onClick={() => add()}
+                    block
+                    icon={<PlusOutlined />}
+                  >
+                    Add
+                  </Button>
+                </Form.Item>
+              </div>
+            )}
+          </Form.List>
         </Form.Item>
       );
     }
@@ -159,12 +213,63 @@ export const ArrayField = ({
         <Form.Item
           wrapperCol={{ span: 16 }}
           name={fieldName}
-          valuePropName="checked"
+          label={field.display_name}
           style={{ marginBottom: "12px" }}
         >
-          <Checkbox disabled={field.immutable && isModuleEdit}>
-            {field.display_name}
-          </Checkbox>
+          <Form.List name={formItemName}>
+            {(arrFields, { add, remove }) => (
+              <div
+                style={{
+                  border: "solid 1px #d3d3d3",
+                  borderRadius: "7px",
+                  padding: "12px",
+                  width: "100%",
+                  backgroundColor: "#fafafa",
+                }}
+              >
+                {arrFields.map((arrField, index) => (
+                  <Col key={arrField.key}>
+                    <Row>
+                      <Form.Item
+                        style={{
+                          paddingBottom: "8px",
+                          marginBottom: "0px",
+                          width: "80%",
+                        }}
+                        wrapperCol={{ span: 24 }}
+                        {...arrField}
+                        name={[arrField.name]}
+                        valuePropName="checked"
+                      >
+                        <Checkbox disabled={field.immutable && isModuleEdit}>
+                          {field.display_name}
+                        </Checkbox>
+                      </Form.Item>
+                      <MinusCircleOutlined
+                        style={{ fontSize: "16px", paddingLeft: "10px" }}
+                        onClick={() => remove(arrField.name)}
+                      />
+                    </Row>
+                    {index + 1 === arrFields.length ? (
+                      <Divider
+                        style={{ marginTop: "4px", marginBottom: "12px" }}
+                      />
+                    ) : null}
+                  </Col>
+                ))}
+                <Form.Item style={{ marginBottom: "0" }}>
+                  <Button
+                    type="dashed"
+                    onClick={() => add()}
+                    block
+                    icon={<PlusOutlined />}
+                  >
+                    Add
+                  </Button>
+                </Form.Item>
+              </div>
+            )}
+          </Form.List>
         </Form.Item>
       );
     }
@@ -187,11 +292,11 @@ export const ArrayField = ({
             }}
             forceRender={true}
           >
-            <Form.Item 
-            wrapperCol={{ span: 16 }} 
-            style={{ 
-              paddingTop: "8px",
-              marginBottom: "0",
+            <Form.Item
+              wrapperCol={{ span: 16 }}
+              style={{
+                paddingTop: "8px",
+                marginBottom: "0",
               }}
             >
               <Form.List name={formItemName}>
