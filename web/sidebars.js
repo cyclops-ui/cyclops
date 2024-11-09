@@ -66,6 +66,7 @@ const sidebars = {
             "installation/demo/feedback",
           ],
         },
+        "installation/namespace-scope",
       ],
     },
     {
