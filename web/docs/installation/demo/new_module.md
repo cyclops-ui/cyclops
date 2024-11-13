@@ -77,9 +77,3 @@ version: main
 ```
 
 Try connecting it again in the `Templates` tab.
-
-:::warning
-**Private repositories are not yet supported!**
-
-This is currently a high priority on our roadmap, and you should expect support for private repositories sooner rather than later.
-:::
