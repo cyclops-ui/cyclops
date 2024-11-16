@@ -6,9 +6,7 @@ import CodeBlockString from "@docusaurus/theme-classic/lib/theme/CodeBlock/Conte
 const InstallCmd = () => {
   return (
     <center className={styles.command}>
-      <h2 className={styles.commandDesc}>
-        Install it with a single command
-      </h2>
+      <h2 className={styles.commandDesc}>Install it with a single command</h2>
       <CodeBlockString language={"sh"}>
         {"kubectl apply -f https://raw.githubusercontent.com/cyclops-ui/cyclops/v0.15.2/install/cyclops-install.yaml && \n" +
           "kubectl apply -f https://raw.githubusercontent.com/cyclops-ui/cyclops/v0.15.2/install/demo-templates.yaml"}
