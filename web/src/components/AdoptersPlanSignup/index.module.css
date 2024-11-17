@@ -1,0 +1,13 @@
+.submitButton {
+    background-color: #ff8803;
+}
+
+.submitButton:hover {
+    background-color: #ffa229;
+    text-decoration: none;
+}
+
+.adopterInput::placeholder {
+    color: #fff;
+    opacity: 1; /* Firefox */
+}

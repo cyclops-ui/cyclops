@@ -3,6 +3,7 @@ import { Card, Button, Typography, Row, Col, ConfigProvider } from "antd";
 import CalendlyWidget from "../components/CalendlyWidget";
 import styles from "./index.module.css";
 import yaml from "/static/img/yaml_background.png";
+import AdoptersPlanSignup from "../components/AdoptersPlanSignup/AdoptersPlanSignup";
 
 const { Paragraph } = Typography;
 
@@ -93,73 +94,99 @@ export default function Pricing() {
             textAlign: "center",
           }}
         >
-          <h1 style={{ marginBottom: "5px" }}>Open Source Software</h1>
-          <h2>with Professional Support</h2>
+	        <h1 style={{ marginBottom: "5px" }}>
+	          Open Source Software
+	        </h1>
+            <h2>with Professional Support</h2>
         </div>
         <Row
           gutter={[40, 40]}
-          style={{ minHeight: "80vh", padding: "5vh 5vw 15vh 5vw" }}
+          style={{padding: "16px", paddingTop: "24px", paddingBottom: "10vh"}}
         >
-          <Col xs={24} sm={24} md={24} lg={8} xl={8}>
-            <Card bordered={false} className={styles.pricingCard}>
+	        <Col
+	          xs={24}
+	          sm={24}
+	          md={24}
+	          lg={{ span: 10, offset: 2 }}
+	          xl={{ span: 10, offset: 2 }}
+	        >
+	          <Card bordered={false} className={styles.pricingCard}>
+	            <h4 style={{ fontSize: "1.6rem", color: "#FFF" }}>
+	              We are Open Source!
+	            </h4>
+	            <hr
+	              style={{
+	                opacity: 0.5,
+	                marginTop: "28px",
+	                marginBottom: "16px",
+	              }}
+	            />
+	            <Paragraph
+	              style={{
+	                color: "#FFFFFF",
+	                fontWeight: "500",
+	                fontSize: "1rem",
+	              }}
+	            >
+	              <ul
+	                className={styles.paragraphlist}
+	                style={{
+	                  listStyleType: "circle",
+	                  textAlign: "left",
+	                }}
+	              >
+	                <li style={{ marginBottom: "10px" }}>
+	                  Free now and forever
+	                </li>
+	                <li style={{ marginBottom: "10px" }}>
+	                  Works with the Helm charts you already
+	                  have
+	                </li>
+	                <li style={{ marginBottom: "10px" }}>
+	                  Integrates smoothly into your existing
+	                  workflow
+	                </li>
+	              </ul>
+	            </Paragraph>
+	            <div
+	                style={{
+	                    position: "absolute",
+	                    left: "0",
+	                    bottom: "20px",
+	                    width: "100%",
+	                }}
+	            >
+	              <ConfigProvider
+	                theme={{
+	                  token: {
+	                    colorPrimary: "#FFF",
+	                  },
+	                }}
+	              >
+	                <Button
+	                  href="../../docs/installation/install"
+	                  shape="round"
+	                  size={"large"}
+	                  className={styles.pricingButton}
+	                >
+	                  <h2 style={{ margin: 0 }}>Quickstart Guide</h2>
+	                </Button>
+	              </ConfigProvider>
+	            </div>
+	          </Card>
+	        </Col>
+	        <Col xs={24} sm={24} md={24} lg={10} xl={10}>
+	          <Card className={styles.pricingCardSupport} >
               <h4 style={{ fontSize: "1.6rem", color: "#FFF" }}>
-                We are Open Source!
+                Onboarding and support
               </h4>
-              <Paragraph
+              <hr
                 style={{
-                  color: "#FFFFFF",
-                  fontWeight: "500",
-                  fontSize: "1rem",
+                  opacity: 0.5,
+                  marginTop: "24px",
+                  marginBottom: "16px",
                 }}
-              >
-                <ul
-                  className={styles.paragraphlist}
-                  style={{
-                    listStyleType: "circle",
-                    textAlign: "left",
-                  }}
-                >
-                  <li style={{ marginBottom: "10px" }}>Free now and forever</li>
-                  <li style={{ marginBottom: "10px" }}>
-                    Works with the Helm charts you already have
-                  </li>
-                  <li style={{ marginBottom: "10px" }}>
-                    Integrates smoothly into your existing workflow
-                  </li>
-                </ul>
-              </Paragraph>
-              <div
-                style={{
-                  position: "absolute",
-                  left: "0",
-                  bottom: "20px",
-                  width: "100%",
-                }}
-              >
-                <ConfigProvider
-                  theme={{
-                    token: {
-                      colorPrimary: "#FFF",
-                    },
-                  }}
-                >
-                  <Button
-                    href="../../docs/installation/install"
-                    shape="round"
-                    size={"large"}
-                    className={styles.pricingButton}
-                  >
-                    <h2 style={{ margin: 0 }}>Quickstart Guide</h2>
-                  </Button>
-                </ConfigProvider>
-              </div>
-            </Card>
-          </Col>
-          <Col xs={24} sm={24} md={24} lg={8} xl={8}>
-            <Card bordered={false} className={styles.pricingCard}>
-              <h4 style={{ fontSize: "1.6rem", color: "#FFF" }}>
-                Need onboarding?
-              </h4>
+              />
               <Paragraph
                 style={{
                   color: "#FFFFFF",
@@ -168,6 +195,15 @@ export default function Pricing() {
                   flex: "1",
                 }}
               >
+                <div
+                  style={{
+                    fontWeight: "bold",
+                    paddingBottom: "12px",
+                  }}
+                >
+                  Get support from our team to customize
+                  Cyclops to your use case
+                </div>
                 <ul
                   className={styles.paragraphlist}
                   style={{
@@ -177,64 +213,36 @@ export default function Pricing() {
                   }}
                 >
                   <li style={{ marginBottom: "10px" }}>
-                    Integrating Cyclops into your existing workflow
+                    Setting up your Cyclops instance
                   </li>
                   <li style={{ marginBottom: "10px" }}>
-                    Creating custom templates for your use cases
+                    Creating templates
                   </li>
                   <li style={{ marginBottom: "10px" }}>
                     Onboarding your developer teams
                   </li>
+                  <li style={{ marginBottom: "10px" }}>
+                    Support maintaining Cyclops through
+                    upgrades
+                  </li>
                 </ul>
-              </Paragraph>
-              <div
-                style={{
-                  position: "absolute",
-                  left: "0",
-                  bottom: "20px",
-                  width: "100%",
-                }}
-              >
-                <CalendlyWidget />
-              </div>
-            </Card>
-          </Col>
-          <Col xs={24} sm={24} md={24} lg={8} xl={8}>
-            <Card bordered={false} className={styles.pricingCard}>
-              <h4 style={{ fontSize: "1.6rem", color: "#FFF" }}>
-                Looking for something more?
-              </h4>
-              <Paragraph
-                style={{
-                  color: "#FFFFFF",
-                  fontWeight: "500",
-                  fontSize: "1rem",
-                }}
-              >
-                <ul
-                  className={styles.paragraphlist}
+                <div
                   style={{
-                    listStyleType: "circle",
-                    textAlign: "left",
+	                  paddingTop: "24px",
+	                  fontSize: "1.2rem",
                   }}
                 >
-                  <li style={{ marginBottom: "10px" }}>
-                    Don't want to host it on your own?
-                  </li>
-                  <li style={{ marginBottom: "10px" }}>
-                    Interested in additional features?
-                  </li>
-                </ul>
+                  Leave your email, and our team will reach
+                  out to you in the next 24 hours - <span style={{color: "#ff8803"}}>no commitment</span>
+                </div>
               </Paragraph>
               <div
-                style={{
-                  position: "absolute",
-                  left: "0",
-                  bottom: "20px",
-                  width: "100%",
-                }}
+              style={{
+                      marginTop: "24px",
+                      textAlign: "center",
+                    }}
               >
-                <CalendlyWidget />
+                <AdoptersPlanSignup />
               </div>
             </Card>
           </Col>
