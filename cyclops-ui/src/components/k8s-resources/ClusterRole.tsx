@@ -9,9 +9,10 @@ interface Props {
 }
 
 interface Rule {
-  verbs: string[];
-  apiGroups: string[];
-  resources: string[];
+  verbs?: string[];
+  apiGroups?: string[];
+  resources?: string[];
+  nonResourceURLs?: string[];
 }
 
 interface ClusterRoleData {
@@ -63,6 +64,20 @@ const ClusterRole = ({ name }: Props) => {
 
   const columns = [
     {
+      title: "Verbs",
+      dataIndex: "verbs",
+      key: "verbs",
+      render: (verbs?: string[]) => (
+        <>
+          {verbs?.map((verb) => (
+            <Tag key={verb} color="orange">
+              {verb}
+            </Tag>
+          ))}
+        </>
+      ),
+    },
+    {
       title: "API Groups",
       dataIndex: "apiGroups",
       key: "apiGroups",
@@ -90,21 +105,24 @@ const ClusterRole = ({ name }: Props) => {
         </>
       ),
     },
-    {
-      title: "Verbs",
-      dataIndex: "verbs",
-      key: "verbs",
-      render: (verbs?: string[]) => (
+  ];
+
+  if (clusterRole.rules.some((rule) => rule.nonResourceURLs)) {
+    columns.push({
+      title: "Non resource URLs",
+      dataIndex: "nonResourceURLs",
+      key: "nonResourceURLs",
+      render: (nonResourceURLs?: string[]) => (
         <>
-          {verbs?.map((verb) => (
-            <Tag key={verb} color="orange">
-              {verb}
+          {nonResourceURLs?.map((url) => (
+            <Tag key={url} color="purple">
+              {url}
             </Tag>
           ))}
         </>
       ),
-    },
-  ];
+    });
+  }
 
   return (
     <div>
