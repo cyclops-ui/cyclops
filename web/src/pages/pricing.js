@@ -231,6 +231,7 @@ export default function Pricing() {
               <div
                 style={{
                   marginTop: "24px",
+                  marginBottom: "-4px",
                   textAlign: "center",
                 }}
               >
