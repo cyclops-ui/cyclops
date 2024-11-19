@@ -592,7 +592,7 @@ const NewModule = () => {
         </Col>
       </Row>
       <Modal
-        title="Values to import"
+        title="Import values as YAML"
         visible={loadingValuesModal}
         onCancel={handleCancel}
         onOk={handleImportValues}
@@ -613,6 +613,14 @@ const NewModule = () => {
             style={{ marginBottom: "20px" }}
           />
         )}
+        <div style={{paddingRight: "16px", paddingBottom: "16px", color: "#777"}}>
+          <Row>
+            You can paste your values in YAML format here, and after submitting them, you can see them in the form and edit them further.
+          </Row>
+          <Row>
+            If you set a value in YAML that does not exist in the UI, it will not be applied to your Module.
+          </Row>
+        </div>
         <AceEditor
           mode={"yaml"}
           theme="github"
