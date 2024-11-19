@@ -563,7 +563,7 @@ const NewModule = () => {
                   !config.root.properties
                 }
               >
-                Load values from file
+                Import values as YAML
               </Button>{" "}
               <Button
                 type="primary"
