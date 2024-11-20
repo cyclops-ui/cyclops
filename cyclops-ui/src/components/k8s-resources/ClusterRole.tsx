@@ -52,10 +52,6 @@ const ClusterRole = ({ name }: Props) => {
   useEffect(() => {
     fetchClusterRole();
 
-    if (isStreamingEnabled()) {
-      return;
-    }
-
     const interval = setInterval(() => fetchClusterRole(), 15000);
     return () => {
       clearInterval(interval);
