@@ -111,7 +111,7 @@ export function findMaps(fields: any[], values: any, initialValues: any): any {
 
         let object: any = {};
         valuesList.forEach((valueFromList) => {
-          object[valueFromList.key] = YAML.parse(valueFromList.value);
+          object[valueFromList.key] = YAML.parse(String(valueFromList.value));
         });
         out[field.name] = object;
         break;
