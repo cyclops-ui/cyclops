@@ -2,7 +2,6 @@ import React, { useCallback, useEffect, useState } from "react";
 import { Col, Divider, Row, Alert, Table, Tag } from "antd";
 import axios from "axios";
 import { mapResponseError } from "../../utils/api/errors";
-import { isStreamingEnabled } from "../../utils/api/common";
 
 interface Props {
   name: string;
