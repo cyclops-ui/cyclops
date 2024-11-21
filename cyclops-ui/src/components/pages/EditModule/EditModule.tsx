@@ -148,7 +148,6 @@ const EditModule = () => {
             setValues(values);
             setPreviousValues(res.data.values);
           } else {
-            console.log(result);
             setError(result.error);
           }
 
