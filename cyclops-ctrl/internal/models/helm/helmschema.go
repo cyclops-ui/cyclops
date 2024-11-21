@@ -31,6 +31,9 @@ type Property struct {
 	MinLength *int    `json:"minLength"`
 	MaxLength *int    `json:"maxLength"`
 	Pattern   *string `json:"pattern"`
+
+	// schema compositions
+	AnyOf []Property `json:"anyOf"`
 }
 
 type PropertyType string
