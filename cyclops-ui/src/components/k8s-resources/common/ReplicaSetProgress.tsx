@@ -21,13 +21,6 @@ const ReplicaSetProgress = ({
 
   const healthyReplicasPercent = (healthyReplicas / totalReplicas) * 100;
 
-  console.log(
-    activeReplicaSet,
-    healthyReplicas,
-    totalReplicas,
-    healthyReplicasPercent,
-  );
-
   return (
     <div
       style={{
