@@ -27,6 +27,7 @@ import DaemonSet from "../DaemonSet";
 import { StatefulSet, StatefulSetLogsButton } from "../StatefulSet";
 import Pod from "../Pod";
 import Service from "../Service";
+import ClusterRole from "../ClusterRole";
 import ConfigMap from "../ConfigMap";
 import PersistentVolumeClaim from "../PersistentVolumeClaim";
 import Secret from "../Secret";
@@ -328,6 +329,9 @@ const ResourceList = ({
         resourceDetails = (
           <Secret name={resource.name} namespace={resource.namespace} />
         );
+        break;
+      case "ClusterRole":
+        resourceDetails = <ClusterRole name={resource.name} />;
         break;
     }
 

@@ -35,6 +35,30 @@ export function flattenObjectKeys(
   }, []);
 }
 
+export function deepMerge(target: any, source: any): any {
+  if (!source && !target) {
+    return {};
+  }
+
+  if (!source) {
+    return target;
+  }
+
+  if (!target) {
+    return source;
+  }
+
+  for (const key in source) {
+    if (source[key] && typeof source[key] === "object" && !Array.isArray(source[key])) {
+      target[key] = deepMerge(target[key] || {}, source[key]);
+    } else {
+      target[key] = source[key];
+    }
+  }
+
+  return target;
+};
+
 export function findMaps(fields: any[], values: any, initialValues: any): any {
   let out: any = initialValues ? initialValues : {};
 
@@ -111,7 +135,7 @@ export function findMaps(fields: any[], values: any, initialValues: any): any {
 
         let object: any = {};
         valuesList.forEach((valueFromList) => {
-          object[valueFromList.key] = YAML.parse(valueFromList.value);
+          object[valueFromList.key] = YAML.parse(String(valueFromList.value));
         });
         out[field.name] = object;
         break;

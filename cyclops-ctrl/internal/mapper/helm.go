@@ -9,6 +9,10 @@ import (
 )
 
 func HelmSchemaToFields(name string, schema helm.Property, defs map[string]helm.Property, dependencies []*models.Template) models.Field {
+	if shouldResolvePropertyComposition(schema) {
+		return HelmSchemaToFields(name, resolvePropertyComposition(schema), defs, dependencies)
+	}
+
 	if schema.Type == "array" {
 		return models.Field{
 			Name:        name,
@@ -210,4 +214,27 @@ func resolveJSONSchemaRef(defs map[string]helm.Property, ref []string) helm.Prop
 	}
 
 	return resolveJSONSchemaRef(def.Properties, ref[1:])
+}
+
+func shouldResolvePropertyComposition(schema helm.Property) bool {
+	return len(schema.AnyOf) != 0
+}
+
+func resolvePropertyComposition(schema helm.Property) helm.Property {
+	if len(schema.AnyOf) == 0 {
+		return schema
+	}
+
+	// go over all options of anyOf and if there is a boolean version, return it.
+	// If a field can be represented with a boolean we should use it since it is
+	// the easiest way to input a correct value.
+	//
+	// If there are multiple boolean anyOfs, return the first one.
+	for _, p := range schema.AnyOf {
+		if p.Type == "boolean" {
+			return p
+		}
+	}
+
+	return schema.AnyOf[0]
 }
