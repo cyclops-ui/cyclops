@@ -3,7 +3,7 @@ title: "Cyclops Launch Week #1"
 authors: [jurajk]
 ---
 
-![launch-week-teaser](../../static/img/2024-11-22-launch-week-1/launch-week-1.png)
+![launch-week-teaser](../../static/img/2024-11-22-launch-week-1/launch-week-2.png)
 
 **Cyclops is having its very first launch week, starting on November 25th!**
 
@@ -26,5 +26,17 @@ Besides reviewing all of your installed Helm releases in a cluster, through this
 ![helm-releases](../../static/img/2024-11-22-launch-week-1/1-helm-releases.png)
 
 Although Cyclops Modules are a more powerful way of managing your applications in the cluster, the Helm releases manager offers a good starting point since it does not require you to change your current CI/CD pipelines or workflows. We also found them great for environments with short lifecycles - such as testing or staging clusters!
+
+## #2 GitOps 🦑
+
+We know this was a highly requested feature, and we are happy to announce that **Cyclops now supports a GitOps workflow!**
+
+All applications within Cyclops are defined as **CRs** called **Modules**. Each time a Module is created, the **Cyclops controller** picks it up, creates other Kubernetes resources from it, and applies them to the cluster. Since Modules are CRDs, you can define them via the YAML manifest. Those manifests allow you to define everything you need for your application in a single place.
+
+Since a **Module can be defined through a manifest**, it can be **stored on a** **git repo** and included in your **GitOps workflow**!
+
+Through the Module manifest, you can also define which values you want to make editable through Cyclops and which values should be handled only with GitOps. For example, the image version should only be handled with GitOps, but you want to enable developers to scale the number of replicas through Cyclops.
+
+**We created a guide** you can follow to get started, check it out [here](https://github.com/cyclops-ui/gitops-starter)!
 
 _**To be continued ...**_
