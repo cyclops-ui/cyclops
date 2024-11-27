@@ -3,7 +3,7 @@ title: "Cyclops Launch Week #1"
 authors: [jurajk]
 ---
 
-![launch-week-teaser](../../static/img/2024-11-22-launch-week-1/launch-week-2.png)
+![launch-week-teaser](../../static/img/2024-11-22-launch-week-1/launch-week-3.png)
 
 **Cyclops is having its very first launch week, starting on November 25th!**
 
@@ -38,5 +38,31 @@ Since a **Module can be defined through a manifest**, it can be **stored on a** 
 Through the Module manifest, you can also define which values you want to make editable through Cyclops and which values should be handled only with GitOps. For example, the image version should only be handled with GitOps, but you want to enable developers to scale the number of replicas through Cyclops.
 
 **We created a guide** you can follow to get started, check it out [here](https://github.com/cyclops-ui/gitops-starter)!
+
+## #3 Namespace Scoped Cyclops 🔬
+
+We know this was a thorn in your side, but from now on, you can restrict Cyclops to a **single namespace** to **limit the permissions** needed for your Cyclops installation! 
+
+Firstly, we introduced **three** **new environment** variables `WATCH_NAMESPACE`, `MODULE_TARGET_NAMESPACE` and `WATCH_NAMESPACE_HELM`, which will help you configure your Cyclops instance to act only in specific namespaces.
+
+```yaml
+...
+- name: cyclops-ctrl
+  image: cyclopsui/cyclops-ctrl:v0.15.2
+  ports:
+    - containerPort: 8080
+  env:
+    - name: PORT
+      value: "8080"
+    - name: WATCH_NAMESPACE
+      value: "my-namespace"
+    - name: MODULE_TARGET_NAMESPACE
+      value: "my-namespace"
+    - name: WATCH_NAMESPACE_HELM
+      value: "my-namespace"
+...
+```
+
+Secondly, we created a Helm chart that utilizes these env variables to create **Roles** and **RoleBindings** **for Cyclops** to be scoped to a single namespace of your choosing. And, of course, we made a guide on how to use these env variables and how to easily get set up - check it out [here](https://cyclops-ui.com/docs/installation/namespace-scope)!
 
 _**To be continued ...**_
