@@ -3,7 +3,7 @@ title: "Cyclops Launch Week #1"
 authors: [jurajk]
 ---
 
-![launch-week-teaser](../../static/img/2024-11-22-launch-week-1/launch-week-3.png)
+![launch-week-teaser](../../static/img/2024-11-22-launch-week-1/launch-week-4.png)
 
 **Cyclops is having its very first launch week, starting on November 25th!**
 
@@ -64,5 +64,15 @@ Firstly, we introduced **three** **new environment** variables `WATCH_NAMESPACE`
 ```
 
 Secondly, we created a Helm chart that utilizes these env variables to create **Roles** and **RoleBindings** **for Cyclops** to be scoped to a single namespace of your choosing. And, of course, we made a guide on how to use these env variables and how to easily get set up - check it out [here](https://cyclops-ui.com/docs/installation/namespace-scope)!
+
+## #4 Private Repositories **🔐**
+
+Most companies do not store their configurations & Helm charts in open repositories, so this feature was a **MUST-have!** However, accessing private repositories requires authentication.
+
+We did not want to bloat Cyclops with a database, so we introduced a **new custom resource** called `TemplateAuthRule`! This resource defines which templates you want to authorize and points Cyclops to the authorization data that is stored securely in **Kubernetes secrets**.
+
+![tar_arch](../../static/img/templates/private-templates/tar_arch.png)
+
+Of course, we created a **tutorial** on how to **enable Cyclops access to your private repos** [here](https://cyclops-ui.com/docs/templates/private_templates).
 
 _**To be continued ...**_
