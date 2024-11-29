@@ -186,7 +186,6 @@ func (r Repo) mapHelmChart(chartName string, files map[string][]byte) (*models.T
 
 	}
 
-
 	var schema helm.Property
 	// unmarshal values schema only if present
 	if len(schemaBytes) > 0 {
@@ -207,7 +206,6 @@ func (r Repo) mapHelmChart(chartName string, files map[string][]byte) (*models.T
 	if err != nil {
 		return &models.Template{}, err
 	}
-
 
 	for depName, files := range dependenciesFromChartsDir {
 		if dependencyExists(depName, dependencies) {
