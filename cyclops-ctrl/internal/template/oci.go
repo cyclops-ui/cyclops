@@ -18,25 +18,35 @@ func (r Repo) LoadOCIHelmChart(repo, chart, version, resolvedVersion string) (*m
 	var err error
 	strictVersion := version
 
+	fmt.Println("loadam OCI chart prije", repo, chart, version, resolvedVersion)
+
 	if len(resolvedVersion) > 0 {
 		strictVersion = resolvedVersion
 	} else if !isValidVersion(version) {
 		strictVersion, err = getOCIStrictVersion(repo, chart, version)
 		if err != nil {
+			fmt.Println("filed to get stric version", repo, chart, version, err)
 			return nil, err
 		}
 	}
+
+	fmt.Println("loadam OCI chart poslje", repo, chart, version, strictVersion)
 
 	cached, ok := r.cache.GetTemplate(repo, chart, strictVersion, string(cyclopsv1alpha1.TemplateSourceTypeOCI))
 	if ok {
 		return cached, nil
 	}
 
+	fmt.Println("prije loadOCIHelmChartBytes", repo, chart, version)
+
 	var tgzData []byte
 	tgzData, err = loadOCIHelmChartBytes(repo, chart, version)
 	if err != nil {
+		fmt.Println("error loadOCIHelmChartBytes", repo, chart, version)
 		return nil, err
 	}
+
+	fmt.Println("done loadOCIHelmChartBytes", repo, chart, version)
 
 	extractedFiles, err := unpackTgzInMemory(tgzData)
 	if err != nil {
@@ -94,21 +104,28 @@ func (r Repo) LoadOCIHelmChartInitialValues(repo, chart, version string) (map[st
 func loadOCIHelmChartBytes(repo, chart, version string) ([]byte, error) {
 	var err error
 	if !isValidVersion(version) {
+		fmt.Println("loadOCIHelmChartBytes not valid version", repo, chart, version)
 		version, err = getOCIStrictVersion(repo, chart, version)
 		if err != nil {
 			return nil, err
 		}
 	}
 
+	fmt.Println("prije authorizeOCI()", repo, chart, version)
+
 	token, err := authorizeOCI(repo, chart, version)
 	if err != nil {
 		return nil, err
 	}
 
+	fmt.Println("done authorizeOCI()", repo, chart, version)
+
 	digest, err := fetchDigest(repo, chart, version, token)
 	if err != nil {
 		return nil, err
 	}
+
+	fmt.Println("done fetchDigest()", repo, chart, version, token)
 
 	contentDigest, err := fetchContentDigest(repo, chart, digest, token)
 	if err != nil {
@@ -259,6 +276,8 @@ func getOCIStrictVersion(repo, chart, version string) (string, error) {
 		return "", err
 	}
 
+	fmt.Println("all tags", tagsResp, repo, chart, version)
+
 	return resolveSemver(version, tagsResp.Tags)
 }
 
@@ -269,12 +288,17 @@ func authorizeOCI(repo, chart, version string) (string, error) {
 		return "", err
 	}
 
+	fmt.Println("durl", dURL.String())
+
 	client := &http.Client{}
 
 	req, err := http.NewRequest(http.MethodHead, dURL.String(), nil)
 	if err != nil {
 		return "", err
 	}
+
+	req.Header.Set("User-Agent", "Helm/3.13.3")
+	req.Header.Set("Accept", "application/vnd.docker.distribution.manifest.v2+json, application/vnd.docker.distribution.manifest.list.v2+json, application/vnd.oci.image.manifest.v1+json, application/vnd.oci.image.index.v1+json, */*")
 
 	resp, err := client.Do(req)
 	if err != nil {
@@ -288,6 +312,8 @@ func authorizeOCI(repo, chart, version string) (string, error) {
 	} else if resp.StatusCode == http.StatusUnauthorized {
 		authUrlRealm, service, scope = parseAuthenticateHeader(resp.Header.Get("WWW-Authenticate"))
 	}
+
+	fmt.Println("durl status", resp.StatusCode)
 
 	if resp.StatusCode != http.StatusUnauthorized {
 		return "", errors.New(fmt.Sprintf("unexpected status code: %v", resp.StatusCode))
@@ -322,6 +348,8 @@ func authorizeOCI(repo, chart, version string) (string, error) {
 	if err != nil {
 		return "", err
 	}
+
+	fmt.Println("response", string(responseBody))
 
 	var ar struct {
 		Token string `json:"token"`
