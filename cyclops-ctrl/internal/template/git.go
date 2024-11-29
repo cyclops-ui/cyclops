@@ -33,7 +33,6 @@ import (
 )
 
 func (r Repo) LoadTemplate(repoURL, path, commit, resolvedVersion string) (*models.Template, error) {
-	fmt.Println("laoding tempalte", repoURL, path, commit, resolvedVersion)
 	creds, err := r.credResolver.RepoAuthCredentials(repoURL)
 	if err != nil {
 		return nil, err
@@ -55,7 +54,6 @@ func (r Repo) LoadTemplate(repoURL, path, commit, resolvedVersion string) (*mode
 	}
 
 	if gitproviders.IsGitHubSource(repoURL) {
-		fmt.Println("ja sam github repoi", repoURL, path, commit, resolvedVersion)
 		ghTemplate, err := r.mapGitHubRepoTemplate(repoURL, path, commitSHA, creds)
 		if err != nil {
 			return nil, err
@@ -523,14 +521,10 @@ func (r Repo) mapGitHubRepoTemplate(repoURL, path, commitSHA string, creds *auth
 		return nil, err
 	}
 
-	fmt.Println("unpacked github repo template ", repoURL, path, commitSHA)
-
 	ghRepoFiles, exists := gitproviders.SanitizeGHFiles(ghRepoFiles, path)
 	if !exists {
 		return nil, errors.Errorf("provided path %v for repo %v does not exist on version %v", path, repoURL, commitSHA)
 	}
-
-	fmt.Println("sanitized github repo template ", repoURL, path, commitSHA)
 
 	template, err := r.mapHelmChart(path, ghRepoFiles)
 	if err != nil {

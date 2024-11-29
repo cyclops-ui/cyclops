@@ -186,7 +186,6 @@ func (r Repo) mapHelmChart(chartName string, files map[string][]byte) (*models.T
 
 	}
 
-	fmt.Println("mapHelmChart", chartName)
 
 	var schema helm.Property
 	// unmarshal values schema only if present
@@ -203,15 +202,12 @@ func (r Repo) mapHelmChart(chartName string, files map[string][]byte) (*models.T
 		return &models.Template{}, err
 	}
 
-	fmt.Println("idem mapirat depse", chartName, schema, metadata)
-
 	// region load dependencies
 	dependencies, err := r.loadDependencies(metadata)
 	if err != nil {
 		return &models.Template{}, err
 	}
 
-	fmt.Println("gotov s meta depsima", chartName)
 
 	for depName, files := range dependenciesFromChartsDir {
 		if dependencyExists(depName, dependencies) {

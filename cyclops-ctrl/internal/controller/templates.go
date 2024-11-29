@@ -1,7 +1,6 @@
 package controller
 
 import (
-	"fmt"
 	"net/http"
 	"strings"
 
@@ -135,7 +134,6 @@ func (c *Templates) CreateTemplatesStore(ctx *gin.Context) {
 		cyclopsv1alpha1.TemplateSourceType(templateStore.TemplateRef.SourceType),
 	)
 	if err != nil {
-		fmt.Println("error fetchiongf tempalte", templateStore.TemplateRef.URL, templateStore.TemplateRef.Path, templateStore.TemplateRef.Version)
 		ctx.JSON(http.StatusBadRequest, dto.NewError("Error loading template", err.Error()))
 		return
 	}
