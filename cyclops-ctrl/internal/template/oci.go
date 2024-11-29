@@ -380,7 +380,7 @@ func authorizeOCITags(repo, chart string) (string, error) {
 
 	client := &http.Client{}
 
-	req, err := http.NewRequest(http.MethodHead, tURL.String(), nil)
+	req, err := http.NewRequest(http.MethodGet, tURL.String(), nil)
 	if err != nil {
 		return "", err
 	}
@@ -432,7 +432,7 @@ func authorizeOCITags(repo, chart string) (string, error) {
 	}
 
 	var ar struct {
-		Token string `json:"access_token"`
+		Token string `json:"token"`
 	}
 
 	if err := json.Unmarshal(responseBody, &ar); err != nil {
