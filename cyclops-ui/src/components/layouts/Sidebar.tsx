@@ -1,5 +1,5 @@
 import React from "react";
-import { Button, Menu, MenuProps, Row } from "antd";
+import { Button, Menu, MenuProps } from "antd";
 import {
   AppstoreAddOutlined,
   HddOutlined,
@@ -7,7 +7,6 @@ import {
   SnippetsOutlined,
   GithubFilled,
   ThunderboltFilled,
-  DiscordFilled,
   DiscordOutlined,
 } from "@ant-design/icons";
 import { useLocation } from "react-router";
