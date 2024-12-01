@@ -2,3 +2,5 @@
 .DS_Store
 
 dist/
+src/**/*.js.map
+src/**/*.js
