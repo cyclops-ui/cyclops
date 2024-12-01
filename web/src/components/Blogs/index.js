@@ -21,6 +21,19 @@ const Blogs = () => {
         <Row gutter={[16, 16]}>
           <Col xs={{ span: 20, offset: 2 }} md={{ span: 6, offset: 3 }}>
             <Blog
+              title={"Where GitOps Meets ClickOps"}
+              description={
+                "In the DevOps landscape, two paradigms have emerged: GitOps and ClickOps, each offering ..."
+              }
+              blogLink={
+                "https://cyclops-ui.com/blog/2024/11/29/gitops-clickops"
+              }
+              avatar={"https://github.com/KaradzaJuraj.png"}
+              banner={"/img/2024-11-29-gitops-clickops/cover.jpeg"}
+            />
+          </Col>
+          <Col xs={{ span: 20, offset: 2 }} md={{ span: 6, offset: 0 }}>
+            <Blog
               title={"Custom AWS Cloud Platforms"}
               description={
                 "But should we use Kubernetes as just a container orchestrator, or is there more to it..."
@@ -43,19 +56,6 @@ const Blogs = () => {
               }
               avatar={"https://github.com/KaradzaJuraj.png"}
               banner={"/img/2024-10-24-five-idps/cover.jpg"}
-            />
-          </Col>
-          <Col xs={{ span: 20, offset: 2 }} md={{ span: 6, offset: 0 }}>
-            <Blog
-              title={"What is Platform Engineering?"}
-              description={
-                "Modern software engineering is becoming more and more complicated, especially in cloud-native environments like Kubernetes..."
-              }
-              blogLink={
-                "https://cyclops-ui.com/blog/2024/10/17/platform-engineering"
-              }
-              avatar={"https://github.com/KaradzaJuraj.png"}
-              banner={"/img/2024-10-17-platform-engineering/cover.jpeg"}
             />
           </Col>
         </Row>

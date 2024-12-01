@@ -3,7 +3,7 @@ title: "Cyclops Launch Week #1"
 authors: [jurajk]
 ---
 
-![launch-week-teaser](../../static/img/2024-11-22-launch-week-1/launch-week-3.png)
+![launch-week-teaser](../../static/img/2024-11-22-launch-week-1/launch-week-5.png)
 
 **Cyclops is having its very first launch week, starting on November 25th!**
 
@@ -41,7 +41,7 @@ Through the Module manifest, you can also define which values you want to make e
 
 ## #3 Namespace Scoped Cyclops 🔬
 
-We know this was a thorn in your side, but from now on, you can restrict Cyclops to a **single namespace** to **limit the permissions** needed for your Cyclops installation! 
+We know this was a thorn in your side, but from now on, you can restrict Cyclops to a **single namespace** to **limit the permissions** needed for your Cyclops installation!
 
 Firstly, we introduced **three** **new environment** variables `WATCH_NAMESPACE`, `MODULE_TARGET_NAMESPACE` and `WATCH_NAMESPACE_HELM`, which will help you configure your Cyclops instance to act only in specific namespaces.
 
@@ -65,4 +65,34 @@ Firstly, we introduced **three** **new environment** variables `WATCH_NAMESPACE`
 
 Secondly, we created a Helm chart that utilizes these env variables to create **Roles** and **RoleBindings** **for Cyclops** to be scoped to a single namespace of your choosing. And, of course, we made a guide on how to use these env variables and how to easily get set up - check it out [here](https://cyclops-ui.com/docs/installation/namespace-scope)!
 
-_**To be continued ...**_
+## #4 Private Repositories 🔐
+
+Most companies do not store their configurations & Helm charts in open repositories, so this feature was a **MUST-have!** However, accessing private repositories requires authentication.
+
+We did not want to bloat Cyclops with a database, so we introduced a **new custom resource** called `TemplateAuthRule`! This resource defines which templates you want to authorize and points Cyclops to the authorization data that is stored securely in **Kubernetes secrets**.
+
+![tar_arch](../../static/img/templates/private-templates/tar_arch.png)
+
+Of course, we created a **tutorial** on how to **enable Cyclops access to your private repos** [here](https://cyclops-ui.com/docs/templates/private_templates).
+
+## #5 Streaming 🌊
+
+If you've used Cyclops recently, you may have noticed a more **responsive** and **smoother** experience. This improvement comes from our latest enhancements: **streaming resource status updates** and **real-time app logs.**
+
+You can now rest comfortably knowing that the resources are getting their status (health) updated **live** from the cluster!
+
+```yaml
+REACT_APP_ENABLE_STREAMING: true
+```
+
+Of course, if your bandwidth is not allowing you to keep an SSE connection open (or you just don’t care about having the state streamed to the UI), we introduced a **new environment variable** in cyclops-ui that allows you to disable this feature ⬆️
+
+If you've used Cyclops recently, you may have noticed a more **responsive** and **smoother** experience. This improvement comes from our latest enhancements: **streaming resource status updates** and **real-time app logs.**
+
+## Launch Week Wrap Up 🎁
+
+This wraps up **Cyclops Launch Week**! We’re thrilled to have shared these five amazing features with you, each designed to make your Kubernetes experience more efficient, secure, and user-friendly.
+
+Thank you for being a part of our journey! If you are interested in keeping up to date, be sure to join our [**Discord community**](https://discord.com/invite/8ErnK3qDb3) where we always share the latest news! 👾
+
+Looking forward to our next launch week 🚀
