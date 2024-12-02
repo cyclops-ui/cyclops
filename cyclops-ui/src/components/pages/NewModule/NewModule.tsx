@@ -12,6 +12,7 @@ import {
   Modal,
   Spin,
   notification,
+  Progress,
 } from "antd";
 import axios from "axios";
 import { deepMerge, findMaps, flattenObjectKeys, mapsToArray } from "../../../utils/form";
@@ -300,7 +301,28 @@ const NewModule = () => {
       );
     }
 
-    return <Spin size="large" />;
+    let percent = 20;
+    let message = "loading template...";
+    if (!loadingTemplate && loadingTemplateInitialValues) {
+      percent += 50;
+      message = "loading initial values...";
+    }
+
+    return (
+      <Col style={{ padding: "0px" }} span={16}>
+        <Row style={{ display: "flex", alignItems: "center" }}>
+          <Spin size={"large"} />
+          <div style={{ paddingLeft: "24px", flexGrow: 1 }}>
+            <Progress
+              percent={percent}
+              strokeColor={"#ff8803"}
+              showInfo={false}
+            />
+            <h4 style={{ color: "#5a5a5a" }}>{message}</h4>
+          </div>
+        </Row>
+      </Col>
+    );
   }
 
   const handleCancel = () => {
