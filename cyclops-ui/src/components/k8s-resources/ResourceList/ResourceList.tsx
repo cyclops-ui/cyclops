@@ -89,6 +89,9 @@ const ResourceList = ({
   });
   const [deleteResourceVerify, setDeleteResourceVerify] = useState("");
 
+  //for fetchManifest function
+  const [loadingResourceManifest, setLoadingResourceManifest] = useState(false);
+
   const [showManagedFields, setShowManagedFields] = useState(false);
 
   const [resourceFilter, setResourceFilter] = useState<string[]>([]);
@@ -162,34 +165,40 @@ const ResourceList = ({
   };
 
   function fetchManifest(
-    group: string,
-    version: string,
-    kind: string,
-    namespace: string,
-    name: string,
-    showManagedFields: boolean,
-  ) {
-    axios
-      .get(`/api/manifest`, {
-        params: {
-          group: group,
-          version: version,
-          kind: kind,
-          name: name,
-          namespace: namespace,
-          includeManagedFields: showManagedFields,
-        },
-      })
-      .then((res) => {
-        setManifestModal((prev) => ({
-          ...prev,
-          manifest: res.data,
-        }));
-      })
-      .catch((error) => {
-        setError(mapResponseError(error));
-      });
-  }
+  group: string,
+  version: string,
+  kind: string,
+  namespace: string,
+  name: string,
+  showManagedFields: boolean,
+) {
+  setLoadingResourceManifest(true);
+
+  axios
+    .get(`/api/manifest`, {
+      params: {
+        group: group,
+        version: version,
+        kind: kind,
+        name: name,
+        namespace: namespace,
+        includeManagedFields: showManagedFields,
+      },
+    })
+    .then((res) => {
+      setManifestModal((prev) => ({
+        ...prev,
+        manifest: res.data,
+      }));
+    })
+    .catch((error) => {
+      console.error("Failed to fetch resource manifest:", error);
+      setError(mapResponseError(error));
+    })
+    .finally(() => {
+      setLoadingResourceManifest(false); 
+    });
+}
 
   const resourceFilterOptions = () => {
     if (!loadResources) {
@@ -635,9 +644,8 @@ const ResourceList = ({
       <Modal
         title="Manifest"
         open={manifestModal.on}
-        onOk={handleCancelManifest}
         onCancel={handleCancelManifest}
-        cancelButtonProps={{ style: { display: "none" } }}
+        footer={null} // Removed the OK button
         width={"70%"}
       >
         <Checkbox onChange={handleCheckboxChange} checked={showManagedFields}>
@@ -645,12 +653,7 @@ const ResourceList = ({
         </Checkbox>
         <Divider style={{ marginTop: "12px", marginBottom: "12px" }} />
         <div style={{ position: "relative" }}>
-          <ReactAce
-            style={{ width: "100%" }}
-            mode={"sass"}
-            value={manifestModal.manifest}
-            readOnly={true}
-          />
+          {moduleManifestContent(manifestModal.manifest, loadingResourceManifest)}
           <Tooltip title={"Copy Manifest"} trigger="hover">
             <Button
               onClick={() => {
