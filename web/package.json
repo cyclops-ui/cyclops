@@ -21,6 +21,7 @@
     "@docusaurus/preset-classic": "^3.0.0",
     "@emotion/react": "^11.11.4",
     "@emotion/styled": "^11.11.0",
+    "@inkeep/docusaurus": "^2.0.15",
     "@mdx-js/react": "^3.0.0",
     "@mui/x-charts": "^7.0.0",
     "antd": "^5.5.0",

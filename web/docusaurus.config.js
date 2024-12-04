@@ -31,6 +31,8 @@ const config = {
     locales: ["en"],
   },
 
+  themes: ["@inkeep/docusaurus/chatButton"],
+
   presets: [
     [
       "@docusaurus/preset-classic",
@@ -239,9 +241,41 @@ const config = {
       },
 
       colorMode: {
-        defaultMode: "light",
-        disableSwitch: false,
+        defaultMode: "dark",
       },
+			inkeepConfig: {
+		    baseSettings: {
+		        apiKey: "15b950a73cca71e1fe1677f215ddc80b02cc047bf5367cdc",
+		        integrationId: "cm416x7gl00in10em2evcwklj",
+		        organizationId: "org_JOGHxQ7SCFPeGdtI",
+		        primaryBrandColor: "#FF8803"
+		    },
+		    aiChatSettings: {
+		        chatSubjectName: "Cyclops",
+		        botAvatarSrcUrl: "https://cyclops-ui.github.io/img/logo.png",
+		        getHelpCallToActions: [
+		            {
+		                name: "Discord",
+		                url: "https://discord.com/invite/8ErnK3qDb3",
+		                icon: {
+		                    builtIn: "FaDiscord"
+		                }
+		            },
+		            {
+		                name: "GitHub",
+		                url: "https://github.com/cyclops-ui/cyclops",
+		                icon: {
+		                    builtIn: "FaGithub"
+		                }
+		            }
+		        ],
+		        quickQuestions: [
+		            "How to install using kubectl?",
+		            "What usage metrics are tracked?",
+		            "How does Cyclops implement helm chart dependencies?"
+		        ]
+		    }
+		}
     }),
 };
 
