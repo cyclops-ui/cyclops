@@ -258,7 +258,7 @@ export const ModuleResourceDetails = ({
     return () => {
       clearInterval(interval);
     };
-  }, [fetchModule, fetchModuleResourcesCallback]);
+  }, [name, fetchModule, fetchModuleResourcesCallback]);
 
   useEffect(() => {
     if (!streamingDisabled) {
