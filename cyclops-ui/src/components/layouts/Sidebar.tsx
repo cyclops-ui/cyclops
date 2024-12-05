@@ -7,6 +7,7 @@ import {
   SnippetsOutlined,
   GithubFilled,
   ThunderboltFilled,
+  DiscordOutlined,
 } from "@ant-design/icons";
 import { useLocation } from "react-router";
 import PathConstants from "../../routes/PathConstants";
@@ -76,7 +77,7 @@ const SideNav = () => {
       />
       <Button
         ghost
-        style={{ margin: "auto 25px 25px 25px" }}
+        style={{ margin: "auto 25px 12px 25px" }}
         icon={<BugFilled />}
         href={
           "https://github.com/cyclops-ui/cyclops/issues/new?assignees=&labels=&projects=&template=bug_report.md&title="
@@ -84,6 +85,22 @@ const SideNav = () => {
       >
         <b>Report a Bug</b>
       </Button>
+      <center
+        style={{
+          color: "#FFF",
+          margin: "12px",
+          marginTop: "0",
+          fontFamily: "Arial, sans-serif",
+          fontWeight: "bold",
+        }}
+      >
+        <Link
+          className={styles.discordlink}
+          to={tagChangelogLink(window.__RUNTIME_CONFIG__.REACT_APP_VERSION)}
+        >
+          <DiscordOutlined style={{ fontSize: "20px" }} /> Join Discord
+        </Link>
+      </center>
       <center
         style={{
           color: "#FFF",
