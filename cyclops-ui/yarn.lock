@@ -4099,13 +4099,6 @@
   dependencies:
     "@types/react" "*"
 
-"@types/react-highlight-words@^0.16.7":
-  version "0.16.7"
-  resolved "https://registry.yarnpkg.com/@types/react-highlight-words/-/react-highlight-words-0.16.7.tgz#82fdd2d2abe4c4a5c0da44be749660f6ec42f0c2"
-  integrity sha512-+upXTIaRd3rGvh1aDQSs9z5X+sV3UM6Jrmjk03GN2GXl4v/+iOJKQj2LZHo6Vp2IoTvMdtxgME26feqo12xXLg==
-  dependencies:
-    "@types/react" "*"
-
 "@types/react-router@^5.1.18":
   version "5.1.20"
   resolved "https://registry.yarnpkg.com/@types/react-router/-/react-router-5.1.20.tgz#88eccaa122a82405ef3efbcaaa5dcdd9f021387c"
