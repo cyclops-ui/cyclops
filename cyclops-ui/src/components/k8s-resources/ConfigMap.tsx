@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from "react";
 import { Divider, Row, Alert, Descriptions } from "antd";
-import axios from "axios";
 import ReactAce from "react-ace";
 import { mapResponseError } from "../../utils/api/errors";
 

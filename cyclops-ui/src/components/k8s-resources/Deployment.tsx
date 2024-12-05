@@ -29,7 +29,7 @@ const Deployment = ({ name, namespace, workload, fetchResource }: Props) => {
       .catch((error) => {
         setError(mapResponseError(error));
       });
-  }, [name, namespace]);
+  }, [fetchResource]);
 
   useEffect(() => {
     fetchDeployment();

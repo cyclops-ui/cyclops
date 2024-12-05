@@ -54,7 +54,7 @@ const Service = ({ name, namespace, fetchResource }: Props) => {
     return () => {
       clearInterval(interval);
     };
-  }, [name, namespace]);
+  }, [fetchResource]);
 
   const externalIPsHostname = (hostname: string) => {
     if (!hostname) {

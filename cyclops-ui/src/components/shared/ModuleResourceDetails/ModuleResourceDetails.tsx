@@ -156,7 +156,24 @@ export interface ModuleResourceDetailsProps {
   ) => void;
 }
 
-export const ModuleResourceDetails = (props: ModuleResourceDetailsProps) => {
+export const ModuleResourceDetails = ({
+  name,
+  streamingDisabled,
+  fetchModule,
+  fetchModuleRawManifest,
+  fetchModuleRenderedManifest,
+  reconcileModule,
+  deleteModule,
+  fetchModuleResources,
+  fetchResource,
+  fetchResourceManifest,
+  resourceStreamImplementation,
+  restartResource,
+  deleteResource,
+  getPodLogs,
+  downloadPodLogs,
+  streamPodLogs,
+}: ModuleResourceDetailsProps) => {
   const [loading, setLoading] = useState(false);
   const [loadModule, setLoadModule] = useState(false);
   const [loadResources, setLoadResources] = useState(false);
@@ -210,9 +227,8 @@ export const ModuleResourceDetails = (props: ModuleResourceDetailsProps) => {
     description: "",
   });
 
-  const fetchModuleResources = useCallback(() => {
-    props
-      .fetchModuleResources(props.name)
+  const fetchModuleResourcesCallback = useCallback(() => {
+    fetchModuleResources(name)
       .then((res) => {
         setResources(res);
         setLoadResources(true);
@@ -222,36 +238,32 @@ export const ModuleResourceDetails = (props: ModuleResourceDetailsProps) => {
         setLoadResources(true);
         setError(mapResponseError(error));
       });
-  }, []);
+  }, [name, fetchModuleResources]);
 
   useEffect(() => {
-    function fetchModule() {
-      props
-        .fetchModule(props.name)
-        .then((res) => {
-          setModule(res);
-          setLoadModule(true);
-        })
-        .catch((error) => {
-          console.log("cile error", error);
-          setLoading(false);
-          setLoadModule(true);
-          setError(mapResponseError(error));
-        });
-    }
+    fetchModule(name)
+      .then((res) => {
+        setModule(res);
+        setLoadModule(true);
+      })
+      .catch((error) => {
+        console.log("cile error", error);
+        setLoading(false);
+        setLoadModule(true);
+        setError(mapResponseError(error));
+      });
 
-    fetchModule();
-    fetchModuleResources();
-    const interval = setInterval(() => fetchModuleResources(), 10000);
+    fetchModuleResourcesCallback();
+    const interval = setInterval(() => fetchModuleResourcesCallback(), 10000);
     return () => {
       clearInterval(interval);
     };
-  }, [fetchModuleResources]);
+  }, [fetchModule, fetchModuleResourcesCallback]);
 
   useEffect(() => {
-    if (!props.streamingDisabled) {
+    if (!streamingDisabled) {
       resourcesStream(
-        `/stream/resources/${props.name}`,
+        `/stream/resources/${name}`,
         (r: any) => {
           let resourceRef: ResourceRef = {
             group: r.group,
@@ -263,10 +275,10 @@ export const ModuleResourceDetails = (props: ModuleResourceDetailsProps) => {
 
           putWorkload(resourceRef, r);
         },
-        props.resourceStreamImplementation,
+        resourceStreamImplementation,
       );
     }
-  }, [props.name]);
+  }, [name, streamingDisabled, resourceStreamImplementation]);
 
   const changeDeleteName = (e: any) => {
     setDeleteName(e.target.value);
@@ -277,8 +289,7 @@ export const ModuleResourceDetails = (props: ModuleResourceDetailsProps) => {
   };
 
   const deleteDeployment = () => {
-    props
-      .deleteModule(props.name)
+    deleteModule(name)
       .then(() => {
         // TODO: turn into function
         // window.location.href = "/modules";
@@ -328,10 +339,10 @@ export const ModuleResourceDetails = (props: ModuleResourceDetailsProps) => {
               )}
               <Tooltip title={"Copy module name to clipboard"} trigger="hover">
                 <span
-                  onClick={() => navigator.clipboard.writeText(props.name)}
+                  onClick={() => navigator.clipboard.writeText(name)}
                   style={{ cursor: "pointer" }}
                 >
-                  {props.name}
+                  {name}
                 </span>
               </Tooltip>
             </Title>
@@ -412,7 +423,7 @@ export const ModuleResourceDetails = (props: ModuleResourceDetailsProps) => {
       resourcesWithStatus++;
 
       let resourceStatus = resource.status;
-      if (!props.streamingDisabled && isWorkload(resource)) {
+      if (!streamingDisabled && isWorkload(resource)) {
         resourceStatus = getWorkload(resource)?.status;
       }
 
@@ -476,8 +487,7 @@ export const ModuleResourceDetails = (props: ModuleResourceDetailsProps) => {
     setLoadingRawManifest(true);
     setViewRawManifest(true);
 
-    props
-      .fetchModuleRawManifest(props.name)
+    fetchModuleRawManifest(name)
       .then((res) => {
         let m = YAML.parse(res);
 
@@ -515,8 +525,7 @@ export const ModuleResourceDetails = (props: ModuleResourceDetailsProps) => {
     setLoadingRenderedManifest(true);
     setViewRenderedManifest(true);
 
-    props
-      .fetchModuleRenderedManifest(props.name)
+    fetchModuleRenderedManifest(name)
       .then((res) => {
         setRenderedManifest(res);
         setLoadingRenderedManifest(false);
@@ -530,13 +539,12 @@ export const ModuleResourceDetails = (props: ModuleResourceDetailsProps) => {
   const submitReconcileModule = () => {
     setLoadingReconciliation(true);
 
-    props
-      .reconcileModule(props.name)
+    reconcileModule(name)
       .then((res) => {
         setLoadingReconciliation(false);
         notification.success({
           message: "Reconciliation triggered",
-          description: `${props.name} has been queued for reconciliation. All the resources will be recreated`,
+          description: `${name} has been queued for reconciliation. All the resources will be recreated`,
           duration: 10,
         });
       })
@@ -606,22 +614,22 @@ export const ModuleResourceDetails = (props: ModuleResourceDetailsProps) => {
   return (
     <div>
       <ModuleDetailsActionsProvider
-        name={props.name}
-        streamingDisabled={props.streamingDisabled}
-        fetchModule={props.fetchModule}
-        fetchModuleRawManifest={props.fetchModuleRawManifest}
-        fetchModuleRenderedManifest={props.fetchModuleRenderedManifest}
-        reconcileModule={props.reconcileModule}
-        deleteModule={props.deleteModule}
-        fetchModuleResources={props.fetchModuleResources}
-        fetchResource={props.fetchResource}
-        fetchResourceManifest={props.fetchResourceManifest}
-        resourceStreamImplementation={props.resourceStreamImplementation}
-        restartResource={props.restartResource}
-        deleteResource={props.deleteResource}
-        getPodLogs={props.getPodLogs}
-        downloadPodLogs={props.downloadPodLogs}
-        streamPodLogs={props.streamPodLogs}
+        name={name}
+        streamingDisabled={streamingDisabled}
+        fetchModule={fetchModule}
+        fetchModuleRawManifest={fetchModuleRawManifest}
+        fetchModuleRenderedManifest={fetchModuleRenderedManifest}
+        reconcileModule={reconcileModule}
+        deleteModule={deleteModule}
+        fetchModuleResources={fetchModuleResources}
+        fetchResource={fetchResource}
+        fetchResourceManifest={fetchResourceManifest}
+        resourceStreamImplementation={resourceStreamImplementation}
+        restartResource={restartResource}
+        deleteResource={deleteResource}
+        getPodLogs={getPodLogs}
+        downloadPodLogs={downloadPodLogs}
+        streamPodLogs={streamPodLogs}
       >
         {error.message.length !== 0 && (
           <Alert
@@ -650,7 +658,7 @@ export const ModuleResourceDetails = (props: ModuleResourceDetailsProps) => {
           <Col>
             <Button
               onClick={function () {
-                window.location.href = "/modules/" + props.name + "/edit";
+                window.location.href = "/modules/" + name + "/edit";
               }}
               block
             >
@@ -671,7 +679,7 @@ export const ModuleResourceDetails = (props: ModuleResourceDetailsProps) => {
           <Col>
             <Button
               onClick={function () {
-                window.location.href = "/modules/" + props.name + "/rollback";
+                window.location.href = "/modules/" + name + "/rollback";
               }}
               block
             >
@@ -714,7 +722,7 @@ export const ModuleResourceDetails = (props: ModuleResourceDetailsProps) => {
         <Modal
           title={
             <>
-              Delete module <span style={{ color: "red" }}>{props.name}</span>
+              Delete module <span style={{ color: "red" }}>{name}</span>
             </>
           }
           open={loading}
@@ -724,7 +732,7 @@ export const ModuleResourceDetails = (props: ModuleResourceDetailsProps) => {
             <Button
               danger
               block
-              disabled={deleteName !== props.name}
+              disabled={deleteName !== name}
               onClick={deleteDeployment}
             >
               Delete
@@ -742,11 +750,7 @@ export const ModuleResourceDetails = (props: ModuleResourceDetailsProps) => {
           <Divider style={{ fontSize: "120%" }} orientationMargin="0" />
           In order to delete this module and related resources, type the name of
           the module in the box below
-          <Input
-            placeholder={props.name}
-            required
-            onChange={changeDeleteName}
-          />
+          <Input placeholder={name} required onChange={changeDeleteName} />
         </Modal>
         <Modal
           title="Module manifest"

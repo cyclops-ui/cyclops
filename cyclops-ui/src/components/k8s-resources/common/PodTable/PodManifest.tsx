@@ -43,7 +43,7 @@ const PodManifest = ({ pod }: PodManifestProps) => {
         setManifest(manifest);
       });
     }
-  }, [pod, showManagedFields, modal]);
+  }, [pod, showManagedFields, modal, fetchResourceManifest]);
 
   useEffect(() => {
     fetchManifest();

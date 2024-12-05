@@ -407,8 +407,8 @@ const TemplateStore = () => {
                 ) : (
                   <FileSyncOutlined
                     className={classNames("statustemplate", {
-                      ["success"]: requestStatus[template.name] === "success",
-                      ["error"]: requestStatus[template.name] === "error",
+                      success: requestStatus[template.name] === "success",
+                      error: requestStatus[template.name] === "error",
                     })}
                     onClick={function () {
                       checkTemplateReference(
