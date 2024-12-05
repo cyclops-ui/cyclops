@@ -13,6 +13,37 @@ export function logStream(
   setLog: (log: string, isReset?: boolean) => void,
   setError: (err: Error, isReset?: boolean) => void,
   signalController: AbortController,
+  logStreamImpl?: (
+    name: string,
+    namespace: string,
+    container: string,
+    setLog: (log: string, isReset?: boolean) => void,
+    setError: (err: Error, isReset?: boolean) => void,
+    signalController: AbortController,
+  ) => void,
+) {
+  if (logStreamImpl === undefined || logStreamImpl === null) {
+    defaultLogStream(
+      name,
+      namespace,
+      container,
+      setLog,
+      setError,
+      signalController,
+    );
+    return;
+  }
+
+  logStreamImpl(name, namespace, container, setLog, setError, signalController);
+}
+
+export function defaultLogStream(
+  name: string,
+  namespace: string,
+  container: string,
+  setLog: (log: string, isReset?: boolean) => void,
+  setError: (err: Error, isReset?: boolean) => void,
+  signalController: AbortController,
 ) {
   fetchEventSource(
     "/api/resources/pods" +
