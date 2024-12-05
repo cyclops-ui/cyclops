@@ -7,9 +7,10 @@ import { mapResponseError } from "../../utils/api/errors";
 interface Props {
   name: string;
   namespace: string;
+  fetchConfigmap?: () => Promise<any>;
 }
 
-const ConfigMap = ({ name, namespace }: Props) => {
+const ConfigMap = ({ name, namespace, fetchConfigmap }: Props) => {
   const [configMap, setConfigMap] = useState({});
   const [error, setError] = useState({
     message: "",
@@ -18,18 +19,9 @@ const ConfigMap = ({ name, namespace }: Props) => {
 
   useEffect(() => {
     function fetchConfigMap() {
-      axios
-        .get(`/api/resources`, {
-          params: {
-            group: ``,
-            version: `v1`,
-            kind: `ConfigMap`,
-            name: name,
-            namespace: namespace,
-          },
-        })
+      fetchConfigmap()
         .then((res) => {
-          setConfigMap(res.data);
+          setConfigMap(res);
         })
         .catch((error) => {
           setError(mapResponseError(error));
@@ -41,7 +33,7 @@ const ConfigMap = ({ name, namespace }: Props) => {
     return () => {
       clearInterval(interval);
     };
-  }, [name, namespace]);
+  }, [fetchConfigmap]);
 
   const configMapData = (configMap: any) => {
     if (configMap.data) {
