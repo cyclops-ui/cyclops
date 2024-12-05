@@ -1,12 +1,12 @@
 import React, { useEffect, useState } from "react";
 import { Col, Divider, Row, Table, Alert, Descriptions, Button } from "antd";
-import axios from "axios";
 import { mapResponseError } from "../../utils/api/errors";
 import { CopyOutlined } from "@ant-design/icons";
 
 interface Props {
   name: string;
   namespace: string;
+  fetchResource: () => Promise<any>;
 }
 
 interface externalIP {
@@ -27,7 +27,7 @@ interface service {
   serviceType: string;
 }
 
-const Service = ({ name, namespace }: Props) => {
+const Service = ({ name, namespace, fetchResource }: Props) => {
   const [service, setService] = useState<service>({
     externalIPs: [],
     ports: [],
@@ -40,18 +40,9 @@ const Service = ({ name, namespace }: Props) => {
 
   useEffect(() => {
     function fetchService() {
-      axios
-        .get(`/api/resources`, {
-          params: {
-            group: ``,
-            version: `v1`,
-            kind: `Service`,
-            name: name,
-            namespace: namespace,
-          },
-        })
+      fetchResource()
         .then((res) => {
-          setService(res.data);
+          setService(res);
         })
         .catch((error) => {
           setError(mapResponseError(error));

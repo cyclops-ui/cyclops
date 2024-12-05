@@ -13,7 +13,6 @@ import {
   Modal,
   Alert,
 } from "antd";
-import axios from "axios";
 import ReactAce from "react-ace";
 import {
   isWorkload,
@@ -41,13 +40,13 @@ import {
   SearchOutlined,
   WarningTwoTone,
 } from "@ant-design/icons";
-import { isStreamingEnabled } from "../../../utils/api/common";
 import { canRestart, RestartButton } from "../common/RestartButton";
 import { gvkString } from "../../../utils/k8s/gvk";
 import Title from "antd/es/typography/Title";
 import { mapResponseError } from "../../../utils/api/errors";
 import { CheckboxChangeEvent } from "antd/es/checkbox";
 import { Workload } from "../../../utils/k8s/workload";
+import { useModuleDetailsActions } from "../../shared/ModuleResourceDetails/ModuleDetailsActionsContext";
 
 interface Props {
   loadResources: boolean;
@@ -62,6 +61,14 @@ const ResourceList = ({
   workloads,
   onResourceDelete,
 }: Props) => {
+  const {
+    streamingDisabled,
+    fetchResource,
+    fetchResourceManifest,
+    restartResource,
+    deleteResource,
+  } = useModuleDetailsActions();
+
   const [error, setError] = useState({
     message: "",
     description: "",
@@ -111,17 +118,14 @@ const ResourceList = ({
     setDeleteResourceVerify("");
   };
 
-  const deleteResource = () => {
-    axios
-      .delete(`/api/resources`, {
-        data: {
-          group: deleteResourceRef.group,
-          version: deleteResourceRef.version,
-          kind: deleteResourceRef.kind,
-          name: deleteResourceRef.name,
-          namespace: deleteResourceRef.namespace,
-        },
-      })
+  const handleDeleteResource = () => {
+    deleteResource(
+      deleteResourceRef.group,
+      deleteResourceRef.version,
+      deleteResourceRef.kind,
+      deleteResourceRef.name,
+      deleteResourceRef.namespace,
+    )
       .then(() => {
         onResourceDelete();
         // setLoadResources(false); TODO
@@ -161,35 +165,32 @@ const ResourceList = ({
     );
   };
 
-  function fetchManifest(
+  const fetchManifest = (
     group: string,
     version: string,
     kind: string,
     namespace: string,
     name: string,
     showManagedFields: boolean,
-  ) {
-    axios
-      .get(`/api/manifest`, {
-        params: {
-          group: group,
-          version: version,
-          kind: kind,
-          name: name,
-          namespace: namespace,
-          includeManagedFields: showManagedFields,
-        },
-      })
+  ) => {
+    fetchResourceManifest(
+      group,
+      version,
+      kind,
+      namespace,
+      name,
+      showManagedFields,
+    )
       .then((res) => {
         setManifestModal((prev) => ({
           ...prev,
-          manifest: res.data,
+          manifest: res,
         }));
       })
       .catch((error) => {
         setError(mapResponseError(error));
       });
-  }
+  };
 
   const resourceFilterOptions = () => {
     if (!loadResources) {
@@ -264,6 +265,19 @@ const ResourceList = ({
       namespace: resource.namespace,
     };
 
+    let fetchResourceCallback = (): Promise<any> => {
+      return Promise.resolve();
+    };
+    if (fetchResource) {
+      fetchResourceCallback = fetchResource(
+        resource.group,
+        resource.version,
+        resource.kind,
+        resource.name,
+        resource.namespace,
+      );
+    }
+
     switch (resource.kind) {
       case "Deployment":
         resourceDetails = (
@@ -271,6 +285,7 @@ const ResourceList = ({
             name={resource.name}
             namespace={resource.namespace}
             workload={getWorkload(resourceRef)}
+            fetchResource={fetchResourceCallback}
           />
         );
         break;
@@ -309,12 +324,20 @@ const ResourceList = ({
         break;
       case "Service":
         resourceDetails = (
-          <Service name={resource.name} namespace={resource.namespace} />
+          <Service
+            name={resource.name}
+            namespace={resource.namespace}
+            fetchResource={fetchResourceCallback}
+          />
         );
         break;
       case "ConfigMap":
         resourceDetails = (
-          <ConfigMap name={resource.name} namespace={resource.namespace} />
+          <ConfigMap
+            name={resource.name}
+            namespace={resource.namespace}
+            fetchConfigmap={fetchResourceCallback}
+          />
         );
         break;
       case "PersistentVolumeClaim":
@@ -376,7 +399,7 @@ const ResourceList = ({
     }
 
     let resourceStatus = resource.status;
-    if (isStreamingEnabled() && isWorkload(resourceRef)) {
+    if (!streamingDisabled && isWorkload(resourceRef)) {
       resourceStatus = getWorkload(resourceRef)?.status;
     }
 
@@ -534,7 +557,14 @@ const ResourceList = ({
           <Col>{deletedWarning}</Col>
           <Col span={19}>
             <Row>
-              <Title style={{ paddingRight: "10px" }} level={3}>
+              <Title
+                level={3}
+                style={{
+                  paddingRight: "10px",
+                  marginTop: "0px",
+                  marginBottom: "10px",
+                }}
+              >
                 {resource.name}
               </Title>
             </Row>
@@ -544,7 +574,9 @@ const ResourceList = ({
           </Col>
         </Row>
         <Row>
-          <Title level={4}>{resource.namespace}</Title>
+          <Title level={4} style={{ marginTop: "0px", marginBottom: "10px" }}>
+            {resource.namespace}
+          </Title>
         </Row>
         <Row gutter={[20, 0]}>
           <Col style={{ float: "right" }}>
@@ -561,6 +593,7 @@ const ResourceList = ({
                 kind={resource.kind}
                 name={resource.name}
                 namespace={resource.namespace}
+                restartResource={restartResource}
               />
             </Col>
           )}
@@ -690,7 +723,7 @@ const ResourceList = ({
               deleteResourceVerify !==
               deleteResourceRef.kind + " " + deleteResourceRef.name
             }
-            onClick={deleteResource}
+            onClick={handleDeleteResource}
           >
             Delete
           </Button>
