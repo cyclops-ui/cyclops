@@ -3,16 +3,17 @@ import { Alert, Button, Col, Divider, Modal, Tabs, TabsProps } from "antd";
 import { useRef, useState } from "react";
 import ReactAce from "react-ace/lib/ace";
 import { mapResponseError } from "../../../../utils/api/errors";
-import { isStreamingEnabled } from "../../../../utils/api/common";
 import { logStream } from "../../../../utils/api/sse/logs";
-import axios from "axios";
 import "ace-builds/src-noconflict/ext-searchbox";
+import { useModuleDetailsActions } from "../../../shared/ModuleResourceDetails/ModuleDetailsActionsContext";
 
 interface PodLogsProps {
   pod: any;
 }
 
 const PodLogs = ({ pod }: PodLogsProps) => {
+  const { streamingDisabled, getPodLogs, downloadPodLogs, streamPodLogs } =
+    useModuleDetailsActions();
   const [logs, setLogs] = useState<string[]>([]);
   const [logsModal, setLogsModal] = useState({
     on: false,
@@ -120,7 +121,7 @@ const PodLogs = ({ pod }: PodLogsProps) => {
     logsSignalControllerRef.current = controller; // store the controller to be able to abort the request
     setLogs(() => []);
 
-    if (isStreamingEnabled()) {
+    if (!streamingDisabled) {
       logStream(
         logsModal.pod,
         logsModal.namespace,
@@ -147,19 +148,10 @@ const PodLogs = ({ pod }: PodLogsProps) => {
         controller,
       );
     } else {
-      axios
-        .get(
-          "/api/resources/pods/" +
-            logsModal.namespace +
-            "/" +
-            logsModal.pod +
-            "/" +
-            container +
-            "/logs",
-        )
+      getPodLogs(logsModal.namespace, logsModal.pod, container)
         .then((res) => {
-          if (res.data) {
-            setLogs(res.data);
+          if (res) {
+            setLogs(res);
           } else {
             setLogs(() => []);
           }
@@ -171,16 +163,18 @@ const PodLogs = ({ pod }: PodLogsProps) => {
   };
 
   const downloadLogs = (container: string) => {
-    return function () {
-      window.location.href =
-        "/api/resources/pods/" +
-        logsModal.namespace +
-        "/" +
-        logsModal.pod +
-        "/" +
-        container +
-        "/logs/download";
-    };
+    return () => downloadPodLogs(logsModal.namespace, logsModal.pod, container);
+    // downloadPodLogs(logsModal.namespace, logsModal.pod, container)
+    // return function () {
+    //   window.location.href =
+    //     "/api/resources/pods/" +
+    //     logsModal.namespace +
+    //     "/" +
+    //     logsModal.pod +
+    //     "/" +
+    //     container +
+    //     "/logs/download";
+    // };
   };
 
   return (
@@ -188,7 +182,7 @@ const PodLogs = ({ pod }: PodLogsProps) => {
       <Button
         style={{ width: "100%" }}
         onClick={function () {
-          if (isStreamingEnabled()) {
+          if (!streamingDisabled) {
             const controller = new AbortController();
             logsSignalControllerRef.current = controller; // store the controller to be able to abort the request
 
@@ -216,21 +210,13 @@ const PodLogs = ({ pod }: PodLogsProps) => {
                 }
               },
               controller,
+              streamPodLogs,
             );
           } else {
-            axios
-              .get(
-                "/api/resources/pods/" +
-                  pod.namespace +
-                  "/" +
-                  pod.name +
-                  "/" +
-                  pod.containers[0].name +
-                  "/logs",
-              )
+            getPodLogs(pod.namespace, pod.name, pod.containers[0].name)
               .then((res) => {
-                if (res.data) {
-                  setLogs(res.data);
+                if (res) {
+                  setLogs(res);
                 } else {
                   setLogs(() => []);
                 }

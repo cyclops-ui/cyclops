@@ -1,15 +1,17 @@
 import { CopyOutlined, FileTextOutlined } from "@ant-design/icons";
 import { Alert, Button, Checkbox, Modal, Tooltip } from "antd";
 import { CheckboxChangeEvent } from "antd/es/checkbox";
-import axios from "axios";
 import { useCallback, useEffect, useState } from "react";
 import ReactAce from "react-ace/lib/ace";
+import { useModuleDetailsActions } from "../../../shared/ModuleResourceDetails/ModuleDetailsActionsContext";
 
 interface PodManifestProps {
   pod: any;
 }
 
 const PodManifest = ({ pod }: PodManifestProps) => {
+  const { fetchResourceManifest } = useModuleDetailsActions();
+
   const [manifest, setManifest] = useState("");
   const [showManagedFields, setShowManagedFields] = useState(false);
   const [modal, setModal] = useState({
@@ -29,18 +31,17 @@ const PodManifest = ({ pod }: PodManifestProps) => {
 
   const fetchManifest = useCallback(async () => {
     if (modal.on) {
-      const { group, name, namespace } = pod;
-      const { data: manifestData } = await axios.get(`/api/manifest`, {
-        params: {
-          group,
-          version: "v1",
-          kind: "Pod",
-          name,
-          namespace: namespace.length ? namespace : "default",
-          includeManagedFields: showManagedFields,
-        },
+      const { name, namespace } = pod;
+      fetchResourceManifest(
+        "",
+        "v1",
+        "Pod",
+        namespace.length ? namespace : "default",
+        name,
+        showManagedFields,
+      ).then((manifest) => {
+        setManifest(manifest);
       });
-      setManifest(manifestData);
     }
   }, [pod, showManagedFields, modal]);
 

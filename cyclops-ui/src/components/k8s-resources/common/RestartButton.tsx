@@ -1,5 +1,4 @@
 import { Button, notification } from "antd";
-import axios from "axios";
 import React from "react";
 import { mapResponseError } from "../../../utils/api/errors";
 import { UndoOutlined } from "@ant-design/icons";
@@ -10,6 +9,13 @@ interface Props {
   kind: string;
   name: string;
   namespace: string;
+  restartResource?: (
+    group: string,
+    version: string,
+    kind: string,
+    name: string,
+    namespace: string,
+  ) => Promise<boolean>;
 }
 
 export const RestartButton = ({
@@ -18,6 +24,7 @@ export const RestartButton = ({
   kind,
   name,
   namespace,
+  restartResource,
 }: Props) => {
   const handleRestart = (
     group: string,
@@ -26,10 +33,7 @@ export const RestartButton = ({
     name: string,
     namespace: string,
   ) => {
-    axios
-      .post(
-        `/api/resources/restart?group=${group}&version=${version}&kind=${kind}&name=${name}&namespace=${namespace}`,
-      )
+    restartResource(group, version, kind, name, namespace)
       .then(() => {
         notification.success({
           message: "Restart Successful",
