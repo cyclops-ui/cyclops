@@ -1,41 +1,44 @@
-import React, { useEffect, useState } from "react";
 import { Divider, Row, Alert, Descriptions, Spin } from "antd";
+import React, { useCallback, useEffect, useState } from "react";
 import ReactAce from "react-ace";
 import { mapResponseError } from "../../utils/api/errors";
+import { useModuleDetailsActions } from "../shared/ModuleResourceDetails/ModuleDetailsActionsContext";
 
 interface Props {
   name: string;
   namespace: string;
-  fetchConfigmap?: () => Promise<any>;
 }
 
-const ConfigMap = ({ name, namespace, fetchConfigmap }: Props) => {
+const ConfigMap = ({ name, namespace }: Props) => {
+  const { fetchResource } = useModuleDetailsActions();
+
   const [loading, setLoading] = useState(true);
+
   const [configMap, setConfigMap] = useState({});
   const [error, setError] = useState({
     message: "",
     description: "",
   });
 
-  useEffect(() => {
-    function fetchConfigMap() {
-      fetchConfigmap()
-        .then((res) => {
-          setConfigMap(res);
-          setLoading(false);
-        })
-        .catch((error) => {
-          setError(mapResponseError(error));
-          setLoading(false);
-        });
-    }
+  const fetchConfigMap = useCallback(() => {
+    fetchResource("", "v1", "ConfigMap", name, namespace)()
+      .then((res) => {
+        setConfigMap(res);
+        setLoading(false);
+      })
+      .catch((error) => {
+        setError(mapResponseError(error));
+        setLoading(false);
+      });
+  }, [name, namespace, fetchResource]);
 
+  useEffect(() => {
     fetchConfigMap();
     const interval = setInterval(() => fetchConfigMap(), 15000);
     return () => {
       clearInterval(interval);
     };
-  }, [fetchConfigmap]);
+  }, [fetchConfigMap]);
 
   const configMapData = (configMap: any) => {
     if (configMap.data) {

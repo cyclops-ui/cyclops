@@ -103,3 +103,14 @@ export async function restartResource(
   );
   return resp.data;
 }
+
+export async function getPodLogs(
+  namespace: string,
+  podName: string,
+  container: string,
+): Promise<string[]> {
+  const resp = await axios.get(
+    `/api/resources/pods/${namespace}/${podName}/${container}/logs`,
+  );
+  return resp.data;
+}

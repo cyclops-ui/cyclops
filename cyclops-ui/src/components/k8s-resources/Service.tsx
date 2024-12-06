@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import {
   Col,
   Divider,
@@ -9,13 +9,14 @@ import {
   Button,
   Spin,
 } from "antd";
+import { Col, Divider, Row, Table, Alert, Descriptions, Button } from "antd";
 import { mapResponseError } from "../../utils/api/errors";
 import { CopyOutlined } from "@ant-design/icons";
+import { useModuleDetailsActions } from "../shared/ModuleResourceDetails/ModuleDetailsActionsContext";
 
 interface Props {
   name: string;
   namespace: string;
-  fetchResource: () => Promise<any>;
 }
 
 interface externalIP {
@@ -36,7 +37,9 @@ interface service {
   serviceType: string;
 }
 
-const Service = ({ name, namespace, fetchResource }: Props) => {
+const Service = ({ name, namespace }: Props) => {
+  const { fetchResource } = useModuleDetailsActions();
+
   const [loading, setLoading] = useState(true);
   const [service, setService] = useState<service>({
     externalIPs: [],
@@ -48,25 +51,25 @@ const Service = ({ name, namespace, fetchResource }: Props) => {
     description: "",
   });
 
-  useEffect(() => {
-    function fetchService() {
-      fetchResource()
-        .then((res) => {
-          setService(res);
-          setLoading(false);
-        })
-        .catch((error) => {
-          setError(mapResponseError(error));
-          setLoading(false);
-        });
-    }
+  const fetchService = useCallback(() => {
+    fetchResource("", "v1", "Service", name, namespace)()
+      .then((res) => {
+        setService(res);
+        setLoading(false);
+      })
+      .catch((error) => {
+        setError(mapResponseError(error));
+        setLoading(false);
+      });
+  }, [name, namespace, fetchResource]);
 
+  useEffect(() => {
     fetchService();
     const interval = setInterval(() => fetchService(), 15000);
     return () => {
       clearInterval(interval);
     };
-  }, [fetchResource]);
+  }, [fetchService]);
 
   const externalIPsHostname = (hostname: string) => {
     if (!hostname) {

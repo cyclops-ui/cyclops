@@ -128,15 +128,15 @@ export interface ModuleResourceDetailsProps {
     kind: string,
     name: string,
     namespace: string,
-  ) => Promise<boolean>;
+  ) => Promise<any>;
   deleteResource: (
     group: string,
     version: string,
     kind: string,
     name: string,
     namespace: string,
-  ) => Promise<boolean>;
-  getPodLogs?: (
+  ) => Promise<any>;
+  getPodLogs: (
     namespace: string,
     name: string,
     container: string,
@@ -154,6 +154,8 @@ export interface ModuleResourceDetailsProps {
     setError: (err: Error, isReset?: boolean) => void,
     signalController: AbortController,
   ) => void;
+  onEditModule?: (moduleName: string) => void;
+  onRollbackModule?: (moduleName: string) => void;
 }
 
 export const ModuleResourceDetails = ({
@@ -173,6 +175,8 @@ export const ModuleResourceDetails = ({
   getPodLogs,
   downloadPodLogs,
   streamPodLogs,
+  onEditModule,
+  onRollbackModule,
 }: ModuleResourceDetailsProps) => {
   const [loading, setLoading] = useState(false);
   const [loadModule, setLoadModule] = useState(false);
@@ -247,7 +251,6 @@ export const ModuleResourceDetails = ({
         setLoadModule(true);
       })
       .catch((error) => {
-        console.log("cile error", error);
         setLoading(false);
         setLoadModule(true);
         setError(mapResponseError(error));
@@ -655,17 +658,21 @@ export const ModuleResourceDetails = ({
           Actions
         </Divider>
         <Row gutter={[20, 0]}>
-          <Col>
-            <Button
-              onClick={function () {
-                window.location.href = "/modules/" + name + "/edit";
-              }}
-              block
-            >
-              <EditOutlined />
-              Edit
-            </Button>
-          </Col>
+          {onEditModule ? (
+            <Col>
+              <Button
+                onClick={() => {
+                  onEditModule(name);
+                }}
+                block
+              >
+                <EditOutlined />
+                Edit
+              </Button>
+            </Col>
+          ) : (
+            <></>
+          )}
           <Col>
             <Button
               onClick={submitReconcileModule}
@@ -676,17 +683,16 @@ export const ModuleResourceDetails = ({
               Reconcile
             </Button>
           </Col>
-          <Col>
-            <Button
-              onClick={function () {
-                window.location.href = "/modules/" + name + "/rollback";
-              }}
-              block
-            >
-              <BookOutlined />
-              Rollback
-            </Button>
-          </Col>
+          {onRollbackModule ? (
+            <Col>
+              <Button onClick={() => onRollbackModule(name)} block>
+                <BookOutlined />
+                Rollback
+              </Button>
+            </Col>
+          ) : (
+            <></>
+          )}
           <Col>
             <Button onClick={handleViewRawModuleManifest} block>
               <FileTextOutlined />

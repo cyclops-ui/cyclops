@@ -1,7 +1,7 @@
-import axios from "axios";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { mapResponseError } from "../../utils/api/errors";
 import { Alert, Descriptions, Divider, Spin } from "antd";
+import { useModuleDetailsActions } from "../shared/ModuleResourceDetails/ModuleDetailsActionsContext";
 
 interface Props {
   name: string;
@@ -14,6 +14,8 @@ interface pvc {
 }
 
 const PersistentVolumeClaim = ({ name, namespace }: Props) => {
+  const { fetchResource } = useModuleDetailsActions();
+
   const [loading, setLoading] = useState(true);
   const [pvc, setPvc] = useState<pvc>({
     size: "",
@@ -24,37 +26,28 @@ const PersistentVolumeClaim = ({ name, namespace }: Props) => {
     description: "",
   });
 
-  useEffect(() => {
-    function fetchPersistentVolumeClaim() {
-      axios
-        .get(`/api/resources`, {
-          params: {
-            group: ``,
-            version: `v1`,
-            kind: `PersistentVolumeClaim`,
-            name: name,
-            namespace: namespace,
-          },
-        })
-        .then((res) => {
-          setPvc({
-            size: res.data.size,
-            accessModes: res.data.accessmodes.join(","),
-          });
-          setLoading(false);
-        })
-        .catch((error) => {
-          setError(mapResponseError(error));
-          setLoading(false);
+  const fetchPersistentVolumeClaim = useCallback(() => {
+    fetchResource("", "v1", "PersistentVolumeClaim", name, namespace)()
+      .then((res) => {
+        setPvc({
+          size: res.size,
+          accessModes: res.accessmodes.join(","),
         });
-    }
+        setLoading(false);
+      })
+      .catch((error) => {
+        setError(mapResponseError(error));
+        setLoading(false);
+      });
+  }, [name, namespace, fetchResource]);
 
+  useEffect(() => {
     fetchPersistentVolumeClaim();
     const interval = setInterval(() => fetchPersistentVolumeClaim(), 15000);
     return () => {
       clearInterval(interval);
     };
-  }, [name, namespace]);
+  }, [fetchPersistentVolumeClaim]);
 
   if (loading) return <Spin size="large" style={{ marginTop: "20px" }} />;
 

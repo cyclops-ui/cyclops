@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import {
   Button,
   Col,
@@ -13,10 +13,10 @@ import {
   Spin,
 } from "antd";
 import axios from "axios";
-// import { DownloadOutlined } from "@ant-design/icons";
 import ReactAce from "react-ace";
 import { formatPodAge } from "../../utils/pods";
 import { mapResponseError } from "../../utils/api/errors";
+import { useModuleDetailsActions } from "../shared/ModuleResourceDetails/ModuleDetailsActionsContext";
 const { Title } = Typography;
 
 interface Props {
@@ -45,6 +45,8 @@ interface logsModal {
 }
 
 const Pod = ({ name, namespace }: Props) => {
+  const { fetchResource } = useModuleDetailsActions();
+
   const [loading, setLoading] = useState(true);
   const [pod, setPod] = useState<pod>({
     status: "",
@@ -65,34 +67,25 @@ const Pod = ({ name, namespace }: Props) => {
   });
   const [logs, setLogs] = useState("");
 
-  useEffect(() => {
-    function fetchPod() {
-      axios
-        .get(`/api/resources`, {
-          params: {
-            group: ``,
-            version: `v1`,
-            kind: `Pod`,
-            name: name,
-            namespace: namespace,
-          },
-        })
-        .then((res) => {
-          setPod(res.data);
-          setLoading(false);
-        })
-        .catch((error) => {
-          setError(mapResponseError(error));
-          setLoading(false);
-        });
-    }
+  const fetchPod = useCallback(() => {
+    fetchResource("", "v1", "Pod", name, namespace)()
+      .then((res) => {
+        setPod(res);
+        setLoading(false);
+      })
+      .catch((error) => {
+        setError(mapResponseError(error));
+        setLoading(false);
+      });
+  }, [name, namespace, fetchResource]);
 
+  useEffect(() => {
     fetchPod();
     const interval = setInterval(() => fetchPod(), 15000);
     return () => {
       clearInterval(interval);
     };
-  }, [name, namespace]);
+  }, [fetchPod]);
 
   const handleCancelLogs = () => {
     setLogsModal({

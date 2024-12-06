@@ -63,7 +63,6 @@ const ResourceList = ({
 }: Props) => {
   const {
     streamingDisabled,
-    fetchResource,
     fetchResourceManifest,
     restartResource,
     deleteResource,
@@ -265,19 +264,6 @@ const ResourceList = ({
       namespace: resource.namespace,
     };
 
-    let fetchResourceCallback = (): Promise<any> => {
-      return Promise.resolve();
-    };
-    if (fetchResource) {
-      fetchResourceCallback = fetchResource(
-        resource.group,
-        resource.version,
-        resource.kind,
-        resource.name,
-        resource.namespace,
-      );
-    }
-
     switch (resource.kind) {
       case "Deployment":
         resourceDetails = (
@@ -285,7 +271,6 @@ const ResourceList = ({
             name={resource.name}
             namespace={resource.namespace}
             workload={getWorkload(resourceRef)}
-            fetchResource={fetchResourceCallback}
           />
         );
         break;
@@ -324,20 +309,12 @@ const ResourceList = ({
         break;
       case "Service":
         resourceDetails = (
-          <Service
-            name={resource.name}
-            namespace={resource.namespace}
-            fetchResource={fetchResourceCallback}
-          />
+          <Service name={resource.name} namespace={resource.namespace} />
         );
         break;
       case "ConfigMap":
         resourceDetails = (
-          <ConfigMap
-            name={resource.name}
-            namespace={resource.namespace}
-            fetchConfigmap={fetchResourceCallback}
-          />
+          <ConfigMap name={resource.name} namespace={resource.namespace} />
         );
         break;
       case "PersistentVolumeClaim":
