@@ -44,7 +44,7 @@ Here are your deployments. Depending on the number of replicas you wanted, there
 
 The topmost element we can see is the deployment's name, which in our case is `demo-1`. Right under, we can see the namespace where our deployment is located. In the current version of Cyclops, all of your deployments and services are put in the `default` namespace. Right under the namespace stands a button _View Manifest_. This button creates a popup that allows you to see the configuration file Cyclops created after you filled in the values for the template.
 
-The Pods are displayed one under another. You can see their name, node, phase, lifetime, image and logs. _View Logs_ is another popup window that displays the last 100 logs of the pod. If you are still interested in the logs feature, learn more about it in the [Logs tutorial](logs). For now, let's provide a short explanation for of the columns in the Deployment section:
+The Pods are displayed one under another. You can see their name, node, phase, lifetime, image and logs. _View Logs_ is another popup window that displays the last 100 logs of the pod. For now, let's provide a short explanation for of the columns in the Deployment section:
 
 1. `Name` shows the full name of the pod
 2. `Node` shows the node in which the pod is running
