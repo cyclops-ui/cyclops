@@ -50,6 +50,12 @@ const ModuleDetails = () => {
             container +
             "/logs/download";
         }}
+        onEditModule={(moduleName: string) => {
+          window.location.href = "/modules/" + moduleName + "/edit";
+        }}
+        onRollbackModule={(moduleName: string) => {
+          window.location.href = "/modules/" + moduleName + "/rollback";
+        }}
       />
     </div>
   );
