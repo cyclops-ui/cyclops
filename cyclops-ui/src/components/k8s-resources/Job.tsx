@@ -3,6 +3,7 @@ import { Col, Divider, Row, Alert } from "antd";
 import axios from "axios";
 import { mapResponseError } from "../../utils/api/errors";
 import PodTable from "./common/PodTable/PodTable";
+import { useModuleDetailsActions } from "../shared/ModuleResourceDetails/ModuleDetailsActionsContext";
 
 interface Props {
   name: string;
@@ -10,6 +11,8 @@ interface Props {
 }
 
 const Job = ({ name, namespace }: Props) => {
+  const { fetchResource } = useModuleDetailsActions();
+
   const [job, setJob] = useState({
     status: "",
     pods: [],
@@ -21,23 +24,14 @@ const Job = ({ name, namespace }: Props) => {
   });
 
   const fetchJob = useCallback(() => {
-    axios
-      .get(`/api/resources`, {
-        params: {
-          group: `batch`,
-          version: `v1`,
-          kind: `Job`,
-          name: name,
-          namespace: namespace,
-        },
-      })
+    fetchResource("batch", "v1", "Job", name, namespace)()
       .then((res) => {
-        setJob(res.data);
+        setJob(res);
       })
       .catch((error) => {
         setError(mapResponseError(error));
       });
-  }, [name, namespace]);
+  }, [name, namespace, fetchResource]);
 
   useEffect(() => {
     fetchJob();

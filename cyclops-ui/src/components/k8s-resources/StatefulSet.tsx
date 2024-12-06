@@ -4,6 +4,7 @@ import axios from "axios";
 import { mapResponseError } from "../../utils/api/errors";
 import PodTable from "./common/PodTable/PodTable";
 import { isStreamingEnabled } from "../../utils/api/common";
+import { useModuleDetailsActions } from "../shared/ModuleResourceDetails/ModuleDetailsActionsContext";
 
 interface Props {
   name: string;
@@ -12,6 +13,8 @@ interface Props {
 }
 
 const StatefulSet = ({ name, namespace, workload }: Props) => {
+  const { fetchResource } = useModuleDetailsActions();
+
   const [statefulSet, setStatefulSet] = useState({
     status: "",
     pods: [],
@@ -23,23 +26,14 @@ const StatefulSet = ({ name, namespace, workload }: Props) => {
   });
 
   const fetchStatefulSet = useCallback(() => {
-    axios
-      .get(`/api/resources`, {
-        params: {
-          group: `apps`,
-          version: `v1`,
-          kind: `StatefulSet`,
-          name: name,
-          namespace: namespace,
-        },
-      })
+    fetchResource("apps", "v1", "StatefulSet", name, namespace)()
       .then((res) => {
-        setStatefulSet(res.data);
+        setStatefulSet(res);
       })
       .catch((error) => {
         setError(mapResponseError(error));
       });
-  }, [name, namespace]);
+  }, [name, namespace, fetchResource]);
 
   useEffect(() => {
     fetchStatefulSet();

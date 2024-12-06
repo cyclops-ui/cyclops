@@ -3,6 +3,7 @@ import { Col, Divider, Row, Alert } from "antd";
 import axios from "axios";
 import { mapResponseError } from "../../utils/api/errors";
 import PodTable from "./common/PodTable/PodTable";
+import { useModuleDetailsActions } from "../shared/ModuleResourceDetails/ModuleDetailsActionsContext";
 
 interface Props {
   name: string;
@@ -10,6 +11,8 @@ interface Props {
 }
 
 const CronJob = ({ name, namespace }: Props) => {
+  const { fetchResource } = useModuleDetailsActions();
+
   const [cronjob, setCronjob] = useState({
     status: "",
     pods: [],
@@ -21,23 +24,14 @@ const CronJob = ({ name, namespace }: Props) => {
   });
 
   const fetchCronJob = useCallback(() => {
-    axios
-      .get(`/api/resources`, {
-        params: {
-          group: `batch`,
-          version: `v1`,
-          kind: `CronJob`,
-          name: name,
-          namespace: namespace,
-        },
-      })
+    fetchResource("batch", "v1", "CronJob", name, namespace)()
       .then((res) => {
-        setCronjob(res.data);
+        setCronjob(res);
       })
       .catch((error) => {
         setError(mapResponseError(error));
       });
-  }, [name, namespace]);
+  }, [name, namespace, fetchResource]);
 
   useEffect(() => {
     fetchCronJob();

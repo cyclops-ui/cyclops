@@ -2,6 +2,7 @@ import React, { useCallback, useEffect, useState } from "react";
 import { Col, Divider, Row, Alert, Table, Tag } from "antd";
 import axios from "axios";
 import { mapResponseError } from "../../utils/api/errors";
+import { useModuleDetailsActions } from "../shared/ModuleResourceDetails/ModuleDetailsActionsContext";
 
 interface Props {
   name: string;
@@ -19,6 +20,8 @@ interface ClusterRoleData {
 }
 
 const ClusterRole = ({ name }: Props) => {
+  const { fetchResource } = useModuleDetailsActions();
+
   const [clusterRole, setClusterRole] = useState<ClusterRoleData>({
     rules: [],
   });
@@ -29,24 +32,16 @@ const ClusterRole = ({ name }: Props) => {
   });
 
   const fetchClusterRole = useCallback(() => {
-    axios
-      .get(`/api/resources`, {
-        params: {
-          group: `rbac.authorization.k8s.io`,
-          version: `v1`,
-          kind: `ClusterRole`,
-          name: name,
-        },
-      })
+    fetchResource("rbac.authorization.k8s.io", "v1", "ClusterRole", name, "")()
       .then((res) => {
         setClusterRole({
-          rules: res.data.rules || [],
+          rules: res.rules || [],
         });
       })
       .catch((error) => {
         setError(mapResponseError(error));
       });
-  }, [name]);
+  }, [name, fetchResource]);
 
   useEffect(() => {
     fetchClusterRole();
