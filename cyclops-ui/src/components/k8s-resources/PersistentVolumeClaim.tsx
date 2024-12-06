@@ -1,4 +1,3 @@
-import axios from "axios";
 import { useCallback, useEffect, useState } from "react";
 import { mapResponseError } from "../../utils/api/errors";
 import { Alert, Descriptions, Divider } from "antd";
