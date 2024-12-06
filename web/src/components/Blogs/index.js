@@ -34,6 +34,19 @@ const Blogs = () => {
           </Col>
           <Col xs={{ span: 20, offset: 2 }} md={{ span: 6, offset: 0 }}>
             <Blog
+              title={"Cyclops Launch Week #1"}
+              description={
+                "For an entire week, we will be unveiling a feature a day - that's five features in total..."
+              }
+              blogLink={
+                "https://cyclops-ui.com/blog/2024/11/22/launch-week-1"
+              }
+              avatar={"https://github.com/KaradzaJuraj.png"}
+              banner={"/img/2024-11-22-launch-week-1/recap.png"}
+            />
+          </Col>
+          <Col xs={{ span: 20, offset: 2 }} md={{ span: 6, offset: 0 }}>
+            <Blog
               title={"Custom AWS Cloud Platforms"}
               description={
                 "But should we use Kubernetes as just a container orchestrator, or is there more to it..."
@@ -43,19 +56,6 @@ const Blogs = () => {
               }
               avatar={"https://github.com/petar-cvit.png"}
               banner={"/img/2024-10-31-custom-aws-cloud-platforms/cover.jpeg"}
-            />
-          </Col>
-          <Col xs={{ span: 20, offset: 2 }} md={{ span: 6, offset: 0 }}>
-            <Blog
-              title={"5 Internal Developer Platforms you need to know about!"}
-              description={
-                "Gartner predicts that by 2026, 80% of software companies will have established platform engineering teams..."
-              }
-              blogLink={
-                "https://cyclops-ui.com/blog/2024/10/24/five-idps"
-              }
-              avatar={"https://github.com/KaradzaJuraj.png"}
-              banner={"/img/2024-10-24-five-idps/cover.jpg"}
             />
           </Col>
         </Row>

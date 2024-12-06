@@ -10,6 +10,8 @@ import title from "/static/img/cyclops-title.png";
 
 import yaml from "/static/img/yaml_background.png";
 
+import devhunt from "/static/img/devhunt.png";
+
 import Comparison from "../components/Comparison";
 import Install from "../components/Install";
 import Features from "../components/Features";
@@ -100,9 +102,10 @@ export default function Home() {
             src={yaml}
           />
 
-          <img className={styles.cyclopsTitle} src={title} />
-          <h2 className={styles.cyclopsDesc}>Developer friendly Kubernetes</h2>
-          <img className={styles.landingCyclops} src={landingCyclops} />
+          <img className={styles.cyclopsTitle} src={title}/>
+          <img className={styles.devhunt} src={devhunt}/>
+          {/*<h2 className={styles.cyclopsDesc}>Developer friendly Kubernetes</h2>*/}
+          <img className={styles.landingCyclops} src={landingCyclops}/>
           <Row>
             <ConfigProvider
               theme={{
