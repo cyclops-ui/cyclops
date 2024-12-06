@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useState } from "react";
-import { Col, Divider, Row, Alert } from "antd";
+import { Col, Divider, Row, Alert, Spin } from "antd";
 import { mapResponseError } from "../../utils/api/errors";
 import PodTable from "./common/PodTable/PodTable";
 import { isStreamingEnabled } from "../../utils/api/common";
@@ -12,6 +12,7 @@ interface Props {
 }
 
 const Deployment = ({ name, namespace, workload, fetchResource }: Props) => {
+  const [loading, setLoading] = useState(true);
   const [deployment, setDeployment] = useState({
     status: "",
     pods: [],
@@ -25,9 +26,11 @@ const Deployment = ({ name, namespace, workload, fetchResource }: Props) => {
     fetchResource()
       .then((res) => {
         setDeployment(res);
+        setLoading(false);
       })
       .catch((error) => {
         setError(mapResponseError(error));
+        setLoading(false);
       });
   }, [fetchResource]);
 
@@ -61,6 +64,8 @@ const Deployment = ({ name, namespace, workload, fetchResource }: Props) => {
 
     return 0;
   }
+
+  if (loading) return <Spin size="large" style={{ marginTop: "20px" }} />;
 
   return (
     <div>

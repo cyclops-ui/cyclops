@@ -10,6 +10,7 @@ import {
   Tabs,
   Modal,
   TabsProps,
+  Spin,
 } from "antd";
 import axios from "axios";
 // import { DownloadOutlined } from "@ant-design/icons";
@@ -44,6 +45,7 @@ interface logsModal {
 }
 
 const Pod = ({ name, namespace }: Props) => {
+  const [loading, setLoading] = useState(true);
   const [pod, setPod] = useState<pod>({
     status: "",
     containers: [],
@@ -77,9 +79,11 @@ const Pod = ({ name, namespace }: Props) => {
         })
         .then((res) => {
           setPod(res.data);
+          setLoading(false);
         })
         .catch((error) => {
           setError(mapResponseError(error));
+          setLoading(false);
         });
     }
 
@@ -201,6 +205,8 @@ const Pod = ({ name, namespace }: Props) => {
         setError(mapResponseError(error));
       });
   };
+
+  if (loading) return <Spin size="large" style={{ marginTop: "20px" }} />;
 
   return (
     <div>

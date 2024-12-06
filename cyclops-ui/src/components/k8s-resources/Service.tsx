@@ -1,5 +1,14 @@
 import React, { useEffect, useState } from "react";
-import { Col, Divider, Row, Table, Alert, Descriptions, Button } from "antd";
+import {
+  Col,
+  Divider,
+  Row,
+  Table,
+  Alert,
+  Descriptions,
+  Button,
+  Spin,
+} from "antd";
 import { mapResponseError } from "../../utils/api/errors";
 import { CopyOutlined } from "@ant-design/icons";
 
@@ -28,6 +37,7 @@ interface service {
 }
 
 const Service = ({ name, namespace, fetchResource }: Props) => {
+  const [loading, setLoading] = useState(true);
   const [service, setService] = useState<service>({
     externalIPs: [],
     ports: [],
@@ -43,9 +53,11 @@ const Service = ({ name, namespace, fetchResource }: Props) => {
       fetchResource()
         .then((res) => {
           setService(res);
+          setLoading(false);
         })
         .catch((error) => {
           setError(mapResponseError(error));
+          setLoading(false);
         });
     }
 
@@ -160,6 +172,8 @@ const Service = ({ name, namespace, fetchResource }: Props) => {
       </Row>
     );
   };
+
+  if (loading) return <Spin size="large" style={{ marginTop: "20px" }} />;
 
   return (
     <div>

@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Divider, Row, Alert, Descriptions } from "antd";
+import { Divider, Row, Alert, Descriptions, Spin } from "antd";
 import ReactAce from "react-ace";
 import { mapResponseError } from "../../utils/api/errors";
 
@@ -10,6 +10,7 @@ interface Props {
 }
 
 const ConfigMap = ({ name, namespace, fetchConfigmap }: Props) => {
+  const [loading, setLoading] = useState(true);
   const [configMap, setConfigMap] = useState({});
   const [error, setError] = useState({
     message: "",
@@ -21,9 +22,11 @@ const ConfigMap = ({ name, namespace, fetchConfigmap }: Props) => {
       fetchConfigmap()
         .then((res) => {
           setConfigMap(res);
+          setLoading(false);
         })
         .catch((error) => {
           setError(mapResponseError(error));
+          setLoading(false);
         });
     }
 
@@ -93,6 +96,8 @@ const ConfigMap = ({ name, namespace, fetchConfigmap }: Props) => {
         return "text";
     }
   };
+
+  if (loading) return <Spin size="large" style={{ marginTop: "20px" }} />;
 
   return (
     <div>

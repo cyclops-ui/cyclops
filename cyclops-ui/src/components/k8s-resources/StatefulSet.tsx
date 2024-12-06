@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useState } from "react";
-import { Col, Divider, Row, Alert } from "antd";
+import { Col, Divider, Row, Alert, Spin } from "antd";
 import axios from "axios";
 import { mapResponseError } from "../../utils/api/errors";
 import PodTable from "./common/PodTable/PodTable";
@@ -12,6 +12,7 @@ interface Props {
 }
 
 const StatefulSet = ({ name, namespace, workload }: Props) => {
+  const [loading, setLoading] = useState(true);
   const [statefulSet, setStatefulSet] = useState({
     status: "",
     pods: [],
@@ -35,9 +36,11 @@ const StatefulSet = ({ name, namespace, workload }: Props) => {
       })
       .then((res) => {
         setStatefulSet(res.data);
+        setLoading(false);
       })
       .catch((error) => {
         setError(mapResponseError(error));
+        setLoading(false);
       });
   }, [name, namespace]);
 
@@ -71,6 +74,8 @@ const StatefulSet = ({ name, namespace, workload }: Props) => {
 
     return 0;
   }
+
+  if (loading) return <Spin size="large" style={{ marginTop: "20px" }} />;
 
   return (
     <div>

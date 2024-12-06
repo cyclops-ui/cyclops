@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useState } from "react";
-import { Col, Divider, Row, Alert } from "antd";
+import { Col, Divider, Row, Alert, Spin } from "antd";
 import axios from "axios";
 import { mapResponseError } from "../../utils/api/errors";
 import PodTable from "./common/PodTable/PodTable";
@@ -10,6 +10,7 @@ interface Props {
 }
 
 const Job = ({ name, namespace }: Props) => {
+  const [loading, setLoading] = useState(true);
   const [job, setJob] = useState({
     status: "",
     pods: [],
@@ -33,9 +34,11 @@ const Job = ({ name, namespace }: Props) => {
       })
       .then((res) => {
         setJob(res.data);
+        setLoading(false);
       })
       .catch((error) => {
         setError(mapResponseError(error));
+        setLoading(false);
       });
   }, [name, namespace]);
 
@@ -46,6 +49,8 @@ const Job = ({ name, namespace }: Props) => {
       clearInterval(interval);
     };
   }, [fetchJob]);
+
+  if (loading) return <Spin size="large" style={{ marginTop: "20px" }} />;
 
   return (
     <div>

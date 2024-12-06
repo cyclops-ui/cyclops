@@ -1,7 +1,7 @@
 import axios from "axios";
 import React, { useEffect, useState } from "react";
 import { mapResponseError } from "../../utils/api/errors";
-import { Alert, Descriptions, Divider } from "antd";
+import { Alert, Descriptions, Divider, Spin } from "antd";
 
 interface Props {
   name: string;
@@ -14,6 +14,7 @@ interface secret {
 }
 
 const Secret = ({ name, namespace }: Props) => {
+  const [loading, setLoading] = useState(true);
   const [secret, setSecret] = useState<secret>({
     type: "",
     dataKeys: [],
@@ -40,9 +41,11 @@ const Secret = ({ name, namespace }: Props) => {
             type: res.data.type,
             dataKeys: res.data.dataKeys,
           });
+          setLoading(false);
         })
         .catch((error) => {
           setError(mapResponseError(error));
+          setLoading(false);
         });
     }
 
@@ -52,6 +55,8 @@ const Secret = ({ name, namespace }: Props) => {
       clearInterval(interval);
     };
   }, [name, namespace]);
+
+  if (loading) return <Spin size="large" style={{ marginTop: "20px" }} />;
 
   return (
     <div>

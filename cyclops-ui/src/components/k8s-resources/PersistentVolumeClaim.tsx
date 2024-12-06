@@ -1,7 +1,7 @@
 import axios from "axios";
 import { useEffect, useState } from "react";
 import { mapResponseError } from "../../utils/api/errors";
-import { Alert, Descriptions, Divider } from "antd";
+import { Alert, Descriptions, Divider, Spin } from "antd";
 
 interface Props {
   name: string;
@@ -14,6 +14,7 @@ interface pvc {
 }
 
 const PersistentVolumeClaim = ({ name, namespace }: Props) => {
+  const [loading, setLoading] = useState(true);
   const [pvc, setPvc] = useState<pvc>({
     size: "",
     accessModes: "",
@@ -40,9 +41,11 @@ const PersistentVolumeClaim = ({ name, namespace }: Props) => {
             size: res.data.size,
             accessModes: res.data.accessmodes.join(","),
           });
+          setLoading(false);
         })
         .catch((error) => {
           setError(mapResponseError(error));
+          setLoading(false);
         });
     }
 
@@ -52,6 +55,8 @@ const PersistentVolumeClaim = ({ name, namespace }: Props) => {
       clearInterval(interval);
     };
   }, [name, namespace]);
+
+  if (loading) return <Spin size="large" style={{ marginTop: "20px" }} />;
 
   return (
     <div>
