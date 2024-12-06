@@ -128,15 +128,15 @@ export interface ModuleResourceDetailsProps {
     kind: string,
     name: string,
     namespace: string,
-  ) => Promise<boolean>;
+  ) => Promise<any>;
   deleteResource: (
     group: string,
     version: string,
     kind: string,
     name: string,
     namespace: string,
-  ) => Promise<boolean>;
-  getPodLogs?: (
+  ) => Promise<any>;
+  getPodLogs: (
     namespace: string,
     name: string,
     container: string,
@@ -247,7 +247,6 @@ export const ModuleResourceDetails = ({
         setLoadModule(true);
       })
       .catch((error) => {
-        console.log("cile error", error);
         setLoading(false);
         setLoadModule(true);
         setError(mapResponseError(error));

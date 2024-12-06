@@ -1,4 +1,4 @@
-import { ReadOutlined } from "@ant-design/icons";
+import { DownloadOutlined, ReadOutlined } from "@ant-design/icons";
 import { Alert, Button, Col, Divider, Modal, Tabs, TabsProps } from "antd";
 import { useRef, useState } from "react";
 import ReactAce from "react-ace/lib/ace";
@@ -57,15 +57,23 @@ const PodLogs = ({ pod }: PodLogsProps) => {
           label: container.name,
           children: (
             <Col>
-              <Button
-                type="primary"
-                // icon={<DownloadOutlined />}
-                onClick={downloadLogs(container.name)}
-                disabled={logs.length === 0}
-              >
-                Download
-              </Button>
-              <Divider style={{ marginTop: "16px", marginBottom: "16px" }} />
+              {downloadPodLogs ? (
+                <div>
+                  <Button
+                    type="primary"
+                    icon={<DownloadOutlined />}
+                    onClick={downloadLogs(container.name)}
+                    disabled={logs.length === 0}
+                  >
+                    Download
+                  </Button>
+                  <Divider
+                    style={{ marginTop: "16px", marginBottom: "16px" }}
+                  />
+                </div>
+              ) : (
+                <></>
+              )}
               <ReactAce
                 style={{ width: "100%" }}
                 mode={"sass"}

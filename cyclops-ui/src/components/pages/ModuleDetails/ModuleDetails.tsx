@@ -11,6 +11,7 @@ import {
   fetchResource,
   fetchResourceManifest,
   getModule,
+  getPodLogs,
   reconcileModule,
   restartResource,
 } from "../../../utils/api/api";
@@ -23,7 +24,7 @@ const ModuleDetails = () => {
     <div>
       <ModuleResourceDetails
         name={moduleName}
-        streamingDisabled={isStreamingEnabled()}
+        streamingDisabled={!isStreamingEnabled()}
         fetchModule={getModule}
         fetchModuleRawManifest={fetchModuleRawManifest}
         fetchModuleRenderedManifest={fetchModuleRenderedManifest}
@@ -34,6 +35,21 @@ const ModuleDetails = () => {
         fetchResourceManifest={fetchResourceManifest}
         restartResource={restartResource}
         deleteResource={deleteResource}
+        getPodLogs={getPodLogs}
+        downloadPodLogs={(
+          namespace: string,
+          podName: string,
+          container: string,
+        ) => {
+          window.location.href =
+            "/api/resources/pods/" +
+            namespace +
+            "/" +
+            podName +
+            "/" +
+            container +
+            "/logs/download";
+        }}
       />
     </div>
   );
