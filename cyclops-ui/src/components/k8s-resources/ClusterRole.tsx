@@ -1,5 +1,4 @@
 import { Col, Divider, Row, Alert, Table, Tag, Spin } from "antd";
-import axios from "axios";
 import React, { useCallback, useEffect, useState } from "react";
 import { mapResponseError } from "../../utils/api/errors";
 import { useModuleDetailsActions } from "../shared/ModuleResourceDetails/ModuleDetailsActionsContext";

@@ -9,7 +9,6 @@ import {
   Button,
   Spin,
 } from "antd";
-import { Col, Divider, Row, Table, Alert, Descriptions, Button } from "antd";
 import { mapResponseError } from "../../utils/api/errors";
 import { CopyOutlined } from "@ant-design/icons";
 import { useModuleDetailsActions } from "../shared/ModuleResourceDetails/ModuleDetailsActionsContext";
