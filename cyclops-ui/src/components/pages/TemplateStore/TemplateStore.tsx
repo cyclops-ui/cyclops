@@ -25,7 +25,7 @@ import {
   FilterOutlined,
 } from "@ant-design/icons";
 import classNames from "classnames";
-import styles from "./styles.module.css";
+import "./custom.css";
 import { mapResponseError } from "../../../utils/api/errors";
 import defaultTemplate from "../../../static/img/default-template-icon.png";
 import {
@@ -406,10 +406,9 @@ const TemplateStore = () => {
                   <Spin />
                 ) : (
                   <FileSyncOutlined
-                    className={classNames(styles.statustemplate, {
-                      [styles.success]:
-                        requestStatus[template.name] === "success",
-                      [styles.error]: requestStatus[template.name] === "error",
+                    className={classNames("statustemplate", {
+                      success: requestStatus[template.name] === "success",
+                      error: requestStatus[template.name] === "error",
                     })}
                     onClick={function () {
                       checkTemplateReference(
@@ -431,7 +430,7 @@ const TemplateStore = () => {
             render={(template) => (
               <>
                 <EditOutlined
-                  className={styles.edittemplate}
+                  className={"edittemplate"}
                   onClick={function () {
                     editForm.setFieldValue(
                       ["ref", "sourceType"],
@@ -455,7 +454,7 @@ const TemplateStore = () => {
             render={(template) => (
               <>
                 <DeleteOutlined
-                  className={styles.deletetemplate}
+                  className={"deletetemplate"}
                   onClick={function () {
                     setConfirmDelete(template.name);
                   }}
@@ -527,29 +526,21 @@ const TemplateStore = () => {
             <Radio.Group
               optionType="button"
               style={{ width: "100%" }}
-              className={styles.templatetypes}
+              className={"templatetypes"}
             >
-              <Radio value="git" className={styles.templatetype}>
-                <img
-                  src={gitLogo}
-                  alt="git"
-                  className={styles.templatetypeicon}
-                />
+              <Radio value="git" className={"templatetype"}>
+                <img src={gitLogo} alt="git" className={"templatetypeicon"} />
                 Git
               </Radio>
-              <Radio value="helm" className={styles.templatetype}>
-                <img
-                  src={helmLogo}
-                  alt="helm"
-                  className={styles.templatetypeicon}
-                />
+              <Radio value="helm" className={"templatetype"}>
+                <img src={helmLogo} alt="helm" className={"templatetypeicon"} />
                 Helm repo
               </Radio>
-              <Radio value="oci" className={styles.templatetype}>
+              <Radio value="oci" className={"templatetype"}>
                 <img
                   src={dockerLogo}
                   alt="docker"
-                  className={styles.templatetypeicon}
+                  className={"templatetypeicon"}
                 />
                 OCI registry
               </Radio>
@@ -619,29 +610,21 @@ const TemplateStore = () => {
             <Radio.Group
               optionType="button"
               style={{ width: "100%" }}
-              className={styles.templatetypes}
+              className={"templatetypes"}
             >
-              <Radio value="git" className={styles.templatetype}>
-                <img
-                  src={gitLogo}
-                  alt="git"
-                  className={styles.templatetypeicon}
-                />
+              <Radio value="git" className={"templatetype"}>
+                <img src={gitLogo} alt="git" className={"templatetypeicon"} />
                 Git
               </Radio>
-              <Radio value="helm" className={styles.templatetype}>
-                <img
-                  src={helmLogo}
-                  alt="helm"
-                  className={styles.templatetypeicon}
-                />
+              <Radio value="helm" className={"templatetype"}>
+                <img src={helmLogo} alt="helm" className={"templatetypeicon"} />
                 Helm repo
               </Radio>
-              <Radio value="oci" className={styles.templatetype}>
+              <Radio value="oci" className={"templatetype"}>
                 <img
                   src={dockerLogo}
                   alt="docker"
-                  className={styles.templatetypeicon}
+                  className={"templatetypeicon"}
                 />
                 OCI registry
               </Radio>
@@ -671,7 +654,8 @@ const TemplateStore = () => {
       <Modal
         title={
           <>
-            Delete template reference <span style={{ color: "red" }}>{confirmDelete}</span>
+            Delete template reference{" "}
+            <span style={{ color: "red" }}>{confirmDelete}</span>
           </>
         }
         open={confirmDelete.length > 0}
