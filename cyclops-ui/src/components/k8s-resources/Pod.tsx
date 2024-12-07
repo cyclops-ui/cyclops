@@ -10,6 +10,7 @@ import {
   Tabs,
   Modal,
   TabsProps,
+  Spin,
 } from "antd";
 import axios from "axios";
 import ReactAce from "react-ace";
@@ -46,6 +47,7 @@ interface logsModal {
 const Pod = ({ name, namespace }: Props) => {
   const { fetchResource } = useModuleDetailsActions();
 
+  const [loading, setLoading] = useState(true);
   const [pod, setPod] = useState<pod>({
     status: "",
     containers: [],
@@ -69,9 +71,11 @@ const Pod = ({ name, namespace }: Props) => {
     fetchResource("", "v1", "Pod", namespace, name)()
       .then((res) => {
         setPod(res);
+        setLoading(false);
       })
       .catch((error) => {
         setError(mapResponseError(error));
+        setLoading(false);
       });
   }, [name, namespace, fetchResource]);
 
@@ -194,6 +198,8 @@ const Pod = ({ name, namespace }: Props) => {
         setError(mapResponseError(error));
       });
   };
+
+  if (loading) return <Spin size="large" style={{ marginTop: "20px" }} />;
 
   return (
     <div>

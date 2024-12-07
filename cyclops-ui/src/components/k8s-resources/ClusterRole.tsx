@@ -1,5 +1,5 @@
+import { Col, Divider, Row, Alert, Table, Tag, Spin } from "antd";
 import React, { useCallback, useEffect, useState } from "react";
-import { Col, Divider, Row, Alert, Table, Tag } from "antd";
 import { mapResponseError } from "../../utils/api/errors";
 import { useModuleDetailsActions } from "../shared/ModuleResourceDetails/ModuleDetailsActionsContext";
 
@@ -20,6 +20,7 @@ interface ClusterRoleData {
 
 const ClusterRole = ({ name }: Props) => {
   const { fetchResource } = useModuleDetailsActions();
+  const [loading, setLoading] = useState(true);
 
   const [clusterRole, setClusterRole] = useState<ClusterRoleData>({
     rules: [],
@@ -36,9 +37,11 @@ const ClusterRole = ({ name }: Props) => {
         setClusterRole({
           rules: res.rules || [],
         });
+        setLoading(false);
       })
       .catch((error) => {
         setError(mapResponseError(error));
+        setLoading(false);
       });
   }, [name, fetchResource]);
 
@@ -112,6 +115,8 @@ const ClusterRole = ({ name }: Props) => {
       ),
     });
   }
+
+  if (loading) return <Spin size="large" style={{ marginTop: "20px" }} />;
 
   return (
     <div>
