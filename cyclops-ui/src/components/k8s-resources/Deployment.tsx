@@ -24,7 +24,7 @@ const Deployment = ({ name, namespace, workload }: Props) => {
   });
 
   const fetchDeployment = useCallback(() => {
-    fetchResource("apps", "v1", "Deployment", name, namespace)()
+    fetchResource("apps", "v1", "Deployment", namespace, name)()
       .then((res) => {
         setDeployment(res);
       })

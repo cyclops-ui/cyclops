@@ -72,8 +72,8 @@ const PodTable = ({ pods, namespace, updateResourceData }: Props) => {
         deletePodRef.podDetails.group,
         deletePodRef.podDetails.version,
         deletePodRef.podDetails.kind,
-        deletePodRef.podDetails.name,
         deletePodRef.podDetails.namespace,
+        deletePodRef.podDetails.name,
       );
 
       updateResourceData();

@@ -122,8 +122,8 @@ const ResourceList = ({
       deleteResourceRef.group,
       deleteResourceRef.version,
       deleteResourceRef.kind,
-      deleteResourceRef.name,
       deleteResourceRef.namespace,
+      deleteResourceRef.name,
     )
       .then(() => {
         onResourceDelete();

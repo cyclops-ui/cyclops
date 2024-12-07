@@ -131,8 +131,8 @@ const PodLogs = ({ pod }: PodLogsProps) => {
 
     if (!streamingDisabled) {
       logStream(
-        logsModal.pod,
         logsModal.namespace,
+        logsModal.pod,
         container,
         (log, isReset = false) => {
           if (isReset) {
@@ -195,8 +195,8 @@ const PodLogs = ({ pod }: PodLogsProps) => {
             logsSignalControllerRef.current = controller; // store the controller to be able to abort the request
 
             logStream(
-              pod.name,
               pod.namespace,
+              pod.name,
               pod.containers[0].name,
               (log, isReset = false) => {
                 if (isReset) {

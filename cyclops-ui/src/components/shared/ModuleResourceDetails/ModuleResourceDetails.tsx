@@ -107,8 +107,8 @@ export interface ModuleResourceDetailsProps {
     group: string,
     version: string,
     kind: string,
-    name: string,
     namespace: string,
+    name: string,
   ) => () => Promise<any>;
   fetchResourceManifest: (
     group: string,
@@ -126,15 +126,15 @@ export interface ModuleResourceDetailsProps {
     group: string,
     version: string,
     kind: string,
-    name: string,
     namespace: string,
+    name: string,
   ) => Promise<any>;
   deleteResource: (
     group: string,
     version: string,
     kind: string,
-    name: string,
     namespace: string,
+    name: string,
   ) => Promise<any>;
   getPodLogs: (
     namespace: string,
@@ -147,8 +147,8 @@ export interface ModuleResourceDetailsProps {
     container: string,
   ) => void;
   streamPodLogs?: (
-    name: string,
     namespace: string,
+    name: string,
     container: string,
     setLog: (log: string, isReset?: boolean) => void,
     setError: (err: Error, isReset?: boolean) => void,

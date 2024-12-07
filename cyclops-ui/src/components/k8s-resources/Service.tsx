@@ -41,7 +41,7 @@ const Service = ({ name, namespace }: Props) => {
   });
 
   const fetchService = useCallback(() => {
-    fetchResource("", "v1", "Service", name, namespace)()
+    fetchResource("", "v1", "Service", namespace, name)()
       .then((res) => {
         setService(res);
       })

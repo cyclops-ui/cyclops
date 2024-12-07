@@ -7,8 +7,8 @@ class RetriableError extends Error {}
 class FatalError extends Error {}
 
 export function logStream(
-  name: string,
   namespace: string,
+  name: string,
   container: string,
   setLog: (log: string, isReset?: boolean) => void,
   setError: (err: Error, isReset?: boolean) => void,
@@ -34,7 +34,7 @@ export function logStream(
     return;
   }
 
-  logStreamImpl(name, namespace, container, setLog, setError, signalController);
+  logStreamImpl(namespace, name, container, setLog, setError, signalController);
 }
 
 export function defaultLogStream(

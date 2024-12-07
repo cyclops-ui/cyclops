@@ -66,7 +66,7 @@ const Pod = ({ name, namespace }: Props) => {
   const [logs, setLogs] = useState("");
 
   const fetchPod = useCallback(() => {
-    fetchResource("", "v1", "Pod", name, namespace)()
+    fetchResource("", "v1", "Pod", namespace, name)()
       .then((res) => {
         setPod(res);
       })

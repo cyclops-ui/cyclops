@@ -23,7 +23,7 @@ const Job = ({ name, namespace }: Props) => {
   });
 
   const fetchJob = useCallback(() => {
-    fetchResource("batch", "v1", "Job", name, namespace)()
+    fetchResource("batch", "v1", "Job", namespace, name)()
       .then((res) => {
         setJob(res);
       })

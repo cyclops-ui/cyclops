@@ -26,7 +26,7 @@ const Secret = ({ name, namespace }: Props) => {
   });
 
   const fetchSecret = useCallback(() => {
-    fetchResource("", "v1", "Secret", name, namespace)()
+    fetchResource("", "v1", "Secret", namespace, name)()
       .then((res) => {
         setSecret({
           type: res.type,

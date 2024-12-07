@@ -31,7 +31,7 @@ const ClusterRole = ({ name }: Props) => {
   });
 
   const fetchClusterRole = useCallback(() => {
-    fetchResource("rbac.authorization.k8s.io", "v1", "ClusterRole", name, "")()
+    fetchResource("rbac.authorization.k8s.io", "v1", "ClusterRole", "", name)()
       .then((res) => {
         setClusterRole({
           rules: res.rules || [],

@@ -25,7 +25,7 @@ const DaemonSet = ({ name, namespace, workload }: Props) => {
   });
 
   const fetchDaemonSet = useCallback(() => {
-    fetchResource("apps", "v1", "DaemonSet", name, namespace)()
+    fetchResource("apps", "v1", "DaemonSet", namespace, name)()
       .then((res) => {
         setDaemonSet(res);
       })

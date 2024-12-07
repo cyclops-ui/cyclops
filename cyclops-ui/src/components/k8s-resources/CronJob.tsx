@@ -23,7 +23,7 @@ const CronJob = ({ name, namespace }: Props) => {
   });
 
   const fetchCronJob = useCallback(() => {
-    fetchResource("batch", "v1", "CronJob", name, namespace)()
+    fetchResource("batch", "v1", "CronJob", namespace, name)()
       .then((res) => {
         setCronjob(res);
       })

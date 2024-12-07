@@ -25,7 +25,7 @@ const StatefulSet = ({ name, namespace, workload }: Props) => {
   });
 
   const fetchStatefulSet = useCallback(() => {
-    fetchResource("apps", "v1", "StatefulSet", name, namespace)()
+    fetchResource("apps", "v1", "StatefulSet", namespace, name)()
       .then((res) => {
         setStatefulSet(res);
       })

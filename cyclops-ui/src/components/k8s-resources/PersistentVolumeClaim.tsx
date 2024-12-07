@@ -26,7 +26,7 @@ const PersistentVolumeClaim = ({ name, namespace }: Props) => {
   });
 
   const fetchPersistentVolumeClaim = useCallback(() => {
-    fetchResource("", "v1", "PersistentVolumeClaim", name, namespace)()
+    fetchResource("", "v1", "PersistentVolumeClaim", namespace, name)()
       .then((res) => {
         setPvc({
           size: res.size,

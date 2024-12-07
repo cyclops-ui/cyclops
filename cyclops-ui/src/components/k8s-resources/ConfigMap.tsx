@@ -19,7 +19,7 @@ const ConfigMap = ({ name, namespace }: Props) => {
   });
 
   const fetchConfigMap = useCallback(() => {
-    fetchResource("", "v1", "ConfigMap", name, namespace)()
+    fetchResource("", "v1", "ConfigMap", namespace, name)()
       .then((res) => {
         setConfigMap(res);
       })

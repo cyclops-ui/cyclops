@@ -13,8 +13,8 @@ interface ModuleDetailsActionsContextType {
     group: string,
     version: string,
     kind: string,
-    name: string,
     namespace: string,
+    name: string,
   ) => () => Promise<any>;
   fetchResourceManifest: (
     group: string,
@@ -32,15 +32,15 @@ interface ModuleDetailsActionsContextType {
     group: string,
     version: string,
     kind: string,
-    name: string,
     namespace: string,
+    name: string,
   ) => Promise<boolean>;
   deleteResource: (
     group: string,
     version: string,
     kind: string,
-    name: string,
     namespace: string,
+    name: string,
   ) => Promise<boolean>;
   getPodLogs?: (
     namespace: string,
@@ -53,8 +53,8 @@ interface ModuleDetailsActionsContextType {
     container: string,
   ) => void;
   streamPodLogs?: (
-    name: string,
     namespace: string,
+    name: string,
     container: string,
     setLog: (log: string, isReset?: boolean) => void,
     setError: (err: Error, isReset?: boolean) => void,
@@ -79,8 +79,8 @@ interface ModuleDetailsActionsProviderProps {
     group: string,
     version: string,
     kind: string,
-    name: string,
     namespace: string,
+    name: string,
   ) => () => Promise<any>;
   fetchResourceManifest: (
     group: string,
@@ -98,15 +98,15 @@ interface ModuleDetailsActionsProviderProps {
     group: string,
     version: string,
     kind: string,
-    name: string,
     namespace: string,
+    name: string,
   ) => Promise<boolean>;
   deleteResource: (
     group: string,
     version: string,
     kind: string,
-    name: string,
     namespace: string,
+    name: string,
   ) => Promise<boolean>;
   getPodLogs?: (
     namespace: string,
@@ -119,8 +119,8 @@ interface ModuleDetailsActionsProviderProps {
     container: string,
   ) => void;
   streamPodLogs?: (
-    name: string,
     namespace: string,
+    name: string,
     container: string,
     setLog: (log: string, isReset?: boolean) => void,
     setError: (err: Error, isReset?: boolean) => void,
