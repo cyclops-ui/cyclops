@@ -12,7 +12,7 @@ interface Props {
 }
 
 const DaemonSet = ({ name, namespace, workload }: Props) => {
-  const { fetchResource } = useModuleDetailsActions();
+  const { fetchResource, streamingDisabled } = useModuleDetailsActions();
 
   const [daemonSet, setDaemonSet] = useState({
     status: "",
@@ -48,7 +48,7 @@ const DaemonSet = ({ name, namespace, workload }: Props) => {
   }, [fetchDaemonSet]);
 
   function getPods() {
-    if (workload && isStreamingEnabled()) {
+    if (workload && !streamingDisabled) {
       return workload.pods;
     }
 

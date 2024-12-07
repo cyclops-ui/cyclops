@@ -12,7 +12,7 @@ interface Props {
 }
 
 const StatefulSet = ({ name, namespace, workload }: Props) => {
-  const { fetchResource } = useModuleDetailsActions();
+  const { fetchResource, streamingDisabled } = useModuleDetailsActions();
 
   const [statefulSet, setStatefulSet] = useState({
     status: "",
@@ -48,7 +48,7 @@ const StatefulSet = ({ name, namespace, workload }: Props) => {
   }, [fetchStatefulSet]);
 
   function getPods() {
-    if (workload && isStreamingEnabled()) {
+    if (workload && !streamingDisabled) {
       return workload.pods;
     }
 

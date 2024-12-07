@@ -12,7 +12,7 @@ interface Props {
 }
 
 const Deployment = ({ name, namespace, workload }: Props) => {
-  const { fetchResource } = useModuleDetailsActions();
+  const { fetchResource, streamingDisabled } = useModuleDetailsActions();
 
   const [deployment, setDeployment] = useState({
     status: "",
@@ -47,7 +47,7 @@ const Deployment = ({ name, namespace, workload }: Props) => {
   }, [fetchDeployment]);
 
   function getPods() {
-    if (workload && isStreamingEnabled()) {
+    if (workload && !streamingDisabled) {
       return workload.pods;
     }
 
