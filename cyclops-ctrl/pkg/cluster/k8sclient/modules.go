@@ -537,6 +537,7 @@ func (k *KubernetesClient) getPods(deployment appsv1.Deployment) ([]dto.Pod, err
 			Node:       item.Spec.NodeName,
 			PodPhase:   string(item.Status.Phase),
 			Started:    item.Status.StartTime,
+			ReplicaSet: getReplicaSetOwner(&item),
 		})
 	}
 
@@ -839,6 +840,16 @@ func containerStatus(status apiv1.ContainerStatus) dto.ContainerStatus {
 		Status:  "running",
 		Running: true,
 	}
+}
+
+func getReplicaSetOwner(pod *apiv1.Pod) string {
+	for _, reference := range pod.OwnerReferences {
+		if reference.Kind == "ReplicaSet" {
+			return reference.Name
+		}
+	}
+
+	return ""
 }
 
 func getDeploymentStatus(deployment *appsv1.Deployment) string {

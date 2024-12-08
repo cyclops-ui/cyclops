@@ -19,15 +19,16 @@ type Resource interface {
 }
 
 type Deployment struct {
-	Group     string `json:"group"`
-	Version   string `json:"version"`
-	Kind      string `json:"kind"`
-	Name      string `json:"name"`
-	Namespace string `json:"namespace"`
-	Replicas  int    `json:"replicas"`
-	Pods      []Pod  `json:"pods"`
-	Status    string `json:"status"`
-	Deleted   bool   `json:"deleted"`
+	Group            string `json:"group"`
+	Version          string `json:"version"`
+	Kind             string `json:"kind"`
+	Name             string `json:"name"`
+	Namespace        string `json:"namespace"`
+	Replicas         int    `json:"replicas"`
+	Pods             []Pod  `json:"pods"`
+	Status           string `json:"status"`
+	Deleted          bool   `json:"deleted"`
+	ActiveReplicaSet string `json:"activeReplicaSet"`
 }
 
 func (d *Deployment) GetGroupVersionKind() string {
@@ -222,6 +223,7 @@ type Pod struct {
 	Status         bool         `json:"status"`
 	Started        *metav1.Time `json:"started"`
 	Deleted        bool         `json:"deleted"`
+	ReplicaSet     string       `json:"replicaSet"`
 }
 
 func (p *Pod) GetGroupVersionKind() string {

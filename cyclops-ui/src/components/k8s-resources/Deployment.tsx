@@ -1,9 +1,10 @@
-import React, { useCallback, useEffect, useState } from "react";
-import { Col, Divider, Row, Alert } from "antd";
+import { Alert, Col, Divider, Row } from "antd";
 import axios from "axios";
+import { useCallback, useEffect, useState } from "react";
+import { isStreamingEnabled } from "../../utils/api/common";
 import { mapResponseError } from "../../utils/api/errors";
 import PodTable from "./common/PodTable/PodTable";
-import { isStreamingEnabled } from "../../utils/api/common";
+import ReplicaSetProgress from "./common/ReplicaSetProgress";
 
 interface Props {
   name: string;
@@ -15,6 +16,8 @@ const Deployment = ({ name, namespace, workload }: Props) => {
   const [deployment, setDeployment] = useState({
     status: "",
     pods: [],
+    replicas: 0,
+    activeReplicaSet: "",
   });
   const [error, setError] = useState({
     message: "",
@@ -43,10 +46,6 @@ const Deployment = ({ name, namespace, workload }: Props) => {
   useEffect(() => {
     fetchDeployment();
 
-    if (isStreamingEnabled()) {
-      return;
-    }
-
     const interval = setInterval(() => fetchDeployment(), 15000);
     return () => {
       clearInterval(interval);
@@ -70,6 +69,8 @@ const Deployment = ({ name, namespace, workload }: Props) => {
 
     return 0;
   }
+
+  const { pods, replicas, activeReplicaSet } = deployment;
 
   return (
     <div>
@@ -97,6 +98,13 @@ const Deployment = ({ name, namespace, workload }: Props) => {
           Replicas: {getPodsLength()}
         </Divider>
         <Col span={24} style={{ overflowX: "auto" }}>
+          {replicas && activeReplicaSet && (
+            <ReplicaSetProgress
+              pods={pods}
+              replicas={replicas}
+              activeReplicaSet={activeReplicaSet}
+            />
+          )}
           <PodTable
             namespace={namespace}
             pods={getPods()}
