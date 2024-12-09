@@ -95,15 +95,23 @@ const PodLogs = ({ pod }: PodLogsProps) => {
           label: "(init container) " + container.name,
           children: (
             <Col>
-              <Button
-                type="primary"
-                // icon={<DownloadOutlined />}
-                onClick={downloadLogs(container.name)}
-                disabled={logs.length === 0}
-              >
-                Download
-              </Button>
-              <Divider style={{ marginTop: "16px", marginBottom: "16px" }} />
+              {downloadPodLogs ? (
+                <div>
+                  <Button
+                    type="primary"
+                    icon={<DownloadOutlined />}
+                    onClick={downloadLogs(container.name)}
+                    disabled={logs.length === 0}
+                  >
+                    Download
+                  </Button>
+                  <Divider
+                    style={{ marginTop: "16px", marginBottom: "16px" }}
+                  />
+                </div>
+              ) : (
+                <></>
+              )}
               <ReactAce
                 style={{ width: "100%" }}
                 mode={"sass"}
@@ -172,17 +180,6 @@ const PodLogs = ({ pod }: PodLogsProps) => {
 
   const downloadLogs = (container: string) => {
     return () => downloadPodLogs(logsModal.namespace, logsModal.pod, container);
-    // downloadPodLogs(logsModal.namespace, logsModal.pod, container)
-    // return function () {
-    //   window.location.href =
-    //     "/api/resources/pods/" +
-    //     logsModal.namespace +
-    //     "/" +
-    //     logsModal.pod +
-    //     "/" +
-    //     container +
-    //     "/logs/download";
-    // };
   };
 
   return (
