@@ -2,7 +2,7 @@ import React, { useCallback, useEffect, useState } from "react";
 import { Divider, Row, Alert, Descriptions } from "antd";
 import ReactAce from "react-ace";
 import { mapResponseError } from "../../utils/api/errors";
-import { useModuleDetailsActions } from "../shared/ModuleResourceDetails/ModuleDetailsActionsContext";
+import { useResourceListActions } from "./ResourceList/ResourceListActionsContext";
 
 interface Props {
   name: string;
@@ -10,7 +10,7 @@ interface Props {
 }
 
 const ConfigMap = ({ name, namespace }: Props) => {
-  const { fetchResource } = useModuleDetailsActions();
+  const { fetchResource } = useResourceListActions();
 
   const [configMap, setConfigMap] = useState({});
   const [error, setError] = useState({

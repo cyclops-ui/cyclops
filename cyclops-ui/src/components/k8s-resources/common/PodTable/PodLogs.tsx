@@ -5,7 +5,7 @@ import ReactAce from "react-ace/lib/ace";
 import { mapResponseError } from "../../../../utils/api/errors";
 import { logStream } from "../../../../utils/api/sse/logs";
 import "ace-builds/src-noconflict/ext-searchbox";
-import { useModuleDetailsActions } from "../../../shared/ModuleResourceDetails/ModuleDetailsActionsContext";
+import { useResourceListActions } from "../../ResourceList/ResourceListActionsContext";
 
 interface PodLogsProps {
   pod: any;
@@ -13,7 +13,7 @@ interface PodLogsProps {
 
 const PodLogs = ({ pod }: PodLogsProps) => {
   const { streamingDisabled, getPodLogs, downloadPodLogs, streamPodLogs } =
-    useModuleDetailsActions();
+    useResourceListActions();
   const [logs, setLogs] = useState<string[]>([]);
   const [logsModal, setLogsModal] = useState({
     on: false,

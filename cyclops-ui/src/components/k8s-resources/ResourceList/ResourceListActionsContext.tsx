@@ -1,14 +1,7 @@
 import React, { createContext, ReactNode, useContext } from "react";
 
-interface ModuleDetailsActionsContextType {
-  name: string;
+interface ResourceListActionsContextType {
   streamingDisabled: boolean;
-  fetchModule: (moduleName: string) => Promise<any>;
-  fetchModuleRawManifest: (moduleName: string) => Promise<string>;
-  fetchModuleRenderedManifest: (moduleName: string) => Promise<string>;
-  reconcileModule: (moduleName: string) => Promise<any>;
-  deleteModule: (moduleName: string) => Promise<any>;
-  fetchModuleResources: (moduleName: string) => Promise<any[]>;
   fetchResource: (
     group: string,
     version: string,
@@ -62,19 +55,12 @@ interface ModuleDetailsActionsContextType {
   ) => void;
 }
 
-const ModuleDetailsActionsContext = createContext<
-  ModuleDetailsActionsContextType | undefined
+const ResourceListActionsContext = createContext<
+  ResourceListActionsContextType | undefined
 >(undefined);
 
-interface ModuleDetailsActionsProviderProps {
-  name: string;
+interface ResourceListActionsProviderProps {
   streamingDisabled: boolean;
-  fetchModule: (moduleName: string) => Promise<any>;
-  fetchModuleRawManifest: (moduleName: string) => Promise<string>;
-  fetchModuleRenderedManifest: (moduleName: string) => Promise<string>;
-  reconcileModule: (moduleName: string) => Promise<any>;
-  deleteModule: (moduleName: string) => Promise<any>;
-  fetchModuleResources: (moduleName: string) => Promise<any[]>;
   fetchResource: (
     group: string,
     version: string,
@@ -129,17 +115,10 @@ interface ModuleDetailsActionsProviderProps {
   children: ReactNode;
 }
 
-export const ModuleDetailsActionsProvider: React.FC<
-  ModuleDetailsActionsProviderProps
+export const ResourceListActionsProvider: React.FC<
+  ResourceListActionsProviderProps
 > = ({
-  name,
   streamingDisabled,
-  fetchModule,
-  fetchModuleRawManifest,
-  fetchModuleRenderedManifest,
-  reconcileModule,
-  deleteModule,
-  fetchModuleResources,
   fetchResource,
   fetchResourceManifest,
   resourceStreamImplementation,
@@ -151,16 +130,9 @@ export const ModuleDetailsActionsProvider: React.FC<
   children,
 }) => {
   return (
-    <ModuleDetailsActionsContext.Provider
+    <ResourceListActionsContext.Provider
       value={{
-        name,
         streamingDisabled,
-        fetchModule,
-        fetchModuleRawManifest,
-        fetchModuleRenderedManifest,
-        reconcileModule,
-        deleteModule,
-        fetchModuleResources,
         fetchResource,
         fetchResourceManifest,
         resourceStreamImplementation,
@@ -172,15 +144,15 @@ export const ModuleDetailsActionsProvider: React.FC<
       }}
     >
       {children}
-    </ModuleDetailsActionsContext.Provider>
+    </ResourceListActionsContext.Provider>
   );
 };
 
-export const useModuleDetailsActions = (): ModuleDetailsActionsContextType => {
-  const context = useContext(ModuleDetailsActionsContext);
+export const useResourceListActions = (): ResourceListActionsContextType => {
+  const context = useContext(ResourceListActionsContext);
   if (!context) {
     throw new Error(
-      "useModuleDetailsActions must be used within a FetchFunctionsProvider",
+      "useResourceListActions must be used within a ResourceListActionsProvider",
     );
   }
   return context;

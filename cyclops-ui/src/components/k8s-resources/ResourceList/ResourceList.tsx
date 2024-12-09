@@ -46,7 +46,7 @@ import Title from "antd/es/typography/Title";
 import { mapResponseError } from "../../../utils/api/errors";
 import { CheckboxChangeEvent } from "antd/es/checkbox";
 import { Workload } from "../../../utils/k8s/workload";
-import { useModuleDetailsActions } from "../../shared/ModuleResourceDetails/ModuleDetailsActionsContext";
+import { useResourceListActions } from "./ResourceListActionsContext";
 
 interface Props {
   loadResources: boolean;
@@ -66,7 +66,7 @@ const ResourceList = ({
     fetchResourceManifest,
     restartResource,
     deleteResource,
-  } = useModuleDetailsActions();
+  } = useResourceListActions();
 
   const [error, setError] = useState({
     message: "",
