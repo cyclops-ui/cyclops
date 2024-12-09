@@ -162,6 +162,7 @@ const PodLogs = ({ pod }: PodLogsProps) => {
           }
         },
         controller,
+        streamPodLogs,
       );
     } else {
       getPodLogs(logsModal.namespace, logsModal.pod, container)
