@@ -217,7 +217,7 @@ export const HelmReleaseDetails = ({
     }
 
     fetchRelease();
-  }, [releaseNamespace, releaseName]);
+  }, [getRelease, releaseNamespace, releaseName]);
 
   const fetchReleaseResources = useCallback(() => {
     fetchHelmReleaseResources(releaseNamespace, releaseName)
@@ -230,7 +230,7 @@ export const HelmReleaseDetails = ({
         setLoadResources(true);
         setError(mapResponseError(error));
       });
-  }, [releaseNamespace, releaseName]);
+  }, [fetchHelmReleaseResources, releaseNamespace, releaseName]);
 
   useEffect(() => {
     fetchReleaseResources();
@@ -258,7 +258,7 @@ export const HelmReleaseDetails = ({
         resourceStreamImplementation,
       );
     }
-  }, [releaseName]);
+  }, [releaseName, resourceStreamImplementation]);
 
   const resourceLoading = () => {
     if (!loadModule) {

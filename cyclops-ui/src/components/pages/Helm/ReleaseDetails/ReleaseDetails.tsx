@@ -5,7 +5,7 @@ import { useParams } from "react-router-dom";
 import "ace-builds/src-noconflict/mode-jsx";
 
 import { isStreamingEnabled } from "../../../../utils/api/common";
-import { HelmReleaseDetails } from "../../../shared/HelmReleaseDetails";
+import { HelmReleaseDetails } from "../../../shared";
 import {
   getHelmRelease,
   getHelmReleaseResources,
