@@ -2,7 +2,7 @@ import React, { useCallback, useEffect, useState } from "react";
 import { Col, Divider, Row, Table, Alert, Descriptions, Button } from "antd";
 import { mapResponseError } from "../../utils/api/errors";
 import { CopyOutlined } from "@ant-design/icons";
-import { useModuleDetailsActions } from "../shared/ModuleResourceDetails/ModuleDetailsActionsContext";
+import { useResourceListActions } from "./ResourceList/ResourceListActionsContext";
 
 interface Props {
   name: string;
@@ -28,7 +28,7 @@ interface service {
 }
 
 const Service = ({ name, namespace }: Props) => {
-  const { fetchResource } = useModuleDetailsActions();
+  const { fetchResource } = useResourceListActions();
 
   const [service, setService] = useState<service>({
     externalIPs: [],

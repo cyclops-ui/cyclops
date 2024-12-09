@@ -3,7 +3,7 @@ import { Col, Divider, Row, Alert } from "antd";
 import { mapResponseError } from "../../utils/api/errors";
 import PodTable from "./common/PodTable/PodTable";
 import { isStreamingEnabled } from "../../utils/api/common";
-import { useModuleDetailsActions } from "../shared/ModuleResourceDetails/ModuleDetailsActionsContext";
+import { useResourceListActions } from "./ResourceList/ResourceListActionsContext";
 
 interface Props {
   name: string;
@@ -12,7 +12,7 @@ interface Props {
 }
 
 const Deployment = ({ name, namespace, workload }: Props) => {
-  const { fetchResource, streamingDisabled } = useModuleDetailsActions();
+  const { fetchResource, streamingDisabled } = useResourceListActions();
 
   const [deployment, setDeployment] = useState({
     status: "",

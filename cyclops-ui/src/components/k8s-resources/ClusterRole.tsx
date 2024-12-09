@@ -1,7 +1,7 @@
 import React, { useCallback, useEffect, useState } from "react";
 import { Col, Divider, Row, Alert, Table, Tag } from "antd";
 import { mapResponseError } from "../../utils/api/errors";
-import { useModuleDetailsActions } from "../shared/ModuleResourceDetails/ModuleDetailsActionsContext";
+import { useResourceListActions } from "./ResourceList/ResourceListActionsContext";
 
 interface Props {
   name: string;
@@ -19,7 +19,7 @@ interface ClusterRoleData {
 }
 
 const ClusterRole = ({ name }: Props) => {
-  const { fetchResource } = useModuleDetailsActions();
+  const { fetchResource } = useResourceListActions();
 
   const [clusterRole, setClusterRole] = useState<ClusterRoleData>({
     rules: [],
