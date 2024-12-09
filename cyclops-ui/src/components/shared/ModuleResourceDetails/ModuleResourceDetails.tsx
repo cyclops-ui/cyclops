@@ -102,6 +102,7 @@ export interface ModuleResourceDetailsProps {
   fetchModuleRenderedManifest: (moduleName: string) => Promise<string>;
   reconcileModule: (moduleName: string) => Promise<any>;
   deleteModule: (moduleName: string) => Promise<any>;
+  onDeleteModuleSuccess: (moduleName: string) => void;
   fetchModuleResources: (moduleName: string) => Promise<any[]>;
   fetchResource: (
     group: string,
@@ -166,6 +167,7 @@ export const ModuleResourceDetails = ({
   fetchModuleRenderedManifest,
   reconcileModule,
   deleteModule,
+  onDeleteModuleSuccess,
   fetchModuleResources,
   fetchResource,
   fetchResourceManifest,
@@ -294,8 +296,7 @@ export const ModuleResourceDetails = ({
   const deleteDeployment = () => {
     deleteModule(name)
       .then(() => {
-        // TODO: turn into function
-        // window.location.href = "/modules";
+        onDeleteModuleSuccess(name);
       })
       .catch((error) => {
         setLoading(false);
