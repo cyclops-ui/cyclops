@@ -1,7 +1,7 @@
-import axios from "axios";
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { mapResponseError } from "../../utils/api/errors";
 import { Alert, Descriptions, Divider } from "antd";
+import { useResourceListActions } from "./ResourceList/ResourceListActionsContext";
 
 interface Props {
   name: string;
@@ -14,6 +14,8 @@ interface secret {
 }
 
 const Secret = ({ name, namespace }: Props) => {
+  const { fetchResource } = useResourceListActions();
+
   const [secret, setSecret] = useState<secret>({
     type: "",
     dataKeys: [],
@@ -23,35 +25,26 @@ const Secret = ({ name, namespace }: Props) => {
     description: "",
   });
 
-  useEffect(() => {
-    function fetchSecret() {
-      axios
-        .get(`/api/resources`, {
-          params: {
-            group: ``,
-            version: `v1`,
-            kind: `Secret`,
-            name: name,
-            namespace: namespace,
-          },
-        })
-        .then((res) => {
-          setSecret({
-            type: res.data.type,
-            dataKeys: res.data.dataKeys,
-          });
-        })
-        .catch((error) => {
-          setError(mapResponseError(error));
+  const fetchSecret = useCallback(() => {
+    fetchResource("", "v1", "Secret", namespace, name)()
+      .then((res) => {
+        setSecret({
+          type: res.type,
+          dataKeys: res.dataKeys,
         });
-    }
+      })
+      .catch((error) => {
+        setError(mapResponseError(error));
+      });
+  }, [name, namespace, fetchResource]);
 
+  useEffect(() => {
     fetchSecret();
     const interval = setInterval(() => fetchSecret(), 15000);
     return () => {
       clearInterval(interval);
     };
-  }, [name, namespace]);
+  }, [fetchSecret]);
 
   return (
     <div>

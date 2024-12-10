@@ -1,0 +1,1 @@
+export { ModuleResourceDetails } from "./ModuleResourceDetails";

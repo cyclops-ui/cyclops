@@ -7,7 +7,7 @@ const NewModule = React.lazy(
   () => import("../components/pages/NewModule/NewModule"),
 );
 const ModuleDetails = React.lazy(
-  () => import("../components/pages/ModuleDetails"),
+  () => import("../components/pages/ModuleDetails/ModuleDetails"),
 );
 const EditModule = React.lazy(
   () => import("../components/pages/EditModule/EditModule"),

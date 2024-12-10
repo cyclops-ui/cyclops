@@ -55,7 +55,26 @@ export function resourceStream(
   }).catch((r) => console.error(r));
 }
 
-export function resourcesStream(path: string, setResource: (r: any) => void) {
+export function resourcesStream(
+  path: string,
+  setResource: (r: any) => void,
+  resourceStreamImplementation?: (
+    path: string,
+    setResource: (r: any) => void,
+  ) => void,
+) {
+  if (
+    resourceStreamImplementation === undefined ||
+    resourceStreamImplementation === null
+  ) {
+    defaultResourcesStream(path, setResource);
+    return;
+  }
+
+  resourceStreamImplementation(path, setResource);
+}
+
+function defaultResourcesStream(path: string, setResource: (r: any) => void) {
   if (!path) {
     return;
   }
@@ -63,7 +82,7 @@ export function resourcesStream(path: string, setResource: (r: any) => void) {
   let maxRetries = 5;
   let retryCounter = 1;
 
-  fetchEventSource(path, {
+  fetchEventSource(`/api/${path}`, {
     method: "GET",
     onmessage(ev) {
       setResource(JSON.parse(ev.data));

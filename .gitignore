@@ -2,3 +2,5 @@
 .DS_Store
 
 dist/
+cyclops-ui/src/**/*.js.map
+cyclops-ui/src/**/*.js

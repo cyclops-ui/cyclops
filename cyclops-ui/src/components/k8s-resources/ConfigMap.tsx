@@ -1,8 +1,8 @@
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { Divider, Row, Alert, Descriptions } from "antd";
-import axios from "axios";
 import ReactAce from "react-ace";
 import { mapResponseError } from "../../utils/api/errors";
+import { useResourceListActions } from "./ResourceList/ResourceListActionsContext";
 
 interface Props {
   name: string;
@@ -10,38 +10,31 @@ interface Props {
 }
 
 const ConfigMap = ({ name, namespace }: Props) => {
+  const { fetchResource } = useResourceListActions();
+
   const [configMap, setConfigMap] = useState({});
   const [error, setError] = useState({
     message: "",
     description: "",
   });
 
-  useEffect(() => {
-    function fetchConfigMap() {
-      axios
-        .get(`/api/resources`, {
-          params: {
-            group: ``,
-            version: `v1`,
-            kind: `ConfigMap`,
-            name: name,
-            namespace: namespace,
-          },
-        })
-        .then((res) => {
-          setConfigMap(res.data);
-        })
-        .catch((error) => {
-          setError(mapResponseError(error));
-        });
-    }
+  const fetchConfigMap = useCallback(() => {
+    fetchResource("", "v1", "ConfigMap", namespace, name)()
+      .then((res) => {
+        setConfigMap(res);
+      })
+      .catch((error) => {
+        setError(mapResponseError(error));
+      });
+  }, [name, namespace, fetchResource]);
 
+  useEffect(() => {
     fetchConfigMap();
     const interval = setInterval(() => fetchConfigMap(), 15000);
     return () => {
       clearInterval(interval);
     };
-  }, [name, namespace]);
+  }, [fetchConfigMap]);
 
   const configMapData = (configMap: any) => {
     if (configMap.data) {

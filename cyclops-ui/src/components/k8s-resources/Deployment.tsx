@@ -1,9 +1,9 @@
 import React, { useCallback, useEffect, useState } from "react";
 import { Col, Divider, Row, Alert } from "antd";
-import axios from "axios";
 import { mapResponseError } from "../../utils/api/errors";
 import PodTable from "./common/PodTable/PodTable";
 import { isStreamingEnabled } from "../../utils/api/common";
+import { useResourceListActions } from "./ResourceList/ResourceListActionsContext";
 
 interface Props {
   name: string;
@@ -12,6 +12,8 @@ interface Props {
 }
 
 const Deployment = ({ name, namespace, workload }: Props) => {
+  const { fetchResource, streamingDisabled } = useResourceListActions();
+
   const [deployment, setDeployment] = useState({
     status: "",
     pods: [],
@@ -22,23 +24,14 @@ const Deployment = ({ name, namespace, workload }: Props) => {
   });
 
   const fetchDeployment = useCallback(() => {
-    axios
-      .get(`/api/resources`, {
-        params: {
-          group: `apps`,
-          version: `v1`,
-          kind: `Deployment`,
-          name: name,
-          namespace: namespace,
-        },
-      })
+    fetchResource("apps", "v1", "Deployment", namespace, name)()
       .then((res) => {
-        setDeployment(res.data);
+        setDeployment(res);
       })
       .catch((error) => {
         setError(mapResponseError(error));
       });
-  }, [name, namespace]);
+  }, [name, namespace, fetchResource]);
 
   useEffect(() => {
     fetchDeployment();
@@ -54,7 +47,7 @@ const Deployment = ({ name, namespace, workload }: Props) => {
   }, [fetchDeployment]);
 
   function getPods() {
-    if (workload && isStreamingEnabled()) {
+    if (workload && !streamingDisabled) {
       return workload.pods;
     }
 

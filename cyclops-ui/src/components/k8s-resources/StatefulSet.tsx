@@ -1,9 +1,9 @@
 import React, { useCallback, useEffect, useState } from "react";
 import { Col, Divider, Row, Alert } from "antd";
-import axios from "axios";
 import { mapResponseError } from "../../utils/api/errors";
 import PodTable from "./common/PodTable/PodTable";
 import { isStreamingEnabled } from "../../utils/api/common";
+import { useResourceListActions } from "./ResourceList/ResourceListActionsContext";
 
 interface Props {
   name: string;
@@ -12,6 +12,8 @@ interface Props {
 }
 
 const StatefulSet = ({ name, namespace, workload }: Props) => {
+  const { fetchResource, streamingDisabled } = useResourceListActions();
+
   const [statefulSet, setStatefulSet] = useState({
     status: "",
     pods: [],
@@ -23,23 +25,14 @@ const StatefulSet = ({ name, namespace, workload }: Props) => {
   });
 
   const fetchStatefulSet = useCallback(() => {
-    axios
-      .get(`/api/resources`, {
-        params: {
-          group: `apps`,
-          version: `v1`,
-          kind: `StatefulSet`,
-          name: name,
-          namespace: namespace,
-        },
-      })
+    fetchResource("apps", "v1", "StatefulSet", namespace, name)()
       .then((res) => {
-        setStatefulSet(res.data);
+        setStatefulSet(res);
       })
       .catch((error) => {
         setError(mapResponseError(error));
       });
-  }, [name, namespace]);
+  }, [name, namespace, fetchResource]);
 
   useEffect(() => {
     fetchStatefulSet();
@@ -55,7 +48,7 @@ const StatefulSet = ({ name, namespace, workload }: Props) => {
   }, [fetchStatefulSet]);
 
   function getPods() {
-    if (workload && isStreamingEnabled()) {
+    if (workload && !streamingDisabled) {
       return workload.pods;
     }
 

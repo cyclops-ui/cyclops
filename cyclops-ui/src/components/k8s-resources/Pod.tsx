@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import {
   Button,
   Col,
@@ -11,11 +11,12 @@ import {
   Modal,
   TabsProps,
 } from "antd";
-import axios from "axios";
-// import { DownloadOutlined } from "@ant-design/icons";
 import ReactAce from "react-ace";
 import { formatPodAge } from "../../utils/pods";
 import { mapResponseError } from "../../utils/api/errors";
+import { logStream } from "../../utils/api/sse/logs";
+import { DownloadOutlined } from "@ant-design/icons";
+import { useResourceListActions } from "./ResourceList/ResourceListActionsContext";
 const { Title } = Typography;
 
 interface Props {
@@ -44,6 +45,15 @@ interface logsModal {
 }
 
 const Pod = ({ name, namespace }: Props) => {
+  const {
+    streamingDisabled,
+    fetchResource,
+    getPodLogs,
+    downloadPodLogs,
+    streamPodLogs,
+  } = useResourceListActions();
+  const logsSignalControllerRef = useRef<AbortController | null>(null);
+
   const [pod, setPod] = useState<pod>({
     status: "",
     containers: [],
@@ -61,34 +71,25 @@ const Pod = ({ name, namespace }: Props) => {
     containers: [],
     initContainers: [],
   });
-  const [logs, setLogs] = useState("");
+  const [logs, setLogs] = useState<string[]>([]);
+
+  const fetchPod = useCallback(() => {
+    fetchResource("", "v1", "Pod", namespace, name)()
+      .then((res) => {
+        setPod(res);
+      })
+      .catch((error) => {
+        setError(mapResponseError(error));
+      });
+  }, [name, namespace, fetchResource]);
 
   useEffect(() => {
-    function fetchPod() {
-      axios
-        .get(`/api/resources`, {
-          params: {
-            group: ``,
-            version: `v1`,
-            kind: `Pod`,
-            name: name,
-            namespace: namespace,
-          },
-        })
-        .then((res) => {
-          setPod(res.data);
-        })
-        .catch((error) => {
-          setError(mapResponseError(error));
-        });
-    }
-
     fetchPod();
     const interval = setInterval(() => fetchPod(), 15000);
     return () => {
       clearInterval(interval);
     };
-  }, [name, namespace]);
+  }, [fetchPod]);
 
   const handleCancelLogs = () => {
     setLogsModal({
@@ -96,20 +97,11 @@ const Pod = ({ name, namespace }: Props) => {
       containers: [],
       initContainers: [],
     });
-    setLogs("");
+    setLogs([]);
   };
 
   const downloadLogs = (container: string) => {
-    return function () {
-      window.location.href =
-        "/api/resources/pods/" +
-        namespace +
-        "/" +
-        name +
-        "/" +
-        container +
-        "/logs/download";
-    };
+    return () => downloadPodLogs(namespace, name, container);
   };
 
   const getTabItems = () => {
@@ -124,18 +116,29 @@ const Pod = ({ name, namespace }: Props) => {
           label: container.name,
           children: (
             <Col>
-              <Button
-                type="primary"
-                // icon={<DownloadOutlined />}
-                onClick={downloadLogs(container.name)}
-              >
-                Download
-              </Button>
-              <Divider style={{ marginTop: "16px", marginBottom: "16px" }} />
+              {downloadPodLogs ? (
+                <div>
+                  <Button
+                    type="primary"
+                    icon={<DownloadOutlined />}
+                    onClick={downloadLogs(container.name)}
+                    disabled={logs.length === 0}
+                  >
+                    Download
+                  </Button>
+                  <Divider
+                    style={{ marginTop: "16px", marginBottom: "16px" }}
+                  />
+                </div>
+              ) : (
+                <></>
+              )}
               <ReactAce
                 style={{ width: "100%" }}
                 mode={"sass"}
-                value={logs}
+                value={
+                  logs.length === 0 ? "No logs available" : logs.join("\n")
+                }
                 readOnly={true}
               />
             </Col>
@@ -151,18 +154,29 @@ const Pod = ({ name, namespace }: Props) => {
           label: "(init container) " + container.name,
           children: (
             <Col>
-              <Button
-                type="primary"
-                // icon={<DownloadOutlined />}
-                onClick={downloadLogs(container.name)}
-              >
-                Download
-              </Button>
-              <Divider style={{ marginTop: "16px", marginBottom: "16px" }} />
+              {downloadPodLogs ? (
+                <div>
+                  <Button
+                    type="primary"
+                    icon={<DownloadOutlined />}
+                    onClick={downloadLogs(container.name)}
+                    disabled={logs.length === 0}
+                  >
+                    Download
+                  </Button>
+                  <Divider
+                    style={{ marginTop: "16px", marginBottom: "16px" }}
+                  />
+                </div>
+              ) : (
+                <></>
+              )}
               <ReactAce
                 style={{ width: "100%" }}
                 mode={"sass"}
-                value={logs}
+                value={
+                  logs.length === 0 ? "No logs available" : logs.join("\n")
+                }
                 readOnly={true}
               />
             </Col>
@@ -175,31 +189,52 @@ const Pod = ({ name, namespace }: Props) => {
   };
 
   const onLogsTabsChange = (container: string) => {
-    axios
-      .get(
-        "/api/resources/pods/" +
-          namespace +
-          "/" +
-          pod +
-          "/" +
-          container +
-          "/logs",
-      )
-      .then((res) => {
-        if (res.data) {
-          let log = "";
-          res.data.forEach((s: string) => {
-            log += s;
-            log += "\n";
-          });
-          setLogs(log);
-        } else {
-          setLogs("No logs available");
-        }
-      })
-      .catch((error) => {
-        setError(mapResponseError(error));
-      });
+    const controller = new AbortController();
+    if (logsSignalControllerRef.current !== null) {
+      logsSignalControllerRef.current.abort();
+    }
+    logsSignalControllerRef.current = controller; // store the controller to be able to abort the request
+    setLogs(() => []);
+
+    if (!streamingDisabled) {
+      logStream(
+        namespace,
+        name,
+        container,
+        (log, isReset = false) => {
+          if (isReset) {
+            setLogs(() => []);
+          } else {
+            setLogs((prevLogs) => {
+              return [...prevLogs, log];
+            });
+          }
+        },
+        (err, isReset = false) => {
+          if (isReset) {
+            setError({
+              message: "",
+              description: "",
+            });
+          } else {
+            setError(mapResponseError(err));
+          }
+        },
+        controller,
+      );
+    } else {
+      getPodLogs(namespace, name, container)
+        .then((res) => {
+          if (res) {
+            setLogs(res);
+          } else {
+            setLogs(() => []);
+          }
+        })
+        .catch((error) => {
+          setError(mapResponseError(error));
+        });
+    }
   };
 
   return (
@@ -252,31 +287,50 @@ const Pod = ({ name, namespace }: Props) => {
         <Col style={{ float: "right" }}>
           <Button
             onClick={function () {
-              axios
-                .get(
-                  "/api/resources/pods/" +
-                    namespace +
-                    "/" +
-                    name +
-                    "/" +
-                    pod.containers[0].name +
-                    "/logs",
-                )
-                .then((res) => {
-                  if (res.data) {
-                    let log = "";
-                    res.data.forEach((s: string) => {
-                      log += s;
-                      log += "\n";
-                    });
-                    setLogs(log);
-                  } else {
-                    setLogs("No logs available");
-                  }
-                })
-                .catch((error) => {
-                  setError(mapResponseError(error));
-                });
+              if (!streamingDisabled) {
+                const controller = new AbortController();
+                logsSignalControllerRef.current = controller; // store the controller to be able to abort the request
+
+                logStream(
+                  namespace,
+                  name,
+                  pod.containers[0].name,
+                  (log, isReset = false) => {
+                    if (isReset) {
+                      setLogs(() => []);
+                    } else {
+                      setLogs((prevLogs) => {
+                        return [...prevLogs, log];
+                      });
+                    }
+                  },
+                  (err, isReset = false) => {
+                    if (isReset) {
+                      setError({
+                        message: "",
+                        description: "",
+                      });
+                    } else {
+                      setError(mapResponseError(err));
+                    }
+                  },
+                  controller,
+                  streamPodLogs,
+                );
+              } else {
+                getPodLogs(namespace, name, pod.containers[0].name)
+                  .then((res) => {
+                    if (res) {
+                      setLogs(res);
+                    } else {
+                      setLogs(() => []);
+                    }
+                  })
+                  .catch((error) => {
+                    setError(mapResponseError(error));
+                  });
+              }
+
               setLogsModal({
                 on: true,
                 containers: pod.containers,
