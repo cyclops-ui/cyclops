@@ -29,6 +29,9 @@ const ReleaseDetails = () => {
       streamingDisabled={!isStreamingEnabled()}
       getRelease={getHelmRelease}
       uninstallRelease={uninstallHelmRelease}
+      onUninstallReleaseSuccess={() => {
+        window.location.href = "/helm/releases";
+      }}
       fetchHelmReleaseResources={getHelmReleaseResources}
       fetchResource={fetchResource}
       fetchResourceManifest={fetchResourceManifest}
