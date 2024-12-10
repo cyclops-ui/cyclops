@@ -14,9 +14,9 @@ import {
 import ReactAce from "react-ace";
 import { formatPodAge } from "../../utils/pods";
 import { mapResponseError } from "../../utils/api/errors";
-import { useModuleDetailsActions } from "../shared/ModuleResourceDetails/ModuleDetailsActionsContext";
 import { logStream } from "../../utils/api/sse/logs";
 import { DownloadOutlined } from "@ant-design/icons";
+import { useResourceListActions } from "./ResourceList/ResourceListActionsContext";
 const { Title } = Typography;
 
 interface Props {
@@ -51,7 +51,7 @@ const Pod = ({ name, namespace }: Props) => {
     getPodLogs,
     downloadPodLogs,
     streamPodLogs,
-  } = useModuleDetailsActions();
+  } = useResourceListActions();
   const logsSignalControllerRef = useRef<AbortController | null>(null);
 
   const [pod, setPod] = useState<pod>({
