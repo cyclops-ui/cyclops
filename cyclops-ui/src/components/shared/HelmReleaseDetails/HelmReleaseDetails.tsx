@@ -405,7 +405,10 @@ export const HelmReleaseDetails = ({
           loadResources={loadResources}
           resources={resources}
           workloads={workloads}
-          onResourceDelete={function () {}}
+          onResourceDelete={() => {
+            setLoadResources(false);
+            fetchReleaseResources();
+          }}
         />
       </ResourceListActionsProvider>
       {/*<Modal*/}
