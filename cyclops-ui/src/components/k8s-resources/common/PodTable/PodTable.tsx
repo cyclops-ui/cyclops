@@ -16,7 +16,7 @@ import { mapResponseError } from "../../../../utils/api/errors";
 import { formatPodAge } from "../../../../utils/pods";
 import PodLogs from "./PodLogs";
 import PodManifest from "./PodManifest";
-import { useModuleDetailsActions } from "../../../shared/ModuleResourceDetails/ModuleDetailsActionsContext";
+import { useResourceListActions } from "../../ResourceList/ResourceListActionsContext";
 
 interface Props {
   namespace: string;
@@ -33,7 +33,7 @@ interface Pod {
 }
 
 const PodTable = ({ pods, namespace, updateResourceData }: Props) => {
-  const { deleteResource } = useModuleDetailsActions();
+  const { deleteResource } = useResourceListActions();
   const [deletePodRef, setDeletePodRef] = useState<{
     on: boolean;
     podDetails: Pod;
@@ -72,8 +72,8 @@ const PodTable = ({ pods, namespace, updateResourceData }: Props) => {
         deletePodRef.podDetails.group,
         deletePodRef.podDetails.version,
         deletePodRef.podDetails.kind,
-        deletePodRef.podDetails.name,
         deletePodRef.podDetails.namespace,
+        deletePodRef.podDetails.name,
       );
 
       updateResourceData();

@@ -21,8 +21,8 @@ export async function reconcileModule(moduleName: string) {
   return await axios.post(`/api/modules/${moduleName}/reconcile`);
 }
 
-export async function deleteModule() {
-  return Promise.resolve();
+export async function deleteModule(moduleName: string) {
+  return await axios.delete(`/api/modules/${moduleName}`);
 }
 
 export async function fetchModuleResources(moduleName: string) {
@@ -34,8 +34,8 @@ export async function deleteResource(
   group: string,
   version: string,
   kind: string,
-  name: string,
   namespace: string,
+  name: string,
 ): Promise<boolean> {
   const resp = await axios.delete(`/api/resources`, {
     data: {
@@ -53,8 +53,8 @@ export function fetchResource(
   group: string,
   version: string,
   kind: string,
-  name: string,
   namespace: string,
+  name: string,
 ) {
   return async () => {
     const resp = await axios.get(`/api/resources`, {
@@ -95,8 +95,8 @@ export async function restartResource(
   group: string,
   version: string,
   kind: string,
-  name: string,
   namespace: string,
+  name: string,
 ): Promise<any> {
   const resp = await axios.post(
     `/api/resources/restart?group=${group}&version=${version}&kind=${kind}&name=${name}&namespace=${namespace}`,

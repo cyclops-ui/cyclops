@@ -2,7 +2,7 @@ import React, { useCallback, useEffect, useState } from "react";
 import { Col, Divider, Row, Alert, Spin } from "antd";
 import { mapResponseError } from "../../utils/api/errors";
 import PodTable from "./common/PodTable/PodTable";
-import { useModuleDetailsActions } from "../shared/ModuleResourceDetails/ModuleDetailsActionsContext";
+import { useResourceListActions } from "./ResourceList/ResourceListActionsContext";
 
 interface Props {
   name: string;
@@ -10,7 +10,7 @@ interface Props {
 }
 
 const CronJob = ({ name, namespace }: Props) => {
-  const { fetchResource } = useModuleDetailsActions();
+  const { fetchResource } = useResourceListActions();
 
   const [loading, setLoading] = useState(true);
 
@@ -25,7 +25,7 @@ const CronJob = ({ name, namespace }: Props) => {
   });
 
   const fetchCronJob = useCallback(() => {
-    fetchResource("batch", "v1", "CronJob", name, namespace)()
+    fetchResource("batch", "v1", "CronJob", namespace, name)()
       .then((res) => {
         setCronjob(res);
         setLoading(false);

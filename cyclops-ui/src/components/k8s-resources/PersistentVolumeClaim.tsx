@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { mapResponseError } from "../../utils/api/errors";
 import { Alert, Descriptions, Divider, Spin } from "antd";
-import { useModuleDetailsActions } from "../shared/ModuleResourceDetails/ModuleDetailsActionsContext";
+import { useResourceListActions } from "./ResourceList/ResourceListActionsContext";
 
 interface Props {
   name: string;
@@ -14,7 +14,7 @@ interface pvc {
 }
 
 const PersistentVolumeClaim = ({ name, namespace }: Props) => {
-  const { fetchResource } = useModuleDetailsActions();
+  const { fetchResource } = useResourceListActions();
 
   const [loading, setLoading] = useState(true);
   const [pvc, setPvc] = useState<pvc>({
@@ -27,7 +27,7 @@ const PersistentVolumeClaim = ({ name, namespace }: Props) => {
   });
 
   const fetchPersistentVolumeClaim = useCallback(() => {
-    fetchResource("", "v1", "PersistentVolumeClaim", name, namespace)()
+    fetchResource("", "v1", "PersistentVolumeClaim", namespace, name)()
       .then((res) => {
         setPvc({
           size: res.size,

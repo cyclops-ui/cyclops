@@ -1,7 +1,7 @@
 import { Col, Divider, Row, Alert, Table, Tag, Spin } from "antd";
 import React, { useCallback, useEffect, useState } from "react";
 import { mapResponseError } from "../../utils/api/errors";
-import { useModuleDetailsActions } from "../shared/ModuleResourceDetails/ModuleDetailsActionsContext";
+import { useResourceListActions } from "./ResourceList/ResourceListActionsContext";
 
 interface Props {
   name: string;
@@ -19,8 +19,8 @@ interface ClusterRoleData {
 }
 
 const ClusterRole = ({ name }: Props) => {
-  const { fetchResource } = useModuleDetailsActions();
   const [loading, setLoading] = useState(true);
+  const { fetchResource } = useResourceListActions();
 
   const [clusterRole, setClusterRole] = useState<ClusterRoleData>({
     rules: [],
@@ -32,7 +32,7 @@ const ClusterRole = ({ name }: Props) => {
   });
 
   const fetchClusterRole = useCallback(() => {
-    fetchResource("rbac.authorization.k8s.io", "v1", "ClusterRole", name, "")()
+    fetchResource("rbac.authorization.k8s.io", "v1", "ClusterRole", "", name)()
       .then((res) => {
         setClusterRole({
           rules: res.rules || [],

@@ -30,21 +30,23 @@ import "./custom.css";
 import "ace-builds/src-noconflict/mode-jsx";
 import ReactAce from "react-ace";
 
+import { mapResponseError } from "../../../utils/api/errors";
+import ResourceList from "../../k8s-resources/ResourceList/ResourceList";
+import { Workload } from "../../../utils/k8s/workload";
+
 import {
   moduleTemplateReferenceView,
   templateRef,
 } from "../../../utils/templateRef";
-import { mapResponseError } from "../../../utils/api/errors";
 import YAML from "yaml";
+
 import { resourcesStream } from "../../../utils/api/sse/resources";
 import {
   isWorkload,
   ResourceRef,
   resourceRefKey,
 } from "../../../utils/resourceRef";
-import ResourceList from "../../k8s-resources/ResourceList/ResourceList";
-import { Workload } from "../../../utils/k8s/workload";
-import { ModuleDetailsActionsProvider } from "./ModuleDetailsActionsContext";
+import { ResourceListActionsProvider } from "../../k8s-resources/ResourceList/ResourceListActionsContext";
 
 const languages = [
   "javascript",
@@ -102,13 +104,14 @@ export interface ModuleResourceDetailsProps {
   fetchModuleRenderedManifest: (moduleName: string) => Promise<string>;
   reconcileModule: (moduleName: string) => Promise<any>;
   deleteModule: (moduleName: string) => Promise<any>;
+  onDeleteModuleSuccess: (moduleName: string) => void;
   fetchModuleResources: (moduleName: string) => Promise<any[]>;
   fetchResource: (
     group: string,
     version: string,
     kind: string,
-    name: string,
     namespace: string,
+    name: string,
   ) => () => Promise<any>;
   fetchResourceManifest: (
     group: string,
@@ -126,15 +129,15 @@ export interface ModuleResourceDetailsProps {
     group: string,
     version: string,
     kind: string,
-    name: string,
     namespace: string,
+    name: string,
   ) => Promise<any>;
   deleteResource: (
     group: string,
     version: string,
     kind: string,
-    name: string,
     namespace: string,
+    name: string,
   ) => Promise<any>;
   getPodLogs: (
     namespace: string,
@@ -147,8 +150,8 @@ export interface ModuleResourceDetailsProps {
     container: string,
   ) => void;
   streamPodLogs?: (
-    name: string,
     namespace: string,
+    name: string,
     container: string,
     setLog: (log: string, isReset?: boolean) => void,
     setError: (err: Error, isReset?: boolean) => void,
@@ -166,6 +169,7 @@ export const ModuleResourceDetails = ({
   fetchModuleRenderedManifest,
   reconcileModule,
   deleteModule,
+  onDeleteModuleSuccess,
   fetchModuleResources,
   fetchResource,
   fetchResourceManifest,
@@ -294,8 +298,7 @@ export const ModuleResourceDetails = ({
   const deleteDeployment = () => {
     deleteModule(name)
       .then(() => {
-        // TODO: turn into function
-        // window.location.href = "/modules";
+        onDeleteModuleSuccess(name);
       })
       .catch((error) => {
         setLoading(false);
@@ -616,15 +619,93 @@ export const ModuleResourceDetails = ({
 
   return (
     <div>
-      <ModuleDetailsActionsProvider
-        name={name}
+      {error.message.length !== 0 && (
+        <Alert
+          message={error.message}
+          description={error.description}
+          type="error"
+          closable
+          afterClose={() => {
+            setError({
+              message: "",
+              description: "",
+            });
+          }}
+          style={{ marginBottom: "20px" }}
+        />
+      )}
+      {moduleLoading()}
+      <Divider
+        style={{ fontSize: "120%" }}
+        orientationMargin="0"
+        orientation={"left"}
+      >
+        Actions
+      </Divider>
+      <Row gutter={[20, 0]}>
+        {onEditModule ? (
+          <Col>
+            <Button
+              onClick={() => {
+                onEditModule(name);
+              }}
+              block
+            >
+              <EditOutlined />
+              Edit
+            </Button>
+          </Col>
+        ) : (
+          <></>
+        )}
+        <Col>
+          <Button
+            onClick={submitReconcileModule}
+            block
+            loading={loadingReconciliation}
+          >
+            <UndoOutlined />
+            Reconcile
+          </Button>
+        </Col>
+        {onRollbackModule ? (
+          <Col>
+            <Button onClick={() => onRollbackModule(name)} block>
+              <BookOutlined />
+              Rollback
+            </Button>
+          </Col>
+        ) : (
+          <></>
+        )}
+        <Col>
+          <Button onClick={handleViewRawModuleManifest} block>
+            <FileTextOutlined />
+            Module manifest
+          </Button>
+        </Col>
+        <Col>
+          <Button onClick={handleViewRenderedManifest} block>
+            <FileTextOutlined />
+            Rendered manifest
+          </Button>
+        </Col>
+        <Col>
+          <Button
+            onClick={function () {
+              setLoading(true);
+            }}
+            danger
+            block
+            loading={loading}
+          >
+            <DeleteOutlined />
+            Delete
+          </Button>
+        </Col>
+      </Row>
+      <ResourceListActionsProvider
         streamingDisabled={streamingDisabled}
-        fetchModule={fetchModule}
-        fetchModuleRawManifest={fetchModuleRawManifest}
-        fetchModuleRenderedManifest={fetchModuleRenderedManifest}
-        reconcileModule={reconcileModule}
-        deleteModule={deleteModule}
-        fetchModuleResources={fetchModuleResources}
         fetchResource={fetchResource}
         fetchResourceManifest={fetchResourceManifest}
         resourceStreamImplementation={resourceStreamImplementation}
@@ -634,151 +715,66 @@ export const ModuleResourceDetails = ({
         downloadPodLogs={downloadPodLogs}
         streamPodLogs={streamPodLogs}
       >
-        {error.message.length !== 0 && (
-          <Alert
-            message={error.message}
-            description={error.description}
-            type="error"
-            closable
-            afterClose={() => {
-              setError({
-                message: "",
-                description: "",
-              });
-            }}
-            style={{ marginBottom: "20px" }}
-          />
-        )}
-        {moduleLoading()}
-        <Divider
-          style={{ fontSize: "120%" }}
-          orientationMargin="0"
-          orientation={"left"}
-        >
-          Actions
-        </Divider>
-        <Row gutter={[20, 0]}>
-          {onEditModule ? (
-            <Col>
-              <Button
-                onClick={() => {
-                  onEditModule(name);
-                }}
-                block
-              >
-                <EditOutlined />
-                Edit
-              </Button>
-            </Col>
-          ) : (
-            <></>
-          )}
-          <Col>
-            <Button
-              onClick={submitReconcileModule}
-              block
-              loading={loadingReconciliation}
-            >
-              <UndoOutlined />
-              Reconcile
-            </Button>
-          </Col>
-          {onRollbackModule ? (
-            <Col>
-              <Button onClick={() => onRollbackModule(name)} block>
-                <BookOutlined />
-                Rollback
-              </Button>
-            </Col>
-          ) : (
-            <></>
-          )}
-          <Col>
-            <Button onClick={handleViewRawModuleManifest} block>
-              <FileTextOutlined />
-              Module manifest
-            </Button>
-          </Col>
-          <Col>
-            <Button onClick={handleViewRenderedManifest} block>
-              <FileTextOutlined />
-              Rendered manifest
-            </Button>
-          </Col>
-          <Col>
-            <Button
-              onClick={function () {
-                setLoading(true);
-              }}
-              danger
-              block
-              loading={loading}
-            >
-              <DeleteOutlined />
-              Delete
-            </Button>
-          </Col>
-        </Row>
         <ResourceList
           loadResources={loadResources}
           resources={resources}
           workloads={workloads}
           onResourceDelete={() => {}}
         />
-        <Modal
-          title={
-            <>
-              Delete module <span style={{ color: "red" }}>{name}</span>
-            </>
-          }
-          open={loading}
-          onCancel={handleCancel}
-          width={"40%"}
-          footer={
-            <Button
-              danger
-              block
-              disabled={deleteName !== name}
-              onClick={deleteDeployment}
-            >
-              Delete
-            </Button>
-          }
-        >
-          <Divider
-            style={{ fontSize: "120%" }}
-            orientationMargin="0"
-            orientation={"left"}
+      </ResourceListActionsProvider>
+      <Modal
+        title={
+          <>
+            Delete module <span style={{ color: "red" }}>{name}</span>
+          </>
+        }
+        open={loading}
+        onCancel={handleCancel}
+        width={"40%"}
+        footer={
+          <Button
+            danger
+            block
+            disabled={deleteName !== name}
+            onClick={deleteDeployment}
           >
-            Child resources
-          </Divider>
-          {getResourcesToDelete()}
-          <Divider style={{ fontSize: "120%" }} orientationMargin="0" />
-          In order to delete this module and related resources, type the name of
-          the module in the box below
-          <Input placeholder={name} required onChange={changeDeleteName} />
-        </Modal>
-        <Modal
-          title="Module manifest"
-          open={viewRawManifest}
-          onOk={() => setViewRawManifest(false)}
-          onCancel={() => setViewRawManifest(false)}
-          cancelButtonProps={{ style: { display: "none" } }}
-          width={"70%"}
+            Delete
+          </Button>
+        }
+      >
+        <Divider
+          style={{ fontSize: "120%" }}
+          orientationMargin="0"
+          orientation={"left"}
         >
-          {moduleManifestContent(rawModuleManifest, loadingRawManifest)}
-        </Modal>
-        <Modal
-          title="Rendered manifest"
-          open={viewRenderedManifest}
-          onOk={() => setViewRenderedManifest(false)}
-          onCancel={() => setViewRenderedManifest(false)}
-          cancelButtonProps={{ style: { display: "none" } }}
-          width={"70%"}
-        >
-          {moduleManifestContent(renderedManifest, loadingRenderedManifest)}
-        </Modal>
-      </ModuleDetailsActionsProvider>
+          Child resources
+        </Divider>
+        {getResourcesToDelete()}
+        <Divider style={{ fontSize: "120%" }} orientationMargin="0" />
+        In order to delete this module and related resources, type the name of
+        the module in the box below
+        <Input placeholder={name} required onChange={changeDeleteName} />
+      </Modal>
+      <Modal
+        title="Module manifest"
+        open={viewRawManifest}
+        onOk={() => setViewRawManifest(false)}
+        onCancel={() => setViewRawManifest(false)}
+        cancelButtonProps={{ style: { display: "none" } }}
+        width={"70%"}
+      >
+        {moduleManifestContent(rawModuleManifest, loadingRawManifest)}
+      </Modal>
+      <Modal
+        title="Rendered manifest"
+        open={viewRenderedManifest}
+        onOk={() => setViewRenderedManifest(false)}
+        onCancel={() => setViewRenderedManifest(false)}
+        cancelButtonProps={{ style: { display: "none" } }}
+        width={"70%"}
+      >
+        {moduleManifestContent(renderedManifest, loadingRenderedManifest)}
+      </Modal>
     </div>
   );
 };

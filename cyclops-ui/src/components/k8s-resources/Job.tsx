@@ -2,7 +2,7 @@ import React, { useCallback, useEffect, useState } from "react";
 import { Col, Divider, Row, Alert, Spin } from "antd";
 import { mapResponseError } from "../../utils/api/errors";
 import PodTable from "./common/PodTable/PodTable";
-import { useModuleDetailsActions } from "../shared/ModuleResourceDetails/ModuleDetailsActionsContext";
+import { useResourceListActions } from "./ResourceList/ResourceListActionsContext";
 
 interface Props {
   name: string;
@@ -10,7 +10,7 @@ interface Props {
 }
 
 const Job = ({ name, namespace }: Props) => {
-  const { fetchResource } = useModuleDetailsActions();
+  const { fetchResource } = useResourceListActions();
 
   const [loading, setLoading] = useState(true);
   const [job, setJob] = useState({
@@ -24,7 +24,7 @@ const Job = ({ name, namespace }: Props) => {
   });
 
   const fetchJob = useCallback(() => {
-    fetchResource("batch", "v1", "Job", name, namespace)()
+    fetchResource("batch", "v1", "Job", namespace, name)()
       .then((res) => {
         setJob(res);
         setLoading(false);

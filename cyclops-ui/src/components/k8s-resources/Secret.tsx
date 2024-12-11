@@ -1,7 +1,7 @@
 import React, { useCallback, useEffect, useState } from "react";
 import { mapResponseError } from "../../utils/api/errors";
 import { Alert, Descriptions, Divider, Spin } from "antd";
-import { useModuleDetailsActions } from "../shared/ModuleResourceDetails/ModuleDetailsActionsContext";
+import { useResourceListActions } from "./ResourceList/ResourceListActionsContext";
 
 interface Props {
   name: string;
@@ -14,7 +14,7 @@ interface secret {
 }
 
 const Secret = ({ name, namespace }: Props) => {
-  const { fetchResource } = useModuleDetailsActions();
+  const { fetchResource } = useResourceListActions();
 
   const [loading, setLoading] = useState(true);
   const [secret, setSecret] = useState<secret>({
@@ -27,7 +27,7 @@ const Secret = ({ name, namespace }: Props) => {
   });
 
   const fetchSecret = useCallback(() => {
-    fetchResource("", "v1", "Secret", name, namespace)()
+    fetchResource("", "v1", "Secret", namespace, name)()
       .then((res) => {
         setSecret({
           type: res.type,

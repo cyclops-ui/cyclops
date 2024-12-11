@@ -3,14 +3,14 @@ import { Alert, Button, Checkbox, Modal, Tooltip } from "antd";
 import { CheckboxChangeEvent } from "antd/es/checkbox";
 import { useCallback, useEffect, useState } from "react";
 import ReactAce from "react-ace/lib/ace";
-import { useModuleDetailsActions } from "../../../shared/ModuleResourceDetails/ModuleDetailsActionsContext";
+import { useResourceListActions } from "../../ResourceList/ResourceListActionsContext";
 
 interface PodManifestProps {
   pod: any;
 }
 
 const PodManifest = ({ pod }: PodManifestProps) => {
-  const { fetchResourceManifest } = useModuleDetailsActions();
+  const { fetchResourceManifest } = useResourceListActions();
 
   const [manifest, setManifest] = useState("");
   const [showManagedFields, setShowManagedFields] = useState(false);

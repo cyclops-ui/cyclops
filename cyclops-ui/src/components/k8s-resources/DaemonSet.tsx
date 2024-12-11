@@ -3,7 +3,7 @@ import { Col, Divider, Row, Alert, Spin } from "antd";
 import { mapResponseError } from "../../utils/api/errors";
 import PodTable from "./common/PodTable/PodTable";
 import { isStreamingEnabled } from "../../utils/api/common";
-import { useModuleDetailsActions } from "../shared/ModuleResourceDetails/ModuleDetailsActionsContext";
+import { useResourceListActions } from "./ResourceList/ResourceListActionsContext";
 
 interface Props {
   name: string;
@@ -12,7 +12,7 @@ interface Props {
 }
 
 const DaemonSet = ({ name, namespace, workload }: Props) => {
-  const { fetchResource } = useModuleDetailsActions();
+  const { fetchResource, streamingDisabled } = useResourceListActions();
 
   const [loading, setLoading] = useState(true);
 
@@ -27,7 +27,7 @@ const DaemonSet = ({ name, namespace, workload }: Props) => {
   });
 
   const fetchDaemonSet = useCallback(() => {
-    fetchResource("apps", "v1", "DaemonSet", name, namespace)()
+    fetchResource("apps", "v1", "DaemonSet", namespace, name)()
       .then((res) => {
         setDaemonSet(res);
         setLoading(false);
@@ -52,7 +52,7 @@ const DaemonSet = ({ name, namespace, workload }: Props) => {
   }, [fetchDaemonSet]);
 
   function getPods() {
-    if (workload && isStreamingEnabled()) {
+    if (workload && !streamingDisabled) {
       return workload.pods;
     }
 

@@ -13,8 +13,8 @@ interface Props {
     group: string,
     version: string,
     kind: string,
-    name: string,
     namespace: string,
+    name: string,
   ) => Promise<boolean>;
 }
 
@@ -30,10 +30,10 @@ export const RestartButton = ({
     group: string,
     version: string,
     kind: string,
-    name: string,
     namespace: string,
+    name: string,
   ) => {
-    restartResource(group, version, kind, name, namespace)
+    restartResource(group, version, kind, namespace, name)
       .then(() => {
         notification.success({
           message: "Restart Successful",
@@ -53,7 +53,7 @@ export const RestartButton = ({
   return (
     <Button
       onClick={() => {
-        handleRestart(group, version, kind, name, namespace);
+        handleRestart(group, version, kind, namespace, name);
       }}
     >
       <UndoOutlined />

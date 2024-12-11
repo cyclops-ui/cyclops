@@ -29,13 +29,16 @@ const ModuleDetails = () => {
         fetchModuleRawManifest={fetchModuleRawManifest}
         fetchModuleRenderedManifest={fetchModuleRenderedManifest}
         reconcileModule={reconcileModule}
-        deleteModule={deleteModule}
         fetchModuleResources={fetchModuleResources}
         fetchResource={fetchResource}
         fetchResourceManifest={fetchResourceManifest}
         restartResource={restartResource}
         deleteResource={deleteResource}
         getPodLogs={getPodLogs}
+        deleteModule={deleteModule}
+        onDeleteModuleSuccess={() => {
+          window.location.href = "/modules";
+        }}
         downloadPodLogs={(
           namespace: string,
           podName: string,

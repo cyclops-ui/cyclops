@@ -2,7 +2,7 @@ import { Divider, Row, Alert, Descriptions, Spin } from "antd";
 import React, { useCallback, useEffect, useState } from "react";
 import ReactAce from "react-ace";
 import { mapResponseError } from "../../utils/api/errors";
-import { useModuleDetailsActions } from "../shared/ModuleResourceDetails/ModuleDetailsActionsContext";
+import { useResourceListActions } from "./ResourceList/ResourceListActionsContext";
 
 interface Props {
   name: string;
@@ -10,7 +10,7 @@ interface Props {
 }
 
 const ConfigMap = ({ name, namespace }: Props) => {
-  const { fetchResource } = useModuleDetailsActions();
+  const { fetchResource } = useResourceListActions();
 
   const [loading, setLoading] = useState(true);
 
@@ -21,7 +21,7 @@ const ConfigMap = ({ name, namespace }: Props) => {
   });
 
   const fetchConfigMap = useCallback(() => {
-    fetchResource("", "v1", "ConfigMap", name, namespace)()
+    fetchResource("", "v1", "ConfigMap", namespace, name)()
       .then((res) => {
         setConfigMap(res);
         setLoading(false);

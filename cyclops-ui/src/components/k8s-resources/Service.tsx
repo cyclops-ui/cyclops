@@ -11,7 +11,7 @@ import {
 } from "antd";
 import { mapResponseError } from "../../utils/api/errors";
 import { CopyOutlined } from "@ant-design/icons";
-import { useModuleDetailsActions } from "../shared/ModuleResourceDetails/ModuleDetailsActionsContext";
+import { useResourceListActions } from "./ResourceList/ResourceListActionsContext";
 
 interface Props {
   name: string;
@@ -37,7 +37,7 @@ interface service {
 }
 
 const Service = ({ name, namespace }: Props) => {
-  const { fetchResource } = useModuleDetailsActions();
+  const { fetchResource } = useResourceListActions();
 
   const [loading, setLoading] = useState(true);
   const [service, setService] = useState<service>({
@@ -51,7 +51,7 @@ const Service = ({ name, namespace }: Props) => {
   });
 
   const fetchService = useCallback(() => {
-    fetchResource("", "v1", "Service", name, namespace)()
+    fetchResource("", "v1", "Service", namespace, name)()
       .then((res) => {
         setService(res);
         setLoading(false);
