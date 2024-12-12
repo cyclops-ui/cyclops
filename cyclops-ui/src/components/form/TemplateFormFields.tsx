@@ -288,7 +288,7 @@ const TemplateFormFields = ({
   }
 
   return (
-    <div>
+    <div className={"module-form-fields"}>
       {mapFields(
         isModuleEdit,
         fields,

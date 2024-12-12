@@ -1,0 +1,22 @@
+.ant-col.ant-form-item-label {
+  padding: 0 !important;
+}
+
+label.ant-form-item-required:before {
+  bottom: 1em !important;
+  position: relative !important;
+}
+
+code {
+  color: #000080;
+}
+
+.custom {
+  .ant-collapse-content-box {
+    padding: 0;
+  }
+}
+
+.linkToTemplate:hover {
+  text-decoration: underline;
+}
