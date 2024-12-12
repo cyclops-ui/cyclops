@@ -5,6 +5,46 @@ export async function getModule(moduleName: string): Promise<any> {
   return response.data;
 }
 
+export async function getTemplate(
+  repo: string,
+  path: string,
+  version: string,
+  sourceType: string,
+): Promise<any> {
+  const resp = await axios.get(
+    `/api/templates?repo=` +
+      repo +
+      `&path=` +
+      path +
+      `&commit=` +
+      version +
+      `&sourceType=` +
+      sourceType,
+  );
+
+  return resp.data;
+}
+
+export async function getTemplateInitialValues(
+  repo: string,
+  path: string,
+  version: string,
+  sourceType: string,
+): Promise<any> {
+  const resp = await axios.get(
+    `/api/templates/initial?repo=` +
+      repo +
+      `&path=` +
+      path +
+      `&commit=` +
+      version +
+      `&sourceType=` +
+      sourceType,
+  );
+
+  return resp.data;
+}
+
 export async function fetchModuleRawManifest(
   moduleName: string,
 ): Promise<string> {
@@ -15,6 +55,18 @@ export async function fetchModuleRawManifest(
 export async function fetchModuleRenderedManifest(moduleName: string) {
   const resp = await axios.get(`/api/modules/${moduleName}/currentManifest`);
   return resp.data;
+}
+
+export async function updateModule(
+  moduleName: string,
+  templateRef: any,
+  values: any,
+) {
+  return await axios.post(`/api/modules/update`, {
+    name: moduleName,
+    template: templateRef,
+    values: values,
+  });
 }
 
 export async function reconcileModule(moduleName: string) {

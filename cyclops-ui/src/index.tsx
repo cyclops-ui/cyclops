@@ -18,4 +18,8 @@ root.render(
 // or send to an analytics endpoint. Learn more: https://bit.ly/CRA-vitals
 reportWebVitals();
 
-export { ModuleResourceDetails, HelmReleaseDetails } from "./components/shared";
+export {
+  ModuleResourceDetails,
+  EditModuleComponent,
+  HelmReleaseDetails,
+} from "./components/shared";

@@ -62,7 +62,7 @@ module.exports = {
   },
   plugins: [
     new MiniCssExtractPlugin({
-      filename: "[name].css",
+      filename: "[name].[contenthash].css",
     }),
     new webpack.DefinePlugin({
       "window.__RUNTIME_CONFIG__": JSON.stringify({

@@ -95,6 +95,10 @@ interface HelmReleaseDetailsProps {
     releaseNamespace: string,
     releaseName: string,
   ) => Promise<any>;
+  onUninstallReleaseSuccess: (
+    releaseNamespace: string,
+    releaseName: string,
+  ) => void;
   fetchHelmReleaseResources: (
     releaseNamespace: string,
     releaseName: string,
@@ -158,6 +162,7 @@ export const HelmReleaseDetails = ({
   streamingDisabled,
   getRelease,
   uninstallRelease,
+  onUninstallReleaseSuccess,
   fetchHelmReleaseResources,
   fetchResource,
   fetchResourceManifest,
@@ -318,7 +323,7 @@ export const HelmReleaseDetails = ({
   const handleUninstallRelease = () => {
     uninstallRelease(releaseNamespace, releaseName)
       .then(() => {
-        window.location.href = "/helm/releases";
+        onUninstallReleaseSuccess(releaseNamespace, releaseName);
       })
       .catch((error) => {
         setLoading(false);
@@ -400,7 +405,10 @@ export const HelmReleaseDetails = ({
           loadResources={loadResources}
           resources={resources}
           workloads={workloads}
-          onResourceDelete={function () {}}
+          onResourceDelete={() => {
+            setLoadResources(false);
+            fetchReleaseResources();
+          }}
         />
       </ResourceListActionsProvider>
       {/*<Modal*/}
