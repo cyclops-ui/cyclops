@@ -1,5 +1,14 @@
 import React, { useCallback, useEffect, useState } from "react";
-import { Col, Divider, Row, Table, Alert, Descriptions, Button } from "antd";
+import {
+  Col,
+  Divider,
+  Row,
+  Table,
+  Alert,
+  Descriptions,
+  Button,
+  Spin,
+} from "antd";
 import { mapResponseError } from "../../utils/api/errors";
 import { CopyOutlined } from "@ant-design/icons";
 import { useResourceListActions } from "./ResourceList/ResourceListActionsContext";
@@ -30,6 +39,7 @@ interface service {
 const Service = ({ name, namespace }: Props) => {
   const { fetchResource } = useResourceListActions();
 
+  const [loading, setLoading] = useState(true);
   const [service, setService] = useState<service>({
     externalIPs: [],
     ports: [],
@@ -44,9 +54,11 @@ const Service = ({ name, namespace }: Props) => {
     fetchResource("", "v1", "Service", namespace, name)()
       .then((res) => {
         setService(res);
+        setLoading(false);
       })
       .catch((error) => {
         setError(mapResponseError(error));
+        setLoading(false);
       });
   }, [name, namespace, fetchResource]);
 
@@ -162,6 +174,8 @@ const Service = ({ name, namespace }: Props) => {
       </Row>
     );
   };
+
+  if (loading) return <Spin size="large" style={{ marginTop: "20px" }} />;
 
   return (
     <div>

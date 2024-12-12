@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useState } from "react";
 import { mapResponseError } from "../../utils/api/errors";
-import { Alert, Descriptions, Divider } from "antd";
+import { Alert, Descriptions, Divider, Spin } from "antd";
 import { useResourceListActions } from "./ResourceList/ResourceListActionsContext";
 
 interface Props {
@@ -16,6 +16,7 @@ interface secret {
 const Secret = ({ name, namespace }: Props) => {
   const { fetchResource } = useResourceListActions();
 
+  const [loading, setLoading] = useState(true);
   const [secret, setSecret] = useState<secret>({
     type: "",
     dataKeys: [],
@@ -32,9 +33,11 @@ const Secret = ({ name, namespace }: Props) => {
           type: res.type,
           dataKeys: res.dataKeys,
         });
+        setLoading(false);
       })
       .catch((error) => {
         setError(mapResponseError(error));
+        setLoading(false);
       });
   }, [name, namespace, fetchResource]);
 
@@ -45,6 +48,8 @@ const Secret = ({ name, namespace }: Props) => {
       clearInterval(interval);
     };
   }, [fetchSecret]);
+
+  if (loading) return <Spin size="large" style={{ marginTop: "20px" }} />;
 
   return (
     <div>

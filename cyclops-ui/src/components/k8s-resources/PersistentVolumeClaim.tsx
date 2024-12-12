@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from "react";
 import { mapResponseError } from "../../utils/api/errors";
-import { Alert, Descriptions, Divider } from "antd";
+import { Alert, Descriptions, Divider, Spin } from "antd";
 import { useResourceListActions } from "./ResourceList/ResourceListActionsContext";
 
 interface Props {
@@ -16,6 +16,7 @@ interface pvc {
 const PersistentVolumeClaim = ({ name, namespace }: Props) => {
   const { fetchResource } = useResourceListActions();
 
+  const [loading, setLoading] = useState(true);
   const [pvc, setPvc] = useState<pvc>({
     size: "",
     accessModes: "",
@@ -32,9 +33,11 @@ const PersistentVolumeClaim = ({ name, namespace }: Props) => {
           size: res.size,
           accessModes: res.accessmodes.join(","),
         });
+        setLoading(false);
       })
       .catch((error) => {
         setError(mapResponseError(error));
+        setLoading(false);
       });
   }, [name, namespace, fetchResource]);
 
@@ -45,6 +48,8 @@ const PersistentVolumeClaim = ({ name, namespace }: Props) => {
       clearInterval(interval);
     };
   }, [fetchPersistentVolumeClaim]);
+
+  if (loading) return <Spin size="large" style={{ marginTop: "20px" }} />;
 
   return (
     <div>

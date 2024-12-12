@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useState } from "react";
-import { Col, Divider, Row, Alert } from "antd";
+import { Col, Divider, Row, Alert, Spin } from "antd";
 import { mapResponseError } from "../../utils/api/errors";
 import PodTable from "./common/PodTable/PodTable";
 import { useResourceListActions } from "./ResourceList/ResourceListActionsContext";
@@ -11,6 +11,8 @@ interface Props {
 
 const CronJob = ({ name, namespace }: Props) => {
   const { fetchResource } = useResourceListActions();
+
+  const [loading, setLoading] = useState(true);
 
   const [cronjob, setCronjob] = useState({
     status: "",
@@ -26,9 +28,11 @@ const CronJob = ({ name, namespace }: Props) => {
     fetchResource("batch", "v1", "CronJob", namespace, name)()
       .then((res) => {
         setCronjob(res);
+        setLoading(false);
       })
       .catch((error) => {
         setError(mapResponseError(error));
+        setLoading(false);
       });
   }, [name, namespace, fetchResource]);
 
@@ -39,6 +43,8 @@ const CronJob = ({ name, namespace }: Props) => {
       clearInterval(interval);
     };
   }, [fetchCronJob]);
+
+  if (loading) return <Spin size="large" style={{ marginTop: "20px" }} />;
 
   return (
     <div>
