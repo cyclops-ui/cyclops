@@ -21,6 +21,19 @@ const Blogs = () => {
         <Row gutter={[16, 16]}>
           <Col xs={{ span: 20, offset: 2 }} md={{ span: 6, offset: 3 }}>
             <Blog
+              title={"Minecraft on Kubernetes: A Dev Platform Example"}
+              description={
+                "Go on, tell your boss you are researching Dev Platforms and go get those diamonds..."
+              }
+              blogLink={
+                "https://cyclops-ui.com/blog/2024/12/12/minecraft"
+              }
+              avatar={"https://github.com/KaradzaJuraj.png"}
+              banner={"/img/2024-12-12-minecraft/cover.jpeg"}
+            />
+          </Col>
+          <Col xs={{ span: 20, offset: 2 }} md={{ span: 6, offset: 0 }}>
+            <Blog
               title={"Where GitOps Meets ClickOps"}
               description={
                 "In the DevOps landscape, two paradigms have emerged: GitOps and ClickOps, each offering ..."
@@ -43,19 +56,6 @@ const Blogs = () => {
               }
               avatar={"https://github.com/KaradzaJuraj.png"}
               banner={"/img/2024-11-22-launch-week-1/recap.png"}
-            />
-          </Col>
-          <Col xs={{ span: 20, offset: 2 }} md={{ span: 6, offset: 0 }}>
-            <Blog
-              title={"Custom AWS Cloud Platforms"}
-              description={
-                "But should we use Kubernetes as just a container orchestrator, or is there more to it..."
-              }
-              blogLink={
-                "https://cyclops-ui.com/blog/2024/10/31/custom-aws-cloud-platforms"
-              }
-              avatar={"https://github.com/petar-cvit.png"}
-              banner={"/img/2024-10-31-custom-aws-cloud-platforms/cover.jpeg"}
             />
           </Col>
         </Row>
