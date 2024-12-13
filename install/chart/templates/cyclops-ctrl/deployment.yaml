@@ -18,7 +18,7 @@ spec:
       serviceAccountName: cyclops-ctrl
       containers:
         - name: cyclops-ctrl
-          image: cyclopsui/cyclops-ctrl:v0.15.2
+          image: cyclopsui/cyclops-ctrl:v0.15.4
           ports:
             - containerPort: 8080
           env:

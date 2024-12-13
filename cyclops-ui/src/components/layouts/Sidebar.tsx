@@ -12,8 +12,9 @@ import {
 import { useLocation } from "react-router";
 import PathConstants from "../../routes/PathConstants";
 import { Link } from "react-router-dom";
-import styles from "./styles.module.css";
+import "./custom.css";
 import helmLogo from "../../static/img/helm_white.png";
+import cyclopsLogo from "../../static/img/cyclops_logo.png";
 
 const SideNav = () => {
   const location = useLocation().pathname.split("/")[1];
@@ -66,7 +67,7 @@ const SideNav = () => {
             display: "inline-flex",
           }}
         >
-          <img src={require("./cyclops_logo.png")} alt="Cyclops" />
+          <img src={cyclopsLogo} alt="Cyclops" />
         </div>
       </a>
       <Menu
@@ -108,10 +109,7 @@ const SideNav = () => {
           marginTop: "0",
         }}
       >
-        <Link
-          className={styles.taglink}
-          to={tagChangelogLink(window.__RUNTIME_CONFIG__.REACT_APP_VERSION)}
-        >
+        <Link className={"taglink"} to={tagChangelogLink("0.0.0")}>
           <GithubFilled /> {window.__RUNTIME_CONFIG__.REACT_APP_VERSION}
         </Link>
       </center>

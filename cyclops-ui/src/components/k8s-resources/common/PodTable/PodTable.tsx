@@ -11,13 +11,12 @@ import {
   Tag,
   Tooltip,
 } from "antd";
-import axios from "axios";
 import { useState } from "react";
 import { mapResponseError } from "../../../../utils/api/errors";
 import { formatPodAge } from "../../../../utils/pods";
 import PodLogs from "./PodLogs";
 import PodManifest from "./PodManifest";
-import styles from "./styles.module.css";
+import { useResourceListActions } from "../../ResourceList/ResourceListActionsContext";
 
 interface Props {
   namespace: string;
@@ -34,6 +33,7 @@ interface Pod {
 }
 
 const PodTable = ({ pods, namespace, updateResourceData }: Props) => {
+  const { deleteResource } = useResourceListActions();
   const [deletePodRef, setDeletePodRef] = useState<{
     on: boolean;
     podDetails: Pod;
@@ -68,15 +68,13 @@ const PodTable = ({ pods, namespace, updateResourceData }: Props) => {
 
   const handleDeletePodAction = async () => {
     try {
-      await axios.delete(`/api/resources`, {
-        data: {
-          group: deletePodRef.podDetails.group,
-          version: deletePodRef.podDetails.version,
-          kind: deletePodRef.podDetails.kind,
-          name: deletePodRef.podDetails.name,
-          namespace: deletePodRef.podDetails.namespace,
-        },
-      });
+      await deleteResource(
+        deletePodRef.podDetails.group,
+        deletePodRef.podDetails.version,
+        deletePodRef.podDetails.kind,
+        deletePodRef.podDetails.namespace,
+        deletePodRef.podDetails.name,
+      );
 
       updateResourceData();
 
@@ -195,7 +193,7 @@ const PodTable = ({ pods, namespace, updateResourceData }: Props) => {
           title="Actions"
           key="actions"
           width="8%"
-          className={styles.actionsmenucol}
+          // className={styles.actionsmenucol}
           render={(pod) => (
             <Popover
               placement={"topRight"}
@@ -208,7 +206,9 @@ const PodTable = ({ pods, namespace, updateResourceData }: Props) => {
                   justifyContent: "center",
                 }}
               >
-                <EllipsisOutlined className={styles.actionsmenu} />
+                <EllipsisOutlined
+                // className={styles.actionsmenu}
+                />
               </div>
             </Popover>
           )}

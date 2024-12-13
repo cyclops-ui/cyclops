@@ -28,6 +28,12 @@
   padding-top: 20px;
 }
 
+.devhunt {
+  width: 20%;
+  padding-bottom: 24px;
+  padding-top: 24px;
+}
+
 .readTheDocs {
   margin-left: 5px;
   backdrop-filter: blur(3px);
@@ -76,6 +82,10 @@
 
   .cyclopsDesc {
     font-size: 18px;
+  }
+
+  .devhunt {
+    width: 60%
   }
 }
 

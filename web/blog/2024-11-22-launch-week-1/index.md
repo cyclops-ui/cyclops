@@ -3,7 +3,7 @@ title: "Cyclops Launch Week #1"
 authors: [jurajk]
 ---
 
-![launch-week-teaser](../../static/img/2024-11-22-launch-week-1/launch-week-5.png)
+![launch-week-teaser](../../static/img/2024-11-22-launch-week-1/recap.png)
 
 **Cyclops is having its very first launch week, starting on November 25th!**
 
