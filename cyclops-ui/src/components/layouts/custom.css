@@ -1,0 +1,19 @@
+.taglink {
+  color: #fff;
+}
+
+.taglink:hover {
+  color: #fe8801;
+}
+
+.discordlink {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  color: #fff;
+}
+
+.discordlink:hover {
+  color: #7289da;
+}
