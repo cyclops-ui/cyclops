@@ -12,9 +12,15 @@ import {
   Modal,
   Spin,
   notification,
+  Switch,
 } from "antd";
 import axios from "axios";
-import { deepMerge, findMaps, flattenObjectKeys, mapsToArray } from "../../../utils/form";
+import {
+  deepMerge,
+  findMaps,
+  flattenObjectKeys,
+  mapsToArray,
+} from "../../../utils/form";
 import "./custom.css";
 import defaultTemplate from "../../../static/img/default-template-icon.png";
 
@@ -85,6 +91,8 @@ const NewModule = () => {
 
   const [namespaces, setNamespaces] = useState<string[]>([]);
 
+  const [gitopsToggle, SetGitopsToggle] = useState(false);
+
   const [notificationApi, contextHolder] = notification.useNotification();
   const openNotification = (errors: FeedbackError[]) => {
     notificationApi.error({
@@ -111,6 +119,11 @@ const NewModule = () => {
   const handleSubmit = (values: any) => {
     const moduleName = values["cyclops_module_name"];
     const moduleNamespace = values["cyclops_module_namespace"];
+    const gitopsConfig = {
+      repo: values["gitops-repo"],
+      path: values["gitops-path"],
+      branch: values["gitops-branch"],
+    };
 
     values = findMaps(config.root.properties, values, initialValuesRaw);
 
@@ -118,6 +131,7 @@ const NewModule = () => {
       .post(`/api/modules/new`, {
         name: moduleName,
         namespace: moduleNamespace,
+        gitops: gitopsConfig,
         values: values,
         template: {
           repo: template.repo,
@@ -310,8 +324,8 @@ const NewModule = () => {
   const handleImportValues = () => {
     let yamlValues = null;
     try {
-      yamlValues = YAML.parse(loadedValues)
-    } catch(err: any) {
+      yamlValues = YAML.parse(loadedValues);
+    } catch (err: any) {
       if (err instanceof YAMLError) {
         setError({
           message: err.name,
@@ -327,15 +341,17 @@ const NewModule = () => {
       return;
     }
 
-    const currentValues = findMaps(config.root.properties, form.getFieldsValue(), null);
-    const values = deepMerge(currentValues, yamlValues)
-
-    form.setFieldsValue(
-      mapsToArray(config.root.properties, values),
+    const currentValues = findMaps(
+      config.root.properties,
+      form.getFieldsValue(),
+      null,
     );
+    const values = deepMerge(currentValues, yamlValues);
+
+    form.setFieldsValue(mapsToArray(config.root.properties, values));
     setLoadedValues("");
     setLoadingValuesModal(false);
-    setError({message: "", description: ""});
+    setError({ message: "", description: "" });
   };
 
   const onFinishFailed = (errors: any) => {
@@ -527,6 +543,74 @@ const NewModule = () => {
                     </Select>
                   </Form.Item>
                 </div>
+                <div style={{ display: advancedOptionsExpanded ? "" : "none" }}>
+                  <Divider
+                    style={{ marginTop: "12px", marginBottom: "12px" }}
+                  />
+                  <Form.Item
+                    name="gitops"
+                    id="gitops"
+                    label={
+                      <div>
+                        GitOps Workflow
+                        <p style={{ color: "#8b8e91", marginBottom: "0px" }}>
+                          Will you be using a GitOps workflow to deploy this
+                          module?
+                        </p>
+                      </div>
+                    }
+                    style={{ padding: "0px 12px 0px 12px" }}
+                  >
+                    <Switch
+                      onChange={() => {
+                        SetGitopsToggle(!gitopsToggle);
+                      }}
+                    />
+                  </Form.Item>
+                  <div style={{ display: gitopsToggle ? "" : "none" }}>
+                    <Form.Item
+                      label="Repository URL"
+                      name="gitops-repo"
+                      rules={[
+                        {
+                          required: gitopsToggle ? true : false,
+                          message: "Repo URL is required",
+                        },
+                      ]}
+                      style={{ padding: "0px 12px 0px 12px" }}
+                    >
+                      <Input />
+                    </Form.Item>
+
+                    <Form.Item
+                      label="Path"
+                      name="gitops-path"
+                      rules={[
+                        {
+                          required: gitopsToggle ? true : false,
+                          message: "Path is required",
+                        },
+                      ]}
+                      style={{ padding: "0px 12px 0px 12px" }}
+                    >
+                      <Input />
+                    </Form.Item>
+
+                    <Form.Item
+                      label="Branch"
+                      name="gitops-branch"
+                      rules={[
+                        {
+                          required: gitopsToggle ? true : false,
+                          message: "Path is required",
+                        },
+                      ]}
+                      style={{ padding: "0px 12px 0px 12px" }}
+                    >
+                      <Input />
+                    </Form.Item>
+                  </div>
+                </div>
                 <div className={"expandadvanced"} onClick={toggleExpand}>
                   {advancedOptionsExpanded ? (
                     <div>
@@ -612,9 +696,13 @@ const NewModule = () => {
             style={{ marginBottom: "20px" }}
           />
         )}
-        <div style={{paddingRight: "16px", paddingBottom: "16px", color: "#777"}}>
-          You can paste your values in YAML format here, and after submitting them, you can see them in the form and edit them further.
-          If you set a value in YAML that does not exist in the UI, it will not be applied to your Module.
+        <div
+          style={{ paddingRight: "16px", paddingBottom: "16px", color: "#777" }}
+        >
+          You can paste your values in YAML format here, and after submitting
+          them, you can see them in the form and edit them further. If you set a
+          value in YAML that does not exist in the UI, it will not be applied to
+          your Module.
         </div>
         <AceEditor
           mode={"yaml"}
