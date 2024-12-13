@@ -96,7 +96,7 @@ const SideNav = () => {
         }}
       >
         <Link
-          className={styles.discordlink}
+          className={"discordlink"}
           to={"https://discord.com/invite/8ErnK3qDb3"}
         >
           <DiscordOutlined style={{ fontSize: "20px" }} /> Join Discord
@@ -109,7 +109,10 @@ const SideNav = () => {
           marginTop: "0",
         }}
       >
-        <Link className={"taglink"} to={tagChangelogLink("0.0.0")}>
+        <Link
+          className={"taglink"}
+          to={tagChangelogLink(window.__RUNTIME_CONFIG__.REACT_APP_VERSION)}
+        >
           <GithubFilled /> {window.__RUNTIME_CONFIG__.REACT_APP_VERSION}
         </Link>
       </center>
