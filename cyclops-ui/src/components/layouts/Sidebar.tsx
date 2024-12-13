@@ -96,7 +96,7 @@ const SideNav = () => {
       >
         <Link
           className={styles.discordlink}
-          to={tagChangelogLink(window.__RUNTIME_CONFIG__.REACT_APP_VERSION)}
+          to={"https://discord.com/invite/8ErnK3qDb3"}
         >
           <DiscordOutlined style={{ fontSize: "20px" }} /> Join Discord
         </Link>
