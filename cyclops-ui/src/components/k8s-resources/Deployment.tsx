@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState, useRef } from "react";
+import { useCallback, useEffect, useState, useRef } from "react";
 import {
   Col,
   Divider,
@@ -10,13 +10,12 @@ import {
   Tabs,
   Modal,
 } from "antd";
-import axios from "axios";
 import { mapResponseError } from "../../utils/api/errors";
 import PodTable from "./common/PodTable/PodTable";
 import { isStreamingEnabled } from "../../utils/api/common";
 import { logStream } from "../../utils/api/sse/logs";
 import ReactAce from "react-ace/lib/ace";
-import { ReadOutlined } from "@ant-design/icons";
+import { DownloadOutlined, ReadOutlined } from "@ant-design/icons";
 import { useResourceListActions } from "./ResourceList/ResourceListActionsContext";
 
 interface Props {
@@ -122,6 +121,8 @@ export const Deployment = ({ name, namespace, workload }: Props) => {
 };
 
 export const DeploymentLogsButton = ({ name, namespace, workload }: Props) => {
+  const { streamingDisabled, getPodLogs, downloadPodLogs, streamPodLogs } =
+    useResourceListActions();
   const [logs, setLogs] = useState<string[]>([]);
   const [logsModal, setLogsModal] = useState({
     on: false,
@@ -162,15 +163,23 @@ export const DeploymentLogsButton = ({ name, namespace, workload }: Props) => {
           label: container.name,
           children: (
             <Col>
-              <Button
-                type="primary"
-                // icon={<DownloadOutlined />}
-                onClick={downloadLogs(container.name)}
-                disabled={logs.length === 0}
-              >
-                Download
-              </Button>
-              <Divider style={{ marginTop: "16px", marginBottom: "16px" }} />
+              {downloadPodLogs ? (
+                <div>
+                  <Button
+                    type="primary"
+                    icon={<DownloadOutlined />}
+                    onClick={downloadLogs(container.name)}
+                    disabled={logs.length === 0}
+                  >
+                    Download
+                  </Button>
+                  <Divider
+                    style={{ marginTop: "16px", marginBottom: "16px" }}
+                  />
+                </div>
+              ) : (
+                <></>
+              )}
               <ReactAce
                 style={{ width: "100%" }}
                 mode={"sass"}
@@ -192,15 +201,23 @@ export const DeploymentLogsButton = ({ name, namespace, workload }: Props) => {
           label: "(init container) " + container.name,
           children: (
             <Col>
-              <Button
-                type="primary"
-                // icon={<DownloadOutlined />}
-                onClick={downloadLogs(container.name)}
-                disabled={logs.length === 0}
-              >
-                Download
-              </Button>
-              <Divider style={{ marginTop: "16px", marginBottom: "16px" }} />
+              {downloadPodLogs ? (
+                <div>
+                  <Button
+                    type="primary"
+                    icon={<DownloadOutlined />}
+                    onClick={downloadLogs(container.name)}
+                    disabled={logs.length === 0}
+                  >
+                    Download
+                  </Button>
+                  <Divider
+                    style={{ marginTop: "16px", marginBottom: "16px" }}
+                  />
+                </div>
+              ) : (
+                <></>
+              )}
               <ReactAce
                 style={{ width: "100%" }}
                 mode={"sass"}
@@ -226,10 +243,10 @@ export const DeploymentLogsButton = ({ name, namespace, workload }: Props) => {
     logsSignalControllerRef.current = controller; // store the controller to be able to abort the request
     setLogs(() => []);
 
-    if (isStreamingEnabled()) {
+    if (!streamingDisabled) {
       logStream(
-        name,
         namespace,
+        name,
         workload.pods[0].containers[0].name,
         (log, isReset = false) => {
           if (isReset) {
@@ -251,21 +268,13 @@ export const DeploymentLogsButton = ({ name, namespace, workload }: Props) => {
           }
         },
         controller,
+        streamPodLogs,
       );
     } else {
-      axios
-        .get(
-          "/api/resources/deployments/" +
-            namespace +
-            "/" +
-            name +
-            "/" +
-            workload.pods[0].containers[0].name +
-            "/logs",
-        )
+      getPodLogs(namespace, name, workload.pods[0].containers[0].name)
         .then((res) => {
-          if (res.data) {
-            setLogs(res.data);
+          if (res) {
+            setLogs(res);
           } else {
             setLogs(() => []);
           }
@@ -277,16 +286,7 @@ export const DeploymentLogsButton = ({ name, namespace, workload }: Props) => {
   };
 
   const downloadLogs = (container: string) => {
-    return function () {
-      window.location.href =
-        "/api/resources/pods/" +
-        namespace +
-        "/" +
-        workload.pods[0].name +
-        "/" +
-        container +
-        "/logs/download";
-    };
+    return () => downloadPodLogs(namespace, workload.pods[0].name, container);
   };
 
   return (
@@ -294,13 +294,13 @@ export const DeploymentLogsButton = ({ name, namespace, workload }: Props) => {
       <Button
         style={{ width: "100%" }}
         onClick={function () {
-          if (isStreamingEnabled()) {
+          if (!streamingDisabled) {
             const controller = new AbortController();
             logsSignalControllerRef.current = controller; // store the controller to be able to abort the request
 
             logStream(
-              workload.pods[0].name,
               namespace,
+              workload.pods[0].name,
               workload.pods[0].containers[0].name,
               (log, isReset = false) => {
                 if (isReset) {
@@ -322,21 +322,13 @@ export const DeploymentLogsButton = ({ name, namespace, workload }: Props) => {
                 }
               },
               controller,
+              streamPodLogs,
             );
           } else {
-            axios
-              .get(
-                "/api/resources/deployments/" +
-                  namespace +
-                  "/" +
-                  name +
-                  "/" +
-                  workload.pods[0].containers[0].name +
-                  "/logs",
-              )
+            getPodLogs(namespace, name, workload.pods[0].containers[0].name)
               .then((res) => {
-                if (res.data) {
-                  setLogs(res.data);
+                if (res) {
+                  setLogs(res);
                 } else {
                   setLogs(() => []);
                 }
