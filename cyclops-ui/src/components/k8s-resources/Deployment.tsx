@@ -1,5 +1,15 @@
 import React, { useCallback, useEffect, useState, useRef } from "react";
-import { Col, Divider, Row, Alert, TabsProps, Button, Tabs, Modal } from "antd";
+import {
+  Col,
+  Divider,
+  Row,
+  Alert,
+  Spin,
+  TabsProps,
+  Button,
+  Tabs,
+  Modal,
+} from "antd";
 import axios from "axios";
 import { mapResponseError } from "../../utils/api/errors";
 import PodTable from "./common/PodTable/PodTable";
@@ -7,6 +17,7 @@ import { isStreamingEnabled } from "../../utils/api/common";
 import { logStream } from "../../utils/api/sse/logs";
 import ReactAce from "react-ace/lib/ace";
 import { ReadOutlined } from "@ant-design/icons";
+import { useResourceListActions } from "./ResourceList/ResourceListActionsContext";
 
 interface Props {
   name: string;
@@ -15,6 +26,10 @@ interface Props {
 }
 
 export const Deployment = ({ name, namespace, workload }: Props) => {
+  const { fetchResource, streamingDisabled } = useResourceListActions();
+
+  const [loading, setLoading] = useState(true);
+
   const [deployment, setDeployment] = useState({
     status: "",
     pods: [],
@@ -25,23 +40,16 @@ export const Deployment = ({ name, namespace, workload }: Props) => {
   });
 
   const fetchDeployment = useCallback(() => {
-    axios
-      .get(`/api/resources`, {
-        params: {
-          group: `apps`,
-          version: `v1`,
-          kind: `Deployment`,
-          name: name,
-          namespace: namespace,
-        },
-      })
+    fetchResource("apps", "v1", "Deployment", namespace, name)()
       .then((res) => {
-        setDeployment(res.data);
+        setDeployment(res);
+        setLoading(false);
       })
       .catch((error) => {
         setError(mapResponseError(error));
+        setLoading(false);
       });
-  }, [name, namespace]);
+  }, [name, namespace, fetchResource]);
 
   useEffect(() => {
     fetchDeployment();
@@ -57,7 +65,7 @@ export const Deployment = ({ name, namespace, workload }: Props) => {
   }, [fetchDeployment]);
 
   function getPods() {
-    if (workload && isStreamingEnabled()) {
+    if (workload && !streamingDisabled) {
       return workload.pods;
     }
 
@@ -73,6 +81,8 @@ export const Deployment = ({ name, namespace, workload }: Props) => {
 
     return 0;
   }
+
+  if (loading) return <Spin size="large" style={{ marginTop: "20px" }} />;
 
   return (
     <div>

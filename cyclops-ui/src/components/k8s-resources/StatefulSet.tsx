@@ -1,5 +1,15 @@
 import React, { useCallback, useEffect, useRef, useState } from "react";
-import { Col, Divider, Row, Alert, TabsProps, Button, Modal, Tabs } from "antd";
+import {
+  Col,
+  Divider,
+  Row,
+  Alert,
+  Spin,
+  TabsProps,
+  Button,
+  Modal,
+  Tabs,
+} from "antd";
 import axios from "axios";
 import { mapResponseError } from "../../utils/api/errors";
 import PodTable from "./common/PodTable/PodTable";
@@ -7,6 +17,7 @@ import { isStreamingEnabled } from "../../utils/api/common";
 import ReactAce from "react-ace/lib/ace";
 import { logStream } from "../../utils/api/sse/logs";
 import { ReadOutlined } from "@ant-design/icons";
+import { useResourceListActions } from "./ResourceList/ResourceListActionsContext";
 
 interface Props {
   name: string;
@@ -15,6 +26,9 @@ interface Props {
 }
 
 export const StatefulSet = ({ name, namespace, workload }: Props) => {
+  const { fetchResource, streamingDisabled } = useResourceListActions();
+
+  const [loading, setLoading] = useState(true);
   const [statefulSet, setStatefulSet] = useState({
     status: "",
     pods: [],
@@ -25,23 +39,16 @@ export const StatefulSet = ({ name, namespace, workload }: Props) => {
   });
 
   const fetchStatefulSet = useCallback(() => {
-    axios
-      .get(`/api/resources`, {
-        params: {
-          group: `apps`,
-          version: `v1`,
-          kind: `StatefulSet`,
-          name: name,
-          namespace: namespace,
-        },
-      })
+    fetchResource("apps", "v1", "StatefulSet", namespace, name)()
       .then((res) => {
-        setStatefulSet(res.data);
+        setStatefulSet(res);
+        setLoading(false);
       })
       .catch((error) => {
         setError(mapResponseError(error));
+        setLoading(false);
       });
-  }, [name, namespace]);
+  }, [name, namespace, fetchResource]);
 
   useEffect(() => {
     fetchStatefulSet();
@@ -57,7 +64,7 @@ export const StatefulSet = ({ name, namespace, workload }: Props) => {
   }, [fetchStatefulSet]);
 
   function getPods() {
-    if (workload && isStreamingEnabled()) {
+    if (workload && !streamingDisabled) {
       return workload.pods;
     }
 
@@ -73,6 +80,8 @@ export const StatefulSet = ({ name, namespace, workload }: Props) => {
 
     return 0;
   }
+
+  if (loading) return <Spin size="large" style={{ marginTop: "20px" }} />;
 
   return (
     <div>

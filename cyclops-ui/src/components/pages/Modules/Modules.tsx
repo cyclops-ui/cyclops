@@ -18,7 +18,7 @@ import axios from "axios";
 
 import Link from "antd/lib/typography/Link";
 
-import styles from "./styles.module.css";
+import "./custom.css";
 import { PlusCircleOutlined, FilterOutlined } from "@ant-design/icons";
 import { mapResponseError } from "../../../utils/api/errors";
 
@@ -162,7 +162,7 @@ const Modules = () => {
             xl={6}
           >
             <a href={"/modules/new"}>
-              <Card className={styles.addmodulecard}>
+              <Card className={"addmodulecard"}>
                 <Row
                   style={{
                     display: "flex",
@@ -209,7 +209,7 @@ const Modules = () => {
               width: "100%",
               maxWidth: "500px",
             }}
-            className={styles.modulecard}
+            className={"modulecard"}
           >
             <Row gutter={[16, 16]}>
               <Col
@@ -288,7 +288,7 @@ const Modules = () => {
     moduleCards.push(
       <Col key={filteredData.length + 1} xs={24} sm={12} md={8} lg={8} xl={6}>
         <a href={"/modules/new"}>
-          <Card className={styles.addmodulecard}>
+          <Card className={"addmodulecard"}>
             <Row
               style={{
                 display: "flex",

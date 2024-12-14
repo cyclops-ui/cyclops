@@ -1,8 +1,17 @@
-import React, { useEffect, useState } from "react";
-import { Col, Divider, Row, Table, Alert, Descriptions, Button } from "antd";
-import axios from "axios";
+import React, { useCallback, useEffect, useState } from "react";
+import {
+  Col,
+  Divider,
+  Row,
+  Table,
+  Alert,
+  Descriptions,
+  Button,
+  Spin,
+} from "antd";
 import { mapResponseError } from "../../utils/api/errors";
 import { CopyOutlined } from "@ant-design/icons";
+import { useResourceListActions } from "./ResourceList/ResourceListActionsContext";
 
 interface Props {
   name: string;
@@ -28,6 +37,9 @@ interface service {
 }
 
 const Service = ({ name, namespace }: Props) => {
+  const { fetchResource } = useResourceListActions();
+
+  const [loading, setLoading] = useState(true);
   const [service, setService] = useState<service>({
     externalIPs: [],
     ports: [],
@@ -38,32 +50,25 @@ const Service = ({ name, namespace }: Props) => {
     description: "",
   });
 
-  useEffect(() => {
-    function fetchService() {
-      axios
-        .get(`/api/resources`, {
-          params: {
-            group: ``,
-            version: `v1`,
-            kind: `Service`,
-            name: name,
-            namespace: namespace,
-          },
-        })
-        .then((res) => {
-          setService(res.data);
-        })
-        .catch((error) => {
-          setError(mapResponseError(error));
-        });
-    }
+  const fetchService = useCallback(() => {
+    fetchResource("", "v1", "Service", namespace, name)()
+      .then((res) => {
+        setService(res);
+        setLoading(false);
+      })
+      .catch((error) => {
+        setError(mapResponseError(error));
+        setLoading(false);
+      });
+  }, [name, namespace, fetchResource]);
 
+  useEffect(() => {
     fetchService();
     const interval = setInterval(() => fetchService(), 15000);
     return () => {
       clearInterval(interval);
     };
-  }, [name, namespace]);
+  }, [fetchService]);
 
   const externalIPsHostname = (hostname: string) => {
     if (!hostname) {
@@ -169,6 +174,8 @@ const Service = ({ name, namespace }: Props) => {
       </Row>
     );
   };
+
+  if (loading) return <Spin size="large" style={{ marginTop: "20px" }} />;
 
   return (
     <div>
