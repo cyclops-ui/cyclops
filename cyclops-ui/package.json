@@ -1,6 +1,6 @@
 {
   "name": "@cyclopsui/cyclops-ui",
-  "version": "0.1.11",
+  "version": "0.1.12",
   "private": false,
   "license": "Apache-2.0",
   "dependencies": {
