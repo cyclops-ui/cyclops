@@ -16,6 +16,7 @@ import {
 } from "@ant-design/icons";
 import { mapFields } from "../../TemplateFormFields";
 import { collapseColor } from "../utils";
+import { useTemplateFormFields } from "../../TemplateFormFieldsContext";
 
 interface Props {
   field: any;
@@ -36,6 +37,8 @@ export const ArrayField = ({
   uniqueFieldName,
   isModuleEdit,
 }: Props) => {
+  const { themePalette } = useTemplateFormFields();
+
   const [open, setOpen] = useState(false);
 
   let header = <Row>{field.name}</Row>;
@@ -93,7 +96,7 @@ export const ArrayField = ({
                   borderRadius: "7px",
                   padding: "12px",
                   width: "100%",
-                  backgroundColor: "#fafafa",
+                  backgroundColor: themePalette === "dark" ? "#444" : "#fafafa",
                 }}
               >
                 {arrFields.map((arrField, index) => (
@@ -146,80 +149,85 @@ export const ArrayField = ({
     }
     if (field.items.type === "object") {
       return (
-        <Collapse
-          size={"small"}
-          bordered={false}
-          onChange={function (value: string | string[]) {
-            setOpen(value.length > 0);
-          }}
+        <div
+          className={`nested-fields ${themePalette === "dark" ? "dark" : ""}`}
         >
-          <Collapse.Panel
-            key={fieldName}
-            header={header}
-            style={{
-              borderRadius: "7px",
-              backgroundColor: collapseColor(open),
+          <Collapse
+            size={"small"}
+            bordered={false}
+            onChange={function (value: string | string[]) {
+              setOpen(value.length > 0);
             }}
-            forceRender={true}
           >
-            <Form.Item
-              wrapperCol={{ span: 16 }}
+            <Collapse.Panel
+              key={fieldName}
+              header={header}
               style={{
-                paddingTop: "8px",
-                marginBottom: "0",
+                borderRadius: "7px",
+                backgroundColor: collapseColor(open, themePalette),
               }}
+              forceRender={true}
             >
-              <Form.List name={formItemName}>
-                {(arrFields, { add, remove }) => (
-                  <>
-                    {arrFields.map((arrField) => (
-                      <Col
-                        key={arrField.key}
-                        style={{ padding: 0, paddingBottom: "12px" }}
-                      >
-                        <div
-                          style={{
-                            border: "solid 1.5px #c3c3c3",
-                            borderRadius: "7px",
-                            padding: "12px",
-                            width: "100%",
-                            backgroundColor: "#fafafa",
-                          }}
+              <Form.Item
+                wrapperCol={{ span: 16 }}
+                style={{
+                  paddingTop: "8px",
+                  marginBottom: "0",
+                }}
+              >
+                <Form.List name={formItemName}>
+                  {(arrFields, { add, remove }) => (
+                    <>
+                      {arrFields.map((arrField) => (
+                        <Col
+                          key={arrField.key}
+                          style={{ padding: 0, paddingBottom: "12px" }}
                         >
-                          {mapFields(
-                            isModuleEdit,
-                            field.items.properties,
-                            initialFields,
-                            [...uniqueFieldName, String("")],
-                            "",
-                            level + 1,
-                            2,
-                            arrField,
-                            field.items.required,
-                          )}
-                          <MinusCircleOutlined
-                            style={{ fontSize: "16px" }}
-                            onClick={() => remove(arrField.name)}
-                          />
-                        </div>
-                      </Col>
-                    ))}
-                    <Form.Item style={{ marginBottom: "0" }}>
-                      <Button
-                        type="dashed"
-                        onClick={() => add()}
-                        block
-                        icon={<PlusOutlined />}
-                      >
-                        Add
-                      </Button>
-                    </Form.Item>
-                  </>
-                )}
-              </Form.List>
-            </Form.Item>
-          </Collapse.Panel>
-        </Collapse>
+                          <div
+                            style={{
+                              border: "solid 1.5px #c3c3c3",
+                              borderRadius: "7px",
+                              padding: "12px",
+                              width: "100%",
+                              backgroundColor:
+                                themePalette === "dark" ? "#444" : "#fafafa",
+                            }}
+                          >
+                            {mapFields(
+                              isModuleEdit,
+                              field.items.properties,
+                              initialFields,
+                              [...uniqueFieldName, String("")],
+                              "",
+                              level + 1,
+                              2,
+                              arrField,
+                              field.items.required,
+                            )}
+                            <MinusCircleOutlined
+                              style={{ fontSize: "16px" }}
+                              onClick={() => remove(arrField.name)}
+                            />
+                          </div>
+                        </Col>
+                      ))}
+                      <Form.Item style={{ marginBottom: "0" }}>
+                        <Button
+                          type="dashed"
+                          onClick={() => add()}
+                          block
+                          icon={<PlusOutlined />}
+                        >
+                          Add
+                        </Button>
+                      </Form.Item>
+                    </>
+                  )}
+                </Form.List>
+              </Form.Item>
+            </Collapse.Panel>
+          </Collapse>
+        </div>
       );
     }
   };

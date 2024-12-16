@@ -13,6 +13,7 @@ import {
   Spin,
   Tooltip,
   Typography,
+  theme,
 } from "antd";
 import "ace-builds/src-noconflict/ace";
 import {
@@ -99,7 +100,7 @@ interface module {
 
 export interface ModuleResourceDetailsProps {
   name: string;
-  themeColor?: string;
+  themePalette?: "dark" | "light";
   streamingDisabled: boolean;
   fetchModule: (moduleName: string) => Promise<any>;
   fetchModuleRawManifest: (moduleName: string) => Promise<string>;
@@ -165,7 +166,7 @@ export interface ModuleResourceDetailsProps {
 
 export const ModuleResourceDetails = ({
   name,
-  themeColor,
+  themePalette = "light",
   streamingDisabled,
   fetchModule,
   fetchModuleRawManifest,
@@ -625,8 +626,9 @@ export const ModuleResourceDetails = ({
       <ConfigProvider
         theme={{
           token: {
-            colorPrimary: themeColor || "#FF8803",
+            colorPrimary: "#FF8803",
           },
+          ...(themePalette === "dark" && { algorithm: theme.darkAlgorithm }),
         }}
       >
         {error.message.length !== 0 && (
@@ -715,6 +717,7 @@ export const ModuleResourceDetails = ({
           </Col>
         </Row>
         <ResourceListActionsProvider
+          themePalette={themePalette}
           streamingDisabled={streamingDisabled}
           fetchResource={fetchResource}
           fetchResourceManifest={fetchResourceManifest}
