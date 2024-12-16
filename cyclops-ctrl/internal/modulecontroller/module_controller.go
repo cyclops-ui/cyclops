@@ -137,6 +137,10 @@ func (r *ModuleReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctr
 
 	r.logger.Info("upsert module", "namespaced name", req.NamespacedName)
 
+	if module.Status == nil {
+		module.Status = &cyclopsv1alpha1.ModuleStatus{}
+	}
+
 	templateVersion := module.Status.TemplateResolvedVersion
 	if len(templateVersion) == 0 {
 		templateVersion = module.Spec.TemplateRef.Version
@@ -442,7 +446,7 @@ func (r *ModuleReconciler) setStatus(
 		trv = templateResolvedVersion
 	}
 
-	module.Status = cyclopsv1alpha1.ModuleStatus{
+	module.Status = &cyclopsv1alpha1.ModuleStatus{
 		ReconciliationStatus: cyclopsv1alpha1.ReconciliationStatus{
 			Status: status,
 			Reason: reason,

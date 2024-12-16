@@ -3,6 +3,7 @@ package main
 import (
 	"flag"
 	"fmt"
+	"github.com/cyclops-ui/cyclops/cyclops-ctrl/internal/git"
 	"os"
 	"strconv"
 	"time"
@@ -86,8 +87,10 @@ func main() {
 		panic(err)
 	}
 
+	credsResolver := auth.NewTemplatesResolver(k8sClient)
+
 	templatesRepo := template.NewRepo(
-		auth.NewTemplatesResolver(k8sClient),
+		credsResolver,
 		cache.NewInMemoryTemplatesCache(),
 	)
 
@@ -101,8 +104,9 @@ func main() {
 	prometheus.StartCacheMetricsUpdater(&monitor, templatesRepo.ReturnCache(), 10*time.Second, setupLog)
 
 	helmReleaseClient := helm.NewReleaseClient(helmWatchNamespace)
+	gitWriteClient := git.NewWriteClient(credsResolver)
 
-	handler, err := handler.New(templatesRepo, k8sClient, helmReleaseClient, renderer, moduleTargetNamespace, telemetryClient, monitor)
+	handler, err := handler.New(templatesRepo, k8sClient, helmReleaseClient, renderer, gitWriteClient, moduleTargetNamespace, telemetryClient, monitor)
 	if err != nil {
 		panic(err)
 	}

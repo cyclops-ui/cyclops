@@ -43,6 +43,10 @@ const (
 	TemplateSourceTypeGit  TemplateSourceType = "git"
 	TemplateSourceTypeHelm TemplateSourceType = "helm"
 	TemplateSourceTypeOCI  TemplateSourceType = "oci"
+
+	GitOpsWriteRepoAnnotation     = "cyclops-ui.com/write-repo"
+	GitOpsWritePathAnnotation     = "cyclops-ui.com/write-path"
+	GitOpsWriteRevisionAnnotation = "cyclops-ui.com/write-revision"
 )
 
 type TemplateRef struct {
@@ -121,7 +125,7 @@ type Module struct {
 	metav1.ObjectMeta `json:"metadata,omitempty"`
 
 	Spec    ModuleSpec     `json:"spec,omitempty"`
-	Status  ModuleStatus   `json:"status,omitempty"`
+	Status  *ModuleStatus  `json:"status,omitempty"`
 	History []HistoryEntry `json:"history,omitempty"`
 }
 

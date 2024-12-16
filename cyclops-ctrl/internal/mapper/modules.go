@@ -20,13 +20,21 @@ func RequestToModule(req dto.Module) (cyclopsv1alpha1.Module, error) {
 		return cyclopsv1alpha1.Module{}, err
 	}
 
+	annotations := make(map[string]string)
+	if req.GitOpsWrite != nil {
+		annotations[cyclopsv1alpha1.GitOpsWriteRepoAnnotation] = req.GitOpsWrite.Repo
+		annotations[cyclopsv1alpha1.GitOpsWritePathAnnotation] = req.GitOpsWrite.Path
+		annotations[cyclopsv1alpha1.GitOpsWriteRevisionAnnotation] = req.GitOpsWrite.Branch
+	}
+
 	return cyclopsv1alpha1.Module{
 		TypeMeta: metav1.TypeMeta{
 			Kind:       "Module",
 			APIVersion: "cyclops-ui.com/v1alpha1",
 		},
 		ObjectMeta: metav1.ObjectMeta{
-			Name: req.Name,
+			Name:        req.Name,
+			Annotations: annotations,
 		},
 		Spec: cyclopsv1alpha1.ModuleSpec{
 			TargetNamespace: mapTargetNamespace(req.Namespace),
@@ -35,6 +43,7 @@ func RequestToModule(req dto.Module) (cyclopsv1alpha1.Module, error) {
 				Raw: data,
 			},
 		},
+		Status:  &cyclopsv1alpha1.ModuleStatus{},
 		History: make([]cyclopsv1alpha1.HistoryEntry, 0),
 	}, nil
 }
@@ -48,6 +57,7 @@ func ModuleToDTO(module cyclopsv1alpha1.Module) (dto.Module, error) {
 		Template:        k8sTemplateRefToDTO(module.Spec.TemplateRef, module.Status.TemplateResolvedVersion),
 		Values:          module.Spec.Values,
 		IconURL:         module.Status.IconURL,
+		GitOpsWrite:     mapGitOpsWrite(module),
 		ReconciliationStatus: dto.ReconciliationStatus{
 			Status: dto.ReconciliationStatusState(module.Status.ReconciliationStatus.Status),
 			Reason: module.Status.ReconciliationStatus.Reason,
@@ -150,4 +160,16 @@ func mapTargetNamespace(targetNamespace string) string {
 	}
 
 	return targetNamespace
+}
+
+func mapGitOpsWrite(module cyclopsv1alpha1.Module) *dto.GitOpsWrite {
+	if repo, ok := module.GetAnnotations()[cyclopsv1alpha1.GitOpsWriteRepoAnnotation]; !ok || len(repo) == 0 {
+		return nil
+	}
+
+	return &dto.GitOpsWrite{
+		Repo:   module.GetAnnotations()[cyclopsv1alpha1.GitOpsWriteRepoAnnotation],
+		Path:   module.GetAnnotations()[cyclopsv1alpha1.GitOpsWritePathAnnotation],
+		Branch: module.GetAnnotations()[cyclopsv1alpha1.GitOpsWriteRevisionAnnotation],
+	}
 }
