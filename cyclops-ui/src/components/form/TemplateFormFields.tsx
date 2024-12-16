@@ -15,8 +15,10 @@ import { WarningTwoTone } from "@ant-design/icons";
 import Link from "antd/lib/typography/Link";
 import { SuggestionInputField } from "./fields/string/SuggestionInput";
 import "./custom.css";
+import { TemplateFormFieldsContextProvider } from "./TemplateFormFieldsContext";
 
 interface Props {
+  themePalette?: "dark" | "light";
   isModuleEdit: boolean;
   fields: any[];
   parentFieldID: string[];
@@ -273,6 +275,7 @@ const NoFieldsAlert = () => {
 };
 
 const TemplateFormFields = ({
+  themePalette = "light",
   isModuleEdit,
   fields,
   initialValues,
@@ -289,17 +292,19 @@ const TemplateFormFields = ({
 
   return (
     <div className={"module-form-fields"}>
-      {mapFields(
-        isModuleEdit,
-        fields,
-        initialValues,
-        parentFieldID,
-        parent,
-        level,
-        arrayIndexLifetime,
-        arrayField,
-        required,
-      )}
+      <TemplateFormFieldsContextProvider themePalette={themePalette}>
+        {mapFields(
+          isModuleEdit,
+          fields,
+          initialValues,
+          parentFieldID,
+          parent,
+          level,
+          arrayIndexLifetime,
+          arrayField,
+          required,
+        )}
+      </TemplateFormFieldsContextProvider>
     </div>
   );
 };

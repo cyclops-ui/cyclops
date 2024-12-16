@@ -7,10 +7,6 @@ label.ant-form-item-required:before {
   position: relative !important;
 }
 
-code {
-  color: #000080;
-}
-
 .custom {
   .ant-collapse-content-box {
     padding: 0;

@@ -62,6 +62,7 @@ const ResourceList = ({
   onResourceDelete,
 }: Props) => {
   const {
+    themePalette,
     streamingDisabled,
     fetchResourceManifest,
     restartResource,
@@ -232,8 +233,14 @@ const ResourceList = ({
       activeCollapses.get(fieldName) &&
       activeCollapses.get(fieldName) === true
     ) {
+      if (themePalette === "dark") {
+        return "#222";
+      }
       return "#EFEFEF";
     } else {
+      if (themePalette === "dark") {
+        return "#333";
+      }
       return "#FAFAFA";
     }
   };
@@ -540,6 +547,7 @@ const ResourceList = ({
                   paddingRight: "10px",
                   marginTop: "0px",
                   marginBottom: "10px",
+                  color: themePalette === "dark" ? "#fff" : "#000",
                 }}
               >
                 {resource.name}
@@ -551,7 +559,14 @@ const ResourceList = ({
           </Col>
         </Row>
         <Row>
-          <Title level={4} style={{ marginTop: "0px", marginBottom: "10px" }}>
+          <Title
+            level={4}
+            style={{
+              marginTop: "0px",
+              marginBottom: "10px",
+              color: themePalette === "dark" ? "#fff" : "#000",
+            }}
+          >
             {resource.namespace}
           </Title>
         </Row>
@@ -590,7 +605,7 @@ const ResourceList = ({
           style={{
             width: "60%",
             border: "none",
-            backgroundColor: "#FFF",
+            backgroundColor: "transparent",
           }}
           onChange={function (values: string | string[]) {
             let m = new Map();

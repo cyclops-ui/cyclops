@@ -3,6 +3,9 @@ import { Col, Collapse, Form, Row, Tooltip } from "antd";
 import { InfoCircleOutlined } from "@ant-design/icons";
 import { mapFields } from "../../TemplateFormFields";
 import { collapseColor } from "../utils";
+import { useTemplateFormFields } from "../../TemplateFormFieldsContext";
+
+import "./custom.css";
 
 interface Props {
   field: any;
@@ -27,6 +30,8 @@ export const ObjectField = ({
   arrayIndexLifetime,
   isModuleEdit,
 }: Props) => {
+  const { themePalette } = useTemplateFormFields();
+
   const [open, setOpen] = useState(false);
 
   let header = <Row>{field.display_name}</Row>;
@@ -53,6 +58,7 @@ export const ObjectField = ({
     <Col
       span={level === 0 ? 16 : 24}
       offset={level === 0 ? 2 : 0}
+      className={`nested-fields ${themePalette === "dark" ? "dark" : ""}`}
       style={{
         paddingTop: "8px",
         paddingBottom: "8px",
@@ -74,7 +80,7 @@ export const ObjectField = ({
           header={header}
           style={{
             borderRadius: "7px",
-            backgroundColor: collapseColor(open),
+            backgroundColor: collapseColor(open, themePalette),
           }}
           forceRender={true}
         >
