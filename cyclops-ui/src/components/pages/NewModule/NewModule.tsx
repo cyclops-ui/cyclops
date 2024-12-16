@@ -119,7 +119,7 @@ const NewModule = () => {
   const handleSubmit = (values: any) => {
     const moduleName = values["cyclops_module_name"];
     const moduleNamespace = values["cyclops_module_namespace"];
-    const gitopsConfig = {
+    const gitOpsWrite = {
       repo: values["gitops-repo"],
       path: values["gitops-path"],
       branch: values["gitops-branch"],
@@ -131,7 +131,7 @@ const NewModule = () => {
       .post(`/api/modules/new`, {
         name: moduleName,
         namespace: moduleNamespace,
-        gitops: gitopsConfig,
+        gitOpsWrite: gitOpsWrite,
         values: values,
         template: {
           repo: template.repo,

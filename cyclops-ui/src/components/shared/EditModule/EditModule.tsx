@@ -10,9 +10,15 @@ import {
   notification,
   Row,
   Spin,
+  Switch,
   Typography,
 } from "antd";
-import { LockFilled, UnlockFilled } from "@ant-design/icons";
+import {
+  DownOutlined,
+  LockFilled,
+  UnlockFilled,
+  UpOutlined,
+} from "@ant-design/icons";
 
 import { findMaps, flattenObjectKeys, mapsToArray } from "../../../utils/form";
 import "./custom.css";
@@ -85,6 +91,7 @@ export const EditModuleComponent = ({
 
   const [form] = Form.useForm();
   const [editTemplateForm] = Form.useForm();
+  const [gitOpsWriteForm] = Form.useForm();
 
   const [initialValuesRaw, setInitialValuesRaw] = useState({});
 
@@ -99,6 +106,9 @@ export const EditModuleComponent = ({
       required: [],
     },
   });
+
+  const [advancedOptionsExpanded, setAdvancedOptionsExpanded] = useState(false);
+  const [gitopsToggle, setGitopsToggle] = useState(false);
 
   const [templateRef, setTemplateRef] = useState<templateRef>({
     repo: "",
@@ -139,6 +149,14 @@ export const EditModuleComponent = ({
           path: module.template.path,
           version: module.template.version,
         });
+
+        setGitopsToggle(String(module.gitOpsWrite.repo).length > 0);
+        gitOpsWriteForm.setFieldsValue({
+          "gitops-repo": module.gitOpsWrite.repo,
+          "gitops-path": module.gitOpsWrite.path,
+          "gitops-branch": module.gitOpsWrite.branch,
+        });
+
         setLoadValues(true);
 
         setTemplateRef({
@@ -398,6 +416,11 @@ export const EditModuleComponent = ({
       );
     } else return templateRef.resolvedVersion.substring(0, 7);
   };
+
+  const toggleExpand = () => {
+    setAdvancedOptionsExpanded(!advancedOptionsExpanded);
+  };
+
   return (
     <div>
       <ConfigProvider
@@ -436,88 +459,206 @@ export const EditModuleComponent = ({
               Template
             </Divider>
             <Row>
-              <Form
-                form={editTemplateForm}
-                layout="inline"
-                autoComplete={"off"}
-                onFinish={handleSubmitTemplateEdit}
-                onFinishFailed={onFinishFailed}
-                style={{ width: "100%" }}
-                requiredMark={(label, { required }) => (
-                  <Row>
-                    <Col>
-                      {required ? (
-                        <span style={{ color: "red", paddingRight: "3px" }}>
-                          *
-                        </span>
-                      ) : (
-                        <></>
-                      )}
-                    </Col>
-                    <Col>{label}</Col>
-                  </Row>
-                )}
+              <div
+                style={{
+                  border: "solid 1.5px #c3c3c3",
+                  borderRadius: "7px",
+                  padding: "0px",
+                  width: "100%",
+                  backgroundColor: "#fafafa",
+                }}
               >
-                {lockButton()}
-                <Form.Item
-                  name={"repo"}
-                  style={{ width: "40%", marginRight: "0" }}
+                <Form
+                  form={editTemplateForm}
+                  layout="inline"
+                  autoComplete={"off"}
+                  onFinish={handleSubmitTemplateEdit}
+                  onFinishFailed={onFinishFailed}
+                  style={{ width: "100%", padding: "12px" }}
+                  requiredMark={(label, { required }) => (
+                    <Row>
+                      <Col>
+                        {required ? (
+                          <span style={{ color: "red", paddingRight: "3px" }}>
+                            *
+                          </span>
+                        ) : (
+                          <></>
+                        )}
+                      </Col>
+                      <Col>{label}</Col>
+                    </Row>
+                  )}
                 >
-                  <Input
-                    placeholder={"Repository"}
-                    disabled={templateRefLock || !loadTemplate}
-                  />
-                </Form.Item>
-                <div
-                  style={{
-                    width: "15px",
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                  }}
-                >
-                  /
-                </div>
-                <Form.Item
-                  name={"path"}
-                  style={{ width: "20%", marginRight: "0" }}
-                >
-                  <Input
-                    placeholder={"Path"}
-                    disabled={templateRefLock || !loadTemplate}
-                  />
-                </Form.Item>
-                <div
-                  style={{
-                    width: "15px",
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                  }}
-                >
-                  @
-                </div>
-                <Form.Item
-                  name={"version"}
-                  style={{ width: "20%", marginRight: "0" }}
-                >
-                  <Input
-                    placeholder={"Version"}
-                    addonAfter={linkToTemplate(templateRef)}
-                    disabled={templateRefLock || !loadTemplate}
-                  />
-                </Form.Item>
-                <Form.Item style={{ paddingLeft: "10px", width: "5%" }}>
-                  <Button
-                    type="primary"
-                    htmlType="submit"
-                    loading={!loadTemplate}
-                    disabled={templateRefLock || !loadTemplate}
+                  {lockButton()}
+                  <Form.Item
+                    name={"repo"}
+                    style={{ width: "35%", marginRight: "0" }}
                   >
-                    Load
-                  </Button>
-                </Form.Item>
-              </Form>
+                    <Input
+                      placeholder={"Repository"}
+                      disabled={templateRefLock || !loadTemplate}
+                    />
+                  </Form.Item>
+                  <div
+                    style={{
+                      width: "15px",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                    }}
+                  >
+                    /
+                  </div>
+                  <Form.Item
+                    name={"path"}
+                    style={{ width: "20%", marginRight: "0" }}
+                  >
+                    <Input
+                      placeholder={"Path"}
+                      disabled={templateRefLock || !loadTemplate}
+                    />
+                  </Form.Item>
+                  <div
+                    style={{
+                      width: "15px",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                    }}
+                  >
+                    @
+                  </div>
+                  <Form.Item
+                    name={"version"}
+                    style={{ width: "20%", marginRight: "0" }}
+                  >
+                    <Input
+                      placeholder={"Version"}
+                      addonAfter={linkToTemplate(templateRef)}
+                      disabled={templateRefLock || !loadTemplate}
+                    />
+                  </Form.Item>
+                  <Form.Item style={{ paddingLeft: "10px", width: "5%" }}>
+                    <Button
+                      type="primary"
+                      htmlType="submit"
+                      loading={!loadTemplate}
+                      disabled={templateRefLock || !loadTemplate}
+                    >
+                      Load
+                    </Button>
+                  </Form.Item>
+                </Form>
+                <div style={{ display: advancedOptionsExpanded ? "" : "none" }}>
+                  <Form
+                    form={gitOpsWriteForm}
+                    wrapperCol={{ span: 16 }}
+                    layout="vertical"
+                    autoComplete={"off"}
+                    onChange={(e) => {
+                      console.log(e);
+                    }}
+                    requiredMark={(label, { required }) => (
+                      <Row>
+                        <Col>
+                          {required ? (
+                            <span style={{ color: "red", paddingRight: "3px" }}>
+                              *
+                            </span>
+                          ) : (
+                            <></>
+                          )}
+                        </Col>
+                        <Col>{label}</Col>
+                      </Row>
+                    )}
+                  >
+                    <Divider
+                      style={{ marginTop: "12px", marginBottom: "12px" }}
+                    />
+                    <Form.Item
+                      name="gitops"
+                      id="gitops"
+                      valuePropName={
+                        gitopsToggle === true ? "checked" : "unchecked"
+                      }
+                      label={
+                        <div>
+                          GitOps Workflow
+                          <p style={{ color: "#8b8e91", marginBottom: "0px" }}>
+                            Will you be using a GitOps workflow to deploy this
+                            module?
+                          </p>
+                        </div>
+                      }
+                      style={{ padding: "0px 12px 0px 12px" }}
+                    >
+                      <Switch
+                        onChange={() => {
+                          setGitopsToggle(!gitopsToggle);
+                        }}
+                      />
+                    </Form.Item>
+                    <div style={{ display: gitopsToggle ? "" : "none" }}>
+                      <Form.Item
+                        label="Repository URL"
+                        name="gitops-repo"
+                        rules={[
+                          {
+                            required: gitopsToggle,
+                            message: "Repo URL is required",
+                          },
+                        ]}
+                        style={{ padding: "0px 12px 0px 12px" }}
+                      >
+                        <Input />
+                      </Form.Item>
+
+                      <Form.Item
+                        label="Path"
+                        name="gitops-path"
+                        rules={[
+                          {
+                            required: gitopsToggle ? true : false,
+                            message: "Path is required",
+                          },
+                        ]}
+                        style={{ padding: "0px 12px 0px 12px" }}
+                      >
+                        <Input />
+                      </Form.Item>
+
+                      <Form.Item
+                        label="Branch"
+                        name="gitops-branch"
+                        rules={[
+                          {
+                            required: gitopsToggle ? true : false,
+                            message: "Path is required",
+                          },
+                        ]}
+                        style={{ padding: "0px 12px 0px 12px" }}
+                      >
+                        <Input />
+                      </Form.Item>
+                    </div>
+                  </Form>
+                </div>
+                <div className={"expandadvanced"} onClick={toggleExpand}>
+                  {advancedOptionsExpanded ? (
+                    <div>
+                      Advanced
+                      <UpOutlined style={{ paddingLeft: "5px" }} />
+                    </div>
+                  ) : (
+                    <div>
+                      Advanced
+                      <DownOutlined style={{ paddingLeft: "5px" }} />
+                    </div>
+                  )}
+                </div>
+              </div>
             </Row>
           </Col>
         </Row>
