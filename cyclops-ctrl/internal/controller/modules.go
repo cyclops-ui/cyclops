@@ -2,12 +2,13 @@ package controller
 
 import (
 	"fmt"
-	"github.com/cyclops-ui/cyclops/cyclops-ctrl/internal/git"
 	"io"
 	"net/http"
 	"os"
 	"strings"
 	"time"
+
+	"github.com/cyclops-ui/cyclops/cyclops-ctrl/internal/git"
 
 	"sigs.k8s.io/yaml"
 
@@ -339,8 +340,19 @@ func (m *Modules) UpdateModule(ctx *gin.Context) {
 	module.SetLabels(curr.GetLabels())
 
 	annotations := curr.GetAnnotations()
+	moduleAnnotations := module.GetAnnotations()
+	if moduleAnnotations != nil {
+		if _, ok := moduleAnnotations["cyclops-ui.com/write-repo"]; ok {
+			annotations["cyclops-ui.com/write-repo"] = moduleAnnotations["cyclops-ui.com/write-repo"]
+		}
+		if _, ok := moduleAnnotations["cyclops-ui.com/write-repo"]; ok {
+			annotations["cyclops-ui.com/write-path"] = moduleAnnotations["cyclops-ui.com/write-path"]
+		}
+		if _, ok := moduleAnnotations["cyclops-ui.com/write-revision"]; ok {
+			annotations["cyclops-ui.com/write-revision"] = moduleAnnotations["cyclops-ui.com/write-revision"]
+		}
+	}
 	delete(annotations, "kubectl.kubernetes.io/last-applied-configuration")
-	fmt.Println(annotations)
 	module.SetAnnotations(annotations)
 
 	if len(module.GetAnnotations()[v1alpha1.GitOpsWriteRepoAnnotation]) != 0 {

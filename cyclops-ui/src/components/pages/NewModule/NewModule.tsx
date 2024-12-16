@@ -141,7 +141,9 @@ const NewModule = () => {
         },
       })
       .then((res) => {
-        window.location.href = "/modules/" + moduleName;
+        window.location.href = gitopsToggle
+          ? "/modules/"
+          : "/modules/" + moduleName;
       })
       .catch((error) => {
         setLoading(false);
@@ -552,18 +554,18 @@ const NewModule = () => {
                     id="gitops"
                     label={
                       <div>
-                        GitOps Workflow
+                        Push changes to Git?
                         <p style={{ color: "#8b8e91", marginBottom: "0px" }}>
-                          Will you be using a GitOps workflow to deploy this
-                          module?
+                          Instead of deploying to the cluster, Cyclops will push
+                          the changes to a git repository.
                         </p>
                       </div>
                     }
                     style={{ padding: "0px 12px 0px 12px" }}
                   >
                     <Switch
-                      onChange={() => {
-                        SetGitopsToggle(!gitopsToggle);
+                      onChange={(e) => {
+                        SetGitopsToggle(e);
                       }}
                     />
                   </Form.Item>

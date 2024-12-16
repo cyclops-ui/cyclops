@@ -62,6 +62,7 @@ export interface EditModuleProps {
     moduleName: string,
     templateRef: any,
     values: string,
+    gitOpsValues: any,
   ) => Promise<any>;
   onUpdateModuleSuccess: (moduleName: string) => void;
 }
@@ -98,6 +99,7 @@ export const EditModuleComponent = ({
   const [values, setValues] = useState({});
   const [isChanged, setIsChanged] = useState(false);
   const [isTemplateChanged, setIsTemplateChanged] = useState(false);
+  const [isGitOpsChanged, setIsGitOpsChanged] = useState(false);
   const [config, setConfig] = useState<Template>({
     name: "",
     resolvedVersion: "",
@@ -150,11 +152,11 @@ export const EditModuleComponent = ({
           version: module.template.version,
         });
 
-        setGitopsToggle(String(module.gitOpsWrite.repo).length > 0);
+        setGitopsToggle(module.gitOpsWrite?.repo);
         gitOpsWriteForm.setFieldsValue({
-          "gitops-repo": module.gitOpsWrite.repo,
-          "gitops-path": module.gitOpsWrite.path,
-          "gitops-branch": module.gitOpsWrite.branch,
+          "gitops-repo": module?.gitOpsWrite?.repo,
+          "gitops-path": module?.gitOpsWrite?.path,
+          "gitops-branch": module?.gitOpsWrite?.branch,
         });
 
         setLoadValues(true);
@@ -303,21 +305,38 @@ export const EditModuleComponent = ({
     }
   }
 
-  const handleSubmit = (values: any) => {
+  async function handleSubmit(values: any) {
     if (isTemplateChanged) {
       values = findMaps(config.root.properties, values, initialValuesRaw);
     } else {
       values = findMaps(config.root.properties, values, previousValues);
     }
 
-    updateModule(moduleName, templateRef, values)
-      .then(() => {
-        onUpdateModuleSuccess(moduleName);
-      })
-      .catch((error) => {
-        setError(mapResponseError(error));
-      });
-  };
+    try {
+      let gitOpsWrite = { repo: "", path: "", branch: "" };
+      if (gitopsToggle) {
+        await gitOpsWriteForm.validateFields([
+          "gitops-repo",
+          "gitops-path",
+          "gitops-branch",
+        ]);
+        gitOpsWrite = {
+          repo: gitOpsWriteForm.getFieldValue("gitops-repo"),
+          path: gitOpsWriteForm.getFieldValue("gitops-path"),
+          branch: gitOpsWriteForm.getFieldValue("gitops-branch"),
+        };
+      }
+      updateModule(moduleName, templateRef, values, gitOpsWrite)
+        .then(() => {
+          onUpdateModuleSuccess(moduleName);
+        })
+        .catch((error) => {
+          setError(mapResponseError(error));
+        });
+    } catch (error) {
+      onFinishFailed(error);
+    }
+  }
 
   const formLoading = () => {
     if (loadTemplate === false || loadValues === false) {
@@ -343,7 +362,10 @@ export const EditModuleComponent = ({
             type="primary"
             htmlType="submit"
             name="Save"
-            disabled={(!isChanged && !isTemplateChanged) || !loadTemplate}
+            disabled={
+              (!isChanged && !isTemplateChanged && !isGitOpsChanged) ||
+              !loadTemplate
+            }
           >
             Deploy
           </Button>{" "}
@@ -556,8 +578,8 @@ export const EditModuleComponent = ({
                     wrapperCol={{ span: 16 }}
                     layout="vertical"
                     autoComplete={"off"}
-                    onChange={(e) => {
-                      console.log(e);
+                    onValuesChange={() => {
+                      setIsGitOpsChanged(true);
                     }}
                     requiredMark={(label, { required }) => (
                       <Row>
@@ -580,23 +602,21 @@ export const EditModuleComponent = ({
                     <Form.Item
                       name="gitops"
                       id="gitops"
-                      valuePropName={
-                        gitopsToggle === true ? "checked" : "unchecked"
-                      }
                       label={
                         <div>
-                          GitOps Workflow
+                          Push changes to Git?
                           <p style={{ color: "#8b8e91", marginBottom: "0px" }}>
-                            Will you be using a GitOps workflow to deploy this
-                            module?
+                            Instead of deploying to the cluster, Cyclops will
+                            push the changes to a git repository.
                           </p>
                         </div>
                       }
                       style={{ padding: "0px 12px 0px 12px" }}
                     >
                       <Switch
-                        onChange={() => {
-                          setGitopsToggle(!gitopsToggle);
+                        checked={gitopsToggle}
+                        onChange={(e) => {
+                          setGitopsToggle(e);
                         }}
                       />
                     </Form.Item>
