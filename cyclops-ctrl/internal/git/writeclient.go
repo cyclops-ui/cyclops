@@ -3,6 +3,9 @@ package git
 import (
 	"errors"
 	"fmt"
+	path2 "path"
+	"time"
+
 	cyclopsv1alpha1 "github.com/cyclops-ui/cyclops/cyclops-ctrl/api/v1alpha1"
 	"github.com/cyclops-ui/cyclops/cyclops-ctrl/internal/auth"
 	"github.com/go-git/go-billy/v5/memfs"
@@ -11,9 +14,7 @@ import (
 	"github.com/go-git/go-git/v5/plumbing/object"
 	"github.com/go-git/go-git/v5/plumbing/transport/http"
 	"github.com/go-git/go-git/v5/storage/memory"
-	path2 "path"
 	"sigs.k8s.io/yaml"
-	"time"
 )
 
 type WriteClient struct {
@@ -76,16 +77,15 @@ func (c *WriteClient) Write(module cyclopsv1alpha1.Module) error {
 			} else {
 				return fmt.Errorf("failed to checkout branch %s: %w", branch.String(), err)
 			}
-
-			err = worktree.Pull(&git.PullOptions{
-				Auth:          httpBasicAuthCredentials(creds),
-				ReferenceName: branch,
-				RemoteName:    "origin",
-				SingleBranch:  true,
-			})
-			if err != nil && !errors.Is(err, git.NoErrAlreadyUpToDate) {
-				return fmt.Errorf("failed to pull changes: %w", err)
-			}
+		}
+		err = worktree.Pull(&git.PullOptions{
+			Auth:          httpBasicAuthCredentials(creds),
+			ReferenceName: branch,
+			RemoteName:    "origin",
+			SingleBranch:  true,
+		})
+		if err != nil && !errors.Is(err, git.NoErrAlreadyUpToDate) {
+			return fmt.Errorf("failed to pull changes: %w", err)
 		}
 	}
 

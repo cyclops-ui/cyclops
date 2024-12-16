@@ -330,7 +330,6 @@ func (m *Modules) UpdateModule(ctx *gin.Context) {
 
 	module.Spec.TemplateRef.SourceType = curr.Spec.TemplateRef.SourceType
 
-	fmt.Println("request.Template", request.Template)
 	module.Status.TemplateResolvedVersion = request.Template.ResolvedVersion
 	module.Status.ReconciliationStatus = curr.Status.ReconciliationStatus
 	module.Status.IconURL = curr.Status.IconURL
