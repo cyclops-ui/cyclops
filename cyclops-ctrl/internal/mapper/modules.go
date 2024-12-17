@@ -43,7 +43,6 @@ func RequestToModule(req dto.Module) (cyclopsv1alpha1.Module, error) {
 				Raw: data,
 			},
 		},
-		Status:  &cyclopsv1alpha1.ModuleStatus{},
 		History: make([]cyclopsv1alpha1.HistoryEntry, 0),
 	}, nil
 }
