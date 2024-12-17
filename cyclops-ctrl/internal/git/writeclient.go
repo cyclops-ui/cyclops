@@ -8,6 +8,7 @@ import (
 
 	cyclopsv1alpha1 "github.com/cyclops-ui/cyclops/cyclops-ctrl/api/v1alpha1"
 	"github.com/cyclops-ui/cyclops/cyclops-ctrl/internal/auth"
+	"github.com/go-git/go-billy/v5"
 	"github.com/go-git/go-billy/v5/memfs"
 	"github.com/go-git/go-git/v5"
 	"github.com/go-git/go-git/v5/plumbing"
@@ -45,48 +46,31 @@ func (c *WriteClient) Write(module cyclopsv1alpha1.Module) error {
 
 	storer := memory.NewStorage()
 	fs := memfs.New()
-	repo, err := git.Clone(storer, fs, &git.CloneOptions{
-		URL:  repoURL,
-		Auth: httpBasicAuthCredentials(creds),
-	})
+
+	repo, worktree, err := cloneRepo(repoURL, revision, storer, &fs, creds)
 	if err != nil {
-		return fmt.Errorf("failed to clone repository: %w", err)
+		if errors.Is(err, git.NoMatchingRefSpecError{}) {
+			storer = memory.NewStorage()
+			fs = memfs.New()
+			repo, worktree, err = cloneRepo(repoURL, "", storer, &fs, creds)
+			if err != nil {
+				return err
+			}
+
+			err = worktree.Checkout(&git.CheckoutOptions{
+				Branch: plumbing.NewBranchReferenceName(revision),
+				Create: true,
+			})
+			if err != nil {
+				return err
+			}
+		} else {
+			return err
+		}
 	}
 
 	if path2.Ext(path) != "yaml" || path2.Ext(path) != "yml" {
 		path = path2.Join(path, fmt.Sprintf("%v.yaml", module.Name))
-	}
-
-	worktree, err := repo.Worktree()
-	if err != nil {
-		return fmt.Errorf("failed to get worktree: %w", err)
-	}
-
-	if len(revision) != 0 {
-		branch := plumbing.NewBranchReferenceName(revision)
-		err = worktree.Checkout(&git.CheckoutOptions{
-			Branch: branch,
-			Create: false,
-		})
-		if err != nil {
-			if errors.Is(err, plumbing.ErrReferenceNotFound) {
-				err = worktree.Checkout(&git.CheckoutOptions{
-					Branch: branch,
-					Create: true,
-				})
-			} else {
-				return fmt.Errorf("failed to checkout branch %s: %w", branch.String(), err)
-			}
-		}
-		err = worktree.Pull(&git.PullOptions{
-			Auth:          httpBasicAuthCredentials(creds),
-			ReferenceName: branch,
-			RemoteName:    "origin",
-			SingleBranch:  true,
-		})
-		if err != nil && !errors.Is(err, git.NoErrAlreadyUpToDate) {
-			return fmt.Errorf("failed to pull changes: %w", err)
-		}
 	}
 
 	file, err := fs.Create(path)
@@ -127,6 +111,30 @@ func (c *WriteClient) Write(module cyclopsv1alpha1.Module) error {
 	}
 
 	return nil
+}
+
+func cloneRepo(url, revision string, storer *memory.Storage, fs *billy.Filesystem, creds *auth.Credentials) (*git.Repository, *git.Worktree, error) {
+	cloneOpts := git.CloneOptions{
+		URL:          url,
+		Auth:         httpBasicAuthCredentials(creds),
+		SingleBranch: true,
+	}
+
+	if len(revision) != 0 {
+		cloneOpts.ReferenceName = plumbing.NewBranchReferenceName(revision)
+	}
+
+	repo, err := git.Clone(storer, *fs, &cloneOpts)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	worktree, err := repo.Worktree()
+	if err != nil {
+		return nil, nil, err
+	}
+
+	return repo, worktree, nil
 }
 
 func httpBasicAuthCredentials(creds *auth.Credentials) *http.BasicAuth {
