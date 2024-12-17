@@ -284,7 +284,7 @@ func (m *Modules) CreateModule(ctx *gin.Context) {
 
 	m.telemetryClient.ModuleCreation()
 
-	if len(module.GetAnnotations()[v1alpha1.GitOpsWriteRepoAnnotation]) != 0 {
+	if module.GetAnnotations() != nil && len(module.GetAnnotations()[v1alpha1.GitOpsWriteRepoAnnotation]) != 0 {
 		err := m.gitWriteClient.Write(module)
 		if err != nil {
 			fmt.Println(err)
