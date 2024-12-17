@@ -340,6 +340,11 @@ func (m *Modules) UpdateModule(ctx *gin.Context) {
 
 	annotations := curr.GetAnnotations()
 	moduleAnnotations := module.GetAnnotations()
+
+	if annotations == nil {
+		annotations = make(map[string]string)
+	}
+
 	if moduleAnnotations != nil {
 		if _, ok := moduleAnnotations["cyclops-ui.com/write-repo"]; ok {
 			annotations["cyclops-ui.com/write-repo"] = moduleAnnotations["cyclops-ui.com/write-repo"]
