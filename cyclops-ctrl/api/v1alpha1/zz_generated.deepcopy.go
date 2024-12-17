@@ -77,11 +77,7 @@ func (in *Module) DeepCopyInto(out *Module) {
 	out.TypeMeta = in.TypeMeta
 	in.ObjectMeta.DeepCopyInto(&out.ObjectMeta)
 	in.Spec.DeepCopyInto(&out.Spec)
-	if in.Status != nil {
-		in, out := &in.Status, &out.Status
-		*out = new(ModuleStatus)
-		(*in).DeepCopyInto(*out)
-	}
+	in.Status.DeepCopyInto(&out.Status)
 	if in.History != nil {
 		in, out := &in.History, &out.History
 		*out = make([]HistoryEntry, len(*in))
