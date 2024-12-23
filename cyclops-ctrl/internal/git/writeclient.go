@@ -29,7 +29,8 @@ func NewWriteClient(templatesResolver auth.TemplatesResolver) *WriteClient {
 }
 
 func (c *WriteClient) Write(module cyclopsv1alpha1.Module) error {
-	module.Status = cyclopsv1alpha1.ModuleStatus{}
+	module.Status.ReconciliationStatus = nil
+	module.Status.ManagedGVRs = nil
 
 	repoURL, exists := module.GetAnnotations()[cyclopsv1alpha1.GitOpsWriteRepoAnnotation]
 	if !exists {
