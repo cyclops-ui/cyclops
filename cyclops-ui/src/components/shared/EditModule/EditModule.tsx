@@ -197,6 +197,7 @@ export const EditModuleComponent = ({
     fetchModuleData();
   }, [
     editTemplateForm,
+    gitOpsWriteForm,
     fetchModule,
     form,
     getTemplate,

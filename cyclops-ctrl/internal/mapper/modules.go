@@ -21,7 +21,7 @@ func RequestToModule(req dto.Module) (cyclopsv1alpha1.Module, error) {
 	}
 
 	annotations := make(map[string]string)
-	if req.GitOpsWrite != nil {
+	if req.GitOpsWrite != nil && len(req.GitOpsWrite.Repo) != 0 {
 		annotations[cyclopsv1alpha1.GitOpsWriteRepoAnnotation] = req.GitOpsWrite.Repo
 		annotations[cyclopsv1alpha1.GitOpsWritePathAnnotation] = req.GitOpsWrite.Path
 		annotations[cyclopsv1alpha1.GitOpsWriteRevisionAnnotation] = req.GitOpsWrite.Branch
@@ -49,20 +49,28 @@ func RequestToModule(req dto.Module) (cyclopsv1alpha1.Module, error) {
 
 func ModuleToDTO(module cyclopsv1alpha1.Module) (dto.Module, error) {
 	return dto.Module{
-		Name:            module.Name,
-		Namespace:       module.Namespace,
-		TargetNamespace: mapTargetNamespace(module.Spec.TargetNamespace),
-		Version:         module.Spec.TemplateRef.Version,
-		Template:        k8sTemplateRefToDTO(module.Spec.TemplateRef, module.Status.TemplateResolvedVersion),
-		Values:          module.Spec.Values,
-		IconURL:         module.Status.IconURL,
-		GitOpsWrite:     mapGitOpsWrite(module),
-		ReconciliationStatus: dto.ReconciliationStatus{
-			Status: dto.ReconciliationStatusState(module.Status.ReconciliationStatus.Status),
-			Reason: module.Status.ReconciliationStatus.Reason,
-			Errors: module.Status.ReconciliationStatus.Errors,
-		},
+		Name:                 module.Name,
+		Namespace:            module.Namespace,
+		TargetNamespace:      mapTargetNamespace(module.Spec.TargetNamespace),
+		Version:              module.Spec.TemplateRef.Version,
+		Template:             k8sTemplateRefToDTO(module.Spec.TemplateRef, module.Status.TemplateResolvedVersion),
+		Values:               module.Spec.Values,
+		IconURL:              module.Status.IconURL,
+		GitOpsWrite:          mapGitOpsWrite(module),
+		ReconciliationStatus: ReconciliationStatusToDTO(module.Status.ReconciliationStatus),
 	}, nil
+}
+
+func ReconciliationStatusToDTO(status *cyclopsv1alpha1.ReconciliationStatus) dto.ReconciliationStatus {
+	if status == nil {
+		return dto.ReconciliationStatus{Status: dto.Unknown}
+	}
+
+	return dto.ReconciliationStatus{
+		Status: dto.ReconciliationStatusState(status.Status),
+		Reason: status.Reason,
+		Errors: status.Errors,
+	}
 }
 
 func ModuleListToDTO(modules []cyclopsv1alpha1.Module) []dto.Module {
