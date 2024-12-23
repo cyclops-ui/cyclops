@@ -284,7 +284,7 @@ func (m *Modules) CreateModule(ctx *gin.Context) {
 
 	m.telemetryClient.ModuleCreation()
 
-	if len(module.GetAnnotations()[v1alpha1.GitOpsWriteRepoAnnotation]) != 0 {
+	if module.GetAnnotations() != nil && len(module.GetAnnotations()[v1alpha1.GitOpsWriteRepoAnnotation]) != 0 {
 		err := m.gitWriteClient.Write(module)
 		if err != nil {
 			fmt.Println(err)
@@ -340,6 +340,11 @@ func (m *Modules) UpdateModule(ctx *gin.Context) {
 
 	annotations := curr.GetAnnotations()
 	moduleAnnotations := module.GetAnnotations()
+
+	if annotations == nil {
+		annotations = make(map[string]string)
+	}
+
 	if moduleAnnotations != nil {
 		if _, ok := moduleAnnotations["cyclops-ui.com/write-repo"]; ok {
 			annotations["cyclops-ui.com/write-repo"] = moduleAnnotations["cyclops-ui.com/write-repo"]
