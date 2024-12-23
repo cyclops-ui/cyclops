@@ -349,13 +349,24 @@ func (m *Modules) UpdateModule(ctx *gin.Context) {
 		if _, ok := moduleAnnotations["cyclops-ui.com/write-repo"]; ok {
 			annotations["cyclops-ui.com/write-repo"] = moduleAnnotations["cyclops-ui.com/write-repo"]
 		}
-		if _, ok := moduleAnnotations["cyclops-ui.com/write-repo"]; ok {
+		if _, ok := moduleAnnotations["cyclops-ui.com/write-path"]; ok {
 			annotations["cyclops-ui.com/write-path"] = moduleAnnotations["cyclops-ui.com/write-path"]
 		}
 		if _, ok := moduleAnnotations["cyclops-ui.com/write-revision"]; ok {
 			annotations["cyclops-ui.com/write-revision"] = moduleAnnotations["cyclops-ui.com/write-revision"]
 		}
 	}
+
+	if len(moduleAnnotations) == 0 || len(moduleAnnotations[v1alpha1.GitOpsWriteRepoAnnotation]) == 0 {
+		delete(annotations, v1alpha1.GitOpsWriteRepoAnnotation)
+	}
+	if len(moduleAnnotations) == 0 || len(moduleAnnotations[v1alpha1.GitOpsWritePathAnnotation]) == 0 {
+		delete(annotations, v1alpha1.GitOpsWritePathAnnotation)
+	}
+	if len(moduleAnnotations) == 0 || len(moduleAnnotations[v1alpha1.GitOpsWriteRevisionAnnotation]) == 0 {
+		delete(annotations, v1alpha1.GitOpsWriteRevisionAnnotation)
+	}
+
 	delete(annotations, "kubectl.kubernetes.io/last-applied-configuration")
 	module.SetAnnotations(annotations)
 
