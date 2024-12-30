@@ -3,6 +3,7 @@ import { Card, Button, Typography, Row, Col, ConfigProvider } from "antd";
 import styles from "./index.module.css";
 import yaml from "/static/img/yaml_background.png";
 import AdoptersPlanSignup from "../components/AdoptersPlanSignup/AdoptersPlanSignup";
+import CalendlyWidget from "../components/CalendlyWidget";
 
 const { Paragraph } = Typography;
 
