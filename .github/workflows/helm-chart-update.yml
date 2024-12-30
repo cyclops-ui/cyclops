@@ -60,7 +60,7 @@ jobs:
           ls -lah
           
           mkdir -p cyclops-ui.github.io/helm
-          cp -r ./packaged/* cyclops-ui.github.io/helm/
+          cp -r ./install/packaged/* cyclops-ui.github.io/helm/
           cd cyclops-ui.github.io
           git config user.name 'github-actions[bot]'
           git config user.email 'github-actions[bot]@users.noreply.github.com'
