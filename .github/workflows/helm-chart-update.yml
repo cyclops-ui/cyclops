@@ -40,7 +40,6 @@ jobs:
           mkdir -p ../packaged
           helm package . -d ../packaged
 
-
       - name: Checkout Target Repository
         uses: actions/checkout@v3
         with:
@@ -52,7 +51,10 @@ jobs:
       - name: Sync Packaged Helm Charts
         run: |
           cp -r ./install/packaged/* cyclops-ui.github.io/helm/
-          cd cyclops-ui.github.io
+          cd cyclops-ui.github.io/helm
+          
+          helm repo index . --url https://cyclops-ui.github.io/helm
+          
           git config user.name 'github-actions[bot]'
           git config user.email 'github-actions[bot]@users.noreply.github.com'
           git add helm/
