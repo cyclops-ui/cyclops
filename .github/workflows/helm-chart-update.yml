@@ -40,10 +40,6 @@ jobs:
           mkdir -p ../packaged
           helm package . -d ../packaged
 
-      - name: print
-        run: |
-          ls install
-          ls -lah install/packaged
 
       - name: Checkout Target Repository
         uses: actions/checkout@v3
