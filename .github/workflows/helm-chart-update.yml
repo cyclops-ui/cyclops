@@ -40,25 +40,20 @@ jobs:
           mkdir -p ../packaged
           helm package . -d ../packaged
 
-      - name: Update Index.yaml
-        working-directory: install/chart
-        run: |
-          helm repo index ../packaged --url https://cyclops-ui.github.io/helm
-
       - name: print
         run: |
           ls install
           ls -lah install/packaged
           cat install/packaged/index.yaml
 
-#      - name: Checkout Target Repository
-#        uses: actions/checkout@v3
-#        with:
-#          repository: cyclops-ui/cyclops-ui.github.io
-#          ref: gh-pages
-#          token: ${{ secrets.TARGET_REPO_TOKEN }}
-#          path: target-repo
-#
+      - name: Checkout Target Repository
+        uses: actions/checkout@v3
+        with:
+          repository: cyclops-ui/cyclops-ui.github.io
+          ref: gh-pages
+          token: ${{ secrets.TARGET_REPO_TOKEN }}
+          path: target-repo
+
 #      - name: Sync Packaged Helm Charts
 #        run: |
 #          mkdir -p target-repo/helm
