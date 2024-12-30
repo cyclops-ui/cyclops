@@ -4,20 +4,68 @@ on:
   push:
     paths:
       - 'install/chart/**'
-    branches:
-      - main
+      - '.github/workflows/helm-chart-update.yml'
+#    branches:
+#      - main
 
 jobs:
-  test:
+#  push-oci:
+#    runs-on: ubuntu-latest
+#    steps:
+#      - uses: actions/checkout@v2
+#      - name: Login to DockerHub
+#        uses: docker/login-action@v1
+#        with:
+#          username: ${{ secrets.DOCKERHUB_USERNAME }}
+#          password: ${{ secrets.DOCKERHUB_TOKEN }}
+#      - name: Push Helm chart to Cyclops OCI
+#        run: |
+#          helm package install/chart
+#          helm push cyclops-chart-$(yq .version install/chart/Chart.yaml).tgz oci://registry-1.docker.io/cyclopsui
+
+  push-helm-repo:
     runs-on: ubuntu-latest
+
     steps:
-      - uses: actions/checkout@v2
-      - name: Login to DockerHub
-        uses: docker/login-action@v1
-        with:
-          username: ${{ secrets.DOCKERHUB_USERNAME }}
-          password: ${{ secrets.DOCKERHUB_TOKEN }}
-      - name: Push Helm chart to Cyclops OCI
+      - name: Checkout Source Repository
+        uses: actions/checkout@v3
+
+      - name: Setup Helm
         run: |
-          helm package install/chart
-          helm push cyclops-chart-$(yq .version install/chart/Chart.yaml).tgz oci://registry-1.docker.io/cyclopsui
+          curl https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3 | bash
+
+      - name: Package Helm Charts
+        working-directory: install/chart
+        run: |
+          mkdir -p ../packaged
+          helm package . -d ../packaged
+
+      - name: Update Index.yaml
+        working-directory: install/chart
+        run: |
+          helm repo index ../packaged --url https://cyclops-ui.github.io/helm
+
+      - name: print
+        run: |
+          ls install
+          ls -lah install/packaged
+          cat install/packaged/index.yaml
+
+#      - name: Checkout Target Repository
+#        uses: actions/checkout@v3
+#        with:
+#          repository: cyclops-ui/cyclops-ui.github.io
+#          ref: gh-pages
+#          token: ${{ secrets.TARGET_REPO_TOKEN }}
+#          path: target-repo
+#
+#      - name: Sync Packaged Helm Charts
+#        run: |
+#          mkdir -p target-repo/helm
+#          cp -r ./packaged/* target-repo/helm/
+#          cd target-repo
+#          git config user.name "GitHub Actions"
+#          git config user.email "actions@github.com"
+#          git add helm/
+#          git commit -m "Update Helm repo on changes to templates"
+#          git push
