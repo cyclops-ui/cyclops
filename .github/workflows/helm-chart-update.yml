@@ -44,7 +44,6 @@ jobs:
         run: |
           ls install
           ls -lah install/packaged
-          cat install/packaged/index.yaml
 
       - name: Checkout Target Repository
         uses: actions/checkout@v3
