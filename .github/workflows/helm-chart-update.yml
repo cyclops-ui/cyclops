@@ -51,6 +51,7 @@ jobs:
           repository: cyclops-ui/cyclops-ui.github.io
           ref: gh-pages
 #          token: ${{ secrets.TARGET_REPO_TOKEN }}
+          path: cyclops-ui.github.io
 
       - name: Sync Packaged Helm Charts
         run: |
