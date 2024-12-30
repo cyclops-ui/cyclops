@@ -4,9 +4,9 @@ on:
   push:
     paths:
       - 'install/chart/**'
-      - '.github/workflows/helm-chart-update.yml'
-#    branches:
-#      - main
+#      - '.github/workflows/helm-chart-update.yml'
+    branches:
+      - main
 
 jobs:
   push-oci:
