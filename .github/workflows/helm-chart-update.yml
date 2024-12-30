@@ -55,7 +55,7 @@ jobs:
       - name: Sync Packaged Helm Charts
         run: |
           git status
-          ls -lah
+          ls -lah ..
           
           mkdir -p cyclops-ui.github.io/helm
           cp -r ./packaged/* cyclops-ui.github.io/helm/
