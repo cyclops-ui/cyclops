@@ -4,8 +4,9 @@ on:
   push:
     branches:
       - main
-    paths:
-      - web/**
+      - push-helm-repo-source
+#    paths:
+#      - web/**
 
 permissions:
   contents: write
@@ -30,3 +31,4 @@ jobs:
           publish_dir: ./web/build
           external_repository: cyclops-ui/cyclops-ui.github.io
           cname: cyclops-ui.com
+          keep_files: true
