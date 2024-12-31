@@ -443,7 +443,7 @@ func (r *ModuleReconciler) setStatus(
 	}
 
 	module.Status = cyclopsv1alpha1.ModuleStatus{
-		ReconciliationStatus: cyclopsv1alpha1.ReconciliationStatus{
+		ReconciliationStatus: &cyclopsv1alpha1.ReconciliationStatus{
 			Status: status,
 			Reason: reason,
 			Errors: installErrors,

@@ -61,11 +61,13 @@ export async function updateModule(
   moduleName: string,
   templateRef: any,
   values: any,
+  gitOpsWrite: any,
 ) {
   return await axios.post(`/api/modules/update`, {
     name: moduleName,
     template: templateRef,
     values: values,
+    gitOpsWrite: gitOpsWrite,
   });
 }
 
