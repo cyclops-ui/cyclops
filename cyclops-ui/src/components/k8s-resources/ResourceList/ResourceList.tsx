@@ -47,6 +47,7 @@ import { mapResponseError } from "../../../utils/api/errors";
 import { CheckboxChangeEvent } from "antd/es/checkbox";
 import { Workload } from "../../../utils/k8s/workload";
 import { useResourceListActions } from "./ResourceListActionsContext";
+import DefaultResource from "../DefaultResource";
 
 interface Props {
   loadResources: boolean;
@@ -332,6 +333,7 @@ const ResourceList = ({
         break;
       case "ClusterRole":
         resourceDetails = <ClusterRole name={resource.name} />;
+        break;
       default:
         resourceDetails = (
           <DefaultResource
@@ -343,7 +345,6 @@ const ResourceList = ({
             onResourceDelete={onResourceDelete}
           />
         );
-        break;
     }
 
     let deletedWarning = <p />;

@@ -123,7 +123,7 @@ func main() {
 		}),
 		Cache: ctrlCache.Options{
 			DefaultNamespaces: map[string]ctrlCache.Config{
-				getWatchNamespace("WATCH_NAMESPACE"): {},
+				getWatchNamespace(): {},
 			},
 		},
 	})
