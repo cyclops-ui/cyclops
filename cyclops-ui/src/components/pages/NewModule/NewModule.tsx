@@ -12,7 +12,6 @@ import {
   Modal,
   Spin,
   notification,
-  Progress,
 } from "antd";
 import axios from "axios";
 import {
