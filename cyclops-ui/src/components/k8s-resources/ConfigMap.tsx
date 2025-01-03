@@ -1,8 +1,8 @@
-import React, { useEffect, useState } from "react";
-import { Divider, Row, Alert, Descriptions } from "antd";
-import axios from "axios";
+import { Divider, Row, Alert, Descriptions, Spin } from "antd";
+import React, { useCallback, useEffect, useState } from "react";
 import ReactAce from "react-ace";
 import { mapResponseError } from "../../utils/api/errors";
+import { useResourceListActions } from "./ResourceList/ResourceListActionsContext";
 
 interface Props {
   name: string;
@@ -10,38 +10,35 @@ interface Props {
 }
 
 const ConfigMap = ({ name, namespace }: Props) => {
+  const { fetchResource } = useResourceListActions();
+
+  const [loading, setLoading] = useState(true);
+
   const [configMap, setConfigMap] = useState({});
   const [error, setError] = useState({
     message: "",
     description: "",
   });
 
-  useEffect(() => {
-    function fetchConfigMap() {
-      axios
-        .get(`/api/resources`, {
-          params: {
-            group: ``,
-            version: `v1`,
-            kind: `ConfigMap`,
-            name: name,
-            namespace: namespace,
-          },
-        })
-        .then((res) => {
-          setConfigMap(res.data);
-        })
-        .catch((error) => {
-          setError(mapResponseError(error));
-        });
-    }
+  const fetchConfigMap = useCallback(() => {
+    fetchResource("", "v1", "ConfigMap", namespace, name)()
+      .then((res) => {
+        setConfigMap(res);
+        setLoading(false);
+      })
+      .catch((error) => {
+        setError(mapResponseError(error));
+        setLoading(false);
+      });
+  }, [name, namespace, fetchResource]);
 
+  useEffect(() => {
     fetchConfigMap();
     const interval = setInterval(() => fetchConfigMap(), 15000);
     return () => {
       clearInterval(interval);
     };
-  }, [name, namespace]);
+  }, [fetchConfigMap]);
 
   const configMapData = (configMap: any) => {
     if (configMap.data) {
@@ -102,6 +99,8 @@ const ConfigMap = ({ name, namespace }: Props) => {
         return "text";
     }
   };
+
+  if (loading) return <Spin size="large" style={{ marginTop: "20px" }} />;
 
   return (
     <div>

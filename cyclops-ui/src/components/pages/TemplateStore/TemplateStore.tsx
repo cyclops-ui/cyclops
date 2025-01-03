@@ -12,6 +12,9 @@ import {
   message,
   Spin,
   notification,
+  Radio,
+  Popover,
+  Checkbox,
 } from "antd";
 import axios from "axios";
 import Title from "antd/es/typography/Title";
@@ -19,9 +22,10 @@ import {
   DeleteOutlined,
   EditOutlined,
   FileSyncOutlined,
+  FilterOutlined,
 } from "@ant-design/icons";
 import classNames from "classnames";
-import styles from "./styles.module.css";
+import "./custom.css";
 import { mapResponseError } from "../../../utils/api/errors";
 import defaultTemplate from "../../../static/img/default-template-icon.png";
 import {
@@ -29,8 +33,13 @@ import {
   FormValidationErrors,
 } from "../../errors/FormValidationErrors";
 
+import gitLogo from "../../../static/img/git.png";
+import helmLogo from "../../../static/img/helm.png";
+import dockerLogo from "../../../static/img/docker-mark-blue.png";
+
 const TemplateStore = () => {
   const [templates, setTemplates] = useState([]);
+  const [query, setQuery] = useState("");
   const [filteredTemplates, setFilteredTemplates] = useState([]);
   const [confirmDelete, setConfirmDelete] = useState("");
   const [confirmDeleteInput, setConfirmDeleteInput] = useState("");
@@ -47,6 +56,10 @@ const TemplateStore = () => {
     message: "",
     description: "",
   });
+
+  const sourceTypeFilter = ["git", "helm", "oci", "unknown"];
+  const [templateSourceTypeFilter, setTemplateSourceTypeFilter] =
+    useState<string[]>(sourceTypeFilter);
 
   const [addForm] = Form.useForm();
   const [editForm] = Form.useForm();
@@ -73,14 +86,24 @@ const TemplateStore = () => {
       });
   }, []);
 
-  const handleSearch = (event: any) => {
-    const query = event.target.value;
+  useEffect(() => {
     var updatedList = [...templates];
-    updatedList = updatedList.filter((template: any) => {
-      return template.name.toLowerCase().indexOf(query.toLowerCase()) !== -1;
-    });
+    updatedList = updatedList
+      .filter((template: any) => {
+        return (
+          template.name.toLowerCase().indexOf(query.toLowerCase().trim()) !== -1
+        );
+      })
+      .filter((template: any) => {
+        if (
+          !template.ref.sourceType &&
+          templateSourceTypeFilter.includes("unknown")
+        )
+          return true;
+        else return templateSourceTypeFilter.includes(template.ref.sourceType);
+      });
     setFilteredTemplates(updatedList);
-  };
+  }, [templateSourceTypeFilter, query, templates]);
 
   const onSubmitFailed = (
     errors: Array<{ message: string; description: string }>,
@@ -146,7 +169,7 @@ const TemplateStore = () => {
       });
       await axios
         .get(
-          `/api/templates?repo=${templateInfo.repo}&path=${templateInfo.path}&commit=${templateInfo.version}`,
+          `/api/templates?repo=${templateInfo.repo}&path=${templateInfo.path}&commit=${templateInfo.version}&sourceType=${templateInfo.sourceType}`,
         )
         .then(() => {
           setRequestStatus((prevStatus) => ({
@@ -176,12 +199,15 @@ const TemplateStore = () => {
     path: string,
     version: string,
     templateName: string,
+    sourceType: string,
   ) => {
     setLoadingTemplateName((prevState) => {
       return { ...prevState, [templateName]: true };
     });
     axios
-      .get(`/api/templates?repo=${repo}&path=${path}&commit=${version}`)
+      .get(
+        `/api/templates?repo=${repo}&path=${path}&commit=${version}&sourceType=${sourceType}`,
+      )
       .then((res) => {
         setLoadingTemplateName((prevState) => {
           return { ...prevState, [templateName]: false };
@@ -228,6 +254,24 @@ const TemplateStore = () => {
 
   const handleCancelDeleteModal = () => {
     setConfirmDelete("");
+  };
+
+  const templateFilterPopover = () => {
+    return (
+      <Checkbox.Group
+        style={{ display: "block" }}
+        onChange={(selectedItems: any[]) =>
+          setTemplateSourceTypeFilter(selectedItems)
+        }
+        value={templateSourceTypeFilter}
+      >
+        {sourceTypeFilter.map((item, index) => (
+          <Checkbox key={index} value={item}>
+            {item}
+          </Checkbox>
+        ))}
+      </Checkbox.Group>
+    );
   };
 
   return (
@@ -281,7 +325,14 @@ const TemplateStore = () => {
           <Input
             placeholder={"Search templates"}
             style={{ width: "30%", marginBottom: "1rem" }}
-            onChange={handleSearch}
+            onChange={(event) => setQuery(event.target.value)}
+            addonAfter={
+              <>
+                <Popover content={templateFilterPopover()} trigger="click">
+                  <FilterOutlined />
+                </Popover>
+              </>
+            }
           ></Input>
         </Col>
       </Row>
@@ -355,10 +406,9 @@ const TemplateStore = () => {
                   <Spin />
                 ) : (
                   <FileSyncOutlined
-                    className={classNames(styles.statustemplate, {
-                      [styles.success]:
-                        requestStatus[template.name] === "success",
-                      [styles.error]: requestStatus[template.name] === "error",
+                    className={classNames("statustemplate", {
+                      success: requestStatus[template.name] === "success",
+                      error: requestStatus[template.name] === "error",
                     })}
                     onClick={function () {
                       checkTemplateReference(
@@ -366,6 +416,7 @@ const TemplateStore = () => {
                         template.ref.path,
                         template.ref.version,
                         template.name,
+                        template.ref.sourceType,
                       );
                     }}
                   />
@@ -379,8 +430,12 @@ const TemplateStore = () => {
             render={(template) => (
               <>
                 <EditOutlined
-                  className={styles.edittemplate}
+                  className={"edittemplate"}
                   onClick={function () {
+                    editForm.setFieldValue(
+                      ["ref", "sourceType"],
+                      template.ref.sourceType,
+                    );
                     editForm.setFieldValue(["ref", "repo"], template.ref.repo);
                     editForm.setFieldValue(["ref", "path"], template.ref.path);
                     editForm.setFieldValue(
@@ -399,7 +454,7 @@ const TemplateStore = () => {
             render={(template) => (
               <>
                 <DeleteOutlined
-                  className={styles.deletetemplate}
+                  className={"deletetemplate"}
                   onClick={function () {
                     setConfirmDelete(template.name);
                   }}
@@ -465,6 +520,34 @@ const TemplateStore = () => {
           <Divider />
 
           <Form.Item
+            name={["ref", "sourceType"]}
+            label="Select template source"
+          >
+            <Radio.Group
+              optionType="button"
+              style={{ width: "100%" }}
+              className={"templatetypes"}
+            >
+              <Radio value="git" className={"templatetype"}>
+                <img src={gitLogo} alt="git" className={"templatetypeicon"} />
+                Git
+              </Radio>
+              <Radio value="helm" className={"templatetype"}>
+                <img src={helmLogo} alt="helm" className={"templatetypeicon"} />
+                Helm repo
+              </Radio>
+              <Radio value="oci" className={"templatetype"}>
+                <img
+                  src={dockerLogo}
+                  alt="docker"
+                  className={"templatetypeicon"}
+                />
+                OCI registry
+              </Radio>
+            </Radio.Group>
+          </Form.Item>
+
+          <Form.Item
             label="Repository URL"
             name={["ref", "repo"]}
             rules={[{ required: true, message: "Repo URL is required" }]}
@@ -521,6 +604,33 @@ const TemplateStore = () => {
           labelCol={{ span: 6 }}
         >
           <Form.Item
+            name={["ref", "sourceType"]}
+            label="Select template source"
+          >
+            <Radio.Group
+              optionType="button"
+              style={{ width: "100%" }}
+              className={"templatetypes"}
+            >
+              <Radio value="git" className={"templatetype"}>
+                <img src={gitLogo} alt="git" className={"templatetypeicon"} />
+                Git
+              </Radio>
+              <Radio value="helm" className={"templatetype"}>
+                <img src={helmLogo} alt="helm" className={"templatetypeicon"} />
+                Helm repo
+              </Radio>
+              <Radio value="oci" className={"templatetype"}>
+                <img
+                  src={dockerLogo}
+                  alt="docker"
+                  className={"templatetypeicon"}
+                />
+                OCI registry
+              </Radio>
+            </Radio.Group>
+          </Form.Item>
+          <Form.Item
             label="Repository URL"
             name={["ref", "repo"]}
             rules={[{ required: true, message: "Repo URL is required" }]}
@@ -542,7 +652,12 @@ const TemplateStore = () => {
         </Form>
       </Modal>
       <Modal
-        title="Delete template ref"
+        title={
+          <>
+            Delete template reference{" "}
+            <span style={{ color: "red" }}>{confirmDelete}</span>
+          </>
+        }
         open={confirmDelete.length > 0}
         onCancel={handleCancelDeleteModal}
         width={"40%"}

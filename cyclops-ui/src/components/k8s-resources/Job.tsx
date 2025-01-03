@@ -1,8 +1,8 @@
 import React, { useCallback, useEffect, useState } from "react";
-import { Col, Divider, Row, Alert } from "antd";
-import axios from "axios";
+import { Col, Divider, Row, Alert, Spin } from "antd";
 import { mapResponseError } from "../../utils/api/errors";
 import PodTable from "./common/PodTable/PodTable";
+import { useResourceListActions } from "./ResourceList/ResourceListActionsContext";
 
 interface Props {
   name: string;
@@ -10,6 +10,9 @@ interface Props {
 }
 
 const Job = ({ name, namespace }: Props) => {
+  const { fetchResource } = useResourceListActions();
+
+  const [loading, setLoading] = useState(true);
   const [job, setJob] = useState({
     status: "",
     pods: [],
@@ -21,23 +24,16 @@ const Job = ({ name, namespace }: Props) => {
   });
 
   const fetchJob = useCallback(() => {
-    axios
-      .get(`/api/resources`, {
-        params: {
-          group: `batch`,
-          version: `v1`,
-          kind: `Job`,
-          name: name,
-          namespace: namespace,
-        },
-      })
+    fetchResource("batch", "v1", "Job", namespace, name)()
       .then((res) => {
-        setJob(res.data);
+        setJob(res);
+        setLoading(false);
       })
       .catch((error) => {
         setError(mapResponseError(error));
+        setLoading(false);
       });
-  }, [name, namespace]);
+  }, [name, namespace, fetchResource]);
 
   useEffect(() => {
     fetchJob();
@@ -46,6 +42,8 @@ const Job = ({ name, namespace }: Props) => {
       clearInterval(interval);
     };
   }, [fetchJob]);
+
+  if (loading) return <Spin size="large" style={{ marginTop: "20px" }} />;
 
   return (
     <div>

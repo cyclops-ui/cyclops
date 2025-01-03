@@ -1,15 +1,21 @@
 import React, { useCallback, useEffect, useState } from "react";
-import { Col, Divider, Row, Alert } from "antd";
-import axios from "axios";
+import { Col, Divider, Row, Alert, Spin } from "antd";
 import { mapResponseError } from "../../utils/api/errors";
 import PodTable from "./common/PodTable/PodTable";
+import { isStreamingEnabled } from "../../utils/api/common";
+import { useResourceListActions } from "./ResourceList/ResourceListActionsContext";
 
 interface Props {
   name: string;
   namespace: string;
+  workload: any;
 }
 
-const DaemonSet = ({ name, namespace }: Props) => {
+const DaemonSet = ({ name, namespace, workload }: Props) => {
+  const { fetchResource, streamingDisabled } = useResourceListActions();
+
+  const [loading, setLoading] = useState(true);
+
   const [daemonSet, setDaemonSet] = useState({
     status: "",
     pods: [],
@@ -21,31 +27,49 @@ const DaemonSet = ({ name, namespace }: Props) => {
   });
 
   const fetchDaemonSet = useCallback(() => {
-    axios
-      .get(`/api/resources`, {
-        params: {
-          group: `apps`,
-          version: `v1`,
-          kind: `DaemonSet`,
-          name: name,
-          namespace: namespace,
-        },
-      })
+    fetchResource("apps", "v1", "DaemonSet", namespace, name)()
       .then((res) => {
-        setDaemonSet(res.data);
+        setDaemonSet(res);
+        setLoading(false);
       })
       .catch((error) => {
         setError(mapResponseError(error));
+        setLoading(false);
       });
-  }, [name, namespace]);
+  }, [name, namespace, fetchResource]);
 
   useEffect(() => {
     fetchDaemonSet();
+
+    if (isStreamingEnabled()) {
+      return;
+    }
+
     const interval = setInterval(() => fetchDaemonSet(), 15000);
     return () => {
       clearInterval(interval);
     };
   }, [fetchDaemonSet]);
+
+  function getPods() {
+    if (workload && !streamingDisabled) {
+      return workload.pods;
+    }
+
+    return daemonSet.pods;
+  }
+
+  function getPodsLength() {
+    let pods = getPods();
+
+    if (Array.isArray(pods)) {
+      return pods.length;
+    }
+
+    return 0;
+  }
+
+  if (loading) return <Spin size="large" style={{ marginTop: "20px" }} />;
 
   return (
     <div>
@@ -70,12 +94,12 @@ const DaemonSet = ({ name, namespace }: Props) => {
           orientationMargin="0"
           orientation={"left"}
         >
-          Pods: {daemonSet.pods.length}
+          Replicas: {getPodsLength()}
         </Divider>
         <Col span={24} style={{ overflowX: "auto" }}>
           <PodTable
             namespace={namespace}
-            pods={daemonSet.pods}
+            pods={getPods()}
             updateResourceData={fetchDaemonSet}
           />
         </Col>

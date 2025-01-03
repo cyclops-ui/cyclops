@@ -2,6 +2,8 @@ package mapper
 
 import (
 	"fmt"
+	v1 "k8s.io/api/core/v1"
+	"strings"
 
 	json "github.com/json-iterator/go"
 	apiextensionsv1 "k8s.io/apiextensions-apiserver/pkg/apis/apiextensions/v1"
@@ -27,7 +29,8 @@ func RequestToModule(req dto.Module) (cyclopsv1alpha1.Module, error) {
 			Name: req.Name,
 		},
 		Spec: cyclopsv1alpha1.ModuleSpec{
-			TemplateRef: DtoTemplateRefToK8s(req.Template),
+			TargetNamespace: mapTargetNamespace(req.Namespace),
+			TemplateRef:     DtoTemplateRefToK8s(req.Template),
 			Values: apiextensionsv1.JSON{
 				Raw: data,
 			},
@@ -38,12 +41,13 @@ func RequestToModule(req dto.Module) (cyclopsv1alpha1.Module, error) {
 
 func ModuleToDTO(module cyclopsv1alpha1.Module) (dto.Module, error) {
 	return dto.Module{
-		Name:      module.Name,
-		Namespace: module.Namespace,
-		Version:   module.Spec.TemplateRef.Version,
-		Template:  k8sTemplateRefToDTO(module.Spec.TemplateRef, module.Status.TemplateResolvedVersion),
-		Values:    module.Spec.Values,
-		IconURL:   module.Status.IconURL,
+		Name:            module.Name,
+		Namespace:       module.Namespace,
+		TargetNamespace: mapTargetNamespace(module.Spec.TargetNamespace),
+		Version:         module.Spec.TemplateRef.Version,
+		Template:        k8sTemplateRefToDTO(module.Spec.TemplateRef, module.Status.TemplateResolvedVersion),
+		Values:          module.Spec.Values,
+		IconURL:         module.Status.IconURL,
 		ReconciliationStatus: dto.ReconciliationStatus{
 			Status: dto.ReconciliationStatusState(module.Status.ReconciliationStatus.Status),
 			Reason: module.Status.ReconciliationStatus.Reason,
@@ -72,9 +76,10 @@ func ModuleListToDTO(modules []cyclopsv1alpha1.Module) []dto.Module {
 
 func DtoTemplateRefToK8s(dto dto.Template) cyclopsv1alpha1.TemplateRef {
 	return cyclopsv1alpha1.TemplateRef{
-		URL:     dto.URL,
-		Path:    dto.Path,
-		Version: dto.Version,
+		URL:        dto.URL,
+		Path:       dto.Path,
+		Version:    dto.Version,
+		SourceType: cyclopsv1alpha1.TemplateSourceType(dto.SourceType),
 	}
 }
 
@@ -84,6 +89,7 @@ func k8sTemplateRefToDTO(templateRef cyclopsv1alpha1.TemplateRef, templateResolv
 		Path:            templateRef.Path,
 		Version:         templateRef.Version,
 		ResolvedVersion: templateResolvedVersion,
+		SourceType:      string(templateRef.SourceType),
 	}
 }
 
@@ -136,4 +142,12 @@ func setValuesRecursive(moduleValues map[string]interface{}, fields map[string]m
 	}
 
 	return values, nil
+}
+
+func mapTargetNamespace(targetNamespace string) string {
+	if len(strings.TrimSpace(targetNamespace)) == 0 {
+		return v1.NamespaceDefault
+	}
+
+	return targetNamespace
 }

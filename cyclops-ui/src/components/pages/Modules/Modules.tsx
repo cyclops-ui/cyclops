@@ -13,28 +13,29 @@ import {
   Popover,
   Checkbox,
 } from "antd";
-import { useNavigate } from "react-router";
+
 import axios from "axios";
+
 import Link from "antd/lib/typography/Link";
 
-import styles from "./styles.module.css";
+import "./custom.css";
 import { PlusCircleOutlined, FilterOutlined } from "@ant-design/icons";
 import { mapResponseError } from "../../../utils/api/errors";
 
 const { Title } = Typography;
 
 const Modules = () => {
-  const history = useNavigate();
   const [allData, setAllData] = useState([]);
   const [filteredData, setFilteredData] = useState([]);
   const [loadingModules, setLoadingModules] = useState(false);
   const [moduleHealthFilter, setModuleHealthFilter] = useState<string[]>([
     "Healthy",
     "Unhealthy",
+    "Progressing",
     "Unknown",
   ]);
   const [searchInputFilter, setsearchInputFilter] = useState("");
-  const resourceFilter = ["Healthy", "Unhealthy", "Unknown"];
+  const resourceFilter = ["Healthy", "Unhealthy", "Progressing", "Unknown"];
   const [error, setError] = useState({
     message: "",
     description: "",
@@ -42,18 +43,27 @@ const Modules = () => {
 
   useEffect(() => {
     setLoadingModules(true);
-    axios
-      .get(`/api/modules/list`)
-      .then((res) => {
-        setAllData(res.data);
-        setFilteredData(res.data);
-        setLoadingModules(false);
-      })
-      .catch((error) => {
-        setError(mapResponseError(error));
-        setLoadingModules(false);
-      });
+
+    function fetchModules() {
+      axios
+        .get(`/api/modules/list`)
+        .then((res) => {
+          setAllData(res.data);
+          setLoadingModules(false);
+        })
+        .catch((error) => {
+          setError(mapResponseError(error));
+          setLoadingModules(false);
+        });
+    }
+
+    fetchModules();
+    const interval = setInterval(() => fetchModules(), 10000);
+    return () => {
+      clearInterval(interval);
+    };
   }, []);
+
   useEffect(() => {
     var updatedList = [...allData];
     updatedList = updatedList.filter((module: any) => {
@@ -71,7 +81,7 @@ const Modules = () => {
   }, [moduleHealthFilter, allData, searchInputFilter]);
 
   const handleClick = () => {
-    history("/modules/new");
+    window.location.href = "/modules/new";
   };
   const handleSelectItem = (selectedItems: any[]) => {
     setModuleHealthFilter(selectedItems);
@@ -98,12 +108,16 @@ const Modules = () => {
   };
 
   const getStatusColor = (module: any) => {
-    if (module.status === "undefined") {
-      return "gray";
+    if (module.status === "unknown") {
+      return "#d3d3d3";
     }
 
     if (module.status === "healthy") {
       return "#27D507";
+    }
+
+    if (module.status === "progressing") {
+      return "#ffbf00";
     }
 
     return "#FF0000";
@@ -139,11 +153,40 @@ const Modules = () => {
     if (filteredData.length === 0) {
       return (
         <div style={{ width: "100%" }}>
+          <Col
+            key={filteredData.length + 1}
+            xs={24}
+            sm={12}
+            md={8}
+            lg={8}
+            xl={6}
+          >
+            <a href={"/modules/new"}>
+              <Card className={"addmodulecard"}>
+                <Row
+                  style={{
+                    display: "flex",
+                    justifyContent: "center",
+                    alignItems: "center",
+                    height: "50px",
+                  }}
+                >
+                  <PlusCircleOutlined
+                    style={{ fontSize: "24px", paddingBottom: "8px" }}
+                  />
+                </Row>
+                <Row>
+                  <h3 style={{ margin: 0 }}>Add new module</h3>
+                </Row>
+              </Card>
+            </a>
+          </Col>
           <Empty description="No Modules Found"></Empty>
         </div>
       );
     }
-    return filteredData.map((module: any, index) => (
+
+    let moduleCards = filteredData.map((module: any, index) => (
       <Col key={index} xs={24} sm={12} md={8} lg={8} xl={6}>
         <a href={"/modules/" + module.name}>
           <Card
@@ -166,7 +209,7 @@ const Modules = () => {
               width: "100%",
               maxWidth: "500px",
             }}
-            className={styles.modulecard}
+            className={"modulecard"}
           >
             <Row gutter={[16, 16]}>
               <Col
@@ -241,6 +284,32 @@ const Modules = () => {
         </a>
       </Col>
     ));
+
+    moduleCards.push(
+      <Col key={filteredData.length + 1} xs={24} sm={12} md={8} lg={8} xl={6}>
+        <a href={"/modules/new"}>
+          <Card className={"addmodulecard"}>
+            <Row
+              style={{
+                display: "flex",
+                justifyContent: "center",
+                alignItems: "center",
+                height: "100%",
+              }}
+            >
+              <PlusCircleOutlined
+                style={{ fontSize: "24px", paddingBottom: "8px" }}
+              />
+            </Row>
+            <Row>
+              <h3>Add new module</h3>
+            </Row>
+          </Card>
+        </a>
+      </Col>,
+    );
+
+    return moduleCards;
   };
 
   return (

@@ -9,6 +9,10 @@ import (
 )
 
 func HelmSchemaToFields(name string, schema helm.Property, defs map[string]helm.Property, dependencies []*models.Template) models.Field {
+	if shouldResolvePropertyComposition(schema) {
+		return HelmSchemaToFields(name, resolvePropertyComposition(schema), defs, dependencies)
+	}
+
 	if schema.Type == "array" {
 		return models.Field{
 			Name:        name,
@@ -48,6 +52,10 @@ func HelmSchemaToFields(name string, schema helm.Property, defs map[string]helm.
 			continue
 		}
 
+		if dependency.RootField.Type != "object" {
+			continue
+		}
+
 		fields = append(fields, models.Field{
 			Name:             dependency.Name,
 			Description:      dependency.RootField.Description,
@@ -58,6 +66,7 @@ func HelmSchemaToFields(name string, schema helm.Property, defs map[string]helm.
 			Properties:       dependency.RootField.Properties,
 			Items:            dependency.RootField.Items,
 			Enum:             dependency.RootField.Enum,
+			Suggestions:      dependency.RootField.Suggestions,
 			Required:         dependency.RootField.Required,
 			FileExtension:    dependency.RootField.FileExtension,
 			Minimum:          dependency.RootField.Minimum,
@@ -80,6 +89,7 @@ func HelmSchemaToFields(name string, schema helm.Property, defs map[string]helm.
 		ManifestKey:      name,
 		Properties:       fields,
 		Enum:             schema.Enum,
+		Suggestions:      schema.Suggestions,
 		Required:         schema.Required,
 		FileExtension:    schema.FileExtension,
 		Minimum:          schema.Minimum,
@@ -204,4 +214,27 @@ func resolveJSONSchemaRef(defs map[string]helm.Property, ref []string) helm.Prop
 	}
 
 	return resolveJSONSchemaRef(def.Properties, ref[1:])
+}
+
+func shouldResolvePropertyComposition(schema helm.Property) bool {
+	return len(schema.AnyOf) != 0
+}
+
+func resolvePropertyComposition(schema helm.Property) helm.Property {
+	if len(schema.AnyOf) == 0 {
+		return schema
+	}
+
+	// go over all options of anyOf and if there is a boolean version, return it.
+	// If a field can be represented with a boolean we should use it since it is
+	// the easiest way to input a correct value.
+	//
+	// If there are multiple boolean anyOfs, return the first one.
+	for _, p := range schema.AnyOf {
+		if p.Type == "boolean" {
+			return p
+		}
+	}
+
+	return schema.AnyOf[0]
 }

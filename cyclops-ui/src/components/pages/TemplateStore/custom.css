@@ -1,0 +1,48 @@
+.deletetemplate {
+  color: red;
+  transform: scale(1.2);
+  transition: transform 0.2s;
+}
+
+.deletetemplate:hover {
+  transform: scale(1.4);
+}
+
+.edittemplate {
+  color: #4096ff;
+  transform: scale(1.2);
+  transition: transform 0.2s;
+}
+
+.edittemplate:hover {
+  transform: scale(1.4);
+}
+
+.statustemplate {
+  color: grey;
+  transform: scale(1.2);
+  transition: transform 0.2s;
+}
+
+.success {
+  color: green;
+}
+
+.error {
+  color: red;
+}
+
+.templatetypes {
+  display: flex;
+}
+
+.templatetype {
+  flex: 1; /* Each button takes equal space */
+  text-align: center; /* Ensure the label text is centered */
+}
+
+.templatetypeicon {
+  height: 24px;
+  margin-right: 8px; /* Add space between the image and the text */
+  padding-bottom: 3px;
+}

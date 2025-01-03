@@ -38,6 +38,12 @@ spec:
                       type: string
                     repo:
                       type: string
+                    sourceType:
+                      enum:
+                      - git
+                      - helm
+                      - oci
+                      type: string
                     version:
                       type: string
                   required:
@@ -66,11 +72,19 @@ spec:
           spec:
             description: ModuleSpec defines the desired state of Module
             properties:
+              targetNamespace:
+                type: string
               template:
                 properties:
                   path:
                     type: string
                   repo:
+                    type: string
+                  sourceType:
+                    enum:
+                    - git
+                    - helm
+                    - oci
                     type: string
                   version:
                     type: string

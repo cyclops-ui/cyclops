@@ -26,7 +26,7 @@ type Deployment struct {
 	Namespace string `json:"namespace"`
 	Replicas  int    `json:"replicas"`
 	Pods      []Pod  `json:"pods"`
-	Status    bool   `json:"status"`
+	Status    string `json:"status"`
 	Deleted   bool   `json:"deleted"`
 }
 
@@ -69,7 +69,7 @@ type DaemonSet struct {
 	Name      string `json:"name"`
 	Namespace string `json:"namespace"`
 	Pods      []Pod  `json:"pods"`
-	Status    bool   `json:"status"`
+	Status    string `json:"status"`
 	Deleted   bool   `json:"deleted"`
 }
 
@@ -105,14 +105,21 @@ func (d *DaemonSet) SetDeleted(deleted bool) {
 	d.Deleted = deleted
 }
 
+type ExternalIP struct {
+	IP       string `json:"ip"`
+	Hostname string `json:"hostname"`
+}
+
 type Service struct {
-	Group     string           `json:"group"`
-	Version   string           `json:"version"`
-	Kind      string           `json:"kind"`
-	Name      string           `json:"name"`
-	Namespace string           `json:"namespace"`
-	Ports     []v1.ServicePort `json:"ports"`
-	Deleted   bool             `json:"deleted"`
+	Group       string           `json:"group"`
+	Version     string           `json:"version"`
+	Kind        string           `json:"kind"`
+	Name        string           `json:"name"`
+	Namespace   string           `json:"namespace"`
+	Type        string           `json:"serviceType"`
+	ExternalIPs []*ExternalIP    `json:"externalIPs"`
+	Ports       []v1.ServicePort `json:"ports"`
+	Deleted     bool             `json:"deleted"`
 }
 
 func (s *Service) GetGroupVersionKind() string {
@@ -257,7 +264,7 @@ type StatefulSet struct {
 	Namespace string `json:"namespace"`
 	Replicas  int    `json:"replicas"`
 	Pods      []Pod  `json:"pods"`
-	Status    bool   `json:"status"`
+	Status    string `json:"status"`
 	Deleted   bool   `json:"deleted"`
 }
 
@@ -707,5 +714,47 @@ func (s *Role) GetDeleted() bool {
 }
 
 func (s *Role) SetDeleted(deleted bool) {
+	s.Deleted = deleted
+}
+
+type ClusterRole struct {
+	Group     string              `json:"group"`
+	Version   string              `json:"version"`
+	Kind      string              `json:"kind"`
+	Name      string              `json:"name"`
+	Namespace string              `json:"namespace"`
+	Deleted   bool                `json:"deleted"`
+	Rules     []rbacv1.PolicyRule `json:"rules"`
+}
+
+func (s *ClusterRole) GetGroupVersionKind() string {
+	return s.Group + "/" + s.Version + ", Kind=" + s.Kind
+}
+
+func (s *ClusterRole) GetGroup() string {
+	return s.Group
+}
+
+func (s *ClusterRole) GetVersion() string {
+	return s.Version
+}
+
+func (s *ClusterRole) GetKind() string {
+	return s.Kind
+}
+
+func (s *ClusterRole) GetName() string {
+	return s.Name
+}
+
+func (s *ClusterRole) GetNamespace() string {
+	return s.Namespace
+}
+
+func (s *ClusterRole) GetDeleted() bool {
+	return s.Deleted
+}
+
+func (s *ClusterRole) SetDeleted(deleted bool) {
 	s.Deleted = deleted
 }

@@ -2,45 +2,53 @@ package controller
 
 import (
 	"fmt"
+	"io"
 	"net/http"
 	"os"
 	"strings"
 	"time"
 
+	"sigs.k8s.io/yaml"
+
 	"github.com/gin-gonic/gin"
 
 	"github.com/cyclops-ui/cyclops/cyclops-ctrl/api/v1alpha1"
-	"github.com/cyclops-ui/cyclops/cyclops-ctrl/internal/cluster/k8sclient"
 	"github.com/cyclops-ui/cyclops/cyclops-ctrl/internal/mapper"
 	"github.com/cyclops-ui/cyclops/cyclops-ctrl/internal/models/dto"
 	"github.com/cyclops-ui/cyclops/cyclops-ctrl/internal/prometheus"
 	"github.com/cyclops-ui/cyclops/cyclops-ctrl/internal/telemetry"
 	"github.com/cyclops-ui/cyclops/cyclops-ctrl/internal/template"
 	"github.com/cyclops-ui/cyclops/cyclops-ctrl/internal/template/render"
+	"github.com/cyclops-ui/cyclops/cyclops-ctrl/pkg/cluster/k8sclient"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
 type Modules struct {
-	kubernetesClient *k8sclient.KubernetesClient
-	templatesRepo    *template.Repo
+	kubernetesClient k8sclient.IKubernetesClient
+	templatesRepo    template.ITemplateRepo
 	renderer         *render.Renderer
-	telemetryClient  telemetry.Client
-	monitor          prometheus.Monitor
+
+	moduleTargetNamespace string
+
+	telemetryClient telemetry.Client
+	monitor         prometheus.Monitor
 }
 
 func NewModulesController(
-	templatesRepo *template.Repo,
-	kubernetes *k8sclient.KubernetesClient,
+	templatesRepo template.ITemplateRepo,
+	kubernetes k8sclient.IKubernetesClient,
 	renderer *render.Renderer,
+	moduleTargetNamespace string,
 	telemetryClient telemetry.Client,
 	monitor prometheus.Monitor,
 ) *Modules {
 	return &Modules{
-		kubernetesClient: kubernetes,
-		templatesRepo:    templatesRepo,
-		renderer:         renderer,
-		telemetryClient:  telemetryClient,
-		monitor:          monitor,
+		kubernetesClient:      kubernetes,
+		templatesRepo:         templatesRepo,
+		renderer:              renderer,
+		moduleTargetNamespace: moduleTargetNamespace,
+		telemetryClient:       telemetryClient,
+		monitor:               monitor,
 	}
 }
 
@@ -50,7 +58,7 @@ func (m *Modules) GetModule(ctx *gin.Context) {
 	module, err := m.kubernetesClient.GetModule(ctx.Param("name"))
 	if err != nil {
 		fmt.Println(err)
-		ctx.Status(http.StatusInternalServerError)
+		ctx.JSON(http.StatusInternalServerError, dto.NewError("Error fetching module", err.Error()))
 		return
 	}
 
@@ -62,6 +70,32 @@ func (m *Modules) GetModule(ctx *gin.Context) {
 	}
 
 	ctx.JSON(http.StatusOK, moduleDTO)
+}
+
+func (m *Modules) GetRawModuleManifest(ctx *gin.Context) {
+	ctx.Header("Access-Control-Allow-Origin", "*")
+
+	module, err := m.kubernetesClient.GetModule(ctx.Param("name"))
+	if err != nil {
+		fmt.Println(err)
+		ctx.Status(http.StatusInternalServerError)
+		return
+	}
+
+	module.History = []v1alpha1.HistoryEntry{}
+	module.ObjectMeta.ManagedFields = []metav1.ManagedFieldsEntry{}
+
+	module.Kind = "Module"
+	module.APIVersion = "cyclops-ui.com/v1alpha1"
+
+	data, err := yaml.Marshal(module)
+	if err != nil {
+		fmt.Println(err)
+		ctx.JSON(http.StatusInternalServerError, dto.NewError("Error marshaling module", err.Error()))
+		return
+	}
+
+	ctx.Data(http.StatusOK, gin.MIMEYAML, data)
 }
 
 func (m *Modules) ListModules(ctx *gin.Context) {
@@ -131,6 +165,8 @@ func (m *Modules) Manifest(ctx *gin.Context) {
 		request.TemplateRef.URL,
 		request.TemplateRef.Path,
 		request.TemplateRef.Version,
+		"",
+		request.TemplateRef.SourceType,
 	)
 	if err != nil {
 		fmt.Println(err)
@@ -144,9 +180,10 @@ func (m *Modules) Manifest(ctx *gin.Context) {
 		},
 		Spec: v1alpha1.ModuleSpec{
 			TemplateRef: v1alpha1.TemplateRef{
-				URL:     request.TemplateRef.URL,
-				Path:    request.TemplateRef.Path,
-				Version: request.TemplateRef.Version,
+				URL:        request.TemplateRef.URL,
+				Path:       request.TemplateRef.Path,
+				Version:    request.TemplateRef.Version,
+				SourceType: request.TemplateRef.SourceType,
 			},
 			Values: request.Values,
 		},
@@ -177,6 +214,8 @@ func (m *Modules) CurrentManifest(ctx *gin.Context) {
 		module.Spec.TemplateRef.URL,
 		module.Spec.TemplateRef.Path,
 		module.Spec.TemplateRef.Version,
+		module.Status.TemplateResolvedVersion,
+		module.Spec.TemplateRef.SourceType,
 	)
 	if err != nil {
 		fmt.Println(err)
@@ -234,6 +273,10 @@ func (m *Modules) CreateModule(ctx *gin.Context) {
 		return
 	}
 
+	if len(m.moduleTargetNamespace) > 0 {
+		module.Spec.TargetNamespace = m.moduleTargetNamespace
+	}
+
 	m.telemetryClient.ModuleCreation()
 
 	err = m.kubernetesClient.CreateModule(module)
@@ -279,9 +322,10 @@ func (m *Modules) UpdateModule(ctx *gin.Context) {
 	module.History = append([]v1alpha1.HistoryEntry{{
 		Generation: curr.Generation,
 		TemplateRef: v1alpha1.HistoryTemplateRef{
-			URL:     curr.Spec.TemplateRef.URL,
-			Path:    curr.Spec.TemplateRef.Path,
-			Version: curr.Status.TemplateResolvedVersion,
+			URL:        curr.Spec.TemplateRef.URL,
+			Path:       curr.Spec.TemplateRef.Path,
+			Version:    curr.Status.TemplateResolvedVersion,
+			SourceType: curr.Spec.TemplateRef.SourceType,
 		},
 		Values: curr.Spec.Values,
 	}}, history...)
@@ -292,10 +336,15 @@ func (m *Modules) UpdateModule(ctx *gin.Context) {
 
 	module.SetResourceVersion(curr.GetResourceVersion())
 
+	module.Spec.TemplateRef.SourceType = curr.Spec.TemplateRef.SourceType
+
 	module.Status.TemplateResolvedVersion = request.Template.ResolvedVersion
 	module.Status.ReconciliationStatus = curr.Status.ReconciliationStatus
 	module.Status.IconURL = curr.Status.IconURL
 	module.Status.ManagedGVRs = curr.Status.ManagedGVRs
+
+	module.Spec.TargetNamespace = curr.Spec.TargetNamespace
+	module.SetLabels(curr.GetLabels())
 
 	result, err := m.kubernetesClient.UpdateModuleStatus(&module)
 	if err != nil {
@@ -366,6 +415,8 @@ func (m *Modules) ResourcesForModule(ctx *gin.Context) {
 		module.Spec.TemplateRef.URL,
 		module.Spec.TemplateRef.Path,
 		templateVersion,
+		module.Status.TemplateResolvedVersion,
+		module.Spec.TemplateRef.SourceType,
 	)
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, dto.NewError("Error fetching template", err.Error()))
@@ -381,12 +432,12 @@ func (m *Modules) ResourcesForModule(ctx *gin.Context) {
 
 	manifest, err := m.renderer.HelmTemplate(*module, t)
 	if err != nil {
-		fmt.Println(err)
+		fmt.Println("error rendering manifest", err)
 		ctx.JSON(http.StatusInternalServerError, dto.NewError("Error rendering Module manifest", err.Error()))
 		return
 	}
 
-	resources, err = m.kubernetesClient.GetDeletedResources(resources, manifest)
+	resources, err = m.kubernetesClient.GetDeletedResources(resources, manifest, module.Spec.TargetNamespace)
 	if err != nil {
 		fmt.Println(err)
 		ctx.JSON(http.StatusInternalServerError, dto.NewError("Error fetching deleted module resources", err.Error()))
@@ -410,6 +461,8 @@ func (m *Modules) Template(ctx *gin.Context) {
 		module.Spec.TemplateRef.URL,
 		module.Spec.TemplateRef.Path,
 		module.Spec.TemplateRef.Version,
+		module.Status.TemplateResolvedVersion,
+		module.Spec.TemplateRef.SourceType,
 	)
 	if err != nil {
 		fmt.Println(err)
@@ -428,6 +481,8 @@ func (m *Modules) Template(ctx *gin.Context) {
 		module.Spec.TemplateRef.URL,
 		module.Spec.TemplateRef.Path,
 		module.Spec.TemplateRef.Version,
+		module.Status.TemplateResolvedVersion,
+		module.Spec.TemplateRef.SourceType,
 	)
 	if err != nil {
 		fmt.Println(err)
@@ -464,6 +519,8 @@ func (m *Modules) HelmTemplate(ctx *gin.Context) {
 		module.Spec.TemplateRef.URL,
 		module.Spec.TemplateRef.Path,
 		module.Spec.TemplateRef.Version,
+		module.Status.TemplateResolvedVersion,
+		module.Spec.TemplateRef.SourceType,
 	)
 	if err != nil {
 		fmt.Println(err)
@@ -505,7 +562,7 @@ func (m *Modules) GetLogs(ctx *gin.Context) {
 	ctx.Header("Access-Control-Allow-Origin", "*")
 
 	logCount := int64(100)
-	logs, err := m.kubernetesClient.GetPodLogs(
+	rawLogs, err := m.kubernetesClient.GetPodLogs(
 		ctx.Param("namespace"),
 		ctx.Param("container"),
 		ctx.Param("name"),
@@ -517,7 +574,55 @@ func (m *Modules) GetLogs(ctx *gin.Context) {
 		return
 	}
 
+	logs := make([]string, 0, len(rawLogs))
+	for _, log := range rawLogs {
+		logs = append(logs, trimLogLine(log))
+	}
+
 	ctx.JSON(http.StatusOK, logs)
+}
+
+func (m *Modules) GetLogsStream(ctx *gin.Context) {
+	ctx.Header("Access-Control-Allow-Origin", "*")
+
+	logCount := int64(100)
+
+	logChan := make(chan string)
+
+	go func() {
+		defer close(logChan)
+
+		err := m.kubernetesClient.GetStreamedPodLogs(
+			ctx.Request.Context(), // we will have to pass the context for the k8s podClient - so it can stop the stream when the client disconnects
+			ctx.Param("namespace"),
+			ctx.Param("container"),
+			ctx.Param("name"),
+			&logCount,
+			logChan,
+		)
+		if err != nil {
+			return
+		}
+	}()
+
+	// stream logs to the client
+	ctx.Stream(func(w io.Writer) bool {
+		for {
+			select {
+			case log, ok := <-logChan:
+				if !ok {
+					return false
+				}
+
+				ctx.SSEvent("pod-log", trimLogLine(log))
+				return true
+			case <-ctx.Request.Context().Done():
+				return false
+			case <-ctx.Done():
+				return false
+			}
+		}
+	})
 }
 
 func (m *Modules) GetDeploymentLogs(ctx *gin.Context) {
@@ -685,4 +790,12 @@ func getTargetGeneration(generation string, module *v1alpha1.Module) (*v1alpha1.
 		Spec:       module.Spec,
 		Status:     module.Status,
 	}, true
+}
+
+func trimLogLine(logLine string) string {
+	parts := strings.SplitN(logLine, " ", 2)
+	if len(parts) > 1 {
+		return parts[1]
+	}
+	return logLine
 }

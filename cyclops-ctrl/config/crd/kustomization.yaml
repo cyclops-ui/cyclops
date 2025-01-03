@@ -3,6 +3,8 @@
 # It should be run by config/default
 resources:
 - bases/cyclops-ui.com_modules.yaml
+- bases/cyclops-ui.com_templateauthrules.yaml
+- bases/cyclops-ui.com_templatestores.yaml
 #+kubebuilder:scaffold:crdkustomizeresource
 
 patchesStrategicMerge:

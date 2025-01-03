@@ -166,3 +166,13 @@ group-imports:
 
 unit-test:
 	go test -v -tags musl,dynamic ./...
+
+coverage:
+	go test -v -coverprofile cover.out ./...
+	go tool cover -html cover.out -o cover.html
+	open cover.html
+
+mockery:
+	GOBIN=$(LOCALBIN) go install github.com/vektra/mockery/v2@latest
+	./bin/mockery
+

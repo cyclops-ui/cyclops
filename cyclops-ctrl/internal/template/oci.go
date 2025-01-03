@@ -10,20 +10,24 @@ import (
 	json "github.com/json-iterator/go"
 	"github.com/pkg/errors"
 
+	cyclopsv1alpha1 "github.com/cyclops-ui/cyclops/cyclops-ctrl/api/v1alpha1"
 	"github.com/cyclops-ui/cyclops/cyclops-ctrl/internal/models"
 )
 
-func (r Repo) LoadOCIHelmChart(repo, chart, version string) (*models.Template, error) {
+func (r Repo) LoadOCIHelmChart(repo, chart, version, resolvedVersion string) (*models.Template, error) {
 	var err error
 	strictVersion := version
-	if !isValidVersion(version) {
+
+	if len(resolvedVersion) > 0 {
+		strictVersion = resolvedVersion
+	} else if !isValidVersion(version) {
 		strictVersion, err = getOCIStrictVersion(repo, chart, version)
 		if err != nil {
 			return nil, err
 		}
 	}
 
-	cached, ok := r.cache.GetTemplate(repo, chart, strictVersion)
+	cached, ok := r.cache.GetTemplate(repo, chart, strictVersion, string(cyclopsv1alpha1.TemplateSourceTypeOCI))
 	if ok {
 		return cached, nil
 	}
@@ -47,7 +51,7 @@ func (r Repo) LoadOCIHelmChart(repo, chart, version string) (*models.Template, e
 	template.Version = version
 	template.ResolvedVersion = strictVersion
 
-	r.cache.SetTemplate(repo, chart, strictVersion, template)
+	r.cache.SetTemplate(repo, chart, strictVersion, string(cyclopsv1alpha1.TemplateSourceTypeOCI), template)
 
 	return template, nil
 }
@@ -62,7 +66,7 @@ func (r Repo) LoadOCIHelmChartInitialValues(repo, chart, version string) (map[st
 		}
 	}
 
-	cached, ok := r.cache.GetTemplateInitialValues(repo, chart, strictVersion)
+	cached, ok := r.cache.GetTemplateInitialValues(repo, chart, strictVersion, string(cyclopsv1alpha1.TemplateSourceTypeOCI))
 	if ok {
 		return cached, nil
 	}
@@ -82,7 +86,7 @@ func (r Repo) LoadOCIHelmChartInitialValues(repo, chart, version string) (map[st
 		return nil, err
 	}
 
-	r.cache.SetTemplateInitialValues(repo, chart, strictVersion, initial)
+	r.cache.SetTemplateInitialValues(repo, chart, strictVersion, string(cyclopsv1alpha1.TemplateSourceTypeOCI), initial)
 
 	return initial, nil
 }
@@ -172,7 +176,8 @@ func fetchContentDigest(repo, chart, digest, token string) (string, error) {
 
 	var ct struct {
 		Layers []struct {
-			Digest string `json:"digest"`
+			Digest    string `json:"digest"`
+			MediaTyle string `json:"mediaType"`
 		} `json:"layers"`
 	}
 
@@ -182,6 +187,12 @@ func fetchContentDigest(repo, chart, digest, token string) (string, error) {
 
 	if len(ct.Layers) == 0 {
 		return "", nil
+	}
+
+	for _, layer := range ct.Layers {
+		if layer.MediaTyle == "application/vnd.cncf.helm.chart.content.v1.tar+gzip" {
+			return layer.Digest, nil
+		}
 	}
 
 	return ct.Layers[0].Digest, nil
@@ -225,37 +236,62 @@ func getOCIStrictVersion(repo, chart, version string) (string, error) {
 		return "", err
 	}
 
-	req, err := http.NewRequest(http.MethodGet, tURL.String(), nil)
-	if err != nil {
-		return "", err
-	}
-
-	req.Header.Set("User-Agent", "Helm/3.13.3")
-	if len(token) != 0 {
-		req.Header.Set("Authorization", fmt.Sprintf("Bearer %v", token))
-	}
-
 	client := &http.Client{}
-	resp, err := client.Do(req)
-	if err != nil {
-		return "", err
-	}
-	defer resp.Body.Close()
+	var allTags []string
+	for {
+		req, err := http.NewRequest(http.MethodGet, tURL.String(), nil)
+		if err != nil {
+			return "", err
+		}
 
-	responseBody, err := ioutil.ReadAll(resp.Body)
-	if err != nil {
-		return "", err
+		req.Header.Set("User-Agent", "Helm/3.13.3")
+		if len(token) != 0 {
+			req.Header.Set("Authorization", fmt.Sprintf("Bearer %v", token))
+		}
+
+		resp, err := client.Do(req)
+		if err != nil {
+			return "", err
+		}
+		defer resp.Body.Close()
+
+		responseBody, err := ioutil.ReadAll(resp.Body)
+		if err != nil {
+			return "", err
+		}
+
+		var tagsResp struct {
+			Tags []string `json:"tags"`
+		}
+
+		if err := json.Unmarshal(responseBody, &tagsResp); err != nil {
+			return "", err
+		}
+
+		allTags = append(allTags, tagsResp.Tags...)
+
+		// continue if response is chunked
+		linkHeader := resp.Header.Get("Link")
+		if linkHeader == "" {
+			break
+		}
+
+		nextURL, err := parseNextLink(linkHeader)
+		if err != nil {
+			return "", err
+		}
+
+		if nextURL == "" {
+			break
+		}
+
+		tURL, err = resolveRelativeURL(tURL, nextURL)
+		if err != nil {
+			return "", err
+		}
 	}
 
-	var tagsResp struct {
-		Tags []string `json:"tags"`
-	}
-
-	if err := json.Unmarshal(responseBody, &tagsResp); err != nil {
-		return "", err
-	}
-
-	return resolveSemver(version, tagsResp.Tags)
+	return resolveSemver(version, allTags)
 }
 
 func authorizeOCI(repo, chart, version string) (string, error) {
@@ -271,6 +307,9 @@ func authorizeOCI(repo, chart, version string) (string, error) {
 	if err != nil {
 		return "", err
 	}
+
+	req.Header.Set("User-Agent", "Helm/3.13.3")
+	req.Header.Set("Accept", "application/vnd.docker.distribution.manifest.v2+json, application/vnd.docker.distribution.manifest.list.v2+json, application/vnd.oci.image.manifest.v1+json, application/vnd.oci.image.index.v1+json, */*")
 
 	resp, err := client.Do(req)
 	if err != nil {
@@ -341,7 +380,7 @@ func authorizeOCITags(repo, chart string) (string, error) {
 
 	client := &http.Client{}
 
-	req, err := http.NewRequest(http.MethodHead, tURL.String(), nil)
+	req, err := http.NewRequest(http.MethodGet, tURL.String(), nil)
 	if err != nil {
 		return "", err
 	}
@@ -393,7 +432,7 @@ func authorizeOCITags(repo, chart string) (string, error) {
 	}
 
 	var ar struct {
-		Token string `json:"access_token"`
+		Token string `json:"token"`
 	}
 
 	if err := json.Unmarshal(responseBody, &ar); err != nil {
@@ -480,4 +519,33 @@ func tagsURL(repo, chart string) (*url.URL, error) {
 		Host:   repoURL.Host,
 		Path:   fmt.Sprintf("v2/%v/%v/tags/list", repoURL.Path, chart),
 	}, nil
+}
+
+func parseNextLink(linkHeader string) (string, error) {
+	links := strings.Split(linkHeader, ",")
+	for _, link := range links {
+		parts := strings.SplitN(link, ";", 2)
+		if len(parts) < 2 {
+			continue
+		}
+
+		urlPart := strings.Trim(parts[0], " <>")
+		relPart := strings.Trim(parts[1], " ")
+		if relPart == `rel="next"` {
+			return urlPart, nil
+		}
+	}
+	return "", nil
+}
+
+func resolveRelativeURL(baseURL *url.URL, nextURL string) (*url.URL, error) {
+	parsedURL, err := url.Parse(nextURL)
+	if err != nil {
+		return nil, err
+	}
+
+	if !parsedURL.IsAbs() {
+		return baseURL.ResolveReference(parsedURL), nil
+	}
+	return parsedURL, nil
 }

@@ -1,43 +1,51 @@
 package handler
 
 import (
+	"github.com/cyclops-ui/cyclops/cyclops-ctrl/internal/controller/sse"
+	"github.com/cyclops-ui/cyclops/cyclops-ctrl/internal/integrations/helm"
+	"github.com/gin-gonic/gin"
 	"net/http"
 
-	"github.com/gin-gonic/gin"
-
-	"github.com/cyclops-ui/cyclops/cyclops-ctrl/internal/cluster/k8sclient"
 	"github.com/cyclops-ui/cyclops/cyclops-ctrl/internal/controller"
 	"github.com/cyclops-ui/cyclops/cyclops-ctrl/internal/prometheus"
 	"github.com/cyclops-ui/cyclops/cyclops-ctrl/internal/telemetry"
 	templaterepo "github.com/cyclops-ui/cyclops/cyclops-ctrl/internal/template"
 	"github.com/cyclops-ui/cyclops/cyclops-ctrl/internal/template/render"
+	"github.com/cyclops-ui/cyclops/cyclops-ctrl/pkg/cluster/k8sclient"
 )
 
 type Handler struct {
 	router *gin.Engine
 
-	templatesRepo *templaterepo.Repo
-	k8sClient     *k8sclient.KubernetesClient
+	templatesRepo templaterepo.ITemplateRepo
+	k8sClient     k8sclient.IKubernetesClient
+	releaseClient *helm.ReleaseClient
 	renderer      *render.Renderer
+
+	moduleTargetNamespace string
 
 	telemetryClient telemetry.Client
 	monitor         prometheus.Monitor
 }
 
 func New(
-	templatesRepo *templaterepo.Repo,
-	kubernetesClient *k8sclient.KubernetesClient,
+	templatesRepo templaterepo.ITemplateRepo,
+	kubernetesClient k8sclient.IKubernetesClient,
+	releaseClient *helm.ReleaseClient,
 	renderer *render.Renderer,
+	moduleTargetNamespace string,
 	telemetryClient telemetry.Client,
 	monitor prometheus.Monitor,
 ) (*Handler, error) {
 	return &Handler{
-		templatesRepo:   templatesRepo,
-		k8sClient:       kubernetesClient,
-		renderer:        renderer,
-		telemetryClient: telemetryClient,
-		monitor:         monitor,
-		router:          gin.New(),
+		templatesRepo:         templatesRepo,
+		k8sClient:             kubernetesClient,
+		renderer:              renderer,
+		releaseClient:         releaseClient,
+		moduleTargetNamespace: moduleTargetNamespace,
+		telemetryClient:       telemetryClient,
+		monitor:               monitor,
+		router:                gin.New(),
 	}, nil
 }
 
@@ -45,10 +53,17 @@ func (h *Handler) Start() error {
 	gin.SetMode(gin.DebugMode)
 
 	templatesController := controller.NewTemplatesController(h.templatesRepo, h.k8sClient, h.telemetryClient)
-	modulesController := controller.NewModulesController(h.templatesRepo, h.k8sClient, h.renderer, h.telemetryClient, h.monitor)
+	modulesController := controller.NewModulesController(h.templatesRepo, h.k8sClient, h.renderer, h.moduleTargetNamespace, h.telemetryClient, h.monitor)
 	clusterController := controller.NewClusterController(h.k8sClient)
+	helmController := controller.NewHelmController(h.k8sClient, h.releaseClient, h.telemetryClient)
 
 	h.router = gin.New()
+
+	server := sse.NewServer(h.k8sClient)
+
+	h.router.GET("/stream/resources/:name", sse.HeadersMiddleware(), server.Resources)
+	h.router.GET("/stream/releases/resources/:name", sse.HeadersMiddleware(), server.ReleaseResources)
+	h.router.POST("/stream/resources", sse.HeadersMiddleware(), server.SingleResource)
 
 	h.router.GET("/ping", h.pong())
 
@@ -68,6 +83,7 @@ func (h *Handler) Start() error {
 	h.router.DELETE("/modules/:name", modulesController.DeleteModule)
 	h.router.POST("/modules/new", modulesController.CreateModule)
 	h.router.POST("/modules/update", modulesController.UpdateModule)
+	h.router.GET("/modules/:name/raw", modulesController.GetRawModuleManifest)
 	h.router.POST("/modules/:name/reconcile", modulesController.ReconcileModule)
 	h.router.GET("/modules/:name/history", modulesController.GetModuleHistory)
 	h.router.POST("/modules/:name/manifest", modulesController.Manifest)
@@ -78,6 +94,7 @@ func (h *Handler) Start() error {
 	//h.router.POST("/modules/resources", modulesController.ModuleToResources)
 
 	h.router.GET("/resources/pods/:namespace/:name/:container/logs", modulesController.GetLogs)
+	h.router.GET("/resources/pods/:namespace/:name/:container/logs/stream", sse.HeadersMiddleware(), modulesController.GetLogsStream)
 	h.router.GET("/resources/pods/:namespace/:name/:container/logs/download", modulesController.DownloadLogs)
 
 	h.router.GET("/manifest", modulesController.GetManifest)
@@ -88,6 +105,18 @@ func (h *Handler) Start() error {
 
 	h.router.GET("/nodes", clusterController.ListNodes)
 	h.router.GET("/nodes/:name", clusterController.GetNode)
+
+	h.router.GET("/namespaces", clusterController.ListNamespaces)
+
+	// region helm migrator
+	h.router.GET("/helm/releases", helmController.ListReleases)
+	h.router.GET("/helm/releases/:namespace/:name", helmController.GetRelease)
+	h.router.POST("/helm/releases/:namespace/:name", helmController.UpgradeRelease)
+	h.router.DELETE("/helm/releases/:namespace/:name", helmController.UninstallRelease)
+	h.router.GET("/helm/releases/:namespace/:name/resources", helmController.GetReleaseResources)
+	h.router.GET("/helm/releases/:namespace/:name/fields", helmController.GetReleaseSchema)
+	h.router.GET("/helm/releases/:namespace/:name/values", helmController.GetReleaseValues)
+	// endregion
 
 	h.router.Use(h.options)
 

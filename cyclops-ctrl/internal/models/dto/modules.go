@@ -3,6 +3,7 @@ package dto
 type Module struct {
 	Name                 string               `json:"name"`
 	Namespace            string               `json:"namespace"`
+	TargetNamespace      string               `json:"targetNamespace"`
 	Template             Template             `json:"template"`
 	Version              string               `json:"version"`
 	Values               interface{}          `json:"values"`
@@ -31,6 +32,7 @@ type Template struct {
 	Path            string `json:"path" binding:"required"`
 	Version         string `json:"version"`
 	ResolvedVersion string `json:"resolvedVersion"`
+	SourceType      string `json:"sourceType"`
 }
 
 type TemplatesResponse struct {

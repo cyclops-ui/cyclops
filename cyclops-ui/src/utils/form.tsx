@@ -1,3 +1,5 @@
+import YAML from "yaml";
+
 export function fileExtension(fileExt: string): string {
   switch (fileExt) {
     case "json":
@@ -33,8 +35,37 @@ export function flattenObjectKeys(
   }, []);
 }
 
+export function deepMerge(target: any, source: any): any {
+  if (!source && !target) {
+    return {};
+  }
+
+  if (!source) {
+    return target;
+  }
+
+  if (!target) {
+    return source;
+  }
+
+  for (const key in source) {
+    if (source[key] && typeof source[key] === "object" && !Array.isArray(source[key])) {
+      target[key] = deepMerge(target[key] || {}, source[key]);
+    } else {
+      target[key] = source[key];
+    }
+  }
+
+  return target;
+};
+
 export function findMaps(fields: any[], values: any, initialValues: any): any {
   let out: any = initialValues ? initialValues : {};
+
+  if (!fields) {
+    return out;
+  }
+
   fields.forEach((field) => {
     let valuesList: any[] = [];
     switch (field.type) {
@@ -104,7 +135,7 @@ export function findMaps(fields: any[], values: any, initialValues: any): any {
 
         let object: any = {};
         valuesList.forEach((valueFromList) => {
-          object[valueFromList.key] = valueFromList.value;
+          object[valueFromList.key] = YAML.parse(String(valueFromList.value));
         });
         out[field.name] = object;
         break;
@@ -113,6 +144,95 @@ export function findMaps(fields: any[], values: any, initialValues: any): any {
 
   return out;
 }
+
+export const mapsToArray = (fields: any[], values: any): any => {
+  let out: any = {};
+
+  if (!fields) {
+    return out;
+  }
+
+  fields.forEach((field) => {
+    let valuesList: any[] = [];
+    switch (field.type) {
+      case "string":
+        out[field.name] = values[field.name];
+        break;
+      case "number":
+        out[field.name] = values[field.name];
+        break;
+      case "boolean":
+        out[field.name] = values[field.name];
+        break;
+      case "object":
+        if (values[field.name]) {
+          out[field.name] = mapsToArray(field.properties, values[field.name]);
+        }
+        break;
+      case "array":
+        if (values[field.name] === undefined || values[field.name] === null) {
+          out[field.name] = [];
+          break;
+        }
+
+        valuesList = [];
+        if (Array.isArray(values[field.name])) {
+          valuesList = values[field.name];
+        } else if (typeof values[field.name] === "string") {
+          valuesList = [values[field.name]];
+        }
+
+        let objectArr: any[] = [];
+        valuesList.forEach((valueFromList) => {
+          // array items not defined
+          if (field.items === null || field.items === undefined) {
+            objectArr.push(valueFromList);
+            return;
+          }
+
+          switch (field.items.type) {
+            case "string":
+              objectArr.push(valueFromList);
+              break;
+            case "object":
+              objectArr.push(
+                mapsToArray(field.items.properties, valueFromList),
+              );
+              break;
+          }
+        });
+        out[field.name] = objectArr;
+        break;
+      case "map":
+        let object: any[] = [];
+
+        if (values[field.name] === undefined || values[field.name] === null) {
+          out[field.name] = [];
+          break;
+        }
+
+        Object.keys(values[field.name]).forEach((key) => {
+          if (typeof values[field.name][key] === "object") {
+            object.push({
+              key: key,
+              value: YAML.stringify(values[field.name][key], null, 4),
+            });
+            return;
+          }
+
+          object.push({
+            key: key,
+            value: values[field.name][key],
+          });
+        });
+
+        out[field.name] = object;
+        break;
+    }
+  });
+
+  return out;
+};
 
 function getObjectArrayInitialValue(
   initialValue: any,

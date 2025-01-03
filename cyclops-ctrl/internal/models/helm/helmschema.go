@@ -13,11 +13,12 @@ type Property struct {
 	Properties    map[string]Property `json:"properties"`
 	Items         *Property           `json:"items"`
 	Enum          []interface{}       `json:"enum"`
+	Suggestions   []interface{}       `json:"x-suggestions"`
 	Required      []string            `json:"required"`
 	FileExtension string              `json:"fileExtension"`
 	Reference     string              `json:"$ref"`
 	Definitions   map[string]Property `json:"$defs"`
-	Immutable     bool			  	  `json:"immutable"`
+	Immutable     bool                `json:"immutable"`
 
 	// number validation
 	Minimum          *float64 `json:"minimum"`
@@ -30,6 +31,9 @@ type Property struct {
 	MinLength *int    `json:"minLength"`
 	MaxLength *int    `json:"maxLength"`
 	Pattern   *string `json:"pattern"`
+
+	// schema compositions
+	AnyOf []Property `json:"anyOf"`
 }
 
 type PropertyType string

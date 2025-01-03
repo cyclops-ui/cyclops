@@ -26,8 +26,10 @@ import (
 
 // ModuleSpec defines the desired state of Module
 type ModuleSpec struct {
-	TemplateRef TemplateRef          `json:"template"`
-	Values      apiextensionsv1.JSON `json:"values"`
+	// +kubebuilder:validation:Optional
+	TargetNamespace string               `json:"targetNamespace"`
+	TemplateRef     TemplateRef          `json:"template"`
+	Values          apiextensionsv1.JSON `json:"values"`
 }
 
 type ModuleValue struct {
@@ -35,10 +37,22 @@ type ModuleValue struct {
 	Value string `json:"value"`
 }
 
+type TemplateSourceType string
+
+const (
+	TemplateSourceTypeGit  TemplateSourceType = "git"
+	TemplateSourceTypeHelm TemplateSourceType = "helm"
+	TemplateSourceTypeOCI  TemplateSourceType = "oci"
+)
+
 type TemplateRef struct {
 	URL     string `json:"repo"`
 	Path    string `json:"path"`
 	Version string `json:"version"`
+
+	// +kubebuilder:validation:Enum=git;helm;oci
+	// +kubebuilder:validation:Optional
+	SourceType TemplateSourceType `json:"sourceType,omitempty"`
 }
 
 type TemplateGitRef struct {
@@ -86,6 +100,10 @@ type HistoryTemplateRef struct {
 	URL     string `json:"repo"`
 	Path    string `json:"path"`
 	Version string `json:"version"`
+
+	// +kubebuilder:validation:Enum=git;helm;oci
+	// +kubebuilder:validation:Optional
+	SourceType TemplateSourceType `json:"sourceType,omitempty"`
 }
 
 type HistoryEntry struct {

@@ -3,7 +3,6 @@ import {
   Alert,
   Button,
   Col,
-  Collapse,
   Divider,
   Form,
   Input,
@@ -16,12 +15,11 @@ import {
   Progress,
 } from "antd";
 import axios from "axios";
-import { useNavigate } from "react-router";
-import { findMaps, flattenObjectKeys } from "../../../utils/form";
+import { deepMerge, findMaps, flattenObjectKeys, mapsToArray } from "../../../utils/form";
 import "./custom.css";
 import defaultTemplate from "../../../static/img/default-template-icon.png";
 
-import YAML from "yaml";
+import YAML, { YAMLError } from "yaml";
 
 import AceEditor from "react-ace";
 
@@ -32,6 +30,7 @@ import {
 } from "../../errors/FormValidationErrors";
 import { mapResponseError } from "../../../utils/api/errors";
 import TemplateFormFields from "../../form/TemplateFormFields";
+import { DownOutlined, UpOutlined } from "@ant-design/icons";
 
 const { Title } = Typography;
 const layout = {
@@ -44,6 +43,7 @@ interface templateStoreOption {
     repo: string;
     path: string;
     version: string;
+    sourceType: string;
   };
 }
 
@@ -64,6 +64,7 @@ const NewModule = () => {
     repo: "",
     path: "",
     version: "",
+    sourceType: "",
   });
 
   const [initialValues, setInitialValues] = useState({});
@@ -78,17 +79,12 @@ const NewModule = () => {
   const [loadingTemplateInitialValues, setLoadingTemplateInitialValues] =
     useState(false);
 
-  var initLoadedFrom: string[];
-  initLoadedFrom = [];
-  const [newFile, setNewFile] = useState("");
-  const [loadedFrom, setLoadedFrom] = useState(initLoadedFrom);
   const [loadedValues, setLoadedValues] = useState("");
-  const [loadingValuesFile, setLoadingValuesFile] = useState(false);
   const [loadingValuesModal, setLoadingValuesModal] = useState(false);
 
   const [templateStore, setTemplateStore] = useState<templateStoreOption[]>([]);
 
-  const history = useNavigate();
+  const [namespaces, setNamespaces] = useState<string[]>([]);
 
   const [notificationApi, contextHolder] = notification.useNotification();
   const openNotification = (errors: FeedbackError[]) => {
@@ -100,111 +96,35 @@ const NewModule = () => {
     });
   };
 
+  const [advancedOptionsExpanded, setAdvancedOptionsExpanded] = useState(false);
+
   const [form] = Form.useForm();
 
   useEffect(() => {
     loadTemplateStore();
+    loadNamespaces();
   }, []);
 
   useEffect(() => {
     form.validateFields(flattenObjectKeys(initialValues));
   }, [initialValues, form]);
 
-  const mapsToArray = (fields: any[], values: any): any => {
-    let out: any = {};
-    fields.forEach((field) => {
-      let valuesList: any[] = [];
-      switch (field.type) {
-        case "string":
-          out[field.name] = values[field.name];
-          break;
-        case "number":
-          out[field.name] = values[field.name];
-          break;
-        case "boolean":
-          out[field.name] = values[field.name];
-          break;
-        case "object":
-          if (values[field.name]) {
-            out[field.name] = mapsToArray(field.properties, values[field.name]);
-          }
-          break;
-        case "array":
-          if (values[field.name] === undefined || values[field.name] === null) {
-            out[field.name] = [];
-            break;
-          }
-
-          valuesList = [];
-          if (Array.isArray(values[field.name])) {
-            valuesList = values[field.name];
-          } else if (typeof values[field.name] === "string") {
-            valuesList = [values[field.name]];
-          }
-
-          let objectArr: any[] = [];
-          valuesList.forEach((valueFromList) => {
-            // array items not defined
-            if (field.items === null || field.items === undefined) {
-              objectArr.push(valueFromList);
-              return;
-            }
-
-            switch (field.items.type) {
-              case "string":
-                objectArr.push(valueFromList);
-                break;
-              case "object":
-                objectArr.push(
-                  mapsToArray(field.items.properties, valueFromList),
-                );
-                break;
-            }
-          });
-          out[field.name] = objectArr;
-          break;
-        case "map":
-          let object: any[] = [];
-
-          if (values[field.name] === undefined || values[field.name] === null) {
-            out[field.name] = [];
-            break;
-          }
-
-          Object.keys(values[field.name]).forEach((key) => {
-            object.push({
-              key: key,
-              value: values[field.name][key],
-            });
-          });
-
-          out[field.name] = object;
-
-          // valuesList.forEach(valueFromList => {
-          //     // object.push({})
-          //     // object[valueFromList.key] = valueFromList.value
-          // })
-          // out[field.name] = object
-          break;
-      }
-    });
-
-    return out;
-  };
-
   const handleSubmit = (values: any) => {
     const moduleName = values["cyclops_module_name"];
+    const moduleNamespace = values["cyclops_module_namespace"];
 
     values = findMaps(config.root.properties, values, initialValuesRaw);
 
     axios
       .post(`/api/modules/new`, {
         name: moduleName,
+        namespace: moduleNamespace,
         values: values,
         template: {
           repo: template.repo,
           path: template.path,
           version: template.version,
+          sourceType: template.sourceType,
         },
       })
       .then((res) => {
@@ -216,7 +136,12 @@ const NewModule = () => {
       });
   };
 
-  const loadTemplate = async (repo: string, path: string, commit: string) => {
+  const loadTemplate = async (
+    repo: string,
+    path: string,
+    commit: string,
+    sourceType: string,
+  ) => {
     setConfig({
       name: "",
       version: "",
@@ -253,7 +178,14 @@ const NewModule = () => {
 
     await axios
       .get(
-        `/api/templates?repo=` + repo + `&path=` + path + `&commit=` + commit,
+        `/api/templates?repo=` +
+          repo +
+          `&path=` +
+          path +
+          `&commit=` +
+          commit +
+          `&sourceType=` +
+          sourceType,
       )
       .then((templatesRes) => {
         setConfig(templatesRes.data);
@@ -277,7 +209,9 @@ const NewModule = () => {
           `&path=` +
           path +
           `&commit=` +
-          commit,
+          commit +
+          `&sourceType=` +
+          sourceType,
       )
       .then((res) => {
         let initialValuesMapped = mapsToArray(
@@ -314,6 +248,17 @@ const NewModule = () => {
       });
   };
 
+  const loadNamespaces = async () => {
+    await axios
+      .get(`/api/namespaces`)
+      .then((res) => {
+        setNamespaces(res.data);
+      })
+      .catch(function (error) {
+        setError(mapResponseError(error));
+      });
+  };
+
   const findTemplateStoreSelected = (name: string) => {
     for (let ts of templateStore) {
       if (ts.name === name) {
@@ -334,28 +279,10 @@ const NewModule = () => {
       repo: ts.ref.repo,
       path: ts.ref.path,
       version: ts.ref.version,
+      sourceType: ts.ref.sourceType,
     });
 
-    loadTemplate(ts.ref.repo, ts.ref.path, ts.ref.version);
-  };
-
-  const onLoadFromFile = () => {
-    setLoadingValuesFile(true);
-    setLoadedValues("");
-
-    if (newFile.trim() === "") {
-      setError({
-        message: "Invalid values file",
-        description: "Values file can't be empty",
-      });
-      setLoadingValuesFile(false);
-      return;
-    }
-
-    setLoadingValuesModal(true);
-
-    loadValues(newFile);
-    setLoadingValuesFile(false);
+    loadTemplate(ts.ref.repo, ts.ref.path, ts.ref.version, ts.ref.sourceType);
   };
 
   function renderFormFields() {
@@ -403,56 +330,34 @@ const NewModule = () => {
   };
 
   const handleImportValues = () => {
-    form.setFieldsValue(
-      mapsToArray(config.root.properties, YAML.parse(loadedValues)),
-    );
-    setLoadedValues("");
-    setLoadingValuesModal(false);
-  };
+    let yamlValues = null;
+    try {
+      yamlValues = YAML.parse(loadedValues)
+    } catch(err: any) {
+      if (err instanceof YAMLError) {
+        setError({
+          message: err.name,
+          description: err.message,
+        });
+        return;
+      }
 
-  const renderLoadedFromFiles = () => {
-    if (loadedFrom.length === 0) {
+      setError({
+        message: "Failed injecting YAML to values",
+        description: "check if YAML is correctly indented",
+      });
       return;
     }
 
-    const files: {} | any = [];
+    const currentValues = findMaps(config.root.properties, form.getFieldsValue(), null);
+    const values = deepMerge(currentValues, yamlValues)
 
-    loadedFrom.forEach((value: string) => {
-      files.push(<p>{value}</p>);
-    });
-
-    return (
-      <Collapse
-        ghost
-        items={[
-          {
-            key: "1",
-            label: "Imported values from",
-            children: files,
-          },
-        ]}
-      />
+    form.setFieldsValue(
+      mapsToArray(config.root.properties, values),
     );
-  };
-
-  const loadValues = (fileName: string) => {
-    axios
-      .get(fileName)
-      .then((res) => {
-        setLoadedValues(res.data);
-        setError({
-          message: "",
-          description: "",
-        });
-        let tmp = loadedFrom;
-        tmp.push(newFile);
-        setLoadedFrom(tmp);
-      })
-      .catch(function (error) {
-        // setLoadingTemplate(false);
-        // setSuccessLoad(false);
-        setError(mapResponseError(error));
-      });
+    setLoadedValues("");
+    setLoadingValuesModal(false);
+    setError({message: "", description: ""});
   };
 
   const onFinishFailed = (errors: any) => {
@@ -470,6 +375,10 @@ const NewModule = () => {
     });
 
     openNotification(errorMessages);
+  };
+
+  const toggleExpand = () => {
+    setAdvancedOptionsExpanded(!advancedOptionsExpanded);
   };
 
   return (
@@ -520,7 +429,7 @@ const NewModule = () => {
             )}
           >
             <Divider orientation="left" orientationMargin="0">
-              Module template
+              Template
             </Divider>
             <Row>
               <Col span={16}>
@@ -563,42 +472,104 @@ const NewModule = () => {
               </Col>
             </Row>
             <Divider orientation="left" orientationMargin="0">
-              Module name
+              Metadata
             </Divider>
-            <Form.Item
-              name="cyclops_module_name"
-              id="cyclops_module_name"
-              label={
-                <div>
-                  Module name
-                  <p style={{ color: "#8b8e91", marginBottom: "0px" }}>
-                    Enter a unique module name
-                  </p>
+            <Col style={{ padding: "0px" }} span={16}>
+              <div
+                style={{
+                  border: "solid 1.5px #c3c3c3",
+                  borderRadius: "7px",
+                  padding: "0px",
+                  width: "100%",
+                  backgroundColor: "#fafafa",
+                }}
+              >
+                <Form.Item
+                  name="cyclops_module_name"
+                  id="cyclops_module_name"
+                  label={
+                    <div>
+                      Module name
+                      <p style={{ color: "#8b8e91", marginBottom: "0px" }}>
+                        Enter a unique module name
+                      </p>
+                    </div>
+                  }
+                  style={{ padding: "12px 12px 0px 12px" }}
+                  rules={[
+                    {
+                      required: true,
+                      message: "Module name is required",
+                    },
+                    {
+                      max: 63,
+                      message:
+                        "Module name must contain no more than 63 characters",
+                    },
+                    {
+                      pattern: /^[a-z0-9](?:[a-z0-9-]*[a-z0-9])?$/, // only alphanumeric characters and hyphens, cannot start or end with a hyphen and the alpha characters can only be lowercase
+                      message:
+                        "Module name must follow the Kubernetes naming convention",
+                    },
+                  ]}
+                  hasFeedback={true}
+                  validateDebounce={1000}
+                >
+                  <Input />
+                </Form.Item>
+                <div style={{ display: advancedOptionsExpanded ? "" : "none" }}>
+                  <Divider
+                    style={{ marginTop: "12px", marginBottom: "12px" }}
+                  />
+                  <Form.Item
+                    name="cyclops_module_namespace"
+                    id="cyclops_module_namespace"
+                    label={
+                      <div>
+                        Target namespace
+                        <p style={{ color: "#8b8e91", marginBottom: "0px" }}>
+                          Namespace used to deploy resources to
+                        </p>
+                      </div>
+                    }
+                    style={{ padding: "0px 12px 0px 12px" }}
+                    hasFeedback={true}
+                    validateDebounce={1000}
+                  >
+                    <Select
+                      showSearch={true}
+                      onChange={onTemplateStoreSelected}
+                      style={{ width: "100%" }}
+                    >
+                      {namespaces.map((namespace: string) => (
+                        <Option key={namespace} value={namespace}>
+                          {namespace}
+                        </Option>
+                      ))}
+                    </Select>
+                  </Form.Item>
                 </div>
-              }
-              rules={[
-                {
-                  required: true,
-                  message: "Module name is required",
-                },
-                {
-                  max: 63,
-                  message:
-                    "Module name must contain no more than 63 characters",
-                },
-                {
-                  pattern: /^[a-z0-9](?:[a-z0-9-]*[a-z0-9])?$/, // only alphanumeric characters and hyphens, cannot start or end with a hyphen and the alpha characters can only be lowercase
-                  message:
-                    "Module name must follow the Kubernetes naming convention",
-                },
-              ]}
-              hasFeedback={true}
-              validateDebounce={1000}
+                <div className={"expandadvanced"} onClick={toggleExpand}>
+                  {advancedOptionsExpanded ? (
+                    <div>
+                      Advanced
+                      <UpOutlined style={{ paddingLeft: "5px" }} />
+                    </div>
+                  ) : (
+                    <div>
+                      Advanced
+                      <DownOutlined style={{ paddingLeft: "5px" }} />
+                    </div>
+                  )}
+                </div>
+              </div>
+            </Col>
+            <Divider
+              orientation="left"
+              orientationMargin="0"
+              style={{ borderColor: "#ccc" }}
             >
-              <Input />
-            </Form.Item>
-            <Divider orientation="left" orientationMargin="0">
-              Define Module
+              Configure
             </Divider>
             {renderFormFields()}
             <div style={{ textAlign: "right" }}>
@@ -607,9 +578,13 @@ const NewModule = () => {
                   setLoadingValuesModal(true);
                 }}
                 name="Save"
-                disabled={loadingTemplate || loadingTemplateInitialValues}
+                disabled={
+                  loadingTemplate ||
+                  loadingTemplateInitialValues ||
+                  !config.root.properties
+                }
               >
-                Load values from file
+                Import values as YAML
               </Button>{" "}
               <Button
                 type="primary"
@@ -624,11 +599,11 @@ const NewModule = () => {
                   !(template.version || template.path || template.repo)
                 }
               >
-                Save
+                Deploy
               </Button>{" "}
               <Button
                 htmlType="button"
-                onClick={() => history("/")}
+                onClick={() => (window.location.href = "/")}
                 disabled={loadingTemplate || loadingTemplateInitialValues}
               >
                 Back
@@ -638,7 +613,7 @@ const NewModule = () => {
         </Col>
       </Row>
       <Modal
-        title="Values to import"
+        title="Import values as YAML"
         visible={loadingValuesModal}
         onCancel={handleCancel}
         onOk={handleImportValues}
@@ -659,24 +634,10 @@ const NewModule = () => {
             style={{ marginBottom: "20px" }}
           />
         )}
-        {renderLoadedFromFiles()}
-        <Input
-          placeholder={"File reference"}
-          style={{ width: "90%", marginBottom: "10px" }}
-          onChange={(value: any) => {
-            setNewFile(value.target.value);
-          }}
-        />
-        {"  "}
-        <Button
-          type="primary"
-          htmlType="button"
-          style={{ width: "9%" }}
-          onClick={onLoadFromFile}
-          loading={loadingValuesFile}
-        >
-          Load
-        </Button>
+        <div style={{paddingRight: "16px", paddingBottom: "16px", color: "#777"}}>
+          You can paste your values in YAML format here, and after submitting them, you can see them in the form and edit them further.
+          If you set a value in YAML that does not exist in the UI, it will not be applied to your Module.
+        </div>
         <AceEditor
           mode={"yaml"}
           theme="github"
