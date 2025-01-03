@@ -3,7 +3,6 @@ import {
   Alert,
   Button,
   Col,
-  Collapse,
   Divider,
   Form,
   Input,
@@ -15,11 +14,16 @@ import {
   notification,
 } from "antd";
 import axios from "axios";
-import { findMaps, flattenObjectKeys, mapsToArray } from "../../../utils/form";
+import {
+  deepMerge,
+  findMaps,
+  flattenObjectKeys,
+  mapsToArray,
+} from "../../../utils/form";
 import "./custom.css";
 import defaultTemplate from "../../../static/img/default-template-icon.png";
 
-import YAML from "yaml";
+import YAML, { YAMLError } from "yaml";
 
 import AceEditor from "react-ace";
 
@@ -79,12 +83,7 @@ const NewModule = () => {
   const [loadingTemplateInitialValues, setLoadingTemplateInitialValues] =
     useState(false);
 
-  var initLoadedFrom: string[];
-  initLoadedFrom = [];
-  const [newFile, setNewFile] = useState("");
-  const [loadedFrom, setLoadedFrom] = useState(initLoadedFrom);
   const [loadedValues, setLoadedValues] = useState("");
-  const [loadingValuesFile, setLoadingValuesFile] = useState(false);
   const [loadingValuesModal, setLoadingValuesModal] = useState(false);
 
   const [templateStore, setTemplateStore] = useState<templateStoreOption[]>([]);
@@ -290,25 +289,6 @@ const NewModule = () => {
     loadTemplate(ts.ref.repo, ts.ref.path, ts.ref.version, ts.ref.sourceType);
   };
 
-  const onLoadFromFile = () => {
-    setLoadingValuesFile(true);
-    setLoadedValues("");
-
-    if (newFile.trim() === "") {
-      setError({
-        message: "Invalid values file",
-        description: "Values file can't be empty",
-      });
-      setLoadingValuesFile(false);
-      return;
-    }
-
-    setLoadingValuesModal(true);
-
-    loadValues(newFile);
-    setLoadingValuesFile(false);
-  };
-
   function renderFormFields() {
     if (!loadingTemplate && !loadingTemplateInitialValues) {
       return (
@@ -325,7 +305,21 @@ const NewModule = () => {
       );
     }
 
-    return <Spin size="large" />;
+    let message = "loading template...";
+    if (!loadingTemplate && loadingTemplateInitialValues) {
+      message = "loading initial values...";
+    }
+
+    return (
+      <Col style={{ padding: "0px" }} span={16}>
+        <Row style={{ display: "flex", alignItems: "center" }}>
+          <Spin size={"large"} />
+          <div style={{ paddingLeft: "24px", flexGrow: 1 }}>
+            <h4 style={{ color: "#888" }}>{message}</h4>
+          </div>
+        </Row>
+      </Col>
+    );
   }
 
   const handleCancel = () => {
@@ -333,56 +327,36 @@ const NewModule = () => {
   };
 
   const handleImportValues = () => {
-    form.setFieldsValue(
-      mapsToArray(config.root.properties, YAML.parse(loadedValues)),
-    );
-    setLoadedValues("");
-    setLoadingValuesModal(false);
-  };
+    let yamlValues = null;
+    try {
+      yamlValues = YAML.parse(loadedValues);
+    } catch (err: any) {
+      if (err instanceof YAMLError) {
+        setError({
+          message: err.name,
+          description: err.message,
+        });
+        return;
+      }
 
-  const renderLoadedFromFiles = () => {
-    if (loadedFrom.length === 0) {
+      setError({
+        message: "Failed injecting YAML to values",
+        description: "check if YAML is correctly indented",
+      });
       return;
     }
 
-    const files: {} | any = [];
-
-    loadedFrom.forEach((value: string) => {
-      files.push(<p>{value}</p>);
-    });
-
-    return (
-      <Collapse
-        ghost
-        items={[
-          {
-            key: "1",
-            label: "Imported values from",
-            children: files,
-          },
-        ]}
-      />
+    const currentValues = findMaps(
+      config.root.properties,
+      form.getFieldsValue(),
+      null,
     );
-  };
+    const values = deepMerge(currentValues, yamlValues);
 
-  const loadValues = (fileName: string) => {
-    axios
-      .get(fileName)
-      .then((res) => {
-        setLoadedValues(res.data);
-        setError({
-          message: "",
-          description: "",
-        });
-        let tmp = loadedFrom;
-        tmp.push(newFile);
-        setLoadedFrom(tmp);
-      })
-      .catch(function (error) {
-        // setLoadingTemplate(false);
-        // setSuccessLoad(false);
-        setError(mapResponseError(error));
-      });
+    form.setFieldsValue(mapsToArray(config.root.properties, values));
+    setLoadedValues("");
+    setLoadingValuesModal(false);
+    setError({ message: "", description: "" });
   };
 
   const onFinishFailed = (errors: any) => {
@@ -565,9 +539,6 @@ const NewModule = () => {
                       showSearch={true}
                       onChange={onTemplateStoreSelected}
                       style={{ width: "100%" }}
-                      placeholder="default"
-                      value="default"
-                      defaultValue="default"
                     >
                       {namespaces.map((namespace: string) => (
                         <Option key={namespace} value={namespace}>
@@ -612,7 +583,7 @@ const NewModule = () => {
                   !config.root.properties
                 }
               >
-                Load values from file
+                Import values as YAML
               </Button>{" "}
               <Button
                 type="primary"
@@ -641,7 +612,7 @@ const NewModule = () => {
         </Col>
       </Row>
       <Modal
-        title="Values to import"
+        title="Import values as YAML"
         visible={loadingValuesModal}
         onCancel={handleCancel}
         onOk={handleImportValues}
@@ -662,24 +633,14 @@ const NewModule = () => {
             style={{ marginBottom: "20px" }}
           />
         )}
-        {renderLoadedFromFiles()}
-        <Input
-          placeholder={"File reference"}
-          style={{ width: "90%", marginBottom: "10px" }}
-          onChange={(value: any) => {
-            setNewFile(value.target.value);
-          }}
-        />
-        {"  "}
-        <Button
-          type="primary"
-          htmlType="button"
-          style={{ width: "9%" }}
-          onClick={onLoadFromFile}
-          loading={loadingValuesFile}
+        <div
+          style={{ paddingRight: "16px", paddingBottom: "16px", color: "#777" }}
         >
-          Load
-        </Button>
+          You can paste your values in YAML format here, and after submitting
+          them, you can see them in the form and edit them further. If you set a
+          value in YAML that does not exist in the UI, it will not be applied to
+          your Module.
+        </div>
         <AceEditor
           mode={"yaml"}
           theme="github"

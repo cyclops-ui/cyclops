@@ -2,7 +2,6 @@ package k8sclient
 
 import (
 	"context"
-
 	apiv1 "k8s.io/api/core/v1"
 	networkingv1 "k8s.io/api/networking/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -154,13 +153,31 @@ func (k *KubernetesClient) mapService(group, version, kind, name, namespace stri
 		return nil, err
 	}
 
+	externalIPs := make([]*dto.ExternalIP, 0)
+	if service.Spec.Type == "LoadBalancer" {
+		for _, ingress := range service.Status.LoadBalancer.Ingress {
+			externalIPs = append(externalIPs, &dto.ExternalIP{
+				IP:       ingress.IP,
+				Hostname: ingress.Hostname,
+			})
+		}
+	}
+
+	for _, externalIP := range service.Spec.ExternalIPs {
+		externalIPs = append(externalIPs, &dto.ExternalIP{
+			IP: externalIP,
+		})
+	}
+
 	return &dto.Service{
-		Group:     group,
-		Version:   version,
-		Kind:      kind,
-		Name:      name,
-		Namespace: namespace,
-		Ports:     service.Spec.Ports,
+		Group:       group,
+		Version:     version,
+		Kind:        kind,
+		Name:        name,
+		Namespace:   namespace,
+		Type:        string(service.Spec.Type),
+		ExternalIPs: externalIPs,
+		Ports:       service.Spec.Ports,
 	}, nil
 }
 
@@ -352,6 +369,21 @@ func (k *KubernetesClient) mapRole(group, version, kind, name, namespace string)
 		Name:      role.Name,
 		Namespace: namespace,
 		Rules:     role.Rules,
+	}, nil
+}
+
+func (k *KubernetesClient) mapClusterRole(group, version, kind, name string) (*dto.ClusterRole, error) {
+	clusterRole, err := k.clientset.RbacV1().ClusterRoles().Get(context.Background(), name, metav1.GetOptions{})
+	if err != nil {
+		return nil, err
+	}
+
+	return &dto.ClusterRole{
+		Group:   group,
+		Version: version,
+		Kind:    kind,
+		Name:    clusterRole.Name,
+		Rules:   clusterRole.Rules,
 	}, nil
 }
 

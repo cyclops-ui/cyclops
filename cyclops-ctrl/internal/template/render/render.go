@@ -74,6 +74,7 @@ func (r *Renderer) HelmTemplate(module cyclopsv1alpha1.Module, moduleTemplate *m
 		return "", err
 	}
 
+	defaultCapabilites := chartutil.DefaultCapabilities
 	top["Capabilities"] = Capabilities{
 		KubeVersion: CapabilitiesKubeVersion{
 			Version:    versionInfo.String(),
@@ -81,6 +82,7 @@ func (r *Renderer) HelmTemplate(module cyclopsv1alpha1.Module, moduleTemplate *m
 			Major:      versionInfo.Major,
 			GitVersion: versionInfo.GitVersion,
 		},
+		HelmVersion: mapCapabilitiesHelmVersion(defaultCapabilites),
 	}
 
 	// TODO fix dependency validation
@@ -197,6 +199,19 @@ func mapTargetNamespace(namespace string) string {
 	return namespace
 }
 
+func mapCapabilitiesHelmVersion(defaultCapabilities *chartutil.Capabilities) CapabilitiesHelmVersion {
+	if defaultCapabilities == nil {
+		return CapabilitiesHelmVersion{}
+	}
+
+	return CapabilitiesHelmVersion{
+		Version:      defaultCapabilities.HelmVersion.Version,
+		GitCommit:    defaultCapabilities.HelmVersion.GitCommit,
+		GitTreeState: defaultCapabilities.HelmVersion.GitTreeState,
+		GoVersion:    defaultCapabilities.HelmVersion.GoVersion,
+	}
+}
+
 type CapabilitiesKubeVersion struct {
 	Version    string
 	Minor      string
@@ -204,7 +219,15 @@ type CapabilitiesKubeVersion struct {
 	GitVersion string
 }
 
+type CapabilitiesHelmVersion struct {
+	Version      string `json:"version,omitempty"`
+	GitCommit    string `json:"git_commit,omitempty"`
+	GitTreeState string `json:"git_tree_state,omitempty"`
+	GoVersion    string `json:"go_version,omitempty"`
+}
+
 type Capabilities struct {
 	APIVersions chartutil.VersionSet
 	KubeVersion CapabilitiesKubeVersion
+	HelmVersion CapabilitiesHelmVersion
 }

@@ -4,11 +4,14 @@ apiVersion: cyclops-ui.com/v1alpha1
 kind: TemplateStore
 metadata:
   name: {{ required "Template name is required for each template" .name }}
-  namespace: cyclops
+  namespace: {{ include "cyclops.namespace" $ | quote }}
   annotations:
     cyclops-ui.com/icon: {{ .iconURL | default "" | quote }}
 spec:
   repo: {{ required "Template repo is required for each template" .repo | quote }}
   path: {{ required "Template path/name is required for each template" .path | quote }}
   version: {{ .version | default "" | quote }}
+  {{- if .sourceType }}
+  sourceType: {{ .sourceType | quote }}
+  {{- end }}
 {{- end }}

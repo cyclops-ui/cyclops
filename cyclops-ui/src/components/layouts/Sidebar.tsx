@@ -6,11 +6,15 @@ import {
   BugFilled,
   SnippetsOutlined,
   GithubFilled,
+  ThunderboltFilled,
+  DiscordOutlined,
 } from "@ant-design/icons";
 import { useLocation } from "react-router";
 import PathConstants from "../../routes/PathConstants";
 import { Link } from "react-router-dom";
-import styles from "./styles.module.css";
+import "./custom.css";
+import helmLogo from "../../static/img/helm_white.png";
+import cyclopsLogo from "../../static/img/cyclops_logo.png";
 
 const SideNav = () => {
   const location = useLocation().pathname.split("/")[1];
@@ -22,14 +26,23 @@ const SideNav = () => {
       key: "modules",
     },
     {
+      label: <a href={PathConstants.TEMPLATES}>Templates</a>,
+      icon: <SnippetsOutlined />,
+      key: "templates",
+    },
+    {
       label: <a href={PathConstants.NODES}>Nodes</a>,
       icon: <HddOutlined />,
       key: "nodes",
     },
     {
-      label: <a href={PathConstants.TEMPLATES}>Templates</a>,
-      icon: <SnippetsOutlined />,
-      key: "templates",
+      label: (
+        <a href={PathConstants.HELM_RELEASES}>
+          Helm releases <ThunderboltFilled style={{ color: "#ffcc66" }} />
+        </a>
+      ),
+      icon: <img alt="" style={{ height: "14px" }} src={helmLogo} />,
+      key: "helm",
     },
   ];
 
@@ -54,7 +67,7 @@ const SideNav = () => {
             display: "inline-flex",
           }}
         >
-          <img src={require("./cyclops_logo.png")} alt="Cyclops" />
+          <img src={cyclopsLogo} alt="Cyclops" />
         </div>
       </a>
       <Menu
@@ -65,7 +78,7 @@ const SideNav = () => {
       />
       <Button
         ghost
-        style={{ margin: "auto 25px 25px 25px" }}
+        style={{ margin: "auto 25px 12px 25px" }}
         icon={<BugFilled />}
         href={
           "https://github.com/cyclops-ui/cyclops/issues/new?assignees=&labels=&projects=&template=bug_report.md&title="
@@ -76,12 +89,28 @@ const SideNav = () => {
       <center
         style={{
           color: "#FFF",
+          margin: "12px",
+          marginTop: "0",
+          fontFamily: "Arial, sans-serif",
+          fontWeight: "bold",
+        }}
+      >
+        <Link
+          className={"discordlink"}
+          to={"https://discord.com/invite/8ErnK3qDb3"}
+        >
+          <DiscordOutlined style={{ fontSize: "20px" }} /> Join Discord
+        </Link>
+      </center>
+      <center
+        style={{
+          color: "#FFF",
           margin: "25px",
           marginTop: "0",
         }}
       >
         <Link
-          className={styles.taglink}
+          className={"taglink"}
           to={tagChangelogLink(window.__RUNTIME_CONFIG__.REACT_APP_VERSION)}
         >
           <GithubFilled /> {window.__RUNTIME_CONFIG__.REACT_APP_VERSION}

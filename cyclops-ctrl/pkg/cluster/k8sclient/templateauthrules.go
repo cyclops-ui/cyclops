@@ -10,11 +10,11 @@ import (
 )
 
 func (k *KubernetesClient) ListTemplateAuthRules() ([]cyclopsv1alpha1.TemplateAuthRule, error) {
-	return k.moduleset.TemplateAuthRules(cyclopsNamespace).List(metav1.ListOptions{})
+	return k.moduleset.TemplateAuthRules(k.moduleNamespace).List(metav1.ListOptions{})
 }
 
 func (k *KubernetesClient) GetTemplateAuthRuleSecret(name, key string) (string, error) {
-	secret, err := k.clientset.CoreV1().Secrets(cyclopsNamespace).Get(context.Background(), name, metav1.GetOptions{})
+	secret, err := k.clientset.CoreV1().Secrets(k.moduleNamespace).Get(context.Background(), name, metav1.GetOptions{})
 	if err != nil {
 		return "", err
 	}

@@ -2,6 +2,8 @@ package k8sclient
 
 import (
 	"context"
+
+	"github.com/go-logr/logr"
 	apiv1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/runtime/schema"
@@ -23,10 +25,21 @@ type KubernetesClient struct {
 	discovery *discovery.DiscoveryClient
 	moduleset *client.CyclopsV1Alpha1Client
 
+	moduleNamespace       string
+	helmReleaseNamespace  string
+	moduleTargetNamespace string
+
 	childLabels ChildLabels
+
+	logger logr.Logger
 }
 
-func New() (*KubernetesClient, error) {
+func New(
+	moduleNamespace string,
+	helmReleaseNamespace string,
+	moduleTargetNamespace string,
+	logger logr.Logger,
+) (*KubernetesClient, error) {
 	config := ctrl.GetConfigOrDie()
 	clientset, err := kubernetes.NewForConfig(config)
 	if err != nil {
@@ -46,10 +59,14 @@ func New() (*KubernetesClient, error) {
 	}
 
 	k := &KubernetesClient{
-		Dynamic:   dynamic,
-		discovery: discovery,
-		clientset: clientset,
-		moduleset: moduleSet,
+		Dynamic:               dynamic,
+		discovery:             discovery,
+		clientset:             clientset,
+		moduleset:             moduleSet,
+		moduleNamespace:       moduleNamespace,
+		helmReleaseNamespace:  helmReleaseNamespace,
+		moduleTargetNamespace: moduleTargetNamespace,
+		logger:                logger,
 	}
 
 	k.loadResourceRelationsLabels()
@@ -95,4 +112,6 @@ type IKubernetesClient interface {
 	CreateTemplateStore(ts *cyclopsv1alpha1.TemplateStore) error
 	UpdateTemplateStore(ts *cyclopsv1alpha1.TemplateStore) error
 	DeleteTemplateStore(name string) error
+	GetResourcesForRelease(release string) ([]dto.Resource, error)
+	GetWorkloadsForRelease(name string) ([]dto.Resource, error)
 }

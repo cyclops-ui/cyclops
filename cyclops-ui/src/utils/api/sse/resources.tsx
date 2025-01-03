@@ -56,17 +56,33 @@ export function resourceStream(
 }
 
 export function resourcesStream(
-  moduleName: string | undefined,
+  path: string,
   setResource: (r: any) => void,
+  resourceStreamImplementation?: (
+    path: string,
+    setResource: (r: any) => void,
+  ) => void,
 ) {
-  if (!moduleName) {
+  if (
+    resourceStreamImplementation === undefined ||
+    resourceStreamImplementation === null
+  ) {
+    defaultResourcesStream(path, setResource);
+    return;
+  }
+
+  resourceStreamImplementation(path, setResource);
+}
+
+function defaultResourcesStream(path: string, setResource: (r: any) => void) {
+  if (!path) {
     return;
   }
 
   let maxRetries = 5;
   let retryCounter = 1;
 
-  fetchEventSource(`/api/stream/resources/` + moduleName, {
+  fetchEventSource(`/api/${path}`, {
     method: "GET",
     onmessage(ev) {
       setResource(JSON.parse(ev.data));

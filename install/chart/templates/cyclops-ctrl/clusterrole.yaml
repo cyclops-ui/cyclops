@@ -1,3 +1,4 @@
+{{- if not (eq ((.Values.global).singleNamespaceScope).enabled true) -}}
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
 metadata:
@@ -6,7 +7,7 @@ metadata:
     app.kubernetes.io/name: cyclops-ctrl
     app.kubernetes.io/part-of: cyclops
   name: cyclops-ctrl
-  namespace: cyclops
+  namespace: {{ include "cyclops.namespace" . | quote }}
 rules:
   - apiGroups:
       - '*'
@@ -18,3 +19,4 @@ rules:
       - '*'
     verbs:
       - '*'
+{{- end }}

@@ -28,6 +28,12 @@
   padding-top: 20px;
 }
 
+.devhunt {
+  width: 20%;
+  padding-bottom: 24px;
+  padding-top: 24px;
+}
+
 .readTheDocs {
   margin-left: 5px;
   backdrop-filter: blur(3px);
@@ -77,6 +83,10 @@
   .cyclopsDesc {
     font-size: 18px;
   }
+
+  .devhunt {
+    width: 60%
+  }
 }
 
 .backgroundcolor {
@@ -86,7 +96,7 @@
 
 .pricingCard {
   backdrop-filter: blur(3px);
-  background-color: rgba(255, 255, 255, 0.3);
+  background-color: rgba(255, 255, 255, 0.2);
   width: 100%;
   height: 100%;
   padding: 20px;
@@ -95,6 +105,20 @@
   display: flex;
   flex-direction: column;
   text-align: center;
+}
+
+.pricingCardSupport {
+  backdrop-filter: blur(3px);
+  background-color: rgba(255, 255, 255, 0.37);
+  width: 100%;
+  height: 100%;
+  padding: 20px;
+  border-radius: 10px;
+  display: flex;
+  flex-direction: column;
+  text-align: center;
+  border: solid 4px #ff8803;
+  padding-bottom: 0;
 }
 
 .pricingButton {

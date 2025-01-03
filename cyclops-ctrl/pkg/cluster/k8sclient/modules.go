@@ -12,6 +12,7 @@ import (
 	batchv1 "k8s.io/api/batch/v1"
 	apiv1 "k8s.io/api/core/v1"
 	networkingv1 "k8s.io/api/networking/v1"
+	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/labels"
@@ -30,31 +31,31 @@ const (
 )
 
 func (k *KubernetesClient) ListModules() ([]cyclopsv1alpha1.Module, error) {
-	moduleList, err := k.moduleset.Modules(cyclopsNamespace).List(metav1.ListOptions{})
+	moduleList, err := k.moduleset.Modules(k.moduleNamespace).List(metav1.ListOptions{})
 
 	return moduleList, err
 }
 
 func (k *KubernetesClient) CreateModule(module cyclopsv1alpha1.Module) error {
-	_, err := k.moduleset.Modules(cyclopsNamespace).Create(&module)
+	_, err := k.moduleset.Modules(k.moduleNamespace).Create(&module)
 	return err
 }
 
 func (k *KubernetesClient) UpdateModule(module *cyclopsv1alpha1.Module) error {
-	_, err := k.moduleset.Modules(cyclopsNamespace).Update(module)
+	_, err := k.moduleset.Modules(k.moduleNamespace).Update(module)
 	return err
 }
 
 func (k *KubernetesClient) UpdateModuleStatus(module *cyclopsv1alpha1.Module) (*cyclopsv1alpha1.Module, error) {
-	return k.moduleset.Modules(cyclopsNamespace).PatchStatus(module)
+	return k.moduleset.Modules(k.moduleNamespace).PatchStatus(module)
 }
 
 func (k *KubernetesClient) DeleteModule(name string) error {
-	return k.moduleset.Modules(cyclopsNamespace).Delete(name)
+	return k.moduleset.Modules(k.moduleNamespace).Delete(name)
 }
 
 func (k *KubernetesClient) GetModule(name string) (*cyclopsv1alpha1.Module, error) {
-	return k.moduleset.Modules(cyclopsNamespace).Get(name)
+	return k.moduleset.Modules(k.moduleNamespace).Get(name)
 }
 
 func (k *KubernetesClient) GetResourcesForModule(name string) ([]dto.Resource, error) {
@@ -67,10 +68,23 @@ func (k *KubernetesClient) GetResourcesForModule(name string) ([]dto.Resource, e
 
 	other := make([]unstructured.Unstructured, 0)
 	for _, gvr := range managedGVRs {
-		rs, err := k.Dynamic.Resource(gvr).List(context.Background(), metav1.ListOptions{
-			LabelSelector: "cyclops.module=" + name,
-		})
+		var rs *unstructured.UnstructuredList
+		if len(k.moduleTargetNamespace) > 0 {
+			rs, err = k.Dynamic.Resource(gvr).Namespace(k.moduleTargetNamespace).List(context.Background(), metav1.ListOptions{
+				LabelSelector: "cyclops.module=" + name,
+			})
+		} else {
+			rs, err = k.Dynamic.Resource(gvr).List(context.Background(), metav1.ListOptions{
+				LabelSelector: "cyclops.module=" + name,
+			})
+		}
+
 		if err != nil {
+			if apierrors.IsNotFound(err) {
+				continue
+			}
+
+			k.logger.Info("error fetching resource", "gvr", gvr, "namespace", k.helmReleaseNamespace)
 			continue
 		}
 
@@ -160,7 +174,7 @@ func (k *KubernetesClient) GetResourcesForCRD(childLabels map[string]string, nam
 func (k *KubernetesClient) GetWorkloadsForModule(name string) ([]dto.Resource, error) {
 	out := make([]dto.Resource, 0, 0)
 
-	deployments, err := k.clientset.AppsV1().Deployments("").List(context.Background(), metav1.ListOptions{
+	deployments, err := k.clientset.AppsV1().Deployments(k.moduleTargetNamespace).List(context.Background(), metav1.ListOptions{
 		LabelSelector: "cyclops.module=" + name,
 	})
 	if err != nil {
@@ -177,7 +191,7 @@ func (k *KubernetesClient) GetWorkloadsForModule(name string) ([]dto.Resource, e
 		})
 	}
 
-	statefulset, err := k.clientset.AppsV1().StatefulSets("").List(context.Background(), metav1.ListOptions{
+	statefulset, err := k.clientset.AppsV1().StatefulSets(k.moduleTargetNamespace).List(context.Background(), metav1.ListOptions{
 		LabelSelector: "cyclops.module=" + name,
 	})
 	if err != nil {
@@ -194,7 +208,7 @@ func (k *KubernetesClient) GetWorkloadsForModule(name string) ([]dto.Resource, e
 		})
 	}
 
-	daemonsets, err := k.clientset.AppsV1().DaemonSets("").List(context.Background(), metav1.ListOptions{
+	daemonsets, err := k.clientset.AppsV1().DaemonSets(k.moduleTargetNamespace).List(context.Background(), metav1.ListOptions{
 		LabelSelector: "cyclops.module=" + name,
 	})
 	if err != nil {
@@ -344,7 +358,7 @@ func (k *KubernetesClient) GetDeletedResources(
 func (k *KubernetesClient) GetModuleResourcesHealth(name string) (string, error) {
 	resourcesWithHealth := 0
 
-	deployments, err := k.clientset.AppsV1().Deployments("").List(context.Background(), metav1.ListOptions{
+	deployments, err := k.clientset.AppsV1().Deployments(k.moduleTargetNamespace).List(context.Background(), metav1.ListOptions{
 		LabelSelector: "cyclops.module=" + name,
 	})
 	if err != nil {
@@ -364,7 +378,7 @@ func (k *KubernetesClient) GetModuleResourcesHealth(name string) (string, error)
 		}
 	}
 
-	statefulsets, err := k.clientset.AppsV1().StatefulSets("").List(context.Background(), metav1.ListOptions{
+	statefulsets, err := k.clientset.AppsV1().StatefulSets(k.moduleTargetNamespace).List(context.Background(), metav1.ListOptions{
 		LabelSelector: "cyclops.module=" + name,
 	})
 	if err != nil {
@@ -384,7 +398,7 @@ func (k *KubernetesClient) GetModuleResourcesHealth(name string) (string, error)
 		}
 	}
 
-	daemonsets, err := k.clientset.AppsV1().DaemonSets("").List(context.Background(), metav1.ListOptions{
+	daemonsets, err := k.clientset.AppsV1().DaemonSets(k.moduleTargetNamespace).List(context.Background(), metav1.ListOptions{
 		LabelSelector: "cyclops.module=" + name,
 	})
 	if err != nil {
@@ -400,7 +414,7 @@ func (k *KubernetesClient) GetModuleResourcesHealth(name string) (string, error)
 		}
 	}
 
-	pvcs, err := k.clientset.CoreV1().PersistentVolumeClaims("").List(context.Background(), metav1.ListOptions{
+	pvcs, err := k.clientset.CoreV1().PersistentVolumeClaims(k.moduleTargetNamespace).List(context.Background(), metav1.ListOptions{
 		LabelSelector: "cyclops.module=" + name,
 	})
 	if err != nil {
@@ -414,7 +428,7 @@ func (k *KubernetesClient) GetModuleResourcesHealth(name string) (string, error)
 		}
 	}
 
-	pods, err := k.clientset.CoreV1().Pods("").List(context.Background(), metav1.ListOptions{
+	pods, err := k.clientset.CoreV1().Pods(k.moduleTargetNamespace).List(context.Background(), metav1.ListOptions{
 		LabelSelector: "cyclops.module=" + name,
 	})
 	if err != nil {

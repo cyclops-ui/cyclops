@@ -141,6 +141,8 @@ func (k *KubernetesClient) GetResource(group, version, kind, name, namespace str
 		return k.mapRole(group, version, kind, name, namespace)
 	case isNetworkPolicy(group, version, kind):
 		return k.mapNetworkPolicy(group, version, kind, name, namespace)
+	case isClusterRole(group, version, kind):
+		return k.mapClusterRole(group, version, kind, name)
 	default:
 		return k.mapDefaultResource(group, version, kind, name, namespace)
 	}
@@ -275,6 +277,8 @@ func (k *KubernetesClient) createDynamicNamespaced(
 	}
 
 	obj.SetResourceVersion(current.GetResourceVersion())
+	obj.SetAnnotations(mergeAnnotations(current.GetAnnotations(), obj.GetAnnotations()))
+	obj.SetFinalizers(current.GetFinalizers())
 
 	_, err = k.Dynamic.Resource(gvr).Namespace(namespace).Update(
 		context.Background(),
@@ -304,6 +308,8 @@ func (k *KubernetesClient) createDynamicNonNamespaced(
 	}
 
 	obj.SetResourceVersion(current.GetResourceVersion())
+	obj.SetAnnotations(mergeAnnotations(current.GetAnnotations(), obj.GetAnnotations()))
+	obj.SetFinalizers(current.GetFinalizers())
 
 	_, err = k.Dynamic.Resource(gvr).Update(
 		context.Background(),
@@ -373,6 +379,20 @@ func mergePVCWithCurrent(current, obj *unstructured.Unstructured) error {
 	return unstructured.SetNestedMap(current.Object, requests, "spec", "resources", "requests")
 }
 
+func mergeAnnotations(existing, new map[string]string) map[string]string {
+	out := make(map[string]string)
+
+	for k, v := range existing {
+		out[k] = v
+	}
+
+	for k, v := range new {
+		out[k] = v
+	}
+
+	return out
+}
+
 func (k *KubernetesClient) ListNodes() ([]apiv1.Node, error) {
 	nodeList, err := k.clientset.CoreV1().Nodes().List(context.TODO(), metav1.ListOptions{})
 	return nodeList.Items, err
@@ -390,6 +410,10 @@ func (k *KubernetesClient) GetPodsForNode(nodeName string) ([]apiv1.Pod, error) 
 }
 
 func (k *KubernetesClient) ListNamespaces() ([]string, error) {
+	if len(k.moduleTargetNamespace) > 0 {
+		return []string{k.moduleTargetNamespace}, nil
+	}
+
 	namespaceList, err := k.clientset.CoreV1().Namespaces().List(context.TODO(), metav1.ListOptions{})
 	if err != nil {
 		return nil, err
@@ -486,6 +510,10 @@ func isRole(group, version, kind string) bool {
 
 func isNetworkPolicy(group, version, kind string) bool {
 	return group == "networking.k8s.io" && version == "v1" && kind == "NetworkPolicy"
+}
+
+func isClusterRole(group, version, kind string) bool {
+	return group == "rbac.authorization.k8s.io" && version == "v1" && kind == "ClusterRole"
 }
 
 func IsWorkload(group, version, kind string) bool {
