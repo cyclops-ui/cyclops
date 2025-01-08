@@ -14,7 +14,12 @@ import {
   notification,
 } from "antd";
 import axios from "axios";
-import { deepMerge, findMaps, flattenObjectKeys, mapsToArray } from "../../../utils/form";
+import {
+  deepMerge,
+  findMaps,
+  flattenObjectKeys,
+  mapsToArray,
+} from "../../../utils/form";
 import "./custom.css";
 import defaultTemplate from "../../../static/img/default-template-icon.png";
 
@@ -300,7 +305,21 @@ const NewModule = () => {
       );
     }
 
-    return <Spin size="large" />;
+    let message = "loading template...";
+    if (!loadingTemplate && loadingTemplateInitialValues) {
+      message = "loading initial values...";
+    }
+
+    return (
+      <Col style={{ padding: "0px" }} span={16}>
+        <Row style={{ display: "flex", alignItems: "center" }}>
+          <Spin size={"large"} />
+          <div style={{ paddingLeft: "24px", flexGrow: 1 }}>
+            <h4 style={{ color: "#888" }}>{message}</h4>
+          </div>
+        </Row>
+      </Col>
+    );
   }
 
   const handleCancel = () => {
@@ -310,8 +329,8 @@ const NewModule = () => {
   const handleImportValues = () => {
     let yamlValues = null;
     try {
-      yamlValues = YAML.parse(loadedValues)
-    } catch(err: any) {
+      yamlValues = YAML.parse(loadedValues);
+    } catch (err: any) {
       if (err instanceof YAMLError) {
         setError({
           message: err.name,
@@ -327,15 +346,17 @@ const NewModule = () => {
       return;
     }
 
-    const currentValues = findMaps(config.root.properties, form.getFieldsValue(), null);
-    const values = deepMerge(currentValues, yamlValues)
-
-    form.setFieldsValue(
-      mapsToArray(config.root.properties, values),
+    const currentValues = findMaps(
+      config.root.properties,
+      form.getFieldsValue(),
+      null,
     );
+    const values = deepMerge(currentValues, yamlValues);
+
+    form.setFieldsValue(mapsToArray(config.root.properties, values));
     setLoadedValues("");
     setLoadingValuesModal(false);
-    setError({message: "", description: ""});
+    setError({ message: "", description: "" });
   };
 
   const onFinishFailed = (errors: any) => {
@@ -612,9 +633,13 @@ const NewModule = () => {
             style={{ marginBottom: "20px" }}
           />
         )}
-        <div style={{paddingRight: "16px", paddingBottom: "16px", color: "#777"}}>
-          You can paste your values in YAML format here, and after submitting them, you can see them in the form and edit them further.
-          If you set a value in YAML that does not exist in the UI, it will not be applied to your Module.
+        <div
+          style={{ paddingRight: "16px", paddingBottom: "16px", color: "#777" }}
+        >
+          You can paste your values in YAML format here, and after submitting
+          them, you can see them in the form and edit them further. If you set a
+          value in YAML that does not exist in the UI, it will not be applied to
+          your Module.
         </div>
         <AceEditor
           mode={"yaml"}

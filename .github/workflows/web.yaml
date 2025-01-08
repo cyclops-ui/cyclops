@@ -30,3 +30,4 @@ jobs:
           publish_dir: ./web/build
           external_repository: cyclops-ui/cyclops-ui.github.io
           cname: cyclops-ui.com
+          keep_files: true
