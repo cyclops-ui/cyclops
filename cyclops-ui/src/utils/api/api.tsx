@@ -75,8 +75,12 @@ export async function reconcileModule(moduleName: string) {
   return await axios.post(`/api/modules/${moduleName}/reconcile`);
 }
 
-export async function deleteModule(moduleName: string) {
-  return await axios.delete(`/api/modules/${moduleName}`);
+export async function deleteModule(moduleName: string, deleteMethod?: string) {
+  return await axios.delete(`/api/modules/${moduleName}`, {
+    params: {
+      deleteMethod: deleteMethod,
+    },
+  });
 }
 
 export async function fetchModuleResources(moduleName: string) {

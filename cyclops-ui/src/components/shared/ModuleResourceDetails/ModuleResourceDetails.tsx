@@ -6,9 +6,12 @@ import {
   ConfigProvider,
   Descriptions,
   Divider,
+  Form,
   Input,
   Modal,
   notification,
+  Popover,
+  Radio,
   Row,
   Spin,
   Tooltip,
@@ -48,6 +51,7 @@ import {
   resourceRefKey,
 } from "../../../utils/resourceRef";
 import { ResourceListActionsProvider } from "../../k8s-resources/ResourceList/ResourceListActionsContext";
+import { useForm } from "antd/es/form/Form";
 
 const languages = [
   "javascript",
@@ -95,6 +99,11 @@ interface module {
   targetNamespace: string;
   template: templateRef;
   iconURL: string;
+  gitOpsWrite: {
+    repo: string;
+    path: string;
+    branch: string;
+  };
 }
 
 export interface ModuleResourceDetailsProps {
@@ -105,7 +114,7 @@ export interface ModuleResourceDetailsProps {
   fetchModuleRawManifest: (moduleName: string) => Promise<string>;
   fetchModuleRenderedManifest: (moduleName: string) => Promise<string>;
   reconcileModule: (moduleName: string) => Promise<any>;
-  deleteModule: (moduleName: string) => Promise<any>;
+  deleteModule: (moduleName: string, deleteMethod?: string) => Promise<any>;
   onDeleteModuleSuccess: (moduleName: string) => void;
   fetchModuleResources: (moduleName: string) => Promise<any[]>;
   fetchResource: (
@@ -191,6 +200,10 @@ export const ModuleResourceDetails = ({
   const [loadingReconciliation, setLoadingReconciliation] = useState(false);
 
   const [deleteName, setDeleteName] = useState("");
+  const [deleteMethod, setDeleteMethod] = useState<
+    "git" | "cluster" | undefined
+  >();
+  const [deleteModuleForm] = Form.useForm();
 
   const [resources, setResources] = useState<any[]>([]);
   const [workloads, setWorkloads] = useState<Map<string, Workload>>(new Map());
@@ -223,6 +236,11 @@ export const ModuleResourceDetails = ({
       sourceType: "",
     },
     iconURL: "",
+    gitOpsWrite: {
+      repo: "",
+      path: "",
+      branch: "",
+    },
   });
 
   const [loadingRawManifest, setLoadingRawManifest] = useState(false);
@@ -298,8 +316,12 @@ export const ModuleResourceDetails = ({
     setLoading(false);
   };
 
+  const handleDeleteModule = (deleteModuleValues) => {
+    console.log("deleteModuleValues", deleteModuleValues);
+  };
+
   const deleteDeployment = () => {
-    deleteModule(name)
+    deleteModule(name, deleteMethod)
       .then(() => {
         onDeleteModuleSuccess(name);
       })
@@ -325,6 +347,88 @@ export const ModuleResourceDetails = ({
     });
 
     return resourcesToDelete;
+  };
+
+  const isModuleSourceGit = () => {
+    return (
+      module.gitOpsWrite &&
+      typeof module.gitOpsWrite.repo === "string" &&
+      module.gitOpsWrite.repo.trim() !== ""
+    );
+  };
+
+  const selectDeletionMethod = () => {
+    if (!isModuleSourceGit()) {
+      return <></>;
+    }
+
+    return (
+      <Form.Item
+        name="method"
+        layout={"vertical"}
+        style={{ width: "100%", marginBottom: "12px" }}
+        rules={[
+          {
+            required: true,
+            message: "Select module deletion method!",
+          },
+        ]}
+        label={
+          <div>
+            Deletion Method
+            <p style={{ color: "#8b8e91", marginBottom: "0px" }}>
+              Select how you want to delete this Module.
+            </p>
+          </div>
+        }
+      >
+        <Radio.Group
+          optionType="button"
+          style={{
+            width: "100%",
+            display: "flex",
+          }}
+        >
+          <Popover
+            content={
+              "Deletes the Module from the cluster directly and doesnt remove the file from Git"
+            }
+            placement={"topRight"}
+          >
+            <Radio.Button
+              value="cluster"
+              style={{
+                flex: 1,
+                textAlign: "center",
+              }}
+            >
+              In-cluster
+            </Radio.Button>
+          </Popover>
+          <Popover
+            content={
+              <div>
+                <Row>Deletes the Module config file from the git repo:</Row>
+                <Row style={{ color: "#777" }}>
+                  {module.gitOpsWrite.repo} / {module.gitOpsWrite.path}
+                </Row>
+              </div>
+            }
+            placement={"topLeft"}
+          >
+            <Radio.Button
+              value="git"
+              style={{
+                flex: 1,
+                textAlign: "center",
+              }}
+            >
+              Git repo
+            </Radio.Button>
+          </Popover>
+        </Radio.Group>
+      </Form.Item>
+    );
   };
 
   const moduleLoading = () => {
@@ -749,7 +853,10 @@ export const ModuleResourceDetails = ({
               danger
               block
               disabled={deleteName !== name}
-              onClick={deleteDeployment}
+              onClick={() => {
+                console.log("delte button hamndler");
+                deleteModuleForm.submit();
+              }}
             >
               Delete
             </Button>
@@ -762,11 +869,23 @@ export const ModuleResourceDetails = ({
           >
             Child resources
           </Divider>
-          {getResourcesToDelete()}
-          <Divider style={{ fontSize: "120%" }} orientationMargin="0" />
-          In order to delete this module and related resources, type the name of
-          the module in the box below
-          <Input placeholder={name} required onChange={changeDeleteName} />
+          <Form
+            form={deleteModuleForm}
+            onFinish={handleDeleteModule}
+            layout={"vertical"}
+          >
+            {getResourcesToDelete()}
+            <Divider style={{ fontSize: "120%" }} orientationMargin="0" />
+            {selectDeletionMethod()}
+            <Form.Item
+              name="deleteModuleName"
+              label={
+                "In order to delete this module and related resources, type the name of the module in the box below"
+              }
+            >
+              <Input placeholder={name} required onChange={changeDeleteName} />
+            </Form.Item>
+          </Form>
         </Modal>
         <Modal
           title="Module manifest"
