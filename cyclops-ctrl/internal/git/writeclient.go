@@ -70,9 +70,7 @@ func (c *WriteClient) Write(module cyclopsv1alpha1.Module) error {
 		}
 	}
 
-	if path2.Ext(path) != "yaml" || path2.Ext(path) != "yml" {
-		path = path2.Join(path, fmt.Sprintf("%v.yaml", module.Name))
-	}
+	path = moduleFilePath(path, module.Name)
 
 	file, err := fs.Create(path)
 	if err != nil {
@@ -112,6 +110,84 @@ func (c *WriteClient) Write(module cyclopsv1alpha1.Module) error {
 	}
 
 	return nil
+}
+
+func (c *WriteClient) DeleteModule(module cyclopsv1alpha1.Module) error {
+	repoURL, exists := module.GetAnnotations()[cyclopsv1alpha1.GitOpsWriteRepoAnnotation]
+	if !exists {
+		return errors.New(fmt.Sprintf("module passed to delete without git repository; set cyclops-ui.com/write-repo annotation in module %v", module.Name))
+	}
+
+	path := module.GetAnnotations()[cyclopsv1alpha1.GitOpsWritePathAnnotation]
+	revision := module.GetAnnotations()[cyclopsv1alpha1.GitOpsWriteRevisionAnnotation]
+
+	creds, err := c.templatesResolver.RepoAuthCredentials(repoURL)
+	if err != nil {
+		return err
+	}
+
+	storer := memory.NewStorage()
+	fs := memfs.New()
+
+	repo, worktree, err := cloneRepo(repoURL, revision, storer, &fs, creds)
+	if err != nil {
+		if errors.Is(err, git.NoMatchingRefSpecError{}) {
+			storer = memory.NewStorage()
+			fs = memfs.New()
+			repo, worktree, err = cloneRepo(repoURL, "", storer, &fs, creds)
+			if err != nil {
+				return err
+			}
+
+			err = worktree.Checkout(&git.CheckoutOptions{
+				Branch: plumbing.NewBranchReferenceName(revision),
+				Create: true,
+			})
+			if err != nil {
+				return err
+			}
+		} else {
+			return err
+		}
+	}
+
+	path = moduleFilePath(path, module.Name)
+
+	err = fs.Remove(path)
+	if err != nil {
+		return fmt.Errorf("failed to remove file from repository: %w", err)
+	}
+
+	if _, err := worktree.Add(path); err != nil {
+		return fmt.Errorf("failed to add changes to worktree: %w", err)
+	}
+
+	commitMessage := fmt.Sprintf("delete module on path %s", path)
+	_, err = worktree.Commit(commitMessage, &git.CommitOptions{
+		Author: &object.Signature{
+			Name: "Cyclops UI",
+			When: time.Now(),
+		},
+	})
+	if err != nil {
+		return fmt.Errorf("failed to commit changes: %w", err)
+	}
+
+	if err := repo.Push(&git.PushOptions{
+		Auth: httpBasicAuthCredentials(creds),
+	}); err != nil {
+		return fmt.Errorf("failed to push changes: %w", err)
+	}
+
+	return nil
+}
+
+func moduleFilePath(path, moduleName string) string {
+	if path2.Ext(path) != "yaml" || path2.Ext(path) != "yml" {
+		path = path2.Join(path, fmt.Sprintf("%v.yaml", moduleName))
+	}
+
+	return path
 }
 
 func cloneRepo(url, revision string, storer *memory.Storage, fs *billy.Filesystem, creds *auth.Credentials) (*git.Repository, *git.Worktree, error) {
