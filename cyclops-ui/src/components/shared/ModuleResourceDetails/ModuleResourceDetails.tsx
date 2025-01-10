@@ -200,9 +200,6 @@ export const ModuleResourceDetails = ({
   const [loadingReconciliation, setLoadingReconciliation] = useState(false);
 
   const [deleteName, setDeleteName] = useState("");
-  const [deleteMethod, setDeleteMethod] = useState<
-    "git" | "cluster" | undefined
-  >();
   const [deleteModuleForm] = Form.useForm();
 
   const [resources, setResources] = useState<any[]>([]);
@@ -317,11 +314,7 @@ export const ModuleResourceDetails = ({
   };
 
   const handleDeleteModule = (deleteModuleValues) => {
-    console.log("deleteModuleValues", deleteModuleValues);
-  };
-
-  const deleteDeployment = () => {
-    deleteModule(name, deleteMethod)
+    deleteModule(name, deleteModuleValues.method)
       .then(() => {
         onDeleteModuleSuccess(name);
       })
