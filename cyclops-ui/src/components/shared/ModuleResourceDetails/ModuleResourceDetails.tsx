@@ -357,7 +357,6 @@ export const ModuleResourceDetails = ({
     return (
       <Form.Item
         name="method"
-        layout={"vertical"}
         style={{ width: "100%", marginBottom: "12px" }}
         rules={[
           {
