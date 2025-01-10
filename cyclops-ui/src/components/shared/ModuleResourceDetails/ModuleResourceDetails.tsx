@@ -51,7 +51,6 @@ import {
   resourceRefKey,
 } from "../../../utils/resourceRef";
 import { ResourceListActionsProvider } from "../../k8s-resources/ResourceList/ResourceListActionsContext";
-import { useForm } from "antd/es/form/Form";
 
 const languages = [
   "javascript",
