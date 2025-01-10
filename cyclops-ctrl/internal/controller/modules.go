@@ -131,6 +131,31 @@ func (m *Modules) ListModules(ctx *gin.Context) {
 
 func (m *Modules) DeleteModule(ctx *gin.Context) {
 	ctx.Header("Access-Control-Allow-Origin", "*")
+	m.monitor.DecModule()
+
+	deleteMethod := ctx.Query("deleteMethod")
+
+	if deleteMethod == "git" {
+		module, err := m.kubernetesClient.GetModule(ctx.Param("name"))
+		if err != nil {
+			ctx.JSON(http.StatusBadRequest, dto.NewError("Error fetching module for deletion", err.Error()))
+			return
+		}
+
+		if module == nil {
+			ctx.JSON(http.StatusBadRequest, dto.NewError("Error fetching module for deletion", "Check that the module exists"))
+			return
+		}
+
+		err = m.gitWriteClient.DeleteModule(*module)
+		if err != nil {
+			ctx.JSON(http.StatusBadRequest, dto.NewError("Error deleting module from git", err.Error()))
+			return
+		}
+
+		ctx.Status(http.StatusOK)
+		return
+	}
 
 	err := m.kubernetesClient.DeleteModule(ctx.Param("name"))
 	if err != nil {
@@ -139,7 +164,6 @@ func (m *Modules) DeleteModule(ctx *gin.Context) {
 		return
 	}
 
-	m.monitor.DecModule()
 	ctx.Status(http.StatusOK)
 }
 
