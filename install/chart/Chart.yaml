@@ -2,7 +2,7 @@ apiVersion: v2
 name: cyclops
 description: Cyclops Helm chart
 type: application
-version: "0.13.0"
+version: "0.14.0"
 appVersion: "v0.15.4"
 home: https://cyclops-ui.com/
 keywords:
