@@ -21,6 +21,19 @@ const Blogs = () => {
         <Row gutter={[16, 16]}>
           <Col xs={{ span: 20, offset: 2 }} md={{ span: 6, offset: 3 }}>
             <Blog
+              title={"DevOps vs Platform Engineering"}
+              description={
+                "If you are confused about what DevOps or Platform Engineering even is, you are not alone..."
+              }
+              blogLink={
+                "https://cyclops-ui.com/blog/2024/12/19/devops-vs-platform"
+              }
+              avatar={"https://github.com/KaradzaJuraj.png"}
+              banner={"/img/2024-12-19-devops-vs-platform/cover.jpeg"}
+            />
+          </Col>
+          <Col xs={{ span: 20, offset: 2 }} md={{ span: 6, offset: 0 }}>
+            <Blog
               title={"Minecraft on Kubernetes: A Dev Platform Example"}
               description={
                 "Go on, tell your boss you are researching Dev Platforms and go get those diamonds..."
@@ -43,19 +56,6 @@ const Blogs = () => {
               }
               avatar={"https://github.com/KaradzaJuraj.png"}
               banner={"/img/2024-11-29-gitops-clickops/cover.jpeg"}
-            />
-          </Col>
-          <Col xs={{ span: 20, offset: 2 }} md={{ span: 6, offset: 0 }}>
-            <Blog
-              title={"Cyclops Launch Week #1"}
-              description={
-                "For an entire week, we will be unveiling a feature a day - that's five features in total..."
-              }
-              blogLink={
-                "https://cyclops-ui.com/blog/2024/11/22/launch-week-1"
-              }
-              avatar={"https://github.com/KaradzaJuraj.png"}
-              banner={"/img/2024-11-22-launch-week-1/recap.png"}
             />
           </Col>
         </Row>

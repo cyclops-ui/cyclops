@@ -318,7 +318,21 @@ const NewModule = () => {
       );
     }
 
-    return <Spin size="large" />;
+    let message = "loading template...";
+    if (!loadingTemplate && loadingTemplateInitialValues) {
+      message = "loading initial values...";
+    }
+
+    return (
+      <Col style={{ padding: "0px" }} span={16}>
+        <Row style={{ display: "flex", alignItems: "center" }}>
+          <Spin size={"large"} />
+          <div style={{ paddingLeft: "24px", flexGrow: 1 }}>
+            <h4 style={{ color: "#888" }}>{message}</h4>
+          </div>
+        </Row>
+      </Col>
+    );
   }
 
   const handleCancel = () => {

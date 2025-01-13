@@ -1,6 +1,5 @@
 import Layout from "@theme/Layout";
 import { Card, Button, Typography, Row, Col, ConfigProvider } from "antd";
-import CalendlyWidget from "../components/CalendlyWidget";
 import styles from "./index.module.css";
 import yaml from "/static/img/yaml_background.png";
 import AdoptersPlanSignup from "../components/AdoptersPlanSignup/AdoptersPlanSignup";
