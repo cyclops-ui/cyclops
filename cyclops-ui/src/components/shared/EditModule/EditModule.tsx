@@ -10,6 +10,7 @@ import {
   notification,
   Row,
   Spin,
+  theme,
   Typography,
 } from "antd";
 import { LockFilled, UnlockFilled } from "@ant-design/icons";
@@ -38,6 +39,7 @@ interface module {
 
 export interface EditModuleProps {
   moduleName: string;
+  themePalette?: "dark" | "light";
   themeColor?: string;
   fetchModule: (moduleName: string) => Promise<any>;
   getTemplate: (
@@ -62,6 +64,7 @@ export interface EditModuleProps {
 
 export const EditModuleComponent = ({
   moduleName,
+  themePalette = "light",
   fetchModule,
   getTemplate,
   getTemplateInitialValues,
@@ -311,6 +314,7 @@ export const EditModuleComponent = ({
     return (
       <div>
         <TemplateFormFields
+          themePalette={themePalette}
           isModuleEdit={true}
           fields={config.root.properties}
           parentFieldID={[]}
@@ -405,6 +409,7 @@ export const EditModuleComponent = ({
           token: {
             colorPrimary: themeColor || "#FF8803",
           },
+          ...(themePalette === "dark" && { algorithm: theme.darkAlgorithm }),
         }}
       >
         {error.message.length !== 0 && (
