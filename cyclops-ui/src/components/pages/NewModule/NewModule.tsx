@@ -12,6 +12,7 @@ import {
   Modal,
   Spin,
   notification,
+  Switch,
 } from "antd";
 import axios from "axios";
 import {
@@ -90,6 +91,8 @@ const NewModule = () => {
 
   const [namespaces, setNamespaces] = useState<string[]>([]);
 
+  const [gitopsToggle, SetGitopsToggle] = useState(false);
+
   const [notificationApi, contextHolder] = notification.useNotification();
   const openNotification = (errors: FeedbackError[]) => {
     notificationApi.error({
@@ -116,6 +119,13 @@ const NewModule = () => {
   const handleSubmit = (values: any) => {
     const moduleName = values["cyclops_module_name"];
     const moduleNamespace = values["cyclops_module_namespace"];
+    const gitOpsWrite = gitopsToggle
+      ? {
+          repo: values["gitops-repo"],
+          path: values["gitops-path"],
+          branch: values["gitops-branch"],
+        }
+      : null;
 
     values = findMaps(config.root.properties, values, initialValuesRaw);
 
@@ -123,6 +133,7 @@ const NewModule = () => {
       .post(`/api/modules/new`, {
         name: moduleName,
         namespace: moduleNamespace,
+        gitOpsWrite: gitOpsWrite,
         values: values,
         template: {
           repo: template.repo,
@@ -132,7 +143,9 @@ const NewModule = () => {
         },
       })
       .then((res) => {
-        window.location.href = "/modules/" + moduleName;
+        window.location.href = gitopsToggle
+          ? "/modules/"
+          : "/modules/" + moduleName;
       })
       .catch((error) => {
         setLoading(false);
@@ -547,6 +560,74 @@ const NewModule = () => {
                       ))}
                     </Select>
                   </Form.Item>
+                </div>
+                <div style={{ display: advancedOptionsExpanded ? "" : "none" }}>
+                  <Divider
+                    style={{ marginTop: "12px", marginBottom: "12px" }}
+                  />
+                  <Form.Item
+                    name="gitops"
+                    id="gitops"
+                    label={
+                      <div>
+                        Push changes to Git?
+                        <p style={{ color: "#8b8e91", marginBottom: "0px" }}>
+                          Instead of deploying to the cluster, Cyclops will push
+                          the changes to a git repository.
+                        </p>
+                      </div>
+                    }
+                    style={{ padding: "0px 12px 0px 12px" }}
+                  >
+                    <Switch
+                      onChange={(e) => {
+                        SetGitopsToggle(e);
+                      }}
+                    />
+                  </Form.Item>
+                  <div style={{ display: gitopsToggle ? "" : "none" }}>
+                    <Form.Item
+                      label="Repository URL"
+                      name="gitops-repo"
+                      rules={[
+                        {
+                          required: gitopsToggle ? true : false,
+                          message: "Repo URL is required",
+                        },
+                      ]}
+                      style={{ padding: "0px 12px 0px 12px" }}
+                    >
+                      <Input />
+                    </Form.Item>
+
+                    <Form.Item
+                      label="Path"
+                      name="gitops-path"
+                      rules={[
+                        {
+                          required: gitopsToggle ? true : false,
+                          message: "Path is required",
+                        },
+                      ]}
+                      style={{ padding: "0px 12px 0px 12px" }}
+                    >
+                      <Input />
+                    </Form.Item>
+
+                    <Form.Item
+                      label="Branch"
+                      name="gitops-branch"
+                      rules={[
+                        {
+                          required: gitopsToggle ? true : false,
+                          message: "Path is required",
+                        },
+                      ]}
+                      style={{ padding: "0px 12px 0px 12px" }}
+                    >
+                      <Input />
+                    </Form.Item>
+                  </div>
                 </div>
                 <div className={"expandadvanced"} onClick={toggleExpand}>
                   {advancedOptionsExpanded ? (
