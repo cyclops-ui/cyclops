@@ -12,6 +12,8 @@ import {
   Modal,
   Spin,
   notification,
+  theme,
+  ConfigProvider,
 } from "antd";
 import {
   deepMerge,
@@ -389,241 +391,13 @@ export const CreateModuleComponent = ({
 
   return (
     <div>
-      {error.message.length !== 0 && (
-        <Alert
-          message={error.message}
-          description={error.description}
-          type="error"
-          closable
-          afterClose={() => {
-            setError({
-              message: "",
-              description: "",
-            });
-          }}
-          style={{ marginBottom: "20px" }}
-        />
-      )}
-      {contextHolder}
-      <Row gutter={[40, 0]}>
-        <Col span={23}>
-          <Title style={{ textAlign: "center" }} level={2}>
-            Define Module
-          </Title>
-        </Col>
-      </Row>
-      <Row gutter={[40, 0]}>
-        <Col span={24}>
-          <Form
-            {...layout}
-            form={form}
-            layout="vertical"
-            autoComplete={"off"}
-            onFinish={handleSubmit}
-            onFinishFailed={onFinishFailed}
-            requiredMark={(label, { required }) => (
-              <Row>
-                <Col>
-                  {required ? (
-                    <span style={{ color: "red", paddingRight: "3px" }}>*</span>
-                  ) : (
-                    <></>
-                  )}
-                </Col>
-                <Col>{label}</Col>
-              </Row>
-            )}
-          >
-            <Divider orientation="left" orientationMargin="0">
-              Template
-            </Divider>
-            <Row>
-              <Col span={16}>
-                <Select
-                  showSearch={true}
-                  onChange={onTemplateStoreSelected}
-                  style={{ width: "100%" }}
-                  placeholder="Select an option"
-                  disabled={loadingTemplate || loadingTemplateInitialValues}
-                >
-                  {templateStore.map((option: any, index) => (
-                    <Option key={option.name} value={option.name}>
-                      {option.iconURL !== null &&
-                      option.iconURL !== undefined &&
-                      option.iconURL.length !== 0 ? (
-                        <img
-                          alt=""
-                          style={{
-                            maxHeight: "1.5em",
-                            maxWidth: "1.5em",
-                            marginRight: "8px",
-                          }}
-                          src={option.iconURL}
-                        />
-                      ) : (
-                        <img
-                          alt=""
-                          style={{
-                            maxHeight: "1.5em",
-                            maxWidth: "1.5em",
-                            marginRight: "8px",
-                          }}
-                          src={defaultTemplate}
-                        />
-                      )}
-                      {option.name}
-                    </Option>
-                  ))}
-                </Select>
-              </Col>
-            </Row>
-            <Divider orientation="left" orientationMargin="0">
-              Metadata
-            </Divider>
-            <Col style={{ padding: "0px" }} span={16}>
-              <div
-                style={{
-                  border: "solid 1.5px #c3c3c3",
-                  borderRadius: "7px",
-                  padding: "0px",
-                  width: "100%",
-                  backgroundColor: "#fafafa",
-                }}
-              >
-                <Form.Item
-                  name="cyclops_module_name"
-                  id="cyclops_module_name"
-                  label={
-                    <div>
-                      Module name
-                      <p style={{ color: "#8b8e91", marginBottom: "0px" }}>
-                        Enter a unique module name
-                      </p>
-                    </div>
-                  }
-                  style={{ padding: "12px 12px 0px 12px" }}
-                  rules={[
-                    {
-                      required: true,
-                      message: "Module name is required",
-                    },
-                    {
-                      max: 63,
-                      message:
-                        "Module name must contain no more than 63 characters",
-                    },
-                    {
-                      pattern: /^[a-z0-9](?:[a-z0-9-]*[a-z0-9])?$/, // only alphanumeric characters and hyphens, cannot start or end with a hyphen and the alpha characters can only be lowercase
-                      message:
-                        "Module name must follow the Kubernetes naming convention",
-                    },
-                  ]}
-                  hasFeedback={true}
-                  validateDebounce={1000}
-                >
-                  <Input />
-                </Form.Item>
-                <div style={{ display: advancedOptionsExpanded ? "" : "none" }}>
-                  <Divider
-                    style={{ marginTop: "12px", marginBottom: "12px" }}
-                  />
-                  <Form.Item
-                    name="cyclops_module_namespace"
-                    id="cyclops_module_namespace"
-                    label={
-                      <div>
-                        Target namespace
-                        <p style={{ color: "#8b8e91", marginBottom: "0px" }}>
-                          Namespace used to deploy resources to
-                        </p>
-                      </div>
-                    }
-                    style={{ padding: "0px 12px 0px 12px" }}
-                    hasFeedback={true}
-                    validateDebounce={1000}
-                  >
-                    <Select
-                      showSearch={true}
-                      onChange={onTemplateStoreSelected}
-                      style={{ width: "100%" }}
-                    >
-                      {namespaces.map((namespace: string) => (
-                        <Option key={namespace} value={namespace}>
-                          {namespace}
-                        </Option>
-                      ))}
-                    </Select>
-                  </Form.Item>
-                </div>
-                <div className={"expandadvanced"} onClick={toggleExpand}>
-                  {advancedOptionsExpanded ? (
-                    <div>
-                      Advanced
-                      <UpOutlined style={{ paddingLeft: "5px" }} />
-                    </div>
-                  ) : (
-                    <div>
-                      Advanced
-                      <DownOutlined style={{ paddingLeft: "5px" }} />
-                    </div>
-                  )}
-                </div>
-              </div>
-            </Col>
-            <Divider
-              orientation="left"
-              orientationMargin="0"
-              style={{ borderColor: "#ccc" }}
-            >
-              Configure
-            </Divider>
-            {renderFormFields()}
-            <div style={{ textAlign: "right" }}>
-              <Button
-                onClick={function () {
-                  setLoadingValuesModal(true);
-                }}
-                name="Save"
-                disabled={
-                  loadingTemplate ||
-                  loadingTemplateInitialValues ||
-                  !config.root.properties
-                }
-              >
-                Import values as YAML
-              </Button>{" "}
-              <Button
-                type="primary"
-                loading={
-                  loading || loadingTemplate || loadingTemplateInitialValues
-                }
-                htmlType="submit"
-                name="Save"
-                disabled={
-                  loadingTemplate ||
-                  loadingTemplateInitialValues ||
-                  !(template.version || template.path || template.repo)
-                }
-              >
-                Deploy
-              </Button>{" "}
-              <Button
-                htmlType="button"
-                onClick={() => (window.location.href = "/")}
-                disabled={loadingTemplate || loadingTemplateInitialValues}
-              >
-                Back
-              </Button>
-            </div>
-          </Form>
-        </Col>
-      </Row>
-      <Modal
-        title="Import values as YAML"
-        visible={loadingValuesModal}
-        onCancel={handleCancel}
-        onOk={handleImportValues}
-        width={"50%"}
+      <ConfigProvider
+        theme={{
+          token: {
+            colorPrimary: "#FF8803",
+          },
+          ...(themePalette === "dark" && { algorithm: theme.darkAlgorithm }),
+        }}
       >
         {error.message.length !== 0 && (
           <Alert
@@ -640,37 +414,282 @@ export const CreateModuleComponent = ({
             style={{ marginBottom: "20px" }}
           />
         )}
-        <div
-          style={{ paddingRight: "16px", paddingBottom: "16px", color: "#777" }}
+        {contextHolder}
+        <Row gutter={[40, 0]}>
+          <Col span={23}>
+            <Title style={{ textAlign: "center" }} level={2}>
+              Define Module
+            </Title>
+          </Col>
+        </Row>
+        <Row gutter={[40, 0]}>
+          <Col span={24}>
+            <Form
+              {...layout}
+              form={form}
+              layout="vertical"
+              autoComplete={"off"}
+              onFinish={handleSubmit}
+              onFinishFailed={onFinishFailed}
+              requiredMark={(label, { required }) => (
+                <Row>
+                  <Col>
+                    {required ? (
+                      <span style={{ color: "red", paddingRight: "3px" }}>
+                        *
+                      </span>
+                    ) : (
+                      <></>
+                    )}
+                  </Col>
+                  <Col>{label}</Col>
+                </Row>
+              )}
+            >
+              <Divider orientation="left" orientationMargin="0">
+                Template
+              </Divider>
+              <Row>
+                <Col span={16}>
+                  <Select
+                    showSearch={true}
+                    onChange={onTemplateStoreSelected}
+                    style={{ width: "100%" }}
+                    placeholder="Select an option"
+                    disabled={loadingTemplate || loadingTemplateInitialValues}
+                  >
+                    {templateStore.map((option: any, index) => (
+                      <Option key={option.name} value={option.name}>
+                        {option.iconURL !== null &&
+                        option.iconURL !== undefined &&
+                        option.iconURL.length !== 0 ? (
+                          <img
+                            alt=""
+                            style={{
+                              maxHeight: "1.5em",
+                              maxWidth: "1.5em",
+                              marginRight: "8px",
+                            }}
+                            src={option.iconURL}
+                          />
+                        ) : (
+                          <img
+                            alt=""
+                            style={{
+                              maxHeight: "1.5em",
+                              maxWidth: "1.5em",
+                              marginRight: "8px",
+                            }}
+                            src={defaultTemplate}
+                          />
+                        )}
+                        {option.name}
+                      </Option>
+                    ))}
+                  </Select>
+                </Col>
+              </Row>
+              <Divider orientation="left" orientationMargin="0">
+                Metadata
+              </Divider>
+              <Col style={{ padding: "0px" }} span={16}>
+                <div
+                  style={{
+                    border: "solid 1.5px #c3c3c3",
+                    borderRadius: "7px",
+                    padding: "0px",
+                    width: "100%",
+                    backgroundColor: "#fafafa",
+                  }}
+                >
+                  <Form.Item
+                    name="cyclops_module_name"
+                    id="cyclops_module_name"
+                    label={
+                      <div>
+                        Module name
+                        <p style={{ color: "#8b8e91", marginBottom: "0px" }}>
+                          Enter a unique module name
+                        </p>
+                      </div>
+                    }
+                    style={{ padding: "12px 12px 0px 12px" }}
+                    rules={[
+                      {
+                        required: true,
+                        message: "Module name is required",
+                      },
+                      {
+                        max: 63,
+                        message:
+                          "Module name must contain no more than 63 characters",
+                      },
+                      {
+                        pattern: /^[a-z0-9](?:[a-z0-9-]*[a-z0-9])?$/, // only alphanumeric characters and hyphens, cannot start or end with a hyphen and the alpha characters can only be lowercase
+                        message:
+                          "Module name must follow the Kubernetes naming convention",
+                      },
+                    ]}
+                    hasFeedback={true}
+                    validateDebounce={1000}
+                  >
+                    <Input />
+                  </Form.Item>
+                  <div
+                    style={{ display: advancedOptionsExpanded ? "" : "none" }}
+                  >
+                    <Divider
+                      style={{ marginTop: "12px", marginBottom: "12px" }}
+                    />
+                    <Form.Item
+                      name="cyclops_module_namespace"
+                      id="cyclops_module_namespace"
+                      label={
+                        <div>
+                          Target namespace
+                          <p style={{ color: "#8b8e91", marginBottom: "0px" }}>
+                            Namespace used to deploy resources to
+                          </p>
+                        </div>
+                      }
+                      style={{ padding: "0px 12px 0px 12px" }}
+                      hasFeedback={true}
+                      validateDebounce={1000}
+                    >
+                      <Select
+                        showSearch={true}
+                        onChange={onTemplateStoreSelected}
+                        style={{ width: "100%" }}
+                      >
+                        {namespaces.map((namespace: string) => (
+                          <Option key={namespace} value={namespace}>
+                            {namespace}
+                          </Option>
+                        ))}
+                      </Select>
+                    </Form.Item>
+                  </div>
+                  <div className={"expandadvanced"} onClick={toggleExpand}>
+                    {advancedOptionsExpanded ? (
+                      <div>
+                        Advanced
+                        <UpOutlined style={{ paddingLeft: "5px" }} />
+                      </div>
+                    ) : (
+                      <div>
+                        Advanced
+                        <DownOutlined style={{ paddingLeft: "5px" }} />
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </Col>
+              <Divider
+                orientation="left"
+                orientationMargin="0"
+                style={{ borderColor: "#ccc" }}
+              >
+                Configure
+              </Divider>
+              {renderFormFields()}
+              <div style={{ textAlign: "right" }}>
+                <Button
+                  onClick={function () {
+                    setLoadingValuesModal(true);
+                  }}
+                  name="Save"
+                  disabled={
+                    loadingTemplate ||
+                    loadingTemplateInitialValues ||
+                    !config.root.properties
+                  }
+                >
+                  Import values as YAML
+                </Button>{" "}
+                <Button
+                  type="primary"
+                  loading={
+                    loading || loadingTemplate || loadingTemplateInitialValues
+                  }
+                  htmlType="submit"
+                  name="Save"
+                  disabled={
+                    loadingTemplate ||
+                    loadingTemplateInitialValues ||
+                    !(template.version || template.path || template.repo)
+                  }
+                >
+                  Deploy
+                </Button>{" "}
+                <Button
+                  htmlType="button"
+                  onClick={() => (window.location.href = "/")}
+                  disabled={loadingTemplate || loadingTemplateInitialValues}
+                >
+                  Back
+                </Button>
+              </div>
+            </Form>
+          </Col>
+        </Row>
+        <Modal
+          title="Import values as YAML"
+          visible={loadingValuesModal}
+          onCancel={handleCancel}
+          onOk={handleImportValues}
+          width={"50%"}
         >
-          You can paste your values in YAML format here, and after submitting
-          them, you can see them in the form and edit them further. If you set a
-          value in YAML that does not exist in the UI, it will not be applied to
-          your Module.
-        </div>
-        <AceEditor
-          mode={"yaml"}
-          theme="github"
-          fontSize={12}
-          showPrintMargin={true}
-          showGutter={true}
-          highlightActiveLine={true}
-          onChange={setLoadedValues}
-          setOptions={{
-            enableBasicAutocompletion: true,
-            enableLiveAutocompletion: true,
-            enableSnippets: false,
-            showLineNumbers: true,
-            tabSize: 4,
-            useWorker: false,
-          }}
-          style={{
-            height: "25em",
-            width: "100%",
-          }}
-          value={loadedValues}
-        />
-      </Modal>
+          {error.message.length !== 0 && (
+            <Alert
+              message={error.message}
+              description={error.description}
+              type="error"
+              closable
+              afterClose={() => {
+                setError({
+                  message: "",
+                  description: "",
+                });
+              }}
+              style={{ marginBottom: "20px" }}
+            />
+          )}
+          <div
+            style={{
+              paddingRight: "16px",
+              paddingBottom: "16px",
+              color: "#777",
+            }}
+          >
+            You can paste your values in YAML format here, and after submitting
+            them, you can see them in the form and edit them further. If you set
+            a value in YAML that does not exist in the UI, it will not be
+            applied to your Module.
+          </div>
+          <AceEditor
+            mode={"yaml"}
+            theme="github"
+            fontSize={12}
+            showPrintMargin={true}
+            showGutter={true}
+            highlightActiveLine={true}
+            onChange={setLoadedValues}
+            setOptions={{
+              enableBasicAutocompletion: true,
+              enableLiveAutocompletion: true,
+              enableSnippets: false,
+              showLineNumbers: true,
+              tabSize: 4,
+              useWorker: false,
+            }}
+            style={{
+              height: "25em",
+              width: "100%",
+            }}
+            value={loadedValues}
+          />
+        </Modal>
+      </ConfigProvider>
     </div>
   );
 };
