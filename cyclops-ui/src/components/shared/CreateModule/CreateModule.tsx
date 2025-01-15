@@ -140,9 +140,23 @@ export const CreateModuleComponent = ({
   const [form] = Form.useForm();
 
   useEffect(() => {
-    loadTemplateStore();
-    loadNamespaces();
-  }, [loadTemplateStore, loadNamespaces]);
+    getTemplateStore()
+      .then((res) => {
+        setTemplateStore(res);
+      })
+      .catch(function (error) {
+        setLoadingTemplate(false);
+        setError(mapResponseError(error));
+      });
+
+    getNamespaces()
+      .then((res) => {
+        setNamespaces(res);
+      })
+      .catch(function (error) {
+        setError(mapResponseError(error));
+      });
+  }, [getTemplateStore, getNamespaces]);
 
   useEffect(() => {
     form.validateFields(flattenObjectKeys(initialValues));
@@ -247,27 +261,6 @@ export const CreateModuleComponent = ({
       })
       .catch(function (error) {
         setLoadingTemplateInitialValues(false);
-        setError(mapResponseError(error));
-      });
-  };
-
-  const loadTemplateStore = async () => {
-    await getTemplateStore()
-      .then((res) => {
-        setTemplateStore(res);
-      })
-      .catch(function (error) {
-        setLoadingTemplate(false);
-        setError(mapResponseError(error));
-      });
-  };
-
-  const loadNamespaces = async () => {
-    await getNamespaces()
-      .then((res) => {
-        setNamespaces(res);
-      })
-      .catch(function (error) {
         setError(mapResponseError(error));
       });
   };
