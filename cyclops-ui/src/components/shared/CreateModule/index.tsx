@@ -1,0 +1,1 @@
+export { CreateModuleComponent } from "./CreateModule";
