@@ -140,7 +140,7 @@ export const CreateModuleComponent = ({
   useEffect(() => {
     loadTemplateStore();
     loadNamespaces();
-  }, []);
+  }, [loadTemplateStore, loadNamespaces]);
 
   useEffect(() => {
     form.validateFields(flattenObjectKeys(initialValues));
