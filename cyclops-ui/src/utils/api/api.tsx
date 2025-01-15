@@ -5,6 +5,18 @@ export async function getModule(moduleName: string): Promise<any> {
   return response.data;
 }
 
+export async function getTemplateStore(): Promise<any[]> {
+  const resp = await axios.get(`/api/templates/store`);
+
+  return resp.data;
+}
+
+export async function getNamespaces(): Promise<string[]> {
+  const resp = await axios.get(`/api/namespaces`);
+
+  return resp.data;
+}
+
 export async function getTemplate(
   repo: string,
   path: string,
@@ -55,6 +67,25 @@ export async function fetchModuleRawManifest(
 export async function fetchModuleRenderedManifest(moduleName: string) {
   const resp = await axios.get(`/api/modules/${moduleName}/currentManifest`);
   return resp.data;
+}
+
+export async function createModule(
+  moduleName: string,
+  moduleNamespace: string,
+  templateRef: any,
+  values: any,
+) {
+  return await axios.post(`/api/modules/new`, {
+    name: moduleName,
+    namespace: moduleNamespace,
+    values: values,
+    template: {
+      repo: templateRef.repo,
+      path: templateRef.path,
+      version: templateRef.version,
+      sourceType: templateRef.sourceType,
+    },
+  });
 }
 
 export async function updateModule(
