@@ -76,6 +76,7 @@ export interface CreateModuleProps {
     values: string,
   ) => Promise<any>;
   onSubmitModuleSuccess: (moduleName: string) => void;
+  onBackButton: () => void;
 }
 
 export const CreateModuleComponent = ({
@@ -86,6 +87,7 @@ export const CreateModuleComponent = ({
   getTemplateInitialValues,
   submitModule,
   onSubmitModuleSuccess,
+  onBackButton,
 }: CreateModuleProps) => {
   const [loading, setLoading] = useState(false);
   const [config, setConfig] = useState({
@@ -295,6 +297,7 @@ export const CreateModuleComponent = ({
     if (!loadingTemplate && !loadingTemplateInitialValues) {
       return (
         <TemplateFormFields
+          themePalette={themePalette}
           isModuleEdit={false}
           fields={config.root.properties}
           parentFieldID={[]}
@@ -488,11 +491,14 @@ export const CreateModuleComponent = ({
               <Col style={{ padding: "0px" }} span={16}>
                 <div
                   style={{
-                    border: "solid 1.5px #c3c3c3",
+                    border: themePalette === "light" ? "#c3c3c3" : "#707070",
+                    borderWidth: "1.5px",
+                    borderStyle: "solid",
                     borderRadius: "7px",
                     padding: "0px",
                     width: "100%",
-                    backgroundColor: "#fafafa",
+                    backgroundColor:
+                      themePalette === "light" ? "#fafafa" : "#404040",
                   }}
                 >
                   <Form.Item
@@ -562,7 +568,14 @@ export const CreateModuleComponent = ({
                       </Select>
                     </Form.Item>
                   </div>
-                  <div className={"expandadvanced"} onClick={toggleExpand}>
+                  <div
+                    className={"expandadvanced"}
+                    style={{
+                      backgroundColor:
+                        themePalette === "light" ? "#eee" : "#595959",
+                    }}
+                    onClick={toggleExpand}
+                  >
                     {advancedOptionsExpanded ? (
                       <div>
                         Advanced
@@ -616,7 +629,7 @@ export const CreateModuleComponent = ({
                 </Button>{" "}
                 <Button
                   htmlType="button"
-                  onClick={() => (window.location.href = "/")}
+                  onClick={() => onBackButton()}
                   disabled={loadingTemplate || loadingTemplateInitialValues}
                 >
                   Back
