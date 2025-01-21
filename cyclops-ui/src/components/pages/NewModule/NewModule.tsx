@@ -10,9 +10,9 @@ import {
 
 const NewModule = () => {
   return (
-    <div style={{ backgroundColor: "#000" }}>
+    <div>
       <CreateModuleComponent
-        themePalette={"dark"}
+        themePalette={"light"}
         getTemplateStore={getTemplateStore}
         getNamespaces={getNamespaces}
         getTemplate={getTemplate}
