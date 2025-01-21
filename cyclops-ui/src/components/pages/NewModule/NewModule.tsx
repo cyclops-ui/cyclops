@@ -10,16 +10,22 @@ import {
 
 const NewModule = () => {
   return (
-    <CreateModuleComponent
-      getTemplateStore={getTemplateStore}
-      getNamespaces={getNamespaces}
-      getTemplate={getTemplate}
-      getTemplateInitialValues={getTemplateInitialValues}
-      submitModule={createModule}
-      onSubmitModuleSuccess={(moduleName) => {
-        window.location.href = "/modules/" + moduleName;
-      }}
-    />
+    <div style={{ backgroundColor: "#000" }}>
+      <CreateModuleComponent
+        themePalette={"dark"}
+        getTemplateStore={getTemplateStore}
+        getNamespaces={getNamespaces}
+        getTemplate={getTemplate}
+        getTemplateInitialValues={getTemplateInitialValues}
+        submitModule={createModule}
+        onSubmitModuleSuccess={(moduleName) => {
+          window.location.href = "/modules/" + moduleName;
+        }}
+        onBackButton={() => {
+          window.location.href = "/modules";
+        }}
+      />
+    </div>
   );
 };
 export default NewModule;

@@ -22,4 +22,5 @@ export {
   ModuleResourceDetails,
   EditModuleComponent,
   HelmReleaseDetails,
+  CreateModuleComponent,
 } from "./components/shared";

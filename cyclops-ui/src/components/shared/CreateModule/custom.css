@@ -20,7 +20,6 @@ code {
 .expandadvanced {
   width: 100%;
   height: 32px;
-  background-color: #eee;
   border-radius: 0 0 7px 7px;
   transition: background-color 0.2s ease;
   display: flex;
@@ -28,8 +27,4 @@ code {
   align-items: center;
   text-align: center;
   cursor: pointer;
-}
-
-.expandadvanced:hover {
-  background-color: #e0e0e0;
 }
