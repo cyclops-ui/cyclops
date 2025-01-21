@@ -17,7 +17,6 @@ limitations under the License.
 package v1alpha1
 
 import (
-	v1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
@@ -31,8 +30,16 @@ type TemplateAuthRuleSpec struct {
 
 	Repo string `json:"repo"`
 
-	Username v1.SecretKeySelector `json:"username"`
-	Password v1.SecretKeySelector `json:"password"`
+	Username SecretKeySelector `json:"username"`
+	Password SecretKeySelector `json:"password"`
+}
+
+type SecretKeySelector struct {
+	Name string `json:"name"`
+	Key  string `json:"key"`
+	// Specify whether the Secret or its key must be defined
+	// +optional
+	Optional *bool `json:"optional,omitempty"`
 }
 
 //+kubebuilder:object:root=true
