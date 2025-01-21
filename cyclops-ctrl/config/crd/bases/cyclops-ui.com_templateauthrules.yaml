@@ -40,18 +40,12 @@ spec:
             description: TemplateAuthRuleSpec defines the desired state of TemplateAuthRule
             properties:
               password:
-                description: SecretKeySelector selects a key of a Secret.
                 properties:
                   key:
-                    description: The key of the secret to select from.  Must be a
-                      valid secret key.
+                    description: Key to extract from the Secret
                     type: string
                   name:
-                    description: |-
-                      Name of the referent.
-                      TODO: Add other useful fields. apiVersion, kind, uid?
-                      More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names
-                      TODO: Drop `kubebuilder:default` when controller-gen doesn't need it https://github.com/kubernetes-sigs/kubebuilder/issues/3896.
+                    description: Name of the Secret
                     type: string
                   optional:
                     description: Specify whether the Secret or its key must be defined
@@ -60,22 +54,15 @@ spec:
                 - key
                 - name
                 type: object
-                x-kubernetes-map-type: atomic
               repo:
                 type: string
               username:
-                description: SecretKeySelector selects a key of a Secret.
                 properties:
                   key:
-                    description: The key of the secret to select from.  Must be a
-                      valid secret key.
+                    description: Key to extract from the Secret
                     type: string
                   name:
-                    description: |-
-                      Name of the referent.
-                      TODO: Add other useful fields. apiVersion, kind, uid?
-                      More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names
-                      TODO: Drop `kubebuilder:default` when controller-gen doesn't need it https://github.com/kubernetes-sigs/kubebuilder/issues/3896.
+                    description: Name of the Secret
                     type: string
                   optional:
                     description: Specify whether the Secret or its key must be defined
@@ -84,7 +71,6 @@ spec:
                 - key
                 - name
                 type: object
-                x-kubernetes-map-type: atomic
             required:
             - password
             - repo

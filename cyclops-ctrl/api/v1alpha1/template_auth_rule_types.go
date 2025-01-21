@@ -35,8 +35,11 @@ type TemplateAuthRuleSpec struct {
 }
 
 type SecretKeySelector struct {
+
+	// Name of the Secret
 	Name string `json:"name"`
-	Key  string `json:"key"`
+	// Key to extract from the Secret
+	Key string `json:"key"`
 	// Specify whether the Secret or its key must be defined
 	// +optional
 	Optional *bool `json:"optional,omitempty"`
