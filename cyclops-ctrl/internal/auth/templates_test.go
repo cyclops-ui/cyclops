@@ -72,11 +72,11 @@ var _ = Describe("Templates resolver", func() {
 			Spec: v1alpha1.TemplateAuthRuleSpec{
 				Repo: "https://github.com/my-org/my-team",
 				Username: v1alpha1.SecretKeySelector{
-					Name: "wrong-secret",
+					Name: "secret-name",
 					Key:  "username",
 				},
 				Password: v1alpha1.SecretKeySelector{
-					Name: "wrong-secret",
+					Name: "secret-name",
 					Key:  "token",
 				},
 			},
