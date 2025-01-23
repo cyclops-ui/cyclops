@@ -67,6 +67,7 @@ export interface EditModuleProps {
     gitOpsValues: any,
   ) => Promise<any>;
   onUpdateModuleSuccess: (moduleName: string) => void;
+  onBackButton: (moduleName: string) => void;
 }
 
 export const EditModuleComponent = ({
@@ -77,6 +78,7 @@ export const EditModuleComponent = ({
   getTemplateInitialValues,
   updateModule,
   onUpdateModuleSuccess,
+  onBackButton,
   themeColor,
 }: EditModuleProps) => {
   const [module, setModule] = useState<module>({
@@ -376,7 +378,7 @@ export const EditModuleComponent = ({
           </Button>{" "}
           <Button
             htmlType="button"
-            onClick={() => (window.location.href = "/modules/" + moduleName)}
+            onClick={() => onBackButton(moduleName)}
             disabled={!loadTemplate}
           >
             Back

@@ -22,7 +22,7 @@ import "./custom.css";
 import { PlusCircleOutlined, FilterOutlined } from "@ant-design/icons";
 import { mapResponseError } from "../../../utils/api/errors";
 
-const { Title } = Typography;
+const { Title, Text } = Typography;
 
 const Modules = () => {
   const [allData, setAllData] = useState([]);
@@ -34,8 +34,12 @@ const Modules = () => {
     "Progressing",
     "Unknown",
   ]);
+  const [moduleNamespaceFilter, setModuleNamespaceFilter] = useState<string[]>(
+    [],
+  );
   const [searchInputFilter, setsearchInputFilter] = useState("");
   const resourceFilter = ["Healthy", "Unhealthy", "Progressing", "Unknown"];
+  const [namespaceFilterData, setNamespaceFilterData] = useState<string[]>([]);
   const [error, setError] = useState({
     message: "",
     description: "",
@@ -43,6 +47,16 @@ const Modules = () => {
 
   useEffect(() => {
     setLoadingModules(true);
+
+    axios
+      .get(`/api/namespaces`)
+      .then((res) => {
+        setNamespaceFilterData(res.data);
+        setModuleNamespaceFilter(res.data);
+      })
+      .catch((error) => {
+        setError(mapResponseError(error));
+      });
 
     function fetchModules() {
       axios
@@ -72,13 +86,17 @@ const Modules = () => {
         -1
       );
     });
-    const newfilteredData = updatedList.filter((module: any) =>
-      moduleHealthFilter
-        .map((status) => status.toLowerCase())
-        .includes(module.status.toLowerCase()),
+    const newfilteredData = updatedList.filter(
+      (module: any) =>
+        moduleHealthFilter
+          .map((status) => status.toLowerCase())
+          .includes(module.status.toLowerCase()) &&
+        moduleNamespaceFilter
+          .map((targetNamespace) => targetNamespace.toLowerCase())
+          .includes(module.targetNamespace.toLowerCase()),
     );
     setFilteredData(newfilteredData);
-  }, [moduleHealthFilter, allData, searchInputFilter]);
+  }, [moduleNamespaceFilter, moduleHealthFilter, allData, searchInputFilter]);
 
   const handleClick = () => {
     window.location.href = "/modules/new";
@@ -86,20 +104,40 @@ const Modules = () => {
   const handleSelectItem = (selectedItems: any[]) => {
     setModuleHealthFilter(selectedItems);
   };
+  const handleNamespaceSelectItem = (selectedItems: any[]) => {
+    setModuleNamespaceFilter(selectedItems);
+  };
 
   const resourceFilterPopover = () => {
     return (
-      <Checkbox.Group
-        style={{ display: "block" }}
-        onChange={handleSelectItem}
-        value={moduleHealthFilter}
-      >
-        {resourceFilter.map((item, index) => (
-          <Checkbox key={index} value={item}>
-            {item}
-          </Checkbox>
-        ))}
-      </Checkbox.Group>
+      <>
+        <Checkbox.Group
+          style={{ display: "block", margin: "5px 0px" }}
+          onChange={handleSelectItem}
+          value={moduleHealthFilter}
+        >
+          <Text strong>Health</Text>
+          <br />
+          {resourceFilter.map((item, index) => (
+            <Checkbox key={index} value={item}>
+              {item}
+            </Checkbox>
+          ))}
+        </Checkbox.Group>
+        <Checkbox.Group
+          style={{ display: "block", margin: "5px 0px" }}
+          onChange={handleNamespaceSelectItem}
+          value={moduleNamespaceFilter}
+        >
+          <Text strong>Namespace</Text>
+          <br />
+          {namespaceFilterData.map((item, index) => (
+            <Checkbox key={index} value={item}>
+              {item}
+            </Checkbox>
+          ))}
+        </Checkbox.Group>
+      </>
     );
   };
   const handleSearch = (event: any) => {

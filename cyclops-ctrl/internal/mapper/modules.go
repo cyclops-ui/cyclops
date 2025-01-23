@@ -79,12 +79,13 @@ func ModuleListToDTO(modules []cyclopsv1alpha1.Module) []dto.Module {
 	for _, module := range modules {
 		values := make(map[string]interface{})
 		out = append(out, dto.Module{
-			Name:      module.Name,
-			Namespace: module.Namespace,
-			Version:   module.Spec.TemplateRef.Version,
-			Template:  k8sTemplateRefToDTO(module.Spec.TemplateRef, module.Status.TemplateResolvedVersion),
-			Values:    values,
-			IconURL:   module.Status.IconURL,
+			Name:            module.Name,
+			Namespace:       module.Namespace,
+			TargetNamespace: mapTargetNamespace(module.Spec.TargetNamespace),
+			Version:         module.Spec.TemplateRef.Version,
+			Template:        k8sTemplateRefToDTO(module.Spec.TemplateRef, module.Status.TemplateResolvedVersion),
+			Values:          values,
+			IconURL:         module.Status.IconURL,
 		})
 	}
 
