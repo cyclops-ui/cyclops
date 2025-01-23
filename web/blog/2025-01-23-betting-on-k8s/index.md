@@ -61,7 +61,6 @@ We’re betting on **Kubernetes becoming the foundation for developer platforms.
 **We are betting on companies building developer platforms on top of Kubernetes, and we want to help them on this journey.**
 
 ***By the way…***
-
-*We're developing Cyclops as an open-source project. If you're keen to give it a try, here's a quick start guide available on our [repository](*https://github.com/cyclops-ui/cyclops*). If you like what you see, consider showing your support by giving us a star ⭐*
+*We're developing Cyclops as an open-source project. If you're keen to give it a try, here's a quick start guide available on our repository. If you like what you see, consider showing your support by giving us a star ⭐*
 
 > ⭐ [***Star Cyclops on GitHub***](https://github.com/cyclops-ui/cyclops) ⭐
