@@ -74,10 +74,12 @@ export async function createModule(
   moduleNamespace: string,
   templateRef: any,
   values: any,
+  gitOpsWrite?: any,
 ) {
   return await axios.post(`/api/modules/new`, {
     name: moduleName,
     namespace: moduleNamespace,
+    gitOpsWrite: gitOpsWrite,
     values: values,
     template: {
       repo: templateRef.repo,
