@@ -29,6 +29,8 @@ spec:
           history:
             items:
               properties:
+                finishedAt:
+                  type: string
                 generation:
                   format: int64
                   type: integer
@@ -125,6 +127,8 @@ spec:
                     items:
                       type: string
                     type: array
+                  finishedAt:
+                    type: string
                   reason:
                     type: string
                   status:
