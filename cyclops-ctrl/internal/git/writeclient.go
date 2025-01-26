@@ -1,9 +1,12 @@
 package git
 
 import (
+	"bytes"
 	"errors"
 	"fmt"
+	"github.com/go-logr/logr"
 	path2 "path"
+	"text/template"
 	"time"
 
 	cyclopsv1alpha1 "github.com/cyclops-ui/cyclops/cyclops-ctrl/api/v1alpha1"
@@ -19,13 +22,31 @@ import (
 )
 
 type WriteClient struct {
-	templatesResolver auth.TemplatesResolver
+	templatesResolver     auth.TemplatesResolver
+	commitMessageTemplate *template.Template
 }
 
-func NewWriteClient(templatesResolver auth.TemplatesResolver) *WriteClient {
+const _defaultCommitMessageTemplate = "Update {{ .Name }} module config"
+
+func NewWriteClient(templatesResolver auth.TemplatesResolver, commitMessageTemplate string, logger logr.Logger) *WriteClient {
 	return &WriteClient{
-		templatesResolver: templatesResolver,
+		templatesResolver:     templatesResolver,
+		commitMessageTemplate: getCommitMessageTemplate(commitMessageTemplate, logger),
 	}
+}
+
+func getCommitMessageTemplate(commitMessageTemplate string, logger logr.Logger) *template.Template {
+	if commitMessageTemplate == "" {
+		return template.Must(template.New("commitMessage").Parse(_defaultCommitMessageTemplate))
+	}
+
+	tmpl, err := template.New("commitMessage").Parse(commitMessageTemplate)
+	if err != nil {
+		logger.Error(err, "failed to parse commit message template, falling back to the default commit message", "template", commitMessageTemplate)
+		return template.Must(template.New("commitMessage").Parse(_defaultCommitMessageTemplate))
+	}
+
+	return tmpl
 }
 
 func (c *WriteClient) Write(module cyclopsv1alpha1.Module) error {
@@ -92,10 +113,15 @@ func (c *WriteClient) Write(module cyclopsv1alpha1.Module) error {
 		return fmt.Errorf("failed to add file to worktree: %w", err)
 	}
 
-	commitMessage := fmt.Sprintf("Update %s with new module data", path)
-	_, err = worktree.Commit(commitMessage, &git.CommitOptions{
+	var o bytes.Buffer
+	err = c.commitMessageTemplate.Execute(&o, module.ObjectMeta)
+	if err != nil {
+		return err
+	}
+
+	_, err = worktree.Commit(o.String(), &git.CommitOptions{
 		Author: &object.Signature{
-			Name: "Cyclops UI",
+			Name: creds.Username,
 			When: time.Now(),
 		},
 	})
@@ -162,10 +188,15 @@ func (c *WriteClient) DeleteModule(module cyclopsv1alpha1.Module) error {
 		return fmt.Errorf("failed to add changes to worktree: %w", err)
 	}
 
-	commitMessage := fmt.Sprintf("delete module on path %s", path)
-	_, err = worktree.Commit(commitMessage, &git.CommitOptions{
+	var o bytes.Buffer
+	err = c.commitMessageTemplate.Execute(&o, module.ObjectMeta)
+	if err != nil {
+		return err
+	}
+
+	_, err = worktree.Commit(o.String(), &git.CommitOptions{
 		Author: &object.Signature{
-			Name: "Cyclops UI",
+			Name: creds.Username,
 			When: time.Now(),
 		},
 	})

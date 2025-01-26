@@ -104,7 +104,7 @@ func main() {
 	prometheus.StartCacheMetricsUpdater(&monitor, templatesRepo.ReturnCache(), 10*time.Second, setupLog)
 
 	helmReleaseClient := helm.NewReleaseClient(helmWatchNamespace)
-	gitWriteClient := git.NewWriteClient(credsResolver)
+	gitWriteClient := git.NewWriteClient(credsResolver, getCommitMessageTemplate(), setupLog)
 
 	handler, err := handler.New(templatesRepo, k8sClient, helmReleaseClient, renderer, gitWriteClient, moduleTargetNamespace, telemetryClient, monitor)
 	if err != nil {
@@ -195,4 +195,8 @@ func getHelmWatchNamespace() string {
 		return ""
 	}
 	return value
+}
+
+func getCommitMessageTemplate() string {
+	return os.Getenv("COMMIT_MESSAGE_TEMPLATE")
 }
