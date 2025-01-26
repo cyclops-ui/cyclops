@@ -4,6 +4,7 @@ type Module struct {
 	Name                 string               `json:"name"`
 	Namespace            string               `json:"namespace"`
 	TargetNamespace      string               `json:"targetNamespace"`
+	GitOpsWrite          *GitOpsWrite         `json:"gitOpsWrite,omitempty"`
 	Template             Template             `json:"template"`
 	Version              string               `json:"version"`
 	Values               interface{}          `json:"values"`
@@ -33,6 +34,12 @@ type Template struct {
 	Version         string `json:"version"`
 	ResolvedVersion string `json:"resolvedVersion"`
 	SourceType      string `json:"sourceType"`
+}
+
+type GitOpsWrite struct {
+	Repo   string `json:"repo"`
+	Path   string `json:"path"`
+	Branch string `json:"branch"`
 }
 
 type TemplatesResponse struct {

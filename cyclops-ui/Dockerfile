@@ -4,6 +4,7 @@ WORKDIR /app
 # Install dependencies
 
 COPY package.json ./
+COPY yarn.lock ./
 
 RUN #npm config set scripts-prepend-node-path true
 
