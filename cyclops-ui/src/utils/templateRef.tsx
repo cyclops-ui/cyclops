@@ -16,7 +16,7 @@ export function githubTemplateReferenceView(templateRef: templateRef) {
   let commitLink =
     templateRef.repo +
     `/tree/` +
-    templateRef.resolvedVersion +
+    (templateRef.resolvedVersion || templateRef.version) +
     `/` +
     templateRef.path;
 
