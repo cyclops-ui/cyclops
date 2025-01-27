@@ -34,7 +34,7 @@ export function githubTemplateReferenceView(templateRef: templateRef) {
 
   return (
     <Row>
-      <Link aria-level={3} href={commitLink}>
+      <Link aria-level={3} href={commitLink} target={"_blank"}>
         <LinkOutlined />
         {" " + refView}
       </Link>

@@ -28,6 +28,7 @@ import {
   DeleteOutlined,
   EditOutlined,
   FileTextOutlined,
+  GithubOutlined,
   UndoOutlined,
 } from "@ant-design/icons";
 import "./custom.css";
@@ -52,6 +53,12 @@ import {
   resourceRefKey,
 } from "../../../utils/resourceRef";
 import { ResourceListActionsProvider } from "../../k8s-resources/ResourceList/ResourceListActionsContext";
+
+import gitLogo from "../../../static/img/git.png";
+import {
+  isGitHubRepo,
+  moduleConfigGitRefLink,
+} from "../../../utils/moduleConfigGitRef";
 
 const languages = [
   "javascript",
@@ -716,6 +723,35 @@ export const ModuleResourceDetails = ({
     );
   };
 
+  const gitConfigRedirectButton = () => {
+    if (!module.gitOpsWrite) {
+      return;
+    }
+
+    if (!isGitHubRepo(module.gitOpsWrite.repo)) {
+      return;
+    }
+
+    return (
+      <Col>
+        <a
+          href={moduleConfigGitRefLink(
+            module.gitOpsWrite.repo,
+            module.gitOpsWrite.path,
+            module.gitOpsWrite.branch,
+            module.name,
+          )}
+          target="_blank"
+        >
+          <Button block>
+            {" "}
+            <GithubOutlined /> View module config{" "}
+          </Button>
+        </a>
+      </Col>
+    );
+  };
+
   return (
     <div>
       <ConfigProvider
@@ -750,6 +786,7 @@ export const ModuleResourceDetails = ({
           Actions
         </Divider>
         <Row gutter={[20, 0]}>
+          {gitConfigRedirectButton()}
           {onEditModule ? (
             <Col>
               <Button
