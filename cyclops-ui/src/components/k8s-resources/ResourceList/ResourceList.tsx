@@ -19,11 +19,11 @@ import {
   ResourceRef,
   resourceRefKey,
 } from "../../../utils/resourceRef";
-import Deployment from "../Deployment";
+import { Deployment, DeploymentLogsButton } from "../Deployment";
 import CronJob from "../CronJob";
 import Job from "../Job";
 import DaemonSet from "../DaemonSet";
-import StatefulSet from "../StatefulSet";
+import { StatefulSet, StatefulSetLogsButton } from "../StatefulSet";
 import Pod from "../Pod";
 import Service from "../Service";
 import ClusterRole from "../ClusterRole";
@@ -586,6 +586,24 @@ const ResourceList = ({
                 name={resource.name}
                 namespace={resource.namespace}
                 restartResource={restartResource}
+              />
+            </Col>
+          )}
+          {resource.kind === "Deployment" && (
+            <Col style={{ float: "right" }}>
+              <DeploymentLogsButton
+                name={resource.name}
+                namespace={resource.namespace}
+                workload={getWorkload(resourceRef)}
+              />
+            </Col>
+          )}
+          {resource.kind === "StatefulSet" && (
+            <Col style={{ float: "right" }}>
+              <StatefulSetLogsButton
+                name={resource.name}
+                namespace={resource.namespace}
+                workload={getWorkload(resourceRef)}
               />
             </Col>
           )}
