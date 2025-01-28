@@ -21,7 +21,11 @@ import type { InputRef } from "antd";
 import { formatBytes } from "../../utils/common";
 import { ColumnType } from "antd/lib/table";
 import type { FilterConfirmProps } from "antd/es/table/interface";
-import { SearchOutlined } from "@ant-design/icons";
+import {
+  CheckCircleTwoTone,
+  CloseSquareTwoTone,
+  SearchOutlined,
+} from "@ant-design/icons";
 import Highlighter from "react-highlight-words";
 import { mapResponseError } from "../../utils/api/errors";
 
@@ -317,7 +321,7 @@ const NodeDetails = () => {
       dataIndex: "namespace",
       key: "namespace",
       width: "30%",
-      ...getColumnFilterProps("namespace"), // temp
+      ...getColumnFilterProps("namespace"),
     },
     {
       title: "CPU",
@@ -335,39 +339,46 @@ const NodeDetails = () => {
     },
   ];
 
-  const conditionColor = (type: string): string => {
+  const conditionIcon = (type: string, status: string) => {
+    const healthy = (
+      <CheckCircleTwoTone
+        style={{
+          paddingLeft: "6px",
+          fontSize: "24px",
+          verticalAlign: "middle",
+        }}
+        twoToneColor={"#52c41a"}
+      />
+    );
+
+    const unhealthy = (
+      <CloseSquareTwoTone
+        style={{
+          paddingLeft: "6px",
+          fontSize: "24px",
+          verticalAlign: "middle",
+        }}
+        twoToneColor={"red"}
+      />
+    );
+
     for (let i = 0; i < node.node.status.conditions.length; i++) {
       let cond: any = node.node.status.conditions[i];
       if (cond.type === type) {
         switch (type) {
           case "MemoryPressure":
-            return cond.status === "True"
-              ? gaugeColors["0%"]
-              : gaugeColors["100%"];
+            return cond.status === "False" ? healthy : unhealthy;
           case "DiskPressure":
-            return cond.status === "True"
-              ? gaugeColors["0%"]
-              : gaugeColors["100%"];
+            return cond.status === "False" ? healthy : unhealthy;
           case "PIDPressure":
-            return cond.status === "True"
-              ? gaugeColors["0%"]
-              : gaugeColors["100%"];
+            return cond.status === "False" ? healthy : unhealthy;
           case "Ready":
-            return cond.status === "True"
-              ? gaugeColors["100%"]
-              : gaugeColors["0%"];
-          default:
-            console.log("default", type);
+            return cond.status === "True" ? healthy : unhealthy;
         }
       }
     }
-
-    return gaugeColors["50%"];
   };
 
-  /**
-   * Color pallete for statuses of resources
-   */
   const gaugeColors = {
     "0%": "#57F287",
     "50%": "#FEE75C",
@@ -487,58 +498,57 @@ const NodeDetails = () => {
         </Divider>
         {node.node.status.conditions.map((condition) => (
           <Col
+            xs={24}
+            sm={12}
+            md={8}
+            lg={8}
+            xl={6}
             key={condition.type}
             span={6}
             style={{
               display: "flex",
               justifyContent: "center",
-              alignItems: "center",
             }}
           >
             <Card
               style={{
                 borderRadius: "10px",
-                borderWidth: "5px",
-                backgroundColor: "#fff",
+                borderWidth: "3px",
+                backgroundColor: "#fafafa",
                 width: "100%",
                 margin: "5px",
-                textAlign: "center",
                 color: "black",
               }}
             >
-              <Progress
-                type="circle"
-                percent={100}
-                status={
-                  conditionColor(condition.type) === gaugeColors["100%"]
-                    ? "success"
-                    : "exception"
-                }
-                trailColor={conditionColor(condition.type)}
-                strokeWidth={15}
-              />
-              <br />
-              <br />
-              <h3>
-                <strong>{condition.type}</strong>
+              <h3 style={{ paddingBottom: "16px" }}>
+                <strong>
+                  {condition.type}
+                  {conditionIcon(condition.type, condition.status)}
+                </strong>
               </h3>
 
-              <Text strong>Last Transition Time: </Text>
-              <br />
-              <Text code>
-                {new Date(
-                  condition.lastTransitionTime.toString(),
-                ).toLocaleString()}
-              </Text>
-              <br />
-              <Text strong>Last HeartBeat Time: </Text>
-              <br />
-              <Text code>
-                {new Date(
-                  condition.lastHeartbeatTime.toString(),
-                ).toLocaleString()}
-              </Text>
-              <br />
+              <div style={{ marginBottom: "8px" }}>
+                <Text strong>Status:</Text>
+                <Text> {condition.status}</Text>
+              </div>
+              <div style={{ marginBottom: "8px" }}>
+                <Text strong>Last Transition Time: </Text>
+                <br />
+                <Text code>
+                  {new Date(
+                    condition.lastTransitionTime.toString(),
+                  ).toLocaleString()}
+                </Text>
+              </div>
+              <div style={{ marginBottom: "8px" }}>
+                <Text strong>Last HeartBeat Time: </Text>
+                <br />
+                <Text code>
+                  {new Date(
+                    condition.lastHeartbeatTime.toString(),
+                  ).toLocaleString()}
+                </Text>
+              </div>
               <Text strong>Message:</Text>
               <br />
               <Text>{condition.message}</Text>
