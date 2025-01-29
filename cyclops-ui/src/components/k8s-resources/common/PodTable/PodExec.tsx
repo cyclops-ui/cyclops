@@ -1,10 +1,5 @@
-import {
-  CodeOutlined,
-  CopyOutlined,
-  DownloadOutlined,
-  ReadOutlined,
-} from "@ant-design/icons";
-import { Button, Modal, Tabs, TabsProps } from "antd";
+import { CodeOutlined, CopyOutlined } from "@ant-design/icons";
+import { Button, Modal } from "antd";
 import { useState } from "react";
 import "ace-builds/src-noconflict/ext-searchbox";
 
