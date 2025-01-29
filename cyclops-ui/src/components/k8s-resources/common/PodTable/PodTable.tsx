@@ -17,6 +17,7 @@ import { formatPodAge } from "../../../../utils/pods";
 import PodLogs from "./PodLogs";
 import PodManifest from "./PodManifest";
 import { useResourceListActions } from "../../ResourceList/ResourceListActionsContext";
+import PodExec from "./PodExec";
 
 interface Props {
   namespace: string;
@@ -106,6 +107,7 @@ const PodTable = ({ pods, namespace, updateResourceData }: Props) => {
         <Row style={{ margin: 4, gap: 8 }}>
           <PodLogs pod={{ ...pod, namespace }} />
           <PodManifest pod={{ ...pod, namespace }} />
+          <PodExec pod={{ ...pod, namespace }} />
           <Button
             style={{ color: "red", width: "100%" }}
             onClick={function () {
@@ -122,7 +124,7 @@ const PodTable = ({ pods, namespace, updateResourceData }: Props) => {
               });
             }}
           >
-            <h4>
+            <h4 style={{ margin: "0" }}>
               <DeleteOutlined style={{ paddingRight: "5px" }} />
               Delete Pod
             </h4>
