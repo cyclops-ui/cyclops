@@ -199,8 +199,6 @@ export const EditModuleComponent = ({
     } else {
       setIsChanged(true);
     }
-
-    setValues(allValues);
   };
 
   const handleTemplateRefChange = (
