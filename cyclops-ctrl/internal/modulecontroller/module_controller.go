@@ -444,9 +444,10 @@ func (r *ModuleReconciler) setStatus(
 
 	module.Status = cyclopsv1alpha1.ModuleStatus{
 		ReconciliationStatus: cyclopsv1alpha1.ReconciliationStatus{
-			Status: status,
-			Reason: reason,
-			Errors: installErrors,
+			Status:     status,
+			Reason:     reason,
+			Errors:     installErrors,
+			FinishedAt: time.Now().Format(time.RFC3339), // Convert time to string format
 		},
 		ManagedGVRs:             r.mergeChildrenGVRs(module.Status.ManagedGVRs, childrenResources),
 		TemplateResolvedVersion: templateResolvedVersion,
