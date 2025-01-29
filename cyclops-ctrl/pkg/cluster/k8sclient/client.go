@@ -29,6 +29,8 @@ type KubernetesClient struct {
 	helmReleaseNamespace  string
 	moduleTargetNamespace string
 
+	childLabels ChildLabels
+
 	logger logr.Logger
 }
 
@@ -56,7 +58,7 @@ func New(
 		panic(err.Error())
 	}
 
-	return &KubernetesClient{
+	k := &KubernetesClient{
 		Dynamic:               dynamic,
 		discovery:             discovery,
 		clientset:             clientset,
@@ -65,7 +67,11 @@ func New(
 		helmReleaseNamespace:  helmReleaseNamespace,
 		moduleTargetNamespace: moduleTargetNamespace,
 		logger:                logger,
-	}, nil
+	}
+
+	k.loadResourceRelationsLabels()
+
+	return k, nil
 }
 
 type IKubernetesClient interface {
