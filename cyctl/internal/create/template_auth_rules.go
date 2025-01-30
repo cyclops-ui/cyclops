@@ -12,7 +12,6 @@ import (
 	"github.com/cyclops-ui/cycops-cyctl/internal/kubeconfig"
 	"github.com/manifoldco/promptui"
 	"github.com/spf13/cobra"
-	v1Spec "k8s.io/api/core/v1"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"sigs.k8s.io/yaml"
 )
@@ -143,18 +142,6 @@ func createTemplateAuthRule(clientset *client.CyclopsV1Alpha1Client, templateAut
 		}
 	}
 
-	var localObjectNameRef, localObjectPasswordRef v1Spec.LocalObjectReference
-	if usernameName != "" {
-		localObjectNameRef = v1Spec.LocalObjectReference{
-			Name: usernameName,
-		}
-	}
-	if passwordName != "" {
-		localObjectPasswordRef = v1Spec.LocalObjectReference{
-			Name: passwordName,
-		}
-	}
-
 	newTemplateAuthRule := v1alpha1.TemplateAuthRule{
 		TypeMeta: v1.TypeMeta{
 			APIVersion: "cyclops-ui.com/v1alpha1",
@@ -166,13 +153,13 @@ func createTemplateAuthRule(clientset *client.CyclopsV1Alpha1Client, templateAut
 		},
 		Spec: v1alpha1.TemplateAuthRuleSpec{
 			Repo: repo,
-			Username: v1Spec.SecretKeySelector{
-				Key:                  usernameKey,
-				LocalObjectReference: localObjectNameRef,
+			Username: v1alpha1.SecretKeySelector{
+				Name: usernameName,
+				Key:  usernameKey,
 			},
-			Password: v1Spec.SecretKeySelector{
-				Key:                  passwordKey,
-				LocalObjectReference: localObjectPasswordRef,
+			Password: v1alpha1.SecretKeySelector{
+				Name: usernameName,
+				Key:  passwordKey,
 			},
 		},
 	}
