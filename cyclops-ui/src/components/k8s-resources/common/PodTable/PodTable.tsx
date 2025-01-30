@@ -195,7 +195,6 @@ const PodTable = ({ pods, namespace, updateResourceData }: Props) => {
           title="Actions"
           key="actions"
           width="8%"
-          // className={styles.actionsmenucol}
           render={(pod) => (
             <Popover
               placement={"topRight"}
@@ -208,9 +207,7 @@ const PodTable = ({ pods, namespace, updateResourceData }: Props) => {
                   justifyContent: "center",
                 }}
               >
-                <EllipsisOutlined
-                // className={styles.actionsmenu}
-                />
+                <EllipsisOutlined />
               </div>
             </Popover>
           )}
