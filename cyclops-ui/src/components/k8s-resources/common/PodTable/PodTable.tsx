@@ -144,7 +144,18 @@ const PodTable = ({ pods, namespace, updateResourceData }: Props) => {
           key="name"
         />
         <Table.Column title="Node" dataIndex="node" />
-        <Table.Column title="Phase" dataIndex="podPhase" />
+        <Table.Column
+          title="Phase"
+          dataIndex="podPhase"
+          filters={[
+            { text: "Pending", value: "Pending" },
+            { text: "Running", value: "Running" },
+            { text: "Succeeded", value: "Succeeded" },
+            { text: "Failed", value: "Failed" },
+            { text: "Unknown", value: "Unknown" },
+          ]}
+          onFilter={(value, record) => record.podPhase === value}
+        />
         <Table.Column
           title="Started"
           dataIndex="started"
