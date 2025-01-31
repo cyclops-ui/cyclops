@@ -10,6 +10,7 @@ type Client interface {
 	ModuleReconciliation()
 	InstanceStart()
 	ReleaseUpdate()
+	ReleaseMigration()
 	TemplateCreation()
 	TemplateEdit()
 }
@@ -101,6 +102,16 @@ func (c EnqueueClient) ReleaseUpdate() {
 	})
 }
 
+func (c EnqueueClient) ReleaseMigration() {
+	_ = c.client.Enqueue(posthog.Capture{
+		Event:      "helm-release-migration",
+		DistinctId: c.distinctID,
+		Properties: map[string]interface{}{
+			"version": c.version,
+		},
+	})
+}
+
 func (c EnqueueClient) TemplateCreation() {
 	_ = c.client.Enqueue(posthog.Capture{
 		Event:      "template-creation",
@@ -133,6 +144,8 @@ func (c MockClient) ModuleCreation() {
 }
 
 func (c MockClient) ReleaseUpdate() {}
+
+func (c MockClient) ReleaseMigration() {}
 
 func (c MockClient) TemplateCreation() {}
 
