@@ -16,6 +16,7 @@ import {
   fetchResource,
   fetchResourceManifest,
   getPodLogs,
+  getTemplate,
   restartResource,
 } from "../../../../utils/api/api";
 
@@ -52,6 +53,7 @@ const ReleaseDetails = () => {
           container +
           "/logs/download";
       }}
+      getTemplate={getTemplate}
     />
   );
 };

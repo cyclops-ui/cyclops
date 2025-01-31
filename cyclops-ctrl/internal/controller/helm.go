@@ -191,3 +191,36 @@ func (h *Helm) GetReleaseValues(ctx *gin.Context) {
 
 	ctx.JSON(http.StatusOK, values)
 }
+
+func (h *Helm) MigrateHelmRelease(ctx *gin.Context) {
+	ctx.Header("Access-Control-Allow-Origin", "*")
+
+	var req dto.Module
+	if err := ctx.BindJSON(&req); err != nil {
+		ctx.JSON(http.StatusBadRequest, dto.NewError("Error binding values", err.Error()))
+		return
+	}
+
+	module, err := mapper.RequestToModule(req)
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, dto.NewError("Error mapping module", err.Error()))
+		return
+	}
+
+	//if len(m.moduleTargetNamespace) > 0 {
+	//	module.Spec.TargetNamespace = m.moduleTargetNamespace
+	//}
+
+	h.telemetryClient.ReleaseMigration()
+
+	err = h.kubernetesClient.CreateModule(module)
+	if err != nil {
+		fmt.Println(err)
+		ctx.JSON(http.StatusInternalServerError, dto.NewError("Error creating module", err.Error()))
+		return
+	}
+
+	// TODO delete secret for the helm release
+
+	ctx.Status(http.StatusCreated)
+}
