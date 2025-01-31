@@ -4,11 +4,11 @@ import {
   Button,
   Col,
   Descriptions,
+  Form,
   Input,
   Modal,
   Row,
   Spin,
-  Tooltip,
   Typography,
 } from "antd";
 import "ace-builds/src-noconflict/ace";
@@ -154,6 +154,12 @@ interface HelmReleaseDetailsProps {
     setError: (err: Error, isReset?: boolean) => void,
     signalController: AbortController,
   ) => void;
+  getTemplate: (
+    repo: string,
+    path: string,
+    version: string,
+    sourceType: string,
+  ) => Promise<any>;
 }
 
 export const HelmReleaseDetails = ({
@@ -172,6 +178,7 @@ export const HelmReleaseDetails = ({
   getPodLogs,
   downloadPodLogs,
   streamPodLogs,
+  getTemplate,
 }: HelmReleaseDetailsProps) => {
   const [loading, setLoading] = useState(false);
   const [loadModule, setLoadModule] = useState(false);
@@ -192,6 +199,11 @@ export const HelmReleaseDetails = ({
   const [loadResources, setLoadResources] = useState(false);
   const [workloads, setWorkloads] = useState<Map<string, Workload>>(new Map());
 
+  const [templateMigrationModal, setTemplateMigrationModal] = useState(false);
+  const [templateMigrationModalLoading, setTemplateMigrationModalLoading] =
+    useState(false);
+  const [migrateTemplateRefForm] = Form.useForm();
+
   function putWorkload(ref: ResourceRef, workload: Workload) {
     let k = resourceRefKey(ref);
 
@@ -203,6 +215,11 @@ export const HelmReleaseDetails = ({
   }
 
   const [error, setError] = useState({
+    message: "",
+    description: "",
+  });
+
+  const [migrationTemplateError, setMigrationTemplateError] = useState({
     message: "",
     description: "",
   });
@@ -331,6 +348,27 @@ export const HelmReleaseDetails = ({
       });
   };
 
+  const handleSubmitMigrateModal = () => {
+    // setTemplateMigrationModal(false);
+    setTemplateMigrationModalLoading(true);
+    const templateRef = migrateTemplateRefForm.getFieldsValue();
+
+    getTemplate(
+      templateRef["repo"],
+      templateRef["path"],
+      templateRef["version"],
+      "",
+    )
+      .then(() => {
+        setTemplateMigrationModalLoading(false);
+        window.location.href = `/helm/releases/${releaseNamespace}/${releaseName}/migrate?repo=${encodeURIComponent(templateRef["repo"])}&path=${encodeURIComponent(templateRef["path"])}&version=${encodeURIComponent(templateRef["version"])}`;
+      })
+      .catch((e) => {
+        setMigrationTemplateError(mapResponseError(e));
+        setTemplateMigrationModalLoading(false);
+      });
+  };
+
   return (
     <div>
       {error.message.length !== 0 && (
@@ -351,19 +389,16 @@ export const HelmReleaseDetails = ({
       {resourceLoading()}
       <Row gutter={[12, 0]}>
         <Col>
-          <Tooltip placement="top" title={"Comming soon!"}>
-            <Button
-              // onClick={() => {
-              //     setTempalteMigrationModal(true);
-              // }}
-              type={"primary"}
-              disabled={true}
-              block
-            >
-              <RocketOutlined />
-              Migrate to Cyclops Module
-            </Button>
-          </Tooltip>
+          <Button
+            onClick={() => {
+              setTemplateMigrationModal(true);
+            }}
+            type={"primary"}
+            block
+          >
+            <RocketOutlined />
+            Migrate to Cyclops Module
+          </Button>
         </Col>
         <Col>
           <Button
@@ -411,16 +446,94 @@ export const HelmReleaseDetails = ({
           }}
         />
       </ResourceListActionsProvider>
-      {/*<Modal*/}
-      {/*    title="Migrate to a Cyclops Module"*/}
-      {/*    open={templateMigrationModal}*/}
-      {/*    onCancel={handleCancelModal}*/}
-      {/*    onOk={handleCancelModal}*/}
-      {/*    confirmLoading={confirmLoading}*/}
-      {/*    width={"60%"}*/}
-      {/*>*/}
-      {/*    <h3>Coming soon</h3>*/}
-      {/*</Modal>*/}
+      <Modal
+        title="Migrate to a Cyclops Module"
+        open={templateMigrationModal}
+        onCancel={() => {
+          setTemplateMigrationModal(false);
+        }}
+        onOk={handleSubmitMigrateModal}
+        confirmLoading={templateMigrationModalLoading}
+        width={"60%"}
+      >
+        {migrationTemplateError.message.length !== 0 && (
+          <Alert
+            message={migrationTemplateError.message}
+            description={migrationTemplateError.description}
+            type="error"
+            closable
+            afterClose={() => {
+              setError({
+                message: "",
+                description: "",
+              });
+            }}
+            style={{ marginBottom: "20px" }}
+          />
+        )}
+        <Row style={{ paddingBottom: "8px" }}>
+          Select the Helm chart you want to use for the Module (cannot be
+          inferred from the Helm release)
+        </Row>
+        <Row>
+          <Form
+            form={migrateTemplateRefForm}
+            layout="inline"
+            autoComplete={"off"}
+            // onFinish={handleSubmitMigrationTemplate}
+            // onFinishFailed={onFinishFailed}
+            style={{ width: "100%" }}
+            requiredMark={(label, { required }) => (
+              <Row>
+                <Col>
+                  {required ? (
+                    <span style={{ color: "red", paddingRight: "3px" }}>*</span>
+                  ) : (
+                    <></>
+                  )}
+                </Col>
+                <Col>{label}</Col>
+              </Row>
+            )}
+          >
+            <Form.Item name={"repo"} style={{ width: "50%", marginRight: "0" }}>
+              <Input placeholder={"Repository"} />
+            </Form.Item>
+            <div
+              style={{
+                width: "2%",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+              }}
+            >
+              /
+            </div>
+            <Form.Item name={"path"} style={{ width: "25%", marginRight: "0" }}>
+              <Input placeholder={"Path"} />
+            </Form.Item>
+            <div
+              style={{
+                width: "2%",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+              }}
+            >
+              @
+            </div>
+            <Form.Item
+              name={"version"}
+              style={{ width: "20%", marginRight: "0" }}
+            >
+              <Input placeholder={"Version"} />
+            </Form.Item>
+          </Form>
+        </Row>
+        <Row style={{ paddingTop: "8px", paddingBottom: "8px", color: "#888" }}>
+          {templateMigrationModalLoading ? "Verifying template..." : ""}
+        </Row>
+      </Modal>
       <Modal
         title={
           <>
