@@ -5,6 +5,7 @@ import {
   Col,
   Descriptions,
   Form,
+  FormInstance,
   Input,
   Modal,
   Row,
@@ -476,59 +477,9 @@ export const HelmReleaseDetails = ({
           inferred from the Helm release)
         </Row>
         <Row>
-          <Form
-            form={migrateTemplateRefForm}
-            layout="inline"
-            autoComplete={"off"}
-            // onFinish={handleSubmitMigrationTemplate}
-            // onFinishFailed={onFinishFailed}
-            style={{ width: "100%" }}
-            requiredMark={(label, { required }) => (
-              <Row>
-                <Col>
-                  {required ? (
-                    <span style={{ color: "red", paddingRight: "3px" }}>*</span>
-                  ) : (
-                    <></>
-                  )}
-                </Col>
-                <Col>{label}</Col>
-              </Row>
-            )}
-          >
-            <Form.Item name={"repo"} style={{ width: "50%", marginRight: "0" }}>
-              <Input placeholder={"Repository"} />
-            </Form.Item>
-            <div
-              style={{
-                width: "2%",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-              }}
-            >
-              /
-            </div>
-            <Form.Item name={"path"} style={{ width: "25%", marginRight: "0" }}>
-              <Input placeholder={"Path"} />
-            </Form.Item>
-            <div
-              style={{
-                width: "2%",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-              }}
-            >
-              @
-            </div>
-            <Form.Item
-              name={"version"}
-              style={{ width: "20%", marginRight: "0" }}
-            >
-              <Input placeholder={"Version"} />
-            </Form.Item>
-          </Form>
+          <HelmReleaseMigrationTemplateModal
+            migrateTemplateRefForm={migrateTemplateRefForm}
+          />
         </Row>
         <Row style={{ paddingTop: "8px", paddingBottom: "8px", color: "#888" }}>
           {templateMigrationModalLoading ? "Verifying template..." : ""}
@@ -586,5 +537,66 @@ export const HelmReleaseDetails = ({
         />
       </Modal>
     </div>
+  );
+};
+
+interface HelmReleaseMigrationTemplateModalProps {
+  migrateTemplateRefForm: FormInstance;
+}
+
+export const HelmReleaseMigrationTemplateModal = ({
+  migrateTemplateRefForm,
+}: HelmReleaseMigrationTemplateModalProps) => {
+  return (
+    <Form
+      form={migrateTemplateRefForm}
+      layout="inline"
+      autoComplete={"off"}
+      // onFinish={handleSubmitMigrationTemplate}
+      // onFinishFailed={onFinishFailed}
+      style={{ width: "100%" }}
+      requiredMark={(label, { required }) => (
+        <Row>
+          <Col>
+            {required ? (
+              <span style={{ color: "red", paddingRight: "3px" }}>*</span>
+            ) : (
+              <></>
+            )}
+          </Col>
+          <Col>{label}</Col>
+        </Row>
+      )}
+    >
+      <Form.Item name={"repo"} style={{ width: "50%", marginRight: "0" }}>
+        <Input placeholder={"Repository"} />
+      </Form.Item>
+      <div
+        style={{
+          width: "2%",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+        }}
+      >
+        /
+      </div>
+      <Form.Item name={"path"} style={{ width: "25%", marginRight: "0" }}>
+        <Input placeholder={"Path"} />
+      </Form.Item>
+      <div
+        style={{
+          width: "2%",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+        }}
+      >
+        @
+      </div>
+      <Form.Item name={"version"} style={{ width: "20%", marginRight: "0" }}>
+        <Input placeholder={"Version"} />
+      </Form.Item>
+    </Form>
   );
 };
