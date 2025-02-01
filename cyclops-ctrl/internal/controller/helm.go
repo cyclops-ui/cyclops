@@ -220,7 +220,11 @@ func (h *Helm) MigrateHelmRelease(ctx *gin.Context) {
 		return
 	}
 
-	// TODO delete secret for the helm release
+	if err := h.kubernetesClient.DeleteReleaseSecret(req.Name, req.Namespace); err != nil {
+		fmt.Println(err)
+		ctx.JSON(http.StatusInternalServerError, dto.NewError("Error creating module", err.Error()))
+		return
+	}
 
 	ctx.Status(http.StatusCreated)
 }

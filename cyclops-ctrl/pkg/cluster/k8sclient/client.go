@@ -108,4 +108,5 @@ type IKubernetesClient interface {
 	DeleteTemplateStore(name string) error
 	GetResourcesForRelease(release string) ([]dto.Resource, error)
 	GetWorkloadsForRelease(name string) ([]dto.Resource, error)
+	DeleteReleaseSecret(releaseName, releaseNamespace string) error
 }
