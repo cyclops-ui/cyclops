@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/cyclops-ui/cyclops/cyclops-ctrl/internal/integrations/helm"
 	"github.com/cyclops-ui/cyclops/cyclops-ctrl/internal/mapper"
+	"github.com/cyclops-ui/cyclops/cyclops-ctrl/internal/models"
 	"github.com/cyclops-ui/cyclops/cyclops-ctrl/internal/models/dto"
 	helm2 "github.com/cyclops-ui/cyclops/cyclops-ctrl/internal/models/helm"
 	"github.com/cyclops-ui/cyclops/cyclops-ctrl/internal/telemetry"
@@ -163,7 +164,7 @@ func (h *Helm) GetReleaseSchema(ctx *gin.Context) {
 
 	rootField := mapper.HelmSchemaToFields("", *root, root.Definitions, nil)
 
-	ctx.JSON(http.StatusOK, rootField)
+	ctx.JSON(http.StatusOK, models.Template{RootField: rootField})
 }
 
 func (h *Helm) GetReleaseValues(ctx *gin.Context) {
