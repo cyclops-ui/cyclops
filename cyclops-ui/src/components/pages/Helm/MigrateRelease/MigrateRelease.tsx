@@ -2,9 +2,8 @@ import React from "react";
 
 import { useSearchParams } from "react-router-dom";
 
-import { HelmReleaseEdit } from "../../../shared/HelmReleaseEdit/HelmReleaseEdit";
+import { HelmReleaseEdit } from "../../../shared/HelmReleaseEdit";
 import {
-  getHelmRelease,
   getHelmReleaseValues,
   migrateHelmRelease,
 } from "../../../../utils/api/helm";
