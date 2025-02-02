@@ -20,7 +20,6 @@ const MigrateRelease = () => {
     <HelmReleaseEdit
       themePalette={"light"}
       themeColor={""}
-      fetchHelmRelease={getHelmRelease}
       fetchHelmChartFields={() => {
         return getTemplate(repo, path, version, "");
       }}
@@ -33,10 +32,10 @@ const MigrateRelease = () => {
         });
       }}
       onSubmitSuccess={(releaseNamespace, releaseName) => {
-        window.location.href = `/modules/${releaseName}`;
+        window.location.href = `/helm/releases/${releaseNamespace}/${releaseName}`;
       }}
       onBackButton={(releaseNamespace, releaseName) => {
-        window.location.href = `/modules/${releaseName}`;
+        window.location.href = `/helm/releases/${releaseNamespace}/${releaseName}`;
       }}
     />
   );

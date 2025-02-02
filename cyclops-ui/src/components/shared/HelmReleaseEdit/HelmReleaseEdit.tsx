@@ -3,11 +3,13 @@ import {
   Alert,
   Button,
   Col,
+  ConfigProvider,
   Divider,
   Form,
   notification,
   Row,
   Spin,
+  theme,
 } from "antd";
 import "ace-builds/src-noconflict/ace";
 
@@ -29,10 +31,6 @@ const layout = {
 export interface HelmReleaseEditProps {
   themePalette?: "dark" | "light";
   themeColor?: string;
-  fetchHelmRelease: (
-    releaseNamespace: string,
-    releaseName: string,
-  ) => Promise<any>;
   fetchHelmReleaseValues: (
     releaseNamespace: string,
     releaseName: string,
@@ -59,7 +57,6 @@ interface Field {
 export const HelmReleaseEdit = ({
   themePalette,
   themeColor,
-  fetchHelmRelease,
   fetchHelmReleaseValues,
   fetchHelmChartFields,
   submitHelmReleaseUpdate,
@@ -190,9 +187,7 @@ export const HelmReleaseEdit = ({
           </Button>{" "}
           <Button
             htmlType="button"
-            onClick={() =>
-              (window.location.href = `/helm/releases/${releaseNamespace}/${releaseName}`)
-            }
+            onClick={() => onBackButton(releaseNamespace, releaseName)}
           >
             Back
           </Button>
@@ -215,45 +210,54 @@ export const HelmReleaseEdit = ({
 
   return (
     <div>
-      {error.message.length !== 0 && (
-        <Alert
-          message={error.message}
-          description={error.description}
-          type="error"
-          closable
-          afterClose={() => {
-            setError({
-              message: "",
-              description: "",
-            });
-          }}
-          style={{ marginBottom: "20px" }}
-        />
-      )}
-      {contextHolder}
-      <Row gutter={[40, 0]}>
-        <Col span={24}>
-          <Title level={2}>
-            <span style={{ color: "#888" }}>Edit release</span>{" "}
-            {releaseNamespace}/{releaseName}
-          </Title>
-        </Col>
-      </Row>
-      <Row gutter={[40, 0]}>
-        <Col span={24}>
-          <Form
-            {...layout}
-            form={form}
-            layout="vertical"
-            autoComplete={"off"}
-            onFinish={handleSubmit}
-            onFinishFailed={onFinishFailed}
-          >
-            <Divider style={{ marginBottom: "12px", marginTop: "12px" }} />
-            {formLoading()}
-          </Form>
-        </Col>
-      </Row>
+      <ConfigProvider
+        theme={{
+          token: {
+            colorPrimary: themeColor || "#FF8803",
+          },
+          ...(themePalette === "dark" && { algorithm: theme.darkAlgorithm }),
+        }}
+      >
+        {error.message.length !== 0 && (
+          <Alert
+            message={error.message}
+            description={error.description}
+            type="error"
+            closable
+            afterClose={() => {
+              setError({
+                message: "",
+                description: "",
+              });
+            }}
+            style={{ marginBottom: "20px" }}
+          />
+        )}
+        {contextHolder}
+        <Row gutter={[40, 0]}>
+          <Col span={24}>
+            <Title level={2}>
+              <span style={{ color: "#888" }}>Edit release</span>{" "}
+              {releaseNamespace}/{releaseName}
+            </Title>
+          </Col>
+        </Row>
+        <Row gutter={[40, 0]}>
+          <Col span={24}>
+            <Form
+              {...layout}
+              form={form}
+              layout="vertical"
+              autoComplete={"off"}
+              onFinish={handleSubmit}
+              onFinishFailed={onFinishFailed}
+            >
+              <Divider style={{ marginBottom: "12px", marginTop: "12px" }} />
+              {formLoading()}
+            </Form>
+          </Col>
+        </Row>
+      </ConfigProvider>
     </div>
   );
 };
