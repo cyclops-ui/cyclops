@@ -73,7 +73,6 @@ export const HelmReleaseEdit = ({
   const [initialValues, setInitialValues] = useState({});
   const [initialValuesRaw, setInitialValuesRaw] = useState({});
 
-  const [isChanged, setIsChanged] = useState(false);
   const [rootField, setRootField] = useState<Field>({
     properties: [],
     required: [],
@@ -131,55 +130,19 @@ export const HelmReleaseEdit = ({
         .finally(() => {
           setLoadTemplate(true);
         });
-
-      // axios
-      //     .get(`/api/helm/releases/${releaseNamespace}/${releaseName}/fields`)
-      //     .then((fieldsResponse) => {
-      //       setRootField(fieldsResponse.data);
-      //
-      //       axios
-      //           .get(`/api/helm/releases/${releaseNamespace}/${releaseName}/values`)
-      //           .then((valuesRes) => {
-      //             setInitialValuesRaw(valuesRes.data);
-      //
-      //             let initialValuesMapped = mapsToArray(
-      //                 fieldsResponse.data.properties,
-      //                 valuesRes.data,
-      //             );
-      //
-      //             setInitialValues(initialValuesMapped);
-      //
-      //             form.setFieldsValue(initialValuesMapped);
-      //           })
-      //           .catch(function (error) {
-      //             setError(mapResponseError(error));
-      //           })
-      //           .finally(() => {
-      //             setLoadValues(true);
-      //           });
-      //     })
-      //     .catch((error) => {
-      //       setLoadValues(true);
-      //       setError(mapResponseError(error));
-      //     })
-      //     .finally(() => {
-      //       setLoadTemplate(true);
-      //     });
     };
     fetchReleaseFields();
-  }, [releaseNamespace, releaseName, form]);
+  }, [
+    releaseNamespace,
+    releaseName,
+    form,
+    fetchHelmChartFields,
+    fetchHelmReleaseValues,
+  ]);
 
   useEffect(() => {
     form.validateFields(flattenObjectKeys(initialValues));
   }, [initialValues, form]);
-
-  const handleValuesChange = (changedValues: any, allValues: any) => {
-    if (JSON.stringify(allValues) === JSON.stringify(initialValues)) {
-      setIsChanged(false);
-    } else {
-      setIsChanged(true);
-    }
-  };
 
   const handleSubmit = (values: any) => {
     setLoadingSubmitRequest(true);
@@ -195,17 +158,6 @@ export const HelmReleaseEdit = ({
         setLoadingSubmitRequest(false);
         setError(mapResponseError(error));
       });
-
-    // axios
-    //     .post(`/api/helm/releases/${releaseNamespace}/${releaseName}`, values)
-    //     .then((res) => {
-    //       setLoadingSubmitRequest(false);
-    //       window.location.href = `/helm/releases/${releaseNamespace}/${releaseName}`;
-    //     })
-    //     .catch((error) => {
-    //       setLoadingSubmitRequest(false);
-    //       setError(mapResponseError(error));
-    //     });
   };
 
   const formLoading = () => {
@@ -232,7 +184,6 @@ export const HelmReleaseEdit = ({
             type="primary"
             htmlType="submit"
             name="Save"
-            // disabled={!isChanged || !loadTemplate || !loadValues}
             loading={loadingSubmitRequest}
           >
             Deploy
@@ -297,7 +248,6 @@ export const HelmReleaseEdit = ({
             autoComplete={"off"}
             onFinish={handleSubmit}
             onFinishFailed={onFinishFailed}
-            onValuesChange={handleValuesChange}
           >
             <Divider style={{ marginBottom: "12px", marginTop: "12px" }} />
             {formLoading()}
