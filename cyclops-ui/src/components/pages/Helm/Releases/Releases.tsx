@@ -21,13 +21,11 @@ import { mapResponseError } from "../../../../utils/api/errors";
 
 import helmLogo from "../../../../static/img/helm.png";
 import {
-  CheckCircleOutlined,
   CheckCircleTwoTone,
   ClockCircleTwoTone,
   CloseCircleTwoTone,
-  CloseSquareTwoTone,
+  ExportOutlined,
   LoadingOutlined,
-  PlusCircleOutlined,
 } from "@ant-design/icons";
 import { HelmReleaseMigrationTemplateModal } from "../../../shared/HelmReleaseDetails/HelmReleaseDetails";
 import { getTemplate } from "../../../../utils/api/api";
@@ -68,20 +66,7 @@ const HelmReleases = () => {
     useState<{
       [key: string]: string;
     }>({});
-
-  // const onSelectChange = (newSelectedRowKeys: React.Key[]) => {
-  //   let newSelectedReleases: {namespace: string, name: string}[] = []
-  //
-  //   newSelectedRowKeys.forEach((k: string) => {
-  //     const keyParts = k.split("/")
-  //     newSelectedReleases.push({
-  //       namespace: keyParts[0],
-  //       name: keyParts[1],
-  //     })
-  //   })
-  //
-  //   setSelectedReleases(newSelectedRowKeys);
-  // };
+  const [batchMigrationFinished, setBatchMigrationFinished] = useState(false);
 
   useEffect(() => {
     setLoadingReleases(true);
@@ -135,6 +120,7 @@ const HelmReleases = () => {
     )
       .then(() => {
         setTemplateMigrationModalLoading(false);
+        setTemplateMigrationModal(false);
         setReleaseMigrationModal(true);
       })
       .catch((e) => {
@@ -143,7 +129,7 @@ const HelmReleases = () => {
       });
   };
 
-  const handleSubmitMigrateModal = () => {
+  const handleSubmitMigrateModal = async () => {
     selectedRowKeys.forEach((r) => {
       const k = r.toString();
 
@@ -154,40 +140,58 @@ const HelmReleases = () => {
 
     const templateRef = migrateTemplateRefForm.getFieldsValue();
 
-    selectedRowKeys.forEach((r) => {
+    for (let r of selectedRowKeys) {
+      const k = r.toString();
+
       setReleaseMigrationModalProgress((prevState) => {
         return { ...prevState, [k]: "migrating" };
       });
 
-      const k = r.toString();
       const keyParts = k.split("/");
       const releaseNamespace = keyParts[0];
       const releaseName = keyParts[1];
 
-      getHelmReleaseValues(releaseNamespace, releaseName)
-        .then((values) => {
-          migrateHelmRelease(releaseNamespace, releaseName, values, {
-            repo: templateRef["repo"],
-            path: templateRef["path"],
-            version: templateRef["version"],
-          })
-            .then(() => {
-              setReleaseMigrationModalProgress((prevState) => {
-                return { ...prevState, [k]: "success" };
-              });
-            })
-            .catch((error) => {
-              setReleaseMigrationModalProgress((prevState) => {
-                return { ...prevState, [k]: "error" };
-              });
-            });
-        })
-        .catch((error) => {
-          setReleaseMigrationModalProgress((prevState) => {
-            return { ...prevState, [k]: "error" };
-          });
+      try {
+        const values = await getHelmReleaseValues(
+          releaseNamespace,
+          releaseName,
+        );
+        await migrateHelmRelease(releaseNamespace, releaseName, values, {
+          repo: templateRef["repo"],
+          path: templateRef["path"],
+          version: templateRef["version"],
         });
-    });
+
+        setReleaseMigrationModalProgress((prevState) => ({
+          ...prevState,
+          [k]: "success",
+        }));
+      } catch (error) {
+        setReleaseMigrationModalProgress((prevState) => ({
+          ...prevState,
+          [k]: "error",
+        }));
+        break;
+      }
+    }
+
+    setBatchMigrationFinished(true);
+  };
+
+  const handleCancelMigrateModal = () => {
+    setReleaseMigrationModal(false);
+    setLoadingReleases(true);
+
+    axios
+      .get(`/api/helm/releases`)
+      .then((res) => {
+        setAllData(res.data);
+        setLoadingReleases(false);
+      })
+      .catch((error) => {
+        setError(mapResponseError(error));
+        setLoadingReleases(false);
+      });
   };
 
   const renderReleasesTable = () => {
@@ -223,15 +227,6 @@ const HelmReleases = () => {
           rowKey={(r) => {
             return `${r.namespace}/${r.name}`;
           }}
-          onRow={(release: any) => {
-            return {
-              style: { cursor: "pointer" },
-              onClick: () => {
-                window.location.href =
-                  "/helm/releases/" + release.namespace + "/" + release.name;
-              },
-            };
-          }}
         >
           <Table.Column
             width={"3%"}
@@ -250,9 +245,10 @@ const HelmReleases = () => {
             title={"Release"}
             render={(release: any) => {
               return (
-                <div>
+                <a href={`/helm/releases/${release.namespace}/${release.name}`}>
+                  <ExportOutlined style={{ paddingRight: "8px" }} />
                   {release.name}:{release.revision}
-                </div>
+                </a>
               );
             }}
           />
@@ -361,11 +357,11 @@ const HelmReleases = () => {
       <Modal
         title="Migrate releases to Cyclops modules"
         open={releaseMigrationModal}
-        onCancel={() => {
-          setTemplateMigrationModal(false);
-        }}
+        onCancel={handleCancelMigrateModal}
         onOk={handleSubmitMigrateModal}
         okText={"Run migration"}
+        okButtonProps={{ disabled: batchMigrationFinished }}
+        cancelText={"Close"}
         confirmLoading={templateMigrationModalLoading}
         width={"80%"}
       >
