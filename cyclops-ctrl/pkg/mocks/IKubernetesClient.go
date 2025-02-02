@@ -314,6 +314,53 @@ func (_c *IKubernetesClient_DeleteModule_Call) RunAndReturn(run func(string) err
 	return _c
 }
 
+// DeleteReleaseSecret provides a mock function with given fields: releaseName, releaseNamespace
+func (_m *IKubernetesClient) DeleteReleaseSecret(releaseName string, releaseNamespace string) error {
+	ret := _m.Called(releaseName, releaseNamespace)
+
+	if len(ret) == 0 {
+		panic("no return value specified for DeleteReleaseSecret")
+	}
+
+	var r0 error
+	if rf, ok := ret.Get(0).(func(string, string) error); ok {
+		r0 = rf(releaseName, releaseNamespace)
+	} else {
+		r0 = ret.Error(0)
+	}
+
+	return r0
+}
+
+// IKubernetesClient_DeleteReleaseSecret_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'DeleteReleaseSecret'
+type IKubernetesClient_DeleteReleaseSecret_Call struct {
+	*mock.Call
+}
+
+// DeleteReleaseSecret is a helper method to define mock.On call
+//   - releaseName string
+//   - releaseNamespace string
+func (_e *IKubernetesClient_Expecter) DeleteReleaseSecret(releaseName interface{}, releaseNamespace interface{}) *IKubernetesClient_DeleteReleaseSecret_Call {
+	return &IKubernetesClient_DeleteReleaseSecret_Call{Call: _e.mock.On("DeleteReleaseSecret", releaseName, releaseNamespace)}
+}
+
+func (_c *IKubernetesClient_DeleteReleaseSecret_Call) Run(run func(releaseName string, releaseNamespace string)) *IKubernetesClient_DeleteReleaseSecret_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run(args[0].(string), args[1].(string))
+	})
+	return _c
+}
+
+func (_c *IKubernetesClient_DeleteReleaseSecret_Call) Return(_a0 error) *IKubernetesClient_DeleteReleaseSecret_Call {
+	_c.Call.Return(_a0)
+	return _c
+}
+
+func (_c *IKubernetesClient_DeleteReleaseSecret_Call) RunAndReturn(run func(string, string) error) *IKubernetesClient_DeleteReleaseSecret_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
 // DeleteTemplateStore provides a mock function with given fields: name
 func (_m *IKubernetesClient) DeleteTemplateStore(name string) error {
 	ret := _m.Called(name)
@@ -891,23 +938,23 @@ func (_c *IKubernetesClient_GetPodsForNode_Call) RunAndReturn(run func(string) (
 }
 
 // GetResource provides a mock function with given fields: group, _a1, kind, name, namespace
-func (_m *IKubernetesClient) GetResource(group string, _a1 string, kind string, name string, namespace string) (any, error) {
+func (_m *IKubernetesClient) GetResource(group string, _a1 string, kind string, name string, namespace string) (interface{}, error) {
 	ret := _m.Called(group, _a1, kind, name, namespace)
 
 	if len(ret) == 0 {
 		panic("no return value specified for GetResource")
 	}
 
-	var r0 any
+	var r0 interface{}
 	var r1 error
-	if rf, ok := ret.Get(0).(func(string, string, string, string, string) (any, error)); ok {
+	if rf, ok := ret.Get(0).(func(string, string, string, string, string) (interface{}, error)); ok {
 		return rf(group, _a1, kind, name, namespace)
 	}
-	if rf, ok := ret.Get(0).(func(string, string, string, string, string) any); ok {
+	if rf, ok := ret.Get(0).(func(string, string, string, string, string) interface{}); ok {
 		r0 = rf(group, _a1, kind, name, namespace)
 	} else {
 		if ret.Get(0) != nil {
-			r0 = ret.Get(0).(any)
+			r0 = ret.Get(0).(interface{})
 		}
 	}
 
@@ -942,12 +989,12 @@ func (_c *IKubernetesClient_GetResource_Call) Run(run func(group string, _a1 str
 	return _c
 }
 
-func (_c *IKubernetesClient_GetResource_Call) Return(_a0 any, _a1 error) *IKubernetesClient_GetResource_Call {
+func (_c *IKubernetesClient_GetResource_Call) Return(_a0 interface{}, _a1 error) *IKubernetesClient_GetResource_Call {
 	_c.Call.Return(_a0, _a1)
 	return _c
 }
 
-func (_c *IKubernetesClient_GetResource_Call) RunAndReturn(run func(string, string, string, string, string) (any, error)) *IKubernetesClient_GetResource_Call {
+func (_c *IKubernetesClient_GetResource_Call) RunAndReturn(run func(string, string, string, string, string) (interface{}, error)) *IKubernetesClient_GetResource_Call {
 	_c.Call.Return(run)
 	return _c
 }
@@ -1353,7 +1400,7 @@ func (_c *IKubernetesClient_GetWorkloadsForRelease_Call) RunAndReturn(run func(s
 	return _c
 }
 
-// ListModules provides a mock function with given fields:
+// ListModules provides a mock function with no fields
 func (_m *IKubernetesClient) ListModules() ([]v1alpha1.Module, error) {
 	ret := _m.Called()
 
@@ -1410,7 +1457,7 @@ func (_c *IKubernetesClient_ListModules_Call) RunAndReturn(run func() ([]v1alpha
 	return _c
 }
 
-// ListNamespaces provides a mock function with given fields:
+// ListNamespaces provides a mock function with no fields
 func (_m *IKubernetesClient) ListNamespaces() ([]string, error) {
 	ret := _m.Called()
 
@@ -1467,7 +1514,7 @@ func (_c *IKubernetesClient_ListNamespaces_Call) RunAndReturn(run func() ([]stri
 	return _c
 }
 
-// ListNodes provides a mock function with given fields:
+// ListNodes provides a mock function with no fields
 func (_m *IKubernetesClient) ListNodes() ([]v1.Node, error) {
 	ret := _m.Called()
 
@@ -1524,7 +1571,7 @@ func (_c *IKubernetesClient_ListNodes_Call) RunAndReturn(run func() ([]v1.Node, 
 	return _c
 }
 
-// ListTemplateAuthRules provides a mock function with given fields:
+// ListTemplateAuthRules provides a mock function with no fields
 func (_m *IKubernetesClient) ListTemplateAuthRules() ([]v1alpha1.TemplateAuthRule, error) {
 	ret := _m.Called()
 
@@ -1581,7 +1628,7 @@ func (_c *IKubernetesClient_ListTemplateAuthRules_Call) RunAndReturn(run func() 
 	return _c
 }
 
-// ListTemplateStore provides a mock function with given fields:
+// ListTemplateStore provides a mock function with no fields
 func (_m *IKubernetesClient) ListTemplateStore() ([]v1alpha1.TemplateStore, error) {
 	ret := _m.Called()
 
@@ -1979,7 +2026,7 @@ func (_c *IKubernetesClient_UpdateTemplateStore_Call) RunAndReturn(run func(*v1a
 	return _c
 }
 
-// VersionInfo provides a mock function with given fields:
+// VersionInfo provides a mock function with no fields
 func (_m *IKubernetesClient) VersionInfo() (*version.Info, error) {
 	ret := _m.Called()
 

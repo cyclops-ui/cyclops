@@ -116,6 +116,7 @@ func (h *Handler) Start() error {
 	h.router.GET("/helm/releases/:namespace/:name/resources", helmController.GetReleaseResources)
 	h.router.GET("/helm/releases/:namespace/:name/fields", helmController.GetReleaseSchema)
 	h.router.GET("/helm/releases/:namespace/:name/values", helmController.GetReleaseValues)
+	h.router.POST("/helm/releases/:namespace/:name/migrate", helmController.MigrateHelmRelease)
 	// endregion
 
 	h.router.Use(h.options)

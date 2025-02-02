@@ -28,6 +28,9 @@ const ReleaseDetails = React.lazy(
 const EditRelease = React.lazy(
   () => import("../components/pages/Helm/EditRelease/EditRelease"),
 );
+const MigrateRelease = React.lazy(
+  () => import("../components/pages/Helm/MigrateRelease/MigrateRelease"),
+);
 
 const routes = [
   { path: PathConstants.HOME, element: <Home /> },
@@ -42,6 +45,7 @@ const routes = [
   { path: PathConstants.HELM_RELEASES, element: <HelmReleases /> },
   { path: PathConstants.HELM_RELEASE, element: <ReleaseDetails /> },
   { path: PathConstants.HELM_RELEASE_EDIT, element: <EditRelease /> },
+  { path: PathConstants.HELM_RELEASE_MIGRATION, element: <MigrateRelease /> },
 ];
 
 export default routes;
