@@ -61,6 +61,17 @@ export async function getHelmReleaseResources(
   return resp.data;
 }
 
+export async function upgradeHelmRelease(
+  releaseNamespace: string,
+  releaseName: string,
+  values: any,
+) {
+  return axios.post(
+    `/api/helm/releases/${releaseNamespace}/${releaseName}`,
+    values,
+  );
+}
+
 export async function uninstallHelmRelease(
   releaseNamespace: string,
   releaseName: string,
