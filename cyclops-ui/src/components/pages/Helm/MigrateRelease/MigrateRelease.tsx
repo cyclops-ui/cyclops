@@ -9,7 +9,7 @@ import {
 } from "../../../../utils/api/helm";
 import { getTemplate } from "../../../../utils/api/api";
 import { InfoCircleOutlined } from "@ant-design/icons";
-import { Alert, Row } from "antd";
+import { Alert } from "antd";
 
 const MigrateRelease = () => {
   const [searchParams] = useSearchParams();

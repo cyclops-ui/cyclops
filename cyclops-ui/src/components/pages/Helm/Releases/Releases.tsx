@@ -25,7 +25,6 @@ import {
   ClockCircleTwoTone,
   CloseCircleTwoTone,
   ExportOutlined,
-  InfoCircleFilled,
   InfoCircleOutlined,
   LoadingOutlined,
 } from "@ant-design/icons";
