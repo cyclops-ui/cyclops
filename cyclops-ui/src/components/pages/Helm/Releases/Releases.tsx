@@ -49,6 +49,10 @@ const HelmReleases = () => {
     message: "",
     description: "",
   });
+  const [releasesMigrationError, setReleasesMigrationError] = useState({
+    message: "",
+    description: "",
+  });
 
   const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([]);
 
@@ -166,7 +170,8 @@ const HelmReleases = () => {
           ...prevState,
           [k]: "success",
         }));
-      } catch (error) {
+      } catch (e) {
+        setReleasesMigrationError(mapResponseError(e));
         setReleaseMigrationModalProgress((prevState) => ({
           ...prevState,
           [k]: "error",
@@ -333,7 +338,7 @@ const HelmReleases = () => {
             type="error"
             closable
             afterClose={() => {
-              setError({
+              setMigrationTemplateError({
                 message: "",
                 description: "",
               });
@@ -365,14 +370,14 @@ const HelmReleases = () => {
         confirmLoading={templateMigrationModalLoading}
         width={"80%"}
       >
-        {migrationTemplateError.message.length !== 0 && (
+        {releasesMigrationError.message.length !== 0 && (
           <Alert
-            message={migrationTemplateError.message}
-            description={migrationTemplateError.description}
+            message={releasesMigrationError.message}
+            description={releasesMigrationError.description}
             type="error"
             closable
             afterClose={() => {
-              setError({
+              setReleasesMigrationError({
                 message: "",
                 description: "",
               });
