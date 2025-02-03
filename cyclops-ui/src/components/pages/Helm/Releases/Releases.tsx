@@ -25,6 +25,8 @@ import {
   ClockCircleTwoTone,
   CloseCircleTwoTone,
   ExportOutlined,
+  InfoCircleFilled,
+  InfoCircleOutlined,
   LoadingOutlined,
 } from "@ant-design/icons";
 import { HelmReleaseMigrationTemplateModal } from "../../../shared/HelmReleaseDetails/HelmReleaseDetails";
@@ -139,7 +141,7 @@ const HelmReleases = () => {
       });
   };
 
-  const handleSubmitMigrateModal = async () => {
+  const runReleaseBatchMigration = async () => {
     selectedRowKeys.forEach((r) => {
       const k = r.toString();
 
@@ -187,6 +189,24 @@ const HelmReleases = () => {
     }
 
     setBatchMigrationFinished(true);
+  };
+
+  const handleSubmitMigrateModal = () => {
+    Modal.confirm({
+      title: "Confirm migration",
+      content:
+        "Migration from Helm releases to Cyclops Modules will retain the existing resources, but releases will not be visible in the the Cyclops UI or the `helm ls` command. In case you want to revert to Helm releases, you can just reinstall them.",
+      okText: "Run Migration",
+      cancelText: "Cancel",
+      icon: <InfoCircleOutlined style={{ color: "#1890ff" }} />, // Use info icon
+      okButtonProps: {
+        style: { backgroundColor: "#ff8803" },
+      },
+      cancelButtonProps: {
+        style: { borderColor: "#ff8803", color: "#ff8803" },
+      },
+      onOk: runReleaseBatchMigration,
+    });
   };
 
   const handleCancelMigrateModal = () => {
