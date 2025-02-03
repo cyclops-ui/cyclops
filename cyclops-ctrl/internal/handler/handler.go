@@ -45,7 +45,6 @@ func New(
 		moduleTargetNamespace: moduleTargetNamespace,
 		telemetryClient:       telemetryClient,
 		monitor:               monitor,
-		router:                gin.New(),
 	}, nil
 }
 
