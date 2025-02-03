@@ -147,7 +147,8 @@ func (h *Helm) GetReleaseSchema(ctx *gin.Context) {
 	}
 
 	if len(release.Chart.Schema) == 0 {
-		ctx.JSON(http.StatusOK, nil)
+		ctx.JSON(http.StatusOK, models.Template{})
+		return
 	}
 
 	var root *helm2.Property

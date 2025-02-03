@@ -349,7 +349,13 @@ export const HelmReleaseDetails = ({
       });
   };
 
-  const handleSubmitMigrateModal = () => {
+  const handleSubmitMigrateModal = async () => {
+    try {
+      await migrateTemplateRefForm.validateFields();
+    } catch (error) {
+      return;
+    }
+
     // setTemplateMigrationModal(false);
     setTemplateMigrationModalLoading(true);
     const templateRef = migrateTemplateRefForm.getFieldsValue();
@@ -568,7 +574,11 @@ export const HelmReleaseMigrationTemplateModal = ({
         </Row>
       )}
     >
-      <Form.Item name={"repo"} style={{ width: "50%", marginRight: "0" }}>
+      <Form.Item
+        name={"repo"}
+        rules={[{ required: true, message: "Provide template repo URL" }]}
+        style={{ width: "50%", marginRight: "0" }}
+      >
         <Input placeholder={"Repository"} />
       </Form.Item>
       <div
@@ -581,7 +591,11 @@ export const HelmReleaseMigrationTemplateModal = ({
       >
         /
       </div>
-      <Form.Item name={"path"} style={{ width: "25%", marginRight: "0" }}>
+      <Form.Item
+        name={"path"}
+        rules={[{ required: true, message: "Provide template path" }]}
+        style={{ width: "25%", marginRight: "0" }}
+      >
         <Input placeholder={"Path"} />
       </Form.Item>
       <div
@@ -594,7 +608,11 @@ export const HelmReleaseMigrationTemplateModal = ({
       >
         @
       </div>
-      <Form.Item name={"version"} style={{ width: "20%", marginRight: "0" }}>
+      <Form.Item
+        name={"version"}
+        rules={[{ required: true, message: "Provide template version" }]}
+        style={{ width: "20%", marginRight: "0" }}
+      >
         <Input placeholder={"Version"} />
       </Form.Item>
     </Form>

@@ -25,6 +25,7 @@ import {
   ClockCircleTwoTone,
   CloseCircleTwoTone,
   ExportOutlined,
+  InfoCircleOutlined,
   LoadingOutlined,
 } from "@ant-design/icons";
 import { HelmReleaseMigrationTemplateModal } from "../../../shared/HelmReleaseDetails/HelmReleaseDetails";
@@ -46,6 +47,10 @@ const HelmReleases = () => {
     description: "",
   });
   const [migrationTemplateError, setMigrationTemplateError] = useState({
+    message: "",
+    description: "",
+  });
+  const [releasesMigrationError, setReleasesMigrationError] = useState({
     message: "",
     description: "",
   });
@@ -107,7 +112,13 @@ const HelmReleases = () => {
     setsearchInputFilter(query);
   };
 
-  const handleSubmitMigrationTemplate = () => {
+  const handleSubmitMigrationTemplate = async () => {
+    try {
+      await migrateTemplateRefForm.validateFields();
+    } catch (error) {
+      return;
+    }
+
     // setTemplateMigrationModal(false);
     setTemplateMigrationModalLoading(true);
     const templateRef = migrateTemplateRefForm.getFieldsValue();
@@ -129,7 +140,7 @@ const HelmReleases = () => {
       });
   };
 
-  const handleSubmitMigrateModal = async () => {
+  const runReleaseBatchMigration = async () => {
     selectedRowKeys.forEach((r) => {
       const k = r.toString();
 
@@ -166,7 +177,8 @@ const HelmReleases = () => {
           ...prevState,
           [k]: "success",
         }));
-      } catch (error) {
+      } catch (e) {
+        setReleasesMigrationError(mapResponseError(e));
         setReleaseMigrationModalProgress((prevState) => ({
           ...prevState,
           [k]: "error",
@@ -176,6 +188,24 @@ const HelmReleases = () => {
     }
 
     setBatchMigrationFinished(true);
+  };
+
+  const handleSubmitMigrateModal = () => {
+    Modal.confirm({
+      title: "Confirm migration",
+      content:
+        "Migration from Helm releases to Cyclops Modules will retain the existing resources, but releases will not be visible in the the Cyclops UI or the `helm ls` command. In case you want to revert to Helm releases, you can just reinstall them.",
+      okText: "Run Migration",
+      cancelText: "Cancel",
+      icon: <InfoCircleOutlined style={{ color: "#1890ff" }} />, // Use info icon
+      okButtonProps: {
+        style: { backgroundColor: "#ff8803" },
+      },
+      cancelButtonProps: {
+        style: { borderColor: "#ff8803", color: "#ff8803" },
+      },
+      onOk: runReleaseBatchMigration,
+    });
   };
 
   const handleCancelMigrateModal = () => {
@@ -333,7 +363,7 @@ const HelmReleases = () => {
             type="error"
             closable
             afterClose={() => {
-              setError({
+              setMigrationTemplateError({
                 message: "",
                 description: "",
               });
@@ -365,14 +395,14 @@ const HelmReleases = () => {
         confirmLoading={templateMigrationModalLoading}
         width={"80%"}
       >
-        {migrationTemplateError.message.length !== 0 && (
+        {releasesMigrationError.message.length !== 0 && (
           <Alert
-            message={migrationTemplateError.message}
-            description={migrationTemplateError.description}
+            message={releasesMigrationError.message}
+            description={releasesMigrationError.description}
             type="error"
             closable
             afterClose={() => {
-              setError({
+              setReleasesMigrationError({
                 message: "",
                 description: "",
               });
