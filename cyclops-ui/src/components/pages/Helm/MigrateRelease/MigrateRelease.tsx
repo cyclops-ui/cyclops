@@ -31,7 +31,7 @@ const MigrateRelease = () => {
         });
       }}
       onSubmitSuccess={(releaseNamespace, releaseName) => {
-        window.location.href = `/helm/releases/${releaseNamespace}/${releaseName}`;
+        window.location.href = `/modules/${releaseName}`;
       }}
       onBackButton={(releaseNamespace, releaseName) => {
         window.location.href = `/helm/releases/${releaseNamespace}/${releaseName}`;
