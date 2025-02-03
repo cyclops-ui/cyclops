@@ -111,7 +111,13 @@ const HelmReleases = () => {
     setsearchInputFilter(query);
   };
 
-  const handleSubmitMigrationTemplate = () => {
+  const handleSubmitMigrationTemplate = async () => {
+    try {
+      await migrateTemplateRefForm.validateFields();
+    } catch (error) {
+      return;
+    }
+
     // setTemplateMigrationModal(false);
     setTemplateMigrationModalLoading(true);
     const templateRef = migrateTemplateRefForm.getFieldsValue();
