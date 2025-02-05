@@ -7,12 +7,15 @@ import {
   getTemplateInitialValues,
   getTemplateStore,
 } from "../../../utils/api/api";
+import { useTheme } from "../../theme/ThemeContext";
 
 const NewModule = () => {
+  const { isDarkMode } = useTheme();
+
   return (
-    <div>
+    <div style={{ backgroundColor: isDarkMode ? "#fff" : "#333" }}>
       <CreateModuleComponent
-        themePalette={"light"}
+        themePalette={isDarkMode ? "light" : "dark"}
         getTemplateStore={getTemplateStore}
         getNamespaces={getNamespaces}
         getTemplate={getTemplate}
