@@ -16,7 +16,6 @@ import "./custom.css";
 import helmLogo from "../../static/img/helm_white.png";
 import cyclopsLogo from "../../static/img/cyclops_logo.png";
 import { ThemeSwitch } from "../theme/ThemeSwitch";
-import { ThemeProvider } from "../theme/ThemeContext";
 
 const SideNav = () => {
   const location = useLocation().pathname.split("/")[1];
