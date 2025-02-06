@@ -741,6 +741,7 @@ export const ModuleResourceDetails = ({
             module.name,
           )}
           target="_blank"
+          rel="noreferrer"
         >
           <Button block>
             {" "}
