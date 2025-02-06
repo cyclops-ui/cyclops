@@ -1,16 +1,26 @@
 import { useTheme } from "./ThemeContext";
-import { Switch } from "antd";
+import { MoonOutlined, SunOutlined } from "@ant-design/icons";
 
 export function ThemeSwitch() {
-  const { isDarkMode, toggleTheme } = useTheme();
+  const { mode, toggleTheme } = useTheme();
 
   return (
-    <Switch
-      checked={isDarkMode}
-      onChange={toggleTheme}
-      checkedChildren="☀️ Light"
-      unCheckedChildren="🌙 Dark"
-      style={{ width: "80px" }}
-    />
+    <button
+      onClick={toggleTheme}
+      style={{
+        background: "transparent",
+        border: "none",
+        cursor: "pointer",
+        fontSize: "1.5rem",
+        transition: "transform 0.3s ease",
+        marginLeft: "auto",
+      }}
+    >
+      {mode === "dark" ? (
+        <MoonOutlined style={{ color: "#fff" }} />
+      ) : (
+        <SunOutlined style={{ color: "#fff" }} />
+      )}
+    </button>
   );
 }

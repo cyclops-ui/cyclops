@@ -15,7 +15,6 @@ import { Link } from "react-router-dom";
 import "./custom.css";
 import helmLogo from "../../static/img/helm_white.png";
 import cyclopsLogo from "../../static/img/cyclops_logo.png";
-import { ThemeSwitch } from "../theme/ThemeSwitch";
 
 const SideNav = () => {
   const location = useLocation().pathname.split("/")[1];
@@ -77,13 +76,10 @@ const SideNav = () => {
         selectedKeys={[location]}
         items={sidebarItems}
       />
-      <div style={{ margin: "auto 25px 12px 25px" }}>
-        <ThemeSwitch />
-      </div>
       <Button
-        ghost
-        style={{ margin: "12px 25px 12px 25px" }}
+        style={{ background: "transparent", margin: "auto 25px 12px 25px" }}
         icon={<BugFilled />}
+        className={"reportbug"}
         href={
           "https://github.com/cyclops-ui/cyclops/issues/new?assignees=&labels=&projects=&template=bug_report.md&title="
         }
@@ -109,7 +105,7 @@ const SideNav = () => {
       <center
         style={{
           color: "#FFF",
-          margin: "25px",
+          marginBottom: "25px",
           marginTop: "0",
         }}
       >

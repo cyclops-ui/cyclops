@@ -3,6 +3,7 @@ import {
   Alert,
   Button,
   Col,
+  ConfigProvider,
   Descriptions,
   Form,
   FormInstance,
@@ -10,6 +11,7 @@ import {
   Modal,
   Row,
   Spin,
+  theme,
   Typography,
 } from "antd";
 import "ace-builds/src-noconflict/ace";
@@ -90,6 +92,7 @@ interface release {
 interface HelmReleaseDetailsProps {
   releaseName: string;
   releaseNamespace: string;
+  themePalette?: "dark" | "light";
   streamingDisabled: boolean;
   getRelease: (releaseNamespace: string, releaseName: string) => Promise<any>;
   uninstallRelease: (
@@ -166,6 +169,7 @@ interface HelmReleaseDetailsProps {
 export const HelmReleaseDetails = ({
   releaseName,
   releaseNamespace,
+  themePalette = "light",
   streamingDisabled,
   getRelease,
   uninstallRelease,
@@ -378,143 +382,13 @@ export const HelmReleaseDetails = ({
 
   return (
     <div>
-      {error.message.length !== 0 && (
-        <Alert
-          message={error.message}
-          description={error.description}
-          type="error"
-          closable
-          afterClose={() => {
-            setError({
-              message: "",
-              description: "",
-            });
-          }}
-          style={{ marginBottom: "20px" }}
-        />
-      )}
-      {resourceLoading()}
-      <Row gutter={[12, 0]}>
-        <Col>
-          <Button
-            onClick={() => {
-              setTemplateMigrationModal(true);
-            }}
-            type={"primary"}
-            block
-          >
-            <RocketOutlined />
-            Migrate to Cyclops Module
-          </Button>
-        </Col>
-        <Col>
-          <Button
-            onClick={() => {
-              window.location.href = `/helm/releases/${releaseNamespace}/${releaseName}/edit`;
-            }}
-            block
-          >
-            <EditOutlined />
-            Edit release
-          </Button>
-        </Col>
-        <Col>
-          <Button
-            onClick={function () {
-              setConfirmUninstall(true);
-            }}
-            danger
-            block
-            loading={loading}
-          >
-            <DeleteOutlined />
-            Delete
-          </Button>
-        </Col>
-      </Row>
-      <ResourceListActionsProvider
-        streamingDisabled={streamingDisabled}
-        fetchResource={fetchResource}
-        fetchResourceManifest={fetchResourceManifest}
-        resourceStreamImplementation={resourceStreamImplementation}
-        restartResource={restartResource}
-        deleteResource={deleteResource}
-        getPodLogs={getPodLogs}
-        downloadPodLogs={downloadPodLogs}
-        streamPodLogs={streamPodLogs}
-      >
-        <ResourceList
-          loadResources={loadResources}
-          resources={resources}
-          workloads={workloads}
-          onResourceDelete={() => {
-            setLoadResources(false);
-            fetchReleaseResources();
-          }}
-        />
-      </ResourceListActionsProvider>
-      <Modal
-        title="Migrate to a Cyclops Module"
-        open={templateMigrationModal}
-        onCancel={() => {
-          setTemplateMigrationModal(false);
+      <ConfigProvider
+        theme={{
+          token: {
+            colorPrimary: "#FF8803",
+          },
+          ...(themePalette === "dark" && { algorithm: theme.darkAlgorithm }),
         }}
-        onOk={handleSubmitMigrateModal}
-        confirmLoading={templateMigrationModalLoading}
-        width={"60%"}
-      >
-        {migrationTemplateError.message.length !== 0 && (
-          <Alert
-            message={migrationTemplateError.message}
-            description={migrationTemplateError.description}
-            type="error"
-            closable
-            afterClose={() => {
-              setError({
-                message: "",
-                description: "",
-              });
-            }}
-            style={{ marginBottom: "20px" }}
-          />
-        )}
-        <Row style={{ paddingBottom: "8px" }}>
-          Select the Helm chart you want to use for the Module (cannot be
-          inferred from the Helm release)
-        </Row>
-        <Row>
-          <HelmReleaseMigrationTemplateModal
-            migrateTemplateRefForm={migrateTemplateRefForm}
-          />
-        </Row>
-        <Row style={{ paddingTop: "8px", paddingBottom: "8px", color: "#888" }}>
-          {templateMigrationModalLoading ? "Verifying template..." : ""}
-        </Row>
-      </Modal>
-      <Modal
-        title={
-          <>
-            Uninstall release{" "}
-            <span style={{ color: "red" }}>
-              {releaseNamespace}/{releaseName}
-            </span>
-          </>
-        }
-        open={confirmUninstall}
-        onCancel={() => {
-          setConfirmUninstall(false);
-        }}
-        width={"40%"}
-        footer={
-          <Button
-            danger
-            block
-            disabled={confirmUninstallInput !== releaseName}
-            onClick={handleUninstallRelease}
-          >
-            Delete
-          </Button>
-        }
       >
         {error.message.length !== 0 && (
           <Alert
@@ -531,17 +405,158 @@ export const HelmReleaseDetails = ({
             style={{ marginBottom: "20px" }}
           />
         )}
-        In order to uninstall this release and related resources, type the name
-        of the release below
-        <Input
-          style={{ marginTop: "12px" }}
-          placeholder={releaseName}
-          required
-          onChange={(e) => {
-            setConfirmUninstallInput(e.target.value);
+        {resourceLoading()}
+        <Row gutter={[12, 0]}>
+          <Col>
+            <Button
+              onClick={() => {
+                setTemplateMigrationModal(true);
+              }}
+              type={"primary"}
+              block
+            >
+              <RocketOutlined />
+              Migrate to Cyclops Module
+            </Button>
+          </Col>
+          <Col>
+            <Button
+              onClick={() => {
+                window.location.href = `/helm/releases/${releaseNamespace}/${releaseName}/edit`;
+              }}
+              block
+            >
+              <EditOutlined />
+              Edit release
+            </Button>
+          </Col>
+          <Col>
+            <Button
+              onClick={function () {
+                setConfirmUninstall(true);
+              }}
+              danger
+              block
+              loading={loading}
+            >
+              <DeleteOutlined />
+              Delete
+            </Button>
+          </Col>
+        </Row>
+        <ResourceListActionsProvider
+          streamingDisabled={streamingDisabled}
+          fetchResource={fetchResource}
+          fetchResourceManifest={fetchResourceManifest}
+          resourceStreamImplementation={resourceStreamImplementation}
+          restartResource={restartResource}
+          deleteResource={deleteResource}
+          getPodLogs={getPodLogs}
+          downloadPodLogs={downloadPodLogs}
+          streamPodLogs={streamPodLogs}
+        >
+          <ResourceList
+            loadResources={loadResources}
+            resources={resources}
+            workloads={workloads}
+            onResourceDelete={() => {
+              setLoadResources(false);
+              fetchReleaseResources();
+            }}
+          />
+        </ResourceListActionsProvider>
+        <Modal
+          title="Migrate to a Cyclops Module"
+          open={templateMigrationModal}
+          onCancel={() => {
+            setTemplateMigrationModal(false);
           }}
-        />
-      </Modal>
+          onOk={handleSubmitMigrateModal}
+          confirmLoading={templateMigrationModalLoading}
+          width={"60%"}
+        >
+          {migrationTemplateError.message.length !== 0 && (
+            <Alert
+              message={migrationTemplateError.message}
+              description={migrationTemplateError.description}
+              type="error"
+              closable
+              afterClose={() => {
+                setError({
+                  message: "",
+                  description: "",
+                });
+              }}
+              style={{ marginBottom: "20px" }}
+            />
+          )}
+          <Row style={{ paddingBottom: "8px" }}>
+            Select the Helm chart you want to use for the Module (cannot be
+            inferred from the Helm release)
+          </Row>
+          <Row>
+            <HelmReleaseMigrationTemplateModal
+              migrateTemplateRefForm={migrateTemplateRefForm}
+            />
+          </Row>
+          <Row
+            style={{ paddingTop: "8px", paddingBottom: "8px", color: "#888" }}
+          >
+            {templateMigrationModalLoading ? "Verifying template..." : ""}
+          </Row>
+        </Modal>
+        <Modal
+          title={
+            <>
+              Uninstall release{" "}
+              <span style={{ color: "red" }}>
+                {releaseNamespace}/{releaseName}
+              </span>
+            </>
+          }
+          open={confirmUninstall}
+          onCancel={() => {
+            setConfirmUninstall(false);
+          }}
+          width={"40%"}
+          footer={
+            <Button
+              danger
+              block
+              disabled={confirmUninstallInput !== releaseName}
+              onClick={handleUninstallRelease}
+            >
+              Delete
+            </Button>
+          }
+        >
+          {error.message.length !== 0 && (
+            <Alert
+              message={error.message}
+              description={error.description}
+              type="error"
+              closable
+              afterClose={() => {
+                setError({
+                  message: "",
+                  description: "",
+                });
+              }}
+              style={{ marginBottom: "20px" }}
+            />
+          )}
+          In order to uninstall this release and related resources, type the
+          name of the release below
+          <Input
+            style={{ marginTop: "12px" }}
+            placeholder={releaseName}
+            required
+            onChange={(e) => {
+              setConfirmUninstallInput(e.target.value);
+            }}
+          />
+        </Modal>
+      </ConfigProvider>
     </div>
   );
 };

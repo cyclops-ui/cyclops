@@ -10,12 +10,12 @@ import {
 import { useTheme } from "../../theme/ThemeContext";
 
 const NewModule = () => {
-  const { isDarkMode } = useTheme();
+  const { mode } = useTheme();
 
   return (
-    <div style={{ backgroundColor: isDarkMode ? "#fff" : "#333" }}>
+    <div style={{ backgroundColor: mode === "light" ? "#fff" : "#222" }}>
       <CreateModuleComponent
-        themePalette={isDarkMode ? "light" : "dark"}
+        themePalette={mode}
         getTemplateStore={getTemplateStore}
         getNamespaces={getNamespaces}
         getTemplate={getTemplate}

@@ -47,6 +47,7 @@ import { mapResponseError } from "../../../utils/api/errors";
 import { CheckboxChangeEvent } from "antd/es/checkbox";
 import { Workload } from "../../../utils/k8s/workload";
 import { useResourceListActions } from "./ResourceListActionsContext";
+import { useTheme } from "../../theme/ThemeContext";
 
 interface Props {
   loadResources: boolean;
@@ -62,12 +63,13 @@ const ResourceList = ({
   onResourceDelete,
 }: Props) => {
   const {
-    themePalette,
     streamingDisabled,
     fetchResourceManifest,
     restartResource,
     deleteResource,
   } = useResourceListActions();
+
+  const { mode } = useTheme();
 
   const [error, setError] = useState({
     message: "",
@@ -233,13 +235,13 @@ const ResourceList = ({
       activeCollapses.get(fieldName) &&
       activeCollapses.get(fieldName) === true
     ) {
-      if (themePalette === "dark") {
+      if (mode === "dark") {
         return "#222";
       }
       return "#EFEFEF";
     } else {
-      if (themePalette === "dark") {
-        return "#333";
+      if (mode === "dark") {
+        return "#141414";
       }
       return "#FAFAFA";
     }
@@ -547,7 +549,7 @@ const ResourceList = ({
                   paddingRight: "10px",
                   marginTop: "0px",
                   marginBottom: "10px",
-                  color: themePalette === "dark" ? "#fff" : "#000",
+                  color: mode === "dark" ? "#fff" : "#000",
                 }}
               >
                 {resource.name}
@@ -564,7 +566,7 @@ const ResourceList = ({
             style={{
               marginTop: "0px",
               marginBottom: "10px",
-              color: themePalette === "dark" ? "#fff" : "#000",
+              color: mode === "dark" ? "#fff" : "#000",
             }}
           >
             {resource.namespace}

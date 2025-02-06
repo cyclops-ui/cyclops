@@ -10,12 +10,15 @@ import {
   getTemplateInitialValues,
   updateModule,
 } from "../../../utils/api/api";
+import { useTheme } from "../../theme/ThemeContext";
 
 const EditModule = () => {
   let { moduleName } = useParams();
+  const { mode } = useTheme();
 
   return (
     <EditModuleComponent
+      themePalette={mode}
       moduleName={moduleName}
       fetchModule={getModule}
       getTemplate={getTemplate}
