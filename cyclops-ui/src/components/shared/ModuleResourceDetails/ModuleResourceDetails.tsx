@@ -54,7 +54,6 @@ import {
 } from "../../../utils/resourceRef";
 import { ResourceListActionsProvider } from "../../k8s-resources/ResourceList/ResourceListActionsContext";
 
-import gitLogo from "../../../static/img/git.png";
 import {
   isGitHubRepo,
   moduleConfigGitRefLink,
