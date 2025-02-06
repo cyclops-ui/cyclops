@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/cyclops-ui/cyclops/cyclops-ctrl/internal/integrations/helm"
 	"github.com/cyclops-ui/cyclops/cyclops-ctrl/internal/mapper"
+	"github.com/cyclops-ui/cyclops/cyclops-ctrl/internal/models"
 	"github.com/cyclops-ui/cyclops/cyclops-ctrl/internal/models/dto"
 	helm2 "github.com/cyclops-ui/cyclops/cyclops-ctrl/internal/models/helm"
 	"github.com/cyclops-ui/cyclops/cyclops-ctrl/internal/telemetry"
@@ -146,7 +147,8 @@ func (h *Helm) GetReleaseSchema(ctx *gin.Context) {
 	}
 
 	if len(release.Chart.Schema) == 0 {
-		ctx.JSON(http.StatusOK, nil)
+		ctx.JSON(http.StatusOK, models.Template{})
+		return
 	}
 
 	var root *helm2.Property
@@ -163,7 +165,7 @@ func (h *Helm) GetReleaseSchema(ctx *gin.Context) {
 
 	rootField := mapper.HelmSchemaToFields("", *root, root.Definitions, nil)
 
-	ctx.JSON(http.StatusOK, rootField)
+	ctx.JSON(http.StatusOK, models.Template{RootField: rootField})
 }
 
 func (h *Helm) GetReleaseValues(ctx *gin.Context) {
@@ -190,4 +192,41 @@ func (h *Helm) GetReleaseValues(ctx *gin.Context) {
 	}
 
 	ctx.JSON(http.StatusOK, values)
+}
+
+func (h *Helm) MigrateHelmRelease(ctx *gin.Context) {
+	ctx.Header("Access-Control-Allow-Origin", "*")
+
+	var req dto.Module
+	if err := ctx.BindJSON(&req); err != nil {
+		ctx.JSON(http.StatusBadRequest, dto.NewError("Error binding values", err.Error()))
+		return
+	}
+
+	module, err := mapper.RequestToModule(req)
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, dto.NewError("Error mapping module", err.Error()))
+		return
+	}
+
+	//if len(m.moduleTargetNamespace) > 0 {
+	//	module.Spec.TargetNamespace = m.moduleTargetNamespace
+	//}
+
+	h.telemetryClient.ReleaseMigration()
+
+	err = h.kubernetesClient.CreateModule(module)
+	if err != nil {
+		fmt.Println(err)
+		ctx.JSON(http.StatusInternalServerError, dto.NewError("Error creating module", err.Error()))
+		return
+	}
+
+	if err := h.kubernetesClient.DeleteReleaseSecret(req.Name, req.Namespace); err != nil {
+		fmt.Println(err)
+		ctx.JSON(http.StatusInternalServerError, dto.NewError("Error creating module", err.Error()))
+		return
+	}
+
+	ctx.Status(http.StatusCreated)
 }

@@ -17,6 +17,7 @@ import { formatPodAge } from "../../../../utils/pods";
 import PodLogs from "./PodLogs";
 import PodManifest from "./PodManifest";
 import { useResourceListActions } from "../../ResourceList/ResourceListActionsContext";
+import PodExec from "./PodExec";
 
 interface Props {
   namespace: string;
@@ -106,6 +107,7 @@ const PodTable = ({ pods, namespace, updateResourceData }: Props) => {
         <Row style={{ margin: 4, gap: 8 }}>
           <PodLogs pod={{ ...pod, namespace }} />
           <PodManifest pod={{ ...pod, namespace }} />
+          <PodExec pod={{ ...pod, namespace }} />
           <Button
             style={{ color: "red", width: "100%" }}
             onClick={function () {
@@ -122,7 +124,7 @@ const PodTable = ({ pods, namespace, updateResourceData }: Props) => {
               });
             }}
           >
-            <h4>
+            <h4 style={{ margin: "0" }}>
               <DeleteOutlined style={{ paddingRight: "5px" }} />
               Delete Pod
             </h4>
@@ -142,7 +144,18 @@ const PodTable = ({ pods, namespace, updateResourceData }: Props) => {
           key="name"
         />
         <Table.Column title="Node" dataIndex="node" />
-        <Table.Column title="Phase" dataIndex="podPhase" />
+        <Table.Column
+          title="Phase"
+          dataIndex="podPhase"
+          filters={[
+            { text: "Pending", value: "Pending" },
+            { text: "Running", value: "Running" },
+            { text: "Succeeded", value: "Succeeded" },
+            { text: "Failed", value: "Failed" },
+            { text: "Unknown", value: "Unknown" },
+          ]}
+          onFilter={(value, record) => record.podPhase === value}
+        />
         <Table.Column
           title="Started"
           dataIndex="started"
@@ -193,7 +206,6 @@ const PodTable = ({ pods, namespace, updateResourceData }: Props) => {
           title="Actions"
           key="actions"
           width="8%"
-          // className={styles.actionsmenucol}
           render={(pod) => (
             <Popover
               placement={"topRight"}
@@ -206,9 +218,7 @@ const PodTable = ({ pods, namespace, updateResourceData }: Props) => {
                   justifyContent: "center",
                 }}
               >
-                <EllipsisOutlined
-                // className={styles.actionsmenu}
-                />
+                <EllipsisOutlined />
               </div>
             </Popover>
           )}

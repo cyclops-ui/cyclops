@@ -241,7 +241,7 @@ const PodLogs = ({ pod }: PodLogsProps) => {
           });
         }}
       >
-        <h4>
+        <h4 style={{ margin: "0" }}>
           <ReadOutlined style={{ paddingRight: "5px" }} />
           View Logs
         </h4>
