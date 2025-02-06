@@ -211,6 +211,10 @@ const HelmReleases = () => {
   const handleCancelMigrateModal = () => {
     setReleaseMigrationModal(false);
     setLoadingReleases(true);
+    setReleasesMigrationError({ message: "", description: "" });
+    setSelectedRowKeys([]);
+    setReleaseMigrationModalProgress({});
+    setBatchMigrationFinished(false);
 
     axios
       .get(`/api/helm/releases`)
