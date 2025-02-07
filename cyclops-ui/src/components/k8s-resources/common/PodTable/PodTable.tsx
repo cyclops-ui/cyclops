@@ -273,7 +273,7 @@ const PodTable = ({ pods, namespace, updateResourceData }: Props) => {
         )}
         <p>
           In order to confirm deleting this resource, type: <br />{" "}
-          <code>{deletePodRef.podDetails.name}</code>
+          <pre>{deletePodRef.podDetails.name}</pre>
         </p>
         <Input
           placeholder={deletePodRef.podDetails.name}

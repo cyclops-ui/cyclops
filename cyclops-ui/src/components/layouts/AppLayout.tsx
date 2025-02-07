@@ -3,7 +3,7 @@ import SideNav from "./Sidebar";
 import React, { Suspense } from "react";
 import Sider from "antd/es/layout/Sider";
 import { Content, Header } from "antd/es/layout/layout";
-import { ConfigProvider, Layout, Menu, theme } from "antd";
+import { ConfigProvider, Layout, theme } from "antd";
 import { useTheme } from "../theme/ThemeContext";
 import { ThemeSwitch } from "../theme/ThemeSwitch";
 

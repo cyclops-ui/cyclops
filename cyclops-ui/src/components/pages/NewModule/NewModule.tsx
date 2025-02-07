@@ -13,7 +13,7 @@ const NewModule = () => {
   const { mode } = useTheme();
 
   return (
-    <div style={{ backgroundColor: mode === "light" ? "#fff" : "#222" }}>
+    <div>
       <CreateModuleComponent
         themePalette={mode}
         getTemplateStore={getTemplateStore}

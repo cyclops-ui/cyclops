@@ -167,6 +167,7 @@ export const HelmReleaseEdit = ({
     return (
       <div>
         <TemplateFormFields
+          themePalette={themePalette}
           isModuleEdit={true}
           fields={rootField.properties}
           parentFieldID={[]}

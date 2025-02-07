@@ -416,7 +416,7 @@ const HelmReleases = () => {
           Modules will use the following template:
         </Row>
         <Row style={{ paddingBottom: "8px" }}>
-          <pre style={{ color: "navy" }}>
+          <pre>
             {migrateTemplateRefForm.getFieldsValue()["repo"]} /{" "}
             {migrateTemplateRefForm.getFieldsValue()["path"]} @{" "}
             {migrateTemplateRefForm.getFieldsValue()["version"]}
