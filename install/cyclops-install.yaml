@@ -383,7 +383,7 @@ spec:
     spec:
       containers:
         - name: cyclops-ui
-          image: cyclopsui/cyclops-ui:v0.16.0
+          image: cyclopsui/cyclops-ui:v0.16.1
           ports:
             - containerPort: 80
           env:
@@ -448,7 +448,7 @@ spec:
       serviceAccountName: cyclops-ctrl
       containers:
         - name: cyclops-ctrl
-          image: cyclopsui/cyclops-ctrl:v0.16.0
+          image: cyclopsui/cyclops-ctrl:v0.16.1
           ports:
             - containerPort: 8080
           env:
