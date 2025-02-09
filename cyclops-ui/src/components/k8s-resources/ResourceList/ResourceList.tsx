@@ -30,6 +30,7 @@ import ClusterRole from "../ClusterRole";
 import ConfigMap from "../ConfigMap";
 import PersistentVolumeClaim from "../PersistentVolumeClaim";
 import Secret from "../Secret";
+import ObjectLogsButton from "../common/ObjectLogsButton";
 import {
   CaretRightOutlined,
   CheckCircleTwoTone,
@@ -586,6 +587,16 @@ const ResourceList = ({
                 name={resource.name}
                 namespace={resource.namespace}
                 restartResource={restartResource}
+              />
+            </Col>
+          )}
+          {(resource.kind === "Deployment" ||
+            resource.kind === "StatefulSet") && (
+            <Col style={{ float: "right" }}>
+              <ObjectLogsButton
+                name={resource.name}
+                namespace={resource.namespace}
+                workload={getWorkload(resourceRef)}
               />
             </Col>
           )}
