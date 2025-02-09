@@ -19,17 +19,18 @@ import {
   ResourceRef,
   resourceRefKey,
 } from "../../../utils/resourceRef";
-import { Deployment, DeploymentLogsButton } from "../Deployment";
+import Deployment from "../Deployment";
 import CronJob from "../CronJob";
 import Job from "../Job";
 import DaemonSet from "../DaemonSet";
-import { StatefulSet, StatefulSetLogsButton } from "../StatefulSet";
+import StatefulSet from "../StatefulSet";
 import Pod from "../Pod";
 import Service from "../Service";
 import ClusterRole from "../ClusterRole";
 import ConfigMap from "../ConfigMap";
 import PersistentVolumeClaim from "../PersistentVolumeClaim";
 import Secret from "../Secret";
+import ObjectLogsButton from "../common/ObjectLogsButton";
 import {
   CaretRightOutlined,
   CheckCircleTwoTone,
@@ -589,18 +590,10 @@ const ResourceList = ({
               />
             </Col>
           )}
-          {resource.kind === "Deployment" && (
+          {(resource.kind === "Deployment" ||
+            resource.kind === "StatefulSet") && (
             <Col style={{ float: "right" }}>
-              <DeploymentLogsButton
-                name={resource.name}
-                namespace={resource.namespace}
-                workload={getWorkload(resourceRef)}
-              />
-            </Col>
-          )}
-          {resource.kind === "StatefulSet" && (
-            <Col style={{ float: "right" }}>
-              <StatefulSetLogsButton
+              <ObjectLogsButton
                 name={resource.name}
                 namespace={resource.namespace}
                 workload={getWorkload(resourceRef)}
