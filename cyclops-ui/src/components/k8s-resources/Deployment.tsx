@@ -1,15 +1,5 @@
-import { useCallback, useEffect, useState, useRef } from "react";
-import {
-  Col,
-  Divider,
-  Row,
-  Alert,
-  Spin,
-  TabsProps,
-  Button,
-  Tabs,
-  Modal,
-} from "antd";
+import { useCallback, useEffect, useState } from "react";
+import { Col, Divider, Row, Alert, Spin } from "antd";
 import { mapResponseError } from "../../utils/api/errors";
 import PodTable from "./common/PodTable/PodTable";
 import { isStreamingEnabled } from "../../utils/api/common";
