@@ -21,6 +21,32 @@ const Blogs = () => {
         <Row gutter={[16, 16]}>
           <Col xs={{ span: 20, offset: 2 }} md={{ span: 6, offset: 3 }}>
             <Blog
+              title={"Cyclops: Platform Engineering for the Rest of Us"}
+              description={
+                "Platform engineering is possibly the biggest concept to take hold in infrastructure over the last 5+ years, and there’s a big reason why...."
+              }
+              blogLink={
+                "https://cyclops-ui.com/blog/2025/02/03/PE-for-the-rest-of-us"
+              }
+              avatar={"https://github.com/richburroughs.png"}
+              banner={"/img/2025-02-03-PE-for-the-rest-of-us/cover.png"}
+            />
+          </Col>
+          <Col xs={{ span: 20, offset: 2 }} md={{ span: 6, offset: 0 }}>
+            <Blog
+              title={"Why we’re betting on Kubernetes (and you should too"}
+              description={
+                "We are literally all in, and I want to tell you why we feel comfortable with that decision..."
+              }
+              blogLink={
+                "https://cyclops-ui.com/blog/2025/01/23/betting-on-k8s"
+              }
+              avatar={"https://github.com/KaradzaJuraj.png"}
+              banner={"/img/2025-01-23-betting-on-k8s/cover.jpg"}
+            />
+          </Col>
+          <Col xs={{ span: 20, offset: 2 }} md={{ span: 6, offset: 0 }}>
+            <Blog
               title={"DevOps vs Platform Engineering"}
               description={
                 "If you are confused about what DevOps or Platform Engineering even is, you are not alone..."
@@ -30,32 +56,6 @@ const Blogs = () => {
               }
               avatar={"https://github.com/KaradzaJuraj.png"}
               banner={"/img/2024-12-19-devops-vs-platform/cover.jpeg"}
-            />
-          </Col>
-          <Col xs={{ span: 20, offset: 2 }} md={{ span: 6, offset: 0 }}>
-            <Blog
-              title={"Minecraft on Kubernetes: A Dev Platform Example"}
-              description={
-                "Go on, tell your boss you are researching Dev Platforms and go get those diamonds..."
-              }
-              blogLink={
-                "https://cyclops-ui.com/blog/2024/12/12/minecraft"
-              }
-              avatar={"https://github.com/KaradzaJuraj.png"}
-              banner={"/img/2024-12-12-minecraft/cover.jpeg"}
-            />
-          </Col>
-          <Col xs={{ span: 20, offset: 2 }} md={{ span: 6, offset: 0 }}>
-            <Blog
-              title={"Where GitOps Meets ClickOps"}
-              description={
-                "In the DevOps landscape, two paradigms have emerged: GitOps and ClickOps, each offering ..."
-              }
-              blogLink={
-                "https://cyclops-ui.com/blog/2024/11/29/gitops-clickops"
-              }
-              avatar={"https://github.com/KaradzaJuraj.png"}
-              banner={"/img/2024-11-29-gitops-clickops/cover.jpeg"}
             />
           </Col>
         </Row>

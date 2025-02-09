@@ -61,7 +61,7 @@ const PodManifest = ({ pod }: PodManifestProps) => {
           setModal({ on: true });
         }}
       >
-        <h4>
+        <h4 style={{ margin: "0" }}>
           <FileTextOutlined style={{ paddingRight: "5px" }} />
           View Manifest
         </h4>

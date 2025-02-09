@@ -24,6 +24,9 @@ const EditModule = () => {
       onUpdateModuleSuccess={(moduleName) => {
         window.location.href = "/modules/" + moduleName;
       }}
+      onBackButton={(moduleName) => {
+        window.location.href = "/modules/" + moduleName;
+      }}
     />
   );
 };

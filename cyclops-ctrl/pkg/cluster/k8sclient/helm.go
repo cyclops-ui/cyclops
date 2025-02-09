@@ -161,3 +161,24 @@ func (k *KubernetesClient) GetWorkloadsForRelease(releaseName string) ([]dto.Res
 
 	return out, nil
 }
+
+func (k *KubernetesClient) DeleteReleaseSecret(releaseName, releaseNamespace string) error {
+	secrets, err := k.clientset.CoreV1().Secrets(releaseNamespace).List(context.Background(), metav1.ListOptions{
+		LabelSelector: labels.Set(map[string]string{
+			"name":  releaseName,
+			"owner": "helm",
+		}).String(),
+		FieldSelector: "type=helm.sh/release.v1",
+	})
+	if err != nil {
+		return err
+	}
+
+	for _, secret := range secrets.Items {
+		if err := k.clientset.CoreV1().Secrets(releaseNamespace).Delete(context.Background(), secret.Name, metav1.DeleteOptions{}); err != nil {
+			return err
+		}
+	}
+
+	return nil
+}

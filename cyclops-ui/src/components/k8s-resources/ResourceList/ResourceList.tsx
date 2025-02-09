@@ -38,7 +38,7 @@ import {
   CloseSquareTwoTone,
   CopyOutlined,
   FileTextOutlined,
-  SearchOutlined,
+  FilterOutlined,
   WarningTwoTone,
 } from "@ant-design/icons";
 import { canRestart, RestartButton } from "../common/RestartButton";
@@ -657,14 +657,16 @@ const ResourceList = ({
         orientationMargin="0"
         orientation={"left"}
       >
-        {"Resources  "}
         <Popover
           content={resourceFilterPopover()}
           placement="rightBottom"
           title="Filter resources"
           trigger="click"
         >
-          <SearchOutlined />
+          <span style={{ cursor: "pointer" }}>
+            Resources
+            <FilterOutlined style={{ paddingLeft: "8px" }} />
+          </span>
         </Popover>
       </Divider>
       {loadingResourceCollapses()}
