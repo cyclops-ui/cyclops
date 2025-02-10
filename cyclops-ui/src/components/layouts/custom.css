@@ -6,6 +6,15 @@
   color: #fe8801;
 }
 
+.reportbug {
+  color: #fff;
+  border-color: #fff;
+}
+
+.reportbug:hover {
+  border-color: #ff8803;
+}
+
 .discordlink {
   display: flex;
   align-items: center;

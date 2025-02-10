@@ -49,6 +49,7 @@ import {
   resourceRefKey,
 } from "../../../utils/resourceRef";
 import { ResourceListActionsProvider } from "../../k8s-resources/ResourceList/ResourceListActionsContext";
+import { useTheme } from "../../theme/ThemeContext";
 
 const languages = [
   "javascript",
@@ -186,6 +187,8 @@ export const ModuleResourceDetails = ({
   onEditModule,
   onRollbackModule,
 }: ModuleResourceDetailsProps) => {
+  const { mode } = useTheme();
+
   const [loading, setLoading] = useState(false);
   const [loadModule, setLoadModule] = useState(false);
   const [loadResources, setLoadResources] = useState(false);
@@ -579,7 +582,7 @@ export const ModuleResourceDetails = ({
         <div style={{ position: "relative" }}>
           <ReactAce
             mode={"sass"}
-            theme={"github"}
+            theme={mode === "light" ? "github" : "twilight"}
             fontSize={12}
             showPrintMargin={true}
             showGutter={true}
@@ -717,7 +720,6 @@ export const ModuleResourceDetails = ({
           </Col>
         </Row>
         <ResourceListActionsProvider
-          themePalette={themePalette}
           streamingDisabled={streamingDisabled}
           fetchResource={fetchResource}
           fetchResourceManifest={fetchResourceManifest}
@@ -782,7 +784,7 @@ export const ModuleResourceDetails = ({
           {moduleManifestContent(rawModuleManifest, loadingRawManifest)}
         </Modal>
         <Modal
-          title="Rendered manifest"
+          title=""
           open={viewRenderedManifest}
           onOk={() => setViewRenderedManifest(false)}
           onCancel={() => setViewRenderedManifest(false)}

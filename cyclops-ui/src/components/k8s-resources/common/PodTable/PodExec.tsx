@@ -2,17 +2,22 @@ import { CodeOutlined, CopyOutlined } from "@ant-design/icons";
 import { Button, Modal } from "antd";
 import { useState } from "react";
 import "ace-builds/src-noconflict/ext-searchbox";
+import { useTheme } from "../../../theme/ThemeContext";
 
 interface PodExecProps {
   pod: any;
 }
 
 const PodExec = ({ pod }: PodExecProps) => {
+  const { mode } = useTheme();
+
   const [openExecModal, setOpenExecModal] = useState(false);
 
   const execCommand = (
     <div>
-      <span style={{ color: "navy" }}>kubectl </span>
+      <span style={{ color: mode === "light" ? "navy" : "lightblue" }}>
+        kubectl{" "}
+      </span>
       <span>exec -n </span>
       <span style={{ color: "#CC6903" }}>{pod.namespace} </span>
       <span>-it </span>
@@ -51,7 +56,7 @@ const PodExec = ({ pod }: PodExecProps) => {
         </div>
         <pre
           style={{
-            background: "#f5f5f5",
+            background: mode === "light" ? "#f5f5f5" : "#383838",
             padding: "10px",
             borderRadius: "5px",
             whiteSpace: "pre-wrap",

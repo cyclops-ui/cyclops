@@ -47,6 +47,7 @@ import { mapResponseError } from "../../../utils/api/errors";
 import { CheckboxChangeEvent } from "antd/es/checkbox";
 import { Workload } from "../../../utils/k8s/workload";
 import { useResourceListActions } from "./ResourceListActionsContext";
+import { useTheme } from "../../theme/ThemeContext";
 
 interface Props {
   loadResources: boolean;
@@ -62,12 +63,13 @@ const ResourceList = ({
   onResourceDelete,
 }: Props) => {
   const {
-    themePalette,
     streamingDisabled,
     fetchResourceManifest,
     restartResource,
     deleteResource,
   } = useResourceListActions();
+
+  const { mode } = useTheme();
 
   const [error, setError] = useState({
     message: "",
@@ -233,13 +235,13 @@ const ResourceList = ({
       activeCollapses.get(fieldName) &&
       activeCollapses.get(fieldName) === true
     ) {
-      if (themePalette === "dark") {
+      if (mode === "dark") {
         return "#222";
       }
       return "#EFEFEF";
     } else {
-      if (themePalette === "dark") {
-        return "#333";
+      if (mode === "dark") {
+        return "#141414";
       }
       return "#FAFAFA";
     }
@@ -530,11 +532,14 @@ const ResourceList = ({
           backgroundColor: getCollapseColor(collapseKey),
           marginBottom: "12px",
           borderRadius: "10px",
-          border: "1px solid #E3E3E3",
-          borderLeft:
-            "solid " +
-            getStatusColor(resourceStatus, resource.deleted) +
-            " 4px",
+          borderStyle: "solid",
+          borderTopColor: mode === "light" ? "#E3E3E3" : "#444",
+          borderRightColor: mode === "light" ? "#E3E3E3" : "#444",
+          borderBottomColor: mode === "light" ? "#E3E3E3" : "#444",
+          borderLeftStyle: "solid",
+          borderLeftColor: getStatusColor(resourceStatus, resource.deleted),
+          borderWidth: "1px",
+          borderLeftWidth: "4px",
         }}
       >
         <Row>
@@ -547,7 +552,7 @@ const ResourceList = ({
                   paddingRight: "10px",
                   marginTop: "0px",
                   marginBottom: "10px",
-                  color: themePalette === "dark" ? "#fff" : "#000",
+                  color: mode === "dark" ? "#fff" : "#000",
                 }}
               >
                 {resource.name}
@@ -564,7 +569,7 @@ const ResourceList = ({
             style={{
               marginTop: "0px",
               marginBottom: "10px",
-              color: themePalette === "dark" ? "#fff" : "#000",
+              color: mode === "dark" ? "#fff" : "#000",
             }}
           >
             {resource.namespace}
@@ -675,6 +680,7 @@ const ResourceList = ({
           <ReactAce
             style={{ width: "100%" }}
             mode={"sass"}
+            theme={mode === "light" ? "github" : "twilight"}
             value={manifestModal.manifest}
             readOnly={true}
           />
@@ -726,7 +732,7 @@ const ResourceList = ({
       >
         <p>
           In order to confirm deleting this resource, type:{" "}
-          <code>{deleteResourceRef.kind + " " + deleteResourceRef.name}</code>
+          <pre>{deleteResourceRef.kind + " " + deleteResourceRef.name}</pre>
         </p>
         <Input
           placeholder={deleteResourceRef.kind + " " + deleteResourceRef.name}

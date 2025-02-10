@@ -1,17 +1,20 @@
 import { DownloadOutlined, ReadOutlined } from "@ant-design/icons";
 import { Alert, Button, Col, Divider, Modal, Tabs, TabsProps } from "antd";
-import { useRef, useState } from "react";
+import React, { useRef, useState } from "react";
 import ReactAce from "react-ace/lib/ace";
 import { mapResponseError } from "../../../../utils/api/errors";
 import { logStream } from "../../../../utils/api/sse/logs";
 import "ace-builds/src-noconflict/ext-searchbox";
 import { useResourceListActions } from "../../ResourceList/ResourceListActionsContext";
+import { useTheme } from "../../../theme/ThemeContext";
 
 interface PodLogsProps {
   pod: any;
 }
 
 const PodLogs = ({ pod }: PodLogsProps) => {
+  const { mode } = useTheme();
+
   const { streamingDisabled, getPodLogs, downloadPodLogs, streamPodLogs } =
     useResourceListActions();
   const [logs, setLogs] = useState<string[]>([]);
@@ -76,6 +79,7 @@ const PodLogs = ({ pod }: PodLogsProps) => {
               )}
               <ReactAce
                 style={{ width: "100%" }}
+                theme={mode === "light" ? "github" : "twilight"}
                 mode={"sass"}
                 value={
                   logs.length === 0 ? "No logs available" : logs.join("\n")
@@ -114,6 +118,7 @@ const PodLogs = ({ pod }: PodLogsProps) => {
               )}
               <ReactAce
                 style={{ width: "100%" }}
+                theme={mode === "light" ? "github" : "twilight"}
                 mode={"sass"}
                 value={
                   logs.length === 0 ? "No logs available" : logs.join("\n")

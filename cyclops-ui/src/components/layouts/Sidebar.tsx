@@ -77,9 +77,9 @@ const SideNav = () => {
         items={sidebarItems}
       />
       <Button
-        ghost
-        style={{ margin: "auto 25px 12px 25px" }}
+        style={{ background: "transparent", margin: "auto 25px 12px 25px" }}
         icon={<BugFilled />}
+        className={"reportbug"}
         href={
           "https://github.com/cyclops-ui/cyclops/issues/new?assignees=&labels=&projects=&template=bug_report.md&title="
         }
@@ -105,7 +105,7 @@ const SideNav = () => {
       <center
         style={{
           color: "#FFF",
-          margin: "25px",
+          marginBottom: "25px",
           marginTop: "0",
         }}
       >

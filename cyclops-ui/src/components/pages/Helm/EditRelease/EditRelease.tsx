@@ -5,11 +5,14 @@ import {
   getHelmReleaseValues,
   upgradeHelmRelease,
 } from "../../../../utils/api/helm";
+import { useTheme } from "../../../theme/ThemeContext";
 
 const EditRelease = () => {
+  const { mode } = useTheme();
+
   return (
     <HelmReleaseEdit
-      themePalette={"light"}
+      themePalette={mode}
       themeColor={""}
       fetchHelmChartFields={getHelmReleaseFields}
       fetchHelmReleaseValues={getHelmReleaseValues}
