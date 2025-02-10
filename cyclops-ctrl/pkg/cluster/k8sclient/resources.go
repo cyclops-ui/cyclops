@@ -143,9 +143,49 @@ func (k *KubernetesClient) GetResource(group, version, kind, name, namespace str
 		return k.mapNetworkPolicy(group, version, kind, name, namespace)
 	case isClusterRole(group, version, kind):
 		return k.mapClusterRole(group, version, kind, name)
+	default:
+		return k.mapDefaultResource(group, version, kind, name, namespace)
 	}
 
 	return nil, nil
+}
+
+func (k *KubernetesClient) mapDefaultResource(group, version, kind, name, namespace string) (any, error) {
+	apiResourceName, err := k.GVKtoAPIResourceName(schema.GroupVersion{Group: group, Version: version}, kind)
+	if err != nil {
+		return nil, err
+	}
+
+	resource, err := k.Dynamic.Resource(schema.GroupVersionResource{
+		Group:    group,
+		Version:  version,
+		Resource: apiResourceName,
+	}).Namespace(namespace).Get(context.Background(), name, metav1.GetOptions{})
+	if err != nil {
+		return "", err
+	}
+
+	childLabels, exists, err := k.getChildLabel(group, version, kind, resource)
+	if err != nil {
+		return nil, err
+	}
+
+	var children []dto.Resource
+	if exists {
+		children, err = k.GetResourcesForCRD(childLabels, name)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	return &dto.Other{
+		Group:     group,
+		Version:   version,
+		Kind:      kind,
+		Name:      name,
+		Namespace: namespace,
+		Children:  children,
+	}, nil
 }
 
 func (k *KubernetesClient) Delete(resource dto.Resource) error {
