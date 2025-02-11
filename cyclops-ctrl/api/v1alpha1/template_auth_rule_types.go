@@ -33,6 +33,7 @@ type TemplateAuthRuleSpec struct {
 
 	Username v1.SecretKeySelector `json:"username"`
 	Password v1.SecretKeySelector `json:"password"`
+	CABundle v1.SecretKeySelector `json:"ca-bundle"`
 }
 
 //+kubebuilder:object:root=true

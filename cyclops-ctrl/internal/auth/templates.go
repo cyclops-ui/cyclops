@@ -13,6 +13,7 @@ type TemplatesResolver struct {
 type Credentials struct {
 	Username string
 	Password string
+	CABundle []byte
 }
 
 func NewTemplatesResolver(k8s k8sClient) TemplatesResolver {
@@ -44,9 +45,15 @@ func (t TemplatesResolver) RepoAuthCredentials(repo string) (*Credentials, error
 				return nil, err
 			}
 
+			caBundle, err := t.k8s.GetTemplateAuthRuleSecret(ta.Spec.CABundle.Name, ta.Spec.CABundle.Key)
+			if err != nil {
+				return nil, err
+			}
+
 			return &Credentials{
 				Username: username,
 				Password: password,
+				CABundle: []byte(caBundle),
 			}, err
 		}
 	}
