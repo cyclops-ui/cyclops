@@ -1227,27 +1227,29 @@ func (_c *IKubernetesClient_GetStreamedPodLogs_Call) RunAndReturn(run func(conte
 	return _c
 }
 
-// GetTemplateAuthRuleSecret provides a mock function with given fields: name, key
-func (_m *IKubernetesClient) GetTemplateAuthRuleSecret(name string, key string) (string, error) {
-	ret := _m.Called(name, key)
+// GetTemplateAuthRuleSecret provides a mock function with given fields: _a0, _a1
+func (_m *IKubernetesClient) GetTemplateAuthRuleSecret(_a0 string, _a1 string) ([]byte, error) {
+	ret := _m.Called(_a0, _a1)
 
 	if len(ret) == 0 {
 		panic("no return value specified for GetTemplateAuthRuleSecret")
 	}
 
-	var r0 string
+	var r0 []byte
 	var r1 error
-	if rf, ok := ret.Get(0).(func(string, string) (string, error)); ok {
-		return rf(name, key)
+	if rf, ok := ret.Get(0).(func(string, string) ([]byte, error)); ok {
+		return rf(_a0, _a1)
 	}
-	if rf, ok := ret.Get(0).(func(string, string) string); ok {
-		r0 = rf(name, key)
+	if rf, ok := ret.Get(0).(func(string, string) []byte); ok {
+		r0 = rf(_a0, _a1)
 	} else {
-		r0 = ret.Get(0).(string)
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).([]byte)
+		}
 	}
 
 	if rf, ok := ret.Get(1).(func(string, string) error); ok {
-		r1 = rf(name, key)
+		r1 = rf(_a0, _a1)
 	} else {
 		r1 = ret.Error(1)
 	}
@@ -1261,25 +1263,25 @@ type IKubernetesClient_GetTemplateAuthRuleSecret_Call struct {
 }
 
 // GetTemplateAuthRuleSecret is a helper method to define mock.On call
-//   - name string
-//   - key string
-func (_e *IKubernetesClient_Expecter) GetTemplateAuthRuleSecret(name interface{}, key interface{}) *IKubernetesClient_GetTemplateAuthRuleSecret_Call {
-	return &IKubernetesClient_GetTemplateAuthRuleSecret_Call{Call: _e.mock.On("GetTemplateAuthRuleSecret", name, key)}
+//   - _a0 string
+//   - _a1 string
+func (_e *IKubernetesClient_Expecter) GetTemplateAuthRuleSecret(_a0 interface{}, _a1 interface{}) *IKubernetesClient_GetTemplateAuthRuleSecret_Call {
+	return &IKubernetesClient_GetTemplateAuthRuleSecret_Call{Call: _e.mock.On("GetTemplateAuthRuleSecret", _a0, _a1)}
 }
 
-func (_c *IKubernetesClient_GetTemplateAuthRuleSecret_Call) Run(run func(name string, key string)) *IKubernetesClient_GetTemplateAuthRuleSecret_Call {
+func (_c *IKubernetesClient_GetTemplateAuthRuleSecret_Call) Run(run func(_a0 string, _a1 string)) *IKubernetesClient_GetTemplateAuthRuleSecret_Call {
 	_c.Call.Run(func(args mock.Arguments) {
 		run(args[0].(string), args[1].(string))
 	})
 	return _c
 }
 
-func (_c *IKubernetesClient_GetTemplateAuthRuleSecret_Call) Return(_a0 string, _a1 error) *IKubernetesClient_GetTemplateAuthRuleSecret_Call {
+func (_c *IKubernetesClient_GetTemplateAuthRuleSecret_Call) Return(_a0 []byte, _a1 error) *IKubernetesClient_GetTemplateAuthRuleSecret_Call {
 	_c.Call.Return(_a0, _a1)
 	return _c
 }
 
-func (_c *IKubernetesClient_GetTemplateAuthRuleSecret_Call) RunAndReturn(run func(string, string) (string, error)) *IKubernetesClient_GetTemplateAuthRuleSecret_Call {
+func (_c *IKubernetesClient_GetTemplateAuthRuleSecret_Call) RunAndReturn(run func(string, string) ([]byte, error)) *IKubernetesClient_GetTemplateAuthRuleSecret_Call {
 	_c.Call.Return(run)
 	return _c
 }

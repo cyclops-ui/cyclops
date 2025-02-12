@@ -117,7 +117,6 @@ spec:
                 type: object
                 x-kubernetes-map-type: atomic
             required:
-            - ca-bundle
             - password
             - repo
             - username

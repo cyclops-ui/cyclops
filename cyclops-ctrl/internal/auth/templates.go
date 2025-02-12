@@ -45,15 +45,18 @@ func (t TemplatesResolver) RepoAuthCredentials(repo string) (*Credentials, error
 				return nil, err
 			}
 
-			caBundle, err := t.k8s.GetTemplateAuthRuleSecret(ta.Spec.CABundle.Name, ta.Spec.CABundle.Key)
-			if err != nil {
-				return nil, err
+			var caBundle []byte
+			if ta.Spec.CABundle != nil {
+				caBundle, err = t.k8s.GetTemplateAuthRuleSecret(ta.Spec.CABundle.Name, ta.Spec.CABundle.Key)
+				if err != nil {
+					return nil, err
+				}
 			}
 
 			return &Credentials{
-				Username: username,
-				Password: password,
-				CABundle: []byte(caBundle),
+				Username: string(username),
+				Password: string(password),
+				CABundle: caBundle,
 			}, err
 		}
 	}
@@ -62,6 +65,6 @@ func (t TemplatesResolver) RepoAuthCredentials(repo string) (*Credentials, error
 }
 
 type k8sClient interface {
-	GetTemplateAuthRuleSecret(string, string) (string, error)
+	GetTemplateAuthRuleSecret(string, string) ([]byte, error)
 	ListTemplateAuthRules() ([]v1alpha1.TemplateAuthRule, error)
 }
