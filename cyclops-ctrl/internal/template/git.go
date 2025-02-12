@@ -287,6 +287,7 @@ func resolveRef(repo, version string, creds *auth.Credentials) (string, error) {
 	refs, err := rem.List(&git.ListOptions{
 		PeelingOption: git.AppendPeeled,
 		Auth:          httpBasicAuthCredentials(creds),
+		CABundle:      gitCABundle(creds),
 	})
 	if err != nil {
 		return "", errors.Wrap(err, fmt.Sprintf("repo %s was not cloned successfully; authentication might be required; check if repository exists and you referenced it correctly", repo))
@@ -312,6 +313,7 @@ func resolveDefaultBranchRef(repo string, creds *auth.Credentials) (string, erro
 	refs, err := rem.List(&git.ListOptions{
 		PeelingOption: git.AppendPeeled,
 		Auth:          httpBasicAuthCredentials(creds),
+		CABundle:      gitCABundle(creds),
 	})
 	if err != nil {
 		return "", errors.Wrap(err, fmt.Sprintf("repo %s was not cloned successfully; authentication might be required; check if repository exists and you referenced it correctly", repo))
@@ -359,9 +361,10 @@ func clone(repoURL, commit string, creds *auth.Credentials) (billy.Filesystem, e
 	}
 
 	repo, err := git.Clone(memory.NewStorage(), memfs.New(), &git.CloneOptions{
-		URL:  repoURL,
-		Tags: git.AllTags,
-		Auth: httpBasicAuthCredentials(creds),
+		URL:      repoURL,
+		Tags:     git.AllTags,
+		Auth:     httpBasicAuthCredentials(creds),
+		CABundle: gitCABundle(creds),
 	})
 	if err != nil {
 		return nil, errors.Wrap(err, fmt.Sprintf("repo %s was not cloned successfully; authentication might be required; check if repository exists and you referenced it correctly", repoURL))
@@ -381,7 +384,8 @@ func clone(repoURL, commit string, creds *auth.Credentials) (billy.Filesystem, e
 			return nil, err
 		}
 		refList, err := remote.List(&git.ListOptions{
-			Auth: httpBasicAuthCredentials(creds),
+			Auth:     httpBasicAuthCredentials(creds),
+			CABundle: gitCABundle(creds),
 		})
 		if err != nil {
 			return nil, err
@@ -567,4 +571,12 @@ func httpBasicAuthCredentials(creds *auth.Credentials) *http.BasicAuth {
 		Username: creds.Username,
 		Password: creds.Password,
 	}
+}
+
+func gitCABundle(creds *auth.Credentials) []byte {
+	if creds == nil {
+		return nil
+	}
+
+	return creds.CABundle
 }

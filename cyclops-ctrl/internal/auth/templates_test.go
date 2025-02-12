@@ -129,7 +129,7 @@ var _ = Describe("Templates resolver", func() {
 				repo: "https://github.com/my-org/my-team",
 				mockCalls: func() {
 					k8sClient.On("ListTemplateAuthRules").Return(tars, nil)
-					k8sClient.On("GetTemplateAuthRuleSecret", "secret-name", "username").Return("", errors.New("some k8s error"))
+					k8sClient.On("GetTemplateAuthRuleSecret", "secret-name", "username").Return(nil, errors.New("some k8s error"))
 				},
 			},
 			out: caseOutput{
@@ -143,8 +143,8 @@ var _ = Describe("Templates resolver", func() {
 				repo: "https://github.com/my-org/my-team",
 				mockCalls: func() {
 					k8sClient.On("ListTemplateAuthRules").Return(tars, nil)
-					k8sClient.On("GetTemplateAuthRuleSecret", "secret-name", "username").Return("my-secret-username", nil)
-					k8sClient.On("GetTemplateAuthRuleSecret", "secret-name", "token").Return("", errors.New("some k8s error"))
+					k8sClient.On("GetTemplateAuthRuleSecret", "secret-name", "username").Return([]byte("my-secret-username"), nil)
+					k8sClient.On("GetTemplateAuthRuleSecret", "secret-name", "token").Return(nil, errors.New("some k8s error"))
 				},
 			},
 			out: caseOutput{
@@ -158,8 +158,8 @@ var _ = Describe("Templates resolver", func() {
 				repo: "https://github.com/my-org/my-team",
 				mockCalls: func() {
 					k8sClient.On("ListTemplateAuthRules").Return(tars, nil)
-					k8sClient.On("GetTemplateAuthRuleSecret", "secret-name", "username").Return("my-secret-username", nil)
-					k8sClient.On("GetTemplateAuthRuleSecret", "secret-name", "token").Return("my-secret-token", nil)
+					k8sClient.On("GetTemplateAuthRuleSecret", "secret-name", "username").Return([]byte("my-secret-username"), nil)
+					k8sClient.On("GetTemplateAuthRuleSecret", "secret-name", "token").Return([]byte("my-secret-token"), nil)
 				},
 			},
 			out: caseOutput{

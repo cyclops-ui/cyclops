@@ -186,6 +186,31 @@ spec:
             spec:
               description: TemplateAuthRuleSpec defines the desired state of TemplateAuthRule
               properties:
+                ca-bundle:
+                  description: SecretKeySelector selects a key of a Secret.
+                  properties:
+                    key:
+                      description: The key of the secret to select from.  Must be a
+                        valid secret key.
+                      type: string
+                    name:
+                      default: ""
+                      description: |-
+                        Name of the referent.
+                        This field is effectively required, but due to backwards compatibility is
+                        allowed to be empty. Instances of this type with an empty value here are
+                        almost certainly wrong.
+                        TODO: Add other useful fields. apiVersion, kind, uid?
+                        More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names
+                        TODO: Drop `kubebuilder:default` when controller-gen doesn't need it https://github.com/kubernetes-sigs/kubebuilder/issues/3896.
+                      type: string
+                    optional:
+                      description: Specify whether the Secret or its key must be defined
+                      type: boolean
+                  required:
+                    - key
+                  type: object
+                  x-kubernetes-map-type: atomic
                 password:
                   description: SecretKeySelector selects a key of a Secret.
                   properties:
@@ -383,7 +408,7 @@ spec:
     spec:
       containers:
         - name: cyclops-ui
-          image: cyclopsui/cyclops-ui:v0.16.1
+          image: cyclopsui/cyclops-ui:v0.18.0-rc.2
           ports:
             - containerPort: 80
           env:
@@ -448,7 +473,7 @@ spec:
       serviceAccountName: cyclops-ctrl
       containers:
         - name: cyclops-ctrl
-          image: cyclopsui/cyclops-ctrl:v0.16.1
+          image: cyclopsui/cyclops-ctrl:v0.18.0-rc.2
           ports:
             - containerPort: 8080
           env:

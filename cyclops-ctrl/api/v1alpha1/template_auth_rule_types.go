@@ -31,8 +31,9 @@ type TemplateAuthRuleSpec struct {
 
 	Repo string `json:"repo"`
 
-	Username v1.SecretKeySelector `json:"username"`
-	Password v1.SecretKeySelector `json:"password"`
+	Username v1.SecretKeySelector  `json:"username"`
+	Password v1.SecretKeySelector  `json:"password"`
+	CABundle *v1.SecretKeySelector `json:"ca-bundle,omitempty"`
 }
 
 //+kubebuilder:object:root=true

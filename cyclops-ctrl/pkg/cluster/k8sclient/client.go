@@ -101,7 +101,7 @@ type IKubernetesClient interface {
 	WatchResource(group, version, resource, name, namespace string) (watch.Interface, error)
 	WatchKubernetesResources(gvrs []ResourceWatchSpec, stopCh chan struct{}) (chan *unstructured.Unstructured, error)
 	ListTemplateAuthRules() ([]cyclopsv1alpha1.TemplateAuthRule, error)
-	GetTemplateAuthRuleSecret(name, key string) (string, error)
+	GetTemplateAuthRuleSecret(string, string) ([]byte, error)
 	ListTemplateStore() ([]cyclopsv1alpha1.TemplateStore, error)
 	CreateTemplateStore(ts *cyclopsv1alpha1.TemplateStore) error
 	UpdateTemplateStore(ts *cyclopsv1alpha1.TemplateStore) error
