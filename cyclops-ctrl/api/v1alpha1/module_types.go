@@ -43,6 +43,10 @@ const (
 	TemplateSourceTypeGit  TemplateSourceType = "git"
 	TemplateSourceTypeHelm TemplateSourceType = "helm"
 	TemplateSourceTypeOCI  TemplateSourceType = "oci"
+
+	GitOpsWriteRepoAnnotation     = "cyclops-ui.com/write-repo"
+	GitOpsWritePathAnnotation     = "cyclops-ui.com/write-path"
+	GitOpsWriteRevisionAnnotation = "cyclops-ui.com/write-revision"
 )
 
 type TemplateRef struct {
@@ -88,12 +92,12 @@ type GroupVersionResource struct {
 
 // ModuleStatus defines the observed state of Module
 type ModuleStatus struct {
-	ReconciliationStatus    ReconciliationStatus `json:"reconciliationStatus"`
-	TemplateResolvedVersion string               `json:"templateResolvedVersion"`
+	ReconciliationStatus    *ReconciliationStatus `json:"reconciliationStatus,omitempty"`
+	TemplateResolvedVersion string                `json:"templateResolvedVersion,omitempty"`
 	// +kubebuilder:validation:Optional
-	ManagedGVRs []GroupVersionResource `json:"managedGVRs"`
+	ManagedGVRs []GroupVersionResource `json:"managedGVRs,omitempty"`
 	// +kubebuilder:validation:Optional
-	IconURL string `json:"iconURL"`
+	IconURL string `json:"iconURL,omitempty"`
 }
 
 type HistoryTemplateRef struct {
