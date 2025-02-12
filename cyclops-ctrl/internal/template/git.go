@@ -290,10 +290,6 @@ func resolveRef(repo, version string, creds *auth.Credentials) (string, error) {
 		CABundle:      gitCABundle(creds),
 	})
 	if err != nil {
-		fmt.Println("error kod list refs 306", len(refs))
-		fmt.Println(httpBasicAuthCredentials(creds).Username)
-		fmt.Println(httpBasicAuthCredentials(creds).Password)
-		fmt.Println(string(gitCABundle(creds)))
 		return "", errors.Wrap(err, fmt.Sprintf("repo %s was not cloned successfully; authentication might be required; check if repository exists and you referenced it correctly", repo))
 	}
 
