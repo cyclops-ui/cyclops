@@ -21,6 +21,19 @@ const Blogs = () => {
         <Row gutter={[16, 16]}>
           <Col xs={{ span: 20, offset: 2 }} md={{ span: 6, offset: 3 }}>
             <Blog
+              title={"What are Internal Developer Platforms?"}
+              description={
+                "A lot of the motivation behind building internal developer platforms is centered around the idea of self-service..."
+              }
+              blogLink={
+                "https://cyclops-ui.com/blog/2025/02/13/what-are-dev-platforms"
+              }
+              avatar={"https://github.com/KaradzaJuraj.png"}
+              banner={"/img/2025-02-13-what-are-dev-platforms/cover.jpeg"}
+            />
+          </Col>
+          <Col xs={{ span: 20, offset: 2 }} md={{ span: 6, offset: 0 }}>
+            <Blog
               title={"Cyclops: Platform Engineering for the Rest of Us"}
               description={
                 "Platform engineering is possibly the biggest concept to take hold in infrastructure over the last 5+ years, and there’s a big reason why...."
@@ -43,19 +56,6 @@ const Blogs = () => {
               }
               avatar={"https://github.com/KaradzaJuraj.png"}
               banner={"/img/2025-01-23-betting-on-k8s/cover.jpg"}
-            />
-          </Col>
-          <Col xs={{ span: 20, offset: 2 }} md={{ span: 6, offset: 0 }}>
-            <Blog
-              title={"DevOps vs Platform Engineering"}
-              description={
-                "If you are confused about what DevOps or Platform Engineering even is, you are not alone..."
-              }
-              blogLink={
-                "https://cyclops-ui.com/blog/2024/12/19/devops-vs-platform"
-              }
-              avatar={"https://github.com/KaradzaJuraj.png"}
-              banner={"/img/2024-12-19-devops-vs-platform/cover.jpeg"}
             />
           </Col>
         </Row>
