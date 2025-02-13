@@ -1,4 +1,4 @@
-# Write Module config to git
+# Push Modules to Git
     
 :::info
 Available from version **v0.17.0**
