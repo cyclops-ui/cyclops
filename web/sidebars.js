@@ -66,6 +66,7 @@ const sidebars = {
             "installation/demo/feedback",
           ],
         },
+        "installation/git-write",
         "installation/namespace-scope",
       ],
     },
@@ -107,11 +108,6 @@ const sidebars = {
         "cyctl/cyctl_update_module",
         "cyctl/cyctl_version",
       ],
-    },
-    {
-      label: "Roadmap",
-      id: "roadmap/roadmap",
-      type: "doc",
     },
     {
       label: "Usage metrics",
