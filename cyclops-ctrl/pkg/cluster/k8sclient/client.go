@@ -80,6 +80,7 @@ type IKubernetesClient interface {
 	DeleteModule(name string) error
 	GetModule(name string) (*cyclopsv1alpha1.Module, error)
 	GetResourcesForModule(name string) ([]dto.Resource, error)
+	MapUnstructuredResource(u unstructured.Unstructured) (dto.Resource, error)
 	GetWorkloadsForModule(name string) ([]dto.Resource, error)
 	GetDeletedResources([]dto.Resource, string, string) ([]dto.Resource, error)
 	GetModuleResourcesHealth(name string) (string, error)

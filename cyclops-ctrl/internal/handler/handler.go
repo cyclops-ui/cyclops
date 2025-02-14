@@ -62,10 +62,10 @@ func (h *Handler) Start() error {
 
 	h.router = gin.New()
 
-	server := sse.NewServer(h.k8sClient)
+	server := sse.NewServer(h.k8sClient, h.releaseClient)
 
 	h.router.GET("/stream/resources/:name", sse.HeadersMiddleware(), server.Resources)
-	h.router.GET("/stream/releases/resources/:name", sse.HeadersMiddleware(), server.ReleaseResources)
+	h.router.GET("/stream/releases/:namespace/:name/resources", sse.HeadersMiddleware(), server.ReleaseResources)
 	h.router.POST("/stream/resources", sse.HeadersMiddleware(), server.SingleResource)
 
 	h.router.GET("/ping", h.pong())
