@@ -1685,6 +1685,64 @@ func (_c *IKubernetesClient_ListTemplateStore_Call) RunAndReturn(run func() ([]v
 	return _c
 }
 
+// MapUnstructuredResource provides a mock function with given fields: u
+func (_m *IKubernetesClient) MapUnstructuredResource(u unstructured.Unstructured) (dto.Resource, error) {
+	ret := _m.Called(u)
+
+	if len(ret) == 0 {
+		panic("no return value specified for MapUnstructuredResource")
+	}
+
+	var r0 dto.Resource
+	var r1 error
+	if rf, ok := ret.Get(0).(func(unstructured.Unstructured) (dto.Resource, error)); ok {
+		return rf(u)
+	}
+	if rf, ok := ret.Get(0).(func(unstructured.Unstructured) dto.Resource); ok {
+		r0 = rf(u)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(dto.Resource)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(unstructured.Unstructured) error); ok {
+		r1 = rf(u)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// IKubernetesClient_MapUnstructuredResource_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'MapUnstructuredResource'
+type IKubernetesClient_MapUnstructuredResource_Call struct {
+	*mock.Call
+}
+
+// MapUnstructuredResource is a helper method to define mock.On call
+//   - u unstructured.Unstructured
+func (_e *IKubernetesClient_Expecter) MapUnstructuredResource(u interface{}) *IKubernetesClient_MapUnstructuredResource_Call {
+	return &IKubernetesClient_MapUnstructuredResource_Call{Call: _e.mock.On("MapUnstructuredResource", u)}
+}
+
+func (_c *IKubernetesClient_MapUnstructuredResource_Call) Run(run func(u unstructured.Unstructured)) *IKubernetesClient_MapUnstructuredResource_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run(args[0].(unstructured.Unstructured))
+	})
+	return _c
+}
+
+func (_c *IKubernetesClient_MapUnstructuredResource_Call) Return(_a0 dto.Resource, _a1 error) *IKubernetesClient_MapUnstructuredResource_Call {
+	_c.Call.Return(_a0, _a1)
+	return _c
+}
+
+func (_c *IKubernetesClient_MapUnstructuredResource_Call) RunAndReturn(run func(unstructured.Unstructured) (dto.Resource, error)) *IKubernetesClient_MapUnstructuredResource_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
 // Restart provides a mock function with given fields: group, _a1, kind, name, namespace
 func (_m *IKubernetesClient) Restart(group string, _a1 string, kind string, name string, namespace string) error {
 	ret := _m.Called(group, _a1, kind, name, namespace)
