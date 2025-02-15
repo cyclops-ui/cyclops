@@ -281,7 +281,7 @@ export const HelmReleaseDetails = ({
         resourceStreamImplementation,
       );
     }
-  }, [releaseName, resourceStreamImplementation]);
+  }, [releaseNamespace, releaseName, resourceStreamImplementation]);
 
   const resourceLoading = () => {
     if (!loadModule) {
