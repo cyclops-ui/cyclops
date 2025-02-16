@@ -234,12 +234,12 @@ const ResourceList = ({
       activeCollapses.get(fieldName) === true
     ) {
       if (mode === "dark") {
-        return "#222";
+        return "#282828";
       }
       return "#EFEFEF";
     } else {
       if (mode === "dark") {
-        return "#141414";
+        return "#1a1a1a";
       }
       return "#FAFAFA";
     }

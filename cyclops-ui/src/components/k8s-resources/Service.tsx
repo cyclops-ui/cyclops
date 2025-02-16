@@ -15,6 +15,7 @@ import {
 import { mapResponseError } from "../../utils/api/errors";
 import { ApiOutlined, CopyOutlined, EllipsisOutlined } from "@ant-design/icons";
 import { useResourceListActions } from "./ResourceList/ResourceListActionsContext";
+import { useTheme } from "../theme/ThemeContext";
 
 interface Props {
   name: string;
@@ -40,6 +41,8 @@ interface service {
 }
 
 const Service = ({ name, namespace }: Props) => {
+  const { mode } = useTheme();
+
   const { fetchResource } = useResourceListActions();
 
   const [loading, setLoading] = useState(true);
@@ -204,7 +207,9 @@ const Service = ({ name, namespace }: Props) => {
 
   const portForwardCommand = (
     <div>
-      <span style={{ color: "navy" }}>kubectl </span>
+      <span style={{ color: mode === "light" ? "navy" : "lightblue" }}>
+        kubectl{" "}
+      </span>
       <span>port-forward -n </span>
       <span style={{ color: "#CC6903" }}>{namespace} </span>
       <span style={{ color: "#CC6903" }}>svc/{name} </span>
@@ -306,7 +311,7 @@ const Service = ({ name, namespace }: Props) => {
         </div>
         <pre
           style={{
-            background: "#f5f5f5",
+            background: mode === "light" ? "#f5f5f5" : "#383838",
             padding: "10px",
             borderRadius: "5px",
             whiteSpace: "pre-wrap",

@@ -779,7 +779,7 @@ export const ModuleResourceDetails = ({
           {moduleManifestContent(rawModuleManifest, loadingRawManifest)}
         </Modal>
         <Modal
-          title=""
+          title="Rendered manifest"
           open={viewRenderedManifest}
           onOk={() => setViewRenderedManifest(false)}
           onCancel={() => setViewRenderedManifest(false)}
