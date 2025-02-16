@@ -35,7 +35,6 @@ import {
   CopyOutlined,
   FileTextOutlined,
   FilterOutlined,
-  WarningTwoTone,
 } from "@ant-design/icons";
 import { canRestart, RestartButton } from "../common/RestartButton";
 import { gvkString } from "../../../utils/k8s/gvk";
@@ -45,7 +44,12 @@ import { CheckboxChangeEvent } from "antd/es/checkbox";
 import { Workload } from "../../../utils/k8s/workload";
 import { useResourceListActions } from "./ResourceListActionsContext";
 import { useTheme } from "../../theme/ThemeContext";
-import { SuccessIcon, PendingIcon, ErrorIcon } from "../../status/icons";
+import {
+  SuccessIcon,
+  PendingIcon,
+  ErrorIcon,
+  WarningIcon,
+} from "../../status/icons";
 
 interface Props {
   loadResources: boolean;
@@ -350,8 +354,7 @@ const ResourceList = ({
           title={"The resource is not a part of the Module and can be deleted"}
           trigger="click"
         >
-          <WarningTwoTone
-            twoToneColor="#F3801A"
+          <WarningIcon
             style={{ right: "0px", fontSize: "30px", paddingRight: "5px" }}
           />
         </Tooltip>
@@ -426,8 +429,7 @@ const ResourceList = ({
       let deletedIcon = <></>;
       if (resource.deleted) {
         deletedIcon = (
-          <WarningTwoTone
-            twoToneColor="#F3801A"
+          <WarningIcon
             style={{
               paddingLeft: "5px",
               fontSize: "20px",
