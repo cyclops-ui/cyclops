@@ -103,7 +103,7 @@ func main() {
 
 	prometheus.StartCacheMetricsUpdater(&monitor, templatesRepo.ReturnCache(), 10*time.Second, setupLog)
 
-	helmReleaseClient := helm.NewReleaseClient(helmWatchNamespace)
+	helmReleaseClient := helm.NewReleaseClient(helmWatchNamespace, k8sClient)
 	gitWriteClient := git.NewWriteClient(credsResolver, getCommitMessageTemplate(), setupLog)
 
 	handler, err := handler.New(templatesRepo, k8sClient, helmReleaseClient, renderer, gitWriteClient, moduleTargetNamespace, telemetryClient, monitor)

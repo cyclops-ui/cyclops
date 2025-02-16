@@ -117,9 +117,10 @@ func (h *Helm) UninstallRelease(ctx *gin.Context) {
 func (h *Helm) GetReleaseResources(ctx *gin.Context) {
 	ctx.Header("Access-Control-Allow-Origin", "*")
 
+	namespace := ctx.Param("namespace")
 	name := ctx.Param("name")
 
-	resources, err := h.kubernetesClient.GetResourcesForRelease(name)
+	resources, err := h.releaseClient.ListResources(namespace, name)
 	if err != nil {
 		fmt.Println(err)
 		ctx.JSON(http.StatusBadRequest, dto.NewError("Error fetching Helm release resources", err.Error()))

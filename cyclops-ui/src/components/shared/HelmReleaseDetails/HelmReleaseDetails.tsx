@@ -266,7 +266,7 @@ export const HelmReleaseDetails = ({
   useEffect(() => {
     if (isStreamingEnabled()) {
       resourcesStream(
-        `/stream/releases/resources/${releaseName}`,
+        `/stream/releases/${releaseNamespace}/${releaseName}/resources`,
         (r: any) => {
           let resourceRef: ResourceRef = {
             group: r.group,
@@ -281,7 +281,7 @@ export const HelmReleaseDetails = ({
         resourceStreamImplementation,
       );
     }
-  }, [releaseName, resourceStreamImplementation]);
+  }, [releaseNamespace, releaseName, resourceStreamImplementation]);
 
   const resourceLoading = () => {
     if (!loadModule) {
