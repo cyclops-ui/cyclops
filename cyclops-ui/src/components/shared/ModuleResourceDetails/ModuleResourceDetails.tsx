@@ -21,9 +21,6 @@ import {
 import "ace-builds/src-noconflict/ace";
 import {
   BookOutlined,
-  CheckCircleTwoTone,
-  ClockCircleTwoTone,
-  CloseSquareTwoTone,
   CopyOutlined,
   DeleteOutlined,
   EditOutlined,
@@ -53,6 +50,8 @@ import {
   resourceRefKey,
 } from "../../../utils/resourceRef";
 import { ResourceListActionsProvider } from "../../k8s-resources/ResourceList/ResourceListActionsContext";
+import { useTheme } from "../../theme/ThemeContext";
+import { SuccessIcon, PendingIcon, ErrorIcon } from "../../status/icons";
 
 import {
   isGitHubRepo,
@@ -200,6 +199,8 @@ export const ModuleResourceDetails = ({
   onEditModule,
   onRollbackModule,
 }: ModuleResourceDetailsProps) => {
+  const { mode } = useTheme();
+
   const [loading, setLoading] = useState(false);
   const [loadModule, setLoadModule] = useState(false);
   const [loadResources, setLoadResources] = useState(false);
@@ -555,41 +556,38 @@ export const ModuleResourceDetails = ({
 
     if (status === "progressing") {
       return (
-        <ClockCircleTwoTone
+        <PendingIcon
           style={{
             verticalAlign: "middle",
             height: "100%",
             marginBottom: "4px",
             fontSize: "150%",
           }}
-          twoToneColor={"#ffcc00"}
         />
       );
     }
 
     if (status === "unhealthy") {
       return (
-        <CloseSquareTwoTone
+        <ErrorIcon
           style={{
             verticalAlign: "middle",
             height: "100%",
             marginBottom: "4px",
             fontSize: "150%",
           }}
-          twoToneColor={"red"}
         />
       );
     }
 
     return (
-      <CheckCircleTwoTone
+      <SuccessIcon
         style={{
           verticalAlign: "middle",
           height: "100%",
           marginBottom: "4px",
           fontSize: "150%",
         }}
-        twoToneColor={"#52c41a"}
       />
     );
   };
@@ -680,7 +678,7 @@ export const ModuleResourceDetails = ({
         <div style={{ position: "relative" }}>
           <ReactAce
             mode={"sass"}
-            theme={"github"}
+            theme={mode === "light" ? "github" : "twilight"}
             fontSize={12}
             showPrintMargin={true}
             showGutter={true}
@@ -849,7 +847,6 @@ export const ModuleResourceDetails = ({
           </Col>
         </Row>
         <ResourceListActionsProvider
-          themePalette={themePalette}
           streamingDisabled={streamingDisabled}
           fetchResource={fetchResource}
           fetchResourceManifest={fetchResourceManifest}

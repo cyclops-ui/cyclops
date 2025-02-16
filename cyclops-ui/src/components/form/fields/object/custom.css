@@ -1,3 +1,5 @@
 .nested-fields.dark .ant-collapse-content-box {
-  background-color: #404040;
+  background-color: #222;
+  border-color: #333;
+  border-left-color: #a35702;
 }

@@ -503,14 +503,15 @@ export const CreateModuleComponent = ({
               <Col style={{ padding: "0px" }} span={16}>
                 <div
                   style={{
-                    border: themePalette === "light" ? "#c3c3c3" : "#707070",
+                    borderColor:
+                      themePalette === "light" ? "#c3c3c3" : "#707070",
                     borderWidth: "1.5px",
                     borderStyle: "solid",
                     borderRadius: "7px",
                     padding: "0px",
                     width: "100%",
                     backgroundColor:
-                      themePalette === "light" ? "#fafafa" : "#404040",
+                      themePalette === "light" ? "#fafafa" : "#333",
                   }}
                 >
                   <Form.Item

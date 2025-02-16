@@ -21,9 +21,6 @@ import { mapResponseError } from "../../../../utils/api/errors";
 
 import helmLogo from "../../../../static/img/helm.png";
 import {
-  CheckCircleTwoTone,
-  ClockCircleTwoTone,
-  CloseCircleTwoTone,
   ExportOutlined,
   InfoCircleOutlined,
   LoadingOutlined,
@@ -34,6 +31,7 @@ import {
   getHelmReleaseValues,
   migrateHelmRelease,
 } from "../../../../utils/api/helm";
+import { SuccessIcon, PendingIcon, ErrorIcon } from "../../../status/icons";
 
 const { Title } = Typography;
 
@@ -420,7 +418,7 @@ const HelmReleases = () => {
           Modules will use the following template:
         </Row>
         <Row style={{ paddingBottom: "8px" }}>
-          <pre style={{ color: "navy" }}>
+          <pre>
             {migrateTemplateRefForm.getFieldsValue()["repo"]} /{" "}
             {migrateTemplateRefForm.getFieldsValue()["path"]} @{" "}
             {migrateTemplateRefForm.getFieldsValue()["version"]}
@@ -447,14 +445,13 @@ const HelmReleases = () => {
               switch (status) {
                 case "pending":
                   return (
-                    <ClockCircleTwoTone
+                    <PendingIcon
                       style={{
                         verticalAlign: "middle",
                         height: "100%",
                         marginBottom: "4px",
                         fontSize: "150%",
                       }}
-                      twoToneColor={"#ffcc00"}
                     />
                   );
                 case "migrating":
@@ -471,26 +468,24 @@ const HelmReleases = () => {
                   );
                 case "success":
                   return (
-                    <CheckCircleTwoTone
+                    <SuccessIcon
                       style={{
                         verticalAlign: "middle",
                         height: "100%",
                         marginBottom: "4px",
                         fontSize: "150%",
                       }}
-                      twoToneColor={"#52c41a"}
                     />
                   );
                 case "error":
                   return (
-                    <CloseCircleTwoTone
+                    <ErrorIcon
                       style={{
                         verticalAlign: "middle",
                         height: "100%",
                         marginBottom: "4px",
                         fontSize: "150%",
                       }}
-                      twoToneColor={"red"}
                     />
                   );
               }

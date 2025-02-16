@@ -10,12 +10,15 @@ import {
 import { getTemplate } from "../../../../utils/api/api";
 import { InfoCircleOutlined } from "@ant-design/icons";
 import { Alert } from "antd";
+import { useTheme } from "../../../theme/ThemeContext";
 
 const MigrateRelease = () => {
   const [searchParams] = useSearchParams();
   const repo = searchParams.get("repo");
   const path = searchParams.get("path");
   const version = searchParams.get("version");
+
+  const { mode } = useTheme();
 
   return (
     <div>
@@ -44,7 +47,7 @@ const MigrateRelease = () => {
         }}
       />
       <HelmReleaseEdit
-        themePalette={"light"}
+        themePalette={mode}
         themeColor={""}
         fetchHelmChartFields={() => {
           return getTemplate(repo, path, version, "");

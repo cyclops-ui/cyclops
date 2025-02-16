@@ -489,11 +489,11 @@ export const EditModuleComponent = ({
             <Row>
               <div
                 style={{
-                  border: "solid 1.5px #c3c3c3",
+                  border: "solid 1.5px",
+                  borderColor: themePalette === "dark" ? "#333" : "#c3c3c3",
                   borderRadius: "7px",
                   padding: "0px",
                   width: "100%",
-                  backgroundColor: "#fafafa",
                 }}
               >
                 <Form
@@ -671,7 +671,10 @@ export const EditModuleComponent = ({
                     </div>
                   </Form>
                 </div>
-                <div className={"expandadvanced"} onClick={toggleExpand}>
+                <div
+                  className={`expandadvanced ${themePalette === "dark" ? "dark" : ""}`}
+                  onClick={toggleExpand}
+                >
                   {advancedOptionsExpanded ? (
                     <div>
                       Advanced

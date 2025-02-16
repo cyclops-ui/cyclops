@@ -43,11 +43,12 @@ export const MapField = ({
         {(fields, { add, remove }) => (
           <div
             style={{
-              border: "solid 1px #d3d3d3",
+              border: "solid 1px",
+              borderColor: themePalette === "dark" ? "#444" : "#d3d3d3",
               borderRadius: "7px",
               padding: "12px",
               width: "100%",
-              backgroundColor: themePalette === "dark" ? "#444" : "#fafafa",
+              backgroundColor: themePalette === "dark" ? "#333" : "#fafafa",
             }}
           >
             {fields.map((arrField, index) => (

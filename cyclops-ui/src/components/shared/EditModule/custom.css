@@ -30,6 +30,14 @@ label.ant-form-item-required:before {
   cursor: pointer;
 }
 
+.expandadvanced.dark {
+  background-color: #222;
+}
+
 .expandadvanced:hover {
   background-color: #e0e0e0;
+}
+
+.expandadvanced.dark:hover {
+  background-color: #333;
 }

@@ -3,6 +3,7 @@ import React, { useCallback, useEffect, useState } from "react";
 import ReactAce from "react-ace";
 import { mapResponseError } from "../../utils/api/errors";
 import { useResourceListActions } from "./ResourceList/ResourceListActionsContext";
+import { useTheme } from "../theme/ThemeContext";
 
 interface Props {
   name: string;
@@ -10,6 +11,8 @@ interface Props {
 }
 
 const ConfigMap = ({ name, namespace }: Props) => {
+  const { mode } = useTheme();
+
   const { fetchResource } = useResourceListActions();
 
   const [loading, setLoading] = useState(true);
@@ -75,6 +78,7 @@ const ConfigMap = ({ name, namespace }: Props) => {
           width="100%"
           mode={configMapDataExtension(key)}
           height={calculateEditorHeight(lines)}
+          theme={mode === "light" ? "github" : "twilight"}
         />
       );
     } else {
