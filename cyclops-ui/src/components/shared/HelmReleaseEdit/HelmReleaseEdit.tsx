@@ -151,9 +151,9 @@ export const HelmReleaseEdit = ({
         setLoadingSubmitRequest(false);
         onSubmitSuccess(releaseNamespace, releaseName);
       })
-      .catch(() => {
+      .catch((e) => {
         setLoadingSubmitRequest(false);
-        setError(mapResponseError(error));
+        setError(mapResponseError(e));
       });
   };
 

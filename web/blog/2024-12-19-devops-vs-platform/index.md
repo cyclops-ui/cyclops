@@ -37,7 +37,7 @@ When a bug reaches production, who’s at fault here? Development teams often bl
 
 And these teams have different goals to keep up with. Devs want to ship as much code as fast as possible, while the Ops team prioritizes stability and reliability. This “siloed“ culture causes tension and inefficiency.
 
-![Dev-Ops-wall](../../static/img/2024-12-19-devops-vs-platform/cover.jpeg)
+![Dev-Ops-wall](../../static/img/2024-12-19-devops-vs-platform/the-wall.jpg)
 
 This was the reality before DevOps became mainstream (and in some cases, it still is). DevOps as a philosophy promotes a collaborative culture where developers and operations teams work closely together throughout the software development lifecycle. Instead of throwing software "*over the wall*", both teams share responsibility for building, deploying, and maintaining the software.
 

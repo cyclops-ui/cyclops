@@ -2,6 +2,7 @@ package handler
 
 import (
 	"github.com/cyclops-ui/cyclops/cyclops-ctrl/internal/controller/sse"
+	"github.com/cyclops-ui/cyclops/cyclops-ctrl/internal/git"
 	"github.com/cyclops-ui/cyclops/cyclops-ctrl/internal/integrations/helm"
 	"github.com/gin-gonic/gin"
 	"net/http"
@@ -17,10 +18,11 @@ import (
 type Handler struct {
 	router *gin.Engine
 
-	templatesRepo templaterepo.ITemplateRepo
-	k8sClient     k8sclient.IKubernetesClient
-	releaseClient *helm.ReleaseClient
-	renderer      *render.Renderer
+	templatesRepo  templaterepo.ITemplateRepo
+	k8sClient      k8sclient.IKubernetesClient
+	releaseClient  *helm.ReleaseClient
+	renderer       *render.Renderer
+	gitWriteClient *git.WriteClient
 
 	moduleTargetNamespace string
 
@@ -33,6 +35,7 @@ func New(
 	kubernetesClient k8sclient.IKubernetesClient,
 	releaseClient *helm.ReleaseClient,
 	renderer *render.Renderer,
+	gitWriteClient *git.WriteClient,
 	moduleTargetNamespace string,
 	telemetryClient telemetry.Client,
 	monitor prometheus.Monitor,
@@ -42,6 +45,7 @@ func New(
 		k8sClient:             kubernetesClient,
 		renderer:              renderer,
 		releaseClient:         releaseClient,
+		gitWriteClient:        gitWriteClient,
 		moduleTargetNamespace: moduleTargetNamespace,
 		telemetryClient:       telemetryClient,
 		monitor:               monitor,
@@ -52,7 +56,7 @@ func (h *Handler) Start() error {
 	gin.SetMode(gin.DebugMode)
 
 	templatesController := controller.NewTemplatesController(h.templatesRepo, h.k8sClient, h.telemetryClient)
-	modulesController := controller.NewModulesController(h.templatesRepo, h.k8sClient, h.renderer, h.moduleTargetNamespace, h.telemetryClient, h.monitor)
+	modulesController := controller.NewModulesController(h.templatesRepo, h.k8sClient, h.renderer, h.gitWriteClient, h.moduleTargetNamespace, h.telemetryClient, h.monitor)
 	clusterController := controller.NewClusterController(h.k8sClient)
 	helmController := controller.NewHelmController(h.k8sClient, h.releaseClient, h.telemetryClient)
 

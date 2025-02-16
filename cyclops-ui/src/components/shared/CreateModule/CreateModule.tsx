@@ -14,6 +14,7 @@ import {
   notification,
   theme,
   ConfigProvider,
+  Switch,
 } from "antd";
 import {
   deepMerge,
@@ -74,6 +75,7 @@ export interface CreateModuleProps {
     moduleNamespace: string,
     templateRef: any,
     values: string,
+    gitOpsWrite?: any,
   ) => Promise<any>;
   onSubmitModuleSuccess: (moduleName: string) => void;
   onBackButton: () => void;
@@ -127,6 +129,8 @@ export const CreateModuleComponent = ({
 
   const [namespaces, setNamespaces] = useState<string[]>([]);
 
+  const [gitopsToggle, SetGitopsToggle] = useState(false);
+
   const [notificationApi, contextHolder] = notification.useNotification();
   const openNotification = (errors: FeedbackError[]) => {
     notificationApi.error({
@@ -167,6 +171,13 @@ export const CreateModuleComponent = ({
   const handleSubmit = (values: any) => {
     const moduleName = values["cyclops_module_name"];
     const moduleNamespace = values["cyclops_module_namespace"];
+    const gitOpsWrite = gitopsToggle
+      ? {
+          repo: values["gitops-repo"],
+          path: values["gitops-path"],
+          branch: values["gitops-branch"],
+        }
+      : null;
 
     values = findMaps(config.root.properties, values, initialValuesRaw);
 
@@ -180,6 +191,7 @@ export const CreateModuleComponent = ({
         sourceType: template.sourceType,
       },
       values,
+      gitOpsWrite,
     )
       .then(() => {
         onSubmitModuleSuccess(moduleName);
@@ -568,6 +580,76 @@ export const CreateModuleComponent = ({
                         ))}
                       </Select>
                     </Form.Item>
+                  </div>
+                  <div
+                    style={{ display: advancedOptionsExpanded ? "" : "none" }}
+                  >
+                    <Divider
+                      style={{ marginTop: "12px", marginBottom: "12px" }}
+                    />
+                    <Form.Item
+                      name="gitops"
+                      id="gitops"
+                      label={
+                        <div>
+                          Push changes to Git?
+                          <p style={{ color: "#8b8e91", marginBottom: "0px" }}>
+                            Instead of deploying to the cluster, Cyclops will
+                            push the changes to a git repository.
+                          </p>
+                        </div>
+                      }
+                      style={{ padding: "0px 12px 0px 12px" }}
+                    >
+                      <Switch
+                        onChange={(e) => {
+                          SetGitopsToggle(e);
+                        }}
+                      />
+                    </Form.Item>
+                    <div style={{ display: gitopsToggle ? "" : "none" }}>
+                      <Form.Item
+                        label="Repository URL"
+                        name="gitops-repo"
+                        rules={[
+                          {
+                            required: gitopsToggle,
+                            message: "Repo URL is required",
+                          },
+                        ]}
+                        style={{ padding: "0px 12px 0px 12px" }}
+                      >
+                        <Input />
+                      </Form.Item>
+
+                      <Form.Item
+                        label="Path"
+                        name="gitops-path"
+                        rules={[
+                          {
+                            required: gitopsToggle,
+                            message: "Path is required",
+                          },
+                        ]}
+                        style={{ padding: "0px 12px 0px 12px" }}
+                      >
+                        <Input />
+                      </Form.Item>
+
+                      <Form.Item
+                        label="Branch"
+                        name="gitops-branch"
+                        rules={[
+                          {
+                            required: gitopsToggle,
+                            message: "Path is required",
+                          },
+                        ]}
+                        style={{ padding: "0px 12px 0px 12px" }}
+                      >
+                        <Input />
+                      </Form.Item>
+                    </div>
                   </div>
                   <div
                     className={"expandadvanced"}

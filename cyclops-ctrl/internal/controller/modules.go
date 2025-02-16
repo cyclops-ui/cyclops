@@ -8,6 +8,8 @@ import (
 	"strings"
 	"time"
 
+	"github.com/cyclops-ui/cyclops/cyclops-ctrl/internal/git"
+
 	"sigs.k8s.io/yaml"
 
 	"github.com/gin-gonic/gin"
@@ -27,6 +29,7 @@ type Modules struct {
 	kubernetesClient k8sclient.IKubernetesClient
 	templatesRepo    template.ITemplateRepo
 	renderer         *render.Renderer
+	gitWriteClient   *git.WriteClient
 
 	moduleTargetNamespace string
 
@@ -38,6 +41,7 @@ func NewModulesController(
 	templatesRepo template.ITemplateRepo,
 	kubernetes k8sclient.IKubernetesClient,
 	renderer *render.Renderer,
+	gitWriteClient *git.WriteClient,
 	moduleTargetNamespace string,
 	telemetryClient telemetry.Client,
 	monitor prometheus.Monitor,
@@ -46,6 +50,7 @@ func NewModulesController(
 		kubernetesClient:      kubernetes,
 		templatesRepo:         templatesRepo,
 		renderer:              renderer,
+		gitWriteClient:        gitWriteClient,
 		moduleTargetNamespace: moduleTargetNamespace,
 		telemetryClient:       telemetryClient,
 		monitor:               monitor,
@@ -126,6 +131,31 @@ func (m *Modules) ListModules(ctx *gin.Context) {
 
 func (m *Modules) DeleteModule(ctx *gin.Context) {
 	ctx.Header("Access-Control-Allow-Origin", "*")
+	m.monitor.DecModule()
+
+	deleteMethod := ctx.Query("deleteMethod")
+
+	if deleteMethod == "git" {
+		module, err := m.kubernetesClient.GetModule(ctx.Param("name"))
+		if err != nil {
+			ctx.JSON(http.StatusBadRequest, dto.NewError("Error fetching module for deletion", err.Error()))
+			return
+		}
+
+		if module == nil {
+			ctx.JSON(http.StatusBadRequest, dto.NewError("Error fetching module for deletion", "Check that the module exists"))
+			return
+		}
+
+		err = m.gitWriteClient.DeleteModule(*module)
+		if err != nil {
+			ctx.JSON(http.StatusBadRequest, dto.NewError("Error deleting module from git", err.Error()))
+			return
+		}
+
+		ctx.Status(http.StatusOK)
+		return
+	}
 
 	err := m.kubernetesClient.DeleteModule(ctx.Param("name"))
 	if err != nil {
@@ -134,7 +164,6 @@ func (m *Modules) DeleteModule(ctx *gin.Context) {
 		return
 	}
 
-	m.monitor.DecModule()
 	ctx.Status(http.StatusOK)
 }
 
@@ -279,6 +308,15 @@ func (m *Modules) CreateModule(ctx *gin.Context) {
 
 	m.telemetryClient.ModuleCreation()
 
+	if module.GetAnnotations() != nil && len(module.GetAnnotations()[v1alpha1.GitOpsWriteRepoAnnotation]) != 0 {
+		err := m.gitWriteClient.Write(module)
+		if err != nil {
+			fmt.Println(err)
+			ctx.JSON(http.StatusInternalServerError, dto.NewError("Error pushing to git", err.Error()))
+		}
+		return
+	}
+
 	err = m.kubernetesClient.CreateModule(module)
 	if err != nil {
 		fmt.Println(err)
@@ -314,6 +352,57 @@ func (m *Modules) UpdateModule(ctx *gin.Context) {
 		return
 	}
 
+	module.Spec.TemplateRef.SourceType = curr.Spec.TemplateRef.SourceType
+
+	module.Status.TemplateResolvedVersion = request.Template.ResolvedVersion
+	module.Status.ReconciliationStatus = curr.Status.ReconciliationStatus
+	module.Status.IconURL = curr.Status.IconURL
+	module.Status.ManagedGVRs = curr.Status.ManagedGVRs
+
+	module.Spec.TargetNamespace = curr.Spec.TargetNamespace
+	module.SetLabels(curr.GetLabels())
+
+	annotations := curr.GetAnnotations()
+	moduleAnnotations := module.GetAnnotations()
+
+	if annotations == nil {
+		annotations = make(map[string]string)
+	}
+
+	if moduleAnnotations != nil {
+		if _, ok := moduleAnnotations["cyclops-ui.com/write-repo"]; ok {
+			annotations["cyclops-ui.com/write-repo"] = moduleAnnotations["cyclops-ui.com/write-repo"]
+		}
+		if _, ok := moduleAnnotations["cyclops-ui.com/write-path"]; ok {
+			annotations["cyclops-ui.com/write-path"] = moduleAnnotations["cyclops-ui.com/write-path"]
+		}
+		if _, ok := moduleAnnotations["cyclops-ui.com/write-revision"]; ok {
+			annotations["cyclops-ui.com/write-revision"] = moduleAnnotations["cyclops-ui.com/write-revision"]
+		}
+	}
+
+	if len(moduleAnnotations) == 0 || len(moduleAnnotations[v1alpha1.GitOpsWriteRepoAnnotation]) == 0 {
+		delete(annotations, v1alpha1.GitOpsWriteRepoAnnotation)
+	}
+	if len(moduleAnnotations) == 0 || len(moduleAnnotations[v1alpha1.GitOpsWritePathAnnotation]) == 0 {
+		delete(annotations, v1alpha1.GitOpsWritePathAnnotation)
+	}
+	if len(moduleAnnotations) == 0 || len(moduleAnnotations[v1alpha1.GitOpsWriteRevisionAnnotation]) == 0 {
+		delete(annotations, v1alpha1.GitOpsWriteRevisionAnnotation)
+	}
+
+	delete(annotations, "kubectl.kubernetes.io/last-applied-configuration")
+	module.SetAnnotations(annotations)
+
+	if len(module.GetAnnotations()[v1alpha1.GitOpsWriteRepoAnnotation]) != 0 {
+		err := m.gitWriteClient.Write(module)
+		if err != nil {
+			fmt.Println(err)
+			ctx.JSON(http.StatusInternalServerError, dto.NewError("Error pushing to git", err.Error()))
+		}
+		return
+	}
+
 	history := curr.History
 	if curr.History == nil {
 		history = make([]v1alpha1.HistoryEntry, 0)
@@ -335,16 +424,6 @@ func (m *Modules) UpdateModule(ctx *gin.Context) {
 	}
 
 	module.SetResourceVersion(curr.GetResourceVersion())
-
-	module.Spec.TemplateRef.SourceType = curr.Spec.TemplateRef.SourceType
-
-	module.Status.TemplateResolvedVersion = request.Template.ResolvedVersion
-	module.Status.ReconciliationStatus = curr.Status.ReconciliationStatus
-	module.Status.IconURL = curr.Status.IconURL
-	module.Status.ManagedGVRs = curr.Status.ManagedGVRs
-
-	module.Spec.TargetNamespace = curr.Spec.TargetNamespace
-	module.SetLabels(curr.GetLabels())
 
 	result, err := m.kubernetesClient.UpdateModuleStatus(&module)
 	if err != nil {
