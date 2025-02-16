@@ -21,14 +21,11 @@ import type { InputRef } from "antd";
 import { formatBytes } from "../../utils/common";
 import { ColumnType } from "antd/lib/table";
 import type { FilterConfirmProps } from "antd/es/table/interface";
-import {
-  CheckCircleTwoTone,
-  CloseSquareTwoTone,
-  SearchOutlined,
-} from "@ant-design/icons";
+import { SearchOutlined } from "@ant-design/icons";
 import Highlighter from "react-highlight-words";
 import { mapResponseError } from "../../utils/api/errors";
 import { useTheme } from "../theme/ThemeContext";
+import { SuccessIcon, ErrorIcon } from "../status/icons";
 
 const { Title, Text } = Typography;
 
@@ -343,24 +340,22 @@ const NodeDetails = () => {
 
   const conditionIcon = (type: string, status: string) => {
     const healthy = (
-      <CheckCircleTwoTone
+      <SuccessIcon
         style={{
           paddingLeft: "6px",
           fontSize: "24px",
           verticalAlign: "middle",
         }}
-        twoToneColor={"#52c41a"}
       />
     );
 
     const unhealthy = (
-      <CloseSquareTwoTone
+      <ErrorIcon
         style={{
           paddingLeft: "6px",
           fontSize: "24px",
           verticalAlign: "middle",
         }}
-        twoToneColor={"red"}
       />
     );
 
@@ -516,7 +511,7 @@ const NodeDetails = () => {
               style={{
                 borderRadius: "10px",
                 borderWidth: "3px",
-                backgroundColor: mode === "light" ? "#fafafa" : "#333",
+                backgroundColor: mode === "light" ? "#fafafa" : "#222",
                 width: "100%",
                 margin: "5px",
                 color: "black",

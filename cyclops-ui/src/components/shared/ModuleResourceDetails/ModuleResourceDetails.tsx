@@ -18,9 +18,6 @@ import {
 import "ace-builds/src-noconflict/ace";
 import {
   BookOutlined,
-  CheckCircleTwoTone,
-  ClockCircleTwoTone,
-  CloseSquareTwoTone,
   CopyOutlined,
   DeleteOutlined,
   EditOutlined,
@@ -50,6 +47,7 @@ import {
 } from "../../../utils/resourceRef";
 import { ResourceListActionsProvider } from "../../k8s-resources/ResourceList/ResourceListActionsContext";
 import { useTheme } from "../../theme/ThemeContext";
+import { SuccessIcon, PendingIcon, ErrorIcon } from "../../status/icons";
 
 const languages = [
   "javascript",
@@ -457,41 +455,38 @@ export const ModuleResourceDetails = ({
 
     if (status === "progressing") {
       return (
-        <ClockCircleTwoTone
+        <PendingIcon
           style={{
             verticalAlign: "middle",
             height: "100%",
             marginBottom: "4px",
             fontSize: "150%",
           }}
-          twoToneColor={"#ffcc00"}
         />
       );
     }
 
     if (status === "unhealthy") {
       return (
-        <CloseSquareTwoTone
+        <ErrorIcon
           style={{
             verticalAlign: "middle",
             height: "100%",
             marginBottom: "4px",
             fontSize: "150%",
           }}
-          twoToneColor={"red"}
         />
       );
     }
 
     return (
-      <CheckCircleTwoTone
+      <SuccessIcon
         style={{
           verticalAlign: "middle",
           height: "100%",
           marginBottom: "4px",
           fontSize: "150%",
         }}
-        twoToneColor={"#52c41a"}
       />
     );
   };

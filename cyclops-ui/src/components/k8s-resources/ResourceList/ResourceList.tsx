@@ -32,9 +32,6 @@ import PersistentVolumeClaim from "../PersistentVolumeClaim";
 import Secret from "../Secret";
 import {
   CaretRightOutlined,
-  CheckCircleTwoTone,
-  ClockCircleTwoTone,
-  CloseSquareTwoTone,
   CopyOutlined,
   FileTextOutlined,
   FilterOutlined,
@@ -48,6 +45,7 @@ import { CheckboxChangeEvent } from "antd/es/checkbox";
 import { Workload } from "../../../utils/k8s/workload";
 import { useResourceListActions } from "./ResourceListActionsContext";
 import { useTheme } from "../../theme/ThemeContext";
+import { SuccessIcon, PendingIcon, ErrorIcon } from "../../status/icons";
 
 interface Props {
   loadResources: boolean;
@@ -393,37 +391,34 @@ const ResourceList = ({
       let statusIcon = <></>;
       if (status === "progressing") {
         statusIcon = (
-          <ClockCircleTwoTone
+          <PendingIcon
             style={{
               paddingLeft: "5px",
               fontSize: "20px",
               verticalAlign: "middle",
             }}
-            twoToneColor={"#ffcc00"}
           />
         );
       }
       if (status === "healthy") {
         statusIcon = (
-          <CheckCircleTwoTone
+          <SuccessIcon
             style={{
               paddingLeft: "5px",
               fontSize: "20px",
               verticalAlign: "middle",
             }}
-            twoToneColor={"#52c41a"}
           />
         );
       }
       if (status === "unhealthy") {
         statusIcon = (
-          <CloseSquareTwoTone
+          <ErrorIcon
             style={{
               paddingLeft: "5px",
               fontSize: "20px",
               verticalAlign: "middle",
             }}
-            twoToneColor={"red"}
           />
         );
       }
