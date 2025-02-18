@@ -235,7 +235,7 @@ const config = {
       announcementBar: {
         id: 'feedback',
         content:
-            '<span style="font-weight: bold">🔊 Share your Cyclops experience and earn an Amazon gift card. Sign up <a target="_blank" href="https://forms.gle/jChD6oNiHFwbK511A">here</a> 🔊</span>',
+            '<span style="font-weight: bold">🔊 Share your Cyclops experience and earn some Cyclops swag. Sign up <a target="_blank" href="https://forms.gle/jChD6oNiHFwbK511A">here</a> 🔊</span>',
         backgroundColor: '#fcc483',
         textColor: '#091E42',
       },
