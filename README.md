@@ -105,6 +105,7 @@ Start your contributing journey at our [CONTRIBUTING.md](./CONTRIBUTING.md) and 
 - **Support for Kustomize** -> currently, only Helm is supported for creating templates
 - **`cyctl` for Windows** -> Chocolatey
 - **Customizable Module details page** -> create custom views of resources that your module uses
+- **Customizable Resource actions** -> support customization of status updates using [CEL](https://github.com/google/cel-spec)
 
 ## 👁️ Share your feedback
 
