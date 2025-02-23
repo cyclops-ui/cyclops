@@ -2,7 +2,9 @@ import React, {useEffect, useState} from 'react';
 import styles from './styles.module.css';
 import SyntaxHighlighter from 'react-syntax-highlighter';
 
-import {ConfigProvider, Form, Input, InputNumber, Select, Switch} from "antd";
+import Form from "antd/es/form";
+
+import {ConfigProvider, Input, InputNumber, Select} from "antd";
 
 const Comparison = () => {
     const [name, setName] = useState("nginx");

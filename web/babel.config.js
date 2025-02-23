@@ -10,4 +10,15 @@ module.exports = {
       },
     ],
   ],
+  plugins: [
+    [
+      "import",
+      {
+        libraryName: "antd",
+        libraryDirectory: "es",
+        style: false,
+      },
+      "antd",
+    ],
+  ],
 };
