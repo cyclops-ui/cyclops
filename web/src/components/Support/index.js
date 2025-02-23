@@ -2,7 +2,8 @@ import React from 'react';
 import clsx from 'clsx';
 import styles from './styles.module.css';
 
-import {Col, Divider, Row} from "antd";
+import Divider from "antd/es/divider";
+
 import Link from '@docusaurus/Link';
 import Title from "antd/es/typography/Title";
 

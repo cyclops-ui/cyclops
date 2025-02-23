@@ -1,8 +1,14 @@
 import Layout from "@theme/Layout";
-import { Card, Button, Typography, Row, Col, ConfigProvider } from "antd";
 import styles from "./index.module.css";
 import yaml from "/static/img/yaml_background.png";
 import AdoptersPlanSignup from "../components/AdoptersPlanSignup/AdoptersPlanSignup";
+
+import Card from "antd/es/card"
+import Button from "antd/es/button"
+import Typography from "antd/es/typography"
+import Row from "antd/es/row"
+import Col from "antd/es/col"
+import ConfigProvider from "antd/es/config-provider"
 
 const { Paragraph } = Typography;
 

@@ -13,7 +13,10 @@ import Features from "../components/Features";
 import Blogs from "../components/Blogs";
 import Testimonials from "../components/Testimonials";
 import Newsletter from "../components/Newsletter";
-import { Button, ConfigProvider, Row } from "antd";
+
+import Button from "antd/es/button";
+import ConfigProvider from "antd/es/config-provider";
+import Row from "antd/es/row";
 
 export default function Home() {
   return (
