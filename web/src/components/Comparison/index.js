@@ -4,7 +4,10 @@ import SyntaxHighlighter from 'react-syntax-highlighter';
 
 import Form from "antd/es/form";
 
-import {ConfigProvider, Input, InputNumber, Select} from "antd";
+import ConfigProvider from "antd/es/config-provider"
+import Input from "antd/es/input"
+import InputNumber from "antd/es/input-number"
+import Select from "antd/es/select"
 
 const Comparison = () => {
     const [name, setName] = useState("nginx");

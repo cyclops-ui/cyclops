@@ -2,9 +2,11 @@ import React, {useEffect, useRef} from 'react';
 import styles from './styles.module.css';
 import FeaturesTitle from "./Title";
 import Validations from "./Validations";
-import {Col, Row} from "antd";
 import Productivity from "./Productivity";
 import Customizable from "./Customizable";
+
+import Col from "antd/es/col"
+import Row from "antd/es/row"
 
 const Features = () => {
     const featRoot = useRef(null);

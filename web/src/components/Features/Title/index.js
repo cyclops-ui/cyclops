@@ -1,6 +1,7 @@
 import React, {useEffect, useRef, useState} from 'react';
 import styles from './styles.module.css';
-import {Row} from "antd";
+
+import Row from "antd/es/row";
 
 import cyclopsTitle from '/static/img/cyclops-title.png';
 

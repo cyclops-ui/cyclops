@@ -1,7 +1,9 @@
 import React from "react";
-import { Button, ConfigProvider } from "antd";
 import styles from "../pages/index.module.css";
 import { Helmet } from "react-helmet";
+
+import Button from "antd/es/button"
+import ConfigProvider from "antd/es/config-provider"
 
 export default function CalendlyWidget() {
   return (

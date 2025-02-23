@@ -1,10 +1,12 @@
 import React, { useEffect, useRef, useState } from "react";
 import styles from "./styles.module.css";
-import { Col, Row } from "antd";
 import Blog from "./Blog";
 import BlogsTitle from "./Title";
 import BlogsDescription from "./Description";
 import More from "./More";
+
+import Col from "antd/es/col"
+import Row from "antd/es/row"
 
 const Blogs = () => {
   return (
