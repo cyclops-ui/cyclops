@@ -14,10 +14,6 @@ import Blogs from "../components/Blogs";
 import Testimonials from "../components/Testimonials";
 import Newsletter from "../components/Newsletter";
 
-import Button from "antd/es/button";
-import ConfigProvider from "antd/es/config-provider";
-import Row from "antd/es/row";
-
 export default function Home() {
   return (
     <Layout
@@ -103,30 +99,14 @@ export default function Home() {
           <img className={styles.cyclopsTitle} src={title}/>
           <h2 className={styles.cyclopsDesc}>Developer friendly Kubernetes</h2>
           <img className={styles.landingCyclops} src={landingCyclops}/>
-          <Row>
-            <ConfigProvider
-              theme={{
-                token: {
-                  colorPrimary: "#fe8801",
-                },
-              }}
-            >
-              <Button
-                href={"/docs/installation/install/manifest"}
-                shape="round"
-                size={"large"}
-                className={styles.readTheDocs}
-                style={{
-                  textDecoration: "none",
-                  display: "flex",
-                  alignContent: "center",
-                  color: "white",
-                }}
-              >
-                <h3>Get started</h3>
-              </Button>
-            </ConfigProvider>
-          </Row>
+          <button
+            onClick={() => {
+              window.location.href = "/docs/installation/install/manifest"
+            }}
+            className={styles.readTheDocs}
+          >
+            <h3 style={{margin: "0px 20px 0px 20px"}}>Get started</h3>
+          </button>
         </div>
         <Comparison/>
         <div className={styles.backgroundcolor}>
