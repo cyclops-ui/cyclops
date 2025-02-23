@@ -1,8 +1,5 @@
 import React from "react";
-import clsx from "clsx";
-import Link from "@docusaurus/Link";
 import Layout from "@theme/Layout";
-import HomepageFeatures from "@site/src/components/HomepageFeatures";
 import styles from "./index.module.css";
 
 import landingCyclops from "/static/img/landing_cyclops.png";
@@ -10,15 +7,13 @@ import title from "/static/img/cyclops-title.png";
 
 import yaml from "/static/img/yaml_background.png";
 
-import devhunt from "/static/img/devhunt.png";
-
 import Comparison from "../components/Comparison";
 import Install from "../components/Install";
 import Features from "../components/Features";
 import Blogs from "../components/Blogs";
 import Testimonials from "../components/Testimonials";
 import Newsletter from "../components/Newsletter";
-import { Button, Col, ConfigProvider, Row } from "antd";
+import { Button, ConfigProvider, Row } from "antd";
 
 export default function Home() {
   return (
@@ -103,8 +98,7 @@ export default function Home() {
           />
 
           <img className={styles.cyclopsTitle} src={title}/>
-          <img className={styles.devhunt} src={devhunt}/>
-          {/*<h2 className={styles.cyclopsDesc}>Developer friendly Kubernetes</h2>*/}
+          <h2 className={styles.cyclopsDesc}>Developer friendly Kubernetes</h2>
           <img className={styles.landingCyclops} src={landingCyclops}/>
           <Row>
             <ConfigProvider
@@ -131,7 +125,7 @@ export default function Home() {
             </ConfigProvider>
           </Row>
         </div>
-        <Comparison />
+        <Comparison/>
         <div className={styles.backgroundcolor}>
           <Features />
           <Testimonials />
