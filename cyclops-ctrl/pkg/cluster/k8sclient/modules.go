@@ -817,6 +817,7 @@ func (k *KubernetesClient) getPodsForNetworkPolicy(policy networkingv1.NetworkPo
 
 		out = append(out, dto.Pod{
 			Name:       item.Name,
+			Namespace:  item.Namespace,
 			Containers: containers,
 			Node:       item.Spec.NodeName,
 			PodPhase:   string(item.Status.Phase),

@@ -47,6 +47,7 @@ import { mapResponseError } from "../../../utils/api/errors";
 import { CheckboxChangeEvent } from "antd/es/checkbox";
 import { Workload } from "../../../utils/k8s/workload";
 import { useResourceListActions } from "./ResourceListActionsContext";
+import NetworkPolicy from "../NetworkPolicy";
 
 interface Props {
   loadResources: boolean;
@@ -339,6 +340,11 @@ const ResourceList = ({
         break;
       case "ClusterRole":
         resourceDetails = <ClusterRole name={resource.name} />;
+        break;
+      case "NetworkPolicy":
+        resourceDetails = (
+          <NetworkPolicy namespace={resource.namespace} name={resource.name} />
+        );
         break;
     }
 
