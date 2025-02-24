@@ -41,7 +41,7 @@ const NetworkPolicy = ({ namespace, name }: Props) => {
         setError(mapResponseError(error));
         setLoading(false);
       });
-  }, [name, fetchResource]);
+  }, [name, namespace, fetchResource]);
 
   useEffect(() => {
     fetchNetworkPolicy();
