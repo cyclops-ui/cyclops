@@ -4,12 +4,15 @@ import { CheckboxChangeEvent } from "antd/es/checkbox";
 import { useCallback, useEffect, useState } from "react";
 import ReactAce from "react-ace/lib/ace";
 import { useResourceListActions } from "../../ResourceList/ResourceListActionsContext";
+import { useTheme } from "../../../theme/ThemeContext";
 
 interface PodManifestProps {
   pod: any;
 }
 
 const PodManifest = ({ pod }: PodManifestProps) => {
+  const { mode } = useTheme();
+
   const { fetchResourceManifest } = useResourceListActions();
 
   const [manifest, setManifest] = useState("");
@@ -98,7 +101,7 @@ const PodManifest = ({ pod }: PodManifestProps) => {
         </Checkbox>
         <ReactAce
           mode={"sass"}
-          theme={"github"}
+          theme={mode === "light" ? "github" : "twilight"}
           fontSize={12}
           showPrintMargin={true}
           showGutter={true}

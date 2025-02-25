@@ -30,15 +30,13 @@ import ClusterRole from "../ClusterRole";
 import ConfigMap from "../ConfigMap";
 import PersistentVolumeClaim from "../PersistentVolumeClaim";
 import Secret from "../Secret";
+import NetworkPolicy from "../NetworkPolicy";
+
 import {
   CaretRightOutlined,
-  CheckCircleTwoTone,
-  ClockCircleTwoTone,
-  CloseSquareTwoTone,
   CopyOutlined,
   FileTextOutlined,
   FilterOutlined,
-  WarningTwoTone,
 } from "@ant-design/icons";
 import { canRestart, RestartButton } from "../common/RestartButton";
 import { gvkString } from "../../../utils/k8s/gvk";
@@ -47,7 +45,13 @@ import { mapResponseError } from "../../../utils/api/errors";
 import { CheckboxChangeEvent } from "antd/es/checkbox";
 import { Workload } from "../../../utils/k8s/workload";
 import { useResourceListActions } from "./ResourceListActionsContext";
-import NetworkPolicy from "../NetworkPolicy";
+import { useTheme } from "../../theme/ThemeContext";
+import {
+  SuccessIcon,
+  PendingIcon,
+  ErrorIcon,
+  WarningIcon,
+} from "../../status/icons";
 
 interface Props {
   loadResources: boolean;
@@ -63,12 +67,13 @@ const ResourceList = ({
   onResourceDelete,
 }: Props) => {
   const {
-    themePalette,
     streamingDisabled,
     fetchResourceManifest,
     restartResource,
     deleteResource,
   } = useResourceListActions();
+
+  const { mode } = useTheme();
 
   const [error, setError] = useState({
     message: "",
@@ -234,13 +239,13 @@ const ResourceList = ({
       activeCollapses.get(fieldName) &&
       activeCollapses.get(fieldName) === true
     ) {
-      if (themePalette === "dark") {
-        return "#222";
+      if (mode === "dark") {
+        return "#282828";
       }
       return "#EFEFEF";
     } else {
-      if (themePalette === "dark") {
-        return "#333";
+      if (mode === "dark") {
+        return "#1a1a1a";
       }
       return "#FAFAFA";
     }
@@ -356,8 +361,7 @@ const ResourceList = ({
           title={"The resource is not a part of the Module and can be deleted"}
           trigger="click"
         >
-          <WarningTwoTone
-            twoToneColor="#F3801A"
+          <WarningIcon
             style={{ right: "0px", fontSize: "30px", paddingRight: "5px" }}
           />
         </Tooltip>
@@ -397,37 +401,34 @@ const ResourceList = ({
       let statusIcon = <></>;
       if (status === "progressing") {
         statusIcon = (
-          <ClockCircleTwoTone
+          <PendingIcon
             style={{
               paddingLeft: "5px",
               fontSize: "20px",
               verticalAlign: "middle",
             }}
-            twoToneColor={"#ffcc00"}
           />
         );
       }
       if (status === "healthy") {
         statusIcon = (
-          <CheckCircleTwoTone
+          <SuccessIcon
             style={{
               paddingLeft: "5px",
               fontSize: "20px",
               verticalAlign: "middle",
             }}
-            twoToneColor={"#52c41a"}
           />
         );
       }
       if (status === "unhealthy") {
         statusIcon = (
-          <CloseSquareTwoTone
+          <ErrorIcon
             style={{
               paddingLeft: "5px",
               fontSize: "20px",
               verticalAlign: "middle",
             }}
-            twoToneColor={"red"}
           />
         );
       }
@@ -435,8 +436,7 @@ const ResourceList = ({
       let deletedIcon = <></>;
       if (resource.deleted) {
         deletedIcon = (
-          <WarningTwoTone
-            twoToneColor="#F3801A"
+          <WarningIcon
             style={{
               paddingLeft: "5px",
               fontSize: "20px",
@@ -536,11 +536,14 @@ const ResourceList = ({
           backgroundColor: getCollapseColor(collapseKey),
           marginBottom: "12px",
           borderRadius: "10px",
-          border: "1px solid #E3E3E3",
-          borderLeft:
-            "solid " +
-            getStatusColor(resourceStatus, resource.deleted) +
-            " 4px",
+          borderStyle: "solid",
+          borderTopColor: mode === "light" ? "#E3E3E3" : "#444",
+          borderRightColor: mode === "light" ? "#E3E3E3" : "#444",
+          borderBottomColor: mode === "light" ? "#E3E3E3" : "#444",
+          borderLeftStyle: "solid",
+          borderLeftColor: getStatusColor(resourceStatus, resource.deleted),
+          borderWidth: "1px",
+          borderLeftWidth: "4px",
         }}
       >
         <Row>
@@ -553,7 +556,7 @@ const ResourceList = ({
                   paddingRight: "10px",
                   marginTop: "0px",
                   marginBottom: "10px",
-                  color: themePalette === "dark" ? "#fff" : "#000",
+                  color: mode === "dark" ? "#fff" : "#000",
                 }}
               >
                 {resource.name}
@@ -570,7 +573,7 @@ const ResourceList = ({
             style={{
               marginTop: "0px",
               marginBottom: "10px",
-              color: themePalette === "dark" ? "#fff" : "#000",
+              color: mode === "dark" ? "#fff" : "#000",
             }}
           >
             {resource.namespace}
@@ -681,6 +684,7 @@ const ResourceList = ({
           <ReactAce
             style={{ width: "100%" }}
             mode={"sass"}
+            theme={mode === "light" ? "github" : "twilight"}
             value={manifestModal.manifest}
             readOnly={true}
           />
@@ -732,7 +736,7 @@ const ResourceList = ({
       >
         <p>
           In order to confirm deleting this resource, type:{" "}
-          <code>{deleteResourceRef.kind + " " + deleteResourceRef.name}</code>
+          <pre>{deleteResourceRef.kind + " " + deleteResourceRef.name}</pre>
         </p>
         <Input
           placeholder={deleteResourceRef.kind + " " + deleteResourceRef.name}

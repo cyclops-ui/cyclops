@@ -1,11 +1,15 @@
 import { Outlet } from "react-router-dom";
 import SideNav from "./Sidebar";
-import { Suspense } from "react";
+import React, { Suspense } from "react";
 import Sider from "antd/es/layout/Sider";
 import { Content, Header } from "antd/es/layout/layout";
-import { ConfigProvider, Layout } from "antd";
+import { ConfigProvider, Layout, theme } from "antd";
+import { useTheme } from "../theme/ThemeContext";
+import { ThemeSwitch } from "../theme/ThemeSwitch";
 
 export default function AppLayout() {
+  const { mode } = useTheme();
+
   return (
     <Layout style={{ minHeight: "100vh" }}>
       <ConfigProvider
@@ -13,6 +17,8 @@ export default function AppLayout() {
           token: {
             colorPrimary: "#fe8801",
           },
+          algorithm:
+            mode === "light" ? theme.defaultAlgorithm : theme.darkAlgorithm,
         }}
       >
         <Sider
@@ -25,19 +31,14 @@ export default function AppLayout() {
           <SideNav />
         </Sider>
         <Layout style={{ marginLeft: 200 }}>
-          <Header
-            style={{
-              position: "fixed",
-              width: "100%",
-              zIndex: 1000,
-            }}
-          />
+          <Header style={{ display: "flex", padding: "0 16px" }}>
+            <ThemeSwitch />
+          </Header>
           <Content
             style={{
-              marginTop: 64,
               padding: 24,
               minHeight: "calc(100vh - 112px)",
-              background: "#fff",
+              background: mode === "light" ? "#fff" : "#141414",
             }}
           >
             <Suspense

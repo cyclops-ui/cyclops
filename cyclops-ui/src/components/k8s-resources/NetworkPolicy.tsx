@@ -4,6 +4,7 @@ import { mapResponseError } from "../../utils/api/errors";
 import { useResourceListActions } from "./ResourceList/ResourceListActionsContext";
 import ReactAce from "react-ace";
 import YAML from "yaml";
+import { useTheme } from "../theme/ThemeContext";
 
 interface Props {
   namespace: string;
@@ -17,6 +18,8 @@ interface NetworkPolicyData {
 }
 
 const NetworkPolicy = ({ namespace, name }: Props) => {
+  const { mode } = useTheme();
+
   const [loading, setLoading] = useState(true);
   const { fetchResource } = useResourceListActions();
 
@@ -103,6 +106,7 @@ const NetworkPolicy = ({ namespace, name }: Props) => {
           ),
         }}
         mode={"sass"}
+        theme={mode === "light" ? "github" : "twilight"}
         value={stringifyRulesToYaml(networkPolicy.ingress)}
         readOnly={true}
       />
@@ -121,6 +125,7 @@ const NetworkPolicy = ({ namespace, name }: Props) => {
           ),
         }}
         mode={"sass"}
+        theme={mode === "light" ? "github" : "twilight"}
         value={stringifyRulesToYaml(networkPolicy.egress)}
         readOnly={true}
       />

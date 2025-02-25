@@ -21,13 +21,11 @@ import type { InputRef } from "antd";
 import { formatBytes } from "../../utils/common";
 import { ColumnType } from "antd/lib/table";
 import type { FilterConfirmProps } from "antd/es/table/interface";
-import {
-  CheckCircleTwoTone,
-  CloseSquareTwoTone,
-  SearchOutlined,
-} from "@ant-design/icons";
+import { SearchOutlined } from "@ant-design/icons";
 import Highlighter from "react-highlight-words";
 import { mapResponseError } from "../../utils/api/errors";
+import { useTheme } from "../theme/ThemeContext";
+import { SuccessIcon, ErrorIcon } from "../status/icons";
 
 const { Title, Text } = Typography;
 
@@ -51,6 +49,7 @@ type DataIndex = keyof DataSourceType;
 
 const NodeDetails = () => {
   let { nodeName } = useParams();
+  const { mode } = useTheme();
 
   const [node, setNode] = useState({
     name: String,
@@ -341,24 +340,22 @@ const NodeDetails = () => {
 
   const conditionIcon = (type: string, status: string) => {
     const healthy = (
-      <CheckCircleTwoTone
+      <SuccessIcon
         style={{
           paddingLeft: "6px",
           fontSize: "24px",
           verticalAlign: "middle",
         }}
-        twoToneColor={"#52c41a"}
       />
     );
 
     const unhealthy = (
-      <CloseSquareTwoTone
+      <ErrorIcon
         style={{
           paddingLeft: "6px",
           fontSize: "24px",
           verticalAlign: "middle",
         }}
-        twoToneColor={"red"}
       />
     );
 
@@ -514,13 +511,18 @@ const NodeDetails = () => {
               style={{
                 borderRadius: "10px",
                 borderWidth: "3px",
-                backgroundColor: "#fafafa",
+                backgroundColor: mode === "light" ? "#fafafa" : "#222",
                 width: "100%",
                 margin: "5px",
                 color: "black",
               }}
             >
-              <h3 style={{ paddingBottom: "16px" }}>
+              <h3
+                style={{
+                  color: mode === "light" ? "#000" : "#fff",
+                  paddingBottom: "16px",
+                }}
+              >
                 <strong>
                   {condition.type}
                   {conditionIcon(condition.type, condition.status)}
@@ -534,7 +536,7 @@ const NodeDetails = () => {
               <div style={{ marginBottom: "8px" }}>
                 <Text strong>Last Transition Time: </Text>
                 <br />
-                <Text code>
+                <Text keyboard>
                   {new Date(
                     condition.lastTransitionTime.toString(),
                   ).toLocaleString()}
@@ -543,7 +545,7 @@ const NodeDetails = () => {
               <div style={{ marginBottom: "8px" }}>
                 <Text strong>Last HeartBeat Time: </Text>
                 <br />
-                <Text code>
+                <Text keyboard>
                   {new Date(
                     condition.lastHeartbeatTime.toString(),
                   ).toLocaleString()}

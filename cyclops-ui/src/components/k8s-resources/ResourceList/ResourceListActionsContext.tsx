@@ -1,7 +1,6 @@
 import React, { createContext, ReactNode, useContext } from "react";
 
 interface ResourceListActionsContextType {
-  themePalette?: "dark" | "light";
   streamingDisabled: boolean;
   fetchResource: (
     group: string,
@@ -61,7 +60,6 @@ const ResourceListActionsContext = createContext<
 >(undefined);
 
 interface ResourceListActionsProviderProps {
-  themePalette?: "dark" | "light";
   streamingDisabled: boolean;
   fetchResource: (
     group: string,
@@ -120,7 +118,6 @@ interface ResourceListActionsProviderProps {
 export const ResourceListActionsProvider: React.FC<
   ResourceListActionsProviderProps
 > = ({
-  themePalette,
   streamingDisabled,
   fetchResource,
   fetchResourceManifest,
@@ -135,7 +132,6 @@ export const ResourceListActionsProvider: React.FC<
   return (
     <ResourceListActionsContext.Provider
       value={{
-        themePalette,
         streamingDisabled,
         fetchResource,
         fetchResourceManifest,

@@ -7,12 +7,15 @@ import {
   getTemplateInitialValues,
   getTemplateStore,
 } from "../../../utils/api/api";
+import { useTheme } from "../../theme/ThemeContext";
 
 const NewModule = () => {
+  const { mode } = useTheme();
+
   return (
     <div>
       <CreateModuleComponent
-        themePalette={"light"}
+        themePalette={mode}
         getTemplateStore={getTemplateStore}
         getNamespaces={getNamespaces}
         getTemplate={getTemplate}
