@@ -85,7 +85,7 @@ kubectl port-forward svc/cyclops-ui 3000:3000 -n cyclops
 
 Next, connect to the UI with your browser at http://localhost:3000/.
 
-## Deploy Niginx with a generic app template
+## Deploy Nginx with a generic app template
 
 For the first portion of the demo, we’ll deploy Nginx using Cyclops.
 

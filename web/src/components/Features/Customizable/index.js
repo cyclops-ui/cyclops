@@ -1,7 +1,13 @@
 import React, {useEffect, useRef, useState} from 'react';
 import styles from './styles.module.css';
-import {Card, Col, ConfigProvider, Form, Input, InputNumber, Row, Select, Switch} from "antd";
-import {CheckOutlined, SmileOutlined} from "@ant-design/icons";
+
+import Card from "antd/es/card"
+import Col from "antd/es/col"
+import ConfigProvider from "antd/es/config-provider"
+import Form from "antd/es/form"
+import Input from "antd/es/input"
+import InputNumber from "antd/es/input-number"
+import Row from "antd/es/row"
 
 const Customizable = () => {
     const elementRef = useRef(null);

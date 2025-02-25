@@ -25,7 +25,7 @@ func (s *Server) Resources(ctx *gin.Context) {
 }
 
 func (s *Server) ReleaseResources(ctx *gin.Context) {
-	resources, err := s.k8sClient.GetWorkloadsForRelease(ctx.Param("name"))
+	resources, err := s.releaseClient.ListWorkloadsForRelease(ctx.Param("namespace"), ctx.Param("name"))
 	if err != nil {
 		ctx.String(http.StatusInternalServerError, err.Error())
 		return

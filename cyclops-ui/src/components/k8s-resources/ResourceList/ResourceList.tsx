@@ -30,6 +30,8 @@ import ClusterRole from "../ClusterRole";
 import ConfigMap from "../ConfigMap";
 import PersistentVolumeClaim from "../PersistentVolumeClaim";
 import Secret from "../Secret";
+import NetworkPolicy from "../NetworkPolicy";
+
 import {
   CaretRightOutlined,
   CopyOutlined,
@@ -343,6 +345,11 @@ const ResourceList = ({
         break;
       case "ClusterRole":
         resourceDetails = <ClusterRole name={resource.name} />;
+        break;
+      case "NetworkPolicy":
+        resourceDetails = (
+          <NetworkPolicy namespace={resource.namespace} name={resource.name} />
+        );
         break;
     }
 

@@ -1,10 +1,12 @@
 import React, { useEffect, useRef, useState } from "react";
 import styles from "./styles.module.css";
-import { Col, Row } from "antd";
 import Blog from "./Blog";
 import BlogsTitle from "./Title";
 import BlogsDescription from "./Description";
 import More from "./More";
+
+import Col from "antd/es/col"
+import Row from "antd/es/row"
 
 const Blogs = () => {
   return (
@@ -20,6 +22,19 @@ const Blogs = () => {
         </Row>
         <Row gutter={[16, 16]}>
           <Col xs={{ span: 20, offset: 2 }} md={{ span: 6, offset: 3 }}>
+            <Blog
+              title={"My Love-Hate Relationship with Helm"}
+              description={
+                "If you have been looking for a tool to deploy your applications into a Kubernetes cluster, you have definitely stumbled upon Helm."
+              }
+              blogLink={
+                "https://cyclops-ui.com/blog/2025/02/20/helm-love-hate-relationship"
+              }
+              avatar={"https://github.com/petar-cvit.png"}
+              banner={"/img/2025-02-20-helm-love-hate-relationship/cover.png"}
+            />
+          </Col>
+          <Col xs={{ span: 20, offset: 2 }} md={{ span: 6, offset: 0 }}>
             <Blog
               title={"What are Internal Developer Platforms?"}
               description={
@@ -43,19 +58,6 @@ const Blogs = () => {
               }
               avatar={"https://github.com/richburroughs.png"}
               banner={"/img/2025-02-03-PE-for-the-rest-of-us/cover.png"}
-            />
-          </Col>
-          <Col xs={{ span: 20, offset: 2 }} md={{ span: 6, offset: 0 }}>
-            <Blog
-              title={"Why we’re betting on Kubernetes (and you should too"}
-              description={
-                "We are literally all in, and I want to tell you why we feel comfortable with that decision..."
-              }
-              blogLink={
-                "https://cyclops-ui.com/blog/2025/01/23/betting-on-k8s"
-              }
-              avatar={"https://github.com/KaradzaJuraj.png"}
-              banner={"/img/2025-01-23-betting-on-k8s/cover.jpg"}
             />
           </Col>
         </Row>

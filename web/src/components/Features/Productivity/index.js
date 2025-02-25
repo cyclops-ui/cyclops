@@ -1,6 +1,9 @@
 import React, { useEffect, useRef, useState } from "react";
 import styles from "./styles.module.css";
-import { Card, Col, Row } from "antd";
+
+import Card from "antd/es/card"
+import Col from "antd/es/col"
+import Row from "antd/es/row"
 
 import graph from "/static/img/productivity-graph.gif";
 
