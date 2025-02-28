@@ -146,7 +146,7 @@ func (_c *ITemplateRepo_GetTemplateInitialValues_Call) RunAndReturn(run func(str
 	return _c
 }
 
-// ReturnCache provides a mock function with given fields:
+// ReturnCache provides a mock function with no fields
 func (_m *ITemplateRepo) ReturnCache() *ristretto.Cache {
 	ret := _m.Called()
 

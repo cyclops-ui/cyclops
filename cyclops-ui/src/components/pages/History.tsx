@@ -6,6 +6,7 @@ import ReactDiffViewer from "react-diff-viewer";
 import ReactAce from "react-ace";
 import { mapResponseError } from "../../utils/api/errors";
 import Alert from "antd/lib/alert/Alert";
+import { useTheme } from "../theme/ThemeContext";
 
 const { Title } = Typography;
 
@@ -14,6 +15,8 @@ require(`ace-builds/src-noconflict/snippets/sass`);
 require(`ace-builds/src-noconflict/theme-github`);
 
 const ModuleHistory = () => {
+  const { mode } = useTheme();
+
   const [error, setError] = useState({
     message: "",
     description: "",
@@ -226,7 +229,7 @@ const ModuleHistory = () => {
       >
         <ReactAce
           mode={"sass"}
-          theme={"github"}
+          theme={mode === "light" ? "github" : "twilight"}
           fontSize={12}
           showPrintMargin={true}
           showGutter={true}
@@ -258,7 +261,7 @@ const ModuleHistory = () => {
           splitView={true}
           leftTitle={"current"}
           rightTitle={"previous"}
-          useDarkTheme={false}
+          useDarkTheme={mode === "dark"}
         />
       </Modal>
       <Button

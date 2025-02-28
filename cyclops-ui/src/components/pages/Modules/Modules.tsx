@@ -12,6 +12,8 @@ import {
   Spin,
   Popover,
   Checkbox,
+  theme,
+  ConfigProvider,
 } from "antd";
 
 import axios from "axios";
@@ -21,10 +23,13 @@ import Link from "antd/lib/typography/Link";
 import "./custom.css";
 import { PlusCircleOutlined, FilterOutlined } from "@ant-design/icons";
 import { mapResponseError } from "../../../utils/api/errors";
+import { useTheme } from "../../theme/ThemeContext";
 
-const { Title } = Typography;
+const { Title, Text } = Typography;
 
 const Modules = () => {
+  const { mode } = useTheme();
+
   const [allData, setAllData] = useState([]);
   const [filteredData, setFilteredData] = useState([]);
   const [loadingModules, setLoadingModules] = useState(false);
@@ -34,8 +39,12 @@ const Modules = () => {
     "Progressing",
     "Unknown",
   ]);
+  const [moduleNamespaceFilter, setModuleNamespaceFilter] = useState<string[]>(
+    [],
+  );
   const [searchInputFilter, setsearchInputFilter] = useState("");
   const resourceFilter = ["Healthy", "Unhealthy", "Progressing", "Unknown"];
+  const [namespaceFilterData, setNamespaceFilterData] = useState<string[]>([]);
   const [error, setError] = useState({
     message: "",
     description: "",
@@ -43,6 +52,16 @@ const Modules = () => {
 
   useEffect(() => {
     setLoadingModules(true);
+
+    axios
+      .get(`/api/namespaces`)
+      .then((res) => {
+        setNamespaceFilterData(res.data);
+        setModuleNamespaceFilter(res.data);
+      })
+      .catch((error) => {
+        setError(mapResponseError(error));
+      });
 
     function fetchModules() {
       axios
@@ -72,13 +91,17 @@ const Modules = () => {
         -1
       );
     });
-    const newfilteredData = updatedList.filter((module: any) =>
-      moduleHealthFilter
-        .map((status) => status.toLowerCase())
-        .includes(module.status.toLowerCase()),
+    const newfilteredData = updatedList.filter(
+      (module: any) =>
+        moduleHealthFilter
+          .map((status) => status.toLowerCase())
+          .includes(module.status.toLowerCase()) &&
+        moduleNamespaceFilter
+          .map((targetNamespace) => targetNamespace.toLowerCase())
+          .includes(module.targetNamespace.toLowerCase()),
     );
     setFilteredData(newfilteredData);
-  }, [moduleHealthFilter, allData, searchInputFilter]);
+  }, [moduleNamespaceFilter, moduleHealthFilter, allData, searchInputFilter]);
 
   const handleClick = () => {
     window.location.href = "/modules/new";
@@ -86,20 +109,40 @@ const Modules = () => {
   const handleSelectItem = (selectedItems: any[]) => {
     setModuleHealthFilter(selectedItems);
   };
+  const handleNamespaceSelectItem = (selectedItems: any[]) => {
+    setModuleNamespaceFilter(selectedItems);
+  };
 
   const resourceFilterPopover = () => {
     return (
-      <Checkbox.Group
-        style={{ display: "block" }}
-        onChange={handleSelectItem}
-        value={moduleHealthFilter}
-      >
-        {resourceFilter.map((item, index) => (
-          <Checkbox key={index} value={item}>
-            {item}
-          </Checkbox>
-        ))}
-      </Checkbox.Group>
+      <>
+        <Checkbox.Group
+          style={{ display: "block", margin: "5px 0px" }}
+          onChange={handleSelectItem}
+          value={moduleHealthFilter}
+        >
+          <Text strong>Health</Text>
+          <br />
+          {resourceFilter.map((item, index) => (
+            <Checkbox key={index} value={item}>
+              {item}
+            </Checkbox>
+          ))}
+        </Checkbox.Group>
+        <Checkbox.Group
+          style={{ display: "block", margin: "5px 0px" }}
+          onChange={handleNamespaceSelectItem}
+          value={moduleNamespaceFilter}
+        >
+          <Text strong>Namespace</Text>
+          <br />
+          {namespaceFilterData.map((item, index) => (
+            <Checkbox key={index} value={item}>
+              {item}
+            </Checkbox>
+          ))}
+        </Checkbox.Group>
+      </>
     );
   };
   const handleSearch = (event: any) => {
@@ -313,64 +356,74 @@ const Modules = () => {
   };
 
   return (
-    <div>
-      {error.message.length !== 0 && (
-        <Alert
-          message={error.message}
-          description={error.description}
-          type="error"
-          closable
-          afterClose={() => {
-            setError({
-              message: "",
-              description: "",
-            });
-          }}
-          style={{ marginBottom: "20px" }}
-        />
-      )}
-
-      <Row gutter={[40, 0]}>
-        <Col span={18}>
-          <Title level={2}>Deployed modules</Title>
-        </Col>
-        <Col span={6}>
-          <Button
-            type={"primary"}
-            onClick={handleClick}
-            block
-            style={{
-              fontWeight: "600",
+    <div style={{ backgroundColor: mode === "light" ? "#fff" : "#141414" }}>
+      <ConfigProvider
+        theme={{
+          token: {
+            colorPrimary: "#FF8803",
+          },
+          algorithm:
+            mode === "light" ? theme.defaultAlgorithm : theme.darkAlgorithm,
+        }}
+      >
+        {error.message.length !== 0 && (
+          <Alert
+            message={error.message}
+            description={error.description}
+            type="error"
+            closable
+            afterClose={() => {
+              setError({
+                message: "",
+                description: "",
+              });
             }}
-          >
-            <PlusCircleOutlined />
-            Add module
-          </Button>
-        </Col>
-      </Row>
+            style={{ marginBottom: "20px" }}
+          />
+        )}
 
-      <Row>
-        <Col span={5}>
-          <Input
-            placeholder={"Search modules"}
-            style={{
-              width: "100%",
-              borderTopRightRadius: "0px",
-              borderBottomRightRadius: "0px",
-            }}
-            onChange={handleSearch}
-            addonAfter={
-              <>
-                <Popover content={resourceFilterPopover()} trigger="click">
-                  <FilterOutlined />
-                </Popover>
-              </>
-            }
-          ></Input>
-        </Col>
-      </Row>
-      <Divider orientationMargin="0" />
-      <Row gutter={[16, 16]}>{renderModulesCards()}</Row>
+        <Row gutter={[40, 0]}>
+          <Col span={18}>
+            <Title level={2}>Deployed modules</Title>
+          </Col>
+          <Col span={6}>
+            <Button
+              type={"primary"}
+              onClick={handleClick}
+              block
+              style={{
+                fontWeight: "600",
+              }}
+            >
+              <PlusCircleOutlined />
+              Add module
+            </Button>
+          </Col>
+        </Row>
+
+        <Row>
+          <Col span={5}>
+            <Input
+              placeholder={"Search modules"}
+              style={{
+                width: "100%",
+                borderTopRightRadius: "0px",
+                borderBottomRightRadius: "0px",
+              }}
+              onChange={handleSearch}
+              addonAfter={
+                <>
+                  <Popover content={resourceFilterPopover()} trigger="click">
+                    <FilterOutlined />
+                  </Popover>
+                </>
+              }
+            ></Input>
+          </Col>
+        </Row>
+        <Divider orientationMargin="0" />
+        <Row gutter={[16, 16]}>{renderModulesCards()}</Row>
+      </ConfigProvider>
     </div>
   );
 };

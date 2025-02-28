@@ -6,24 +6,26 @@ import {
   ConfigProvider,
   Descriptions,
   Divider,
+  Form,
   Input,
   Modal,
   notification,
+  Popover,
+  Radio,
   Row,
   Spin,
   Tooltip,
   Typography,
+  theme,
 } from "antd";
 import "ace-builds/src-noconflict/ace";
 import {
   BookOutlined,
-  CheckCircleTwoTone,
-  ClockCircleTwoTone,
-  CloseSquareTwoTone,
   CopyOutlined,
   DeleteOutlined,
   EditOutlined,
   FileTextOutlined,
+  GithubOutlined,
   UndoOutlined,
 } from "@ant-design/icons";
 import "./custom.css";
@@ -48,6 +50,13 @@ import {
   resourceRefKey,
 } from "../../../utils/resourceRef";
 import { ResourceListActionsProvider } from "../../k8s-resources/ResourceList/ResourceListActionsContext";
+import { useTheme } from "../../theme/ThemeContext";
+import { SuccessIcon, PendingIcon, ErrorIcon } from "../../status/icons";
+
+import {
+  isGitHubRepo,
+  moduleConfigGitRefLink,
+} from "../../../utils/moduleConfigGitRef";
 
 const languages = [
   "javascript",
@@ -95,17 +104,22 @@ interface module {
   targetNamespace: string;
   template: templateRef;
   iconURL: string;
+  gitOpsWrite: {
+    repo: string;
+    path: string;
+    branch: string;
+  };
 }
 
 export interface ModuleResourceDetailsProps {
   name: string;
-  themeColor?: string;
+  themePalette?: "dark" | "light";
   streamingDisabled: boolean;
   fetchModule: (moduleName: string) => Promise<any>;
   fetchModuleRawManifest: (moduleName: string) => Promise<string>;
   fetchModuleRenderedManifest: (moduleName: string) => Promise<string>;
   reconcileModule: (moduleName: string) => Promise<any>;
-  deleteModule: (moduleName: string) => Promise<any>;
+  deleteModule: (moduleName: string, deleteMethod?: string) => Promise<any>;
   onDeleteModuleSuccess: (moduleName: string) => void;
   fetchModuleResources: (moduleName: string) => Promise<any[]>;
   fetchResource: (
@@ -165,7 +179,7 @@ export interface ModuleResourceDetailsProps {
 
 export const ModuleResourceDetails = ({
   name,
-  themeColor,
+  themePalette = "light",
   streamingDisabled,
   fetchModule,
   fetchModuleRawManifest,
@@ -185,12 +199,15 @@ export const ModuleResourceDetails = ({
   onEditModule,
   onRollbackModule,
 }: ModuleResourceDetailsProps) => {
+  const { mode } = useTheme();
+
   const [loading, setLoading] = useState(false);
   const [loadModule, setLoadModule] = useState(false);
   const [loadResources, setLoadResources] = useState(false);
   const [loadingReconciliation, setLoadingReconciliation] = useState(false);
 
   const [deleteName, setDeleteName] = useState("");
+  const [deleteModuleForm] = Form.useForm();
 
   const [resources, setResources] = useState<any[]>([]);
   const [workloads, setWorkloads] = useState<Map<string, Workload>>(new Map());
@@ -223,6 +240,11 @@ export const ModuleResourceDetails = ({
       sourceType: "",
     },
     iconURL: "",
+    gitOpsWrite: {
+      repo: "",
+      path: "",
+      branch: "",
+    },
   });
 
   const [loadingRawManifest, setLoadingRawManifest] = useState(false);
@@ -298,8 +320,8 @@ export const ModuleResourceDetails = ({
     setLoading(false);
   };
 
-  const deleteDeployment = () => {
-    deleteModule(name)
+  const handleDeleteModule = (deleteModuleValues) => {
+    deleteModule(name, deleteModuleValues.method)
       .then(() => {
         onDeleteModuleSuccess(name);
       })
@@ -325,6 +347,87 @@ export const ModuleResourceDetails = ({
     });
 
     return resourcesToDelete;
+  };
+
+  const isModuleSourceGit = () => {
+    return (
+      module.gitOpsWrite &&
+      typeof module.gitOpsWrite.repo === "string" &&
+      module.gitOpsWrite.repo.trim() !== ""
+    );
+  };
+
+  const selectDeletionMethod = () => {
+    if (!isModuleSourceGit()) {
+      return <></>;
+    }
+
+    return (
+      <Form.Item
+        name="method"
+        style={{ width: "100%", marginBottom: "12px" }}
+        rules={[
+          {
+            required: true,
+            message: "Select module deletion method!",
+          },
+        ]}
+        label={
+          <div>
+            Deletion Method
+            <p style={{ color: "#8b8e91", marginBottom: "0px" }}>
+              Select how you want to delete this Module.
+            </p>
+          </div>
+        }
+      >
+        <Radio.Group
+          optionType="button"
+          style={{
+            width: "100%",
+            display: "flex",
+          }}
+        >
+          <Popover
+            content={
+              "Deletes the Module from the cluster directly and doesnt remove the file from Git"
+            }
+            placement={"topRight"}
+          >
+            <Radio.Button
+              value="cluster"
+              style={{
+                flex: 1,
+                textAlign: "center",
+              }}
+            >
+              In-cluster
+            </Radio.Button>
+          </Popover>
+          <Popover
+            content={
+              <div>
+                <Row>Deletes the Module config file from the git repo:</Row>
+                <Row style={{ color: "#777" }}>
+                  {module.gitOpsWrite.repo} / {module.gitOpsWrite.path}
+                </Row>
+              </div>
+            }
+            placement={"topLeft"}
+          >
+            <Radio.Button
+              value="git"
+              style={{
+                flex: 1,
+                textAlign: "center",
+              }}
+            >
+              Git repo
+            </Radio.Button>
+          </Popover>
+        </Radio.Group>
+      </Form.Item>
+    );
   };
 
   const moduleLoading = () => {
@@ -453,41 +556,38 @@ export const ModuleResourceDetails = ({
 
     if (status === "progressing") {
       return (
-        <ClockCircleTwoTone
+        <PendingIcon
           style={{
             verticalAlign: "middle",
             height: "100%",
             marginBottom: "4px",
             fontSize: "150%",
           }}
-          twoToneColor={"#ffcc00"}
         />
       );
     }
 
     if (status === "unhealthy") {
       return (
-        <CloseSquareTwoTone
+        <ErrorIcon
           style={{
             verticalAlign: "middle",
             height: "100%",
             marginBottom: "4px",
             fontSize: "150%",
           }}
-          twoToneColor={"red"}
         />
       );
     }
 
     return (
-      <CheckCircleTwoTone
+      <SuccessIcon
         style={{
           verticalAlign: "middle",
           height: "100%",
           marginBottom: "4px",
           fontSize: "150%",
         }}
-        twoToneColor={"#52c41a"}
       />
     );
   };
@@ -578,7 +678,7 @@ export const ModuleResourceDetails = ({
         <div style={{ position: "relative" }}>
           <ReactAce
             mode={"sass"}
-            theme={"github"}
+            theme={mode === "light" ? "github" : "twilight"}
             fontSize={12}
             showPrintMargin={true}
             showGutter={true}
@@ -620,13 +720,44 @@ export const ModuleResourceDetails = ({
     );
   };
 
+  const gitConfigRedirectButton = () => {
+    if (!module.gitOpsWrite) {
+      return;
+    }
+
+    if (!isGitHubRepo(module.gitOpsWrite.repo)) {
+      return;
+    }
+
+    return (
+      <Col>
+        <a
+          href={moduleConfigGitRefLink(
+            module.gitOpsWrite.repo,
+            module.gitOpsWrite.path,
+            module.gitOpsWrite.branch,
+            module.name,
+          )}
+          target="_blank"
+          rel="noreferrer"
+        >
+          <Button block>
+            {" "}
+            <GithubOutlined /> View module config{" "}
+          </Button>
+        </a>
+      </Col>
+    );
+  };
+
   return (
     <div>
       <ConfigProvider
         theme={{
           token: {
-            colorPrimary: themeColor || "#FF8803",
+            colorPrimary: "#FF8803",
           },
+          ...(themePalette === "dark" && { algorithm: theme.darkAlgorithm }),
         }}
       >
         {error.message.length !== 0 && (
@@ -653,6 +784,7 @@ export const ModuleResourceDetails = ({
           Actions
         </Divider>
         <Row gutter={[20, 0]}>
+          {gitConfigRedirectButton()}
           {onEditModule ? (
             <Col>
               <Button
@@ -749,7 +881,10 @@ export const ModuleResourceDetails = ({
               danger
               block
               disabled={deleteName !== name}
-              onClick={deleteDeployment}
+              onClick={() => {
+                console.log("delte button hamndler");
+                deleteModuleForm.submit();
+              }}
             >
               Delete
             </Button>
@@ -762,11 +897,23 @@ export const ModuleResourceDetails = ({
           >
             Child resources
           </Divider>
-          {getResourcesToDelete()}
-          <Divider style={{ fontSize: "120%" }} orientationMargin="0" />
-          In order to delete this module and related resources, type the name of
-          the module in the box below
-          <Input placeholder={name} required onChange={changeDeleteName} />
+          <Form
+            form={deleteModuleForm}
+            onFinish={handleDeleteModule}
+            layout={"vertical"}
+          >
+            {getResourcesToDelete()}
+            <Divider style={{ fontSize: "120%" }} orientationMargin="0" />
+            {selectDeletionMethod()}
+            <Form.Item
+              name="deleteModuleName"
+              label={
+                "In order to delete this module and related resources, type the name of the module in the box below"
+              }
+            >
+              <Input placeholder={name} required onChange={changeDeleteName} />
+            </Form.Item>
+          </Form>
         </Modal>
         <Modal
           title="Module manifest"

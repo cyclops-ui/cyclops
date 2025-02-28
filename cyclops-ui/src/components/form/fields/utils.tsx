@@ -17,10 +17,21 @@ export const isFieldNullOrUndefined = (
   return !obj || obj[fieldName] === null || obj[fieldName] === undefined;
 };
 
-export function collapseColor(open: boolean): string {
+export function collapseColor(
+  open: boolean,
+  themePalette?: "dark" | "light",
+): string {
   if (open) {
+    if (themePalette === "dark") {
+      return "#a35702";
+    }
+
     return "#faca93";
   } else {
+    if (themePalette === "dark") {
+      return "#bd6502";
+    }
+
     return "#fae8d4";
   }
 }

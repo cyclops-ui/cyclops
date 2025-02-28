@@ -1,19 +1,22 @@
 package sse
 
 import (
+	"github.com/cyclops-ui/cyclops/cyclops-ctrl/internal/integrations/helm"
 	"github.com/gin-gonic/gin"
 
 	"github.com/cyclops-ui/cyclops/cyclops-ctrl/pkg/cluster/k8sclient"
 )
 
 type Server struct {
-	k8sClient k8sclient.IKubernetesClient
+	k8sClient     k8sclient.IKubernetesClient
+	releaseClient *helm.ReleaseClient
 }
 
 // Initialize event and Start procnteessing requests
-func NewServer(k8sClient k8sclient.IKubernetesClient) *Server {
+func NewServer(k8sClient k8sclient.IKubernetesClient, releaseClient *helm.ReleaseClient) *Server {
 	server := &Server{
-		k8sClient: k8sClient,
+		k8sClient:     k8sClient,
+		releaseClient: releaseClient,
 	}
 
 	return server

@@ -11,6 +11,8 @@ const PathConstants = {
   HELM_RELEASES: "/helm/releases",
   HELM_RELEASE: "/helm/releases/:releaseNamespace/:releaseName",
   HELM_RELEASE_EDIT: "/helm/releases/:releaseNamespace/:releaseName/edit",
+  HELM_RELEASE_MIGRATION:
+    "/helm/releases/:releaseNamespace/:releaseName/migrate",
 };
 
 export default PathConstants;

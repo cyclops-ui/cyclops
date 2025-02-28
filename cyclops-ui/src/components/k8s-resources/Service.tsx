@@ -8,10 +8,14 @@ import {
   Descriptions,
   Button,
   Spin,
+  Popover,
+  Modal,
+  Checkbox,
 } from "antd";
 import { mapResponseError } from "../../utils/api/errors";
-import { CopyOutlined } from "@ant-design/icons";
+import { ApiOutlined, CopyOutlined, EllipsisOutlined } from "@ant-design/icons";
 import { useResourceListActions } from "./ResourceList/ResourceListActionsContext";
+import { useTheme } from "../theme/ThemeContext";
 
 interface Props {
   name: string;
@@ -37,6 +41,8 @@ interface service {
 }
 
 const Service = ({ name, namespace }: Props) => {
+  const { mode } = useTheme();
+
   const { fetchResource } = useResourceListActions();
 
   const [loading, setLoading] = useState(true);
@@ -44,6 +50,10 @@ const Service = ({ name, namespace }: Props) => {
     externalIPs: [],
     ports: [],
     serviceType: "",
+  });
+  const [portForwardModal, setPortForwardModal] = useState({
+    open: false,
+    ports: [],
   });
   const [error, setError] = useState({
     message: "",
@@ -175,6 +185,50 @@ const Service = ({ name, namespace }: Props) => {
     );
   };
 
+  const portActionsMenu = (port: any) => {
+    return (
+      <div style={{ width: "400px" }}>
+        <h3>Port actions</h3>
+        <Divider style={{ margin: "8px" }} />
+        <Row style={{ margin: 4, gap: 8 }}>
+          <Button
+            style={{ width: "100%" }}
+            onClick={() => {
+              setPortForwardModal({ open: true, ports: [port.port] });
+            }}
+          >
+            <ApiOutlined />
+            Port forward
+          </Button>
+        </Row>
+      </div>
+    );
+  };
+
+  const portForwardCommand = (
+    <div>
+      <span style={{ color: mode === "light" ? "navy" : "lightblue" }}>
+        kubectl{" "}
+      </span>
+      <span>port-forward -n </span>
+      <span style={{ color: "#CC6903" }}>{namespace} </span>
+      <span style={{ color: "#CC6903" }}>svc/{name} </span>
+      {portForwardModal.ports.map((port: string) => {
+        return (
+          <span style={{ color: "#CC6903" }}>
+            {port}:{port}{" "}
+          </span>
+        );
+      })}
+    </div>
+  );
+
+  const portForwardCommandValue = `kubectl port-forward -n ${namespace} svc/${name} ${portForwardModal.ports
+    .map((port: string) => {
+      return `${port}:${port}`;
+    })
+    .join(" ")}`;
+
   if (loading) return <Spin size="large" style={{ marginTop: "20px" }} />;
 
   return (
@@ -216,9 +270,90 @@ const Service = ({ name, namespace }: Props) => {
             <Table.Column title="Protocol" dataIndex="protocol" />
             <Table.Column title="Port" dataIndex="port" />
             <Table.Column title="Target port" dataIndex="targetPort" />
+            <Table.Column
+              title="Actions"
+              key="actions"
+              width="8%"
+              render={(port) => (
+                <Popover
+                  placement={"topRight"}
+                  content={portActionsMenu(port)}
+                  trigger="click"
+                >
+                  <div
+                    style={{
+                      display: "flex",
+                      justifyContent: "center",
+                    }}
+                  >
+                    <EllipsisOutlined />
+                  </div>
+                </Popover>
+              )}
+            />
           </Table>
         </Col>
       </Row>
+      <Modal
+        title="Port forward command"
+        open={portForwardModal.open}
+        onCancel={() => {
+          setPortForwardModal({ open: false, ports: [] });
+        }}
+        cancelButtonProps={{ style: { display: "none" } }}
+        okButtonProps={{ style: { display: "none" } }}
+        style={{ zIndex: 103 }}
+        width={"60%"}
+      >
+        <div style={{ paddingTop: "8px", paddingBottom: "4px" }}>
+          Copy the command below and run it from your terminal to exec into the
+          pod:
+        </div>
+        <pre
+          style={{
+            background: mode === "light" ? "#f5f5f5" : "#383838",
+            padding: "10px",
+            borderRadius: "5px",
+            whiteSpace: "pre-wrap",
+            wordBreak: "break-word",
+            position: "relative",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+            minHeight: "50px",
+          }}
+        >
+          {portForwardCommand}
+          <Button
+            icon={<CopyOutlined />}
+            onClick={() => {
+              navigator.clipboard.writeText(portForwardCommandValue);
+            }}
+            style={{
+              position: "relative",
+              padding: "2px 8px",
+              fontSize: "12px",
+            }}
+          />
+        </pre>
+        Select which ports you want to port-forward:
+        <div>
+          <Checkbox.Group
+            onChange={(v) => {
+              setPortForwardModal({ open: true, ports: v });
+            }}
+            value={portForwardModal.ports}
+          >
+            <div style={{ display: "flex", flexDirection: "column" }}>
+              {service.ports.map((port: any) => (
+                <Checkbox key={port.port} value={port.port}>
+                  {port.name} <span style={{ color: "#999" }}>{port.port}</span>
+                </Checkbox>
+              ))}
+            </div>
+          </Checkbox.Group>
+        </div>
+      </Modal>
     </div>
   );
 };

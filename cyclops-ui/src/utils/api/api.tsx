@@ -5,6 +5,18 @@ export async function getModule(moduleName: string): Promise<any> {
   return response.data;
 }
 
+export async function getTemplateStore(): Promise<any[]> {
+  const resp = await axios.get(`/api/templates/store`);
+
+  return resp.data;
+}
+
+export async function getNamespaces(): Promise<string[]> {
+  const resp = await axios.get(`/api/namespaces`);
+
+  return resp.data;
+}
+
 export async function getTemplate(
   repo: string,
   path: string,
@@ -57,15 +69,38 @@ export async function fetchModuleRenderedManifest(moduleName: string) {
   return resp.data;
 }
 
+export async function createModule(
+  moduleName: string,
+  moduleNamespace: string,
+  templateRef: any,
+  values: any,
+  gitOpsWrite?: any,
+) {
+  return await axios.post(`/api/modules/new`, {
+    name: moduleName,
+    namespace: moduleNamespace,
+    gitOpsWrite: gitOpsWrite,
+    values: values,
+    template: {
+      repo: templateRef.repo,
+      path: templateRef.path,
+      version: templateRef.version,
+      sourceType: templateRef.sourceType,
+    },
+  });
+}
+
 export async function updateModule(
   moduleName: string,
   templateRef: any,
   values: any,
+  gitOpsWrite: any,
 ) {
   return await axios.post(`/api/modules/update`, {
     name: moduleName,
     template: templateRef,
     values: values,
+    gitOpsWrite: gitOpsWrite,
   });
 }
 
@@ -73,8 +108,12 @@ export async function reconcileModule(moduleName: string) {
   return await axios.post(`/api/modules/${moduleName}/reconcile`);
 }
 
-export async function deleteModule(moduleName: string) {
-  return await axios.delete(`/api/modules/${moduleName}`);
+export async function deleteModule(moduleName: string, deleteMethod?: string) {
+  return await axios.delete(`/api/modules/${moduleName}`, {
+    params: {
+      deleteMethod: deleteMethod,
+    },
+  });
 }
 
 export async function fetchModuleResources(moduleName: string) {

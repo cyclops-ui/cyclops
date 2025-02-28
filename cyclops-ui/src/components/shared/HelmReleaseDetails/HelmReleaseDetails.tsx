@@ -3,12 +3,15 @@ import {
   Alert,
   Button,
   Col,
+  ConfigProvider,
   Descriptions,
+  Form,
+  FormInstance,
   Input,
   Modal,
   Row,
   Spin,
-  Tooltip,
+  theme,
   Typography,
 } from "antd";
 import "ace-builds/src-noconflict/ace";
@@ -89,6 +92,7 @@ interface release {
 interface HelmReleaseDetailsProps {
   releaseName: string;
   releaseNamespace: string;
+  themePalette?: "dark" | "light";
   streamingDisabled: boolean;
   getRelease: (releaseNamespace: string, releaseName: string) => Promise<any>;
   uninstallRelease: (
@@ -154,11 +158,18 @@ interface HelmReleaseDetailsProps {
     setError: (err: Error, isReset?: boolean) => void,
     signalController: AbortController,
   ) => void;
+  getTemplate: (
+    repo: string,
+    path: string,
+    version: string,
+    sourceType: string,
+  ) => Promise<any>;
 }
 
 export const HelmReleaseDetails = ({
   releaseName,
   releaseNamespace,
+  themePalette = "light",
   streamingDisabled,
   getRelease,
   uninstallRelease,
@@ -172,6 +183,7 @@ export const HelmReleaseDetails = ({
   getPodLogs,
   downloadPodLogs,
   streamPodLogs,
+  getTemplate,
 }: HelmReleaseDetailsProps) => {
   const [loading, setLoading] = useState(false);
   const [loadModule, setLoadModule] = useState(false);
@@ -192,6 +204,11 @@ export const HelmReleaseDetails = ({
   const [loadResources, setLoadResources] = useState(false);
   const [workloads, setWorkloads] = useState<Map<string, Workload>>(new Map());
 
+  const [templateMigrationModal, setTemplateMigrationModal] = useState(false);
+  const [templateMigrationModalLoading, setTemplateMigrationModalLoading] =
+    useState(false);
+  const [migrateTemplateRefForm] = Form.useForm();
+
   function putWorkload(ref: ResourceRef, workload: Workload) {
     let k = resourceRefKey(ref);
 
@@ -203,6 +220,11 @@ export const HelmReleaseDetails = ({
   }
 
   const [error, setError] = useState({
+    message: "",
+    description: "",
+  });
+
+  const [migrationTemplateError, setMigrationTemplateError] = useState({
     message: "",
     description: "",
   });
@@ -248,7 +270,7 @@ export const HelmReleaseDetails = ({
   useEffect(() => {
     if (isStreamingEnabled()) {
       resourcesStream(
-        `/stream/releases/resources/${releaseName}`,
+        `/stream/releases/${releaseNamespace}/${releaseName}/resources`,
         (r: any) => {
           let resourceRef: ResourceRef = {
             group: r.group,
@@ -263,7 +285,7 @@ export const HelmReleaseDetails = ({
         resourceStreamImplementation,
       );
     }
-  }, [releaseName, resourceStreamImplementation]);
+  }, [releaseNamespace, releaseName, resourceStreamImplementation]);
 
   const resourceLoading = () => {
     if (!loadModule) {
@@ -331,120 +353,42 @@ export const HelmReleaseDetails = ({
       });
   };
 
+  const handleSubmitMigrateModal = async () => {
+    try {
+      await migrateTemplateRefForm.validateFields();
+    } catch (error) {
+      return;
+    }
+
+    // setTemplateMigrationModal(false);
+    setTemplateMigrationModalLoading(true);
+    const templateRef = migrateTemplateRefForm.getFieldsValue();
+
+    getTemplate(
+      templateRef["repo"],
+      templateRef["path"],
+      templateRef["version"],
+      "",
+    )
+      .then(() => {
+        setTemplateMigrationModalLoading(false);
+        window.location.href = `/helm/releases/${releaseNamespace}/${releaseName}/migrate?repo=${encodeURIComponent(templateRef["repo"])}&path=${encodeURIComponent(templateRef["path"])}&version=${encodeURIComponent(templateRef["version"])}`;
+      })
+      .catch((e) => {
+        setMigrationTemplateError(mapResponseError(e));
+        setTemplateMigrationModalLoading(false);
+      });
+  };
+
   return (
     <div>
-      {error.message.length !== 0 && (
-        <Alert
-          message={error.message}
-          description={error.description}
-          type="error"
-          closable
-          afterClose={() => {
-            setError({
-              message: "",
-              description: "",
-            });
-          }}
-          style={{ marginBottom: "20px" }}
-        />
-      )}
-      {resourceLoading()}
-      <Row gutter={[12, 0]}>
-        <Col>
-          <Tooltip placement="top" title={"Comming soon!"}>
-            <Button
-              // onClick={() => {
-              //     setTempalteMigrationModal(true);
-              // }}
-              type={"primary"}
-              disabled={true}
-              block
-            >
-              <RocketOutlined />
-              Migrate to Cyclops Module
-            </Button>
-          </Tooltip>
-        </Col>
-        <Col>
-          <Button
-            onClick={() => {
-              window.location.href = `/helm/releases/${releaseNamespace}/${releaseName}/edit`;
-            }}
-            block
-          >
-            <EditOutlined />
-            Edit release
-          </Button>
-        </Col>
-        <Col>
-          <Button
-            onClick={function () {
-              setConfirmUninstall(true);
-            }}
-            danger
-            block
-            loading={loading}
-          >
-            <DeleteOutlined />
-            Delete
-          </Button>
-        </Col>
-      </Row>
-      <ResourceListActionsProvider
-        streamingDisabled={streamingDisabled}
-        fetchResource={fetchResource}
-        fetchResourceManifest={fetchResourceManifest}
-        resourceStreamImplementation={resourceStreamImplementation}
-        restartResource={restartResource}
-        deleteResource={deleteResource}
-        getPodLogs={getPodLogs}
-        downloadPodLogs={downloadPodLogs}
-        streamPodLogs={streamPodLogs}
-      >
-        <ResourceList
-          loadResources={loadResources}
-          resources={resources}
-          workloads={workloads}
-          onResourceDelete={() => {
-            setLoadResources(false);
-            fetchReleaseResources();
-          }}
-        />
-      </ResourceListActionsProvider>
-      {/*<Modal*/}
-      {/*    title="Migrate to a Cyclops Module"*/}
-      {/*    open={templateMigrationModal}*/}
-      {/*    onCancel={handleCancelModal}*/}
-      {/*    onOk={handleCancelModal}*/}
-      {/*    confirmLoading={confirmLoading}*/}
-      {/*    width={"60%"}*/}
-      {/*>*/}
-      {/*    <h3>Coming soon</h3>*/}
-      {/*</Modal>*/}
-      <Modal
-        title={
-          <>
-            Uninstall release{" "}
-            <span style={{ color: "red" }}>
-              {releaseNamespace}/{releaseName}
-            </span>
-          </>
-        }
-        open={confirmUninstall}
-        onCancel={() => {
-          setConfirmUninstall(false);
+      <ConfigProvider
+        theme={{
+          token: {
+            colorPrimary: "#FF8803",
+          },
+          ...(themePalette === "dark" && { algorithm: theme.darkAlgorithm }),
         }}
-        width={"40%"}
-        footer={
-          <Button
-            danger
-            block
-            disabled={confirmUninstallInput !== releaseName}
-            onClick={handleUninstallRelease}
-          >
-            Delete
-          </Button>
-        }
       >
         {error.message.length !== 0 && (
           <Alert
@@ -461,17 +405,231 @@ export const HelmReleaseDetails = ({
             style={{ marginBottom: "20px" }}
           />
         )}
-        In order to uninstall this release and related resources, type the name
-        of the release below
-        <Input
-          style={{ marginTop: "12px" }}
-          placeholder={releaseName}
-          required
-          onChange={(e) => {
-            setConfirmUninstallInput(e.target.value);
+        {resourceLoading()}
+        <Row gutter={[12, 0]}>
+          <Col>
+            <Button
+              onClick={() => {
+                setTemplateMigrationModal(true);
+              }}
+              type={"primary"}
+              block
+            >
+              <RocketOutlined />
+              Migrate to Cyclops Module
+            </Button>
+          </Col>
+          <Col>
+            <Button
+              onClick={() => {
+                window.location.href = `/helm/releases/${releaseNamespace}/${releaseName}/edit`;
+              }}
+              block
+            >
+              <EditOutlined />
+              Edit release
+            </Button>
+          </Col>
+          <Col>
+            <Button
+              onClick={function () {
+                setConfirmUninstall(true);
+              }}
+              danger
+              block
+              loading={loading}
+            >
+              <DeleteOutlined />
+              Delete
+            </Button>
+          </Col>
+        </Row>
+        <ResourceListActionsProvider
+          streamingDisabled={streamingDisabled}
+          fetchResource={fetchResource}
+          fetchResourceManifest={fetchResourceManifest}
+          resourceStreamImplementation={resourceStreamImplementation}
+          restartResource={restartResource}
+          deleteResource={deleteResource}
+          getPodLogs={getPodLogs}
+          downloadPodLogs={downloadPodLogs}
+          streamPodLogs={streamPodLogs}
+        >
+          <ResourceList
+            loadResources={loadResources}
+            resources={resources}
+            workloads={workloads}
+            onResourceDelete={() => {
+              setLoadResources(false);
+              fetchReleaseResources();
+            }}
+          />
+        </ResourceListActionsProvider>
+        <Modal
+          title="Migrate to a Cyclops Module"
+          open={templateMigrationModal}
+          onCancel={() => {
+            setTemplateMigrationModal(false);
           }}
-        />
-      </Modal>
+          onOk={handleSubmitMigrateModal}
+          confirmLoading={templateMigrationModalLoading}
+          width={"60%"}
+        >
+          {migrationTemplateError.message.length !== 0 && (
+            <Alert
+              message={migrationTemplateError.message}
+              description={migrationTemplateError.description}
+              type="error"
+              closable
+              afterClose={() => {
+                setError({
+                  message: "",
+                  description: "",
+                });
+              }}
+              style={{ marginBottom: "20px" }}
+            />
+          )}
+          <Row style={{ paddingBottom: "8px" }}>
+            Select the Helm chart you want to use for the Module (cannot be
+            inferred from the Helm release)
+          </Row>
+          <Row>
+            <HelmReleaseMigrationTemplateModal
+              migrateTemplateRefForm={migrateTemplateRefForm}
+            />
+          </Row>
+          <Row
+            style={{ paddingTop: "8px", paddingBottom: "8px", color: "#888" }}
+          >
+            {templateMigrationModalLoading ? "Verifying template..." : ""}
+          </Row>
+        </Modal>
+        <Modal
+          title={
+            <>
+              Uninstall release{" "}
+              <span style={{ color: "red" }}>
+                {releaseNamespace}/{releaseName}
+              </span>
+            </>
+          }
+          open={confirmUninstall}
+          onCancel={() => {
+            setConfirmUninstall(false);
+          }}
+          width={"40%"}
+          footer={
+            <Button
+              danger
+              block
+              disabled={confirmUninstallInput !== releaseName}
+              onClick={handleUninstallRelease}
+            >
+              Delete
+            </Button>
+          }
+        >
+          {error.message.length !== 0 && (
+            <Alert
+              message={error.message}
+              description={error.description}
+              type="error"
+              closable
+              afterClose={() => {
+                setError({
+                  message: "",
+                  description: "",
+                });
+              }}
+              style={{ marginBottom: "20px" }}
+            />
+          )}
+          In order to uninstall this release and related resources, type the
+          name of the release below
+          <Input
+            style={{ marginTop: "12px" }}
+            placeholder={releaseName}
+            required
+            onChange={(e) => {
+              setConfirmUninstallInput(e.target.value);
+            }}
+          />
+        </Modal>
+      </ConfigProvider>
     </div>
+  );
+};
+
+interface HelmReleaseMigrationTemplateModalProps {
+  migrateTemplateRefForm: FormInstance;
+}
+
+export const HelmReleaseMigrationTemplateModal = ({
+  migrateTemplateRefForm,
+}: HelmReleaseMigrationTemplateModalProps) => {
+  return (
+    <Form
+      form={migrateTemplateRefForm}
+      layout="inline"
+      autoComplete={"off"}
+      // onFinish={handleSubmitMigrationTemplate}
+      // onFinishFailed={onFinishFailed}
+      style={{ width: "100%" }}
+      requiredMark={(label, { required }) => (
+        <Row>
+          <Col>
+            {required ? (
+              <span style={{ color: "red", paddingRight: "3px" }}>*</span>
+            ) : (
+              <></>
+            )}
+          </Col>
+          <Col>{label}</Col>
+        </Row>
+      )}
+    >
+      <Form.Item
+        name={"repo"}
+        rules={[{ required: true, message: "Provide template repo URL" }]}
+        style={{ width: "50%", marginRight: "0" }}
+      >
+        <Input placeholder={"Repository"} />
+      </Form.Item>
+      <div
+        style={{
+          width: "2%",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+        }}
+      >
+        /
+      </div>
+      <Form.Item
+        name={"path"}
+        rules={[{ required: true, message: "Provide template path" }]}
+        style={{ width: "25%", marginRight: "0" }}
+      >
+        <Input placeholder={"Path"} />
+      </Form.Item>
+      <div
+        style={{
+          width: "2%",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+        }}
+      >
+        @
+      </div>
+      <Form.Item
+        name={"version"}
+        rules={[{ required: true, message: "Provide template version" }]}
+        style={{ width: "20%", marginRight: "0" }}
+      >
+        <Input placeholder={"Version"} />
+      </Form.Item>
+    </Form>
   );
 };

@@ -2,6 +2,7 @@ package handler
 
 import (
 	"github.com/cyclops-ui/cyclops/cyclops-ctrl/internal/controller/sse"
+	"github.com/cyclops-ui/cyclops/cyclops-ctrl/internal/git"
 	"github.com/cyclops-ui/cyclops/cyclops-ctrl/internal/integrations/helm"
 	"github.com/gin-gonic/gin"
 	"net/http"
@@ -17,10 +18,11 @@ import (
 type Handler struct {
 	router *gin.Engine
 
-	templatesRepo templaterepo.ITemplateRepo
-	k8sClient     k8sclient.IKubernetesClient
-	releaseClient *helm.ReleaseClient
-	renderer      *render.Renderer
+	templatesRepo  templaterepo.ITemplateRepo
+	k8sClient      k8sclient.IKubernetesClient
+	releaseClient  *helm.ReleaseClient
+	renderer       *render.Renderer
+	gitWriteClient *git.WriteClient
 
 	moduleTargetNamespace string
 
@@ -33,6 +35,7 @@ func New(
 	kubernetesClient k8sclient.IKubernetesClient,
 	releaseClient *helm.ReleaseClient,
 	renderer *render.Renderer,
+	gitWriteClient *git.WriteClient,
 	moduleTargetNamespace string,
 	telemetryClient telemetry.Client,
 	monitor prometheus.Monitor,
@@ -42,10 +45,10 @@ func New(
 		k8sClient:             kubernetesClient,
 		renderer:              renderer,
 		releaseClient:         releaseClient,
+		gitWriteClient:        gitWriteClient,
 		moduleTargetNamespace: moduleTargetNamespace,
 		telemetryClient:       telemetryClient,
 		monitor:               monitor,
-		router:                gin.New(),
 	}, nil
 }
 
@@ -53,16 +56,16 @@ func (h *Handler) Start() error {
 	gin.SetMode(gin.DebugMode)
 
 	templatesController := controller.NewTemplatesController(h.templatesRepo, h.k8sClient, h.telemetryClient)
-	modulesController := controller.NewModulesController(h.templatesRepo, h.k8sClient, h.renderer, h.moduleTargetNamespace, h.telemetryClient, h.monitor)
+	modulesController := controller.NewModulesController(h.templatesRepo, h.k8sClient, h.renderer, h.gitWriteClient, h.moduleTargetNamespace, h.telemetryClient, h.monitor)
 	clusterController := controller.NewClusterController(h.k8sClient)
 	helmController := controller.NewHelmController(h.k8sClient, h.releaseClient, h.telemetryClient)
 
 	h.router = gin.New()
 
-	server := sse.NewServer(h.k8sClient)
+	server := sse.NewServer(h.k8sClient, h.releaseClient)
 
 	h.router.GET("/stream/resources/:name", sse.HeadersMiddleware(), server.Resources)
-	h.router.GET("/stream/releases/resources/:name", sse.HeadersMiddleware(), server.ReleaseResources)
+	h.router.GET("/stream/releases/:namespace/:name/resources", sse.HeadersMiddleware(), server.ReleaseResources)
 	h.router.POST("/stream/resources", sse.HeadersMiddleware(), server.SingleResource)
 
 	h.router.GET("/ping", h.pong())
@@ -116,6 +119,7 @@ func (h *Handler) Start() error {
 	h.router.GET("/helm/releases/:namespace/:name/resources", helmController.GetReleaseResources)
 	h.router.GET("/helm/releases/:namespace/:name/fields", helmController.GetReleaseSchema)
 	h.router.GET("/helm/releases/:namespace/:name/values", helmController.GetReleaseValues)
+	h.router.POST("/helm/releases/:namespace/:name/migrate", helmController.MigrateHelmRelease)
 	// endregion
 
 	h.router.Use(h.options)

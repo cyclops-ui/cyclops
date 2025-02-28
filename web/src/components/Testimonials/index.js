@@ -1,9 +1,10 @@
 import React, {useEffect, useRef, useState} from 'react';
 import styles from './styles.module.css';
-import {Col, Row} from "antd";
 import Testimonial from "./Testimonial";
 import TestimonialsTitle from "./Title";
-import { LinkedinFilled } from '@ant-design/icons';
+
+import Col from "antd/es/col"
+import Row from "antd/es/row"
 
 const Testimonials = () => {
     return (

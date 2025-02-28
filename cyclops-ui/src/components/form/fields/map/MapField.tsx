@@ -2,6 +2,7 @@ import React from "react";
 import { Button, Col, Divider, Form, Input, Row } from "antd";
 import { MinusCircleOutlined, PlusOutlined } from "@ant-design/icons";
 import TextArea from "antd/es/input/TextArea";
+import { useTemplateFormFields } from "../../TemplateFormFieldsContext";
 
 interface Props {
   field: any;
@@ -18,6 +19,8 @@ export const MapField = ({
   formItemName,
   isRequired,
 }: Props) => {
+  const { themePalette } = useTemplateFormFields();
+
   return (
     <Form.Item
       wrapperCol={{ span: level === 0 ? 16 : 24 }}
@@ -40,11 +43,12 @@ export const MapField = ({
         {(fields, { add, remove }) => (
           <div
             style={{
-              border: "solid 1px #d3d3d3",
+              border: "solid 1px",
+              borderColor: themePalette === "dark" ? "#444" : "#d3d3d3",
               borderRadius: "7px",
               padding: "12px",
               width: "100%",
-              backgroundColor: "#fafafa",
+              backgroundColor: themePalette === "dark" ? "#333" : "#fafafa",
             }}
           >
             {fields.map((arrField, index) => (

@@ -16,13 +16,16 @@ import {
   restartResource,
 } from "../../../utils/api/api";
 import { isStreamingEnabled } from "../../../utils/api/common";
+import { useTheme } from "../../theme/ThemeContext";
 
 const ModuleDetails = () => {
   let { moduleName } = useParams();
+  const { mode } = useTheme();
 
   return (
     <div>
       <ModuleResourceDetails
+        themePalette={mode}
         name={moduleName}
         streamingDisabled={!isStreamingEnabled()}
         fetchModule={getModule}

@@ -94,20 +94,12 @@ func (k *KubernetesClient) GetResourcesForModule(name string) ([]dto.Resource, e
 	}
 
 	for _, o := range other {
-		status, err := k.getResourceStatus(o)
+		res, err := k.MapUnstructuredResource(o)
 		if err != nil {
 			return nil, err
 		}
 
-		out = append(out, &dto.Other{
-			Group:     o.GroupVersionKind().Group,
-			Version:   o.GroupVersionKind().Version,
-			Kind:      o.GroupVersionKind().Kind,
-			Name:      o.GetName(),
-			Namespace: o.GetNamespace(),
-			Status:    status,
-			Deleted:   false,
-		})
+		out = append(out, res)
 	}
 
 	sort.Slice(out, func(i, j int) bool {
@@ -119,6 +111,23 @@ func (k *KubernetesClient) GetResourcesForModule(name string) ([]dto.Resource, e
 	})
 
 	return out, nil
+}
+
+func (k *KubernetesClient) MapUnstructuredResource(u unstructured.Unstructured) (dto.Resource, error) {
+	status, err := k.getResourceStatus(u)
+	if err != nil {
+		return nil, err
+	}
+
+	return &dto.Other{
+		Group:     u.GroupVersionKind().Group,
+		Version:   u.GroupVersionKind().Version,
+		Kind:      u.GroupVersionKind().Kind,
+		Name:      u.GetName(),
+		Namespace: u.GetNamespace(),
+		Status:    status,
+		Deleted:   false,
+	}, nil
 }
 
 func (k *KubernetesClient) GetResourcesForCRD(childLabels map[string]string, name string) ([]dto.Resource, error) {
@@ -858,6 +867,7 @@ func (k *KubernetesClient) getPodsForNetworkPolicy(policy networkingv1.NetworkPo
 
 		out = append(out, dto.Pod{
 			Name:       item.Name,
+			Namespace:  item.Namespace,
 			Containers: containers,
 			Node:       item.Spec.NodeName,
 			PodPhase:   string(item.Status.Phase),
