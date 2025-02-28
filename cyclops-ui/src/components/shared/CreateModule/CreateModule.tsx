@@ -91,7 +91,6 @@ export const CreateModuleComponent = ({
   onSubmitModuleSuccess,
   onBackButton,
 }: CreateModuleProps) => {
-  const [loading, setLoading] = useState(false);
   const [config, setConfig] = useState({
     name: "",
     version: "",
@@ -121,6 +120,8 @@ export const CreateModuleComponent = ({
   const [loadingTemplate, setLoadingTemplate] = useState(false);
   const [loadingTemplateInitialValues, setLoadingTemplateInitialValues] =
     useState(false);
+
+  const [loadingSubmitCreate, setLoadingSubmitCreate] = useState(false);
 
   const [loadedValues, setLoadedValues] = useState("");
   const [loadingValuesModal, setLoadingValuesModal] = useState(false);
@@ -169,6 +170,8 @@ export const CreateModuleComponent = ({
   }, [initialValues, form]);
 
   const handleSubmit = (values: any) => {
+    setLoadingSubmitCreate(true);
+
     const moduleName = values["cyclops_module_name"];
     const moduleNamespace = values["cyclops_module_namespace"];
     const gitOpsWrite = gitopsToggle
@@ -197,8 +200,10 @@ export const CreateModuleComponent = ({
         onSubmitModuleSuccess(moduleName);
       })
       .catch((error) => {
-        setLoading(false);
         setError(mapResponseError(error));
+      })
+      .finally(() => {
+        setLoadingSubmitCreate(false);
       });
   };
 
@@ -697,9 +702,7 @@ export const CreateModuleComponent = ({
                 </Button>{" "}
                 <Button
                   type="primary"
-                  loading={
-                    loading || loadingTemplate || loadingTemplateInitialValues
-                  }
+                  loading={loadingSubmitCreate}
                   htmlType="submit"
                   name="Save"
                   disabled={

@@ -114,6 +114,8 @@ export const EditModuleComponent = ({
     },
   });
 
+  const [loadingSubmitUpdate, setLoadingSubmitUpdate] = useState(false);
+
   const [advancedOptionsExpanded, setAdvancedOptionsExpanded] = useState(false);
   const [gitopsToggle, setGitopsToggle] = useState(false);
 
@@ -310,6 +312,8 @@ export const EditModuleComponent = ({
   }
 
   async function handleSubmit(values: any) {
+    setLoadingSubmitUpdate(true);
+
     if (isTemplateChanged) {
       values = findMaps(config.root.properties, values, initialValuesRaw);
     } else {
@@ -336,6 +340,9 @@ export const EditModuleComponent = ({
         })
         .catch((error) => {
           setError(mapResponseError(error));
+        })
+        .finally(() => {
+          setLoadingSubmitUpdate(false);
         });
     } catch (error) {
       onFinishFailed(error);
@@ -371,6 +378,7 @@ export const EditModuleComponent = ({
               (!isChanged && !isTemplateChanged && !isGitOpsChanged) ||
               !loadTemplate
             }
+            loading={loadingSubmitUpdate}
           >
             Deploy
           </Button>{" "}
