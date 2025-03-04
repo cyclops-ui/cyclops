@@ -195,6 +195,7 @@ func (m *Modules) Manifest(ctx *gin.Context) {
 		request.TemplateRef.Path,
 		request.TemplateRef.Version,
 		"",
+		"",
 		request.TemplateRef.SourceType,
 	)
 	if err != nil {
@@ -244,6 +245,7 @@ func (m *Modules) CurrentManifest(ctx *gin.Context) {
 		module.Spec.TemplateRef.Path,
 		module.Spec.TemplateRef.Version,
 		module.Status.TemplateResolvedVersion,
+		module.Spec.TemplateRef.CRDName,
 		module.Spec.TemplateRef.SourceType,
 	)
 	if err != nil {
@@ -495,6 +497,7 @@ func (m *Modules) ResourcesForModule(ctx *gin.Context) {
 		module.Spec.TemplateRef.Path,
 		templateVersion,
 		module.Status.TemplateResolvedVersion,
+		module.Spec.TemplateRef.CRDName,
 		module.Spec.TemplateRef.SourceType,
 	)
 	if err != nil {
@@ -541,6 +544,7 @@ func (m *Modules) Template(ctx *gin.Context) {
 		module.Spec.TemplateRef.Path,
 		module.Spec.TemplateRef.Version,
 		module.Status.TemplateResolvedVersion,
+		module.Spec.TemplateRef.CRDName,
 		module.Spec.TemplateRef.SourceType,
 	)
 	if err != nil {
@@ -561,6 +565,7 @@ func (m *Modules) Template(ctx *gin.Context) {
 		module.Spec.TemplateRef.Path,
 		module.Spec.TemplateRef.Version,
 		module.Status.TemplateResolvedVersion,
+		module.Spec.TemplateRef.CRDName,
 		module.Spec.TemplateRef.SourceType,
 	)
 	if err != nil {
@@ -599,6 +604,7 @@ func (m *Modules) HelmTemplate(ctx *gin.Context) {
 		module.Spec.TemplateRef.Path,
 		module.Spec.TemplateRef.Version,
 		module.Status.TemplateResolvedVersion,
+		module.Spec.TemplateRef.CRDName,
 		module.Spec.TemplateRef.SourceType,
 	)
 	if err != nil {

@@ -39,9 +39,10 @@ func (c *Templates) GetTemplate(ctx *gin.Context) {
 	repo := ctx.Query("repo")
 	path := ctx.Query("path")
 	commit := ctx.Query("commit")
+	CRDName := ctx.Query("crdName")
 	sourceType := ctx.Query("sourceType")
 
-	if repo == "" {
+	if repo == "" && CRDName == "" {
 		ctx.String(http.StatusBadRequest, "set repo field")
 		return
 	}
@@ -51,6 +52,7 @@ func (c *Templates) GetTemplate(ctx *gin.Context) {
 		path,
 		commit,
 		"",
+		CRDName,
 		cyclopsv1alpha1.TemplateSourceType(sourceType),
 	)
 	if err != nil {
@@ -67,9 +69,10 @@ func (c *Templates) GetTemplateInitialValues(ctx *gin.Context) {
 	repo := ctx.Query("repo")
 	path := ctx.Query("path")
 	commit := ctx.Query("commit")
+	CRDName := ctx.Query("crdName")
 	sourceType := ctx.Query("sourceType")
 
-	if repo == "" {
+	if repo == "" && CRDName == "" {
 		ctx.JSON(http.StatusBadRequest, dto.NewError("Specify repo field", "Repo not specified"))
 		return
 	}
@@ -78,6 +81,7 @@ func (c *Templates) GetTemplateInitialValues(ctx *gin.Context) {
 		repo,
 		path,
 		commit,
+		CRDName,
 		cyclopsv1alpha1.TemplateSourceType(sourceType),
 	)
 	if err != nil {
@@ -97,6 +101,18 @@ func (c *Templates) GetTemplateInitialValues(ctx *gin.Context) {
 func (c *Templates) ListTemplatesStore(ctx *gin.Context) {
 	ctx.Header("Access-Control-Allow-Origin", "*")
 
+	if ctx.Param("crdmode") == "true" {
+		store, err := c.kubernetesClient.ListTemplateCRDs()
+		if err != nil {
+			ctx.JSON(http.StatusInternalServerError, dto.NewError("Error fetching templates store", err.Error()))
+			return
+		}
+
+		storeDTO := mapper.TemplateCRDListToDTO(store)
+
+		ctx.JSON(http.StatusOK, storeDTO)
+	}
+
 	store, err := c.kubernetesClient.ListTemplateStore()
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, dto.NewError("Error fetching templates store", err.Error()))
@@ -104,7 +120,6 @@ func (c *Templates) ListTemplatesStore(ctx *gin.Context) {
 	}
 
 	storeDTO := mapper.TemplateStoreListToDTO(store)
-
 	ctx.JSON(http.StatusOK, storeDTO)
 }
 
@@ -130,6 +145,7 @@ func (c *Templates) CreateTemplatesStore(ctx *gin.Context) {
 		templateStore.TemplateRef.URL,
 		templateStore.TemplateRef.Path,
 		templateStore.TemplateRef.Version,
+		"",
 		"",
 		cyclopsv1alpha1.TemplateSourceType(templateStore.TemplateRef.SourceType),
 	)
@@ -172,6 +188,7 @@ func (c *Templates) EditTemplatesStore(ctx *gin.Context) {
 		templateStore.TemplateRef.URL,
 		templateStore.TemplateRef.Path,
 		templateStore.TemplateRef.Version,
+		"",
 		"",
 		cyclopsv1alpha1.TemplateSourceType(templateStore.TemplateRef.SourceType),
 	)
