@@ -29,10 +29,11 @@ type ReconciliationStatus struct {
 }
 
 type Template struct {
-	URL             string `json:"repo" binding:"required"`
-	Path            string `json:"path" binding:"required"`
+	URL             string `json:"repo"`
+	Path            string `json:"path"`
 	Version         string `json:"version"`
 	ResolvedVersion string `json:"resolvedVersion"`
+	CRDName         string `json:"crdName"`
 	SourceType      string `json:"sourceType"`
 }
 

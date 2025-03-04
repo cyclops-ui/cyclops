@@ -147,6 +147,7 @@ func (r *ModuleReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctr
 		module.Spec.TemplateRef.Path,
 		templateVersion,
 		module.Status.TemplateResolvedVersion,
+		module.Spec.TemplateRef.CRDName,
 		module.Spec.TemplateRef.SourceType,
 	)
 	if err != nil {

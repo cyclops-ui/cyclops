@@ -172,7 +172,7 @@ func (k *KubernetesClient) mapDefaultResource(group, version, kind, name, namesp
 
 	var children []dto.Resource
 	if exists {
-		children, err = k.GetResourcesForCRD(childLabels, name)
+		children, err = k.getResourcesForCRD(childLabels, name)
 		if err != nil {
 			return nil, err
 		}

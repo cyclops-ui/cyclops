@@ -97,6 +97,7 @@ func DtoTemplateRefToK8s(dto dto.Template) cyclopsv1alpha1.TemplateRef {
 		URL:        dto.URL,
 		Path:       dto.Path,
 		Version:    dto.Version,
+		CRDName:    dto.CRDName,
 		SourceType: cyclopsv1alpha1.TemplateSourceType(dto.SourceType),
 	}
 }
