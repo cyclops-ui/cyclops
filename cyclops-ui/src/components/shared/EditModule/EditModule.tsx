@@ -52,12 +52,14 @@ export interface EditModuleProps {
     repo: string,
     path: string,
     version: string,
+    crdName: string,
     sourceType: string,
   ) => Promise<any>;
   getTemplateInitialValues: (
     repo: string,
     path: string,
     version: string,
+    crdName: string,
     sourceType: string,
   ) => Promise<any>;
   updateModule: (
@@ -178,6 +180,7 @@ export const EditModuleComponent = ({
           module.template.repo,
           module.template.path,
           module.template.resolvedVersion,
+          module.template.crdName,
           module.template.sourceType,
         );
 
@@ -254,6 +257,7 @@ export const EditModuleComponent = ({
         templateEditValues.repo,
         templateEditValues.path,
         templateEditValues.version,
+        "",
         templateRef.sourceType,
       );
 
@@ -261,6 +265,7 @@ export const EditModuleComponent = ({
         templateEditValues.repo,
         templateEditValues.path,
         templateEditValues.version,
+        "",
         templateRef.sourceType,
       );
 
