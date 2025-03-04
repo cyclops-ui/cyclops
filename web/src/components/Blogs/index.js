@@ -23,6 +23,19 @@ const Blogs = () => {
         <Row gutter={[16, 16]}>
           <Col xs={{ span: 20, offset: 2 }} md={{ span: 6, offset: 3 }}>
             <Blog
+              title={"Cyclops Launch Week #2"}
+              description={
+                "Cyclops is having its second-ever Launch Week, starting on March 10th!"
+              }
+              blogLink={
+                "https://cyclops-ui.com/blog/2025/03/04/launch-week-2"
+              }
+              avatar={"https://github.com/petar-cvit.png"}
+              banner={"/img/2025-03-04-launch-week-2/lw-teaser.png"}
+            />
+          </Col>
+          <Col xs={{ span: 20, offset: 2 }} md={{ span: 6, offset: 0 }}>
+            <Blog
               title={"My Love-Hate Relationship with Helm"}
               description={
                 "If you have been looking for a tool to deploy your applications into a Kubernetes cluster, you have definitely stumbled upon Helm."
@@ -45,19 +58,6 @@ const Blogs = () => {
               }
               avatar={"https://github.com/KaradzaJuraj.png"}
               banner={"/img/2025-02-13-what-are-dev-platforms/cover.jpeg"}
-            />
-          </Col>
-          <Col xs={{ span: 20, offset: 2 }} md={{ span: 6, offset: 0 }}>
-            <Blog
-              title={"Cyclops: Platform Engineering for the Rest of Us"}
-              description={
-                "Platform engineering is possibly the biggest concept to take hold in infrastructure over the last 5+ years, and there’s a big reason why...."
-              }
-              blogLink={
-                "https://cyclops-ui.com/blog/2025/02/03/PE-for-the-rest-of-us"
-              }
-              avatar={"https://github.com/richburroughs.png"}
-              banner={"/img/2025-02-03-PE-for-the-rest-of-us/cover.png"}
             />
           </Col>
         </Row>
