@@ -91,7 +91,7 @@ var _ = Describe("Templates controller test", func() {
 					sourceType: "git",
 					mockCalls: func() {
 						templatesRepo.On(
-							"GetTemplate", "https://github.com/my-org/templates", "charts/api", "main", "", v1alpha1.TemplateSourceTypeGit,
+							"GetTemplate", "https://github.com/my-org/templates", "charts/api", "main", "", "", v1alpha1.TemplateSourceTypeGit,
 						).Return(nil, errors.New("some template error"))
 					},
 				},
@@ -109,7 +109,7 @@ var _ = Describe("Templates controller test", func() {
 					sourceType: "git",
 					mockCalls: func() {
 						templatesRepo.On(
-							"GetTemplate", "https://github.com/my-org/templates", "charts/api", "main", "", v1alpha1.TemplateSourceTypeGit,
+							"GetTemplate", "https://github.com/my-org/templates", "charts/api", "main", "", "", v1alpha1.TemplateSourceTypeGit,
 						).Return(expectedTemplate, nil)
 					},
 				},
@@ -210,7 +210,7 @@ var _ = Describe("Templates controller test", func() {
 					sourceType: "git",
 					mockCalls: func() {
 						templatesRepo.On(
-							"GetTemplateInitialValues", "https://github.com/my-org/templates", "charts/api", "main", v1alpha1.TemplateSourceTypeGit,
+							"GetTemplateInitialValues", "https://github.com/my-org/templates", "charts/api", "main", "", v1alpha1.TemplateSourceTypeGit,
 						).Return(nil, errors.New("some template error"))
 					},
 				},
@@ -227,7 +227,7 @@ var _ = Describe("Templates controller test", func() {
 					sourceType: "git",
 					mockCalls: func() {
 						templatesRepo.On(
-							"GetTemplateInitialValues", "https://github.com/my-org/templates", "charts/api", "main", v1alpha1.TemplateSourceTypeGit,
+							"GetTemplateInitialValues", "https://github.com/my-org/templates", "charts/api", "main", "", v1alpha1.TemplateSourceTypeGit,
 						).Return(brokenValues, nil)
 					},
 				},
@@ -245,7 +245,7 @@ var _ = Describe("Templates controller test", func() {
 					sourceType: "git",
 					mockCalls: func() {
 						templatesRepo.On(
-							"GetTemplateInitialValues", "https://github.com/my-org/templates", "charts/api", "main", v1alpha1.TemplateSourceTypeGit,
+							"GetTemplateInitialValues", "https://github.com/my-org/templates", "charts/api", "main", "", v1alpha1.TemplateSourceTypeGit,
 						).Return(expectedValues, nil)
 					},
 				},
@@ -470,6 +470,7 @@ var _ = Describe("Templates controller test", func() {
 							"charts/demo",
 							"main",
 							"",
+							"",
 							v1alpha1.TemplateSourceTypeGit,
 						).Return(nil, errors.New("some template error"))
 					},
@@ -492,6 +493,7 @@ var _ = Describe("Templates controller test", func() {
 							"https://github.com/cyclops-ui/templates",
 							"charts/demo",
 							"main",
+							"",
 							"",
 							v1alpha1.TemplateSourceTypeGit,
 						).Return(&models.Template{Name: "new-template", IconURL: "some-icon.png"}, nil)
@@ -533,6 +535,7 @@ var _ = Describe("Templates controller test", func() {
 							"https://github.com/cyclops-ui/templates",
 							"charts/demo",
 							"main",
+							"",
 							"",
 							v1alpha1.TemplateSourceTypeGit,
 						).Return(&models.Template{Name: "new-template", IconURL: "some-icon.png"}, nil)
@@ -647,6 +650,7 @@ var _ = Describe("Templates controller test", func() {
 							"charts/demo",
 							"main",
 							"",
+							"",
 							v1alpha1.TemplateSourceTypeGit,
 						).Return(nil, errors.New("some template error"))
 					},
@@ -670,6 +674,7 @@ var _ = Describe("Templates controller test", func() {
 							"https://github.com/cyclops-ui/templates",
 							"charts/demo",
 							"main",
+							"",
 							"",
 							v1alpha1.TemplateSourceTypeGit,
 						).Return(&models.Template{Name: "my-template", IconURL: "some-icon.png"}, nil)
@@ -712,6 +717,7 @@ var _ = Describe("Templates controller test", func() {
 							"https://github.com/cyclops-ui/templates",
 							"charts/demo",
 							"main",
+							"",
 							"",
 							v1alpha1.TemplateSourceTypeGit,
 						).Return(&models.Template{Name: "my-template", IconURL: "some-icon.png"}, nil)

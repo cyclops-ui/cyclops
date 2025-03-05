@@ -73,3 +73,21 @@ func (c *Cluster) ListNamespaces(ctx *gin.Context) {
 
 	ctx.JSON(http.StatusOK, namespaces)
 }
+
+func (c *Cluster) ListCRDs(ctx *gin.Context) {
+	ctx.Header("Access-Control-Allow-Origin", "*")
+
+	crds, err := c.kubernetesClient.ListCRDs()
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, dto.NewError("Error fetching namespaces", err.Error()))
+		return
+	}
+
+	crdNames := make([]string, 0)
+
+	for _, crd := range crds {
+		crdNames = append(crdNames, crd.Name)
+	}
+
+	ctx.JSON(http.StatusOK, crdNames)
+}

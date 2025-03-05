@@ -130,18 +130,22 @@ func (k *KubernetesClient) MapUnstructuredResource(u unstructured.Unstructured) 
 	}, nil
 }
 
-func (k *KubernetesClient) GetResourcesForCRD(childLabels map[string]string, name string) ([]dto.Resource, error) {
+func (k *KubernetesClient) getResourcesForCRD(childLabels *ResourceFetchRule, name string) ([]dto.Resource, error) {
 	out := make([]dto.Resource, 0, 0)
 
-	managedGVRs, err := k.getManagedGVRs("")
-	if err != nil {
-		return nil, err
+	managedGVRs := childLabels.ManagedGVRs
+	var err error
+	if len(childLabels.ManagedGVRs) == 0 {
+		managedGVRs, err = k.getManagedGVRs("")
+		if err != nil {
+			return nil, err
+		}
 	}
 
 	other := make([]unstructured.Unstructured, 0)
 	for _, gvr := range managedGVRs {
 		rs, err := k.Dynamic.Resource(gvr).List(context.Background(), metav1.ListOptions{
-			LabelSelector: labels.Set(childLabels).String(),
+			LabelSelector: labels.Set(childLabels.MatchLabels).String(),
 		})
 		if err != nil {
 			continue

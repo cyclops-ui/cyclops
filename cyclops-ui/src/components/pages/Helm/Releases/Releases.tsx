@@ -126,6 +126,7 @@ const HelmReleases = () => {
       templateRef["path"],
       templateRef["version"],
       "",
+      "",
     )
       .then(() => {
         setTemplateMigrationModalLoading(false);

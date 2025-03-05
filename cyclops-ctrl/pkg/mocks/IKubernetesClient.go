@@ -5,7 +5,10 @@ package mocks
 import (
 	context "context"
 
+	apiextensionsv1 "k8s.io/apiextensions-apiserver/pkg/apis/apiextensions/v1"
+
 	dto "github.com/cyclops-ui/cyclops/cyclops-ctrl/internal/models/dto"
+
 	k8sclient "github.com/cyclops-ui/cyclops/cyclops-ctrl/pkg/cluster/k8sclient"
 
 	mock "github.com/stretchr/testify/mock"
@@ -1284,6 +1287,64 @@ func (_c *IKubernetesClient_GetTemplateAuthRuleSecret_Call) RunAndReturn(run fun
 	return _c
 }
 
+// GetTemplateCRDs provides a mock function with given fields: name
+func (_m *IKubernetesClient) GetTemplateCRDs(name string) (*apiextensionsv1.CustomResourceDefinition, error) {
+	ret := _m.Called(name)
+
+	if len(ret) == 0 {
+		panic("no return value specified for GetTemplateCRDs")
+	}
+
+	var r0 *apiextensionsv1.CustomResourceDefinition
+	var r1 error
+	if rf, ok := ret.Get(0).(func(string) (*apiextensionsv1.CustomResourceDefinition, error)); ok {
+		return rf(name)
+	}
+	if rf, ok := ret.Get(0).(func(string) *apiextensionsv1.CustomResourceDefinition); ok {
+		r0 = rf(name)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*apiextensionsv1.CustomResourceDefinition)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(string) error); ok {
+		r1 = rf(name)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// IKubernetesClient_GetTemplateCRDs_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'GetTemplateCRDs'
+type IKubernetesClient_GetTemplateCRDs_Call struct {
+	*mock.Call
+}
+
+// GetTemplateCRDs is a helper method to define mock.On call
+//   - name string
+func (_e *IKubernetesClient_Expecter) GetTemplateCRDs(name interface{}) *IKubernetesClient_GetTemplateCRDs_Call {
+	return &IKubernetesClient_GetTemplateCRDs_Call{Call: _e.mock.On("GetTemplateCRDs", name)}
+}
+
+func (_c *IKubernetesClient_GetTemplateCRDs_Call) Run(run func(name string)) *IKubernetesClient_GetTemplateCRDs_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run(args[0].(string))
+	})
+	return _c
+}
+
+func (_c *IKubernetesClient_GetTemplateCRDs_Call) Return(_a0 *apiextensionsv1.CustomResourceDefinition, _a1 error) *IKubernetesClient_GetTemplateCRDs_Call {
+	_c.Call.Return(_a0, _a1)
+	return _c
+}
+
+func (_c *IKubernetesClient_GetTemplateCRDs_Call) RunAndReturn(run func(string) (*apiextensionsv1.CustomResourceDefinition, error)) *IKubernetesClient_GetTemplateCRDs_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
 // GetWorkloadsForModule provides a mock function with given fields: name
 func (_m *IKubernetesClient) GetWorkloadsForModule(name string) ([]dto.Resource, error) {
 	ret := _m.Called(name)
@@ -1624,6 +1685,63 @@ func (_c *IKubernetesClient_ListTemplateAuthRules_Call) Return(_a0 []v1alpha1.Te
 }
 
 func (_c *IKubernetesClient_ListTemplateAuthRules_Call) RunAndReturn(run func() ([]v1alpha1.TemplateAuthRule, error)) *IKubernetesClient_ListTemplateAuthRules_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
+// ListTemplateCRDs provides a mock function with no fields
+func (_m *IKubernetesClient) ListTemplateCRDs() ([]apiextensionsv1.CustomResourceDefinition, error) {
+	ret := _m.Called()
+
+	if len(ret) == 0 {
+		panic("no return value specified for ListTemplateCRDs")
+	}
+
+	var r0 []apiextensionsv1.CustomResourceDefinition
+	var r1 error
+	if rf, ok := ret.Get(0).(func() ([]apiextensionsv1.CustomResourceDefinition, error)); ok {
+		return rf()
+	}
+	if rf, ok := ret.Get(0).(func() []apiextensionsv1.CustomResourceDefinition); ok {
+		r0 = rf()
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).([]apiextensionsv1.CustomResourceDefinition)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func() error); ok {
+		r1 = rf()
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// IKubernetesClient_ListTemplateCRDs_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'ListTemplateCRDs'
+type IKubernetesClient_ListTemplateCRDs_Call struct {
+	*mock.Call
+}
+
+// ListTemplateCRDs is a helper method to define mock.On call
+func (_e *IKubernetesClient_Expecter) ListTemplateCRDs() *IKubernetesClient_ListTemplateCRDs_Call {
+	return &IKubernetesClient_ListTemplateCRDs_Call{Call: _e.mock.On("ListTemplateCRDs")}
+}
+
+func (_c *IKubernetesClient_ListTemplateCRDs_Call) Run(run func()) *IKubernetesClient_ListTemplateCRDs_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run()
+	})
+	return _c
+}
+
+func (_c *IKubernetesClient_ListTemplateCRDs_Call) Return(_a0 []apiextensionsv1.CustomResourceDefinition, _a1 error) *IKubernetesClient_ListTemplateCRDs_Call {
+	_c.Call.Return(_a0, _a1)
+	return _c
+}
+
+func (_c *IKubernetesClient_ListTemplateCRDs_Call) RunAndReturn(run func() ([]apiextensionsv1.CustomResourceDefinition, error)) *IKubernetesClient_ListTemplateCRDs_Call {
 	_c.Call.Return(run)
 	return _c
 }

@@ -3,6 +3,10 @@ import { Alert } from "antd";
 import axios from "axios";
 import { mapResponseError } from "../../utils/api/errors";
 import ResourceList from "./ResourceList/ResourceList";
+import { useResourceListActions } from "./ResourceList/ResourceListActionsContext";
+import { Workload } from "../../utils/k8s/workload";
+import { ResourceRef, resourceRefKey } from "../../utils/resourceRef";
+import { resourcesStream } from "../../utils/api/sse/resources";
 
 interface Props {
   group: string;
@@ -21,9 +25,30 @@ const DefaultResource = ({
   namespace,
   onResourceDelete,
 }: Props) => {
+  const { streamingDisabled, resourceStreamImplementation } =
+    useResourceListActions();
+
   const [resource, setResource] = useState({
     children: [],
   });
+  const [workloads, setWorkloads] = useState<Map<string, Workload>>(new Map());
+
+  function getWorkload(ref: ResourceRef): Workload | undefined {
+    let k = resourceRefKey(ref);
+
+    return workloads.get(k);
+  }
+
+  function putWorkload(ref: ResourceRef, workload: Workload) {
+    let k = resourceRefKey(ref);
+
+    setWorkloads((prev) => {
+      const s = new Map(prev);
+      s.set(k, workload);
+      return s;
+    });
+  }
+
   const [error, setError] = useState({
     message: "",
     description: "",
@@ -61,13 +86,33 @@ const DefaultResource = ({
     };
   }, [fetchResource]);
 
+  useEffect(() => {
+    if (!streamingDisabled) {
+      resourcesStream(
+        `/stream/resources/crd?group=${group}&version=${version}&kind=${kind}&namespace=${namespace}&name=${name}`,
+        (r: any) => {
+          let resourceRef: ResourceRef = {
+            group: r.group,
+            version: r.version,
+            kind: r.kind,
+            name: r.name,
+            namespace: r.namespace,
+          };
+
+          putWorkload(resourceRef, r);
+        },
+        resourceStreamImplementation,
+      );
+    }
+  }, [name, streamingDisabled, resourceStreamImplementation]);
+
   const resourceList = () => {
     if (resource.children) {
       return (
         <ResourceList
           loadResources={loadResources}
           resources={resource.children}
-          workloads={new Map()}
+          workloads={workloads}
           onResourceDelete={onResourceDelete}
         />
       );

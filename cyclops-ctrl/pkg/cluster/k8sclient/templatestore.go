@@ -1,6 +1,8 @@
 package k8sclient
 
 import (
+	"context"
+	v1 "k8s.io/apiextensions-apiserver/pkg/apis/apiextensions/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	cyclopsv1alpha1 "github.com/cyclops-ui/cyclops/cyclops-ctrl/api/v1alpha1"
@@ -29,4 +31,13 @@ func (k *KubernetesClient) UpdateTemplateStore(ts *cyclopsv1alpha1.TemplateStore
 
 func (k *KubernetesClient) DeleteTemplateStore(name string) error {
 	return k.moduleset.TemplateStore(k.moduleNamespace).Delete(name)
+}
+
+func (k *KubernetesClient) ListCRDs() ([]v1.CustomResourceDefinition, error) {
+	crds, err := k.extensionsClientset.ApiextensionsV1().CustomResourceDefinitions().List(context.Background(), metav1.ListOptions{})
+	return crds.Items, err
+}
+
+func (k *KubernetesClient) GetCRD(name string) (*v1.CustomResourceDefinition, error) {
+	return k.extensionsClientset.ApiextensionsV1().CustomResourceDefinitions().Get(context.Background(), name, metav1.GetOptions{})
 }
