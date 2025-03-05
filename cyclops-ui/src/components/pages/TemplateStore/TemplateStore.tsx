@@ -15,6 +15,7 @@ import {
   Radio,
   Popover,
   Checkbox,
+  Tabs,
 } from "antd";
 import axios from "axios";
 import Title from "antd/es/typography/Title";
@@ -36,11 +37,18 @@ import {
 import gitLogo from "../../../static/img/git.png";
 import helmLogo from "../../../static/img/helm.png";
 import dockerLogo from "../../../static/img/docker-mark-blue.png";
+import { HelmTemplateStore } from "./create/HelmTemplateStore";
+import { CRDTemplateStore } from "./create/CRDTemplateStore";
+import HelmTemplateTable from "./table/HelmTemplateTable";
+import CRDTemplateTable from "./table/CRDTemplateTable";
 
 const TemplateStore = () => {
   const [templates, setTemplates] = useState([]);
   const [query, setQuery] = useState("");
+
   const [filteredTemplates, setFilteredTemplates] = useState([]);
+  const [crdTemplates, setCrdTemplates] = useState([]);
+
   const [confirmDelete, setConfirmDelete] = useState("");
   const [confirmDeleteInput, setConfirmDeleteInput] = useState("");
   const [newTemplateModal, setNewTemplateModal] = useState(false);
@@ -52,6 +60,10 @@ const TemplateStore = () => {
   const [requestStatus, setRequestStatus] = useState<{ [key: string]: string }>(
     {},
   );
+
+  const [activeCreateTemplateTab, setActiveCreateOption] =
+    useState<string>("helm");
+
   const [error, setError] = useState({
     message: "",
     description: "",
@@ -85,6 +97,14 @@ const TemplateStore = () => {
         setError(mapResponseError(error));
       });
   }, []);
+
+  useEffect(() => {
+    templates.forEach((t) => {
+      if (t.ref.sourceType === "crd") {
+        setCrdTemplates((prev) => [...prev, t]);
+      }
+    });
+  }, [templates]);
 
   useEffect(() => {
     var updatedList = [...templates];
@@ -128,6 +148,10 @@ const TemplateStore = () => {
 
   const handleSubmit = (values: any) => {
     setConfirmLoading(true);
+
+    if (activeCreateTemplateTab == "crd") {
+      values.ref = { ...values.ref, sourceType: "crd" };
+    }
 
     axios
       .put(`/api/templates/store`, values)
@@ -294,7 +318,7 @@ const TemplateStore = () => {
       {contextHolder}
       <Row gutter={[40, 0]} style={{ justifyContent: "space-between" }}>
         <Col>
-          <Title level={2}>Templates: {filteredTemplates.length}</Title>
+          <Title level={2}>Templates</Title>
         </Col>
         <Col>
           <div style={{ display: "flex", gap: "0.5rem" }}>
@@ -337,132 +361,56 @@ const TemplateStore = () => {
         </Col>
       </Row>
       <Col span={24} style={{ overflowX: "auto" }}>
-        <Table dataSource={filteredTemplates}>
-          <Table.Column
-            dataIndex="iconURL"
-            width={"3%"}
-            render={function (iconURL) {
-              if (!iconURL || iconURL.length === 0) {
-                return (
-                  <img
-                    alt=""
-                    style={{
-                      verticalAlign: "middle",
-                      margin: "-5px",
-                      maxHeight: "36px",
-                    }}
-                    src={defaultTemplate}
-                  />
+        <Tabs defaultActiveKey="1" type="card">
+          <Tabs.TabPane tab="Helm chart" key="helm">
+            <HelmTemplateTable
+              templateStores={filteredTemplates}
+              loadingTemplateName={loadingTemplateName}
+              requestStatus={requestStatus}
+              checkTemplateReference={checkTemplateReference}
+              onEditTemplate={(template: any) => {
+                editForm.setFieldValue(
+                  ["ref", "sourceType"],
+                  template.ref.sourceType,
                 );
-              }
-
-              return (
-                <img
-                  alt=""
-                  style={{
-                    verticalAlign: "middle",
-                    margin: "-5px",
-                    maxHeight: "36px",
-                  }}
-                  src={iconURL}
-                />
-              );
-            }}
-          />
-          <Table.Column title="Name" dataIndex="name" width={"20%"} />
-          <Table.Column
-            title="Repo"
-            dataIndex={["ref", "repo"]}
-            width={"30%"}
-          />
-          <Table.Column
-            title="Path"
-            dataIndex={["ref", "path"]}
-            width={"20%"}
-            render={function (value: any, record: any, index: number) {
-              if (!value.startsWith("/")) {
-                return "/" + value;
-              }
-              return value;
-            }}
-          />
-          <Table.Column
-            title="Version"
-            dataIndex={["ref", "version"]}
-            width={"10%"}
-            render={function (value: any, record: any, index: number) {
-              if (String(value).length === 0) {
-                return <span style={{ color: "#A0A0A0" }}>{"<default>"}</span>;
-              }
-              return value;
-            }}
-          />
-          <Table.Column
-            title="Validate"
-            width="5%"
-            render={(template) => (
-              <>
-                {loadingTemplateName[template.name] === true ? (
-                  <Spin />
-                ) : (
-                  <FileSyncOutlined
-                    className={classNames("statustemplate", {
-                      success: requestStatus[template.name] === "success",
-                      error: requestStatus[template.name] === "error",
-                    })}
-                    onClick={function () {
-                      checkTemplateReference(
-                        template.ref.repo,
-                        template.ref.path,
-                        template.ref.version,
-                        template.name,
-                        template.ref.sourceType,
-                      );
-                    }}
-                  />
-                )}
-              </>
-            )}
-          />
-          <Table.Column
-            title="Edit"
-            width="5%"
-            render={(template) => (
-              <>
-                <EditOutlined
-                  className={"edittemplate"}
-                  onClick={function () {
-                    editForm.setFieldValue(
-                      ["ref", "sourceType"],
-                      template.ref.sourceType,
-                    );
-                    editForm.setFieldValue(["ref", "repo"], template.ref.repo);
-                    editForm.setFieldValue(["ref", "path"], template.ref.path);
-                    editForm.setFieldValue(
-                      ["ref", "version"],
-                      template.ref.version,
-                    );
-                    setEditModal(template.name);
-                  }}
-                />
-              </>
-            )}
-          />
-          <Table.Column
-            title="Delete"
-            width="5%"
-            render={(template) => (
-              <>
-                <DeleteOutlined
-                  className={"deletetemplate"}
-                  onClick={function () {
-                    setConfirmDelete(template.name);
-                  }}
-                />
-              </>
-            )}
-          />
-        </Table>
+                editForm.setFieldValue(["ref", "repo"], template.ref.repo);
+                editForm.setFieldValue(["ref", "path"], template.ref.path);
+                editForm.setFieldValue(
+                  ["ref", "version"],
+                  template.ref.version,
+                );
+                setEditModal(template.name);
+              }}
+              onDeleteTemplate={(template: any) => {
+                setConfirmDelete(template.name);
+              }}
+            />
+          </Tabs.TabPane>
+          <Tabs.TabPane tab="Kubernetes CRD" key="crd">
+            <CRDTemplateTable
+              templateStores={crdTemplates}
+              loadingTemplateName={loadingTemplateName}
+              requestStatus={requestStatus}
+              checkTemplateReference={checkTemplateReference}
+              onEditTemplate={(template: any) => {
+                editForm.setFieldValue(
+                  ["ref", "sourceType"],
+                  template.ref.sourceType,
+                );
+                editForm.setFieldValue(["ref", "repo"], template.ref.repo);
+                editForm.setFieldValue(["ref", "path"], template.ref.path);
+                editForm.setFieldValue(
+                  ["ref", "version"],
+                  template.ref.version,
+                );
+                setEditModal(template.name);
+              }}
+              onDeleteTemplate={(template: any) => {
+                setConfirmDelete(template.name);
+              }}
+            />
+          </Tabs.TabPane>
+        </Tabs>
       </Col>
       <Modal
         title="Add new"
@@ -518,54 +466,20 @@ const TemplateStore = () => {
           </Form.Item>
 
           <Divider />
-
-          <Form.Item
-            name={["ref", "sourceType"]}
-            label="Select template source"
+          <Tabs
+            defaultActiveKey="1"
+            type="card"
+            onChange={(e) => {
+              setActiveCreateOption(e);
+            }}
           >
-            <Radio.Group
-              optionType="button"
-              style={{ width: "100%" }}
-              className={"templatetypes"}
-            >
-              <Radio value="git" className={"templatetype"}>
-                <img src={gitLogo} alt="git" className={"templatetypeicon"} />
-                Git
-              </Radio>
-              <Radio value="helm" className={"templatetype"}>
-                <img src={helmLogo} alt="helm" className={"templatetypeicon"} />
-                Helm repo
-              </Radio>
-              <Radio value="oci" className={"templatetype"}>
-                <img
-                  src={dockerLogo}
-                  alt="docker"
-                  className={"templatetypeicon"}
-                />
-                OCI registry
-              </Radio>
-            </Radio.Group>
-          </Form.Item>
-
-          <Form.Item
-            label="Repository URL"
-            name={["ref", "repo"]}
-            rules={[{ required: true, message: "Repo URL is required" }]}
-          >
-            <Input />
-          </Form.Item>
-
-          <Form.Item
-            label="Path"
-            name={["ref", "path"]}
-            rules={[{ required: true, message: "Path is required" }]}
-          >
-            <Input />
-          </Form.Item>
-
-          <Form.Item label="Version" name={["ref", "version"]}>
-            <Input />
-          </Form.Item>
+            <Tabs.TabPane tab="Helm chart" key="helm">
+              <HelmTemplateStore active={activeCreateTemplateTab === "helm"} />
+            </Tabs.TabPane>
+            <Tabs.TabPane tab="Kubernetes CRD" key="crd">
+              <CRDTemplateStore active={activeCreateTemplateTab === "helm"} />
+            </Tabs.TabPane>
+          </Tabs>
         </Form>
       </Modal>
       <Modal

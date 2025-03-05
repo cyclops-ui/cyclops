@@ -91,6 +91,7 @@ export const EditModuleComponent = ({
       path: "",
       version: "",
       resolvedVersion: "",
+      crdName: "",
       sourceType: "",
     },
   });
@@ -124,6 +125,7 @@ export const EditModuleComponent = ({
     path: "",
     version: "",
     resolvedVersion: "",
+    crdName: "",
     sourceType: "",
   });
   const [templateRefLock, setTemplateRefLock] = useState(true);
@@ -173,6 +175,7 @@ export const EditModuleComponent = ({
           path: module.template.path,
           version: module.template.version,
           resolvedVersion: module.template.resolvedVersion,
+          crdName: module.template.crdName,
           sourceType: module.template.sourceType,
         });
 
@@ -237,6 +240,7 @@ export const EditModuleComponent = ({
       path: path,
       version: version,
       resolvedVersion: resolvedVersion,
+      crdName: "",
       sourceType: templateRef.sourceType,
     };
 
@@ -274,6 +278,7 @@ export const EditModuleComponent = ({
         path: templateEditValues.path,
         version: templateEditValues.version,
         resolvedVersion: template.resolvedVersion,
+        crdName: templateRef.crdName,
         sourceType: templateRef.sourceType,
       });
       handleTemplateRefChange(
@@ -486,112 +491,29 @@ export const EditModuleComponent = ({
             </Title>
           </Col>
         </Row>
-        <Row gutter={[40, 0]}>
-          <Col span={24}>
-            <Divider orientation="left" orientationMargin="0">
-              Template
-            </Divider>
-            <Row>
-              <div
-                style={{
-                  border: "solid 1.5px",
-                  borderColor: themePalette === "dark" ? "#333" : "#c3c3c3",
-                  borderRadius: "7px",
-                  padding: "0px",
-                  width: "100%",
-                }}
-              >
-                <Form
-                  form={editTemplateForm}
-                  layout="inline"
-                  autoComplete={"off"}
-                  onFinish={handleSubmitTemplateEdit}
-                  onFinishFailed={onFinishFailed}
-                  style={{ width: "100%", padding: "12px" }}
-                  requiredMark={(label, { required }) => (
-                    <Row>
-                      <Col>
-                        {required ? (
-                          <span style={{ color: "red", paddingRight: "3px" }}>
-                            *
-                          </span>
-                        ) : (
-                          <></>
-                        )}
-                      </Col>
-                      <Col>{label}</Col>
-                    </Row>
-                  )}
+        {module.template.sourceType !== "crd" && (
+          <Row gutter={[40, 0]}>
+            <Col span={24}>
+              <Divider orientation="left" orientationMargin="0">
+                Template
+              </Divider>
+              <Row>
+                <div
+                  style={{
+                    border: "solid 1.5px",
+                    borderColor: themePalette === "dark" ? "#333" : "#c3c3c3",
+                    borderRadius: "7px",
+                    padding: "0px",
+                    width: "100%",
+                  }}
                 >
-                  {lockButton()}
-                  <Form.Item
-                    name={"repo"}
-                    style={{ width: "35%", marginRight: "0" }}
-                  >
-                    <Input
-                      placeholder={"Repository"}
-                      disabled={templateRefLock || !loadTemplate}
-                    />
-                  </Form.Item>
-                  <div
-                    style={{
-                      width: "15px",
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "center",
-                    }}
-                  >
-                    /
-                  </div>
-                  <Form.Item
-                    name={"path"}
-                    style={{ width: "20%", marginRight: "0" }}
-                  >
-                    <Input
-                      placeholder={"Path"}
-                      disabled={templateRefLock || !loadTemplate}
-                    />
-                  </Form.Item>
-                  <div
-                    style={{
-                      width: "15px",
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "center",
-                    }}
-                  >
-                    @
-                  </div>
-                  <Form.Item
-                    name={"version"}
-                    style={{ width: "20%", marginRight: "0" }}
-                  >
-                    <Input
-                      placeholder={"Version"}
-                      addonAfter={linkToTemplate(templateRef)}
-                      disabled={templateRefLock || !loadTemplate}
-                    />
-                  </Form.Item>
-                  <Form.Item style={{ paddingLeft: "10px", width: "5%" }}>
-                    <Button
-                      type="primary"
-                      htmlType="submit"
-                      loading={!loadTemplate}
-                      disabled={templateRefLock || !loadTemplate}
-                    >
-                      Load
-                    </Button>
-                  </Form.Item>
-                </Form>
-                <div style={{ display: advancedOptionsExpanded ? "" : "none" }}>
                   <Form
-                    form={gitOpsWriteForm}
-                    wrapperCol={{ span: 16 }}
-                    layout="vertical"
+                    form={editTemplateForm}
+                    layout="inline"
                     autoComplete={"off"}
-                    onValuesChange={() => {
-                      setIsGitOpsChanged(true);
-                    }}
+                    onFinish={handleSubmitTemplateEdit}
+                    onFinishFailed={onFinishFailed}
+                    style={{ width: "100%", padding: "12px" }}
                     requiredMark={(label, { required }) => (
                       <Row>
                         <Col>
@@ -607,95 +529,186 @@ export const EditModuleComponent = ({
                       </Row>
                     )}
                   >
-                    <Divider
-                      style={{ marginTop: "12px", marginBottom: "12px" }}
-                    />
+                    {lockButton()}
                     <Form.Item
-                      name="gitops"
-                      id="gitops"
-                      label={
-                        <div>
-                          Push changes to Git?
-                          <p style={{ color: "#8b8e91", marginBottom: "0px" }}>
-                            Instead of deploying to the cluster, Cyclops will
-                            push the changes to a git repository.
-                          </p>
-                        </div>
-                      }
-                      style={{ padding: "0px 12px 0px 12px" }}
+                      name={"repo"}
+                      style={{ width: "35%", marginRight: "0" }}
                     >
-                      <Switch
-                        checked={gitopsToggle}
-                        onChange={(e) => {
-                          setGitopsToggle(e);
-                        }}
+                      <Input
+                        placeholder={"Repository"}
+                        disabled={templateRefLock || !loadTemplate}
                       />
                     </Form.Item>
-                    <div style={{ display: gitopsToggle ? "" : "none" }}>
-                      <Form.Item
-                        label="Repository URL"
-                        name="gitops-repo"
-                        rules={[
-                          {
-                            required: gitopsToggle,
-                            message: "Repo URL is required",
-                          },
-                        ]}
-                        style={{ padding: "0px 12px 0px 12px" }}
-                      >
-                        <Input />
-                      </Form.Item>
-
-                      <Form.Item
-                        label="Path"
-                        name="gitops-path"
-                        rules={[
-                          {
-                            required: gitopsToggle ? true : false,
-                            message: "Path is required",
-                          },
-                        ]}
-                        style={{ padding: "0px 12px 0px 12px" }}
-                      >
-                        <Input />
-                      </Form.Item>
-
-                      <Form.Item
-                        label="Branch"
-                        name="gitops-branch"
-                        rules={[
-                          {
-                            required: gitopsToggle ? true : false,
-                            message: "Path is required",
-                          },
-                        ]}
-                        style={{ padding: "0px 12px 0px 12px" }}
-                      >
-                        <Input />
-                      </Form.Item>
+                    <div
+                      style={{
+                        width: "15px",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                      }}
+                    >
+                      /
                     </div>
+                    <Form.Item
+                      name={"path"}
+                      style={{ width: "20%", marginRight: "0" }}
+                    >
+                      <Input
+                        placeholder={"Path"}
+                        disabled={templateRefLock || !loadTemplate}
+                      />
+                    </Form.Item>
+                    <div
+                      style={{
+                        width: "15px",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                      }}
+                    >
+                      @
+                    </div>
+                    <Form.Item
+                      name={"version"}
+                      style={{ width: "20%", marginRight: "0" }}
+                    >
+                      <Input
+                        placeholder={"Version"}
+                        addonAfter={linkToTemplate(templateRef)}
+                        disabled={templateRefLock || !loadTemplate}
+                      />
+                    </Form.Item>
+                    <Form.Item style={{ paddingLeft: "10px", width: "5%" }}>
+                      <Button
+                        type="primary"
+                        htmlType="submit"
+                        loading={!loadTemplate}
+                        disabled={templateRefLock || !loadTemplate}
+                      >
+                        Load
+                      </Button>
+                    </Form.Item>
                   </Form>
+                  <div
+                    style={{ display: advancedOptionsExpanded ? "" : "none" }}
+                  >
+                    <Form
+                      form={gitOpsWriteForm}
+                      wrapperCol={{ span: 16 }}
+                      layout="vertical"
+                      autoComplete={"off"}
+                      onValuesChange={() => {
+                        setIsGitOpsChanged(true);
+                      }}
+                      requiredMark={(label, { required }) => (
+                        <Row>
+                          <Col>
+                            {required ? (
+                              <span
+                                style={{ color: "red", paddingRight: "3px" }}
+                              >
+                                *
+                              </span>
+                            ) : (
+                              <></>
+                            )}
+                          </Col>
+                          <Col>{label}</Col>
+                        </Row>
+                      )}
+                    >
+                      <Divider
+                        style={{ marginTop: "12px", marginBottom: "12px" }}
+                      />
+                      <Form.Item
+                        name="gitops"
+                        id="gitops"
+                        label={
+                          <div>
+                            Push changes to Git?
+                            <p
+                              style={{ color: "#8b8e91", marginBottom: "0px" }}
+                            >
+                              Instead of deploying to the cluster, Cyclops will
+                              push the changes to a git repository.
+                            </p>
+                          </div>
+                        }
+                        style={{ padding: "0px 12px 0px 12px" }}
+                      >
+                        <Switch
+                          checked={gitopsToggle}
+                          onChange={(e) => {
+                            setGitopsToggle(e);
+                          }}
+                        />
+                      </Form.Item>
+                      <div style={{ display: gitopsToggle ? "" : "none" }}>
+                        <Form.Item
+                          label="Repository URL"
+                          name="gitops-repo"
+                          rules={[
+                            {
+                              required: gitopsToggle,
+                              message: "Repo URL is required",
+                            },
+                          ]}
+                          style={{ padding: "0px 12px 0px 12px" }}
+                        >
+                          <Input />
+                        </Form.Item>
+
+                        <Form.Item
+                          label="Path"
+                          name="gitops-path"
+                          rules={[
+                            {
+                              required: gitopsToggle ? true : false,
+                              message: "Path is required",
+                            },
+                          ]}
+                          style={{ padding: "0px 12px 0px 12px" }}
+                        >
+                          <Input />
+                        </Form.Item>
+
+                        <Form.Item
+                          label="Branch"
+                          name="gitops-branch"
+                          rules={[
+                            {
+                              required: gitopsToggle ? true : false,
+                              message: "Path is required",
+                            },
+                          ]}
+                          style={{ padding: "0px 12px 0px 12px" }}
+                        >
+                          <Input />
+                        </Form.Item>
+                      </div>
+                    </Form>
+                  </div>
+                  <div
+                    className={`expandadvanced ${themePalette === "dark" ? "dark" : ""}`}
+                    onClick={toggleExpand}
+                  >
+                    {advancedOptionsExpanded ? (
+                      <div>
+                        Advanced
+                        <UpOutlined style={{ paddingLeft: "5px" }} />
+                      </div>
+                    ) : (
+                      <div>
+                        Advanced
+                        <DownOutlined style={{ paddingLeft: "5px" }} />
+                      </div>
+                    )}
+                  </div>
                 </div>
-                <div
-                  className={`expandadvanced ${themePalette === "dark" ? "dark" : ""}`}
-                  onClick={toggleExpand}
-                >
-                  {advancedOptionsExpanded ? (
-                    <div>
-                      Advanced
-                      <UpOutlined style={{ paddingLeft: "5px" }} />
-                    </div>
-                  ) : (
-                    <div>
-                      Advanced
-                      <DownOutlined style={{ paddingLeft: "5px" }} />
-                    </div>
-                  )}
-                </div>
-              </div>
-            </Row>
-          </Col>
-        </Row>
+              </Row>
+            </Col>
+          </Row>
+        )}
         <Row gutter={[40, 0]}>
           <Col span={24}>
             <Form

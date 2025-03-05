@@ -302,10 +302,10 @@ export const CreateModuleComponent = ({
     }
 
     setTemplate({
-      crdName: ts.ref.crdName,
       repo: ts.ref.repo,
       path: ts.ref.path,
       version: ts.ref.version,
+      crdName: ts.ref.crdName,
       sourceType: ts.ref.sourceType,
     });
 
