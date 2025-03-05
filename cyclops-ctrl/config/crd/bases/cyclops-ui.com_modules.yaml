@@ -34,6 +34,8 @@ spec:
                   type: integer
                 template:
                   properties:
+                    CRDName:
+                      type: string
                     path:
                       type: string
                     repo:
@@ -43,13 +45,10 @@ spec:
                       - git
                       - helm
                       - oci
+                      - crd
                       type: string
                     version:
                       type: string
-                  required:
-                  - path
-                  - repo
-                  - version
                   type: object
                 values:
                   x-kubernetes-preserve-unknown-fields: true

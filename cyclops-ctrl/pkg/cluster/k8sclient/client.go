@@ -119,8 +119,8 @@ type IKubernetesClient interface {
 	CreateTemplateStore(ts *cyclopsv1alpha1.TemplateStore) error
 	UpdateTemplateStore(ts *cyclopsv1alpha1.TemplateStore) error
 	DeleteTemplateStore(name string) error
-	ListTemplateCRDs() ([]v1.CustomResourceDefinition, error)
-	GetTemplateCRDs(name string) (*v1.CustomResourceDefinition, error)
+	ListCRDs() ([]v1.CustomResourceDefinition, error)
+	GetCRD(name string) (*v1.CustomResourceDefinition, error)
 	GetResourcesForRelease(release string) ([]dto.Resource, error)
 	GetWorkloadsForRelease(name string) ([]dto.Resource, error)
 	DeleteReleaseSecret(releaseName, releaseNamespace string) error

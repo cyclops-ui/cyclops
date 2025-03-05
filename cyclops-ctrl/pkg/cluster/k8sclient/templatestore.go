@@ -33,11 +33,11 @@ func (k *KubernetesClient) DeleteTemplateStore(name string) error {
 	return k.moduleset.TemplateStore(k.moduleNamespace).Delete(name)
 }
 
-func (k *KubernetesClient) ListTemplateCRDs() ([]v1.CustomResourceDefinition, error) {
+func (k *KubernetesClient) ListCRDs() ([]v1.CustomResourceDefinition, error) {
 	crds, err := k.extensionsClientset.ApiextensionsV1().CustomResourceDefinitions().List(context.Background(), metav1.ListOptions{})
 	return crds.Items, err
 }
 
-func (k *KubernetesClient) GetTemplateCRDs(name string) (*v1.CustomResourceDefinition, error) {
+func (k *KubernetesClient) GetCRD(name string) (*v1.CustomResourceDefinition, error) {
 	return k.extensionsClientset.ApiextensionsV1().CustomResourceDefinitions().Get(context.Background(), name, metav1.GetOptions{})
 }

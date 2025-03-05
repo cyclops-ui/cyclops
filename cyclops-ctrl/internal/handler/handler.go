@@ -65,6 +65,7 @@ func (h *Handler) Start() error {
 	server := sse.NewServer(h.k8sClient, h.releaseClient)
 
 	h.router.GET("/stream/resources/:name", sse.HeadersMiddleware(), server.Resources)
+	h.router.GET("/stream/resources/crd", sse.HeadersMiddleware(), server.CRDResources)
 	h.router.GET("/stream/releases/:namespace/:name/resources", sse.HeadersMiddleware(), server.ReleaseResources)
 	h.router.POST("/stream/resources", sse.HeadersMiddleware(), server.SingleResource)
 
@@ -110,6 +111,7 @@ func (h *Handler) Start() error {
 	h.router.GET("/nodes/:name", clusterController.GetNode)
 
 	h.router.GET("/namespaces", clusterController.ListNamespaces)
+	h.router.GET("/crds", clusterController.ListCRDs)
 
 	// region helm migrator
 	h.router.GET("/helm/releases", helmController.ListReleases)

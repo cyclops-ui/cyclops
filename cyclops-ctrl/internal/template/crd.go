@@ -11,7 +11,7 @@ import (
 )
 
 func (r Repo) GetTemplateCRDs(name string) (*models.Template, error) {
-	crd, err := r.k8sClient.GetTemplateCRDs(name)
+	crd, err := r.k8sClient.GetCRD(name)
 	if err != nil {
 		return nil, err
 	}
@@ -44,7 +44,7 @@ func (r Repo) GetTemplateCRDs(name string) (*models.Template, error) {
 }
 
 func (r Repo) LoadInitialTemplateValuesCRD(name string) (map[string]interface{}, error) {
-	crd, err := r.k8sClient.GetTemplateCRDs(name)
+	crd, err := r.k8sClient.GetCRD(name)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get CRD %s: %v", name, err)
 	}

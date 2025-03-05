@@ -24,6 +24,7 @@ func TemplateStoreListToDTO(store []v1alpha1.TemplateStore) []dto.TemplateStore 
 				URL:        templateStore.Spec.URL,
 				Path:       templateStore.Spec.Path,
 				Version:    templateStore.Spec.Version,
+				CRDName:    templateStore.Spec.CRDName,
 				SourceType: string(templateStore.Spec.SourceType),
 			},
 		})
@@ -48,6 +49,7 @@ func DTOToTemplateStore(store dto.TemplateStore, iconURL string) *v1alpha1.Templ
 			URL:        store.TemplateRef.URL,
 			Path:       store.TemplateRef.Path,
 			Version:    store.TemplateRef.Version,
+			CRDName:    store.TemplateRef.CRDName,
 			SourceType: v1alpha1.TemplateSourceType(store.TemplateRef.SourceType),
 		},
 	}

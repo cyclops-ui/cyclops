@@ -101,18 +101,6 @@ func (c *Templates) GetTemplateInitialValues(ctx *gin.Context) {
 func (c *Templates) ListTemplatesStore(ctx *gin.Context) {
 	ctx.Header("Access-Control-Allow-Origin", "*")
 
-	if ctx.Param("crdmode") == "true" {
-		store, err := c.kubernetesClient.ListTemplateCRDs()
-		if err != nil {
-			ctx.JSON(http.StatusInternalServerError, dto.NewError("Error fetching templates store", err.Error()))
-			return
-		}
-
-		storeDTO := mapper.TemplateCRDListToDTO(store)
-
-		ctx.JSON(http.StatusOK, storeDTO)
-	}
-
 	store, err := c.kubernetesClient.ListTemplateStore()
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, dto.NewError("Error fetching templates store", err.Error()))
@@ -136,7 +124,7 @@ func (c *Templates) CreateTemplatesStore(ctx *gin.Context) {
 	templateStore.TemplateRef.Path = strings.Trim(templateStore.TemplateRef.Path, "/")
 	templateStore.TemplateRef.Version = strings.Trim(templateStore.TemplateRef.Version, "/")
 
-	if templateStore.TemplateRef.URL == "" {
+	if templateStore.TemplateRef.SourceType != "crd" && templateStore.TemplateRef.URL == "" {
 		ctx.JSON(http.StatusBadRequest, dto.NewError("Invalid template reference", "Template repo not set"))
 		return
 	}
@@ -146,7 +134,7 @@ func (c *Templates) CreateTemplatesStore(ctx *gin.Context) {
 		templateStore.TemplateRef.Path,
 		templateStore.TemplateRef.Version,
 		"",
-		"",
+		templateStore.TemplateRef.CRDName,
 		cyclopsv1alpha1.TemplateSourceType(templateStore.TemplateRef.SourceType),
 	)
 	if err != nil {

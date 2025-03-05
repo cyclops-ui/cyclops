@@ -27,7 +27,7 @@ func NewRenderer(kubernetesClient k8sclient.IKubernetesClient) *Renderer {
 	}
 }
 
-func (r *Renderer) HelmTemplate(module cyclopsv1alpha1.Module, moduleTemplate *models.Template) (string, error) {
+func (r *Renderer) RenderManifest(module cyclopsv1alpha1.Module, moduleTemplate *models.Template) (string, error) {
 	if module.Spec.TemplateRef.SourceType == cyclopsv1alpha1.TemplateSourceTypeCRD {
 		return r.renderCRD(module)
 	}
@@ -130,7 +130,7 @@ func (r *Renderer) helmTemplate(module cyclopsv1alpha1.Module, moduleTemplate *m
 }
 
 func (r *Renderer) renderCRD(module cyclopsv1alpha1.Module) (string, error) {
-	crd, err := r.k8sClient.GetTemplateCRDs(module.Spec.TemplateRef.CRDName)
+	crd, err := r.k8sClient.GetCRD(module.Spec.TemplateRef.CRDName)
 
 	cr := map[string]interface{}{
 		"apiVersion": fmt.Sprintf("%s/%s", crd.Spec.Group, crd.Spec.Versions[0].Name),
