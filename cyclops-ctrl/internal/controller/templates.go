@@ -42,8 +42,13 @@ func (c *Templates) GetTemplate(ctx *gin.Context) {
 	CRDName := ctx.Query("crdName")
 	sourceType := ctx.Query("sourceType")
 
-	if repo == "" && CRDName == "" {
+	if sourceType != "crd" && repo == "" {
 		ctx.String(http.StatusBadRequest, "set repo field")
+		return
+	}
+
+	if sourceType == "crd" && CRDName == "" {
+		ctx.String(http.StatusBadRequest, "set crd name")
 		return
 	}
 
@@ -72,8 +77,13 @@ func (c *Templates) GetTemplateInitialValues(ctx *gin.Context) {
 	CRDName := ctx.Query("crdName")
 	sourceType := ctx.Query("sourceType")
 
-	if repo == "" && CRDName == "" {
-		ctx.JSON(http.StatusBadRequest, dto.NewError("Specify repo field", "Repo not specified"))
+	if sourceType != "crd" && repo == "" {
+		ctx.String(http.StatusBadRequest, "set repo field")
+		return
+	}
+
+	if sourceType == "crd" && CRDName == "" {
+		ctx.String(http.StatusBadRequest, "set crd name")
 		return
 	}
 
