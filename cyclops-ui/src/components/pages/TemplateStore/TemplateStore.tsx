@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from "react";
 import {
   Col,
-  Table,
   Alert,
   Row,
   Button,
@@ -10,7 +9,6 @@ import {
   Input,
   Divider,
   message,
-  Spin,
   notification,
   Radio,
   Popover,
@@ -19,16 +17,9 @@ import {
 } from "antd";
 import axios from "axios";
 import Title from "antd/es/typography/Title";
-import {
-  DeleteOutlined,
-  EditOutlined,
-  FileSyncOutlined,
-  FilterOutlined,
-} from "@ant-design/icons";
-import classNames from "classnames";
+import { FilterOutlined } from "@ant-design/icons";
 import "./custom.css";
 import { mapResponseError } from "../../../utils/api/errors";
-import defaultTemplate from "../../../static/img/default-template-icon.png";
 import {
   FeedbackError,
   FormValidationErrors,
@@ -149,7 +140,7 @@ const TemplateStore = () => {
   const handleSubmit = (values: any) => {
     setConfirmLoading(true);
 
-    if (activeCreateTemplateTab == "crd") {
+    if (activeCreateTemplateTab === "crd") {
       values.ref = { ...values.ref, sourceType: "crd" };
     }
 

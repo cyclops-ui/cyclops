@@ -1,7 +1,4 @@
-import { Alert, Form, Input, Radio, Select } from "antd";
-import gitLogo from "../../../../static/img/git.png";
-import helmLogo from "../../../../static/img/helm.png";
-import dockerLogo from "../../../../static/img/docker-mark-blue.png";
+import { Alert, Form, Select } from "antd";
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { mapResponseError } from "../../../../utils/api/errors";

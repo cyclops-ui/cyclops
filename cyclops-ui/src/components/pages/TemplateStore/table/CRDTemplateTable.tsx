@@ -1,34 +1,14 @@
-import { Spin, Table } from "antd";
-import defaultTemplate from "../../../../static/img/default-template-icon.png";
-import {
-  DeleteOutlined,
-  EditOutlined,
-  FileSyncOutlined,
-} from "@ant-design/icons";
-import classNames from "classnames";
+import { Table } from "antd";
+import { DeleteOutlined } from "@ant-design/icons";
 import React from "react";
 
 interface CRDTemplateTableProps {
   templateStores: any[];
-  loadingTemplateName: { [key: string]: boolean };
-  requestStatus: { [key: string]: string };
-  checkTemplateReference: (
-    repo: string,
-    path: string,
-    version: string,
-    name: string,
-    sourceType: string,
-  ) => void;
-  onEditTemplate: (template: any) => void;
   onDeleteTemplate: (template: any) => void;
 }
 
 const CRDTemplateTable = ({
   templateStores,
-  loadingTemplateName,
-  requestStatus,
-  checkTemplateReference,
-  onEditTemplate,
   onDeleteTemplate,
 }: CRDTemplateTableProps) => {
   return (

@@ -33,12 +33,6 @@ const DefaultResource = ({
   });
   const [workloads, setWorkloads] = useState<Map<string, Workload>>(new Map());
 
-  function getWorkload(ref: ResourceRef): Workload | undefined {
-    let k = resourceRefKey(ref);
-
-    return workloads.get(k);
-  }
-
   function putWorkload(ref: ResourceRef, workload: Workload) {
     let k = resourceRefKey(ref);
 
@@ -104,7 +98,15 @@ const DefaultResource = ({
         resourceStreamImplementation,
       );
     }
-  }, [name, streamingDisabled, resourceStreamImplementation]);
+  }, [
+    group,
+    version,
+    kind,
+    namespace,
+    group,
+    streamingDisabled,
+    resourceStreamImplementation,
+  ]);
 
   const resourceList = () => {
     if (resource.children) {
