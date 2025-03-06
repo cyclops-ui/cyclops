@@ -49,6 +49,7 @@ interface templateStoreOption {
     repo: string;
     path: string;
     version: string;
+    crdName: string;
     sourceType: string;
   };
 }
@@ -62,12 +63,14 @@ export interface CreateModuleProps {
     repo: string,
     path: string,
     version: string,
+    crdName: string,
     sourceType: string,
   ) => Promise<any>;
   getTemplateInitialValues: (
     repo: string,
     path: string,
     version: string,
+    crdName: string,
     sourceType: string,
   ) => Promise<any>;
   submitModule: (
@@ -104,6 +107,7 @@ export const CreateModuleComponent = ({
   });
 
   const [template, setTemplate] = useState({
+    crdName: "",
     repo: "",
     path: "",
     version: "",
@@ -188,6 +192,7 @@ export const CreateModuleComponent = ({
         repo: template.repo,
         path: template.path,
         version: template.version,
+        crdName: template.crdName,
         sourceType: template.sourceType,
       },
       values,
@@ -206,6 +211,7 @@ export const CreateModuleComponent = ({
     repo: string,
     path: string,
     commit: string,
+    crdName: string,
     sourceType: string,
   ) => {
     setConfig({
@@ -230,7 +236,7 @@ export const CreateModuleComponent = ({
       description: "",
     });
 
-    if (repo.trim() === "") {
+    if (sourceType !== "crd" && repo.trim() === "") {
       setError({
         message: "Invalid repository name",
         description: "Repository name must not be empty",
@@ -242,7 +248,7 @@ export const CreateModuleComponent = ({
 
     let tmpConfig: any = {};
 
-    await getTemplate(repo, path, commit, sourceType)
+    await getTemplate(repo, path, commit, crdName, sourceType)
       .then((templatesRes) => {
         setConfig(templatesRes);
         tmpConfig = templatesRes;
@@ -258,7 +264,7 @@ export const CreateModuleComponent = ({
         setError(mapResponseError(error));
       });
 
-    getTemplateInitialValues(repo, path, commit, sourceType)
+    getTemplateInitialValues(repo, path, commit, crdName, sourceType)
       .then((res) => {
         let initialValuesMapped = mapsToArray(tmpConfig.root.properties, res);
 
@@ -299,10 +305,17 @@ export const CreateModuleComponent = ({
       repo: ts.ref.repo,
       path: ts.ref.path,
       version: ts.ref.version,
+      crdName: ts.ref.crdName,
       sourceType: ts.ref.sourceType,
     });
 
-    loadTemplate(ts.ref.repo, ts.ref.path, ts.ref.version, ts.ref.sourceType);
+    loadTemplate(
+      ts.ref.repo,
+      ts.ref.path,
+      ts.ref.version,
+      ts.ref.crdName,
+      ts.ref.sourceType,
+    );
   };
 
   function renderFormFields() {
@@ -702,11 +715,11 @@ export const CreateModuleComponent = ({
                   }
                   htmlType="submit"
                   name="Save"
-                  disabled={
-                    loadingTemplate ||
-                    loadingTemplateInitialValues ||
-                    !(template.version || template.path || template.repo)
-                  }
+                  // disabled={
+                  //   loadingTemplate ||
+                  //   loadingTemplateInitialValues ||
+                  //   !(template.version || template.path || template.repo)
+                  // }
                 >
                   Deploy
                 </Button>{" "}

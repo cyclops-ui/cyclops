@@ -237,6 +237,7 @@ export const ModuleResourceDetails = ({
       path: "",
       version: "",
       resolvedVersion: "",
+      crdName: "",
       sourceType: "",
     },
     iconURL: "",

@@ -1,6 +1,13 @@
 childLabels:
-  - group: postgresql.cnpg.io
-    version: v1
-    kind: Cluster
+  - group: kro.run
+    version: v1alpha1
+    kind: Application
     matchLabels:
-      cnpg.io/cluster: "{{ .metadata.name }}"
+      kro.run/instance-name: "{{ .metadata.name }}"
+    managedGVKs:
+      - group: apps
+        version: v1
+        resource: deployments
+      - group: ""
+        version: v1
+        resource: services

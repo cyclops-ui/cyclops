@@ -92,6 +92,7 @@ func main() {
 	templatesRepo := template.NewRepo(
 		credsResolver,
 		cache.NewInMemoryTemplatesCache(),
+		k8sClient,
 	)
 
 	monitor, err := prometheus.NewMonitor(setupLog)
