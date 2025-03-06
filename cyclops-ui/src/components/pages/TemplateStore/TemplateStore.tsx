@@ -380,22 +380,6 @@ const TemplateStore = () => {
           <Tabs.TabPane tab="Kubernetes CRD" key="crd">
             <CRDTemplateTable
               templateStores={crdTemplates}
-              loadingTemplateName={loadingTemplateName}
-              requestStatus={requestStatus}
-              checkTemplateReference={checkTemplateReference}
-              onEditTemplate={(template: any) => {
-                editForm.setFieldValue(
-                  ["ref", "sourceType"],
-                  template.ref.sourceType,
-                );
-                editForm.setFieldValue(["ref", "repo"], template.ref.repo);
-                editForm.setFieldValue(["ref", "path"], template.ref.path);
-                editForm.setFieldValue(
-                  ["ref", "version"],
-                  template.ref.version,
-                );
-                setEditModal(template.name);
-              }}
               onDeleteTemplate={(template: any) => {
                 setConfirmDelete(template.name);
               }}
