@@ -103,7 +103,7 @@ const DefaultResource = ({
     version,
     kind,
     namespace,
-    group,
+    name,
     streamingDisabled,
     resourceStreamImplementation,
   ]);
