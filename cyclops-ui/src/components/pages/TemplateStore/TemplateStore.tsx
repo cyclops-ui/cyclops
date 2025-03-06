@@ -353,7 +353,7 @@ const TemplateStore = () => {
       </Row>
       <Col span={24} style={{ overflowX: "auto" }}>
         <Tabs defaultActiveKey="1" type="card">
-          <Tabs.TabPane tab="Helm chart" key="helm">
+          <Tabs.TabPane tab="Helm charts" key="helm">
             <HelmTemplateTable
               templateStores={filteredTemplates}
               loadingTemplateName={loadingTemplateName}
@@ -377,7 +377,7 @@ const TemplateStore = () => {
               }}
             />
           </Tabs.TabPane>
-          <Tabs.TabPane tab="Kubernetes CRD" key="crd">
+          <Tabs.TabPane tab="Kubernetes CRDs" key="crd">
             <CRDTemplateTable
               templateStores={crdTemplates}
               onDeleteTemplate={(template: any) => {
