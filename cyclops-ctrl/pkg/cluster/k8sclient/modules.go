@@ -203,13 +203,13 @@ func (k *KubernetesClient) getManagedGVRs(moduleName string) ([]schema.GroupVers
 		return existing, nil
 	}
 
-	apiResources, err := k.clientset.Discovery().ServerPreferredResources()
+	clusterApiResources, err := k.clusterApiResources()
 	if err != nil {
 		return nil, err
 	}
 
 	gvrs := make([]schema.GroupVersionResource, 0)
-	for _, resource := range apiResources {
+	for _, resource := range clusterApiResources.resourcesList {
 		gvk, err := schema.ParseGroupVersion(resource.GroupVersion)
 		if err != nil {
 			continue
