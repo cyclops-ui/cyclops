@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Button, Col, Modal, Row, Table, Typography } from "antd";
+import { Button, Col, Modal, Row, Spin, Table, Typography } from "antd";
 import axios from "axios";
 import { useParams } from "react-router-dom";
 import ReactDiffViewer from "react-diff-viewer";
@@ -22,6 +22,7 @@ const ModuleHistory = () => {
     description: "",
   });
 
+  const [loadingDiff, setLoadingDiff] = useState(false);
   const [diff, setDiff] = useState({
     curr: "",
     previous: "",
@@ -112,10 +113,11 @@ const ModuleHistory = () => {
       }
     });
 
+    setLoadingDiff(true);
     axios
-      .post("/api/modules/" + moduleName + "/manifest", {
-        template: target.template,
-        values: target.values,
+      .post("/api/modules/rollback/manifest", {
+        moduleName: moduleName,
+        generation: target.generation,
       })
       .then(function (res) {
         setDiff({
@@ -125,6 +127,9 @@ const ModuleHistory = () => {
       })
       .catch(function (error) {
         setError(mapResponseError(error));
+      })
+      .finally(() => {
+        setLoadingDiff(false);
       });
 
     setDiffModal({
@@ -142,9 +147,9 @@ const ModuleHistory = () => {
     });
 
     axios
-      .post("/api/modules/" + moduleName + "/manifest", {
-        template: target.template,
-        values: target.values,
+      .post("/api/modules/rollback/manifest", {
+        moduleName: moduleName,
+        generation: target.generation,
       })
       .then(function (res) {
         setManifest(res.data);
@@ -255,14 +260,18 @@ const ModuleHistory = () => {
         onCancel={handleCancelDiff}
         width={"60%"}
       >
-        <ReactDiffViewer
-          oldValue={diff.curr}
-          newValue={diff.previous}
-          splitView={true}
-          leftTitle={"current"}
-          rightTitle={"previous"}
-          useDarkTheme={mode === "dark"}
-        />
+        {loadingDiff ? (
+          <Spin />
+        ) : (
+          <ReactDiffViewer
+            oldValue={diff.curr}
+            newValue={diff.previous}
+            splitView={true}
+            leftTitle={"current"}
+            rightTitle={"previous"}
+            useDarkTheme={mode === "dark"}
+          />
+        )}
       </Modal>
       <Button
         style={{ float: "right" }}
