@@ -26,3 +26,24 @@ You will simply need to choose a template for your migration, and voila! Your ap
 But that is not the only news we bring! We are super happy to announce our newly established **partnership with Suse!** You can now find a familiar face in the **Rancher Marketplace** and install Cyclops in one click.
 
 ![rancher](../../static/img/2025-03-04-launch-week-2/rancher_mp.png)
+
+## #2 Pushing Modules to Git ⏫
+
+You now have the flexibility to deploy a Module in two ways:
+
+1. **Deploy directly to your Kubernetes cluster**
+2. **Push the Module manifest to a Git repository**
+
+Simply specify the repository and path where you want to store the configuration, then click `Deploy`. From there, tools like ArgoCD can take over and deploy the application. Once it's live, Cyclops will automatically detect it and display it in the UI.
+
+When you edit a Module using this workflow, any changes will be pushed to the Git repository, keeping everything in sync.
+
+Check out our [updated documentation](https://cyclops-ui.com/docs/installation/git-write) for more details.
+
+![feature-2](../../static/img/2025-03-04-launch-week-2/day-2-speed.gif)
+
+We are also very excited to announce that now you can **find Cyclops on the** **DigitalOcean marketplace!** To celebrate, we have published a tutorial in collaboration with DigitalOcean on how you can easily create an internal developer platform on their Kubernetes clusters.
+
+Check it [out](https://www.digitalocean.com/community/tutorials/build-developer-platform-kubernetes-cyclops)! 🌊
+
+![digital-ocean-cyclops](../../static/img/2025-03-04-launch-week-2/do-mp.png)
