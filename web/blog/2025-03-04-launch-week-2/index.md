@@ -83,3 +83,17 @@ Five days, five big releases - from better Helm migrations to Git integration, B
 We’re excited to hear your thoughts, so try out the new features, give us feedback, and stay tuned - we have even bigger things coming soon. 🎵
 
 Thank you for being a part of ourjourney! If you are interested in keeping up to date, be sure to [join our Discord community](https://discord.com/invite/8ErnK3qDb3) where we always share the latest news! 👾
+
+## #3 Backstage Plugin **🧩**
+
+[**Backstage**](https://backstage.io/) is a framework for building developer portals built and **open-sourced by Spotify**.
+
+Developer portals built with Backstage allow you to have a centralized catalog of all applications and services running in your system. All of the applications your developers are working on in a company are listed and organized in a single place.
+
+Another benefit of Backstage is that it centralizes all the tools used for managing software into a single platform, so deployment processes, monitoring, alerting, and so on are all in a single app. This is achieved through Backstage's plugin architecture, **and Cyclops implements its own plugin**.
+
+With the Cyclops plugin, you can view all of your deployed Cyclops applications and get the **full experience of Cyclops in your Backstage instance**.
+
+Check our [docs](https://cyclops-ui.com/docs/backstage/modules-plugin) on how to set it up for yourself!
+
+![feature-3](../../static/img/2025-03-04-launch-week-2/day-3.gif)
