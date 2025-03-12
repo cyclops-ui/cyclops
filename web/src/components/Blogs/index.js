@@ -44,7 +44,7 @@ const Blogs = () => {
                 "https://cyclops-ui.com/blog/2025/03/04/launch-week-2"
               }
               avatar={"https://github.com/KaradzaJuraj.png"}
-              banner={"/img/2025-03-04-launch-week-2/lw-teaser.png"}
+              banner={"/img/2025-03-04-launch-week-2/lw-cover.png"}
             />
           </Col>
           <Col xs={{ span: 20, offset: 2 }} md={{ span: 6, offset: 0 }}>
