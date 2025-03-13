@@ -62,7 +62,7 @@ Check our [docs](https://cyclops-ui.com/docs/backstage/modules-plugin) on how to
 
 ![feature-3](../../static/img/2025-03-04-launch-week-2/day-3.gif)
 
-## #4 Backstage Plugin **🧩**
+## #4 Backstage Plugin **✌️**
 
 This launch week, we are releasing not one but two Backstage plugins.
 
