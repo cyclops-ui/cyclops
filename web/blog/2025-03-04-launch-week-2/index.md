@@ -61,3 +61,15 @@ With the Cyclops plugin, you can view all of your deployed Cyclops applications 
 Check our [docs](https://cyclops-ui.com/docs/backstage/modules-plugin) on how to set it up for yourself!
 
 ![feature-3](../../static/img/2025-03-04-launch-week-2/day-3.gif)
+
+## #4 Backstage Plugin **✌️**
+
+This launch week, we are releasing not one but two Backstage plugins.
+
+Backstage has a concept of components that represent services and applications in your system so you keep track of your software. In order to allow you to map your components to applications in Cyclops, we released another plugin that is integrated into your component catalog.
+
+Each of your Backstage components will now have an additional tab showing you your Cyclops application with all the **Kubernetes resources and allowing you to edit, roll back, or delete your application**.
+
+With this plugin, your software catalog allows your developers to **deploy their applications and manage the whole lifecycle from a single pane of glass**.
+
+![feature-4](../../static/img/2025-03-04-launch-week-2/day-4.gif)
