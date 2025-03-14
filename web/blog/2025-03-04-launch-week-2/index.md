@@ -73,3 +73,21 @@ Each of your Backstage components will now have an additional tab showing you yo
 With this plugin, your software catalog allows your developers to **deploy their applications and manage the whole lifecycle from a single pane of glass**.
 
 ![feature-4](../../static/img/2025-03-04-launch-week-2/day-4.gif)
+
+## #5 Dark Theme 🌙
+
+We heard you - **Dark Mode is here!** Cyclops now comes with a sleek **dark theme** that’s easier on the eyes and perfect for late-night sessions. Simply toggle it in the top right corner and enjoy the new look!
+
+A small change, but an essential one - because let’s be real, **no developer can live without Dark Mode!** 🌚
+
+![feature-4](../../static/img/2025-03-04-launch-week-2/day-5.gif)
+
+## That’s it! For now…
+
+And that’s a wrap on **Cyclops Launch Week #2**! 🎉
+
+Five days, five big releases - from better Helm migrations to Git integration, Backstage plugins, and now Dark Mode. But this is just the beginning!
+
+We’re excited to hear your thoughts, so try out the new features, give us feedback, and stay tuned - we have even bigger things coming soon. 🎵
+
+Thank you for being a part of ourjourney! If you are interested in keeping up to date, be sure to [join our Discord community](https://discord.com/invite/8ErnK3qDb3) where we always share the latest news! 👾
