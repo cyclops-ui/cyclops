@@ -139,6 +139,9 @@ spec:
                 type: object
               templateResolvedVersion:
                 type: string
+            required:
+            - reconciliationStatus
+            - templateResolvedVersion
             type: object
         type: object
     served: true
