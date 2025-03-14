@@ -70,18 +70,10 @@ const ModuleHistory = () => {
       generation: 0,
     });
 
-    let target: any = {};
-    historyEntries.forEach((h: any) => {
-      if (h.generation === diffModal.generation) {
-        target = h;
-      }
-    });
-
     axios
-      .post(`/api/modules/update`, {
-        values: target.values,
-        name: moduleName,
-        template: target.template,
+      .post(`/api/modules/rollback`, {
+        moduleName: moduleName,
+        generation: diffModal.generation,
       })
       .then((res) => {
         window.location.href = "/modules/" + moduleName;

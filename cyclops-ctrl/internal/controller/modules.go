@@ -546,6 +546,9 @@ func (m *Modules) RollbackModule(ctx *gin.Context) {
 
 	module := curr.DeepCopy()
 
+	module.Kind = "Module"
+	module.APIVersion = "cyclops-ui.com/v1alpha1"
+
 	history := module.History
 	if module.History == nil {
 		history = make([]v1alpha1.HistoryEntry, 0)
