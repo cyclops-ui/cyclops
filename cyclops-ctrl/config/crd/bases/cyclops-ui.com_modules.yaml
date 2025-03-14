@@ -140,8 +140,8 @@ spec:
               templateResolvedVersion:
                 type: string
             required:
-              - reconciliationStatus
-              - templateResolvedVersion
+            - reconciliationStatus
+            - templateResolvedVersion
             type: object
         type: object
     served: true
