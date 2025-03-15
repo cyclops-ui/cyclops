@@ -2,9 +2,9 @@ package k8sclient
 
 import (
 	"context"
-
 	"github.com/go-logr/logr"
 	apiv1 "k8s.io/api/core/v1"
+	v1 "k8s.io/apiextensions-apiserver/pkg/apis/apiextensions/v1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/runtime/schema"
 	"k8s.io/apimachinery/pkg/version"
@@ -14,20 +14,25 @@ import (
 	"k8s.io/client-go/kubernetes"
 	ctrl "sigs.k8s.io/controller-runtime"
 
+	apiextensionsclientset "k8s.io/apiextensions-apiserver/pkg/client/clientset/clientset"
+
 	cyclopsv1alpha1 "github.com/cyclops-ui/cyclops/cyclops-ctrl/api/v1alpha1"
 	"github.com/cyclops-ui/cyclops/cyclops-ctrl/api/v1alpha1/client"
 	"github.com/cyclops-ui/cyclops/cyclops-ctrl/internal/models/dto"
 )
 
 type KubernetesClient struct {
-	Dynamic   dynamic.Interface
-	clientset *kubernetes.Clientset
-	discovery *discovery.DiscoveryClient
-	moduleset *client.CyclopsV1Alpha1Client
+	Dynamic             dynamic.Interface
+	clientset           *kubernetes.Clientset
+	discovery           *discovery.DiscoveryClient
+	moduleset           *client.CyclopsV1Alpha1Client
+	extensionsClientset *apiextensionsclientset.Clientset
 
 	moduleNamespace       string
 	helmReleaseNamespace  string
 	moduleTargetNamespace string
+
+	childLabels ChildLabels
 
 	logger logr.Logger
 }
@@ -56,16 +61,23 @@ func New(
 		panic(err.Error())
 	}
 
-	return &KubernetesClient{
+	extensionsClientset := apiextensionsclientset.NewForConfigOrDie(config)
+
+	k := &KubernetesClient{
 		Dynamic:               dynamic,
 		discovery:             discovery,
 		clientset:             clientset,
 		moduleset:             moduleSet,
+		extensionsClientset:   extensionsClientset,
 		moduleNamespace:       moduleNamespace,
 		helmReleaseNamespace:  helmReleaseNamespace,
 		moduleTargetNamespace: moduleTargetNamespace,
 		logger:                logger,
-	}, nil
+	}
+
+	k.loadResourceRelationsLabels()
+
+	return k, nil
 }
 
 type IKubernetesClient interface {
@@ -107,6 +119,8 @@ type IKubernetesClient interface {
 	CreateTemplateStore(ts *cyclopsv1alpha1.TemplateStore) error
 	UpdateTemplateStore(ts *cyclopsv1alpha1.TemplateStore) error
 	DeleteTemplateStore(name string) error
+	ListCRDs() ([]v1.CustomResourceDefinition, error)
+	GetCRD(name string) (*v1.CustomResourceDefinition, error)
 	GetResourcesForRelease(release string) ([]dto.Resource, error)
 	GetWorkloadsForRelease(name string) ([]dto.Resource, error)
 	DeleteReleaseSecret(releaseName, releaseNamespace string) error

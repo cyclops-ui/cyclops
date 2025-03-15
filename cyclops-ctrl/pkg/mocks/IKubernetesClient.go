@@ -5,6 +5,8 @@ package mocks
 import (
 	context "context"
 
+	corev1 "k8s.io/api/core/v1"
+
 	dto "github.com/cyclops-ui/cyclops/cyclops-ctrl/internal/models/dto"
 	k8sclient "github.com/cyclops-ui/cyclops/cyclops-ctrl/pkg/cluster/k8sclient"
 
@@ -14,7 +16,7 @@ import (
 
 	unstructured "k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 
-	v1 "k8s.io/api/core/v1"
+	v1 "k8s.io/apiextensions-apiserver/pkg/apis/apiextensions/v1"
 
 	v1alpha1 "github.com/cyclops-ui/cyclops/cyclops-ctrl/api/v1alpha1"
 
@@ -464,6 +466,64 @@ func (_c *IKubernetesClient_GVKtoAPIResourceName_Call) RunAndReturn(run func(sch
 	return _c
 }
 
+// GetCRD provides a mock function with given fields: name
+func (_m *IKubernetesClient) GetCRD(name string) (*v1.CustomResourceDefinition, error) {
+	ret := _m.Called(name)
+
+	if len(ret) == 0 {
+		panic("no return value specified for GetCRD")
+	}
+
+	var r0 *v1.CustomResourceDefinition
+	var r1 error
+	if rf, ok := ret.Get(0).(func(string) (*v1.CustomResourceDefinition, error)); ok {
+		return rf(name)
+	}
+	if rf, ok := ret.Get(0).(func(string) *v1.CustomResourceDefinition); ok {
+		r0 = rf(name)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*v1.CustomResourceDefinition)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(string) error); ok {
+		r1 = rf(name)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// IKubernetesClient_GetCRD_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'GetCRD'
+type IKubernetesClient_GetCRD_Call struct {
+	*mock.Call
+}
+
+// GetCRD is a helper method to define mock.On call
+//   - name string
+func (_e *IKubernetesClient_Expecter) GetCRD(name interface{}) *IKubernetesClient_GetCRD_Call {
+	return &IKubernetesClient_GetCRD_Call{Call: _e.mock.On("GetCRD", name)}
+}
+
+func (_c *IKubernetesClient_GetCRD_Call) Run(run func(name string)) *IKubernetesClient_GetCRD_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run(args[0].(string))
+	})
+	return _c
+}
+
+func (_c *IKubernetesClient_GetCRD_Call) Return(_a0 *v1.CustomResourceDefinition, _a1 error) *IKubernetesClient_GetCRD_Call {
+	_c.Call.Return(_a0, _a1)
+	return _c
+}
+
+func (_c *IKubernetesClient_GetCRD_Call) RunAndReturn(run func(string) (*v1.CustomResourceDefinition, error)) *IKubernetesClient_GetCRD_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
 // GetDeletedResources provides a mock function with given fields: _a0, _a1, _a2
 func (_m *IKubernetesClient) GetDeletedResources(_a0 []dto.Resource, _a1 string, _a2 string) ([]dto.Resource, error) {
 	ret := _m.Called(_a0, _a1, _a2)
@@ -761,23 +821,23 @@ func (_c *IKubernetesClient_GetModuleResourcesHealth_Call) RunAndReturn(run func
 }
 
 // GetNode provides a mock function with given fields: name
-func (_m *IKubernetesClient) GetNode(name string) (*v1.Node, error) {
+func (_m *IKubernetesClient) GetNode(name string) (*corev1.Node, error) {
 	ret := _m.Called(name)
 
 	if len(ret) == 0 {
 		panic("no return value specified for GetNode")
 	}
 
-	var r0 *v1.Node
+	var r0 *corev1.Node
 	var r1 error
-	if rf, ok := ret.Get(0).(func(string) (*v1.Node, error)); ok {
+	if rf, ok := ret.Get(0).(func(string) (*corev1.Node, error)); ok {
 		return rf(name)
 	}
-	if rf, ok := ret.Get(0).(func(string) *v1.Node); ok {
+	if rf, ok := ret.Get(0).(func(string) *corev1.Node); ok {
 		r0 = rf(name)
 	} else {
 		if ret.Get(0) != nil {
-			r0 = ret.Get(0).(*v1.Node)
+			r0 = ret.Get(0).(*corev1.Node)
 		}
 	}
 
@@ -808,12 +868,12 @@ func (_c *IKubernetesClient_GetNode_Call) Run(run func(name string)) *IKubernete
 	return _c
 }
 
-func (_c *IKubernetesClient_GetNode_Call) Return(_a0 *v1.Node, _a1 error) *IKubernetesClient_GetNode_Call {
+func (_c *IKubernetesClient_GetNode_Call) Return(_a0 *corev1.Node, _a1 error) *IKubernetesClient_GetNode_Call {
 	_c.Call.Return(_a0, _a1)
 	return _c
 }
 
-func (_c *IKubernetesClient_GetNode_Call) RunAndReturn(run func(string) (*v1.Node, error)) *IKubernetesClient_GetNode_Call {
+func (_c *IKubernetesClient_GetNode_Call) RunAndReturn(run func(string) (*corev1.Node, error)) *IKubernetesClient_GetNode_Call {
 	_c.Call.Return(run)
 	return _c
 }
@@ -880,23 +940,23 @@ func (_c *IKubernetesClient_GetPodLogs_Call) RunAndReturn(run func(string, strin
 }
 
 // GetPodsForNode provides a mock function with given fields: nodeName
-func (_m *IKubernetesClient) GetPodsForNode(nodeName string) ([]v1.Pod, error) {
+func (_m *IKubernetesClient) GetPodsForNode(nodeName string) ([]corev1.Pod, error) {
 	ret := _m.Called(nodeName)
 
 	if len(ret) == 0 {
 		panic("no return value specified for GetPodsForNode")
 	}
 
-	var r0 []v1.Pod
+	var r0 []corev1.Pod
 	var r1 error
-	if rf, ok := ret.Get(0).(func(string) ([]v1.Pod, error)); ok {
+	if rf, ok := ret.Get(0).(func(string) ([]corev1.Pod, error)); ok {
 		return rf(nodeName)
 	}
-	if rf, ok := ret.Get(0).(func(string) []v1.Pod); ok {
+	if rf, ok := ret.Get(0).(func(string) []corev1.Pod); ok {
 		r0 = rf(nodeName)
 	} else {
 		if ret.Get(0) != nil {
-			r0 = ret.Get(0).([]v1.Pod)
+			r0 = ret.Get(0).([]corev1.Pod)
 		}
 	}
 
@@ -927,12 +987,12 @@ func (_c *IKubernetesClient_GetPodsForNode_Call) Run(run func(nodeName string)) 
 	return _c
 }
 
-func (_c *IKubernetesClient_GetPodsForNode_Call) Return(_a0 []v1.Pod, _a1 error) *IKubernetesClient_GetPodsForNode_Call {
+func (_c *IKubernetesClient_GetPodsForNode_Call) Return(_a0 []corev1.Pod, _a1 error) *IKubernetesClient_GetPodsForNode_Call {
 	_c.Call.Return(_a0, _a1)
 	return _c
 }
 
-func (_c *IKubernetesClient_GetPodsForNode_Call) RunAndReturn(run func(string) ([]v1.Pod, error)) *IKubernetesClient_GetPodsForNode_Call {
+func (_c *IKubernetesClient_GetPodsForNode_Call) RunAndReturn(run func(string) ([]corev1.Pod, error)) *IKubernetesClient_GetPodsForNode_Call {
 	_c.Call.Return(run)
 	return _c
 }
@@ -1400,6 +1460,63 @@ func (_c *IKubernetesClient_GetWorkloadsForRelease_Call) RunAndReturn(run func(s
 	return _c
 }
 
+// ListCRDs provides a mock function with no fields
+func (_m *IKubernetesClient) ListCRDs() ([]v1.CustomResourceDefinition, error) {
+	ret := _m.Called()
+
+	if len(ret) == 0 {
+		panic("no return value specified for ListCRDs")
+	}
+
+	var r0 []v1.CustomResourceDefinition
+	var r1 error
+	if rf, ok := ret.Get(0).(func() ([]v1.CustomResourceDefinition, error)); ok {
+		return rf()
+	}
+	if rf, ok := ret.Get(0).(func() []v1.CustomResourceDefinition); ok {
+		r0 = rf()
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).([]v1.CustomResourceDefinition)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func() error); ok {
+		r1 = rf()
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// IKubernetesClient_ListCRDs_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'ListCRDs'
+type IKubernetesClient_ListCRDs_Call struct {
+	*mock.Call
+}
+
+// ListCRDs is a helper method to define mock.On call
+func (_e *IKubernetesClient_Expecter) ListCRDs() *IKubernetesClient_ListCRDs_Call {
+	return &IKubernetesClient_ListCRDs_Call{Call: _e.mock.On("ListCRDs")}
+}
+
+func (_c *IKubernetesClient_ListCRDs_Call) Run(run func()) *IKubernetesClient_ListCRDs_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run()
+	})
+	return _c
+}
+
+func (_c *IKubernetesClient_ListCRDs_Call) Return(_a0 []v1.CustomResourceDefinition, _a1 error) *IKubernetesClient_ListCRDs_Call {
+	_c.Call.Return(_a0, _a1)
+	return _c
+}
+
+func (_c *IKubernetesClient_ListCRDs_Call) RunAndReturn(run func() ([]v1.CustomResourceDefinition, error)) *IKubernetesClient_ListCRDs_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
 // ListModules provides a mock function with no fields
 func (_m *IKubernetesClient) ListModules() ([]v1alpha1.Module, error) {
 	ret := _m.Called()
@@ -1515,23 +1632,23 @@ func (_c *IKubernetesClient_ListNamespaces_Call) RunAndReturn(run func() ([]stri
 }
 
 // ListNodes provides a mock function with no fields
-func (_m *IKubernetesClient) ListNodes() ([]v1.Node, error) {
+func (_m *IKubernetesClient) ListNodes() ([]corev1.Node, error) {
 	ret := _m.Called()
 
 	if len(ret) == 0 {
 		panic("no return value specified for ListNodes")
 	}
 
-	var r0 []v1.Node
+	var r0 []corev1.Node
 	var r1 error
-	if rf, ok := ret.Get(0).(func() ([]v1.Node, error)); ok {
+	if rf, ok := ret.Get(0).(func() ([]corev1.Node, error)); ok {
 		return rf()
 	}
-	if rf, ok := ret.Get(0).(func() []v1.Node); ok {
+	if rf, ok := ret.Get(0).(func() []corev1.Node); ok {
 		r0 = rf()
 	} else {
 		if ret.Get(0) != nil {
-			r0 = ret.Get(0).([]v1.Node)
+			r0 = ret.Get(0).([]corev1.Node)
 		}
 	}
 
@@ -1561,12 +1678,12 @@ func (_c *IKubernetesClient_ListNodes_Call) Run(run func()) *IKubernetesClient_L
 	return _c
 }
 
-func (_c *IKubernetesClient_ListNodes_Call) Return(_a0 []v1.Node, _a1 error) *IKubernetesClient_ListNodes_Call {
+func (_c *IKubernetesClient_ListNodes_Call) Return(_a0 []corev1.Node, _a1 error) *IKubernetesClient_ListNodes_Call {
 	_c.Call.Return(_a0, _a1)
 	return _c
 }
 
-func (_c *IKubernetesClient_ListNodes_Call) RunAndReturn(run func() ([]v1.Node, error)) *IKubernetesClient_ListNodes_Call {
+func (_c *IKubernetesClient_ListNodes_Call) RunAndReturn(run func() ([]corev1.Node, error)) *IKubernetesClient_ListNodes_Call {
 	_c.Call.Return(run)
 	return _c
 }

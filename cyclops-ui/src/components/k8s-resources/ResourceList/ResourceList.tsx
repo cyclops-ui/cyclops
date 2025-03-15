@@ -45,6 +45,8 @@ import { mapResponseError } from "../../../utils/api/errors";
 import { CheckboxChangeEvent } from "antd/es/checkbox";
 import { Workload } from "../../../utils/k8s/workload";
 import { useResourceListActions } from "./ResourceListActionsContext";
+import DefaultResource from "../DefaultResource";
+
 import { useTheme } from "../../theme/ThemeContext";
 import {
   SuccessIcon,
@@ -351,6 +353,17 @@ const ResourceList = ({
           <NetworkPolicy namespace={resource.namespace} name={resource.name} />
         );
         break;
+      default:
+        resourceDetails = (
+          <DefaultResource
+            group={resource.group}
+            version={resource.version}
+            kind={resource.kind}
+            name={resource.name}
+            namespace={resource.namespace}
+            onResourceDelete={onResourceDelete}
+          />
+        );
     }
 
     let deletedWarning = <p />;
