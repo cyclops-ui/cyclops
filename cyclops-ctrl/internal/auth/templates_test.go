@@ -1,11 +1,11 @@
 package auth
 
 import (
+	"testing"
+
 	"github.com/cyclops-ui/cyclops/cyclops-ctrl/api/v1alpha1"
 	"github.com/cyclops-ui/cyclops/cyclops-ctrl/pkg/mocks"
 	"github.com/pkg/errors"
-	apiv1 "k8s.io/api/core/v1"
-	"testing"
 
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
@@ -45,39 +45,39 @@ var _ = Describe("Templates resolver", func() {
 		{
 			Spec: v1alpha1.TemplateAuthRuleSpec{
 				Repo: "https://github.com/my-org/some-other-team",
-				Username: apiv1.SecretKeySelector{
-					LocalObjectReference: apiv1.LocalObjectReference{Name: "wrong-secret"},
-					Key:                  "username",
+				Username: v1alpha1.SecretKeySelector{
+					Name: "wrong-secret",
+					Key:  "username",
 				},
-				Password: apiv1.SecretKeySelector{
-					LocalObjectReference: apiv1.LocalObjectReference{Name: "wrong-secret"},
-					Key:                  "token",
+				Password: v1alpha1.SecretKeySelector{
+					Name: "wrong-secret",
+					Key:  "token",
 				},
 			},
 		},
 		{
 			Spec: v1alpha1.TemplateAuthRuleSpec{
 				Repo: "https://github.com/invalid-org/some))-other-team", // invalid regex should not break resolver
-				Username: apiv1.SecretKeySelector{
-					LocalObjectReference: apiv1.LocalObjectReference{Name: "wrong-secret"},
-					Key:                  "username",
+				Username: v1alpha1.SecretKeySelector{
+					Name: "wrong-secret",
+					Key:  "username",
 				},
-				Password: apiv1.SecretKeySelector{
-					LocalObjectReference: apiv1.LocalObjectReference{Name: "wrong-secret"},
-					Key:                  "token",
+				Password: v1alpha1.SecretKeySelector{
+					Name: "wrong-secret",
+					Key:  "token",
 				},
 			},
 		},
 		{
 			Spec: v1alpha1.TemplateAuthRuleSpec{
 				Repo: "https://github.com/my-org/my-team",
-				Username: apiv1.SecretKeySelector{
-					LocalObjectReference: apiv1.LocalObjectReference{Name: "secret-name"},
-					Key:                  "username",
+				Username: v1alpha1.SecretKeySelector{
+					Name: "secret-name",
+					Key:  "username",
 				},
-				Password: apiv1.SecretKeySelector{
-					LocalObjectReference: apiv1.LocalObjectReference{Name: "secret-name"},
-					Key:                  "token",
+				Password: v1alpha1.SecretKeySelector{
+					Name: "secret-name",
+					Key:  "token",
 				},
 			},
 		},
