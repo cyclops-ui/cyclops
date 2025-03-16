@@ -82,6 +82,15 @@ const sidebars = {
       ],
     },
     {
+      type: "category",
+      label: "Backstage plugins",
+      items: [
+        "backstage/plugins",
+        "backstage/modules-plugin",
+        "backstage/catalog-plugin",
+      ],
+    },
+    {
       label: "Cyclops CLI (cyctl)",
       type: "category",
       items: [
