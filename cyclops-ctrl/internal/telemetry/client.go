@@ -21,14 +21,15 @@ type logger interface {
 }
 
 type EnqueueClient struct {
-	client     posthog.Client
-	distinctID string
-	version    string
+	client         posthog.Client
+	distinctID     string
+	version        string
+	installManager string
 }
 
 type MockClient struct{}
 
-func NewClient(disable bool, version string, logger logger) (Client, error) {
+func NewClient(disable bool, version, installManager string, logger logger) (Client, error) {
 	if disable {
 		logger.Info("telemetry disabled")
 		return MockClient{}, nil
@@ -56,9 +57,10 @@ func NewClient(disable bool, version string, logger logger) (Client, error) {
 	logger.Info("starting instance with UUID", "UUID", idStr)
 
 	return EnqueueClient{
-		client:     client,
-		distinctID: idStr,
-		version:    version,
+		client:         client,
+		distinctID:     idStr,
+		version:        version,
+		installManager: installManager,
 	}, nil
 }
 
@@ -67,7 +69,8 @@ func (c EnqueueClient) InstanceStart() {
 		Event:      "cyclops-instance-start",
 		DistinctId: c.distinctID,
 		Properties: map[string]interface{}{
-			"version": c.version,
+			"version":         c.version,
+			"install_manager": c.installManager,
 		},
 	})
 }
@@ -77,7 +80,8 @@ func (c EnqueueClient) ModuleReconciliation() {
 		Event:      "module-reconciliation",
 		DistinctId: c.distinctID,
 		Properties: map[string]interface{}{
-			"version": c.version,
+			"version":         c.version,
+			"install_manager": c.installManager,
 		},
 	})
 }
@@ -87,7 +91,8 @@ func (c EnqueueClient) ModuleCreation() {
 		Event:      "module-creation",
 		DistinctId: c.distinctID,
 		Properties: map[string]interface{}{
-			"version": c.version,
+			"version":         c.version,
+			"install_manager": c.installManager,
 		},
 	})
 }
@@ -97,7 +102,8 @@ func (c EnqueueClient) ReleaseUpdate() {
 		Event:      "helm-release-upgrade",
 		DistinctId: c.distinctID,
 		Properties: map[string]interface{}{
-			"version": c.version,
+			"version":         c.version,
+			"install_manager": c.installManager,
 		},
 	})
 }
@@ -107,7 +113,8 @@ func (c EnqueueClient) ReleaseMigration() {
 		Event:      "helm-release-migration",
 		DistinctId: c.distinctID,
 		Properties: map[string]interface{}{
-			"version": c.version,
+			"version":         c.version,
+			"install_manager": c.installManager,
 		},
 	})
 }
@@ -117,7 +124,8 @@ func (c EnqueueClient) TemplateCreation() {
 		Event:      "template-creation",
 		DistinctId: c.distinctID,
 		Properties: map[string]interface{}{
-			"version": c.version,
+			"version":         c.version,
+			"install_manager": c.installManager,
 		},
 	})
 }
@@ -127,7 +135,8 @@ func (c EnqueueClient) TemplateEdit() {
 		Event:      "template-edit",
 		DistinctId: c.distinctID,
 		Properties: map[string]interface{}{
-			"version": c.version,
+			"version":         c.version,
+			"install_manager": c.installManager,
 		},
 	})
 }
