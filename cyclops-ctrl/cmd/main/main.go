@@ -68,6 +68,7 @@ func main() {
 	telemetryClient, _ := telemetry.NewClient(
 		getEnvBool("DISABLE_TELEMETRY"),
 		os.Getenv("CYCLOPS_VERSION"),
+		os.Getenv("INSTALL_MANAGER"),
 		setupLog,
 	)
 	telemetryClient.InstanceStart()
