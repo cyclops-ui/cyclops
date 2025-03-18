@@ -413,7 +413,7 @@ func (k *KubernetesClient) isResourceNamespaced(gvk schema.GroupVersionKind) (bo
 }
 
 func (k *KubernetesClient) clusterApiResources() (*apiResources, error) {
-	_, resources, err := k.discovery.ServerGroupsAndResources()
+	resources, err := k.discovery.ServerPreferredResources()
 	if err != nil {
 		var discoveryErr *discovery.ErrGroupDiscoveryFailed
 		if errors.As(err, &discoveryErr) {
