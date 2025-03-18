@@ -18,6 +18,7 @@ import (
 	"k8s.io/apimachinery/pkg/runtime/schema"
 	"k8s.io/apimachinery/pkg/version"
 	"k8s.io/apimachinery/pkg/watch"
+	"k8s.io/client-go/discovery"
 	"k8s.io/client-go/tools/cache"
 
 	"github.com/cyclops-ui/cyclops/cyclops-ctrl/api/v1alpha1"
@@ -388,12 +389,12 @@ func (k *KubernetesClient) ListNamespaces() ([]string, error) {
 }
 
 func (k *KubernetesClient) isResourceNamespaced(gvk schema.GroupVersionKind) (bool, error) {
-	resourcesList, err := k.discovery.ServerPreferredResources()
+	resourcesList, err := k.clusterApiResources()
 	if err != nil {
 		return false, err
 	}
 
-	for _, resource := range resourcesList {
+	for _, resource := range resourcesList.resourcesList {
 		gv, err := schema.ParseGroupVersion(resource.GroupVersion)
 		if err != nil {
 			return false, err
@@ -412,12 +413,17 @@ func (k *KubernetesClient) isResourceNamespaced(gvk schema.GroupVersionKind) (bo
 }
 
 func (k *KubernetesClient) clusterApiResources() (*apiResources, error) {
-	resourcesList, err := k.discovery.ServerPreferredResources()
+	resources, err := k.discovery.ServerPreferredResources()
 	if err != nil {
-		return nil, err
+		var discoveryErr *discovery.ErrGroupDiscoveryFailed
+		if errors.As(err, &discoveryErr) {
+			fmt.Printf("Warning: Discovery failed for some resources: %v\n", err)
+		} else {
+			return nil, fmt.Errorf("failed to retrieve API resources: %w", err)
+		}
 	}
 
-	return &apiResources{resourcesList: resourcesList}, nil
+	return &apiResources{resourcesList: resources}, nil
 }
 
 func isDeployment(group, version, kind string) bool {
