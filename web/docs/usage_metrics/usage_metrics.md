@@ -30,6 +30,7 @@ Each time one of the events above is triggered, Cyclops sends an HTTP request to
 `distinct_id` - generated for each Cyclops instance using [NewUUID](https://pkg.go.dev/github.com/google/uuid#NewUUID) from google/uuid package  
 `event` - which event was triggered; see events above  
 `properties.version` - version of your Cyclops instance
+`properties.install_manager` - emits if Cyclops is installed via other applications/marketplaces (Rancher, Civo marketplace, DigitalOcean marketplace...)
 
 ## Turn off
 

@@ -136,9 +136,6 @@ spec:
                   type: object
                 templateResolvedVersion:
                   type: string
-              required:
-                - reconciliationStatus
-                - templateResolvedVersion
               type: object
           type: object
       served: true
@@ -383,7 +380,7 @@ spec:
     spec:
       containers:
         - name: cyclops-ui
-          image: cyclopsui/cyclops-ui:v0.18.1-rc.1
+          image: cyclopsui/cyclops-ui:v0.18.1
           ports:
             - containerPort: 80
           env:
@@ -448,7 +445,7 @@ spec:
       serviceAccountName: cyclops-ctrl
       containers:
         - name: cyclops-ctrl
-          image: cyclopsui/cyclops-ctrl:v0.18.1-rc.1
+          image: cyclopsui/cyclops-ctrl:v0.18.1
           ports:
             - containerPort: 8080
           env:

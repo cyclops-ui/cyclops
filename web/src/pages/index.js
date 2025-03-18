@@ -107,7 +107,24 @@ export default function Home() {
           >
             <h3 style={{margin: "0px 20px 0px 20px"}}>Get started</h3>
           </button>
-        </div>
+          <a
+            href={
+              "https://www.producthunt.com/posts/cyclops-3?embed=true&utm_source=badge-featured&utm_medium=badge&utm_souce=badge-cyclops&#0045;3"
+            }
+            target={"_blank"}
+            style={{ zIndex: "1", margin: "15px" }}
+          >
+            <img
+              src={
+                "https://api.producthunt.com/widgets/embed-image/v1/featured.svg?post_id=934878&theme=light&t=1741601107320"
+              }
+              alt="Cyclops - Open&#0045;Source&#0032;tool&#0032;for&#0032;building&#0032;Internal&#0032;Developer&#0032;Platforms | Product Hunt"
+              style={{ width: "250px", height: "54px" }}
+              width={"250"}
+              height={"54"}
+            />
+          </a>
+          </div>
         <Comparison/>
         <div className={styles.backgroundcolor}>
           <Features />
