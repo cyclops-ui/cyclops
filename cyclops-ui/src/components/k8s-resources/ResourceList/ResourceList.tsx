@@ -277,8 +277,10 @@ const ResourceList = ({
       namespace: resource.namespace,
     };
 
-    switch (resource.kind) {
-      case "Deployment":
+    switch (true) {
+      case resource.group === "apps" &&
+        resource.version === "v1" &&
+        resource.kind === "Deployment":
         resourceDetails = (
           <Deployment
             name={resource.name}
@@ -287,17 +289,23 @@ const ResourceList = ({
           />
         );
         break;
-      case "CronJob":
+      case resource.group === "batch" &&
+        resource.version === "v1" &&
+        resource.kind === "CronJob":
         resourceDetails = (
           <CronJob name={resource.name} namespace={resource.namespace} />
         );
         break;
-      case "Job":
+      case resource.group === "batch" &&
+        resource.version === "v1" &&
+        resource.kind === "Job":
         resourceDetails = (
           <Job name={resource.name} namespace={resource.namespace} />
         );
         break;
-      case "DaemonSet":
+      case resource.group === "apps" &&
+        resource.version === "v1" &&
+        resource.kind === "DaemonSet":
         resourceDetails = (
           <DaemonSet
             name={resource.name}
@@ -306,7 +314,9 @@ const ResourceList = ({
           />
         );
         break;
-      case "StatefulSet":
+      case resource.group === "apps" &&
+        resource.version === "v1" &&
+        resource.kind === "StatefulSet":
         resourceDetails = (
           <StatefulSet
             name={resource.name}
@@ -315,22 +325,30 @@ const ResourceList = ({
           />
         );
         break;
-      case "Pod":
+      case resource.group === "" &&
+        resource.version === "v1" &&
+        resource.kind === "Pod":
         resourceDetails = (
           <Pod name={resource.name} namespace={resource.namespace} />
         );
         break;
-      case "Service":
+      case resource.group === "" &&
+        resource.version === "v1" &&
+        resource.kind === "Service":
         resourceDetails = (
           <Service name={resource.name} namespace={resource.namespace} />
         );
         break;
-      case "ConfigMap":
+      case resource.group === "" &&
+        resource.version === "v1" &&
+        resource.kind === "ConfigMap":
         resourceDetails = (
           <ConfigMap name={resource.name} namespace={resource.namespace} />
         );
         break;
-      case "PersistentVolumeClaim":
+      case resource.group === "" &&
+        resource.version === "v1" &&
+        resource.kind === "PersistentVolumeClaim":
         resourceDetails = (
           <PersistentVolumeClaim
             name={resource.name}
@@ -338,15 +356,21 @@ const ResourceList = ({
           />
         );
         break;
-      case "Secret":
+      case resource.group === "" &&
+        resource.version === "v1" &&
+        resource.kind === "Secret":
         resourceDetails = (
           <Secret name={resource.name} namespace={resource.namespace} />
         );
         break;
-      case "ClusterRole":
+      case resource.group === "rbac.authorization.k8s.io" &&
+        resource.version === "v1" &&
+        resource.kind === "ClusterRole":
         resourceDetails = <ClusterRole name={resource.name} />;
         break;
-      case "NetworkPolicy":
+      case resource.group === "networking.k8s.io" &&
+        resource.version === "v1" &&
+        resource.kind === "NetworkPolicy":
         resourceDetails = (
           <NetworkPolicy namespace={resource.namespace} name={resource.name} />
         );
