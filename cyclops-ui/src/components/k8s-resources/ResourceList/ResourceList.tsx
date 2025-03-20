@@ -27,6 +27,7 @@ import StatefulSet from "../StatefulSet";
 import Pod from "../Pod";
 import Service from "../Service";
 import ClusterRole from "../ClusterRole";
+import Role from "../Role";
 import ConfigMap from "../ConfigMap";
 import PersistentVolumeClaim from "../PersistentVolumeClaim";
 import Secret from "../Secret";
@@ -367,6 +368,13 @@ const ResourceList = ({
         resource.version === "v1" &&
         resource.kind === "ClusterRole":
         resourceDetails = <ClusterRole name={resource.name} />;
+        break;
+      case resource.group === "rbac.authorization.k8s.io" &&
+        resource.version === "v1" &&
+        resource.kind === "Role":
+        resourceDetails = (
+          <Role name={resource.name} namespace={resource.namespace} />
+        );
         break;
       case resource.group === "networking.k8s.io" &&
         resource.version === "v1" &&
