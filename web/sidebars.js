@@ -51,6 +51,7 @@ const sidebars = {
           },
           items: [
             "installation/install/manifest",
+            "installation/install/helm",
             "installation/install/glasskube",
             "installation/install/cyctl",
           ],
