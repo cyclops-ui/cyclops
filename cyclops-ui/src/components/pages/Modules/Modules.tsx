@@ -14,6 +14,7 @@ import {
   Checkbox,
   theme,
   ConfigProvider,
+  notification,
 } from "antd";
 
 import axios from "axios";
@@ -49,6 +50,16 @@ const Modules = () => {
     message: "",
     description: "",
   });
+
+  const [checkedModules, setCheckedModules] = useState<string[]>([]);
+
+  const handleCheckboxChange = (moduleName: string, checked: boolean) => {
+    setCheckedModules((prev) =>
+      checked
+        ? [...prev, moduleName]
+        : prev.filter((name) => name !== moduleName),
+    );
+  };
 
   useEffect(() => {
     setLoadingModules(true);
@@ -106,6 +117,23 @@ const Modules = () => {
   const handleClick = () => {
     window.location.href = "/modules/new";
   };
+
+  const handleBatchReconcile = () => {
+    axios
+      .post(`/api/modules/reconcile`, { modules: checkedModules })
+      .then(() => {
+        notification.success({
+          message: "Reconciliation triggered",
+          description: `Modules have been queued for reconciliation.`,
+          duration: 10,
+        });
+        setCheckedModules([]);
+      })
+      .catch((error) => {
+        setError(mapResponseError(error));
+      });
+  };
+
   const handleSelectItem = (selectedItems: any[]) => {
     setModuleHealthFilter(selectedItems);
   };
@@ -234,17 +262,29 @@ const Modules = () => {
         <a href={"/modules/" + module.name}>
           <Card
             title={
-              <div>
-                {module.iconURL ? (
-                  <img
-                    alt=""
-                    style={{ height: "2em", marginRight: "8px" }}
-                    src={module.iconURL}
-                  />
-                ) : (
-                  <></>
-                )}
-                {module.name}
+              <div
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "space-between",
+                }}
+              >
+                <div style={{ display: "flex", alignItems: "center" }}>
+                  {module.iconURL && (
+                    <img
+                      alt=""
+                      style={{ height: "2em", marginRight: "8px" }}
+                      src={module.iconURL}
+                    />
+                  )}
+                  {module.name}
+                </div>
+                <Checkbox
+                  checked={checkedModules.includes(module.name)}
+                  onChange={(e) =>
+                    handleCheckboxChange(module.name, e.target.checked)
+                  }
+                />
               </div>
             }
             style={{
@@ -382,9 +422,22 @@ const Modules = () => {
           />
         )}
 
-        <Row gutter={[40, 0]}>
-          <Col span={18}>
+        <Row gutter={[20, 0]}>
+          <Col span={14}>
             <Title level={2}>Deployed modules</Title>
+          </Col>
+          <Col span={4}>
+            <Button
+              onClick={handleBatchReconcile}
+              disabled={checkedModules.length === 0}
+              block
+              style={{
+                fontWeight: "600",
+              }}
+            >
+              <PlusCircleOutlined />
+              Reconcile
+            </Button>
           </Col>
           <Col span={6}>
             <Button
