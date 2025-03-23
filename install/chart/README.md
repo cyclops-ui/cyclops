@@ -10,9 +10,9 @@ You can check [Cyclops landing page](https://cyclops-ui.com) or our [GitHub repo
 
 To install Cyclops Helm chart into your Kubernetes cluster, you can install it via OCI chart:
 ```bash
-helm install cyclops \\
---namespace cyclops \\
---create-namespace \\
+helm install cyclops \
+--namespace cyclops \
+--create-namespace \
 oci://registry-1.docker.io/cyclopsui/cyclops
 ```
 
