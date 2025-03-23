@@ -100,7 +100,7 @@ func main() {
 		setupLog.Error(err, "failed to set up prom monitor")
 	}
 
-	renderer := render.NewRenderer(k8sClient)
+	renderer := render.NewRenderer(k8sClient, templatesRepo)
 
 	prometheus.StartCacheMetricsUpdater(&monitor, templatesRepo.ReturnCache(), 10*time.Second, setupLog)
 

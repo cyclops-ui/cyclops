@@ -49,6 +49,23 @@ func getCommitMessageTemplate(commitMessageTemplate string, logger logr.Logger) 
 	return tmpl
 }
 
+func getModulePath(module cyclopsv1alpha1.Module) (string, error) {
+	path := module.GetAnnotations()[cyclopsv1alpha1.GitOpsWritePathAnnotation]
+
+	tmpl, err := template.New("modulePath").Parse(path)
+	if err != nil {
+		return "", err
+	}
+
+	var o bytes.Buffer
+	err = tmpl.Execute(&o, module)
+	if err != nil {
+		return "", err
+	}
+
+	return o.String(), nil
+}
+
 func (c *WriteClient) Write(module cyclopsv1alpha1.Module) error {
 	module.Status.ReconciliationStatus = nil
 	module.Status.ManagedGVRs = nil
@@ -58,7 +75,11 @@ func (c *WriteClient) Write(module cyclopsv1alpha1.Module) error {
 		return errors.New(fmt.Sprintf("module passed to write without git repository; set cyclops-ui.com/write-repo annotation in module %v", module.Name))
 	}
 
-	path := module.GetAnnotations()[cyclopsv1alpha1.GitOpsWritePathAnnotation]
+	path, err := getModulePath(module)
+	if err != nil {
+		return err
+	}
+
 	revision := module.GetAnnotations()[cyclopsv1alpha1.GitOpsWriteRevisionAnnotation]
 
 	creds, err := c.templatesResolver.RepoAuthCredentials(repoURL)

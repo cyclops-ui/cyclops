@@ -95,6 +95,7 @@ func (h *Handler) Start() error {
 	h.router.GET("/modules/:name/template", modulesController.Template)
 	h.router.GET("/modules/:name/helm-template", modulesController.HelmTemplate)
 	//h.router.POST("/modules/resources", modulesController.ModuleToResources)
+	h.router.POST("/modules/reconcile", modulesController.BatchReconcileModules)
 
 	h.router.GET("/resources/pods/:namespace/:name/:container/logs", modulesController.GetLogs)
 	h.router.GET("/resources/pods/:namespace/:name/:container/logs/stream", sse.HeadersMiddleware(), modulesController.GetLogsStream)

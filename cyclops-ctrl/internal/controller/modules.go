@@ -476,6 +476,53 @@ func (m *Modules) ReconcileModule(ctx *gin.Context) {
 	ctx.Status(http.StatusAccepted)
 }
 
+func (m *Modules) BatchReconcileModules(ctx *gin.Context) {
+	ctx.Header("Access-Control-Allow-Origin", "*")
+
+	type ReconcileModulesReq struct {
+		Modules []string `json:"modules"`
+	}
+
+	var request struct {
+		Modules []string `json:"modules"`
+	}
+	if err := ctx.BindJSON(&request); err != nil {
+		fmt.Println(err)
+		ctx.JSON(http.StatusBadRequest, dto.NewError("Error mapping modules reconcile request", err.Error()))
+		return
+	}
+
+	for _, moduleName := range request.Modules {
+		if err := m.reconcileModule(moduleName); err != nil {
+			fmt.Println(err)
+			ctx.JSON(http.StatusInternalServerError, dto.NewError(fmt.Sprintf("Error reconciling module %v", moduleName), err.Error()))
+			return
+		}
+	}
+
+	ctx.Status(http.StatusAccepted)
+}
+
+func (m *Modules) reconcileModule(moduleName string) error {
+	module, err := m.kubernetesClient.GetModule(moduleName)
+	if err != nil {
+		return err
+	}
+
+	annotations := module.GetAnnotations()
+	if annotations == nil {
+		annotations = make(map[string]string)
+	}
+
+	annotations["cyclops/reconciled-at"] = time.Now().Format(time.RFC3339)
+	module.SetAnnotations(annotations)
+
+	module.Kind = "Module"
+	module.APIVersion = "cyclops-ui.com/v1alpha1"
+
+	return m.kubernetesClient.UpdateModule(module)
+}
+
 func (m *Modules) ResourcesForModule(ctx *gin.Context) {
 	ctx.Header("Access-Control-Allow-Origin", "*")
 
