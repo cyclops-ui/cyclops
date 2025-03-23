@@ -6,6 +6,33 @@ Cyclops is an open-source tool that allows you to create custom Kubernetes UIs. 
 
 You can check [Cyclops landing page](https://cyclops-ui.com) or our [GitHub repo](https://github.com/cyclops-ui/cyclops) for documentation and more details.
 
+---
+
+To install Cyclops Helm chart into your Kubernetes cluster, you can install it via OCI chart:
+```bash
+helm install cyclops \\
+--namespace cyclops \\
+--create-namespace \\
+oci://registry-1.docker.io/cyclopsui/cyclops
+```
+
+Or add our Helm chart:
+
+```
+helm repo add cyclops-ui https://cyclops-ui.com/helm
+helm repo update
+```
+
+And install Cyclops:
+
+```
+helm install cyclops \
+--namespace cyclops \
+--create-namespace \
+cyclops-ui/cyclops
+```
+---
+
 You can confirm Cyclops is healthy by checking if Cyclops pods are up and running. You can do it with the command below
 
 ```
@@ -19,6 +46,8 @@ NAME                           READY   STATUS    RESTARTS   AGE
 cyclops-ctrl-8b9cff4db-p74x6   1/1     Running   0          38s
 cyclops-ui-6cb54c69bf-g78d5    1/1     Running   0          38s
 ```
+
+---
 
 Cyclops UI is exposed via a Kubernetes service. You can port forward the service and use it from localhost with the command below:
 
