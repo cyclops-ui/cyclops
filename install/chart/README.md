@@ -8,7 +8,7 @@ You can check [Cyclops landing page](https://cyclops-ui.com) or our [GitHub repo
 
 ---
 
-To install Cyclops Helm chart into your Kubernetes cluster, you can install it via OCI chart:
+You can install the Cyclops Helm chart in your Kubernetes cluster using our OCI chart:
 ```bash
 helm install cyclops \
 --namespace cyclops \
