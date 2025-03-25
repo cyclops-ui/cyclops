@@ -575,11 +575,7 @@ export const CreateModuleComponent = ({
                       hasFeedback={true}
                       validateDebounce={1000}
                     >
-                      <Select
-                        showSearch={true}
-                        onChange={onTemplateStoreSelected}
-                        style={{ width: "100%" }}
-                      >
+                      <Select showSearch={true} style={{ width: "100%" }}>
                         {namespaces.map((namespace: string) => (
                           <Option key={namespace} value={namespace}>
                             {namespace}
