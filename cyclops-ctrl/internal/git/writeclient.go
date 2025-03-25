@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/go-logr/logr"
+	json "github.com/json-iterator/go"
 	path2 "path"
 	"text/template"
 	"time"
@@ -57,8 +58,17 @@ func getModulePath(module cyclopsv1alpha1.Module) (string, error) {
 		return "", err
 	}
 
+	moduleMap := make(map[string]interface{})
+	moduleData, err := json.Marshal(module)
+	if err != nil {
+		return "", err
+	}
+	if err := json.Unmarshal(moduleData, &moduleMap); err != nil {
+		return "", err
+	}
+
 	var o bytes.Buffer
-	err = tmpl.Execute(&o, module)
+	err = tmpl.Execute(&o, moduleMap)
 	if err != nil {
 		return "", err
 	}

@@ -24,7 +24,8 @@ type Handler struct {
 	renderer       *render.Renderer
 	gitWriteClient *git.WriteClient
 
-	moduleTargetNamespace string
+	moduleTargetNamespace      string
+	disableTemplateVersionLock bool
 
 	telemetryClient telemetry.Client
 	monitor         prometheus.Monitor
@@ -37,18 +38,20 @@ func New(
 	renderer *render.Renderer,
 	gitWriteClient *git.WriteClient,
 	moduleTargetNamespace string,
+	disableTemplateVersionLock bool,
 	telemetryClient telemetry.Client,
 	monitor prometheus.Monitor,
 ) (*Handler, error) {
 	return &Handler{
-		templatesRepo:         templatesRepo,
-		k8sClient:             kubernetesClient,
-		renderer:              renderer,
-		releaseClient:         releaseClient,
-		gitWriteClient:        gitWriteClient,
-		moduleTargetNamespace: moduleTargetNamespace,
-		telemetryClient:       telemetryClient,
-		monitor:               monitor,
+		templatesRepo:              templatesRepo,
+		k8sClient:                  kubernetesClient,
+		renderer:                   renderer,
+		releaseClient:              releaseClient,
+		gitWriteClient:             gitWriteClient,
+		moduleTargetNamespace:      moduleTargetNamespace,
+		disableTemplateVersionLock: disableTemplateVersionLock,
+		telemetryClient:            telemetryClient,
+		monitor:                    monitor,
 	}, nil
 }
 
@@ -56,7 +59,16 @@ func (h *Handler) Start() error {
 	gin.SetMode(gin.DebugMode)
 
 	templatesController := controller.NewTemplatesController(h.templatesRepo, h.k8sClient, h.telemetryClient)
-	modulesController := controller.NewModulesController(h.templatesRepo, h.k8sClient, h.renderer, h.gitWriteClient, h.moduleTargetNamespace, h.telemetryClient, h.monitor)
+	modulesController := controller.NewModulesController(
+		h.templatesRepo,
+		h.k8sClient,
+		h.renderer,
+		h.gitWriteClient,
+		h.moduleTargetNamespace,
+		h.disableTemplateVersionLock,
+		h.telemetryClient,
+		h.monitor,
+	)
 	clusterController := controller.NewClusterController(h.k8sClient)
 	helmController := controller.NewHelmController(h.k8sClient, h.releaseClient, h.telemetryClient)
 

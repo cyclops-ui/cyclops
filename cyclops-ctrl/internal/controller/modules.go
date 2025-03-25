@@ -31,7 +31,8 @@ type Modules struct {
 	renderer         *render.Renderer
 	gitWriteClient   *git.WriteClient
 
-	moduleTargetNamespace string
+	moduleTargetNamespace      string
+	disableTemplateVersionLock bool
 
 	telemetryClient telemetry.Client
 	monitor         prometheus.Monitor
@@ -43,17 +44,19 @@ func NewModulesController(
 	renderer *render.Renderer,
 	gitWriteClient *git.WriteClient,
 	moduleTargetNamespace string,
+	disableTemplateVersionLock bool,
 	telemetryClient telemetry.Client,
 	monitor prometheus.Monitor,
 ) *Modules {
 	return &Modules{
-		kubernetesClient:      kubernetes,
-		templatesRepo:         templatesRepo,
-		renderer:              renderer,
-		gitWriteClient:        gitWriteClient,
-		moduleTargetNamespace: moduleTargetNamespace,
-		telemetryClient:       telemetryClient,
-		monitor:               monitor,
+		kubernetesClient:           kubernetes,
+		templatesRepo:              templatesRepo,
+		renderer:                   renderer,
+		gitWriteClient:             gitWriteClient,
+		moduleTargetNamespace:      moduleTargetNamespace,
+		disableTemplateVersionLock: disableTemplateVersionLock,
+		telemetryClient:            telemetryClient,
+		monitor:                    monitor,
 	}
 }
 
@@ -243,7 +246,7 @@ func (m *Modules) CurrentManifest(ctx *gin.Context) {
 		module.Spec.TemplateRef.URL,
 		module.Spec.TemplateRef.Path,
 		module.Spec.TemplateRef.Version,
-		module.Status.TemplateResolvedVersion,
+		module.TemplateResolvedVersion(m.disableTemplateVersionLock),
 		module.Spec.TemplateRef.SourceType,
 	)
 	if err != nil {
@@ -540,8 +543,8 @@ func (m *Modules) ResourcesForModule(ctx *gin.Context) {
 	t, err := m.templatesRepo.GetTemplate(
 		module.Spec.TemplateRef.URL,
 		module.Spec.TemplateRef.Path,
-		templateVersion,
-		module.Status.TemplateResolvedVersion,
+		module.TemplateResolvedVersion(m.disableTemplateVersionLock),
+		"",
 		module.Spec.TemplateRef.SourceType,
 	)
 	if err != nil {
@@ -587,7 +590,7 @@ func (m *Modules) Template(ctx *gin.Context) {
 		module.Spec.TemplateRef.URL,
 		module.Spec.TemplateRef.Path,
 		module.Spec.TemplateRef.Version,
-		module.Status.TemplateResolvedVersion,
+		module.TemplateResolvedVersion(m.disableTemplateVersionLock),
 		module.Spec.TemplateRef.SourceType,
 	)
 	if err != nil {
@@ -607,7 +610,7 @@ func (m *Modules) Template(ctx *gin.Context) {
 		module.Spec.TemplateRef.URL,
 		module.Spec.TemplateRef.Path,
 		module.Spec.TemplateRef.Version,
-		module.Status.TemplateResolvedVersion,
+		module.TemplateResolvedVersion(m.disableTemplateVersionLock),
 		module.Spec.TemplateRef.SourceType,
 	)
 	if err != nil {
@@ -645,7 +648,7 @@ func (m *Modules) HelmTemplate(ctx *gin.Context) {
 		module.Spec.TemplateRef.URL,
 		module.Spec.TemplateRef.Path,
 		module.Spec.TemplateRef.Version,
-		module.Status.TemplateResolvedVersion,
+		module.TemplateResolvedVersion(m.disableTemplateVersionLock),
 		module.Spec.TemplateRef.SourceType,
 	)
 	if err != nil {
