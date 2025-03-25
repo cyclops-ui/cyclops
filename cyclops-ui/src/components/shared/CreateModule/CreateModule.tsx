@@ -111,7 +111,7 @@ export const CreateModuleComponent = ({
   const [template, setTemplate] = useState<templateStoreOption>();
 
   const [initialValues, setInitialValues] = useState({});
-  const [initialValuesRaw, setInitialValuesRaw] = useState({});
+  // const [initialValuesRaw, setInitialValuesRaw] = useState({});
 
   const [error, setError] = useState({
     message: "",
@@ -234,7 +234,7 @@ export const CreateModuleComponent = ({
       dependencies: [],
     });
     form.setFieldsValue({});
-    setInitialValuesRaw({});
+    // setInitialValuesRaw({});
     setInitialValues({});
 
     setLoadingTemplate(true);
@@ -277,7 +277,7 @@ export const CreateModuleComponent = ({
       .then((res) => {
         let initialValuesMapped = mapsToArray(tmpConfig.root.properties, res);
 
-        setInitialValuesRaw(res);
+        // setInitialValuesRaw(res);
         setInitialValues(initialValuesMapped);
         form.setFieldsValue(initialValuesMapped);
 
