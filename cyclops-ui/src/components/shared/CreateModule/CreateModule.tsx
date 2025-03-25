@@ -80,6 +80,7 @@ export interface CreateModuleProps {
     moduleNamespace: string,
     templateRef: any,
     values: string,
+    lockTemplateVersion?: boolean,
     gitOpsWrite?: any,
   ) => Promise<any>;
   onSubmitModuleSuccess: (moduleName: string) => void;
@@ -188,6 +189,7 @@ export const CreateModuleComponent = ({
 
     const moduleName = values["cyclops_module_name"];
     const moduleNamespace = values["cyclops_module_namespace"];
+    const lockTemplateVersion = values["cyclops_module_lock_version"];
 
     values = findMaps(config.root.properties, values, {});
 
@@ -201,6 +203,7 @@ export const CreateModuleComponent = ({
         sourceType: template.ref.sourceType,
       },
       values,
+      lockTemplateVersion,
       resolveGitOpsWrite(values),
     )
       .then(() => {
@@ -560,6 +563,26 @@ export const CreateModuleComponent = ({
                     <Divider
                       style={{ marginTop: "12px", marginBottom: "12px" }}
                     />
+                    <Form.Item
+                      name="cyclops_module_lock_version"
+                      id="cyclops_module_lock_version"
+                      label={
+                        <div>
+                          Lock template version
+                          <p style={{ color: "#8b8e91", marginBottom: "0px" }}>
+                            If toggled, this Module will not automatically
+                            follow the latest version of the template selected
+                            and you will have to bump the template version while
+                            editing the module.
+                          </p>
+                        </div>
+                      }
+                      style={{ padding: "0px 12px 0px 12px" }}
+                      hasFeedback={true}
+                      validateDebounce={1000}
+                    >
+                      <Switch />
+                    </Form.Item>
                     <Form.Item
                       name="cyclops_module_namespace"
                       id="cyclops_module_namespace"

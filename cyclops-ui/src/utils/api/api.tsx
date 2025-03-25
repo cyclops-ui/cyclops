@@ -74,6 +74,7 @@ export async function createModule(
   moduleNamespace: string,
   templateRef: any,
   values: any,
+  lockTemplateVersion?: boolean,
   gitOpsWrite?: any,
 ) {
   return await axios.post(`/api/modules/new`, {
@@ -87,6 +88,7 @@ export async function createModule(
       version: templateRef.version,
       sourceType: templateRef.sourceType,
     },
+    lockTemplateVersion: lockTemplateVersion,
   });
 }
 
