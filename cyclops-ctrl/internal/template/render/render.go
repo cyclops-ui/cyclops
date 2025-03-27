@@ -1,6 +1,8 @@
 package render
 
 import (
+	"fmt"
+	"sigs.k8s.io/yaml"
 	"sort"
 	"strings"
 
@@ -25,7 +27,15 @@ func NewRenderer(kubernetesClient k8sclient.IKubernetesClient) *Renderer {
 	}
 }
 
-func (r *Renderer) HelmTemplate(module cyclopsv1alpha1.Module, moduleTemplate *models.Template) (string, error) {
+func (r *Renderer) RenderManifest(module cyclopsv1alpha1.Module, moduleTemplate *models.Template) (string, error) {
+	if module.Spec.TemplateRef.SourceType == cyclopsv1alpha1.TemplateSourceTypeCRD {
+		return r.renderCRD(module)
+	}
+
+	return r.helmTemplate(module, moduleTemplate)
+}
+
+func (r *Renderer) helmTemplate(module cyclopsv1alpha1.Module, moduleTemplate *models.Template) (string, error) {
 	if moduleTemplate == nil {
 		return "", nil
 	}
@@ -117,6 +127,27 @@ func (r *Renderer) HelmTemplate(module cyclopsv1alpha1.Module, moduleTemplate *m
 	}
 
 	return manifest, err
+}
+
+func (r *Renderer) renderCRD(module cyclopsv1alpha1.Module) (string, error) {
+	crd, err := r.k8sClient.GetCRD(module.Spec.TemplateRef.CRDName)
+
+	cr := map[string]interface{}{
+		"apiVersion": fmt.Sprintf("%s/%s", crd.Spec.Group, crd.Spec.Versions[0].Name),
+		"kind":       crd.Spec.Names.Kind,
+		"metadata": map[string]interface{}{
+			"name":      module.Name,
+			"namespace": mapTargetNamespace(module.Spec.TargetNamespace),
+		},
+		"spec": module.Spec.Values,
+	}
+
+	yamlBytes, err := yaml.Marshal(cr)
+	if err != nil {
+		return "", fmt.Errorf("failed to marshal CR to YAML: %w", err)
+	}
+
+	return string(yamlBytes), nil
 }
 
 func mapMetadata(metadata *helm.Metadata) *helmchart.Metadata {

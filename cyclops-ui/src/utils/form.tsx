@@ -49,7 +49,11 @@ export function deepMerge(target: any, source: any): any {
   }
 
   for (const key in source) {
-    if (source[key] && typeof source[key] === "object" && !Array.isArray(source[key])) {
+    if (
+      source[key] &&
+      typeof source[key] === "object" &&
+      !Array.isArray(source[key])
+    ) {
       target[key] = deepMerge(target[key] || {}, source[key]);
     } else {
       target[key] = source[key];
@@ -57,7 +61,7 @@ export function deepMerge(target: any, source: any): any {
   }
 
   return target;
-};
+}
 
 export function findMaps(fields: any[], values: any, initialValues: any): any {
   let out: any = initialValues ? initialValues : {};

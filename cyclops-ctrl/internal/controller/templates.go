@@ -39,10 +39,16 @@ func (c *Templates) GetTemplate(ctx *gin.Context) {
 	repo := ctx.Query("repo")
 	path := ctx.Query("path")
 	commit := ctx.Query("commit")
+	CRDName := ctx.Query("crdName")
 	sourceType := ctx.Query("sourceType")
 
-	if repo == "" {
+	if sourceType != "crd" && repo == "" {
 		ctx.String(http.StatusBadRequest, "set repo field")
+		return
+	}
+
+	if sourceType == "crd" && CRDName == "" {
+		ctx.String(http.StatusBadRequest, "set crd name")
 		return
 	}
 
@@ -51,6 +57,7 @@ func (c *Templates) GetTemplate(ctx *gin.Context) {
 		path,
 		commit,
 		"",
+		CRDName,
 		cyclopsv1alpha1.TemplateSourceType(sourceType),
 	)
 	if err != nil {
@@ -67,10 +74,16 @@ func (c *Templates) GetTemplateInitialValues(ctx *gin.Context) {
 	repo := ctx.Query("repo")
 	path := ctx.Query("path")
 	commit := ctx.Query("commit")
+	CRDName := ctx.Query("crdName")
 	sourceType := ctx.Query("sourceType")
 
-	if repo == "" {
-		ctx.JSON(http.StatusBadRequest, dto.NewError("Specify repo field", "Repo not specified"))
+	if sourceType != "crd" && repo == "" {
+		ctx.String(http.StatusBadRequest, "set repo field")
+		return
+	}
+
+	if sourceType == "crd" && CRDName == "" {
+		ctx.String(http.StatusBadRequest, "set crd name")
 		return
 	}
 
@@ -78,6 +91,7 @@ func (c *Templates) GetTemplateInitialValues(ctx *gin.Context) {
 		repo,
 		path,
 		commit,
+		CRDName,
 		cyclopsv1alpha1.TemplateSourceType(sourceType),
 	)
 	if err != nil {
@@ -104,7 +118,6 @@ func (c *Templates) ListTemplatesStore(ctx *gin.Context) {
 	}
 
 	storeDTO := mapper.TemplateStoreListToDTO(store)
-
 	ctx.JSON(http.StatusOK, storeDTO)
 }
 
@@ -121,7 +134,7 @@ func (c *Templates) CreateTemplatesStore(ctx *gin.Context) {
 	templateStore.TemplateRef.Path = strings.Trim(templateStore.TemplateRef.Path, "/")
 	templateStore.TemplateRef.Version = strings.Trim(templateStore.TemplateRef.Version, "/")
 
-	if templateStore.TemplateRef.URL == "" {
+	if templateStore.TemplateRef.SourceType != "crd" && templateStore.TemplateRef.URL == "" {
 		ctx.JSON(http.StatusBadRequest, dto.NewError("Invalid template reference", "Template repo not set"))
 		return
 	}
@@ -131,6 +144,7 @@ func (c *Templates) CreateTemplatesStore(ctx *gin.Context) {
 		templateStore.TemplateRef.Path,
 		templateStore.TemplateRef.Version,
 		"",
+		templateStore.TemplateRef.CRDName,
 		cyclopsv1alpha1.TemplateSourceType(templateStore.TemplateRef.SourceType),
 	)
 	if err != nil {
@@ -172,6 +186,7 @@ func (c *Templates) EditTemplatesStore(ctx *gin.Context) {
 		templateStore.TemplateRef.URL,
 		templateStore.TemplateRef.Path,
 		templateStore.TemplateRef.Version,
+		"",
 		"",
 		cyclopsv1alpha1.TemplateSourceType(templateStore.TemplateRef.SourceType),
 	)
