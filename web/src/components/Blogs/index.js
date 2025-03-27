@@ -23,6 +23,19 @@ const Blogs = () => {
         <Row gutter={[16, 16]}>
           <Col xs={{ span: 20, offset: 2 }} md={{ span: 6, offset: 3 }}>
             <Blog
+              title={"How Platform Engineering Helps You Move Like a Startup Again"}
+              description={
+                "There's been a quiet shift happening in engineering teams over the last few years. DevOps isn't going away, but it *is* evolving..."
+              }
+              blogLink={
+                "https://cyclops-ui.com/blog/2025/03/27/move-like-a-startup"
+              }
+              avatar={"https://github.com/KaradzaJuraj.png"}
+              banner={"/img/2025-03-27-move-like-a-startup/cover.jpeg"}
+            />
+          </Col>
+          <Col xs={{ span: 20, offset: 2 }} md={{ span: 6, offset: 0 }}>
+            <Blog
               title={"Internal Developer Portals vs Platforms"}
               description={
                 "TL;DR: The Internal Developer Portal is the interface to the Internal Developer Platform. That's it. You can go now."
@@ -45,19 +58,6 @@ const Blogs = () => {
               }
               avatar={"https://github.com/KaradzaJuraj.png"}
               banner={"/img/2025-03-06-how-we-took-gitops-further/cover.jpeg"}
-            />
-          </Col>
-          <Col xs={{ span: 20, offset: 2 }} md={{ span: 6, offset: 0 }}>
-            <Blog
-              title={"Cyclops Launch Week #2"}
-              description={
-                "Cyclops is having its second-ever Launch Week, starting on March 10th!"
-              }
-              blogLink={
-                "https://cyclops-ui.com/blog/2025/03/04/launch-week-2"
-              }
-              avatar={"https://github.com/KaradzaJuraj.png"}
-              banner={"/img/2025-03-04-launch-week-2/lw-cover.png"}
             />
           </Col>
         </Row>
