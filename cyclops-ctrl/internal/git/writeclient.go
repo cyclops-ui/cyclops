@@ -77,8 +77,9 @@ func getModulePath(module cyclopsv1alpha1.Module) (string, error) {
 }
 
 func (c *WriteClient) Write(module cyclopsv1alpha1.Module) error {
-	module.Status.ReconciliationStatus = nil
-	module.Status.ManagedGVRs = nil
+	//module.Status.ReconciliationStatus = nil
+	//module.Status.ManagedGVRs = nil
+	module.Status = cyclopsv1alpha1.ModuleStatus{}
 
 	repoURL, exists := module.GetAnnotations()[cyclopsv1alpha1.GitOpsWriteRepoAnnotation]
 	if !exists {
