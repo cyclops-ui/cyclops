@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/go-logr/logr"
+	json "github.com/json-iterator/go"
 	path2 "path"
 	"text/template"
 	"time"
@@ -22,16 +23,18 @@ import (
 )
 
 type WriteClient struct {
-	templatesResolver     auth.TemplatesResolver
-	commitMessageTemplate *template.Template
+	templatesResolver          auth.TemplatesResolver
+	disableTemplateVersionLock bool
+	commitMessageTemplate      *template.Template
 }
 
 const _defaultCommitMessageTemplate = "Update {{ .Name }} module config"
 
-func NewWriteClient(templatesResolver auth.TemplatesResolver, commitMessageTemplate string, logger logr.Logger) *WriteClient {
+func NewWriteClient(templatesResolver auth.TemplatesResolver, disableTemplateVersionLock bool, commitMessageTemplate string, logger logr.Logger) *WriteClient {
 	return &WriteClient{
-		templatesResolver:     templatesResolver,
-		commitMessageTemplate: getCommitMessageTemplate(commitMessageTemplate, logger),
+		templatesResolver:          templatesResolver,
+		disableTemplateVersionLock: disableTemplateVersionLock,
+		commitMessageTemplate:      getCommitMessageTemplate(commitMessageTemplate, logger),
 	}
 }
 
@@ -49,16 +52,52 @@ func getCommitMessageTemplate(commitMessageTemplate string, logger logr.Logger) 
 	return tmpl
 }
 
+func getModulePath(module cyclopsv1alpha1.Module) (string, error) {
+	path := module.GetAnnotations()[cyclopsv1alpha1.GitOpsWritePathAnnotation]
+
+	tmpl, err := template.New("modulePath").Parse(path)
+	if err != nil {
+		return "", err
+	}
+
+	moduleMap := make(map[string]interface{})
+	moduleData, err := json.Marshal(module)
+	if err != nil {
+		return "", err
+	}
+	if err := json.Unmarshal(moduleData, &moduleMap); err != nil {
+		return "", err
+	}
+
+	var o bytes.Buffer
+	err = tmpl.Execute(&o, moduleMap)
+	if err != nil {
+		return "", err
+	}
+
+	return o.String(), nil
+}
+
 func (c *WriteClient) Write(module cyclopsv1alpha1.Module) error {
-	module.Status.ReconciliationStatus = nil
-	module.Status.ManagedGVRs = nil
+	// If the version lock is disabled, there is no need to push the exact version of the template used. If not disabled
+	// the ReconciliationStatus and ManagedGVRs should still be omitted since those are specific to cluster state.
+	if c.disableTemplateVersionLock {
+		module.Status = cyclopsv1alpha1.ModuleStatus{}
+	} else {
+		module.Status.ReconciliationStatus = nil
+		module.Status.ManagedGVRs = nil
+	}
 
 	repoURL, exists := module.GetAnnotations()[cyclopsv1alpha1.GitOpsWriteRepoAnnotation]
 	if !exists {
 		return errors.New(fmt.Sprintf("module passed to write without git repository; set cyclops-ui.com/write-repo annotation in module %v", module.Name))
 	}
 
-	path := module.GetAnnotations()[cyclopsv1alpha1.GitOpsWritePathAnnotation]
+	path, err := getModulePath(module)
+	if err != nil {
+		return err
+	}
+
 	revision := module.GetAnnotations()[cyclopsv1alpha1.GitOpsWriteRevisionAnnotation]
 
 	creds, err := c.templatesResolver.RepoAuthCredentials(repoURL)

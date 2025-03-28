@@ -1,6 +1,7 @@
 package render
 
 import (
+	"github.com/cyclops-ui/cyclops/cyclops-ctrl/internal/template"
 	"sort"
 	"strings"
 
@@ -16,18 +17,30 @@ import (
 )
 
 type Renderer struct {
-	k8sClient k8sclient.IKubernetesClient
+	k8sClient    k8sclient.IKubernetesClient
+	templateRepo template.ITemplateRepo
 }
 
-func NewRenderer(kubernetesClient k8sclient.IKubernetesClient) *Renderer {
+func NewRenderer(kubernetesClient k8sclient.IKubernetesClient, templateRepo template.ITemplateRepo) *Renderer {
 	return &Renderer{
-		k8sClient: kubernetesClient,
+		k8sClient:    kubernetesClient,
+		templateRepo: templateRepo,
 	}
 }
 
 func (r *Renderer) HelmTemplate(module cyclopsv1alpha1.Module, moduleTemplate *models.Template) (string, error) {
 	if moduleTemplate == nil {
 		return "", nil
+	}
+
+	initialValues, err := r.templateRepo.GetTemplateInitialValues(
+		module.Spec.TemplateRef.URL,
+		module.Spec.TemplateRef.Path,
+		moduleTemplate.ResolvedVersion,
+		module.Spec.TemplateRef.SourceType,
+	)
+	if err != nil {
+		return "", err
 	}
 
 	chart := &helmchart.Chart{
@@ -44,6 +57,8 @@ func (r *Renderer) HelmTemplate(module cyclopsv1alpha1.Module, moduleTemplate *m
 	if err := json.Unmarshal(module.Spec.Values.Raw, &values); err != nil {
 		return "", err
 	}
+
+	values = chartutil.CoalesceTables(values, initialValues)
 
 	for _, dependency := range moduleTemplate.Dependencies {
 		if !evaluateDependencyCondition(dependency.Condition, values) {

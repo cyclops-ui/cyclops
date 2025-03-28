@@ -16,6 +16,15 @@ func TemplateStoreListToDTO(store []v1alpha1.TemplateStore) []dto.TemplateStore 
 			iconURL = templateStore.GetAnnotations()[v1alpha1.IconURLAnnotation]
 		}
 
+		var enforceGitOpsWrite *dto.GitOpsWrite
+		if templateStore.Spec.EnforceGitOpsWrite != nil {
+			enforceGitOpsWrite = &dto.GitOpsWrite{
+				Repo:   templateStore.Spec.EnforceGitOpsWrite.Repo,
+				Path:   templateStore.Spec.EnforceGitOpsWrite.Path,
+				Branch: templateStore.Spec.EnforceGitOpsWrite.Version,
+			}
+		}
+
 		out = append(out, dto.TemplateStore{
 			Name:    templateStore.Name,
 			IconURL: iconURL,
@@ -25,6 +34,7 @@ func TemplateStoreListToDTO(store []v1alpha1.TemplateStore) []dto.TemplateStore 
 				Version:    templateStore.Spec.Version,
 				SourceType: string(templateStore.Spec.SourceType),
 			},
+			EnforceGitOpsWrite: enforceGitOpsWrite,
 		})
 	}
 

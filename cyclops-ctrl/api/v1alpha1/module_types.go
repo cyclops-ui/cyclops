@@ -49,6 +49,12 @@ const (
 	GitOpsWriteRevisionAnnotation = "cyclops-ui.com/write-revision"
 )
 
+type GitOpsWriteDestination struct {
+	Repo    string `json:"repo"`
+	Path    string `json:"path"`
+	Version string `json:"version"`
+}
+
 type TemplateRef struct {
 	URL     string `json:"repo"`
 	Path    string `json:"path"`
@@ -57,6 +63,9 @@ type TemplateRef struct {
 	// +kubebuilder:validation:Enum=git;helm;oci
 	// +kubebuilder:validation:Optional
 	SourceType TemplateSourceType `json:"sourceType,omitempty"`
+
+	// +kubebuilder:validation:Optional
+	EnforceGitOpsWrite *GitOpsWriteDestination `json:"enforceGitOpsWrite,omitempty"`
 }
 
 type TemplateGitRef struct {
@@ -136,6 +145,18 @@ type ModuleList struct {
 	metav1.TypeMeta `json:",inline"`
 	metav1.ListMeta `json:"metadata,omitempty"`
 	Items           []Module `json:"items"`
+}
+
+func (m *Module) TemplateResolvedVersion(disableTemplateVersionLock bool) string {
+	if disableTemplateVersionLock {
+		return m.Spec.TemplateRef.Version
+	}
+
+	if len(m.Status.TemplateResolvedVersion) == 0 {
+		return m.Spec.TemplateRef.Version
+	}
+
+	return m.Status.TemplateResolvedVersion
 }
 
 func init() {
