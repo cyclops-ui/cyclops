@@ -20,7 +20,6 @@
     <a href="https://www.linkedin.com/company/cyclops-ui">LinkedIn</a>
 </p>
 
-
 ## 🟠 What is Cyclops?
 
 Cyclops is an open-source dev tool that simplifies Kubernetes with an easy-to-use UI, making it less intimidating. Instead of creating and configuring your Kubernetes manifests with YAML, use Cyclops to painlessly configure and deploy your applications - validations included!
