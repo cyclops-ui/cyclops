@@ -555,7 +555,8 @@ func (m *Modules) RollbackModule(ctx *gin.Context) {
 	}
 
 	module.History = append([]v1alpha1.HistoryEntry{{
-		Generation: curr.Generation,
+		Generation:      curr.Generation,
+		TargetNamespace: curr.Spec.TargetNamespace,
 		TemplateRef: v1alpha1.HistoryTemplateRef{
 			URL:        curr.Spec.TemplateRef.URL,
 			Path:       curr.Spec.TemplateRef.Path,
