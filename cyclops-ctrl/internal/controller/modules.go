@@ -409,7 +409,8 @@ func (m *Modules) UpdateModule(ctx *gin.Context) {
 	}
 
 	module.History = append([]v1alpha1.HistoryEntry{{
-		Generation: curr.Generation,
+		Generation:      curr.Generation,
+		TargetNamespace: curr.Spec.TargetNamespace,
 		TemplateRef: v1alpha1.HistoryTemplateRef{
 			URL:        curr.Spec.TemplateRef.URL,
 			Path:       curr.Spec.TemplateRef.Path,
@@ -434,6 +435,161 @@ func (m *Modules) UpdateModule(ctx *gin.Context) {
 
 	module.ResourceVersion = result.ResourceVersion
 	err = m.kubernetesClient.UpdateModule(&module)
+	if err != nil {
+		fmt.Println(err)
+		ctx.JSON(http.StatusInternalServerError, dto.NewError("Error updating module", err.Error()))
+		return
+	}
+
+	ctx.Status(http.StatusOK)
+}
+
+func (m *Modules) HistoryEntryManifest(ctx *gin.Context) {
+	ctx.Header("Access-Control-Allow-Origin", "*")
+
+	var request dto.RollbackRequest
+	if err := ctx.BindJSON(&request); err != nil {
+		fmt.Println(err)
+		ctx.JSON(http.StatusBadRequest, dto.NewError("Error mapping module request", err.Error()))
+		return
+	}
+
+	curr, err := m.kubernetesClient.GetModule(request.ModuleName)
+	if err != nil {
+		fmt.Println(err)
+		ctx.JSON(http.StatusInternalServerError, dto.NewError("Error fetching module", err.Error()))
+		return
+	}
+
+	var targetGeneration *v1alpha1.HistoryEntry
+	for _, entry := range curr.History {
+		if entry.Generation == request.Generation {
+			targetGeneration = &entry
+			break
+		}
+	}
+
+	if targetGeneration == nil {
+		ctx.JSON(http.StatusInternalServerError, dto.NewError("Invalid rollback generation provided", fmt.Sprintf("Generation %d does not exist", request.Generation)))
+		return
+	}
+
+	targetTemplate, err := m.templatesRepo.GetTemplate(
+		targetGeneration.TemplateRef.URL,
+		targetGeneration.TemplateRef.Path,
+		targetGeneration.TemplateRef.Version,
+		"",
+		targetGeneration.TemplateRef.SourceType,
+	)
+	if err != nil {
+		fmt.Println(err)
+		ctx.Status(http.StatusInternalServerError)
+		return
+	}
+
+	manifest, err := m.renderer.HelmTemplate(v1alpha1.Module{
+		ObjectMeta: metav1.ObjectMeta{
+			Name: request.ModuleName,
+		},
+		Spec: v1alpha1.ModuleSpec{
+			TargetNamespace: targetGeneration.TargetNamespace,
+			TemplateRef: v1alpha1.TemplateRef{
+				URL:        targetGeneration.TemplateRef.URL,
+				Path:       targetGeneration.TemplateRef.Path,
+				Version:    targetGeneration.TemplateRef.Version,
+				SourceType: targetGeneration.TemplateRef.SourceType,
+			},
+			Values: targetGeneration.Values,
+		},
+	}, targetTemplate)
+	if err != nil {
+		fmt.Println(err)
+		ctx.Status(http.StatusInternalServerError)
+		return
+	}
+
+	manifest = strings.TrimPrefix(manifest, "\n---")
+	manifest = strings.TrimSuffix(manifest, "---\n")
+
+	ctx.String(http.StatusOK, manifest)
+}
+
+func (m *Modules) RollbackModule(ctx *gin.Context) {
+	ctx.Header("Access-Control-Allow-Origin", "*")
+
+	var request dto.RollbackRequest
+	if err := ctx.BindJSON(&request); err != nil {
+		fmt.Println(err)
+		ctx.JSON(http.StatusBadRequest, dto.NewError("Error mapping module request", err.Error()))
+		return
+	}
+
+	curr, err := m.kubernetesClient.GetModule(request.ModuleName)
+	if err != nil {
+		fmt.Println(err)
+		ctx.JSON(http.StatusInternalServerError, dto.NewError("Error fetching module", err.Error()))
+		return
+	}
+
+	var targetGeneration *v1alpha1.HistoryEntry
+	for _, entry := range curr.History {
+		if entry.Generation == request.Generation {
+			targetGeneration = &entry
+			break
+		}
+	}
+
+	if targetGeneration == nil {
+		ctx.JSON(http.StatusInternalServerError, dto.NewError("Invalid rollback generation provided", fmt.Sprintf("Generation %d does not exist", request.Generation)))
+		return
+	}
+
+	module := curr.DeepCopy()
+
+	module.Kind = "Module"
+	module.APIVersion = "cyclops-ui.com/v1alpha1"
+
+	history := module.History
+	if module.History == nil {
+		history = make([]v1alpha1.HistoryEntry, 0)
+	}
+
+	module.History = append([]v1alpha1.HistoryEntry{{
+		Generation:      curr.Generation,
+		TargetNamespace: curr.Spec.TargetNamespace,
+		TemplateRef: v1alpha1.HistoryTemplateRef{
+			URL:        curr.Spec.TemplateRef.URL,
+			Path:       curr.Spec.TemplateRef.Path,
+			Version:    curr.Status.TemplateResolvedVersion,
+			SourceType: curr.Spec.TemplateRef.SourceType,
+		},
+		Values: curr.Spec.Values,
+	}}, history...)
+
+	if len(module.History) > 10 {
+		module.History = module.History[:len(module.History)-1]
+	}
+
+	module.Spec.Values = targetGeneration.Values
+	module.Spec.TemplateRef = v1alpha1.TemplateRef{
+		URL:        targetGeneration.TemplateRef.URL,
+		Path:       targetGeneration.TemplateRef.Path,
+		Version:    targetGeneration.TemplateRef.Version,
+		SourceType: targetGeneration.TemplateRef.SourceType,
+	}
+	module.Spec.TargetNamespace = targetGeneration.TargetNamespace
+
+	module.SetResourceVersion(curr.GetResourceVersion())
+
+	result, err := m.kubernetesClient.UpdateModuleStatus(module)
+	if err != nil {
+		fmt.Println(err)
+		ctx.JSON(http.StatusInternalServerError, dto.NewError("Error updating module status", err.Error()))
+		return
+	}
+
+	module.ResourceVersion = result.ResourceVersion
+	err = m.kubernetesClient.UpdateModule(module)
 	if err != nil {
 		fmt.Println(err)
 		ctx.JSON(http.StatusInternalServerError, dto.NewError("Error updating module", err.Error()))

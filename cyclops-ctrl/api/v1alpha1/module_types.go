@@ -111,9 +111,12 @@ type HistoryTemplateRef struct {
 }
 
 type HistoryEntry struct {
-	Generation  int64                `json:"generation"`
-	TemplateRef HistoryTemplateRef   `json:"template"`
-	Values      apiextensionsv1.JSON `json:"values"`
+	Generation int64 `json:"generation"`
+
+	// +kubebuilder:validation:Optional
+	TargetNamespace string               `json:"targetNamespace"`
+	TemplateRef     HistoryTemplateRef   `json:"template"`
+	Values          apiextensionsv1.JSON `json:"values"`
 }
 
 //+kubebuilder:object:root=true

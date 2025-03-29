@@ -86,6 +86,8 @@ func (h *Handler) Start() error {
 	h.router.DELETE("/modules/:name", modulesController.DeleteModule)
 	h.router.POST("/modules/new", modulesController.CreateModule)
 	h.router.POST("/modules/update", modulesController.UpdateModule)
+	h.router.POST("/modules/rollback/manifest", modulesController.HistoryEntryManifest)
+	h.router.POST("/modules/rollback", modulesController.RollbackModule)
 	h.router.GET("/modules/:name/raw", modulesController.GetRawModuleManifest)
 	h.router.POST("/modules/:name/reconcile", modulesController.ReconcileModule)
 	h.router.GET("/modules/:name/history", modulesController.GetModuleHistory)
