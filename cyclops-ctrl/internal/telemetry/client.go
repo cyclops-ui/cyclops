@@ -21,14 +21,15 @@ type logger interface {
 }
 
 type EnqueueClient struct {
-	client     posthog.Client
-	distinctID string
-	version    string
+	client         posthog.Client
+	distinctID     string
+	version        string
+	installManager string
 }
 
 type MockClient struct{}
 
-func NewClient(disable bool, version string, logger logger) (Client, error) {
+func NewClient(disable bool, version, installManager string, logger logger) (Client, error) {
 	if disable {
 		logger.Info("telemetry disabled")
 		return MockClient{}, nil
@@ -56,9 +57,10 @@ func NewClient(disable bool, version string, logger logger) (Client, error) {
 	logger.Info("starting instance with UUID", "UUID", idStr)
 
 	return EnqueueClient{
-		client:     client,
-		distinctID: idStr,
-		version:    version,
+		client:         client,
+		distinctID:     idStr,
+		version:        version,
+		installManager: installManager,
 	}, nil
 }
 
@@ -66,9 +68,7 @@ func (c EnqueueClient) InstanceStart() {
 	_ = c.client.Enqueue(posthog.Capture{
 		Event:      "cyclops-instance-start",
 		DistinctId: c.distinctID,
-		Properties: map[string]interface{}{
-			"version": c.version,
-		},
+		Properties: c.messageProps(),
 	})
 }
 
@@ -76,9 +76,7 @@ func (c EnqueueClient) ModuleReconciliation() {
 	_ = c.client.Enqueue(posthog.Capture{
 		Event:      "module-reconciliation",
 		DistinctId: c.distinctID,
-		Properties: map[string]interface{}{
-			"version": c.version,
-		},
+		Properties: c.messageProps(),
 	})
 }
 
@@ -86,9 +84,7 @@ func (c EnqueueClient) ModuleCreation() {
 	_ = c.client.Enqueue(posthog.Capture{
 		Event:      "module-creation",
 		DistinctId: c.distinctID,
-		Properties: map[string]interface{}{
-			"version": c.version,
-		},
+		Properties: c.messageProps(),
 	})
 }
 
@@ -96,9 +92,7 @@ func (c EnqueueClient) ReleaseUpdate() {
 	_ = c.client.Enqueue(posthog.Capture{
 		Event:      "helm-release-upgrade",
 		DistinctId: c.distinctID,
-		Properties: map[string]interface{}{
-			"version": c.version,
-		},
+		Properties: c.messageProps(),
 	})
 }
 
@@ -106,9 +100,7 @@ func (c EnqueueClient) ReleaseMigration() {
 	_ = c.client.Enqueue(posthog.Capture{
 		Event:      "helm-release-migration",
 		DistinctId: c.distinctID,
-		Properties: map[string]interface{}{
-			"version": c.version,
-		},
+		Properties: c.messageProps(),
 	})
 }
 
@@ -116,9 +108,7 @@ func (c EnqueueClient) TemplateCreation() {
 	_ = c.client.Enqueue(posthog.Capture{
 		Event:      "template-creation",
 		DistinctId: c.distinctID,
-		Properties: map[string]interface{}{
-			"version": c.version,
-		},
+		Properties: c.messageProps(),
 	})
 }
 
@@ -126,10 +116,20 @@ func (c EnqueueClient) TemplateEdit() {
 	_ = c.client.Enqueue(posthog.Capture{
 		Event:      "template-edit",
 		DistinctId: c.distinctID,
-		Properties: map[string]interface{}{
-			"version": c.version,
-		},
+		Properties: c.messageProps(),
 	})
+}
+
+func (c EnqueueClient) messageProps() map[string]interface{} {
+	props := map[string]interface{}{
+		"version": c.version,
+	}
+
+	if props != nil && len(c.installManager) != 0 {
+		props["install_manager"] = c.installManager
+	}
+
+	return props
 }
 
 // region mock client

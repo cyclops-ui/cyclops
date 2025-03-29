@@ -28,6 +28,10 @@ spec:
             - name: DISABLE_TELEMETRY
               value: {{ ((.Values.global).disableTelemetry) | quote }}
             {{- end }}
+            {{- if ((.Values.global).installManager) }}
+            - name: INSTALL_MANAGER
+              value: {{ .Values.global.installManager | quote }}
+            {{- end }}
             {{- include "cyclops-ctrl.watchNamespace" . | nindent 12 }}
             {{- include "cyclops-ctrl.moduleTargetNamespace" . | nindent 12 }}
             {{- include "cyclops-ctrl.watchNamespaceHelm" . | nindent 12 }}

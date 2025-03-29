@@ -20,10 +20,6 @@
     <a href="https://www.linkedin.com/company/cyclops-ui">LinkedIn</a>
 </p>
 
-<h4 align="center">🚀 We're launching on Product Hunt this Friday, March 14th! 🚀</h4>
-<p align="center" width="100%">
-<a href="https://www.producthunt.com/posts/cyclops-3?embed=true&utm_source=badge-featured&utm_medium=badge&utm_souce=badge-cyclops&#0045;3" target="_blank"><img src="https://api.producthunt.com/widgets/embed-image/v1/featured.svg?post_id=934878&theme=light&t=1741601107320" alt="Cyclops - Open&#0045;Source&#0032;tool&#0032;for&#0032;building&#0032;Internal&#0032;Developer&#0032;Platforms | Product Hunt" style="width: 250px; height: 54px;" width="250" height="54" /></a>
-</p>
 
 ## 🟠 What is Cyclops?
 
