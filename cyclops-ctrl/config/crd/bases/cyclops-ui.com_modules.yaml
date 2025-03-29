@@ -32,6 +32,8 @@ spec:
                 generation:
                   format: int64
                   type: integer
+                targetNamespace:
+                  type: string
                 template:
                   properties:
                     path:
