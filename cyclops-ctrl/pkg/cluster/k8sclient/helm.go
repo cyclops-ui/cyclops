@@ -13,8 +13,8 @@ import (
 	"github.com/cyclops-ui/cyclops/cyclops-ctrl/internal/models/dto"
 )
 
-func (k *KubernetesClient) GetResourcesForRelease(releaseName string) ([]dto.Resource, error) {
-	out := make([]dto.Resource, 0, 0)
+func (k *KubernetesClient) GetResourcesForRelease(releaseName string) ([]*dto.Resource, error) {
+	out := make([]*dto.Resource, 0, 0)
 
 	managedGVRs := []schema.GroupVersionResource{
 		{Group: "", Version: "v1", Resource: "configmaps"},
@@ -74,7 +74,7 @@ func (k *KubernetesClient) GetResourcesForRelease(releaseName string) ([]dto.Res
 			return nil, err
 		}
 
-		out = append(out, &dto.Other{
+		out = append(out, &dto.Resource{
 			Group:     o.GroupVersionKind().Group,
 			Version:   o.GroupVersionKind().Version,
 			Kind:      o.GroupVersionKind().Kind,
@@ -96,8 +96,8 @@ func (k *KubernetesClient) GetResourcesForRelease(releaseName string) ([]dto.Res
 	return out, nil
 }
 
-func (k *KubernetesClient) GetWorkloadsForRelease(releaseName string) ([]dto.Resource, error) {
-	out := make([]dto.Resource, 0, 0)
+func (k *KubernetesClient) GetWorkloadsForRelease(releaseName string) ([]*dto.Resource, error) {
+	out := make([]*dto.Resource, 0, 0)
 
 	deployments, err := k.clientset.AppsV1().Deployments(k.helmReleaseNamespace).List(context.Background(), metav1.ListOptions{
 		LabelSelector: labels.Set(map[string]string{
@@ -110,7 +110,7 @@ func (k *KubernetesClient) GetWorkloadsForRelease(releaseName string) ([]dto.Res
 	}
 
 	for _, item := range deployments.Items {
-		out = append(out, &dto.Other{
+		out = append(out, &dto.Resource{
 			Group:     "apps",
 			Version:   "v1",
 			Kind:      "Deployment",
@@ -130,7 +130,7 @@ func (k *KubernetesClient) GetWorkloadsForRelease(releaseName string) ([]dto.Res
 	}
 
 	for _, item := range statefulset.Items {
-		out = append(out, &dto.Other{
+		out = append(out, &dto.Resource{
 			Group:     "apps",
 			Version:   "v1",
 			Kind:      "StatefulSet",
@@ -150,7 +150,7 @@ func (k *KubernetesClient) GetWorkloadsForRelease(releaseName string) ([]dto.Res
 	}
 
 	for _, item := range daemonsets.Items {
-		out = append(out, &dto.Other{
+		out = append(out, &dto.Resource{
 			Group:     "apps",
 			Version:   "v1",
 			Kind:      "DaemonSet",

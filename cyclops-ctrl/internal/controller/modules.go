@@ -268,15 +268,14 @@ func (m *Modules) CurrentManifest(ctx *gin.Context) {
 func (m *Modules) DeleteModuleResource(ctx *gin.Context) {
 	ctx.Header("Access-Control-Allow-Origin", "*")
 
-	var request dto.DeleteResource
+	var request *dto.Resource
 	if err := ctx.BindJSON(&request); err != nil {
 		fmt.Println(err)
 		ctx.JSON(http.StatusBadRequest, dto.NewError("Error mapping module request", err.Error()))
 		return
 	}
 
-	err := m.kubernetesClient.Delete(&request)
-	if err != nil {
+	if err := m.kubernetesClient.Delete(request); err != nil {
 		fmt.Println(err)
 		ctx.JSON(http.StatusInternalServerError, dto.NewError("Error deleting module", err.Error()))
 		return
