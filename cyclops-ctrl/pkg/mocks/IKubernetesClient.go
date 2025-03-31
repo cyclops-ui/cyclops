@@ -223,7 +223,7 @@ func (_c *IKubernetesClient_CreateTemplateStore_Call) RunAndReturn(run func(*v1a
 }
 
 // Delete provides a mock function with given fields: resource
-func (_m *IKubernetesClient) Delete(resource dto.Resource) error {
+func (_m *IKubernetesClient) Delete(resource *dto.Resource) error {
 	ret := _m.Called(resource)
 
 	if len(ret) == 0 {
@@ -231,7 +231,7 @@ func (_m *IKubernetesClient) Delete(resource dto.Resource) error {
 	}
 
 	var r0 error
-	if rf, ok := ret.Get(0).(func(dto.Resource) error); ok {
+	if rf, ok := ret.Get(0).(func(*dto.Resource) error); ok {
 		r0 = rf(resource)
 	} else {
 		r0 = ret.Error(0)
@@ -246,14 +246,14 @@ type IKubernetesClient_Delete_Call struct {
 }
 
 // Delete is a helper method to define mock.On call
-//   - resource dto.Resource
+//   - resource *dto.Resource
 func (_e *IKubernetesClient_Expecter) Delete(resource interface{}) *IKubernetesClient_Delete_Call {
 	return &IKubernetesClient_Delete_Call{Call: _e.mock.On("Delete", resource)}
 }
 
-func (_c *IKubernetesClient_Delete_Call) Run(run func(resource dto.Resource)) *IKubernetesClient_Delete_Call {
+func (_c *IKubernetesClient_Delete_Call) Run(run func(resource *dto.Resource)) *IKubernetesClient_Delete_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(dto.Resource))
+		run(args[0].(*dto.Resource))
 	})
 	return _c
 }
@@ -263,7 +263,7 @@ func (_c *IKubernetesClient_Delete_Call) Return(_a0 error) *IKubernetesClient_De
 	return _c
 }
 
-func (_c *IKubernetesClient_Delete_Call) RunAndReturn(run func(dto.Resource) error) *IKubernetesClient_Delete_Call {
+func (_c *IKubernetesClient_Delete_Call) RunAndReturn(run func(*dto.Resource) error) *IKubernetesClient_Delete_Call {
 	_c.Call.Return(run)
 	return _c
 }
@@ -465,27 +465,27 @@ func (_c *IKubernetesClient_GVKtoAPIResourceName_Call) RunAndReturn(run func(sch
 }
 
 // GetDeletedResources provides a mock function with given fields: _a0, _a1, _a2
-func (_m *IKubernetesClient) GetDeletedResources(_a0 []dto.Resource, _a1 string, _a2 string) ([]dto.Resource, error) {
+func (_m *IKubernetesClient) GetDeletedResources(_a0 []*dto.Resource, _a1 string, _a2 string) ([]*dto.Resource, error) {
 	ret := _m.Called(_a0, _a1, _a2)
 
 	if len(ret) == 0 {
 		panic("no return value specified for GetDeletedResources")
 	}
 
-	var r0 []dto.Resource
+	var r0 []*dto.Resource
 	var r1 error
-	if rf, ok := ret.Get(0).(func([]dto.Resource, string, string) ([]dto.Resource, error)); ok {
+	if rf, ok := ret.Get(0).(func([]*dto.Resource, string, string) ([]*dto.Resource, error)); ok {
 		return rf(_a0, _a1, _a2)
 	}
-	if rf, ok := ret.Get(0).(func([]dto.Resource, string, string) []dto.Resource); ok {
+	if rf, ok := ret.Get(0).(func([]*dto.Resource, string, string) []*dto.Resource); ok {
 		r0 = rf(_a0, _a1, _a2)
 	} else {
 		if ret.Get(0) != nil {
-			r0 = ret.Get(0).([]dto.Resource)
+			r0 = ret.Get(0).([]*dto.Resource)
 		}
 	}
 
-	if rf, ok := ret.Get(1).(func([]dto.Resource, string, string) error); ok {
+	if rf, ok := ret.Get(1).(func([]*dto.Resource, string, string) error); ok {
 		r1 = rf(_a0, _a1, _a2)
 	} else {
 		r1 = ret.Error(1)
@@ -500,26 +500,26 @@ type IKubernetesClient_GetDeletedResources_Call struct {
 }
 
 // GetDeletedResources is a helper method to define mock.On call
-//   - _a0 []dto.Resource
+//   - _a0 []*dto.Resource
 //   - _a1 string
 //   - _a2 string
 func (_e *IKubernetesClient_Expecter) GetDeletedResources(_a0 interface{}, _a1 interface{}, _a2 interface{}) *IKubernetesClient_GetDeletedResources_Call {
 	return &IKubernetesClient_GetDeletedResources_Call{Call: _e.mock.On("GetDeletedResources", _a0, _a1, _a2)}
 }
 
-func (_c *IKubernetesClient_GetDeletedResources_Call) Run(run func(_a0 []dto.Resource, _a1 string, _a2 string)) *IKubernetesClient_GetDeletedResources_Call {
+func (_c *IKubernetesClient_GetDeletedResources_Call) Run(run func(_a0 []*dto.Resource, _a1 string, _a2 string)) *IKubernetesClient_GetDeletedResources_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].([]dto.Resource), args[1].(string), args[2].(string))
+		run(args[0].([]*dto.Resource), args[1].(string), args[2].(string))
 	})
 	return _c
 }
 
-func (_c *IKubernetesClient_GetDeletedResources_Call) Return(_a0 []dto.Resource, _a1 error) *IKubernetesClient_GetDeletedResources_Call {
+func (_c *IKubernetesClient_GetDeletedResources_Call) Return(_a0 []*dto.Resource, _a1 error) *IKubernetesClient_GetDeletedResources_Call {
 	_c.Call.Return(_a0, _a1)
 	return _c
 }
 
-func (_c *IKubernetesClient_GetDeletedResources_Call) RunAndReturn(run func([]dto.Resource, string, string) ([]dto.Resource, error)) *IKubernetesClient_GetDeletedResources_Call {
+func (_c *IKubernetesClient_GetDeletedResources_Call) RunAndReturn(run func([]*dto.Resource, string, string) ([]*dto.Resource, error)) *IKubernetesClient_GetDeletedResources_Call {
 	_c.Call.Return(run)
 	return _c
 }
@@ -1000,23 +1000,23 @@ func (_c *IKubernetesClient_GetResource_Call) RunAndReturn(run func(string, stri
 }
 
 // GetResourcesForModule provides a mock function with given fields: name
-func (_m *IKubernetesClient) GetResourcesForModule(name string) ([]dto.Resource, error) {
+func (_m *IKubernetesClient) GetResourcesForModule(name string) ([]*dto.Resource, error) {
 	ret := _m.Called(name)
 
 	if len(ret) == 0 {
 		panic("no return value specified for GetResourcesForModule")
 	}
 
-	var r0 []dto.Resource
+	var r0 []*dto.Resource
 	var r1 error
-	if rf, ok := ret.Get(0).(func(string) ([]dto.Resource, error)); ok {
+	if rf, ok := ret.Get(0).(func(string) ([]*dto.Resource, error)); ok {
 		return rf(name)
 	}
-	if rf, ok := ret.Get(0).(func(string) []dto.Resource); ok {
+	if rf, ok := ret.Get(0).(func(string) []*dto.Resource); ok {
 		r0 = rf(name)
 	} else {
 		if ret.Get(0) != nil {
-			r0 = ret.Get(0).([]dto.Resource)
+			r0 = ret.Get(0).([]*dto.Resource)
 		}
 	}
 
@@ -1047,34 +1047,34 @@ func (_c *IKubernetesClient_GetResourcesForModule_Call) Run(run func(name string
 	return _c
 }
 
-func (_c *IKubernetesClient_GetResourcesForModule_Call) Return(_a0 []dto.Resource, _a1 error) *IKubernetesClient_GetResourcesForModule_Call {
+func (_c *IKubernetesClient_GetResourcesForModule_Call) Return(_a0 []*dto.Resource, _a1 error) *IKubernetesClient_GetResourcesForModule_Call {
 	_c.Call.Return(_a0, _a1)
 	return _c
 }
 
-func (_c *IKubernetesClient_GetResourcesForModule_Call) RunAndReturn(run func(string) ([]dto.Resource, error)) *IKubernetesClient_GetResourcesForModule_Call {
+func (_c *IKubernetesClient_GetResourcesForModule_Call) RunAndReturn(run func(string) ([]*dto.Resource, error)) *IKubernetesClient_GetResourcesForModule_Call {
 	_c.Call.Return(run)
 	return _c
 }
 
 // GetResourcesForRelease provides a mock function with given fields: release
-func (_m *IKubernetesClient) GetResourcesForRelease(release string) ([]dto.Resource, error) {
+func (_m *IKubernetesClient) GetResourcesForRelease(release string) ([]*dto.Resource, error) {
 	ret := _m.Called(release)
 
 	if len(ret) == 0 {
 		panic("no return value specified for GetResourcesForRelease")
 	}
 
-	var r0 []dto.Resource
+	var r0 []*dto.Resource
 	var r1 error
-	if rf, ok := ret.Get(0).(func(string) ([]dto.Resource, error)); ok {
+	if rf, ok := ret.Get(0).(func(string) ([]*dto.Resource, error)); ok {
 		return rf(release)
 	}
-	if rf, ok := ret.Get(0).(func(string) []dto.Resource); ok {
+	if rf, ok := ret.Get(0).(func(string) []*dto.Resource); ok {
 		r0 = rf(release)
 	} else {
 		if ret.Get(0) != nil {
-			r0 = ret.Get(0).([]dto.Resource)
+			r0 = ret.Get(0).([]*dto.Resource)
 		}
 	}
 
@@ -1105,12 +1105,12 @@ func (_c *IKubernetesClient_GetResourcesForRelease_Call) Run(run func(release st
 	return _c
 }
 
-func (_c *IKubernetesClient_GetResourcesForRelease_Call) Return(_a0 []dto.Resource, _a1 error) *IKubernetesClient_GetResourcesForRelease_Call {
+func (_c *IKubernetesClient_GetResourcesForRelease_Call) Return(_a0 []*dto.Resource, _a1 error) *IKubernetesClient_GetResourcesForRelease_Call {
 	_c.Call.Return(_a0, _a1)
 	return _c
 }
 
-func (_c *IKubernetesClient_GetResourcesForRelease_Call) RunAndReturn(run func(string) ([]dto.Resource, error)) *IKubernetesClient_GetResourcesForRelease_Call {
+func (_c *IKubernetesClient_GetResourcesForRelease_Call) RunAndReturn(run func(string) ([]*dto.Resource, error)) *IKubernetesClient_GetResourcesForRelease_Call {
 	_c.Call.Return(run)
 	return _c
 }
@@ -1285,23 +1285,23 @@ func (_c *IKubernetesClient_GetTemplateAuthRuleSecret_Call) RunAndReturn(run fun
 }
 
 // GetWorkloadsForModule provides a mock function with given fields: name
-func (_m *IKubernetesClient) GetWorkloadsForModule(name string) ([]dto.Resource, error) {
+func (_m *IKubernetesClient) GetWorkloadsForModule(name string) ([]*dto.Resource, error) {
 	ret := _m.Called(name)
 
 	if len(ret) == 0 {
 		panic("no return value specified for GetWorkloadsForModule")
 	}
 
-	var r0 []dto.Resource
+	var r0 []*dto.Resource
 	var r1 error
-	if rf, ok := ret.Get(0).(func(string) ([]dto.Resource, error)); ok {
+	if rf, ok := ret.Get(0).(func(string) ([]*dto.Resource, error)); ok {
 		return rf(name)
 	}
-	if rf, ok := ret.Get(0).(func(string) []dto.Resource); ok {
+	if rf, ok := ret.Get(0).(func(string) []*dto.Resource); ok {
 		r0 = rf(name)
 	} else {
 		if ret.Get(0) != nil {
-			r0 = ret.Get(0).([]dto.Resource)
+			r0 = ret.Get(0).([]*dto.Resource)
 		}
 	}
 
@@ -1332,34 +1332,34 @@ func (_c *IKubernetesClient_GetWorkloadsForModule_Call) Run(run func(name string
 	return _c
 }
 
-func (_c *IKubernetesClient_GetWorkloadsForModule_Call) Return(_a0 []dto.Resource, _a1 error) *IKubernetesClient_GetWorkloadsForModule_Call {
+func (_c *IKubernetesClient_GetWorkloadsForModule_Call) Return(_a0 []*dto.Resource, _a1 error) *IKubernetesClient_GetWorkloadsForModule_Call {
 	_c.Call.Return(_a0, _a1)
 	return _c
 }
 
-func (_c *IKubernetesClient_GetWorkloadsForModule_Call) RunAndReturn(run func(string) ([]dto.Resource, error)) *IKubernetesClient_GetWorkloadsForModule_Call {
+func (_c *IKubernetesClient_GetWorkloadsForModule_Call) RunAndReturn(run func(string) ([]*dto.Resource, error)) *IKubernetesClient_GetWorkloadsForModule_Call {
 	_c.Call.Return(run)
 	return _c
 }
 
 // GetWorkloadsForRelease provides a mock function with given fields: name
-func (_m *IKubernetesClient) GetWorkloadsForRelease(name string) ([]dto.Resource, error) {
+func (_m *IKubernetesClient) GetWorkloadsForRelease(name string) ([]*dto.Resource, error) {
 	ret := _m.Called(name)
 
 	if len(ret) == 0 {
 		panic("no return value specified for GetWorkloadsForRelease")
 	}
 
-	var r0 []dto.Resource
+	var r0 []*dto.Resource
 	var r1 error
-	if rf, ok := ret.Get(0).(func(string) ([]dto.Resource, error)); ok {
+	if rf, ok := ret.Get(0).(func(string) ([]*dto.Resource, error)); ok {
 		return rf(name)
 	}
-	if rf, ok := ret.Get(0).(func(string) []dto.Resource); ok {
+	if rf, ok := ret.Get(0).(func(string) []*dto.Resource); ok {
 		r0 = rf(name)
 	} else {
 		if ret.Get(0) != nil {
-			r0 = ret.Get(0).([]dto.Resource)
+			r0 = ret.Get(0).([]*dto.Resource)
 		}
 	}
 
@@ -1390,12 +1390,12 @@ func (_c *IKubernetesClient_GetWorkloadsForRelease_Call) Run(run func(name strin
 	return _c
 }
 
-func (_c *IKubernetesClient_GetWorkloadsForRelease_Call) Return(_a0 []dto.Resource, _a1 error) *IKubernetesClient_GetWorkloadsForRelease_Call {
+func (_c *IKubernetesClient_GetWorkloadsForRelease_Call) Return(_a0 []*dto.Resource, _a1 error) *IKubernetesClient_GetWorkloadsForRelease_Call {
 	_c.Call.Return(_a0, _a1)
 	return _c
 }
 
-func (_c *IKubernetesClient_GetWorkloadsForRelease_Call) RunAndReturn(run func(string) ([]dto.Resource, error)) *IKubernetesClient_GetWorkloadsForRelease_Call {
+func (_c *IKubernetesClient_GetWorkloadsForRelease_Call) RunAndReturn(run func(string) ([]*dto.Resource, error)) *IKubernetesClient_GetWorkloadsForRelease_Call {
 	_c.Call.Return(run)
 	return _c
 }
@@ -1686,23 +1686,23 @@ func (_c *IKubernetesClient_ListTemplateStore_Call) RunAndReturn(run func() ([]v
 }
 
 // MapUnstructuredResource provides a mock function with given fields: u
-func (_m *IKubernetesClient) MapUnstructuredResource(u unstructured.Unstructured) (dto.Resource, error) {
+func (_m *IKubernetesClient) MapUnstructuredResource(u unstructured.Unstructured) (*dto.Resource, error) {
 	ret := _m.Called(u)
 
 	if len(ret) == 0 {
 		panic("no return value specified for MapUnstructuredResource")
 	}
 
-	var r0 dto.Resource
+	var r0 *dto.Resource
 	var r1 error
-	if rf, ok := ret.Get(0).(func(unstructured.Unstructured) (dto.Resource, error)); ok {
+	if rf, ok := ret.Get(0).(func(unstructured.Unstructured) (*dto.Resource, error)); ok {
 		return rf(u)
 	}
-	if rf, ok := ret.Get(0).(func(unstructured.Unstructured) dto.Resource); ok {
+	if rf, ok := ret.Get(0).(func(unstructured.Unstructured) *dto.Resource); ok {
 		r0 = rf(u)
 	} else {
 		if ret.Get(0) != nil {
-			r0 = ret.Get(0).(dto.Resource)
+			r0 = ret.Get(0).(*dto.Resource)
 		}
 	}
 
@@ -1733,12 +1733,12 @@ func (_c *IKubernetesClient_MapUnstructuredResource_Call) Run(run func(u unstruc
 	return _c
 }
 
-func (_c *IKubernetesClient_MapUnstructuredResource_Call) Return(_a0 dto.Resource, _a1 error) *IKubernetesClient_MapUnstructuredResource_Call {
+func (_c *IKubernetesClient_MapUnstructuredResource_Call) Return(_a0 *dto.Resource, _a1 error) *IKubernetesClient_MapUnstructuredResource_Call {
 	_c.Call.Return(_a0, _a1)
 	return _c
 }
 
-func (_c *IKubernetesClient_MapUnstructuredResource_Call) RunAndReturn(run func(unstructured.Unstructured) (dto.Resource, error)) *IKubernetesClient_MapUnstructuredResource_Call {
+func (_c *IKubernetesClient_MapUnstructuredResource_Call) RunAndReturn(run func(unstructured.Unstructured) (*dto.Resource, error)) *IKubernetesClient_MapUnstructuredResource_Call {
 	_c.Call.Return(run)
 	return _c
 }
