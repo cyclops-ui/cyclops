@@ -237,7 +237,7 @@ func (k *KubernetesClient) GetDeletedResources(
 	manifest string,
 	targetNamespace string,
 ) ([]*dto.Resource, error) {
-	resourcesFromTemplate := make(map[string][]*dto.Resource, 0)
+	resourcesFromTemplate := make(map[dto.Resource]struct{}, 0)
 
 	ar, err := k.clusterApiResources()
 	if err != nil {
@@ -260,8 +260,6 @@ func (k *KubernetesClient) GetDeletedResources(
 			continue
 		}
 
-		objGVK := obj.GetObjectKind().GroupVersionKind().String()
-
 		objNamespace := apiv1.NamespaceDefault
 		if len(strings.TrimSpace(targetNamespace)) != 0 {
 			objNamespace = strings.TrimSpace(targetNamespace)
@@ -280,35 +278,43 @@ func (k *KubernetesClient) GetDeletedResources(
 			objNamespace = ""
 		}
 
-		resourcesFromTemplate[objGVK] = append(resourcesFromTemplate[objGVK], &dto.Resource{
+		resourcesFromTemplate[dto.Resource{
+			Group:     obj.GroupVersionKind().Group,
+			Version:   obj.GroupVersionKind().Version,
+			Kind:      obj.GroupVersionKind().Kind,
 			Name:      obj.GetName(),
 			Namespace: objNamespace,
-		})
+		}] = struct{}{}
 	}
 
 	out := make([]*dto.Resource, 0, len(resources))
 	for _, resource := range resources {
-		gvk := resource.GetGroupVersionKind()
-
-		if _, ok := resourcesFromTemplate[gvk]; !ok {
-			resource.SetDeleted(true)
-			out = append(out, resource)
-			continue
+		resourceKey := dto.Resource{
+			Group:     resource.Group,
+			Version:   resource.Version,
+			Kind:      resource.Kind,
+			Name:      resource.Name,
+			Namespace: resource.Namespace,
 		}
 
-		found := false
-		for _, rs := range resourcesFromTemplate[gvk] {
-			if resource.GetName() == rs.GetName() && (resource.GetNamespace() == rs.GetNamespace() || rs.GetNamespace() == "") {
-				found = true
-				break
-			}
-		}
-
-		if found == false {
+		if _, found := resourcesFromTemplate[resourceKey]; found == false {
 			resource.SetDeleted(true)
 		}
 
+		delete(resourcesFromTemplate, resourceKey)
 		out = append(out, resource)
+	}
+
+	// add all resources left from resourcesFromTemplate as missing; have been generated as manifest, but were not found in cluster
+	for r, _ := range resourcesFromTemplate {
+		out = append(out, &dto.Resource{
+			Group:     r.Group,
+			Version:   r.Version,
+			Kind:      r.Kind,
+			Name:      r.Name,
+			Namespace: r.Namespace,
+			Missing:   true,
+		})
 	}
 
 	return out, nil

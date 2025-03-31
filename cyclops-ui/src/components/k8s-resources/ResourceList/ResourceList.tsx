@@ -554,6 +554,31 @@ const ResourceList = ({
       );
     };
 
+    if (resource.missing) {
+      resourceCollapses.push(
+        <Collapse.Panel
+          header={genExtra(resource, resourceStatus)}
+          key={collapseKey}
+          collapsible={"disabled"}
+          style={{
+            display: getResourceDisplay(
+              resource.group,
+              resource.version,
+              resource.kind,
+            ),
+            width: getCollapseWidth(collapseKey),
+            backgroundColor: getCollapseColor(collapseKey),
+            marginBottom: "12px",
+            borderRadius: "10px",
+            borderStyle: "dashed",
+            borderColor: mode === "light" ? "#E3E3E3" : "#444",
+            borderWidth: "1px",
+          }}
+        />,
+      );
+      return;
+    }
+
     resourceCollapses.push(
       <Collapse.Panel
         header={genExtra(resource, resourceStatus)}
