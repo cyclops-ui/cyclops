@@ -38,6 +38,7 @@ import {
   CopyOutlined,
   FileTextOutlined,
   FilterOutlined,
+  WarningTwoTone,
 } from "@ant-design/icons";
 import { canRestart, RestartButton } from "../common/RestartButton";
 import { gvkString } from "../../../utils/k8s/gvk";
@@ -391,10 +392,11 @@ const ResourceList = ({
       deletedWarning = (
         <Tooltip
           title={"The resource is not a part of the Module and can be deleted"}
-          trigger="click"
+          trigger="hover"
         >
-          <WarningIcon
+          <WarningTwoTone
             style={{ right: "0px", fontSize: "30px", paddingRight: "5px" }}
+            twoToneColor={mode === "light" ? "#F3801A" : ["#F3801A", "#4a2607"]}
           />
         </Tooltip>
       );
@@ -557,7 +559,17 @@ const ResourceList = ({
     if (resource.missing) {
       resourceCollapses.push(
         <Collapse.Panel
-          header={genExtra(resource, resourceStatus)}
+          header={
+            <Tooltip
+              title={
+                "The resource is missing from the cluster. Reconcile Module to recreate it."
+              }
+              trigger="hover"
+              placement={"right"}
+            >
+              {genExtra(resource, resourceStatus)}
+            </Tooltip>
+          }
           key={collapseKey}
           collapsible={"disabled"}
           style={{
