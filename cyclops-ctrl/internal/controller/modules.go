@@ -5,6 +5,7 @@ import (
 	"io"
 	"net/http"
 	"os"
+	"sort"
 	"strings"
 	"time"
 
@@ -677,6 +678,14 @@ func (m *Modules) ResourcesForModule(ctx *gin.Context) {
 		ctx.JSON(http.StatusInternalServerError, dto.NewError("Error fetching deleted module resources", err.Error()))
 		return
 	}
+
+	sort.Slice(resources, func(i, j int) bool {
+		if resources[i].GetGroupVersionKind() != resources[j].GetGroupVersionKind() {
+			return resources[i].GetGroupVersionKind() < resources[j].GetGroupVersionKind()
+		}
+
+		return resources[i].GetName() < resources[j].GetName()
+	})
 
 	ctx.JSON(http.StatusOK, resources)
 }

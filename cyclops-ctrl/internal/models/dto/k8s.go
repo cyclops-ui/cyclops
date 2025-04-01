@@ -15,6 +15,7 @@ type Resource struct {
 	Namespace string `json:"namespace"`
 	Status    string `json:"status"`
 	Deleted   bool   `json:"deleted"`
+	Missing   bool   `json:"missing"`
 }
 
 func (r *Resource) GetGroupVersionKind() string {
