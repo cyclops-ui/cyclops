@@ -37,6 +37,8 @@ type TemplateAuthRuleSpec struct {
 
 //+kubebuilder:object:root=true
 //+kubebuilder:subresource:status
+//+kubebuilder:printcolumn:name="Age",type="date",JSONPath=".metadata.creationTimestamp"
+//+kubebuilder:printcolumn:name="Repository",type=string,JSONPath=`.spec.repo`
 
 // TemplateAuthRule is the Schema for the modules API
 type TemplateAuthRule struct {

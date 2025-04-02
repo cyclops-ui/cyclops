@@ -13,7 +13,33 @@ spec:
     singular: module
   scope: Namespaced
   versions:
-    - name: v1alpha1
+    - additionalPrinterColumns:
+        - jsonPath: .metadata.creationTimestamp
+          name: Age
+          type: date
+        - jsonPath: .spec.targetNamespace
+          name: Target Namespace
+          priority: 1
+          type: string
+        - jsonPath: .spec.template.repo
+          name: Template
+          type: string
+        - jsonPath: .spec.template.path
+          name: Template path
+          priority: 1
+          type: string
+        - jsonPath: .spec.template.version
+          name: Template version
+          priority: 1
+          type: string
+        - jsonPath: .status.templateResolvedVersion
+          name: Template resolved version
+          priority: 1
+          type: string
+        - jsonPath: .status.reconciliationStatus.status
+          name: Reconciliation Status
+          type: string
+      name: v1alpha1
       schema:
         openAPIV3Schema:
           description: Module is the Schema for the modules API
@@ -160,7 +186,14 @@ spec:
     singular: templateauthrule
   scope: Namespaced
   versions:
-    - name: v1alpha1
+    - additionalPrinterColumns:
+        - jsonPath: .metadata.creationTimestamp
+          name: Age
+          type: date
+        - jsonPath: .spec.repo
+          name: Repository
+          type: string
+      name: v1alpha1
       schema:
         openAPIV3Schema:
           description: TemplateAuthRule is the Schema for the modules API
@@ -263,7 +296,23 @@ spec:
     singular: templatestore
   scope: Namespaced
   versions:
-    - name: v1alpha1
+    - additionalPrinterColumns:
+        - jsonPath: .metadata.creationTimestamp
+          name: Age
+          type: date
+        - jsonPath: .spec.sourceType
+          name: Type
+          type: string
+        - jsonPath: .spec.repo
+          name: Repository
+          type: string
+        - jsonPath: .spec.path
+          name: Path
+          type: string
+        - jsonPath: .spec.version
+          name: Version
+          type: string
+      name: v1alpha1
       schema:
         openAPIV3Schema:
           description: TemplateStore holds reference to a template that can be offered
@@ -308,6 +357,7 @@ spec:
           type: object
       served: true
       storage: true
+      subresources: {}
 ---
 apiVersion: v1
 kind: Namespace
