@@ -121,13 +121,23 @@ type HistoryTemplateRef struct {
 }
 
 type HistoryEntry struct {
-	Generation  int64                `json:"generation"`
-	TemplateRef HistoryTemplateRef   `json:"template"`
-	Values      apiextensionsv1.JSON `json:"values"`
+	Generation int64 `json:"generation"`
+
+	// +kubebuilder:validation:Optional
+	TargetNamespace string               `json:"targetNamespace"`
+	TemplateRef     HistoryTemplateRef   `json:"template"`
+	Values          apiextensionsv1.JSON `json:"values"`
 }
 
 //+kubebuilder:object:root=true
 //+kubebuilder:subresource:status
+//+kubebuilder:printcolumn:name="Age",type="date",JSONPath=".metadata.creationTimestamp"
+//+kubebuilder:printcolumn:name="Target Namespace",type=string,JSONPath=`.spec.targetNamespace`,priority=1
+//+kubebuilder:printcolumn:name="Template",type=string,JSONPath=`.spec.template.repo`
+//+kubebuilder:printcolumn:name="Template path",type=string,JSONPath=`.spec.template.path`,priority=1
+//+kubebuilder:printcolumn:name="Template version",type=string,JSONPath=`.spec.template.version`,priority=1
+//+kubebuilder:printcolumn:name="Template resolved version",type=string,JSONPath=`.status.templateResolvedVersion`,priority=1
+//+kubebuilder:printcolumn:name="Reconciliation Status",type=string,JSONPath=`.status.reconciliationStatus.status`
 
 // Module is the Schema for the modules API
 type Module struct {

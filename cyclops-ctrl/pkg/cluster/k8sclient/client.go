@@ -2,6 +2,7 @@ package k8sclient
 
 import (
 	"context"
+
 	"github.com/go-logr/logr"
 	apiv1 "k8s.io/api/core/v1"
 	v1 "k8s.io/apiextensions-apiserver/pkg/apis/apiextensions/v1"
@@ -91,10 +92,10 @@ type IKubernetesClient interface {
 	UpdateModuleStatus(module *cyclopsv1alpha1.Module) (*cyclopsv1alpha1.Module, error)
 	DeleteModule(name string) error
 	GetModule(name string) (*cyclopsv1alpha1.Module, error)
-	GetResourcesForModule(name string) ([]dto.Resource, error)
-	MapUnstructuredResource(u unstructured.Unstructured) (dto.Resource, error)
-	GetWorkloadsForModule(name string) ([]dto.Resource, error)
-	GetDeletedResources([]dto.Resource, string, string) ([]dto.Resource, error)
+	GetResourcesForModule(name string) ([]*dto.Resource, error)
+	MapUnstructuredResource(u unstructured.Unstructured) (*dto.Resource, error)
+	GetWorkloadsForModule(name string) ([]*dto.Resource, error)
+	GetDeletedResources([]*dto.Resource, string, string) ([]*dto.Resource, error)
 	GetModuleResourcesHealth(name string) (string, error)
 	GVKtoAPIResourceName(gv schema.GroupVersion, kind string) (string, error)
 	VersionInfo() (*version.Info, error)
@@ -104,7 +105,7 @@ type IKubernetesClient interface {
 	GetManifest(group, version, kind, name, namespace string, includeManagedFields bool) (string, error)
 	Restart(group, version, kind, name, namespace string) error
 	GetResource(group, version, kind, name, namespace string) (any, error)
-	Delete(resource dto.Resource) error
+	Delete(resource *dto.Resource) error
 	CreateDynamic(cyclopsv1alpha1.GroupVersionResource, *unstructured.Unstructured, string) error
 	ApplyCRD(obj *unstructured.Unstructured) error
 	ListNodes() ([]apiv1.Node, error)
@@ -119,9 +120,9 @@ type IKubernetesClient interface {
 	CreateTemplateStore(ts *cyclopsv1alpha1.TemplateStore) error
 	UpdateTemplateStore(ts *cyclopsv1alpha1.TemplateStore) error
 	DeleteTemplateStore(name string) error
+	GetResourcesForRelease(release string) ([]*dto.Resource, error)
+	GetWorkloadsForRelease(name string) ([]*dto.Resource, error)
 	ListCRDs() ([]v1.CustomResourceDefinition, error)
 	GetCRD(name string) (*v1.CustomResourceDefinition, error)
-	GetResourcesForRelease(release string) ([]dto.Resource, error)
-	GetWorkloadsForRelease(name string) ([]dto.Resource, error)
 	DeleteReleaseSecret(releaseName, releaseNamespace string) error
 }

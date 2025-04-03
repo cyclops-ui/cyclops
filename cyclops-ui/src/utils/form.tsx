@@ -74,12 +74,12 @@ export function findMaps(fields: any[], values: any, initialValues: any): any {
     let valuesList: any[] = [];
     switch (field.type) {
       case "string":
-        if (values[field.name]) {
+        if (values[field.name] !== undefined && values[field.name] !== null) {
           out[field.name] = values[field.name];
         }
         break;
       case "number":
-        if (values[field.name]) {
+        if (values[field.name] !== undefined && values[field.name] !== null) {
           out[field.name] = values[field.name];
         }
         break;

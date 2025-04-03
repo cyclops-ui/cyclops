@@ -5,6 +5,14 @@ authors: [jurajk]
 
 ![launch-week-teaser](../../static/img/2025-03-04-launch-week-2/lw-cover.png)
 
+**Cyclops is having its second-ever Launch Week, starting on March 10th!**
+
+Throughout the week, we’ll unveil a new feature of Cyclops every day - **five features in total!**
+
+Features are not the only thing that we will be announcing. Behind the scenes, we have been making friends in the Kubernetes space...
+
+Come back here each day to see what we launch, or follow us on [**X**](https://x.com/CyclopsUI) and [**LinkedIn**](https://www.linkedin.com/company/96014689/) to keep up to date and follow the hashtag **#cyclopslaunchweek2**
+
 ## #1 **Migrating Helm Releases to Modules**♻️
 
 Cyclops already picks up on any installed **Helm releases in your cluster.** But when selecting a Helm release, you will notice a new button pop up in the top right corner!
@@ -83,17 +91,3 @@ Five days, five big releases - from better Helm migrations to Git integration, B
 We’re excited to hear your thoughts, so try out the new features, give us feedback, and stay tuned - we have even bigger things coming soon. 🎵
 
 Thank you for being a part of ourjourney! If you are interested in keeping up to date, be sure to [join our Discord community](https://discord.com/invite/8ErnK3qDb3) where we always share the latest news! 👾
-
-## #3 Backstage Plugin **🧩**
-
-[**Backstage**](https://backstage.io/) is a framework for building developer portals built and **open-sourced by Spotify**.
-
-Developer portals built with Backstage allow you to have a centralized catalog of all applications and services running in your system. All of the applications your developers are working on in a company are listed and organized in a single place.
-
-Another benefit of Backstage is that it centralizes all the tools used for managing software into a single platform, so deployment processes, monitoring, alerting, and so on are all in a single app. This is achieved through Backstage's plugin architecture, **and Cyclops implements its own plugin**.
-
-With the Cyclops plugin, you can view all of your deployed Cyclops applications and get the **full experience of Cyclops in your Backstage instance**.
-
-Check our [docs](https://cyclops-ui.com/docs/backstage/modules-plugin) on how to set it up for yourself!
-
-![feature-3](../../static/img/2025-03-04-launch-week-2/day-3.gif)

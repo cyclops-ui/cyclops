@@ -129,7 +129,7 @@ func (r *ReleaseClient) UpgradeRelease(
 	return err
 }
 
-func (r *ReleaseClient) ListResources(namespace string, name string) ([]dto.Resource, error) {
+func (r *ReleaseClient) ListResources(namespace string, name string) ([]*dto.Resource, error) {
 	if len(r.namespace) > 0 && namespace != r.namespace {
 		return nil, errors.New(fmt.Sprintf("invalid namespace provided: %v", namespace))
 	}
@@ -154,7 +154,7 @@ func (r *ReleaseClient) ListResources(namespace string, name string) ([]dto.Reso
 		return nil, errors.New("empty release info resources")
 	}
 
-	out := make([]dto.Resource, 0, 0)
+	out := make([]*dto.Resource, 0, 0)
 	for gv, objs := range releaseStatus.Info.Resources {
 		if strings.HasSuffix(gv, "(related)") {
 			continue
@@ -186,13 +186,13 @@ func (r *ReleaseClient) ListResources(namespace string, name string) ([]dto.Reso
 	return out, nil
 }
 
-func (r *ReleaseClient) ListWorkloadsForRelease(namespace, name string) ([]dto.Resource, error) {
+func (r *ReleaseClient) ListWorkloadsForRelease(namespace, name string) ([]*dto.Resource, error) {
 	resources, err := r.ListResources(namespace, name)
 	if err != nil {
 		return nil, err
 	}
 
-	workloads := make([]dto.Resource, 0, 0)
+	workloads := make([]*dto.Resource, 0, 0)
 	for _, resource := range resources {
 		if resource.GetGroup() == "apps" &&
 			resource.GetVersion() == "v1" &&

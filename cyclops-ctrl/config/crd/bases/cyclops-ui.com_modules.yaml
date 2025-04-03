@@ -14,7 +14,33 @@ spec:
     singular: module
   scope: Namespaced
   versions:
-  - name: v1alpha1
+  - additionalPrinterColumns:
+    - jsonPath: .metadata.creationTimestamp
+      name: Age
+      type: date
+    - jsonPath: .spec.targetNamespace
+      name: Target Namespace
+      priority: 1
+      type: string
+    - jsonPath: .spec.template.repo
+      name: Template
+      type: string
+    - jsonPath: .spec.template.path
+      name: Template path
+      priority: 1
+      type: string
+    - jsonPath: .spec.template.version
+      name: Template version
+      priority: 1
+      type: string
+    - jsonPath: .status.templateResolvedVersion
+      name: Template resolved version
+      priority: 1
+      type: string
+    - jsonPath: .status.reconciliationStatus.status
+      name: Reconciliation Status
+      type: string
+    name: v1alpha1
     schema:
       openAPIV3Schema:
         description: Module is the Schema for the modules API
@@ -32,6 +58,8 @@ spec:
                 generation:
                   format: int64
                   type: integer
+                targetNamespace:
+                  type: string
                 template:
                   properties:
                     CRDName:

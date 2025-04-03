@@ -189,7 +189,7 @@ func (k *KubernetesClient) mapDefaultResource(group, version, kind, name, namesp
 	}, nil
 }
 
-func (k *KubernetesClient) Delete(resource dto.Resource) error {
+func (k *KubernetesClient) Delete(resource *dto.Resource) error {
 	apiResourceName, err := k.GVKtoAPIResourceName(
 		schema.GroupVersion{
 			Group:   resource.GetGroup(),

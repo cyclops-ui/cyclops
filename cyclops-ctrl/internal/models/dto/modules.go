@@ -48,6 +48,11 @@ type TemplatesResponse struct {
 	New     string `json:"new"`
 }
 
+type RollbackRequest struct {
+	ModuleName string `json:"moduleName"`
+	Generation int64  `json:"generation"`
+}
+
 type DeleteResource struct {
 	Group     string `json:"group"`
 	Version   string `json:"version"`
