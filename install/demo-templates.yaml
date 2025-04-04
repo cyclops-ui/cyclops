@@ -29,7 +29,7 @@ apiVersion: cyclops-ui.com/v1alpha1
 kind: TemplateStore
 metadata:
   annotations:
-    cyclops-ui.com/icon: https://bitnami.com/assets/stacks/jenkins/img/jenkins-stack-220x234.png
+    cyclops-ui.com/icon: https://dyltqmyl993wv.cloudfront.net/assets/stacks/jenkins/img/jenkins-stack-220x234.png
   name: jenkins
   namespace: cyclops
 spec:
@@ -42,7 +42,7 @@ apiVersion: cyclops-ui.com/v1alpha1
 kind: TemplateStore
 metadata:
   annotations:
-    cyclops-ui.com/icon: https://bitnami.com/assets/stacks/mariadb/img/mariadb-stack-220x234.png
+    cyclops-ui.com/icon: https://dyltqmyl993wv.cloudfront.net/assets/stacks/mariadb/img/mariadb-stack-220x234.png
   name: mariadb
   namespace: cyclops
 spec:
@@ -68,7 +68,7 @@ apiVersion: cyclops-ui.com/v1alpha1
 kind: TemplateStore
 metadata:
   annotations:
-    cyclops-ui.com/icon: https://bitnami.com/assets/stacks/mysql/img/mysql-stack-220x234.png
+    cyclops-ui.com/icon: https://dyltqmyl993wv.cloudfront.net/assets/stacks/mysql/img/mysql-stack-220x234.png
   name: mysql
   namespace: cyclops
 spec:
@@ -81,7 +81,7 @@ apiVersion: cyclops-ui.com/v1alpha1
 kind: TemplateStore
 metadata:
   annotations:
-    cyclops-ui.com/icon: https://bitnami.com/assets/stacks/postgresql/img/postgresql-stack-220x234.png
+    cyclops-ui.com/icon: https://dyltqmyl993wv.cloudfront.net/assets/stacks/postgresql/img/postgresql-stack-220x234.png
   name: postgresql
   namespace: cyclops
 spec:
@@ -94,7 +94,7 @@ apiVersion: cyclops-ui.com/v1alpha1
 kind: TemplateStore
 metadata:
   annotations:
-    cyclops-ui.com/icon: https://bitnami.com/assets/stacks/prometheus/img/prometheus-stack-220x234.png
+    cyclops-ui.com/icon: https://dyltqmyl993wv.cloudfront.net/assets/stacks/prometheus/img/prometheus-stack-220x234.png
   name: prometheus
   namespace: cyclops
 spec:
@@ -107,7 +107,7 @@ apiVersion: cyclops-ui.com/v1alpha1
 kind: TemplateStore
 metadata:
   annotations:
-    cyclops-ui.com/icon: https://bitnami.com/assets/stacks/rabbitmq/img/rabbitmq-stack-220x234.png
+    cyclops-ui.com/icon: https://dyltqmyl993wv.cloudfront.net/assets/stacks/rabbitmq/img/rabbitmq-stack-220x234.png
   name: rabbitmq
   namespace: cyclops
 spec:
@@ -120,7 +120,7 @@ apiVersion: cyclops-ui.com/v1alpha1
 kind: TemplateStore
 metadata:
   annotations:
-    cyclops-ui.com/icon: https://bitnami.com/assets/stacks/redis/img/redis-stack-220x234.png
+    cyclops-ui.com/icon: https://dyltqmyl993wv.cloudfront.net/assets/stacks/redis/img/redis-stack-220x234.png
   name: redis
   namespace: cyclops
 spec:
@@ -159,7 +159,7 @@ apiVersion: cyclops-ui.com/v1alpha1
 kind: TemplateStore
 metadata:
   annotations:
-    cyclops-ui.com/icon: https://bitnami.com/assets/stacks/valkey/img/valkey-stack-220x234.png
+    cyclops-ui.com/icon: https://dyltqmyl993wv.cloudfront.net/assets/stacks/valkey/img/valkey-stack-220x234.png
   name: valkey
   namespace: cyclops
 spec:
