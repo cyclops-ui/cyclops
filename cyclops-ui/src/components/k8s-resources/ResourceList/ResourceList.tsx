@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   Divider,
   Row,
@@ -47,6 +47,8 @@ import { mapResponseError } from "../../../utils/api/errors";
 import { CheckboxChangeEvent } from "antd/es/checkbox";
 import { Workload } from "../../../utils/k8s/workload";
 import { useResourceListActions } from "./ResourceListActionsContext";
+import DefaultResource from "../DefaultResource";
+
 import { useTheme } from "../../theme/ThemeContext";
 import {
   SuccessIcon,
@@ -113,6 +115,23 @@ const ResourceList = ({
     let k = resourceRefKey(ref);
     return workloads.get(k);
   }
+
+  useEffect(() => {
+    if (resources.length === 1) {
+      const resourceKey =
+        resources[0].kind +
+        "/" +
+        resources[0].namespace +
+        "/" +
+        resources[0].name;
+
+      if (activeCollapses.get(resourceKey) === undefined) {
+        const newMap = new Map(activeCollapses);
+        newMap.set(resourceKey, true);
+        setActiveCollapses(newMap);
+      }
+    }
+  }, [resources, activeCollapses, setActiveCollapses]);
 
   const handleCancelDeleteResource = () => {
     setDeleteResourceModal(false);
@@ -384,6 +403,17 @@ const ResourceList = ({
           <NetworkPolicy namespace={resource.namespace} name={resource.name} />
         );
         break;
+      default:
+        resourceDetails = (
+          <DefaultResource
+            group={resource.group}
+            version={resource.version}
+            kind={resource.kind}
+            name={resource.name}
+            namespace={resource.namespace}
+            onResourceDelete={onResourceDelete}
+          />
+        );
     }
 
     let deletedWarning = <p />;
@@ -687,12 +717,20 @@ const ResourceList = ({
           }}
           onChange={function (values: string | string[]) {
             let m = new Map();
+
+            for (let key of activeCollapses.keys()) {
+              m.set(key, false);
+            }
+
             for (let value of values) {
               m.set(value, true);
             }
 
             setActiveCollapses(m);
           }}
+          activeKey={Array.from(activeCollapses.keys()).filter((key) =>
+            activeCollapses.get(key),
+          )}
         >
           {resourceCollapses}
         </Collapse>

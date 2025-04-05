@@ -477,6 +477,20 @@ spec:
     - Ingress
     - Egress
 ---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: cyclops-ctrl
+  namespace: cyclops
+#data:
+#  resource-relations: |
+#    childLabels:
+#      - group: postgresql.cnpg.io
+#        version: v1
+#        kind: Cluster
+#        matchLabels:
+#          cnpg.io/cluster: "{{ .metadata.name }}"
+---
 apiVersion: apps/v1
 kind: Deployment
 metadata:

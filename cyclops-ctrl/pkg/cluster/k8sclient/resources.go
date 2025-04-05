@@ -1,6 +1,7 @@
 package k8sclient
 
 import (
+	"bytes"
 	"context"
 	"fmt"
 	"strings"
@@ -11,6 +12,7 @@ import (
 	"gopkg.in/yaml.v2"
 
 	apiv1 "k8s.io/api/core/v1"
+	apiextensionsv1 "k8s.io/apiextensions-apiserver/pkg/apis/apiextensions/v1"
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
@@ -20,6 +22,7 @@ import (
 	"k8s.io/apimachinery/pkg/watch"
 	"k8s.io/client-go/discovery"
 	"k8s.io/client-go/tools/cache"
+	"k8s.io/client-go/util/jsonpath"
 
 	"github.com/cyclops-ui/cyclops/cyclops-ctrl/api/v1alpha1"
 	"github.com/cyclops-ui/cyclops/cyclops-ctrl/internal/models/dto"
@@ -144,9 +147,98 @@ func (k *KubernetesClient) GetResource(group, version, kind, name, namespace str
 		return k.mapNetworkPolicy(group, version, kind, name, namespace)
 	case isClusterRole(group, version, kind):
 		return k.mapClusterRole(group, version, kind, name)
+	default:
+		return k.mapDefaultResource(group, version, kind, name, namespace)
 	}
 
 	return nil, nil
+}
+
+func (k *KubernetesClient) mapDefaultResource(group, version, kind, name, namespace string) (any, error) {
+	apiResourceName, err := k.GVKtoAPIResourceName(schema.GroupVersion{Group: group, Version: version}, kind)
+	if err != nil {
+		return nil, err
+	}
+
+	resource, err := k.Dynamic.Resource(schema.GroupVersionResource{
+		Group:    group,
+		Version:  version,
+		Resource: apiResourceName,
+	}).Namespace(namespace).Get(context.Background(), name, metav1.GetOptions{})
+	if err != nil {
+		return "", err
+	}
+
+	childLabels, exists, err := k.getChildLabel(group, version, kind, resource)
+	if err != nil {
+		return nil, err
+	}
+
+	var children []*dto.Resource
+	if exists {
+		children, err = k.getResourcesForCRD(childLabels, name)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	additionalPrinterColumns, err := k.getCRDPrinterColumns(group, apiResourceName)
+	if err != nil {
+		return nil, err
+	}
+
+	printerColumns, err := k.compileCRDPrinterColumns(resource, additionalPrinterColumns)
+	if err != nil {
+		return nil, err
+	}
+
+	return &dto.Other{
+		Group:                    group,
+		Version:                  version,
+		Kind:                     kind,
+		Name:                     name,
+		Namespace:                namespace,
+		Children:                 children,
+		AdditionalPrinterColumns: printerColumns,
+	}, nil
+}
+
+func (k *KubernetesClient) compileCRDPrinterColumns(obj *unstructured.Unstructured, additionalPrinterColumns []apiextensionsv1.CustomResourceColumnDefinition) (map[string]interface{}, error) {
+	if obj == nil {
+		return nil, fmt.Errorf("object is nil")
+	}
+
+	columns := make(map[string]interface{})
+	for _, col := range additionalPrinterColumns {
+		j := jsonpath.New(col.Name)
+		err := j.Parse("{" + col.JSONPath + "}")
+		if err != nil {
+			return nil, fmt.Errorf("error parsing JSONPath for column %s: %w", col.Name, err)
+		}
+
+		results := new(bytes.Buffer)
+		err = j.Execute(results, obj.Object)
+		if err != nil {
+			return nil, fmt.Errorf("error executing JSONPath for column %s: %w", col.Name, err)
+		}
+
+		columns[col.Name] = results.String()
+	}
+
+	return columns, nil
+}
+
+func (k *KubernetesClient) getCRDPrinterColumns(group, apiResourceName string) ([]apiextensionsv1.CustomResourceColumnDefinition, error) {
+	crd, err := k.extensionsClientset.ApiextensionsV1().CustomResourceDefinitions().Get(
+		context.Background(),
+		apiResourceName+"."+group,
+		metav1.GetOptions{},
+	)
+	if err != nil {
+		return nil, nil
+	}
+
+	return crd.Spec.Versions[0].AdditionalPrinterColumns, nil
 }
 
 func (k *KubernetesClient) Delete(resource *dto.Resource) error {

@@ -162,6 +162,7 @@ interface HelmReleaseDetailsProps {
     repo: string,
     path: string,
     version: string,
+    crdName: string,
     sourceType: string,
   ) => Promise<any>;
 }
@@ -368,6 +369,7 @@ export const HelmReleaseDetails = ({
       templateRef["repo"],
       templateRef["path"],
       templateRef["version"],
+      "",
       "",
     )
       .then(() => {
