@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useState } from "react";
-import { Alert } from "antd";
+import { Alert, Descriptions } from "antd";
 import axios from "axios";
 import { mapResponseError } from "../../utils/api/errors";
 import ResourceList from "./ResourceList/ResourceList";
@@ -28,8 +28,12 @@ const DefaultResource = ({
   const { streamingDisabled, resourceStreamImplementation } =
     useResourceListActions();
 
-  const [resource, setResource] = useState({
+  const [resource, setResource] = useState<{
+    children: any[];
+    additionalPrinterColumns: Record<string, any>;
+  }>({
     children: [],
+    additionalPrinterColumns: {},
   });
   const [workloads, setWorkloads] = useState<Map<string, Workload>>(new Map());
 
@@ -108,6 +112,36 @@ const DefaultResource = ({
     resourceStreamImplementation,
   ]);
 
+  const additionalPrinterColumns = (
+    additionalPrinterColumns: Record<string, any>,
+  ) => {
+    const entries = Object.entries<string>(additionalPrinterColumns ?? {});
+
+    if (entries.length === 0) return;
+
+    return (
+      <Descriptions
+        style={{ width: "100%", paddingTop: "24px" }}
+        size={"small"}
+        bordered
+        column={1}
+      >
+        {Object.entries<string>(additionalPrinterColumns).map(
+          ([key, dataValue]) => (
+            <Descriptions.Item
+              key={key}
+              labelStyle={{ width: "40%" }}
+              label={key}
+              span={24}
+            >
+              {dataValue}
+            </Descriptions.Item>
+          ),
+        )}
+      </Descriptions>
+    );
+  };
+
   const resourceList = () => {
     if (resource.children) {
       return (
@@ -144,6 +178,7 @@ const DefaultResource = ({
           paddingRight: "12px",
         }}
       >
+        {additionalPrinterColumns(resource.additionalPrinterColumns)}
         {resourceList()}
       </div>
     </div>

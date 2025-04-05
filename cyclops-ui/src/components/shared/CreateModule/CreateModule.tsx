@@ -415,6 +415,22 @@ export const CreateModuleComponent = ({
     setAdvancedOptionsExpanded(!advancedOptionsExpanded);
   };
 
+  const templateStoreIconURL = (templateStore: any): string => {
+    if (templateStore.ref?.crdName?.length !== 0) {
+      return "https://github.com/kubernetes/community/blob/master/icons/png/resources/labeled/crd-128.png?raw=true";
+    }
+
+    if (
+      templateStore.iconURL !== null &&
+      templateStore.iconURL !== undefined &&
+      templateStore.iconURL.length !== 0
+    ) {
+      return templateStore.iconURL;
+    }
+
+    return defaultTemplate as string;
+  };
+
   return (
     <div>
       <ConfigProvider
@@ -486,29 +502,15 @@ export const CreateModuleComponent = ({
                   >
                     {templateStore.map((option: any, index) => (
                       <Option key={option.name} value={option.name}>
-                        {option.iconURL !== null &&
-                        option.iconURL !== undefined &&
-                        option.iconURL.length !== 0 ? (
-                          <img
-                            alt=""
-                            style={{
-                              maxHeight: "1.5em",
-                              maxWidth: "1.5em",
-                              marginRight: "8px",
-                            }}
-                            src={option.iconURL}
-                          />
-                        ) : (
-                          <img
-                            alt=""
-                            style={{
-                              maxHeight: "1.5em",
-                              maxWidth: "1.5em",
-                              marginRight: "8px",
-                            }}
-                            src={defaultTemplate}
-                          />
-                        )}
+                        <img
+                          alt=""
+                          style={{
+                            maxHeight: "1.5em",
+                            maxWidth: "1.5em",
+                            marginRight: "8px",
+                          }}
+                          src={templateStoreIconURL(option)}
+                        />
                         {option.name}
                       </Option>
                     ))}
