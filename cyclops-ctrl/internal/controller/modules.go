@@ -483,6 +483,7 @@ func (m *Modules) HistoryEntryManifest(ctx *gin.Context) {
 		targetGeneration.TemplateRef.Path,
 		targetGeneration.TemplateRef.Version,
 		"",
+		targetGeneration.TemplateRef.CRDName,
 		targetGeneration.TemplateRef.SourceType,
 	)
 	if err != nil {
@@ -491,7 +492,7 @@ func (m *Modules) HistoryEntryManifest(ctx *gin.Context) {
 		return
 	}
 
-	manifest, err := m.renderer.HelmTemplate(v1alpha1.Module{
+	manifest, err := m.renderer.RenderManifest(v1alpha1.Module{
 		ObjectMeta: metav1.ObjectMeta{
 			Name: request.ModuleName,
 		},

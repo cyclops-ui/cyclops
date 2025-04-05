@@ -130,8 +130,8 @@ func (k *KubernetesClient) MapUnstructuredResource(u unstructured.Unstructured) 
 	}, nil
 }
 
-func (k *KubernetesClient) getResourcesForCRD(childLabels *ResourceFetchRule, name string) ([]dto.Resource, error) {
-	out := make([]dto.Resource, 0, 0)
+func (k *KubernetesClient) getResourcesForCRD(childLabels *ResourceFetchRule, name string) ([]*dto.Resource, error) {
+	out := make([]*dto.Resource, 0, 0)
 
 	managedGVRs := childLabels.ManagedGVRs
 	var err error
@@ -162,7 +162,7 @@ func (k *KubernetesClient) getResourcesForCRD(childLabels *ResourceFetchRule, na
 			return nil, err
 		}
 
-		out = append(out, &dto.Other{
+		out = append(out, &dto.Resource{
 			Group:     o.GroupVersionKind().Group,
 			Version:   o.GroupVersionKind().Version,
 			Kind:      o.GroupVersionKind().Kind,
