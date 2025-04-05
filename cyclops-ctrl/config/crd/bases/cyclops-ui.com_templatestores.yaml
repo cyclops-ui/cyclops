@@ -27,9 +27,6 @@ spec:
     - jsonPath: .spec.path
       name: Path
       type: string
-    - jsonPath: .spec.path
-      name: Testing
-      type: string
     - jsonPath: .spec.version
       name: Version
       type: string
