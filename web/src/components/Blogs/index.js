@@ -23,6 +23,19 @@ const Blogs = () => {
         <Row gutter={[16, 16]}>
           <Col xs={{ span: 20, offset: 2 }} md={{ span: 6, offset: 3 }}>
             <Blog
+              title={"From Helm Chart to Developer UI in 5 Minutes"}
+              description={
+                "Helm is great… …until you give it to a developer."
+              }
+              blogLink={
+                "https://cyclops-ui.com/blog/2025/04/03/helm-to-idp-in-five"
+              }
+              avatar={"https://github.com/KaradzaJuraj.png"}
+              banner={"/img/2025-04-03-helm-to-idp-in-five/cover.png"}
+            />
+          </Col>
+          <Col xs={{ span: 20, offset: 2 }} md={{ span: 6, offset: 0 }}>
+            <Blog
               title={"How Platform Engineering Helps You Move Like a Startup Again"}
               description={
                 "There's been a quiet shift happening in engineering teams over the last few years. DevOps isn't going away, but it *is* evolving..."
@@ -45,19 +58,6 @@ const Blogs = () => {
               }
               avatar={"https://github.com/KaradzaJuraj.png"}
               banner={"/img/2025-03-13-portal-vs-platform/cover.jpeg"}
-            />
-          </Col>
-          <Col xs={{ span: 20, offset: 2 }} md={{ span: 6, offset: 0 }}>
-            <Blog
-              title={"How We Took GitOps a Step Further"}
-              description={
-                "GitOps has changed how teams manage infrastructure and deployments, making..."
-              }
-              blogLink={
-                "https://cyclops-ui.com/blog/2025/03/06/how-we-took-gitops-further"
-              }
-              avatar={"https://github.com/KaradzaJuraj.png"}
-              banner={"/img/2025-03-06-how-we-took-gitops-further/cover.jpeg"}
             />
           </Col>
         </Row>
