@@ -50,7 +50,7 @@ const MigrateRelease = () => {
         themePalette={mode}
         themeColor={""}
         fetchHelmChartFields={() => {
-          return getTemplate(repo, path, version, "");
+          return getTemplate(repo, path, version, "", "");
         }}
         fetchHelmReleaseValues={getHelmReleaseValues}
         submitHelmReleaseUpdate={(releaseNamespace, releaseName, values) => {

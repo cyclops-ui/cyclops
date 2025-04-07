@@ -85,111 +85,218 @@ describe("deepMerge", () => {
     },
     {
       description: "target has fields",
-      target: {name: "my-app"},
+      target: { name: "my-app" },
       source: {},
-      out: {name: "my-app"},
+      out: { name: "my-app" },
     },
     {
       description: "field overlap",
-      target: {name: "my-app"},
-      source: {name: "another-app"},
-      out: {name: "another-app"},
+      target: { name: "my-app" },
+      source: { name: "another-app" },
+      out: { name: "another-app" },
     },
     {
       description: "no field overlap",
-      target: {name: "my-app"},
-      source: {someField: "value"},
-      out: {name: "my-app", someField: "value"},
+      target: { name: "my-app" },
+      source: { someField: "value" },
+      out: { name: "my-app", someField: "value" },
     },
     {
       description: "nested fields, no overlap",
-      target: {general: {image: "nginx", version: 3}},
-      source: {someField: "value"},
-      out: {general: {image: "nginx", version: 3}, someField: "value"},
+      target: { general: { image: "nginx", version: 3 } },
+      source: { someField: "value" },
+      out: { general: { image: "nginx", version: 3 }, someField: "value" },
     },
     {
       description: "both have nested fields, no overlap",
-      target: {general: {image: "nginx", version: 3}},
-      source: { someField: "value", networking: {expose: true, host: "example.com", serviceType: ""}},
-      out: {general: {image: "nginx", version: 3}, someField: "value", networking: {expose: true, host: "example.com", serviceType: ""}},
+      target: { general: { image: "nginx", version: 3 } },
+      source: {
+        someField: "value",
+        networking: { expose: true, host: "example.com", serviceType: "" },
+      },
+      out: {
+        general: { image: "nginx", version: 3 },
+        someField: "value",
+        networking: { expose: true, host: "example.com", serviceType: "" },
+      },
     },
     {
       description: "both have nested fields, no overlap, null value",
-      target: {general: {image: "nginx", version: 3}},
-      source: { someField: "value", networking: {expose: true, host: "example.com", serviceType: null}},
-      out: {general: {image: "nginx", version: 3}, someField: "value", networking: {expose: true, host: "example.com", serviceType: null}},
+      target: { general: { image: "nginx", version: 3 } },
+      source: {
+        someField: "value",
+        networking: { expose: true, host: "example.com", serviceType: null },
+      },
+      out: {
+        general: { image: "nginx", version: 3 },
+        someField: "value",
+        networking: { expose: true, host: "example.com", serviceType: null },
+      },
     },
     {
       description: "both have nested fields, no overlap, undefined value",
-      target: {general: {image: "nginx", version: 3}},
-      source: { someField: "value", networking: {expose: true, host: "example.com", serviceType: undefined}},
-      out: {general: {image: "nginx", version: 3}, someField: "value", networking: {expose: true, host: "example.com", serviceType: undefined}},
+      target: { general: { image: "nginx", version: 3 } },
+      source: {
+        someField: "value",
+        networking: {
+          expose: true,
+          host: "example.com",
+          serviceType: undefined,
+        },
+      },
+      out: {
+        general: { image: "nginx", version: 3 },
+        someField: "value",
+        networking: {
+          expose: true,
+          host: "example.com",
+          serviceType: undefined,
+        },
+      },
     },
     {
       description: "both have nested fields, overlap",
-      target: {general: {image: "nginx", version: 3}},
-      source: { someField: "value", general: {image: "redis", version: 5}, networking: {expose: true, host: "example.com", serviceType: undefined}},
-      out: {general: {image: "redis", version: 5}, someField: "value", networking: {expose: true, host: "example.com", serviceType: undefined}},
+      target: { general: { image: "nginx", version: 3 } },
+      source: {
+        someField: "value",
+        general: { image: "redis", version: 5 },
+        networking: {
+          expose: true,
+          host: "example.com",
+          serviceType: undefined,
+        },
+      },
+      out: {
+        general: { image: "redis", version: 5 },
+        someField: "value",
+        networking: {
+          expose: true,
+          host: "example.com",
+          serviceType: undefined,
+        },
+      },
     },
     {
       description: "both have same nested fields",
-      target: { someField: "value", general: {image: "redis", version: 5}, networking: {expose: true, host: "example.com", serviceType: undefined}},
-      source: { someField: "value", general: {image: "redis", version: 5}, networking: {expose: true, host: "example.com", serviceType: undefined}},
-      out: { someField: "value", general: {image: "redis", version: 5}, networking: {expose: true, host: "example.com", serviceType: undefined}},
+      target: {
+        someField: "value",
+        general: { image: "redis", version: 5 },
+        networking: {
+          expose: true,
+          host: "example.com",
+          serviceType: undefined,
+        },
+      },
+      source: {
+        someField: "value",
+        general: { image: "redis", version: 5 },
+        networking: {
+          expose: true,
+          host: "example.com",
+          serviceType: undefined,
+        },
+      },
+      out: {
+        someField: "value",
+        general: { image: "redis", version: 5 },
+        networking: {
+          expose: true,
+          host: "example.com",
+          serviceType: undefined,
+        },
+      },
     },
     {
       description: "target has arrays",
-      target: {myList: [1, 2, 3]},
+      target: { myList: [1, 2, 3] },
       source: {},
-      out: {myList: [1, 2, 3]},
+      out: { myList: [1, 2, 3] },
     },
     {
       description: "source has arrays",
       target: {},
-      source: {myList: [1, 2, 3]},
-      out: {myList: [1, 2, 3]},
+      source: { myList: [1, 2, 3] },
+      out: { myList: [1, 2, 3] },
     },
     {
       description: "both have arrays",
-      target: {myList: [4, 5, 6]},
-      source: {myList: [1, 2, 3]},
-      out: {myList: [1, 2, 3]},
+      target: { myList: [4, 5, 6] },
+      source: { myList: [1, 2, 3] },
+      out: { myList: [1, 2, 3] },
     },
     {
       description: "target has empty array",
-      target: {myList: []},
+      target: { myList: [] },
       source: {},
-      out: {myList: []},
+      out: { myList: [] },
     },
     {
       description: "source has empty array",
       target: {},
-      source: {myList: []},
-      out: {myList: []},
+      source: { myList: [] },
+      out: { myList: [] },
     },
     {
       description: "both have empyt arrays",
-      target: {myList: []},
-      source: {myList: []},
-      out: {myList: []},
+      target: { myList: [] },
+      source: { myList: [] },
+      out: { myList: [] },
     },
     {
       description: "both have nested fields, target has arrays",
-      target: {general: {image: "nginx", version: 3}, myList: ["here", "I", "am"]},
-      source: { someField: "value", networking: {expose: true, host: "example.com", serviceType: undefined}},
-      out: {general: {image: "nginx", version: 3}, someField: "value", networking: {expose: true, host: "example.com", serviceType: undefined}, myList: ["here", "I", "am"]},
+      target: {
+        general: { image: "nginx", version: 3 },
+        myList: ["here", "I", "am"],
+      },
+      source: {
+        someField: "value",
+        networking: {
+          expose: true,
+          host: "example.com",
+          serviceType: undefined,
+        },
+      },
+      out: {
+        general: { image: "nginx", version: 3 },
+        someField: "value",
+        networking: {
+          expose: true,
+          host: "example.com",
+          serviceType: undefined,
+        },
+        myList: ["here", "I", "am"],
+      },
     },
     {
       description: "both have nested fields, source has arrays",
-      target: {general: {image: "nginx", version: 3}},
-      source: { someField: "value", networking: {expose: true, host: "example.com", serviceType: undefined}, myList: ["am", "I", "here"]},
-      out: {general: {image: "nginx", version: 3}, someField: "value", networking: {expose: true, host: "example.com", serviceType: undefined}, myList: ["am", "I", "here"]},
+      target: { general: { image: "nginx", version: 3 } },
+      source: {
+        someField: "value",
+        networking: {
+          expose: true,
+          host: "example.com",
+          serviceType: undefined,
+        },
+        myList: ["am", "I", "here"],
+      },
+      out: {
+        general: { image: "nginx", version: 3 },
+        someField: "value",
+        networking: {
+          expose: true,
+          host: "example.com",
+          serviceType: undefined,
+        },
+        myList: ["am", "I", "here"],
+      },
     },
   ];
 
   testCases.forEach((testCase) => {
     it(testCase.description, () => {
-      expect(deepMerge(testCase.target, testCase.source)).toStrictEqual(testCase.out);
+      expect(deepMerge(testCase.target, testCase.source)).toStrictEqual(
+        testCase.out,
+      );
     });
-  })
+  });
 });
