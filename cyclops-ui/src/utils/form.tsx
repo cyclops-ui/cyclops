@@ -216,6 +216,13 @@ export const mapsToArray = (fields: any[], values: any): any => {
         }
 
         Object.keys(values[field.name]).forEach((key) => {
+          if (values[field.name][key] === null) {
+            object.push({
+              key: key,
+            });
+            return;
+          }
+
           if (typeof values[field.name][key] === "object") {
             object.push({
               key: key,
@@ -229,6 +236,8 @@ export const mapsToArray = (fields: any[], values: any): any => {
             value: values[field.name][key],
           });
         });
+
+        object.sort((a, b) => a.key.localeCompare(b.key));
 
         out[field.name] = object;
         break;
