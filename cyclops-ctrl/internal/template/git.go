@@ -518,7 +518,7 @@ func (r Repo) mapGitHubRepoTemplate(repoURL, path, commitSHA string, creds *auth
 
 	ghRepoFiles, err := unpackTgzInMemory(tgzData)
 	if err != nil {
-		return nil, err
+		return nil, errors.Wrap(err, "failed to clone repo from GitHub: make sure that the version (branch or commit) exist on the specified repo")
 	}
 
 	ghRepoFiles, exists := gitproviders.SanitizeGHFiles(ghRepoFiles, path)
