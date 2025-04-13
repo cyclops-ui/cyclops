@@ -77,7 +77,10 @@ export interface CreateModuleProps {
     values: string,
     gitOpsWrite?: any,
   ) => Promise<any>;
-  onSubmitModuleSuccess: (moduleName: string) => void;
+  onSubmitModuleSuccess: (
+    moduleName: string,
+    gitOpsWriteEnabled: boolean,
+  ) => void;
   onBackButton: () => void;
 }
 
@@ -197,7 +200,7 @@ export const CreateModuleComponent = ({
       gitOpsWrite,
     )
       .then(() => {
-        onSubmitModuleSuccess(moduleName);
+        onSubmitModuleSuccess(moduleName, gitopsToggle);
       })
       .catch((error) => {
         setError(mapResponseError(error));
