@@ -48,7 +48,7 @@ export default function AppLayout() {
 
           <Content
             style={{
-              marginTop: 64, // height of the header
+              marginTop: 64,
               padding: 24,
               minHeight: "calc(100vh - 112px)",
               background: mode === "light" ? "#fff" : "#141414",
