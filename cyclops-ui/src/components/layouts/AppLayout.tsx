@@ -31,11 +31,24 @@ export default function AppLayout() {
           <SideNav />
         </Sider>
         <Layout style={{ marginLeft: 200 }}>
-          <Header style={{ display: "flex", padding: "0 16px" }}>
+          <Header
+            style={{
+              position: "fixed",
+              top: 0,
+              left: 200,
+              right: 0,
+              zIndex: 100,
+              display: "flex",
+              padding: "0 16px",
+              height: 64,
+            }}
+          >
             <ThemeSwitch />
           </Header>
+
           <Content
             style={{
+              marginTop: 64, // height of the header
               padding: 24,
               minHeight: "calc(100vh - 112px)",
               background: mode === "light" ? "#fff" : "#141414",
