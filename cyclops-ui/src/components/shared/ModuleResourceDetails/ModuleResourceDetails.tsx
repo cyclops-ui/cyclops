@@ -97,8 +97,6 @@ languages.forEach((lang) => {
 });
 themes.forEach((theme) => require(`ace-builds/src-noconflict/theme-${theme}`));
 
-const { Title } = Typography;
-
 interface module {
   name: string;
   namespace: string;
