@@ -15,7 +15,6 @@ import {
   Row,
   Spin,
   Tooltip,
-  Typography,
   theme,
 } from "antd";
 import "ace-builds/src-noconflict/ace";
@@ -57,6 +56,7 @@ import {
   isGitHubRepo,
   moduleConfigGitRefLink,
 } from "../../../utils/moduleConfigGitRef";
+import ModuleTitle from "./ModuleTitle/ModuleTitle";
 
 const languages = [
   "javascript",
@@ -95,8 +95,6 @@ languages.forEach((lang) => {
   require(`ace-builds/src-noconflict/snippets/${lang}`);
 });
 themes.forEach((theme) => require(`ace-builds/src-noconflict/theme-${theme}`));
-
-const { Title } = Typography;
 
 interface module {
   name: string;
@@ -430,6 +428,20 @@ export const ModuleResourceDetails = ({
     );
   };
 
+  const moduleTitleLoading = () => {
+    if (!loadModule) {
+      return <Spin />;
+    }
+
+    return (
+      <ModuleTitle
+        moduleName={name}
+        appIconURL={module.iconURL}
+        statusIcon={moduleStatusIcon()}
+      />
+    );
+  };
+
   const moduleLoading = () => {
     if (!loadModule) {
       return <Spin />;
@@ -437,29 +449,6 @@ export const ModuleResourceDetails = ({
 
     return (
       <div>
-        <Row gutter={[40, 0]}>
-          <Col>
-            <Title level={1} style={{ marginTop: "0px" }}>
-              {module.iconURL ? (
-                <img
-                  alt=""
-                  style={{ height: "1.5em", marginRight: "8px" }}
-                  src={module.iconURL}
-                />
-              ) : (
-                <></>
-              )}
-              <Tooltip title={"Copy module name to clipboard"} trigger="hover">
-                <span
-                  onClick={() => navigator.clipboard.writeText(name)}
-                  style={{ cursor: "pointer" }}
-                >
-                  {name}
-                </span>
-              </Tooltip>
-            </Title>
-          </Col>
-        </Row>
         <Descriptions
           column={1}
           colon={false}
@@ -775,6 +764,7 @@ export const ModuleResourceDetails = ({
             style={{ marginBottom: "20px" }}
           />
         )}
+        {moduleTitleLoading()}
         {moduleLoading()}
         <Divider
           style={{ fontSize: "120%" }}
