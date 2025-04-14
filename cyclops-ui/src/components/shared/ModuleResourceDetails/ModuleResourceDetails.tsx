@@ -15,7 +15,6 @@ import {
   Row,
   Spin,
   Tooltip,
-  Typography,
   theme,
 } from "antd";
 import "ace-builds/src-noconflict/ace";
