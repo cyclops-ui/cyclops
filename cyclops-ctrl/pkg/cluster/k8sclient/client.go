@@ -2,6 +2,8 @@ package k8sclient
 
 import (
 	"context"
+	"k8s.io/client-go/rest"
+	"k8s.io/client-go/tools/remotecommand"
 
 	"github.com/go-logr/logr"
 	apiv1 "k8s.io/api/core/v1"
@@ -20,6 +22,8 @@ import (
 )
 
 type KubernetesClient struct {
+	config *rest.Config
+
 	Dynamic   dynamic.Interface
 	clientset *kubernetes.Clientset
 	discovery *discovery.DiscoveryClient
@@ -57,6 +61,7 @@ func New(
 	}
 
 	return &KubernetesClient{
+		config:                config,
 		Dynamic:               dynamic,
 		discovery:             discovery,
 		clientset:             clientset,
@@ -110,4 +115,5 @@ type IKubernetesClient interface {
 	GetResourcesForRelease(release string) ([]*dto.Resource, error)
 	GetWorkloadsForRelease(name string) ([]*dto.Resource, error)
 	DeleteReleaseSecret(releaseName, releaseNamespace string) error
+	CommandExecutor(namespace, podName, container string) (remotecommand.Executor, error)
 }
