@@ -21,9 +21,5 @@ func (k *KubernetesClient) CommandExecutor(namespace, podName, container string)
 			TTY:       true,
 		}, scheme.ParameterCodec)
 
-	//fmt.Println(req.URL().String())
-	//
-	//return remotecommand.NewWebSocketExecutor(k.config, "POST", req.URL().String())
-
 	return remotecommand.NewSPDYExecutor(k.config, "POST", req.URL())
 }

@@ -2,7 +2,7 @@ package handler
 
 import (
 	"github.com/cyclops-ui/cyclops/cyclops-ctrl/internal/controller/sse"
-	exec "github.com/cyclops-ui/cyclops/cyclops-ctrl/internal/controller/ws"
+	"github.com/cyclops-ui/cyclops/cyclops-ctrl/internal/controller/ws"
 	"github.com/cyclops-ui/cyclops/cyclops-ctrl/internal/git"
 	"github.com/cyclops-ui/cyclops/cyclops-ctrl/internal/integrations/helm"
 	"github.com/gin-gonic/gin"
@@ -64,7 +64,7 @@ func (h *Handler) Start() error {
 	h.router = gin.New()
 
 	server := sse.NewServer(h.k8sClient, h.releaseClient)
-	wsServer := exec.NewServer(h.k8sClient)
+	wsServer := ws.NewServer(h.k8sClient)
 
 	h.router.GET("/exec/:podNamespace/:podName/:containerName", wsServer.ExecCommand)
 
