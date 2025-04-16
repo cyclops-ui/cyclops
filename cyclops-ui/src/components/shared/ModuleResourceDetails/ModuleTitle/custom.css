@@ -2,7 +2,6 @@
   position: sticky;
   top: 64px;
   z-index: 50;
-  background-color: #fff;
   padding-bottom: 12px;
   transition: top 0.3s ease-in-out;
 }
