@@ -2,6 +2,7 @@ import { Typography, Divider, Tooltip } from "antd";
 import React, { ReactElement, useEffect, useState } from "react";
 import classNames from "classnames";
 import "./custom.css";
+import { useTheme } from "../../../theme/ThemeContext";
 
 const { Title } = Typography;
 
@@ -16,6 +17,7 @@ const ModuleTitle = ({
   appIconURL,
   statusIcon,
 }: ModuleTitleProps) => {
+  const { mode } = useTheme();
   const [scrolled, setScrolled] = useState(false);
 
   useEffect(() => {
@@ -33,7 +35,12 @@ const ModuleTitle = ({
   }, []);
 
   return (
-    <div className={classNames("page-title-container", { scrolled })}>
+    <div
+      className={classNames("page-title-container", { scrolled })}
+      style={{
+        background: mode === "light" ? "#fff" : "#141414",
+      }}
+    >
       <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
         {appIconURL ? (
           <img
