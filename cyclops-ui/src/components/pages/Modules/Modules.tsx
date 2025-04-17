@@ -224,7 +224,10 @@ const Modules = () => {
               </Card>
             </a>
           </Col>
-          <Empty description="No Modules Found"></Empty>
+          <Empty
+            image={Empty.PRESENTED_IMAGE_SIMPLE}
+            description="No Modules Found"
+          ></Empty>
         </div>
       );
     }
