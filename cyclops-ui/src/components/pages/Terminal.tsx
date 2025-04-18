@@ -1,6 +1,7 @@
 import React, { useEffect, useRef } from "react";
 import { Card } from "antd";
 import { Terminal } from "xterm";
+import { FitAddon } from "xterm-addon-fit";
 import "xterm/css/xterm.css";
 
 interface ExecTerminalProps {
@@ -16,6 +17,7 @@ const ExecTerminal = ({
 }: ExecTerminalProps) => {
   const terminalRef = useRef<HTMLDivElement>(null);
   const term = useRef<Terminal | null>(null);
+  const fitAddon = useRef<FitAddon | null>(new FitAddon());
   const socket = useRef<WebSocket | null>(null);
   const inputBuffer = useRef<string>("");
 
@@ -33,11 +35,12 @@ const ExecTerminal = ({
     });
 
     term.current = t;
+    t.loadAddon(fitAddon.current!);
 
     const openTerminal = () => {
       if (terminalRef.current) {
         t.open(terminalRef.current);
-        terminalRef.current.style.height = "100%";
+        fitAddon.current?.fit();
 
         socket.current = new WebSocket(
           `ws://localhost:8888/exec/${namespace}/${podName}/${containerName}`,
@@ -116,7 +119,10 @@ const ExecTerminal = ({
   }, [namespace, podName, containerName]);
 
   return (
-    <Card style={{ backgroundColor: "#1e1e1e", color: "#fff", height: "100%" }}>
+    <Card
+      style={{ backgroundColor: "#1e1e1e", color: "#fff", height: "100%" }}
+      styles={{ body: { height: "100%" } }}
+    >
       <div
         ref={terminalRef}
         style={{
