@@ -10,6 +10,8 @@ import (
 
 	mock "github.com/stretchr/testify/mock"
 
+	remotecommand "k8s.io/client-go/tools/remotecommand"
+
 	schema "k8s.io/apimachinery/pkg/runtime/schema"
 
 	unstructured "k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
@@ -78,6 +80,66 @@ func (_c *IKubernetesClient_ApplyCRD_Call) Return(_a0 error) *IKubernetesClient_
 }
 
 func (_c *IKubernetesClient_ApplyCRD_Call) RunAndReturn(run func(*unstructured.Unstructured) error) *IKubernetesClient_ApplyCRD_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
+// CommandExecutor provides a mock function with given fields: namespace, podName, container
+func (_m *IKubernetesClient) CommandExecutor(namespace string, podName string, container string) (remotecommand.Executor, error) {
+	ret := _m.Called(namespace, podName, container)
+
+	if len(ret) == 0 {
+		panic("no return value specified for CommandExecutor")
+	}
+
+	var r0 remotecommand.Executor
+	var r1 error
+	if rf, ok := ret.Get(0).(func(string, string, string) (remotecommand.Executor, error)); ok {
+		return rf(namespace, podName, container)
+	}
+	if rf, ok := ret.Get(0).(func(string, string, string) remotecommand.Executor); ok {
+		r0 = rf(namespace, podName, container)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(remotecommand.Executor)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(string, string, string) error); ok {
+		r1 = rf(namespace, podName, container)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// IKubernetesClient_CommandExecutor_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'CommandExecutor'
+type IKubernetesClient_CommandExecutor_Call struct {
+	*mock.Call
+}
+
+// CommandExecutor is a helper method to define mock.On call
+//   - namespace string
+//   - podName string
+//   - container string
+func (_e *IKubernetesClient_Expecter) CommandExecutor(namespace interface{}, podName interface{}, container interface{}) *IKubernetesClient_CommandExecutor_Call {
+	return &IKubernetesClient_CommandExecutor_Call{Call: _e.mock.On("CommandExecutor", namespace, podName, container)}
+}
+
+func (_c *IKubernetesClient_CommandExecutor_Call) Run(run func(namespace string, podName string, container string)) *IKubernetesClient_CommandExecutor_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run(args[0].(string), args[1].(string), args[2].(string))
+	})
+	return _c
+}
+
+func (_c *IKubernetesClient_CommandExecutor_Call) Return(_a0 remotecommand.Executor, _a1 error) *IKubernetesClient_CommandExecutor_Call {
+	_c.Call.Return(_a0, _a1)
+	return _c
+}
+
+func (_c *IKubernetesClient_CommandExecutor_Call) RunAndReturn(run func(string, string, string) (remotecommand.Executor, error)) *IKubernetesClient_CommandExecutor_Call {
 	_c.Call.Return(run)
 	return _c
 }
