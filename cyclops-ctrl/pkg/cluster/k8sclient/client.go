@@ -109,6 +109,7 @@ type IKubernetesClient interface {
 	ListTemplateAuthRules() ([]cyclopsv1alpha1.TemplateAuthRule, error)
 	GetTemplateAuthRuleSecret(name, key string) (string, error)
 	ListTemplateStore() ([]cyclopsv1alpha1.TemplateStore, error)
+	GetTemplateStore(name string) (*cyclopsv1alpha1.TemplateStore, error)
 	CreateTemplateStore(ts *cyclopsv1alpha1.TemplateStore) error
 	UpdateTemplateStore(ts *cyclopsv1alpha1.TemplateStore) error
 	DeleteTemplateStore(name string) error
