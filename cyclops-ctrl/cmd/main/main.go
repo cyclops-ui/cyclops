@@ -4,6 +4,7 @@ import (
 	"flag"
 	"fmt"
 	"github.com/cyclops-ui/cyclops/cyclops-ctrl/internal/git"
+	"github.com/cyclops-ui/cyclops/cyclops-ctrl/pkg/auth"
 	"github.com/cyclops-ui/cyclops/cyclops-ctrl/pkg/template"
 	"github.com/cyclops-ui/cyclops/cyclops-ctrl/pkg/template/cache"
 	"github.com/cyclops-ui/cyclops/cyclops-ctrl/pkg/template/render"
@@ -23,7 +24,6 @@ import (
 	metricsserver "sigs.k8s.io/controller-runtime/pkg/metrics/server"
 	"sigs.k8s.io/controller-runtime/pkg/webhook"
 
-	"github.com/cyclops-ui/cyclops/cyclops-ctrl/internal/auth"
 	"github.com/cyclops-ui/cyclops/cyclops-ctrl/internal/handler"
 	"github.com/cyclops-ui/cyclops/cyclops-ctrl/internal/integrations/helm"
 	"github.com/cyclops-ui/cyclops/cyclops-ctrl/internal/modulecontroller"

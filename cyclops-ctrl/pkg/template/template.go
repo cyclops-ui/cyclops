@@ -2,6 +2,7 @@ package template
 
 import (
 	"fmt"
+	"github.com/cyclops-ui/cyclops/cyclops-ctrl/pkg/auth"
 
 	"github.com/pkg/errors"
 
@@ -9,7 +10,6 @@ import (
 	"helm.sh/helm/v3/pkg/registry"
 
 	cyclopsv1alpha1 "github.com/cyclops-ui/cyclops/cyclops-ctrl/api/v1alpha1"
-	"github.com/cyclops-ui/cyclops/cyclops-ctrl/internal/auth"
 	"github.com/cyclops-ui/cyclops/cyclops-ctrl/internal/models"
 	"github.com/cyclops-ui/cyclops/cyclops-ctrl/internal/models/helm"
 )

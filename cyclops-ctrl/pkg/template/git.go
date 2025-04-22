@@ -5,6 +5,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"github.com/cyclops-ui/cyclops/cyclops-ctrl/pkg/auth"
 	gitproviders2 "github.com/cyclops-ui/cyclops/cyclops-ctrl/pkg/template/gitproviders"
 	"io"
 	path2 "path"
@@ -26,7 +27,6 @@ import (
 	"helm.sh/helm/v3/pkg/chart"
 
 	cyclopsv1alpha1 "github.com/cyclops-ui/cyclops/cyclops-ctrl/api/v1alpha1"
-	"github.com/cyclops-ui/cyclops/cyclops-ctrl/internal/auth"
 	"github.com/cyclops-ui/cyclops/cyclops-ctrl/internal/mapper"
 	"github.com/cyclops-ui/cyclops/cyclops-ctrl/internal/models"
 	"github.com/cyclops-ui/cyclops/cyclops-ctrl/internal/models/helm"
