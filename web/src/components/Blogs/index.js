@@ -23,6 +23,19 @@ const Blogs = () => {
         <Row gutter={[16, 16]}>
           <Col xs={{ span: 20, offset: 2 }} md={{ span: 6, offset: 3 }}>
             <Blog
+              title={"What are Golden Paths in Platform Engineering?"}
+              description={
+                "Netflix uses the term Paved Road, and Spotify uses Golden Path, but in the end, they are the same thing..."
+              }
+              blogLink={
+                "https://cyclops-ui.com/blog/2025/04/25/golden-paths"
+              }
+              avatar={"https://github.com/KaradzaJuraj.png"}
+              banner={"/img/2025-04-24-golden-paths/cover.png"}
+            />
+          </Col>
+          <Col xs={{ span: 20, offset: 2 }} md={{ span: 6, offset: 0 }}>
+            <Blog
               title={"From Helm Chart to Developer UI in 5 Minutes"}
               description={
                 "Helm is great… …until you give it to a developer."
@@ -45,19 +58,6 @@ const Blogs = () => {
               }
               avatar={"https://github.com/KaradzaJuraj.png"}
               banner={"/img/2025-03-27-move-like-a-startup/cover.jpeg"}
-            />
-          </Col>
-          <Col xs={{ span: 20, offset: 2 }} md={{ span: 6, offset: 0 }}>
-            <Blog
-              title={"Internal Developer Portals vs Platforms"}
-              description={
-                "TL;DR: The Internal Developer Portal is the interface to the Internal Developer Platform. That's it. You can go now."
-              }
-              blogLink={
-                "https://cyclops-ui.com/blog/2025/03/13/portal-vs-platform"
-              }
-              avatar={"https://github.com/KaradzaJuraj.png"}
-              banner={"/img/2025-03-13-portal-vs-platform/cover.jpeg"}
             />
           </Col>
         </Row>
