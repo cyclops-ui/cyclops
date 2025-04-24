@@ -43,7 +43,7 @@ const ExecTerminal = ({
         fitAddon.current?.fit();
 
         socket.current = new WebSocket(
-          `ws://localhost:8888/exec/${namespace}/${podName}/${containerName}`,
+          `/api/exec/${namespace}/${podName}/${containerName}`,
         );
 
         socket.current.onopen = () => {
