@@ -4,11 +4,12 @@ import (
 	"bytes"
 	"errors"
 	"fmt"
-	"github.com/cyclops-ui/cyclops/cyclops-ctrl/pkg/auth"
-	"github.com/go-logr/logr"
 	path2 "path"
 	"text/template"
 	"time"
+
+	"github.com/cyclops-ui/cyclops/cyclops-ctrl/pkg/auth"
+	"github.com/go-logr/logr"
 
 	cyclopsv1alpha1 "github.com/cyclops-ui/cyclops/cyclops-ctrl/api/v1alpha1"
 	"github.com/go-git/go-billy/v5"

@@ -1,11 +1,12 @@
 package auth
 
 import (
+	"testing"
+
 	"github.com/cyclops-ui/cyclops/cyclops-ctrl/api/v1alpha1"
 	"github.com/cyclops-ui/cyclops/cyclops-ctrl/pkg/mocks"
 	"github.com/pkg/errors"
 	apiv1 "k8s.io/api/core/v1"
-	"testing"
 
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"

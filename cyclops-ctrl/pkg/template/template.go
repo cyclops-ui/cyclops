@@ -2,6 +2,7 @@ package template
 
 import (
 	"fmt"
+
 	"github.com/cyclops-ui/cyclops/cyclops-ctrl/pkg/auth"
 
 	"github.com/pkg/errors"

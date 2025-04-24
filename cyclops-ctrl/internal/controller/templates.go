@@ -1,9 +1,10 @@
 package controller
 
 import (
-	"github.com/cyclops-ui/cyclops/cyclops-ctrl/pkg/template"
 	"net/http"
 	"strings"
+
+	"github.com/cyclops-ui/cyclops/cyclops-ctrl/pkg/template"
 
 	"github.com/gin-gonic/gin"
 	json "github.com/json-iterator/go"

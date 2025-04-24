@@ -5,12 +5,14 @@ import (
 	"context"
 	"flag"
 	"fmt"
-	"k8s.io/client-go/kubernetes/scheme"
 	"os"
 	"path/filepath"
 
+	"k8s.io/client-go/kubernetes/scheme"
+
 	v1 "k8s.io/api/core/v1"
 	"k8s.io/client-go/kubernetes"
+
 	//"k8s.io/client-go/rest"
 	"k8s.io/client-go/tools/clientcmd"
 	"k8s.io/client-go/tools/remotecommand"

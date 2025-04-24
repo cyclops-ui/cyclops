@@ -1,6 +1,8 @@
 package handler
 
 import (
+	"net/http"
+
 	"github.com/cyclops-ui/cyclops/cyclops-ctrl/internal/controller/sse"
 	"github.com/cyclops-ui/cyclops/cyclops-ctrl/internal/controller/ws"
 	"github.com/cyclops-ui/cyclops/cyclops-ctrl/internal/git"
@@ -8,7 +10,6 @@ import (
 	templaterepo "github.com/cyclops-ui/cyclops/cyclops-ctrl/pkg/template"
 	"github.com/cyclops-ui/cyclops/cyclops-ctrl/pkg/template/render"
 	"github.com/gin-gonic/gin"
-	"net/http"
 
 	"github.com/cyclops-ui/cyclops/cyclops-ctrl/internal/controller"
 	"github.com/cyclops-ui/cyclops/cyclops-ctrl/internal/prometheus"

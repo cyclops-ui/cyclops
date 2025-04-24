@@ -3,14 +3,15 @@ package main
 import (
 	"flag"
 	"fmt"
+	"os"
+	"strconv"
+	"time"
+
 	"github.com/cyclops-ui/cyclops/cyclops-ctrl/internal/git"
 	"github.com/cyclops-ui/cyclops/cyclops-ctrl/pkg/auth"
 	"github.com/cyclops-ui/cyclops/cyclops-ctrl/pkg/template"
 	"github.com/cyclops-ui/cyclops/cyclops-ctrl/pkg/template/cache"
 	"github.com/cyclops-ui/cyclops/cyclops-ctrl/pkg/template/render"
-	"os"
-	"strconv"
-	"time"
 
 	_ "github.com/joho/godotenv/autoload"
 	"k8s.io/apimachinery/pkg/runtime"

@@ -19,11 +19,12 @@ package modulecontroller
 import (
 	"context"
 	"fmt"
-	templaterepo "github.com/cyclops-ui/cyclops/cyclops-ctrl/pkg/template"
-	"github.com/cyclops-ui/cyclops/cyclops-ctrl/pkg/template/render"
 	"sort"
 	"strings"
 	"time"
+
+	templaterepo "github.com/cyclops-ui/cyclops/cyclops-ctrl/pkg/template"
+	"github.com/cyclops-ui/cyclops/cyclops-ctrl/pkg/template/render"
 
 	"github.com/go-logr/logr"
 	"helm.sh/helm/v3/pkg/chart"

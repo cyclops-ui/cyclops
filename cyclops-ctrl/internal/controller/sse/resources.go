@@ -1,10 +1,11 @@
 package sse
 
 import (
-	"github.com/cyclops-ui/cyclops/cyclops-ctrl/internal/models/dto"
 	"io"
 	"net/http"
 	"time"
+
+	"github.com/cyclops-ui/cyclops/cyclops-ctrl/internal/models/dto"
 
 	"github.com/pkg/errors"
 

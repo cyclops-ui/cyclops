@@ -5,12 +5,13 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	"github.com/cyclops-ui/cyclops/cyclops-ctrl/pkg/auth"
-	gitproviders2 "github.com/cyclops-ui/cyclops/cyclops-ctrl/pkg/template/gitproviders"
 	"io"
 	path2 "path"
 	"path/filepath"
 	"strings"
+
+	"github.com/cyclops-ui/cyclops/cyclops-ctrl/pkg/auth"
+	gitproviders2 "github.com/cyclops-ui/cyclops/cyclops-ctrl/pkg/template/gitproviders"
 
 	"github.com/pkg/errors"
 	"gopkg.in/yaml.v2"

@@ -2,12 +2,13 @@ package gitproviders
 
 import (
 	"fmt"
-	"github.com/cyclops-ui/cyclops/cyclops-ctrl/pkg/auth"
 	"io/ioutil"
 	"net/http"
 	"net/url"
 	path2 "path"
 	"strings"
+
+	"github.com/cyclops-ui/cyclops/cyclops-ctrl/pkg/auth"
 
 	"github.com/pkg/errors"
 )
