@@ -6,6 +6,7 @@ module.exports = function (app) {
     createProxyMiddleware({
       target: process.env.REACT_APP_CYCLOPS_CTRL_HOST,
       changeOrigin: true,
+      ws: true,
       pathRewrite: {
         "^/api": "",
       },
