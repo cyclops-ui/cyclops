@@ -9,6 +9,9 @@ import (
 	"strings"
 	"time"
 
+	"github.com/cyclops-ui/cyclops/cyclops-ctrl/pkg/template"
+	"github.com/cyclops-ui/cyclops/cyclops-ctrl/pkg/template/render"
+
 	"github.com/cyclops-ui/cyclops/cyclops-ctrl/internal/git"
 
 	"sigs.k8s.io/yaml"
@@ -20,8 +23,6 @@ import (
 	"github.com/cyclops-ui/cyclops/cyclops-ctrl/internal/models/dto"
 	"github.com/cyclops-ui/cyclops/cyclops-ctrl/internal/prometheus"
 	"github.com/cyclops-ui/cyclops/cyclops-ctrl/internal/telemetry"
-	"github.com/cyclops-ui/cyclops/cyclops-ctrl/internal/template"
-	"github.com/cyclops-ui/cyclops/cyclops-ctrl/internal/template/render"
 	"github.com/cyclops-ui/cyclops/cyclops-ctrl/pkg/cluster/k8sclient"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )

@@ -3,10 +3,15 @@ package main
 import (
 	"flag"
 	"fmt"
-	"github.com/cyclops-ui/cyclops/cyclops-ctrl/internal/git"
 	"os"
 	"strconv"
 	"time"
+
+	"github.com/cyclops-ui/cyclops/cyclops-ctrl/internal/git"
+	"github.com/cyclops-ui/cyclops/cyclops-ctrl/pkg/auth"
+	"github.com/cyclops-ui/cyclops/cyclops-ctrl/pkg/template"
+	"github.com/cyclops-ui/cyclops/cyclops-ctrl/pkg/template/cache"
+	"github.com/cyclops-ui/cyclops/cyclops-ctrl/pkg/template/render"
 
 	_ "github.com/joho/godotenv/autoload"
 	"k8s.io/apimachinery/pkg/runtime"
@@ -20,15 +25,11 @@ import (
 	metricsserver "sigs.k8s.io/controller-runtime/pkg/metrics/server"
 	"sigs.k8s.io/controller-runtime/pkg/webhook"
 
-	"github.com/cyclops-ui/cyclops/cyclops-ctrl/internal/auth"
 	"github.com/cyclops-ui/cyclops/cyclops-ctrl/internal/handler"
 	"github.com/cyclops-ui/cyclops/cyclops-ctrl/internal/integrations/helm"
 	"github.com/cyclops-ui/cyclops/cyclops-ctrl/internal/modulecontroller"
 	"github.com/cyclops-ui/cyclops/cyclops-ctrl/internal/prometheus"
 	"github.com/cyclops-ui/cyclops/cyclops-ctrl/internal/telemetry"
-	"github.com/cyclops-ui/cyclops/cyclops-ctrl/internal/template"
-	"github.com/cyclops-ui/cyclops/cyclops-ctrl/internal/template/cache"
-	"github.com/cyclops-ui/cyclops/cyclops-ctrl/internal/template/render"
 	"github.com/cyclops-ui/cyclops/cyclops-ctrl/pkg/cluster/k8sclient"
 
 	cyclopsv1alpha1 "github.com/cyclops-ui/cyclops/cyclops-ctrl/api/v1alpha1"

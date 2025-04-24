@@ -6,6 +6,10 @@ import (
 	cyclopsv1alpha1 "github.com/cyclops-ui/cyclops/cyclops-ctrl/api/v1alpha1"
 )
 
+func (k *KubernetesClient) GetTemplateStore(name string) (*cyclopsv1alpha1.TemplateStore, error) {
+	return k.moduleset.TemplateStore(k.moduleNamespace).Get(name)
+}
+
 func (k *KubernetesClient) ListTemplateStore() ([]cyclopsv1alpha1.TemplateStore, error) {
 	return k.moduleset.TemplateStore(k.moduleNamespace).List(metav1.ListOptions{})
 }

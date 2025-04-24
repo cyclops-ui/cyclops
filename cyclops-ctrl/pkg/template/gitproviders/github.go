@@ -8,9 +8,9 @@ import (
 	path2 "path"
 	"strings"
 
-	"github.com/pkg/errors"
+	"github.com/cyclops-ui/cyclops/cyclops-ctrl/pkg/auth"
 
-	"github.com/cyclops-ui/cyclops/cyclops-ctrl/internal/auth"
+	"github.com/pkg/errors"
 )
 
 func IsGitHubSource(repoURL string) bool {

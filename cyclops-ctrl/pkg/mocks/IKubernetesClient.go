@@ -1346,6 +1346,64 @@ func (_c *IKubernetesClient_GetTemplateAuthRuleSecret_Call) RunAndReturn(run fun
 	return _c
 }
 
+// GetTemplateStore provides a mock function with given fields: name
+func (_m *IKubernetesClient) GetTemplateStore(name string) (*v1alpha1.TemplateStore, error) {
+	ret := _m.Called(name)
+
+	if len(ret) == 0 {
+		panic("no return value specified for GetTemplateStore")
+	}
+
+	var r0 *v1alpha1.TemplateStore
+	var r1 error
+	if rf, ok := ret.Get(0).(func(string) (*v1alpha1.TemplateStore, error)); ok {
+		return rf(name)
+	}
+	if rf, ok := ret.Get(0).(func(string) *v1alpha1.TemplateStore); ok {
+		r0 = rf(name)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*v1alpha1.TemplateStore)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(string) error); ok {
+		r1 = rf(name)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// IKubernetesClient_GetTemplateStore_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'GetTemplateStore'
+type IKubernetesClient_GetTemplateStore_Call struct {
+	*mock.Call
+}
+
+// GetTemplateStore is a helper method to define mock.On call
+//   - name string
+func (_e *IKubernetesClient_Expecter) GetTemplateStore(name interface{}) *IKubernetesClient_GetTemplateStore_Call {
+	return &IKubernetesClient_GetTemplateStore_Call{Call: _e.mock.On("GetTemplateStore", name)}
+}
+
+func (_c *IKubernetesClient_GetTemplateStore_Call) Run(run func(name string)) *IKubernetesClient_GetTemplateStore_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run(args[0].(string))
+	})
+	return _c
+}
+
+func (_c *IKubernetesClient_GetTemplateStore_Call) Return(_a0 *v1alpha1.TemplateStore, _a1 error) *IKubernetesClient_GetTemplateStore_Call {
+	_c.Call.Return(_a0, _a1)
+	return _c
+}
+
+func (_c *IKubernetesClient_GetTemplateStore_Call) RunAndReturn(run func(string) (*v1alpha1.TemplateStore, error)) *IKubernetesClient_GetTemplateStore_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
 // GetWorkloadsForModule provides a mock function with given fields: name
 func (_m *IKubernetesClient) GetWorkloadsForModule(name string) ([]*dto.Resource, error) {
 	ret := _m.Called(name)
