@@ -86,7 +86,10 @@ func NewWithConfig(config ClientConfig, logger logr.Logger) (*KubernetesClient, 
 		return nil, fmt.Errorf("failed to create module client: %w", err)
 	}
 
-	discovery := discovery.NewDiscoveryClientForConfigOrDie(k8sConfig)
+	discovery, err := discovery.NewDiscoveryClientForConfig(k8sConfig)
+	if err != nil {
+		panic(err.Error())
+	}
 
 	dynamic, err := dynamic.NewForConfig(k8sConfig)
 	if err != nil {
