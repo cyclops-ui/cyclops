@@ -55,7 +55,10 @@ func NewWithConfig(config ClientConfig, logger logr.Logger) (*KubernetesClient, 
 	if config.KubeconfigPath == "" {
 		k8sConfig, err = rest.InClusterConfig()
 		if err != nil {
-			k8sConfig = ctrl.GetConfigOrDie()
+			k8sConfig, err = ctrl.GetConfig()
+			if err != nil {
+				return nil, err
+			}
 		}
 	} else {
 		loadingRules := &clientcmd.ClientConfigLoadingRules{
@@ -88,7 +91,7 @@ func NewWithConfig(config ClientConfig, logger logr.Logger) (*KubernetesClient, 
 
 	discovery, err := discovery.NewDiscoveryClientForConfig(k8sConfig)
 	if err != nil {
-		panic(err.Error())
+		return nil, fmt.Errorf("failed to create discovery client: %w", err)
 	}
 
 	dynamic, err := dynamic.NewForConfig(k8sConfig)
