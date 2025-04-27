@@ -6,7 +6,7 @@ const TestimonialsTitle = () => {
         <div className={styles.wrapper}>
             <div className={styles.installTitle}>
                 <h1 className={styles.titleText}>
-                    Their words, not ours
+                    Their <span style={{color: "#ff8803"}}>words</span>, not ours
                 </h1>
             </div>
         </div>
