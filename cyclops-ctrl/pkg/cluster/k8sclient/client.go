@@ -2,8 +2,10 @@ package k8sclient
 
 import (
 	"context"
+	"fmt"
 
 	"k8s.io/client-go/rest"
+	"k8s.io/client-go/tools/clientcmd"
 	"k8s.io/client-go/tools/remotecommand"
 
 	"github.com/go-logr/logr"
@@ -37,41 +39,91 @@ type KubernetesClient struct {
 	logger logr.Logger
 }
 
+type ClientConfig struct {
+	KubeconfigPath string
+	Context        string
+
+	ModuleNamespace       string
+	HelmReleaseNamespace  string
+	ModuleTargetNamespace string
+}
+
+func NewWithConfig(config ClientConfig, logger logr.Logger) (*KubernetesClient, error) {
+	var k8sConfig *rest.Config
+	var err error
+
+	if config.KubeconfigPath == "" {
+		k8sConfig, err = rest.InClusterConfig()
+		if err != nil {
+			k8sConfig, err = ctrl.GetConfig()
+			if err != nil {
+				return nil, err
+			}
+		}
+	} else {
+		loadingRules := &clientcmd.ClientConfigLoadingRules{
+			ExplicitPath: config.KubeconfigPath,
+		}
+
+		configOverrides := &clientcmd.ConfigOverrides{}
+		if config.Context != "" {
+			configOverrides.CurrentContext = config.Context
+		}
+
+		k8sConfig, err = clientcmd.NewNonInteractiveDeferredLoadingClientConfig(
+			loadingRules,
+			configOverrides,
+		).ClientConfig()
+		if err != nil {
+			return nil, fmt.Errorf("failed to load kubeconfig: %w", err)
+		}
+	}
+
+	clientset, err := kubernetes.NewForConfig(k8sConfig)
+	if err != nil {
+		return nil, fmt.Errorf("failed to create clientset: %w", err)
+	}
+
+	moduleSet, err := client.NewForConfig(k8sConfig)
+	if err != nil {
+		return nil, fmt.Errorf("failed to create module client: %w", err)
+	}
+
+	discovery, err := discovery.NewDiscoveryClientForConfig(k8sConfig)
+	if err != nil {
+		return nil, fmt.Errorf("failed to create discovery client: %w", err)
+	}
+
+	dynamic, err := dynamic.NewForConfig(k8sConfig)
+	if err != nil {
+		return nil, fmt.Errorf("failed to create dynamic client: %w", err)
+	}
+
+	return &KubernetesClient{
+		config:                k8sConfig,
+		Dynamic:               dynamic,
+		discovery:             discovery,
+		clientset:             clientset,
+		moduleset:             moduleSet,
+		moduleNamespace:       config.ModuleNamespace,
+		helmReleaseNamespace:  config.HelmReleaseNamespace,
+		moduleTargetNamespace: config.ModuleTargetNamespace,
+		logger:                logger,
+	}, nil
+}
+
 func New(
 	moduleNamespace string,
 	helmReleaseNamespace string,
 	moduleTargetNamespace string,
 	logger logr.Logger,
 ) (*KubernetesClient, error) {
-	config := ctrl.GetConfigOrDie()
-	clientset, err := kubernetes.NewForConfig(config)
-	if err != nil {
-		return nil, err
+	config := ClientConfig{
+		ModuleNamespace:       moduleNamespace,
+		HelmReleaseNamespace:  helmReleaseNamespace,
+		ModuleTargetNamespace: moduleTargetNamespace,
 	}
-
-	moduleSet, err := client.NewForConfig(config)
-	if err != nil {
-		panic(err)
-	}
-
-	discovery := discovery.NewDiscoveryClientForConfigOrDie(config)
-
-	dynamic, err := dynamic.NewForConfig(config)
-	if err != nil {
-		panic(err.Error())
-	}
-
-	return &KubernetesClient{
-		config:                config,
-		Dynamic:               dynamic,
-		discovery:             discovery,
-		clientset:             clientset,
-		moduleset:             moduleSet,
-		moduleNamespace:       moduleNamespace,
-		helmReleaseNamespace:  helmReleaseNamespace,
-		moduleTargetNamespace: moduleTargetNamespace,
-		logger:                logger,
-	}, nil
+	return NewWithConfig(config, logger)
 }
 
 type IKubernetesClient interface {
