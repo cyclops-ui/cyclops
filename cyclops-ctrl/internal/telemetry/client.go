@@ -8,6 +8,7 @@ import (
 type Client interface {
 	ModuleCreation()
 	ModuleReconciliation()
+	MCPModuleReconciliation()
 	InstanceStart()
 	ReleaseUpdate()
 	ReleaseMigration()
@@ -80,6 +81,14 @@ func (c EnqueueClient) ModuleReconciliation() {
 	})
 }
 
+func (c EnqueueClient) MCPModuleReconciliation() {
+	_ = c.client.Enqueue(posthog.Capture{
+		Event:      "mcp-module-reconciliation",
+		DistinctId: c.distinctID,
+		Properties: c.messageProps(),
+	})
+}
+
 func (c EnqueueClient) ModuleCreation() {
 	_ = c.client.Enqueue(posthog.Capture{
 		Event:      "module-creation",
@@ -138,6 +147,9 @@ func (c MockClient) InstanceStart() {
 }
 
 func (c MockClient) ModuleReconciliation() {
+}
+
+func (c MockClient) MCPModuleReconciliation() {
 }
 
 func (c MockClient) ModuleCreation() {

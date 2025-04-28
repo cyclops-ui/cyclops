@@ -136,6 +136,10 @@ func (r *ModuleReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctr
 		return ctrl.Result{}, err
 	}
 
+	if module.Annotations[cyclopsv1alpha1.ModuleManagerAnnotation] == "mcp" {
+		r.telemetryClient.MCPModuleReconciliation()
+	}
+
 	r.logger.Info("upsert module", "namespaced name", req.NamespacedName)
 
 	templateVersion := module.Status.TemplateResolvedVersion
