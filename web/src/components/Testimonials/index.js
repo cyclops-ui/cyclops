@@ -10,17 +10,17 @@ const Testimonials = () => {
     const testimonials = [
         {
             name: "Kunal",
-            position: "SRE",
+            position: "DevRel manager at Civo",
             testimonial: "Deploying has never been easier: A single interface to manage your workloads on Kubernetes. 🔥 An easy way to get started on Kubernetes👌"
         },
         {
             name: "Rosana",
-            position: "SRE",
+            position: "AWS Container Hero",
             testimonial: "Cyclops has transformed my Kubernetes management experience. Its intuitive form-based UI and Helm integration make deploying and monitoring applications straightforward and error-free. A must-try tool for anyone looking to simplify their Kubernetes operations!"
         },
         {
             name: "Ken",
-            position: "SRE",
+            position: "VP, DevOps",
             testimonial: "Cyclops utilizes Helm charts for application deployment, making Kubernetes more accessible to users with different levels of expertise."
         },
         {
@@ -60,7 +60,7 @@ const Testimonials = () => {
         },
         {
           name: "Anmol",
-          position: "Software Developer (Blockhain Dev)",
+          position: "Software Developer (Blockchain Dev)",
           testimonial: "I really like the idea of Cyclops. It is so much easier for users who dont know or need to know about k8s. Why did this not exist before?",
         },
         {

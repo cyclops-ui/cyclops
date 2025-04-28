@@ -60,7 +60,7 @@
 }
 
 .column1 {
-    animation: scroll1 25s linear infinite;
+    animation: scroll1 23s linear infinite;
     animation-play-state: running;
 }
 
@@ -70,7 +70,7 @@
 }
 
 .column3 {
-    animation: scroll3 23s linear infinite;
+    animation: scroll3 21s linear infinite;
     animation-play-state: running;
 }
 
