@@ -2,15 +2,16 @@ package controller
 
 import (
 	"fmt"
-	json "github.com/json-iterator/go"
 	"io"
-	apiextensionsv1 "k8s.io/apiextensions-apiserver/pkg/apis/apiextensions/v1"
-	"k8s.io/apimachinery/pkg/api/errors"
 	"net/http"
 	"os"
 	"sort"
 	"strings"
 	"time"
+
+	json "github.com/json-iterator/go"
+	apiextensionsv1 "k8s.io/apiextensions-apiserver/pkg/apis/apiextensions/v1"
+	"k8s.io/apimachinery/pkg/api/errors"
 
 	"github.com/cyclops-ui/cyclops/cyclops-ctrl/pkg/template"
 	"github.com/cyclops-ui/cyclops/cyclops-ctrl/pkg/template/render"
