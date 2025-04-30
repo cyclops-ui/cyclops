@@ -49,6 +49,8 @@ const (
 	GitOpsWriteRevisionAnnotation = "cyclops-ui.com/write-revision"
 
 	ModuleManagerAnnotation = "cyclops-ui.com/module-manager"
+
+	MCPServerModuleLabel = "cyclops-ui.com/mcp-server"
 )
 
 type TemplateRef struct {

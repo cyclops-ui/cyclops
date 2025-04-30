@@ -103,6 +103,9 @@ func (h *Handler) Start() error {
 	h.router.GET("/modules/:name/helm-template", modulesController.HelmTemplate)
 	//h.router.POST("/modules/resources", modulesController.ModuleToResources)
 
+	h.router.POST("/modules/mcp/install", modulesController.InstallMCPServer)
+	h.router.GET("/modules/mcp/status", modulesController.MCPServerStatus)
+
 	h.router.GET("/resources/pods/:namespace/:name/:container/logs", modulesController.GetLogs)
 	h.router.GET("/resources/pods/:namespace/:name/:container/logs/stream", sse.HeadersMiddleware(), modulesController.GetLogsStream)
 	h.router.GET("/resources/pods/:namespace/:name/:container/logs/download", modulesController.DownloadLogs)
