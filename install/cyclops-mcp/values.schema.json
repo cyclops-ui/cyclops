@@ -1,0 +1,33 @@
+{
+  "properties": {
+    "replicas": {
+      "title": "Replicas",
+      "description": "Number of replicas for your MCP server",
+      "type": "integer"
+    },
+    "version": {
+      "title": "MCP server version",
+      "description": "Cyclops MCP server version",
+      "type": "string"
+    },
+    "scope": {
+      "properties": {
+        "watchNamespace": {
+          "title": "Watch Namespace",
+          "description": "Cluster namespace where your Modules are stored - defaults to cyclops namespace",
+          "type": "null"
+        }
+      },
+      "order": [
+        "watchNamespace"
+      ],
+      "title": "MCP server scope",
+      "type": "object"
+    }
+  },
+  "required": [
+    "replicas",
+    "version"
+  ],
+  "type": "object"
+}
