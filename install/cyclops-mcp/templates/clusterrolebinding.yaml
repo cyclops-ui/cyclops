@@ -1,0 +1,17 @@
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  labels:
+    app.kubernetes.io/component: mcp
+    app.kubernetes.io/name: cyclops-mcp
+    app.kubernetes.io/part-of: cyclops
+  name: cyclops-mcp
+  namespace: {{ include "cyclops.namespace" . | quote }}
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: cyclops-mcp
+subjects:
+  - kind: ServiceAccount
+    name: cyclops-mcp
+    namespace: {{ include "cyclops.namespace" . | quote }}
