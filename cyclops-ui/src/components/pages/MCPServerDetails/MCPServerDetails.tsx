@@ -135,7 +135,6 @@ const MCPServerDetails = () => {
                 onClick={handleInstallMCP}
                 block
                 type={"primary"}
-                disabled={mcpServerStatus === "installed"}
                 style={{
                   fontWeight: "600",
                 }}
