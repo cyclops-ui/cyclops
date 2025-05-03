@@ -19,6 +19,10 @@ const Templates = React.lazy(
   () => import("../components/pages/TemplateStore/TemplateStore"),
 );
 
+const MCPServerDetails = React.lazy(
+  () => import("../components/pages/MCPServerDetails/MCPServerDetails"),
+);
+
 const HelmReleases = React.lazy(
   () => import("../components/pages/Helm/Releases/Releases"),
 );
@@ -42,6 +46,7 @@ const routes = [
   { path: PathConstants.NODES, element: <Nodes /> },
   { path: PathConstants.NODE_GET, element: <NodeDetails /> },
   { path: PathConstants.TEMPLATES, element: <Templates /> },
+  { path: PathConstants.ADDONS_MCP_SERVER, element: <MCPServerDetails /> },
   { path: PathConstants.HELM_RELEASES, element: <HelmReleases /> },
   { path: PathConstants.HELM_RELEASE, element: <ReleaseDetails /> },
   { path: PathConstants.HELM_RELEASE_EDIT, element: <EditRelease /> },

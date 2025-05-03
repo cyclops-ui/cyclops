@@ -51,35 +51,10 @@ const Modules = () => {
   const resourceFilter = ["Healthy", "Unhealthy", "Progressing", "Unknown"];
   const [namespaceFilterData, setNamespaceFilterData] = useState<string[]>([]);
 
-  const [mcpServerStatus, setMcpServerStatus] = useState<
-    "installed" | "pending" | "none"
-  >("none");
-
   const [error, setError] = useState({
     message: "",
     description: "",
   });
-
-  useEffect(() => {
-    function fetchMCPStatus() {
-      axios
-        .get(`/api/modules/mcp/status`)
-        .then((res) => {
-          if (res.data?.installed === true) {
-            setMcpServerStatus("installed");
-          }
-        })
-        .catch((error) => {
-          setError(mapResponseError(error));
-        });
-    }
-
-    fetchMCPStatus();
-    const interval = setInterval(() => fetchMCPStatus(), 10000);
-    return () => {
-      clearInterval(interval);
-    };
-  }, []);
 
   useEffect(() => {
     setLoadingModules(true);
@@ -144,30 +119,30 @@ const Modules = () => {
     setModuleNamespaceFilter(selectedItems);
   };
 
-  const handleInstallMCP = () => {
-    setMcpServerStatus("pending");
-    axios
-      .post(`/api/modules/mcp/install`)
-      .then(() => {
-        setMcpServerStatus("installed");
-      })
-      .catch((error) => {
-        setMcpServerStatus("none");
-        setError(mapResponseError(error));
-      });
-  };
+  // const handleInstallMCP = () => {
+  //   setMcpServerStatus("pending");
+  //   axios
+  //     .post(`/api/modules/mcp/install`)
+  //     .then(() => {
+  //       setMcpServerStatus("installed");
+  //     })
+  //     .catch((error) => {
+  //       setMcpServerStatus("none");
+  //       setError(mapResponseError(error));
+  //     });
+  // };
 
-  const MCPStatusIcon = () => {
-    if (mcpServerStatus === "installed") {
-      return <SuccessIcon />;
-    }
-
-    if (mcpServerStatus === "pending") {
-      return <LoadingOutlined />;
-    }
-
-    return <PlusCircleOutlined />;
-  };
+  // const MCPStatusIcon = () => {
+  //   if (mcpServerStatus === "installed") {
+  //     return <SuccessIcon />;
+  //   }
+  //
+  //   if (mcpServerStatus === "pending") {
+  //     return <LoadingOutlined />;
+  //   }
+  //
+  //   return <PlusCircleOutlined />;
+  // };
 
   const resourceFilterPopover = () => {
     return (
@@ -442,21 +417,8 @@ const Modules = () => {
         )}
 
         <Row gutter={[16, 0]}>
-          <Col span={12}>
+          <Col span={18}>
             <Title level={2}>Deployed modules</Title>
-          </Col>
-          <Col span={6}>
-            <Button
-              onClick={handleInstallMCP}
-              block
-              disabled={mcpServerStatus === "installed"}
-              style={{
-                fontWeight: "600",
-              }}
-            >
-              {MCPStatusIcon()}
-              Install Cyclops MCP server
-            </Button>
           </Col>
           <Col span={6}>
             <Button

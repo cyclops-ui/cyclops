@@ -8,6 +8,8 @@ import {
   GithubFilled,
   ThunderboltFilled,
   DiscordOutlined,
+  ApiOutlined,
+  RobotOutlined,
 } from "@ant-design/icons";
 import { useLocation } from "react-router";
 import PathConstants from "../../routes/PathConstants";
@@ -43,6 +45,18 @@ const SideNav = () => {
       ),
       icon: <img alt="" style={{ height: "14px" }} src={helmLogo} />,
       key: "helm",
+    },
+    {
+      label: "Addons",
+      icon: <ApiOutlined />,
+      key: "addons",
+      children: [
+        {
+          icon: <RobotOutlined />,
+          label: <a href={PathConstants.ADDONS_MCP_SERVER}>MCP server</a>,
+          key: "addons-mcp",
+        },
+      ],
     },
   ];
 
