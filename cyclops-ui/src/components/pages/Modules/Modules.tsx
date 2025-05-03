@@ -21,14 +21,9 @@ import axios from "axios";
 import Link from "antd/lib/typography/Link";
 
 import "./custom.css";
-import {
-  PlusCircleOutlined,
-  FilterOutlined,
-  LoadingOutlined,
-} from "@ant-design/icons";
+import { PlusCircleOutlined, FilterOutlined } from "@ant-design/icons";
 import { mapResponseError } from "../../../utils/api/errors";
 import { useTheme } from "../../theme/ThemeContext";
-import { SuccessIcon } from "../../status/icons";
 
 const { Title, Text } = Typography;
 
@@ -118,31 +113,6 @@ const Modules = () => {
   const handleNamespaceSelectItem = (selectedItems: any[]) => {
     setModuleNamespaceFilter(selectedItems);
   };
-
-  // const handleInstallMCP = () => {
-  //   setMcpServerStatus("pending");
-  //   axios
-  //     .post(`/api/modules/mcp/install`)
-  //     .then(() => {
-  //       setMcpServerStatus("installed");
-  //     })
-  //     .catch((error) => {
-  //       setMcpServerStatus("none");
-  //       setError(mapResponseError(error));
-  //     });
-  // };
-
-  // const MCPStatusIcon = () => {
-  //   if (mcpServerStatus === "installed") {
-  //     return <SuccessIcon />;
-  //   }
-  //
-  //   if (mcpServerStatus === "pending") {
-  //     return <LoadingOutlined />;
-  //   }
-  //
-  //   return <PlusCircleOutlined />;
-  // };
 
   const resourceFilterPopover = () => {
     return (
