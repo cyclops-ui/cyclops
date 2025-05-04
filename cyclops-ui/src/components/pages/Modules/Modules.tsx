@@ -45,6 +45,7 @@ const Modules = () => {
   const [searchInputFilter, setsearchInputFilter] = useState("");
   const resourceFilter = ["Healthy", "Unhealthy", "Progressing", "Unknown"];
   const [namespaceFilterData, setNamespaceFilterData] = useState<string[]>([]);
+
   const [error, setError] = useState({
     message: "",
     description: "",
@@ -385,7 +386,7 @@ const Modules = () => {
           />
         )}
 
-        <Row gutter={[40, 0]}>
+        <Row gutter={[16, 0]}>
           <Col span={18}>
             <Title level={2}>Deployed modules</Title>
           </Col>

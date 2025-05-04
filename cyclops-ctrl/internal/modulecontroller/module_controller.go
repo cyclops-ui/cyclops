@@ -136,7 +136,7 @@ func (r *ModuleReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctr
 		return ctrl.Result{}, err
 	}
 
-	if module.Annotations[cyclopsv1alpha1.ModuleManagerAnnotation] == "mcp" {
+	if len(module.Labels) != 0 && module.Labels[cyclopsv1alpha1.ModuleManagerLabel] == "mcp" {
 		r.telemetryClient.MCPModuleReconciliation()
 	}
 
