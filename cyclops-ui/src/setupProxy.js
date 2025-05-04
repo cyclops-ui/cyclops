@@ -5,9 +5,7 @@ module.exports = function (app) {
     "/api",
     createProxyMiddleware(
       (pathname) => {
-        const out = pathname.startsWith("/api");
-        console.log("filter", pathname, out);
-        return out;
+        return pathname.startsWith("/api");
       },
       {
         target: process.env.REACT_APP_CYCLOPS_CTRL_HOST,
