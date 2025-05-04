@@ -14,6 +14,7 @@ type Client interface {
 	ReleaseMigration()
 	TemplateCreation()
 	TemplateEdit()
+	AddonInstall(addon string)
 }
 
 type logger interface {
@@ -129,6 +130,20 @@ func (c EnqueueClient) TemplateEdit() {
 	})
 }
 
+func (c EnqueueClient) AddonInstall(addon string) {
+	props := c.messageProps()
+	if props == nil {
+		props = map[string]interface{}{}
+	}
+	props["addon"] = addon
+
+	_ = c.client.Enqueue(posthog.Capture{
+		Event:      "addon-install",
+		DistinctId: c.distinctID,
+		Properties: props,
+	})
+}
+
 func (c EnqueueClient) messageProps() map[string]interface{} {
 	props := map[string]interface{}{
 		"version": c.version,
@@ -162,5 +177,7 @@ func (c MockClient) ReleaseMigration() {}
 func (c MockClient) TemplateCreation() {}
 
 func (c MockClient) TemplateEdit() {}
+
+func (c MockClient) AddonInstall(_ string) {}
 
 // endregion

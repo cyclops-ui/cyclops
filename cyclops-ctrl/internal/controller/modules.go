@@ -1023,6 +1023,8 @@ func (m *Modules) InstallMCPServer(ctx *gin.Context) {
 		"version":  "latest",
 	}
 
+	m.telemetryClient.AddonInstall("mcp-server")
+
 	valBytes, err := json.Marshal(mcpModuleValues)
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, gin.H{
@@ -1040,6 +1042,7 @@ func (m *Modules) InstallMCPServer(ctx *gin.Context) {
 			Name: "mcp-cyclops",
 			Labels: map[string]string{
 				v1alpha1.MCPServerModuleLabel: "true",
+				v1alpha1.AddonModuleLabel:     "true",
 			},
 		},
 		Spec: v1alpha1.ModuleSpec{
