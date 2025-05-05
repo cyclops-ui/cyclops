@@ -2,7 +2,10 @@
 
 Cyclops MCP allows your favorite AI agent to manage your Kubernetes applications. Cyclops MCP servers provide tools for agents to create and update existing applications safely.
 
-![image](https://github.com/user-attachments/assets/f86617e3-712a-4625-9d28-63f078366059)
+<video controls width="100%">
+    <source src="https://github.com/user-attachments/assets/0c675c33-1e36-4fdb-bf8c-2fd7fb491e6b" type="video/mp4" />
+    Your browser does not support the video tag.
+</video>
 
 This means it can check all of your existing templates and the schema of those templates to create accurate and production-ready applications. Your agent now has much less room to make a misconfiguration since it creates high-level resources (Cyclops Modules) instead of touching every line of your Kubernetes resources (Deployments, Services, and Ingresses).
 
