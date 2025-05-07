@@ -21,7 +21,12 @@ const NewModule = () => {
         getTemplate={getTemplate}
         getTemplateInitialValues={getTemplateInitialValues}
         submitModule={createModule}
-        onSubmitModuleSuccess={(moduleName) => {
+        onSubmitModuleSuccess={(moduleName, gitOpsWriteEnabled) => {
+          if (gitOpsWriteEnabled) {
+            window.location.href = "/modules";
+            return;
+          }
+
           window.location.href = "/modules/" + moduleName;
         }}
         onBackButton={() => {
