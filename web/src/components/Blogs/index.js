@@ -23,12 +23,25 @@ const Blogs = () => {
         <Row gutter={[16, 16]}>
           <Col xs={{ span: 20, offset: 2 }} md={{ span: 6, offset: 3 }}>
             <Blog
+              title={"Vibe Coding on Kubernetes with Cyclops MCP"}
+              description={
+                "You want your infrastructure to be stable, and vibe coding isn't exactly known for stability..."
+              }
+              blogLink={
+                "https://cyclops-ui.com/blog/2025/05/08/cyclops-mcp"
+              }
+              avatar={"https://github.com/petar-cvit.png"}
+              banner={"/img/2025-05-08-cyclops-mcp/cover.png"}
+            />
+          </Col>
+          <Col xs={{ span: 20, offset: 2 }} md={{ span: 6, offset: 0 }}>
+            <Blog
               title={"What are Golden Paths in Platform Engineering?"}
               description={
                 "Netflix uses the term Paved Road, and Spotify uses Golden Path, but in the end, they are the same thing..."
               }
               blogLink={
-                "https://cyclops-ui.com/blog/2025/04/25/golden-paths"
+                "https://cyclops-ui.com/blog/2025/04/24/golden-paths"
               }
               avatar={"https://github.com/KaradzaJuraj.png"}
               banner={"/img/2025-04-24-golden-paths/cover.png"}
@@ -45,19 +58,6 @@ const Blogs = () => {
               }
               avatar={"https://github.com/KaradzaJuraj.png"}
               banner={"/img/2025-04-03-helm-to-idp-in-five/cover.png"}
-            />
-          </Col>
-          <Col xs={{ span: 20, offset: 2 }} md={{ span: 6, offset: 0 }}>
-            <Blog
-              title={"How Platform Engineering Helps You Move Like a Startup Again"}
-              description={
-                "There's been a quiet shift happening in engineering teams over the last few years. DevOps isn't going away, but it *is* evolving..."
-              }
-              blogLink={
-                "https://cyclops-ui.com/blog/2025/03/27/move-like-a-startup"
-              }
-              avatar={"https://github.com/KaradzaJuraj.png"}
-              banner={"/img/2025-03-27-move-like-a-startup/cover.jpeg"}
             />
           </Col>
         </Row>
