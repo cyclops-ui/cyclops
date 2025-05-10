@@ -36,8 +36,8 @@ Configure your MCP Cyclops server:
 ```json
 {
   "mcpServers": {
-    "mcp-cyclops": {
-      "command": "mcp-cyclops"
+    "cyclops-kubernetes": {
+      "url": "http://localhost:8000/sse"
     }
   }
 }
