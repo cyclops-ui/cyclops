@@ -13,7 +13,43 @@ It allows you to move fast and ensure no uncaught misconfigurations are hitting 
 
 **With Cyclops and our MCP, you can now abstract Kubernetes complexity from your developers AND your AI agents**
 
-## Install
+## Install via UI
+
+The easiest way to install the Cyclops MCP server is through the Cyclops UI. Below are instructions on how to install it via binary and kubectl, but the recommended way of installing it is via the UI.
+
+> ⚠️ To install Cyclops MCP through the UI, you should run Cyclops on a version `v0.20.1` or greater
+
+1. Install the Cyclops MCP by going to sidebar `“Addon”` > `"MCP server"`. You can now click `"Install Cyclops MCP server"` and your Cyclops MCP server will be up and running in a few seconds.
+
+![Cyclops MCP Addon](../../static/img/mcp/mcp-addon.png)
+
+2. Now that your MCP server is up running, all thats left is exposing it outside of your cluster and connecting your AI agent to it.
+
+   To expose the MCP server on localhost you can simply port-forward it with the following command:
+
+    ```bash
+    kubectl port-forward -n cyclops svc/cyclops-mcp 8000:8000
+    ```
+
+   Your server is now available on `localhost:8000`.
+
+3. To connect it to an AI agent you will just have to provide the Cyclops MCP server in its configuration. For example, to add it to Cursor, you can simply add it with the following JSON:
+
+    ```bash
+    {
+      "mcpServers": {
+        "cyclops-kubernetes": {
+          "url": "http://localhost:8000/sse"
+        }
+      }
+    }
+    ```
+
+You can now start a fresh conversation with your AI companion. Above is an example of how we used it with Cursor.
+
+<details>
+
+<summary>Install stdin binary</summary>
 
 ### 1. Make sure Cyclops is installed in your Kubernetes cluster
 
@@ -36,14 +72,54 @@ Configure your MCP Cyclops server:
 ```json
 {
   "mcpServers": {
-    "cyclops-kubernetes": {
-      "url": "http://localhost:8000/sse"
+    "mcp-cyclops": {
+      "command": "mcp-cyclops"
     }
   }
 }
 ```
 
-## Install on a Kubernetes cluster
+## Configuration
+
+You can configure Cyclops MCP server via env variables. Below is an example of adding the configuration for specifying the kubeconfig file the Cyclops MCP server should use when managing your Cyclops applications.
+
+```json
+{
+  "mcpServers": {
+    "mcp-cyclops": {
+      "command": "mcp-cyclops",
+      "env": {
+        "KUBECONFIG": "/path/to/your/kubeconfig"
+      }
+    }
+  }
+}
+
+```
+
+### Environment variables
+
+Below is the list of environment variables used for configuring your Cyclops MCP server:
+
+| Env var                           | Description                                                                             |
+|-----------------------------------|-----------------------------------------------------------------------------------------|
+| `KUBECONFIG`                      | Path to kubeconfig file (optional, defaults to in-cluster config or $HOME/.kube/config) |
+| `CYCLOPS_KUBE_CONTEXT`            | Kubernetes context to use (optional)                                                    |
+| `CYCLOPS_MODULE_NAMESPACE`        | Namespace where modules are stored                                                      |
+| `CYCLOPS_HELM_RELEASE_NAMESPACE`  | Namespace for Helm releases                                                             |
+| `CYCLOPS_MODULE_TARGET_NAMESPACE` | Target namespace for modules                                                            |
+
+---
+
+</details>
+
+<details>
+
+<summary>
+Install to a Kubernetes cluster manually
+</summary>
+
+---
 
 Instead of having each developer install `mcp-cyclops` binary, you can install the Cyclops MCP server with SSE as transport type to your Kubernetes cluster and allow all of your developers to connect to the same server.
 
@@ -99,6 +175,9 @@ Instead of having each developer install `mcp-cyclops` binary, you can install t
       }
     }
     ```
+---
+
+</details>
 
 ## Tools
 
@@ -111,33 +190,3 @@ Instead of having each developer install `mcp-cyclops` binary, you can install t
 | `get_template_schema` | Returns JSON schema for the given template. Needs to be checked before calling `create_module` tool                                |
 | `get_template_store`  | Fetch Template Store by Name                                                                                                       |
 | `list_template_store` | List Template Stores from cluster                                                                                                  |
-
-## Configuration
-
-You can configure Cyclops MCP server via env variables. Below is an example of adding the configuration for specifying the kubeconfig file the Cyclops MCP server should use when managing your Cyclops applications.
-
-```json
-{
-  "mcpServers": {
-    "mcp-cyclops": {
-      "command": "mcp-cyclops",
-      "env": {
-        "KUBECONFIG": "/path/to/your/kubeconfig"
-      }
-    }
-  }
-}
-
-```
-
-### Environment variables
-
-Below is the list of environment variables used for configuring your Cyclops MCP server:
-
-| Env var                           | Description                                                                             |
-|-----------------------------------|-----------------------------------------------------------------------------------------|
-| `KUBECONFIG`                      | Path to kubeconfig file (optional, defaults to in-cluster config or $HOME/.kube/config) |
-| `CYCLOPS_KUBE_CONTEXT`            | Kubernetes context to use (optional)                                                    |
-| `CYCLOPS_MODULE_NAMESPACE`        | Namespace where modules are stored                                                      |
-| `CYCLOPS_HELM_RELEASE_NAMESPACE`  | Namespace for Helm releases                                                             |
-| `CYCLOPS_MODULE_TARGET_NAMESPACE` | Target namespace for modules                                                            |
