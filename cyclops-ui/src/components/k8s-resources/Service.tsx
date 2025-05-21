@@ -185,26 +185,6 @@ const Service = ({ name, namespace }: Props) => {
     );
   };
 
-  const portActionsMenu = (port: any) => {
-    return (
-      <div style={{ width: "400px" }}>
-        <h3>Port actions</h3>
-        <Divider style={{ margin: "8px" }} />
-        <Row style={{ margin: 4, gap: 8 }}>
-          <Button
-            style={{ width: "100%" }}
-            onClick={() => {
-              setPortForwardModal({ open: true, ports: [port.port] });
-            }}
-          >
-            <ApiOutlined />
-            Port forward
-          </Button>
-        </Row>
-      </div>
-    );
-  };
-
   const portForwardCommand = (
     <div>
       <span style={{ color: mode === "light" ? "navy" : "lightblue" }}>
@@ -259,6 +239,7 @@ const Service = ({ name, namespace }: Props) => {
               title="Name"
               dataIndex="name"
               key="name"
+              width="20%"
               render={(text) =>
                 text ? (
                   text
@@ -267,28 +248,26 @@ const Service = ({ name, namespace }: Props) => {
                 )
               }
             />
-            <Table.Column title="Protocol" dataIndex="protocol" />
-            <Table.Column title="Port" dataIndex="port" />
-            <Table.Column title="Target port" dataIndex="targetPort" />
+            <Table.Column title="Protocol" dataIndex="protocol" width="19%" />
+            <Table.Column title="Port" dataIndex="port" width="18%" />
             <Table.Column
-              title="Actions"
+              title="Target port"
+              dataIndex="targetPort"
+              width="18%"
+            />
+            <Table.Column
               key="actions"
-              width="8%"
+              width="25%"
               render={(port) => (
-                <Popover
-                  placement={"topRight"}
-                  content={portActionsMenu(port)}
-                  trigger="click"
+                <Button
+                  style={{ width: "100%" }}
+                  onClick={() => {
+                    setPortForwardModal({ open: true, ports: [port.port] });
+                  }}
                 >
-                  <div
-                    style={{
-                      display: "flex",
-                      justifyContent: "center",
-                    }}
-                  >
-                    <EllipsisOutlined />
-                  </div>
-                </Popover>
+                  <ApiOutlined />
+                  Port forward
+                </Button>
               )}
             />
           </Table>
