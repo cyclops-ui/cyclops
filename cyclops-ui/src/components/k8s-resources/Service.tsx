@@ -8,12 +8,11 @@ import {
   Descriptions,
   Button,
   Spin,
-  Popover,
   Modal,
   Checkbox,
 } from "antd";
 import { mapResponseError } from "../../utils/api/errors";
-import { ApiOutlined, CopyOutlined, EllipsisOutlined } from "@ant-design/icons";
+import { ApiOutlined, CopyOutlined } from "@ant-design/icons";
 import { useResourceListActions } from "./ResourceList/ResourceListActionsContext";
 import { useTheme } from "../theme/ThemeContext";
 
