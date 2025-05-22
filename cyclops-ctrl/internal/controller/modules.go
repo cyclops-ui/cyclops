@@ -654,8 +654,8 @@ func (m *Modules) ResourcesForModule(ctx *gin.Context) {
 	t, err := m.templatesRepo.GetTemplate(
 		module.Spec.TemplateRef.URL,
 		module.Spec.TemplateRef.Path,
+		templateVersion,
 		module.Status.TemplateResolvedVersion,
-		"",
 		module.Spec.TemplateRef.SourceType,
 	)
 	if err != nil {

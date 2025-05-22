@@ -13,18 +13,15 @@ import (
 	"github.com/cyclops-ui/cyclops/cyclops-ctrl/internal/models"
 	"github.com/cyclops-ui/cyclops/cyclops-ctrl/internal/models/helm"
 	"github.com/cyclops-ui/cyclops/cyclops-ctrl/pkg/cluster/k8sclient"
-	"github.com/cyclops-ui/cyclops/cyclops-ctrl/pkg/template"
 )
 
 type Renderer struct {
-	k8sClient    k8sclient.IKubernetesClient
-	templateRepo template.ITemplateRepo
+	k8sClient k8sclient.IKubernetesClient
 }
 
-func NewRenderer(kubernetesClient k8sclient.IKubernetesClient, templateRepo template.ITemplateRepo) *Renderer {
+func NewRenderer(kubernetesClient k8sclient.IKubernetesClient) *Renderer {
 	return &Renderer{
-		k8sClient:    kubernetesClient,
-		templateRepo: templateRepo,
+		k8sClient: kubernetesClient,
 	}
 }
 

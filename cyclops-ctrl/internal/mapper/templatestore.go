@@ -42,6 +42,15 @@ func TemplateStoreListToDTO(store []v1alpha1.TemplateStore) []dto.TemplateStore 
 }
 
 func DTOToTemplateStore(store dto.TemplateStore, iconURL string) *v1alpha1.TemplateStore {
+	var enforceGitOpsWrite *v1alpha1.GitOpsWriteDestination
+	if store.EnforceGitOpsWrite != nil {
+		enforceGitOpsWrite = &v1alpha1.GitOpsWriteDestination{
+			Repo:    store.EnforceGitOpsWrite.Repo,
+			Path:    store.EnforceGitOpsWrite.Path,
+			Version: store.EnforceGitOpsWrite.Branch,
+		}
+	}
+
 	return &v1alpha1.TemplateStore{
 		TypeMeta: metav1.TypeMeta{
 			Kind:       "TemplateStore",
@@ -54,10 +63,11 @@ func DTOToTemplateStore(store dto.TemplateStore, iconURL string) *v1alpha1.Templ
 			},
 		},
 		Spec: v1alpha1.TemplateRef{
-			URL:        store.TemplateRef.URL,
-			Path:       store.TemplateRef.Path,
-			Version:    store.TemplateRef.Version,
-			SourceType: v1alpha1.TemplateSourceType(store.TemplateRef.SourceType),
+			URL:                store.TemplateRef.URL,
+			Path:               store.TemplateRef.Path,
+			Version:            store.TemplateRef.Version,
+			SourceType:         v1alpha1.TemplateSourceType(store.TemplateRef.SourceType),
+			EnforceGitOpsWrite: enforceGitOpsWrite,
 		},
 	}
 }

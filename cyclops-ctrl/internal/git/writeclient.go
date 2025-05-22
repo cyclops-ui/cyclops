@@ -99,6 +99,10 @@ func (c *WriteClient) Write(module cyclopsv1alpha1.Module) error {
 		return err
 	}
 
+	if creds == nil {
+		return errors.New(fmt.Sprintf("failed to fetch creds for repo %v: check template auth rules", repoURL))
+	}
+
 	storer := memory.NewStorage()
 	fs := memfs.New()
 

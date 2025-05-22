@@ -188,13 +188,6 @@ export const CreateModuleComponent = ({
 
     const moduleName = values["cyclops_module_name"];
     const moduleNamespace = values["cyclops_module_namespace"];
-    const gitOpsWrite = gitopsToggle
-      ? {
-          repo: values["gitops-repo"],
-          path: values["gitops-path"],
-          branch: values["gitops-branch"],
-        }
-      : null;
 
     values = findMaps(config.root.properties, values, initialValuesRaw);
 
@@ -592,7 +585,13 @@ export const CreateModuleComponent = ({
                     </Form.Item>
                   </div>
                   <div
-                    style={{ display: advancedOptionsExpanded ? "" : "none" }}
+                    style={{
+                      display:
+                        advancedOptionsExpanded &&
+                        template?.enforceGitOpsWrite === undefined
+                          ? ""
+                          : "none",
+                    }}
                   >
                     <Divider
                       style={{ marginTop: "12px", marginBottom: "12px" }}
