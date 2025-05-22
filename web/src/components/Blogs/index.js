@@ -23,6 +23,19 @@ const Blogs = () => {
         <Row gutter={[16, 16]}>
           <Col xs={{ span: 20, offset: 2 }} md={{ span: 6, offset: 3 }}>
             <Blog
+              title={"MCP Servers for Agentic Dev Platforms"}
+              description={
+                "For the past couple of months, the concept of MCP has been booming..."
+              }
+              blogLink={
+                "https://cyclops-ui.com/blog/2025/05/22/agentic-platform-for-mcps"
+              }
+              avatar={"https://github.com/KaradzaJuraj.png"}
+              banner={"/img/2025-05-22-agentic-platform-for-mcps/cover.png"}
+            />
+          </Col>
+          <Col xs={{ span: 20, offset: 2 }} md={{ span: 6, offset: 0 }}>
+            <Blog
               title={"Signs You Might Need a Developer Platform"}
               description={
                 "We put together a lighthearted guide, told through memes, to help you spot the signs early..."
@@ -45,19 +58,6 @@ const Blogs = () => {
               }
               avatar={"https://github.com/petar-cvit.png"}
               banner={"/img/2025-05-08-cyclops-mcp/cover.png"}
-            />
-          </Col>
-          <Col xs={{ span: 20, offset: 2 }} md={{ span: 6, offset: 0 }}>
-            <Blog
-              title={"What are Golden Paths in Platform Engineering?"}
-              description={
-                "Netflix uses the term Paved Road, and Spotify uses Golden Path, but in the end, they are the same thing..."
-              }
-              blogLink={
-                "https://cyclops-ui.com/blog/2025/04/24/golden-paths"
-              }
-              avatar={"https://github.com/KaradzaJuraj.png"}
-              banner={"/img/2025-04-24-golden-paths/cover.png"}
             />
           </Col>
         </Row>
