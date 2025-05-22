@@ -4,16 +4,13 @@ import (
 	"bytes"
 	"errors"
 	"fmt"
-	"github.com/go-logr/logr"
 	json "github.com/json-iterator/go"
 	path2 "path"
 	"text/template"
 	"time"
 
-	"github.com/cyclops-ui/cyclops/cyclops-ctrl/pkg/auth"
 	"github.com/go-logr/logr"
 
-	cyclopsv1alpha1 "github.com/cyclops-ui/cyclops/cyclops-ctrl/api/v1alpha1"
 	"github.com/go-git/go-billy/v5"
 	"github.com/go-git/go-billy/v5/memfs"
 	"github.com/go-git/go-git/v5"
@@ -22,6 +19,9 @@ import (
 	"github.com/go-git/go-git/v5/plumbing/transport/http"
 	"github.com/go-git/go-git/v5/storage/memory"
 	"sigs.k8s.io/yaml"
+
+	cyclopsv1alpha1 "github.com/cyclops-ui/cyclops/cyclops-ctrl/api/v1alpha1"
+	"github.com/cyclops-ui/cyclops/cyclops-ctrl/pkg/auth"
 )
 
 type WriteClient struct {

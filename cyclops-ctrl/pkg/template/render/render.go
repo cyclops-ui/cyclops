@@ -1,7 +1,6 @@
 package render
 
 import (
-	"github.com/cyclops-ui/cyclops/cyclops-ctrl/internal/template"
 	"sort"
 	"strings"
 
@@ -14,6 +13,7 @@ import (
 	"github.com/cyclops-ui/cyclops/cyclops-ctrl/internal/models"
 	"github.com/cyclops-ui/cyclops/cyclops-ctrl/internal/models/helm"
 	"github.com/cyclops-ui/cyclops/cyclops-ctrl/pkg/cluster/k8sclient"
+	"github.com/cyclops-ui/cyclops/cyclops-ctrl/pkg/template"
 )
 
 type Renderer struct {
