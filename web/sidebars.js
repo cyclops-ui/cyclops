@@ -83,6 +83,11 @@ const sidebars = {
       ],
     },
     {
+      type: "doc",
+      label: "Cyclops MCP server",
+      id: "mcp/about",
+    },
+    {
       type: "category",
       label: "Backstage plugins",
       items: [

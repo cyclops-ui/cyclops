@@ -23,41 +23,41 @@ const Blogs = () => {
         <Row gutter={[16, 16]}>
           <Col xs={{ span: 20, offset: 2 }} md={{ span: 6, offset: 3 }}>
             <Blog
-              title={"Internal Developer Portals vs Platforms"}
+              title={"Signs You Might Need a Developer Platform"}
               description={
-                "TL;DR: The Internal Developer Portal is the interface to the Internal Developer Platform. That's it. You can go now."
+                "We put together a lighthearted guide, told through memes, to help you spot the signs early..."
               }
               blogLink={
-                "https://cyclops-ui.com/blog/2025/03/13/portal-vs-platform"
+                "https://cyclops-ui.com/blog/2025/05/15/idp-signs"
               }
               avatar={"https://github.com/KaradzaJuraj.png"}
-              banner={"/img/2025-03-13-portal-vs-platform/cover.jpeg"}
+              banner={"/img/2025-05-15-idp-signs/cover.png"}
             />
           </Col>
           <Col xs={{ span: 20, offset: 2 }} md={{ span: 6, offset: 0 }}>
             <Blog
-              title={"How We Took GitOps a Step Further"}
+              title={"Vibe Coding on Kubernetes with Cyclops MCP"}
               description={
-                "GitOps has changed how teams manage infrastructure and deployments, making..."
+                "You want your infrastructure to be stable, and vibe coding isn't exactly known for stability..."
               }
               blogLink={
-                "https://cyclops-ui.com/blog/2025/03/06/how-we-took-gitops-further"
+                "https://cyclops-ui.com/blog/2025/05/08/cyclops-mcp"
               }
-              avatar={"https://github.com/KaradzaJuraj.png"}
-              banner={"/img/2025-03-06-how-we-took-gitops-further/cover.jpeg"}
+              avatar={"https://github.com/petar-cvit.png"}
+              banner={"/img/2025-05-08-cyclops-mcp/cover.png"}
             />
           </Col>
           <Col xs={{ span: 20, offset: 2 }} md={{ span: 6, offset: 0 }}>
             <Blog
-              title={"Cyclops Launch Week #2"}
+              title={"What are Golden Paths in Platform Engineering?"}
               description={
-                "Cyclops is having its second-ever Launch Week, starting on March 10th!"
+                "Netflix uses the term Paved Road, and Spotify uses Golden Path, but in the end, they are the same thing..."
               }
               blogLink={
-                "https://cyclops-ui.com/blog/2025/03/04/launch-week-2"
+                "https://cyclops-ui.com/blog/2025/04/24/golden-paths"
               }
               avatar={"https://github.com/KaradzaJuraj.png"}
-              banner={"/img/2025-03-04-launch-week-2/lw-cover.png"}
+              banner={"/img/2025-04-24-golden-paths/cover.png"}
             />
           </Col>
         </Row>

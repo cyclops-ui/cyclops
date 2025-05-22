@@ -4,6 +4,10 @@ import (
 	"bytes"
 	"errors"
 	"fmt"
+	"io"
+	"net/http"
+	"net/http/httptest"
+
 	"github.com/cyclops-ui/cyclops/cyclops-ctrl/api/v1alpha1"
 	"github.com/cyclops-ui/cyclops/cyclops-ctrl/internal/models"
 	"github.com/cyclops-ui/cyclops/cyclops-ctrl/internal/models/dto"
@@ -13,10 +17,7 @@ import (
 	json "github.com/json-iterator/go"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
-	"io"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"net/http"
-	"net/http/httptest"
 
 	"github.com/cyclops-ui/cyclops/cyclops-ctrl/internal/controller"
 	k8smocks "github.com/cyclops-ui/cyclops/cyclops-ctrl/pkg/mocks"

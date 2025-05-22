@@ -23,6 +23,9 @@ import (
 	"strings"
 	"time"
 
+	templaterepo "github.com/cyclops-ui/cyclops/cyclops-ctrl/pkg/template"
+	"github.com/cyclops-ui/cyclops/cyclops-ctrl/pkg/template/render"
+
 	"github.com/go-logr/logr"
 	"helm.sh/helm/v3/pkg/chart"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
@@ -40,8 +43,6 @@ import (
 	"github.com/cyclops-ui/cyclops/cyclops-ctrl/internal/models"
 	"github.com/cyclops-ui/cyclops/cyclops-ctrl/internal/prometheus"
 	"github.com/cyclops-ui/cyclops/cyclops-ctrl/internal/telemetry"
-	templaterepo "github.com/cyclops-ui/cyclops/cyclops-ctrl/internal/template"
-	"github.com/cyclops-ui/cyclops/cyclops-ctrl/internal/template/render"
 	"github.com/cyclops-ui/cyclops/cyclops-ctrl/pkg/cluster/k8sclient"
 )
 
@@ -130,6 +131,10 @@ func (r *ModuleReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctr
 	if err != nil {
 		r.monitor.OnFailedReconciliation()
 		return ctrl.Result{}, err
+	}
+
+	if len(module.Labels) != 0 && module.Labels[cyclopsv1alpha1.ModuleManagerLabel] == "mcp" {
+		r.telemetryClient.MCPModuleReconciliation()
 	}
 
 	r.logger.Info("upsert module", "namespaced name", req.NamespacedName)

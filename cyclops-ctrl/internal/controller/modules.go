@@ -5,8 +5,16 @@ import (
 	"io"
 	"net/http"
 	"os"
+	"sort"
 	"strings"
 	"time"
+
+	json "github.com/json-iterator/go"
+	apiextensionsv1 "k8s.io/apiextensions-apiserver/pkg/apis/apiextensions/v1"
+	"k8s.io/apimachinery/pkg/api/errors"
+
+	"github.com/cyclops-ui/cyclops/cyclops-ctrl/pkg/template"
+	"github.com/cyclops-ui/cyclops/cyclops-ctrl/pkg/template/render"
 
 	"github.com/cyclops-ui/cyclops/cyclops-ctrl/internal/git"
 
@@ -19,8 +27,6 @@ import (
 	"github.com/cyclops-ui/cyclops/cyclops-ctrl/internal/models/dto"
 	"github.com/cyclops-ui/cyclops/cyclops-ctrl/internal/prometheus"
 	"github.com/cyclops-ui/cyclops/cyclops-ctrl/internal/telemetry"
-	"github.com/cyclops-ui/cyclops/cyclops-ctrl/internal/template"
-	"github.com/cyclops-ui/cyclops/cyclops-ctrl/internal/template/render"
 	"github.com/cyclops-ui/cyclops/cyclops-ctrl/pkg/cluster/k8sclient"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
@@ -271,15 +277,14 @@ func (m *Modules) CurrentManifest(ctx *gin.Context) {
 func (m *Modules) DeleteModuleResource(ctx *gin.Context) {
 	ctx.Header("Access-Control-Allow-Origin", "*")
 
-	var request dto.DeleteResource
+	var request *dto.Resource
 	if err := ctx.BindJSON(&request); err != nil {
 		fmt.Println(err)
 		ctx.JSON(http.StatusBadRequest, dto.NewError("Error mapping module request", err.Error()))
 		return
 	}
 
-	err := m.kubernetesClient.Delete(&request)
-	if err != nil {
+	if err := m.kubernetesClient.Delete(request); err != nil {
 		fmt.Println(err)
 		ctx.JSON(http.StatusInternalServerError, dto.NewError("Error deleting module", err.Error()))
 		return
@@ -412,7 +417,8 @@ func (m *Modules) UpdateModule(ctx *gin.Context) {
 	}
 
 	module.History = append([]v1alpha1.HistoryEntry{{
-		Generation: curr.Generation,
+		Generation:      curr.Generation,
+		TargetNamespace: curr.Spec.TargetNamespace,
 		TemplateRef: v1alpha1.HistoryTemplateRef{
 			URL:        curr.Spec.TemplateRef.URL,
 			Path:       curr.Spec.TemplateRef.Path,
@@ -437,6 +443,161 @@ func (m *Modules) UpdateModule(ctx *gin.Context) {
 
 	module.ResourceVersion = result.ResourceVersion
 	err = m.kubernetesClient.UpdateModule(&module)
+	if err != nil {
+		fmt.Println(err)
+		ctx.JSON(http.StatusInternalServerError, dto.NewError("Error updating module", err.Error()))
+		return
+	}
+
+	ctx.Status(http.StatusOK)
+}
+
+func (m *Modules) HistoryEntryManifest(ctx *gin.Context) {
+	ctx.Header("Access-Control-Allow-Origin", "*")
+
+	var request dto.RollbackRequest
+	if err := ctx.BindJSON(&request); err != nil {
+		fmt.Println(err)
+		ctx.JSON(http.StatusBadRequest, dto.NewError("Error mapping module request", err.Error()))
+		return
+	}
+
+	curr, err := m.kubernetesClient.GetModule(request.ModuleName)
+	if err != nil {
+		fmt.Println(err)
+		ctx.JSON(http.StatusInternalServerError, dto.NewError("Error fetching module", err.Error()))
+		return
+	}
+
+	var targetGeneration *v1alpha1.HistoryEntry
+	for _, entry := range curr.History {
+		if entry.Generation == request.Generation {
+			targetGeneration = &entry
+			break
+		}
+	}
+
+	if targetGeneration == nil {
+		ctx.JSON(http.StatusInternalServerError, dto.NewError("Invalid rollback generation provided", fmt.Sprintf("Generation %d does not exist", request.Generation)))
+		return
+	}
+
+	targetTemplate, err := m.templatesRepo.GetTemplate(
+		targetGeneration.TemplateRef.URL,
+		targetGeneration.TemplateRef.Path,
+		targetGeneration.TemplateRef.Version,
+		"",
+		targetGeneration.TemplateRef.SourceType,
+	)
+	if err != nil {
+		fmt.Println(err)
+		ctx.Status(http.StatusInternalServerError)
+		return
+	}
+
+	manifest, err := m.renderer.HelmTemplate(v1alpha1.Module{
+		ObjectMeta: metav1.ObjectMeta{
+			Name: request.ModuleName,
+		},
+		Spec: v1alpha1.ModuleSpec{
+			TargetNamespace: targetGeneration.TargetNamespace,
+			TemplateRef: v1alpha1.TemplateRef{
+				URL:        targetGeneration.TemplateRef.URL,
+				Path:       targetGeneration.TemplateRef.Path,
+				Version:    targetGeneration.TemplateRef.Version,
+				SourceType: targetGeneration.TemplateRef.SourceType,
+			},
+			Values: targetGeneration.Values,
+		},
+	}, targetTemplate)
+	if err != nil {
+		fmt.Println(err)
+		ctx.Status(http.StatusInternalServerError)
+		return
+	}
+
+	manifest = strings.TrimPrefix(manifest, "\n---")
+	manifest = strings.TrimSuffix(manifest, "---\n")
+
+	ctx.String(http.StatusOK, manifest)
+}
+
+func (m *Modules) RollbackModule(ctx *gin.Context) {
+	ctx.Header("Access-Control-Allow-Origin", "*")
+
+	var request dto.RollbackRequest
+	if err := ctx.BindJSON(&request); err != nil {
+		fmt.Println(err)
+		ctx.JSON(http.StatusBadRequest, dto.NewError("Error mapping module request", err.Error()))
+		return
+	}
+
+	curr, err := m.kubernetesClient.GetModule(request.ModuleName)
+	if err != nil {
+		fmt.Println(err)
+		ctx.JSON(http.StatusInternalServerError, dto.NewError("Error fetching module", err.Error()))
+		return
+	}
+
+	var targetGeneration *v1alpha1.HistoryEntry
+	for _, entry := range curr.History {
+		if entry.Generation == request.Generation {
+			targetGeneration = &entry
+			break
+		}
+	}
+
+	if targetGeneration == nil {
+		ctx.JSON(http.StatusInternalServerError, dto.NewError("Invalid rollback generation provided", fmt.Sprintf("Generation %d does not exist", request.Generation)))
+		return
+	}
+
+	module := curr.DeepCopy()
+
+	module.Kind = "Module"
+	module.APIVersion = "cyclops-ui.com/v1alpha1"
+
+	history := module.History
+	if module.History == nil {
+		history = make([]v1alpha1.HistoryEntry, 0)
+	}
+
+	module.History = append([]v1alpha1.HistoryEntry{{
+		Generation:      curr.Generation,
+		TargetNamespace: curr.Spec.TargetNamespace,
+		TemplateRef: v1alpha1.HistoryTemplateRef{
+			URL:        curr.Spec.TemplateRef.URL,
+			Path:       curr.Spec.TemplateRef.Path,
+			Version:    curr.Status.TemplateResolvedVersion,
+			SourceType: curr.Spec.TemplateRef.SourceType,
+		},
+		Values: curr.Spec.Values,
+	}}, history...)
+
+	if len(module.History) > 10 {
+		module.History = module.History[:len(module.History)-1]
+	}
+
+	module.Spec.Values = targetGeneration.Values
+	module.Spec.TemplateRef = v1alpha1.TemplateRef{
+		URL:        targetGeneration.TemplateRef.URL,
+		Path:       targetGeneration.TemplateRef.Path,
+		Version:    targetGeneration.TemplateRef.Version,
+		SourceType: targetGeneration.TemplateRef.SourceType,
+	}
+	module.Spec.TargetNamespace = targetGeneration.TargetNamespace
+
+	module.SetResourceVersion(curr.GetResourceVersion())
+
+	result, err := m.kubernetesClient.UpdateModuleStatus(module)
+	if err != nil {
+		fmt.Println(err)
+		ctx.JSON(http.StatusInternalServerError, dto.NewError("Error updating module status", err.Error()))
+		return
+	}
+
+	module.ResourceVersion = result.ResourceVersion
+	err = m.kubernetesClient.UpdateModule(module)
 	if err != nil {
 		fmt.Println(err)
 		ctx.JSON(http.StatusInternalServerError, dto.NewError("Error updating module", err.Error()))
@@ -572,6 +733,14 @@ func (m *Modules) ResourcesForModule(ctx *gin.Context) {
 		ctx.JSON(http.StatusInternalServerError, dto.NewError("Error fetching deleted module resources", err.Error()))
 		return
 	}
+
+	sort.Slice(resources, func(i, j int) bool {
+		if resources[i].GetGroupVersionKind() != resources[j].GetGroupVersionKind() {
+			return resources[i].GetGroupVersionKind() < resources[j].GetGroupVersionKind()
+		}
+
+		return resources[i].GetName() < resources[j].GetName()
+	})
 
 	ctx.JSON(http.StatusOK, resources)
 }
@@ -894,6 +1063,92 @@ func (m *Modules) GetResource(ctx *gin.Context) {
 	}
 
 	ctx.JSON(http.StatusOK, resource)
+}
+
+func (m *Modules) InstallMCPServer(ctx *gin.Context) {
+	ctx.Header("Access-Control-Allow-Origin", "*")
+
+	mcpModuleValues := map[string]interface{}{
+		"replicas": 1,
+		"version":  "latest",
+	}
+
+	m.telemetryClient.AddonInstall("mcp-server")
+
+	valBytes, err := json.Marshal(mcpModuleValues)
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, gin.H{
+			"error":  "Failed to create MCP server module values",
+			"reason": err.Error(),
+		})
+	}
+
+	mcpServerModule := v1alpha1.Module{
+		TypeMeta: metav1.TypeMeta{
+			Kind:       "Module",
+			APIVersion: "cyclops-ui.com/v1alpha1",
+		},
+		ObjectMeta: metav1.ObjectMeta{
+			Name: "mcp-cyclops",
+			Labels: map[string]string{
+				v1alpha1.MCPServerModuleLabel: "true",
+				v1alpha1.AddonModuleLabel:     "true",
+			},
+		},
+		Spec: v1alpha1.ModuleSpec{
+			TargetNamespace: "cyclops",
+			TemplateRef: v1alpha1.TemplateRef{
+				URL:        "https://github.com/cyclops-ui/templates",
+				Path:       "cyclops-mcp",
+				Version:    "main",
+				SourceType: "git",
+			},
+			Values: apiextensionsv1.JSON{
+				Raw: valBytes,
+			},
+		},
+		History: make([]v1alpha1.HistoryEntry, 0),
+	}
+
+	if err := m.kubernetesClient.CreateModule(mcpServerModule); err != nil {
+		ctx.JSON(http.StatusInternalServerError, gin.H{
+			"error":  "Failed to create Cyclops MCP server module",
+			"reason": err.Error(),
+		})
+		return
+	}
+
+	ctx.Status(http.StatusCreated)
+}
+
+func (m *Modules) MCPServerStatus(ctx *gin.Context) {
+	ctx.Header("Access-Control-Allow-Origin", "*")
+
+	type MCPServerStatus struct {
+		Installed bool `json:"installed"`
+	}
+
+	module, err := m.kubernetesClient.GetModule("mcp-cyclops")
+	if err != nil {
+		if errors.IsNotFound(err) {
+			ctx.JSON(http.StatusOK, MCPServerStatus{Installed: false})
+			return
+		}
+
+		ctx.JSON(http.StatusInternalServerError, gin.H{
+			"error":  "Failed to check Cyclops MCP server status",
+			"reason": err.Error(),
+		})
+		return
+	}
+
+	if module.Labels == nil {
+		ctx.JSON(http.StatusOK, MCPServerStatus{Installed: false})
+		return
+	}
+
+	_, ok := module.Labels[v1alpha1.MCPServerModuleLabel]
+	ctx.JSON(http.StatusOK, MCPServerStatus{Installed: ok})
 }
 
 func getTargetGeneration(generation string, module *v1alpha1.Module) (*v1alpha1.Module, bool) {

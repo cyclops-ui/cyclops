@@ -1,17 +1,19 @@
 package handler
 
 import (
+	"net/http"
+
 	"github.com/cyclops-ui/cyclops/cyclops-ctrl/internal/controller/sse"
+	"github.com/cyclops-ui/cyclops/cyclops-ctrl/internal/controller/ws"
 	"github.com/cyclops-ui/cyclops/cyclops-ctrl/internal/git"
 	"github.com/cyclops-ui/cyclops/cyclops-ctrl/internal/integrations/helm"
+	templaterepo "github.com/cyclops-ui/cyclops/cyclops-ctrl/pkg/template"
+	"github.com/cyclops-ui/cyclops/cyclops-ctrl/pkg/template/render"
 	"github.com/gin-gonic/gin"
-	"net/http"
 
 	"github.com/cyclops-ui/cyclops/cyclops-ctrl/internal/controller"
 	"github.com/cyclops-ui/cyclops/cyclops-ctrl/internal/prometheus"
 	"github.com/cyclops-ui/cyclops/cyclops-ctrl/internal/telemetry"
-	templaterepo "github.com/cyclops-ui/cyclops/cyclops-ctrl/internal/template"
-	"github.com/cyclops-ui/cyclops/cyclops-ctrl/internal/template/render"
 	"github.com/cyclops-ui/cyclops/cyclops-ctrl/pkg/cluster/k8sclient"
 )
 
@@ -75,6 +77,9 @@ func (h *Handler) Start() error {
 	h.router = gin.New()
 
 	server := sse.NewServer(h.k8sClient, h.releaseClient)
+	wsServer := ws.NewServer(h.k8sClient)
+
+	h.router.GET("/exec/:podNamespace/:podName/:containerName", wsServer.ExecCommand)
 
 	h.router.GET("/stream/resources/:name", sse.HeadersMiddleware(), server.Resources)
 	h.router.GET("/stream/releases/:namespace/:name/resources", sse.HeadersMiddleware(), server.ReleaseResources)
@@ -98,6 +103,8 @@ func (h *Handler) Start() error {
 	h.router.DELETE("/modules/:name", modulesController.DeleteModule)
 	h.router.POST("/modules/new", modulesController.CreateModule)
 	h.router.POST("/modules/update", modulesController.UpdateModule)
+	h.router.POST("/modules/rollback/manifest", modulesController.HistoryEntryManifest)
+	h.router.POST("/modules/rollback", modulesController.RollbackModule)
 	h.router.GET("/modules/:name/raw", modulesController.GetRawModuleManifest)
 	h.router.POST("/modules/:name/reconcile", modulesController.ReconcileModule)
 	h.router.GET("/modules/:name/history", modulesController.GetModuleHistory)
@@ -108,6 +115,9 @@ func (h *Handler) Start() error {
 	h.router.GET("/modules/:name/helm-template", modulesController.HelmTemplate)
 	//h.router.POST("/modules/resources", modulesController.ModuleToResources)
 	h.router.POST("/modules/reconcile", modulesController.BatchReconcileModules)
+
+	h.router.POST("/modules/mcp/install", modulesController.InstallMCPServer)
+	h.router.GET("/modules/mcp/status", modulesController.MCPServerStatus)
 
 	h.router.GET("/resources/pods/:namespace/:name/:container/logs", modulesController.GetLogs)
 	h.router.GET("/resources/pods/:namespace/:name/:container/logs/stream", sse.HeadersMiddleware(), modulesController.GetLogsStream)

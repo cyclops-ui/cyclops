@@ -234,7 +234,10 @@ const HelmReleases = () => {
     if (filteredData.length === 0) {
       return (
         <div style={{ width: "100%" }}>
-          <Empty description="No Helm releases found"></Empty>
+          <Empty
+            image={Empty.PRESENTED_IMAGE_SIMPLE}
+            description="No Helm releases found"
+          ></Empty>
         </div>
       );
     }

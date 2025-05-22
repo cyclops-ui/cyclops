@@ -8,11 +8,13 @@ import (
 type Client interface {
 	ModuleCreation()
 	ModuleReconciliation()
+	MCPModuleReconciliation()
 	InstanceStart()
 	ReleaseUpdate()
 	ReleaseMigration()
 	TemplateCreation()
 	TemplateEdit()
+	AddonInstall(addon string)
 }
 
 type logger interface {
@@ -80,6 +82,14 @@ func (c EnqueueClient) ModuleReconciliation() {
 	})
 }
 
+func (c EnqueueClient) MCPModuleReconciliation() {
+	_ = c.client.Enqueue(posthog.Capture{
+		Event:      "mcp-module-reconciliation",
+		DistinctId: c.distinctID,
+		Properties: c.messageProps(),
+	})
+}
+
 func (c EnqueueClient) ModuleCreation() {
 	_ = c.client.Enqueue(posthog.Capture{
 		Event:      "module-creation",
@@ -120,6 +130,20 @@ func (c EnqueueClient) TemplateEdit() {
 	})
 }
 
+func (c EnqueueClient) AddonInstall(addon string) {
+	props := c.messageProps()
+	if props == nil {
+		props = map[string]interface{}{}
+	}
+	props["addon"] = addon
+
+	_ = c.client.Enqueue(posthog.Capture{
+		Event:      "addon-install",
+		DistinctId: c.distinctID,
+		Properties: props,
+	})
+}
+
 func (c EnqueueClient) messageProps() map[string]interface{} {
 	props := map[string]interface{}{
 		"version": c.version,
@@ -140,6 +164,9 @@ func (c MockClient) InstanceStart() {
 func (c MockClient) ModuleReconciliation() {
 }
 
+func (c MockClient) MCPModuleReconciliation() {
+}
+
 func (c MockClient) ModuleCreation() {
 }
 
@@ -150,5 +177,7 @@ func (c MockClient) ReleaseMigration() {}
 func (c MockClient) TemplateCreation() {}
 
 func (c MockClient) TemplateEdit() {}
+
+func (c MockClient) AddonInstall(_ string) {}
 
 // endregion

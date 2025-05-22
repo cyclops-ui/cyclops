@@ -162,7 +162,7 @@ local-redis:
 	docker-compose up --detach
 
 group-imports:
-	goimports-reviser -recursive -file-path .
+	goimports -w .
 
 unit-test:
 	go test -v -tags musl,dynamic ./...

@@ -10,6 +10,9 @@ import (
 	"path/filepath"
 	"strings"
 
+	"github.com/cyclops-ui/cyclops/cyclops-ctrl/pkg/auth"
+	gitproviders2 "github.com/cyclops-ui/cyclops/cyclops-ctrl/pkg/template/gitproviders"
+
 	"github.com/pkg/errors"
 	"gopkg.in/yaml.v2"
 
@@ -25,11 +28,9 @@ import (
 	"helm.sh/helm/v3/pkg/chart"
 
 	cyclopsv1alpha1 "github.com/cyclops-ui/cyclops/cyclops-ctrl/api/v1alpha1"
-	"github.com/cyclops-ui/cyclops/cyclops-ctrl/internal/auth"
 	"github.com/cyclops-ui/cyclops/cyclops-ctrl/internal/mapper"
 	"github.com/cyclops-ui/cyclops/cyclops-ctrl/internal/models"
 	"github.com/cyclops-ui/cyclops/cyclops-ctrl/internal/models/helm"
-	"github.com/cyclops-ui/cyclops/cyclops-ctrl/internal/template/gitproviders"
 )
 
 func (r Repo) LoadTemplate(repoURL, path, commit, resolvedVersion string) (*models.Template, error) {
@@ -53,7 +54,7 @@ func (r Repo) LoadTemplate(repoURL, path, commit, resolvedVersion string) (*mode
 		return cached, nil
 	}
 
-	if gitproviders.IsGitHubSource(repoURL) {
+	if gitproviders2.IsGitHubSource(repoURL) {
 		ghTemplate, err := r.mapGitHubRepoTemplate(repoURL, path, commitSHA, creds)
 		if err != nil {
 			return nil, err
@@ -207,7 +208,7 @@ func (r Repo) LoadInitialTemplateValues(repoURL, path, commit string) (map[strin
 		return cached, nil
 	}
 
-	if gitproviders.IsGitHubSource(repoURL) {
+	if gitproviders2.IsGitHubSource(repoURL) {
 		ghInitialValues, err := r.mapGitHubRepoInitialValues(repoURL, path, commitSHA, creds)
 		if err != nil {
 			return nil, err
@@ -352,7 +353,7 @@ func readValuesFile(fs billy.Filesystem, path string) ([]byte, error) {
 
 func clone(repoURL, commit string, creds *auth.Credentials) (billy.Filesystem, error) {
 	// region clone from git
-	if gitproviders.IsAzureRepo(repoURL) {
+	if gitproviders2.IsAzureRepo(repoURL) {
 		transport.UnsupportedCapabilities = []capability.Capability{
 			capability.ThinPack,
 		}
@@ -511,17 +512,17 @@ func readFiles(path string, fs billy.Filesystem) ([]*chart.File, error) {
 }
 
 func (r Repo) mapGitHubRepoTemplate(repoURL, path, commitSHA string, creds *auth.Credentials) (*models.Template, error) {
-	tgzData, err := gitproviders.GitHubClone(repoURL, commitSHA, creds)
+	tgzData, err := gitproviders2.GitHubClone(repoURL, commitSHA, creds)
 	if err != nil {
 		return nil, err
 	}
 
 	ghRepoFiles, err := unpackTgzInMemory(tgzData)
 	if err != nil {
-		return nil, err
+		return nil, errors.Wrap(err, "failed to clone repo from GitHub: make sure that the version (branch or commit) exist on the specified repo")
 	}
 
-	ghRepoFiles, exists := gitproviders.SanitizeGHFiles(ghRepoFiles, path)
+	ghRepoFiles, exists := gitproviders2.SanitizeGHFiles(ghRepoFiles, path)
 	if !exists {
 		return nil, errors.Errorf("provided path %v for repo %v does not exist on version %v", path, repoURL, commitSHA)
 	}
@@ -535,7 +536,7 @@ func (r Repo) mapGitHubRepoTemplate(repoURL, path, commitSHA string, creds *auth
 }
 
 func (r Repo) mapGitHubRepoInitialValues(repoURL, path, commitSHA string, creds *auth.Credentials) (map[string]interface{}, error) {
-	tgzData, err := gitproviders.GitHubClone(repoURL, commitSHA, creds)
+	tgzData, err := gitproviders2.GitHubClone(repoURL, commitSHA, creds)
 	if err != nil {
 		return nil, err
 	}
@@ -545,7 +546,7 @@ func (r Repo) mapGitHubRepoInitialValues(repoURL, path, commitSHA string, creds 
 		return nil, err
 	}
 
-	ghRepoFiles, exists := gitproviders.SanitizeGHFiles(ghRepoFiles, path)
+	ghRepoFiles, exists := gitproviders2.SanitizeGHFiles(ghRepoFiles, path)
 	if !exists {
 		return nil, errors.Errorf("provided path %v for repo %v does not exist on version %v", path, repoURL, commitSHA)
 	}

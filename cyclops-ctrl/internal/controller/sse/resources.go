@@ -1,10 +1,11 @@
 package sse
 
 import (
-	"github.com/cyclops-ui/cyclops/cyclops-ctrl/internal/models/dto"
 	"io"
 	"net/http"
 	"time"
+
+	"github.com/cyclops-ui/cyclops/cyclops-ctrl/internal/models/dto"
 
 	"github.com/pkg/errors"
 
@@ -34,7 +35,7 @@ func (s *Server) ReleaseResources(ctx *gin.Context) {
 	s.streamResources(ctx, resources)
 }
 
-func (s *Server) streamResources(ctx *gin.Context, resources []dto.Resource) {
+func (s *Server) streamResources(ctx *gin.Context, resources []*dto.Resource) {
 	watchSpecs := make([]k8sclient.ResourceWatchSpec, 0, len(resources))
 	for _, resource := range resources {
 		if !k8sclient.IsWorkload(resource.GetGroup(), resource.GetVersion(), resource.GetKind()) {

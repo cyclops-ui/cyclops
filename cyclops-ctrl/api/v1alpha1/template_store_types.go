@@ -26,6 +26,11 @@ import (
 const IconURLAnnotation = "cyclops-ui.com/icon"
 
 //+kubebuilder:object:root=true
+//+kubebuilder:printcolumn:name="Age",type="date",JSONPath=".metadata.creationTimestamp"
+//+kubebuilder:printcolumn:name="Type",type=string,JSONPath=`.spec.sourceType`
+//+kubebuilder:printcolumn:name="Repository",type=string,JSONPath=`.spec.repo`
+//+kubebuilder:printcolumn:name="Path",type=string,JSONPath=`.spec.path`
+//+kubebuilder:printcolumn:name="Version",type=string,JSONPath=`.spec.version`
 
 // TemplateStore holds reference to a template that can be offered as a starting point
 type TemplateStore struct {

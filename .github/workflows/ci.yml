@@ -37,6 +37,31 @@ jobs:
           cd ${{ github.workspace }}/cyclops-ctrl
           make unit-test
 
+  validate-crd-updates:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Validate Module
+        working-directory: cyclops-ctrl
+        run: |
+          diff \
+            <(yq -N 'select(.kind == "CustomResourceDefinition" and .metadata.name == "modules.cyclops-ui.com")' ../install/cyclops-install.yaml) \
+            <(yq -N config/crd/bases/cyclops-ui.com_modules.yaml)
+      - name: Validate TemplateAuthRule
+        working-directory: cyclops-ctrl
+        run: |
+          diff \
+            <(yq -N 'select(.kind == "CustomResourceDefinition" and .metadata.name == "templateauthrules.cyclops-ui.com")' ../install/cyclops-install.yaml) \
+            <(yq -N config/crd/bases/cyclops-ui.com_templateauthrules.yaml)
+      - name: Validate TemplateStore
+        working-directory: cyclops-ctrl
+        run: |
+          diff \
+            <(yq -N 'select(.kind == "CustomResourceDefinition" and .metadata.name == "templatestores.cyclops-ui.com")' ../install/cyclops-install.yaml) \
+            <(yq -N config/crd/bases/cyclops-ui.com_templatestores.yaml)
+
   build-UI:
     needs:
       - test-UI
@@ -67,6 +92,7 @@ jobs:
   build-controller:
     needs:
       - test-controller
+      - validate-crd-updates
     runs-on: ubuntu-latest
     steps:
       - name: Set up QEMU

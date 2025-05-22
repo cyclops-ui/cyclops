@@ -49,7 +49,11 @@ export function deepMerge(target: any, source: any): any {
   }
 
   for (const key in source) {
-    if (source[key] && typeof source[key] === "object" && !Array.isArray(source[key])) {
+    if (
+      source[key] &&
+      typeof source[key] === "object" &&
+      !Array.isArray(source[key])
+    ) {
       target[key] = deepMerge(target[key] || {}, source[key]);
     } else {
       target[key] = source[key];
@@ -57,7 +61,7 @@ export function deepMerge(target: any, source: any): any {
   }
 
   return target;
-};
+}
 
 export function findMaps(fields: any[], values: any, initialValues: any): any {
   let out: any = initialValues ? initialValues : {};
@@ -70,12 +74,12 @@ export function findMaps(fields: any[], values: any, initialValues: any): any {
     let valuesList: any[] = [];
     switch (field.type) {
       case "string":
-        if (values[field.name]) {
+        if (values[field.name] !== undefined && values[field.name] !== null) {
           out[field.name] = values[field.name];
         }
         break;
       case "number":
-        if (values[field.name]) {
+        if (values[field.name] !== undefined && values[field.name] !== null) {
           out[field.name] = values[field.name];
         }
         break;
@@ -212,6 +216,13 @@ export const mapsToArray = (fields: any[], values: any): any => {
         }
 
         Object.keys(values[field.name]).forEach((key) => {
+          if (values[field.name][key] === null) {
+            object.push({
+              key: key,
+            });
+            return;
+          }
+
           if (typeof values[field.name][key] === "object") {
             object.push({
               key: key,
@@ -225,6 +236,8 @@ export const mapsToArray = (fields: any[], values: any): any => {
             value: values[field.name][key],
           });
         });
+
+        object.sort((a, b) => a.key.localeCompare(b.key));
 
         out[field.name] = object;
         break;
