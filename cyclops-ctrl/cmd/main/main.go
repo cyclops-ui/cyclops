@@ -77,7 +77,6 @@ func main() {
 	watchNamespace := getWatchNamespace()
 	helmWatchNamespace := getHelmWatchNamespace()
 	moduleTargetNamespace := getModuleTargetNamespace()
-	disableTemplateVersionLock := getEnvBool("MODULE_DISABLE_TEMPLATE_VERSION_LOCK")
 
 	k8sClient, err := k8sclient.New(
 		watchNamespace,
@@ -107,9 +106,9 @@ func main() {
 	prometheus.StartCacheMetricsUpdater(&monitor, templatesRepo.ReturnCache(), 10*time.Second, setupLog)
 
 	helmReleaseClient := helm.NewReleaseClient(helmWatchNamespace, k8sClient)
-	gitWriteClient := git.NewWriteClient(credsResolver, disableTemplateVersionLock, getCommitMessageTemplate(), setupLog)
+	gitWriteClient := git.NewWriteClient(credsResolver, getCommitMessageTemplate(), setupLog)
 
-	handler, err := handler.New(templatesRepo, k8sClient, helmReleaseClient, renderer, gitWriteClient, moduleTargetNamespace, disableTemplateVersionLock, telemetryClient, monitor)
+	handler, err := handler.New(templatesRepo, k8sClient, helmReleaseClient, renderer, gitWriteClient, moduleTargetNamespace, telemetryClient, monitor)
 	if err != nil {
 		panic(err)
 	}
@@ -144,7 +143,6 @@ func main() {
 		templatesRepo,
 		k8sClient,
 		renderer,
-		disableTemplateVersionLock,
 		telemetryClient,
 		monitor,
 	)).SetupWithManager(mgr); err != nil {

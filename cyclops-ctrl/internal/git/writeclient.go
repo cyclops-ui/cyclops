@@ -25,18 +25,16 @@ import (
 )
 
 type WriteClient struct {
-	templatesResolver          auth.TemplatesResolver
-	disableTemplateVersionLock bool
-	commitMessageTemplate      *template.Template
+	templatesResolver     auth.TemplatesResolver
+	commitMessageTemplate *template.Template
 }
 
 const _defaultCommitMessageTemplate = "Update {{ .Name }} module config"
 
-func NewWriteClient(templatesResolver auth.TemplatesResolver, disableTemplateVersionLock bool, commitMessageTemplate string, logger logr.Logger) *WriteClient {
+func NewWriteClient(templatesResolver auth.TemplatesResolver, commitMessageTemplate string, logger logr.Logger) *WriteClient {
 	return &WriteClient{
-		templatesResolver:          templatesResolver,
-		disableTemplateVersionLock: disableTemplateVersionLock,
-		commitMessageTemplate:      getCommitMessageTemplate(commitMessageTemplate, logger),
+		templatesResolver:     templatesResolver,
+		commitMessageTemplate: getCommitMessageTemplate(commitMessageTemplate, logger),
 	}
 }
 
@@ -81,14 +79,8 @@ func getModulePath(module cyclopsv1alpha1.Module) (string, error) {
 }
 
 func (c *WriteClient) Write(module cyclopsv1alpha1.Module) error {
-	// If the version lock is disabled, there is no need to push the exact version of the template used. If not disabled
-	// the ReconciliationStatus and ManagedGVRs should still be omitted since those are specific to cluster state.
-	if c.disableTemplateVersionLock {
-		module.Status = cyclopsv1alpha1.ModuleStatus{}
-	} else {
-		module.Status.ReconciliationStatus = nil
-		module.Status.ManagedGVRs = nil
-	}
+	module.Status.ReconciliationStatus = nil
+	module.Status.ManagedGVRs = nil
 
 	repoURL, exists := module.GetAnnotations()[cyclopsv1alpha1.GitOpsWriteRepoAnnotation]
 	if !exists {

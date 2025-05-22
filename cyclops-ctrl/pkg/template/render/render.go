@@ -33,16 +33,6 @@ func (r *Renderer) HelmTemplate(module cyclopsv1alpha1.Module, moduleTemplate *m
 		return "", nil
 	}
 
-	initialValues, err := r.templateRepo.GetTemplateInitialValues(
-		module.Spec.TemplateRef.URL,
-		module.Spec.TemplateRef.Path,
-		moduleTemplate.ResolvedVersion,
-		module.Spec.TemplateRef.SourceType,
-	)
-	if err != nil {
-		return "", err
-	}
-
 	chart := &helmchart.Chart{
 		Raw:       []*helmchart.File{},
 		Metadata:  mapMetadata(moduleTemplate.HelmChartMetadata),
@@ -57,8 +47,6 @@ func (r *Renderer) HelmTemplate(module cyclopsv1alpha1.Module, moduleTemplate *m
 	if err := json.Unmarshal(module.Spec.Values.Raw, &values); err != nil {
 		return "", err
 	}
-
-	values = chartutil.CoalesceTables(values, initialValues)
 
 	for _, dependency := range moduleTemplate.Dependencies {
 		if !evaluateDependencyCondition(dependency.Condition, values) {

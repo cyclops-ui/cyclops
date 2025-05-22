@@ -37,8 +37,7 @@ type Modules struct {
 	renderer         *render.Renderer
 	gitWriteClient   *git.WriteClient
 
-	moduleTargetNamespace      string
-	disableTemplateVersionLock bool
+	moduleTargetNamespace string
 
 	telemetryClient telemetry.Client
 	monitor         prometheus.Monitor
@@ -50,19 +49,17 @@ func NewModulesController(
 	renderer *render.Renderer,
 	gitWriteClient *git.WriteClient,
 	moduleTargetNamespace string,
-	disableTemplateVersionLock bool,
 	telemetryClient telemetry.Client,
 	monitor prometheus.Monitor,
 ) *Modules {
 	return &Modules{
-		kubernetesClient:           kubernetes,
-		templatesRepo:              templatesRepo,
-		renderer:                   renderer,
-		gitWriteClient:             gitWriteClient,
-		moduleTargetNamespace:      moduleTargetNamespace,
-		disableTemplateVersionLock: disableTemplateVersionLock,
-		telemetryClient:            telemetryClient,
-		monitor:                    monitor,
+		kubernetesClient:      kubernetes,
+		templatesRepo:         templatesRepo,
+		renderer:              renderer,
+		gitWriteClient:        gitWriteClient,
+		moduleTargetNamespace: moduleTargetNamespace,
+		telemetryClient:       telemetryClient,
+		monitor:               monitor,
 	}
 }
 
@@ -252,7 +249,7 @@ func (m *Modules) CurrentManifest(ctx *gin.Context) {
 		module.Spec.TemplateRef.URL,
 		module.Spec.TemplateRef.Path,
 		module.Spec.TemplateRef.Version,
-		module.TemplateResolvedVersion(m.disableTemplateVersionLock),
+		module.Status.TemplateResolvedVersion,
 		module.Spec.TemplateRef.SourceType,
 	)
 	if err != nil {
@@ -640,53 +637,6 @@ func (m *Modules) ReconcileModule(ctx *gin.Context) {
 	ctx.Status(http.StatusAccepted)
 }
 
-func (m *Modules) BatchReconcileModules(ctx *gin.Context) {
-	ctx.Header("Access-Control-Allow-Origin", "*")
-
-	type ReconcileModulesReq struct {
-		Modules []string `json:"modules"`
-	}
-
-	var request struct {
-		Modules []string `json:"modules"`
-	}
-	if err := ctx.BindJSON(&request); err != nil {
-		fmt.Println(err)
-		ctx.JSON(http.StatusBadRequest, dto.NewError("Error mapping modules reconcile request", err.Error()))
-		return
-	}
-
-	for _, moduleName := range request.Modules {
-		if err := m.reconcileModule(moduleName); err != nil {
-			fmt.Println(err)
-			ctx.JSON(http.StatusInternalServerError, dto.NewError(fmt.Sprintf("Error reconciling module %v", moduleName), err.Error()))
-			return
-		}
-	}
-
-	ctx.Status(http.StatusAccepted)
-}
-
-func (m *Modules) reconcileModule(moduleName string) error {
-	module, err := m.kubernetesClient.GetModule(moduleName)
-	if err != nil {
-		return err
-	}
-
-	annotations := module.GetAnnotations()
-	if annotations == nil {
-		annotations = make(map[string]string)
-	}
-
-	annotations["cyclops/reconciled-at"] = time.Now().Format(time.RFC3339)
-	module.SetAnnotations(annotations)
-
-	module.Kind = "Module"
-	module.APIVersion = "cyclops-ui.com/v1alpha1"
-
-	return m.kubernetesClient.UpdateModule(module)
-}
-
 func (m *Modules) ResourcesForModule(ctx *gin.Context) {
 	ctx.Header("Access-Control-Allow-Origin", "*")
 
@@ -704,7 +654,7 @@ func (m *Modules) ResourcesForModule(ctx *gin.Context) {
 	t, err := m.templatesRepo.GetTemplate(
 		module.Spec.TemplateRef.URL,
 		module.Spec.TemplateRef.Path,
-		module.TemplateResolvedVersion(m.disableTemplateVersionLock),
+		module.Status.TemplateResolvedVersion,
 		"",
 		module.Spec.TemplateRef.SourceType,
 	)
@@ -759,7 +709,7 @@ func (m *Modules) Template(ctx *gin.Context) {
 		module.Spec.TemplateRef.URL,
 		module.Spec.TemplateRef.Path,
 		module.Spec.TemplateRef.Version,
-		module.TemplateResolvedVersion(m.disableTemplateVersionLock),
+		module.Status.TemplateResolvedVersion,
 		module.Spec.TemplateRef.SourceType,
 	)
 	if err != nil {
@@ -779,7 +729,7 @@ func (m *Modules) Template(ctx *gin.Context) {
 		module.Spec.TemplateRef.URL,
 		module.Spec.TemplateRef.Path,
 		module.Spec.TemplateRef.Version,
-		module.TemplateResolvedVersion(m.disableTemplateVersionLock),
+		module.Status.TemplateResolvedVersion,
 		module.Spec.TemplateRef.SourceType,
 	)
 	if err != nil {
@@ -817,7 +767,7 @@ func (m *Modules) HelmTemplate(ctx *gin.Context) {
 		module.Spec.TemplateRef.URL,
 		module.Spec.TemplateRef.Path,
 		module.Spec.TemplateRef.Version,
-		module.TemplateResolvedVersion(m.disableTemplateVersionLock),
+		module.Status.TemplateResolvedVersion,
 		module.Spec.TemplateRef.SourceType,
 	)
 	if err != nil {

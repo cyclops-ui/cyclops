@@ -26,8 +26,7 @@ type Handler struct {
 	renderer       *render.Renderer
 	gitWriteClient *git.WriteClient
 
-	moduleTargetNamespace      string
-	disableTemplateVersionLock bool
+	moduleTargetNamespace string
 
 	telemetryClient telemetry.Client
 	monitor         prometheus.Monitor
@@ -40,20 +39,18 @@ func New(
 	renderer *render.Renderer,
 	gitWriteClient *git.WriteClient,
 	moduleTargetNamespace string,
-	disableTemplateVersionLock bool,
 	telemetryClient telemetry.Client,
 	monitor prometheus.Monitor,
 ) (*Handler, error) {
 	return &Handler{
-		templatesRepo:              templatesRepo,
-		k8sClient:                  kubernetesClient,
-		renderer:                   renderer,
-		releaseClient:              releaseClient,
-		gitWriteClient:             gitWriteClient,
-		moduleTargetNamespace:      moduleTargetNamespace,
-		disableTemplateVersionLock: disableTemplateVersionLock,
-		telemetryClient:            telemetryClient,
-		monitor:                    monitor,
+		templatesRepo:         templatesRepo,
+		k8sClient:             kubernetesClient,
+		renderer:              renderer,
+		releaseClient:         releaseClient,
+		gitWriteClient:        gitWriteClient,
+		moduleTargetNamespace: moduleTargetNamespace,
+		telemetryClient:       telemetryClient,
+		monitor:               monitor,
 	}, nil
 }
 
@@ -67,7 +64,6 @@ func (h *Handler) Start() error {
 		h.renderer,
 		h.gitWriteClient,
 		h.moduleTargetNamespace,
-		h.disableTemplateVersionLock,
 		h.telemetryClient,
 		h.monitor,
 	)
@@ -114,7 +110,6 @@ func (h *Handler) Start() error {
 	h.router.GET("/modules/:name/template", modulesController.Template)
 	h.router.GET("/modules/:name/helm-template", modulesController.HelmTemplate)
 	//h.router.POST("/modules/resources", modulesController.ModuleToResources)
-	h.router.POST("/modules/reconcile", modulesController.BatchReconcileModules)
 
 	h.router.POST("/modules/mcp/install", modulesController.InstallMCPServer)
 	h.router.GET("/modules/mcp/status", modulesController.MCPServerStatus)

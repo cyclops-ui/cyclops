@@ -55,8 +55,6 @@ type ModuleReconciler struct {
 	kubernetesClient k8sclient.IKubernetesClient
 	renderer         *render.Renderer
 
-	disableTemplateVersionLock bool
-
 	telemetryClient telemetry.Client
 	monitor         prometheus.Monitor
 	logger          logr.Logger
@@ -68,20 +66,18 @@ func NewModuleReconciler(
 	templatesRepo templaterepo.ITemplateRepo,
 	kubernetesClient k8sclient.IKubernetesClient,
 	renderer *render.Renderer,
-	disableTemplateVersionLock bool,
 	telemetryClient telemetry.Client,
 	monitor prometheus.Monitor,
 ) *ModuleReconciler {
 	return &ModuleReconciler{
-		Client:                     client,
-		Scheme:                     scheme,
-		templatesRepo:              templatesRepo,
-		kubernetesClient:           kubernetesClient,
-		renderer:                   renderer,
-		disableTemplateVersionLock: disableTemplateVersionLock,
-		telemetryClient:            telemetryClient,
-		monitor:                    monitor,
-		logger:                     ctrl.Log.WithName("reconciler"),
+		Client:           client,
+		Scheme:           scheme,
+		templatesRepo:    templatesRepo,
+		kubernetesClient: kubernetesClient,
+		renderer:         renderer,
+		telemetryClient:  telemetryClient,
+		monitor:          monitor,
+		logger:           ctrl.Log.WithName("reconciler"),
 	}
 }
 
@@ -139,16 +135,16 @@ func (r *ModuleReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctr
 
 	r.logger.Info("upsert module", "namespaced name", req.NamespacedName)
 
-	templateVersion := module.TemplateResolvedVersion(r.disableTemplateVersionLock)
-	//if len(templateVersion) == 0 {
-	//	templateVersion = module.Spec.TemplateRef.Version
-	//}
+	templateVersion := module.Status.TemplateResolvedVersion
+	if len(templateVersion) == 0 {
+		templateVersion = module.Spec.TemplateRef.Version
+	}
 
 	template, err := r.templatesRepo.GetTemplate(
 		module.Spec.TemplateRef.URL,
 		module.Spec.TemplateRef.Path,
 		templateVersion,
-		"",
+		module.Status.TemplateResolvedVersion,
 		module.Spec.TemplateRef.SourceType,
 	)
 	if err != nil {

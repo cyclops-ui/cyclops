@@ -80,7 +80,6 @@ export interface CreateModuleProps {
     moduleNamespace: string,
     templateRef: any,
     values: string,
-    lockTemplateVersion?: boolean,
     gitOpsWrite?: any,
   ) => Promise<any>;
   onSubmitModuleSuccess: (moduleName: string) => void;
@@ -111,7 +110,7 @@ export const CreateModuleComponent = ({
   const [template, setTemplate] = useState<templateStoreOption>();
 
   const [initialValues, setInitialValues] = useState({});
-  // const [initialValuesRaw, setInitialValuesRaw] = useState({});
+  const [initialValuesRaw, setInitialValuesRaw] = useState({});
 
   const [error, setError] = useState({
     message: "",
@@ -189,9 +188,15 @@ export const CreateModuleComponent = ({
 
     const moduleName = values["cyclops_module_name"];
     const moduleNamespace = values["cyclops_module_namespace"];
-    const lockTemplateVersion = values["cyclops_module_lock_version"];
+    const gitOpsWrite = gitopsToggle
+      ? {
+          repo: values["gitops-repo"],
+          path: values["gitops-path"],
+          branch: values["gitops-branch"],
+        }
+      : null;
 
-    values = findMaps(config.root.properties, values, {});
+    values = findMaps(config.root.properties, values, initialValuesRaw);
 
     submitModule(
       moduleName,
@@ -203,7 +208,6 @@ export const CreateModuleComponent = ({
         sourceType: template.ref.sourceType,
       },
       values,
-      lockTemplateVersion,
       resolveGitOpsWrite(values),
     )
       .then(() => {
@@ -234,7 +238,7 @@ export const CreateModuleComponent = ({
       dependencies: [],
     });
     form.setFieldsValue({});
-    // setInitialValuesRaw({});
+    setInitialValuesRaw({});
     setInitialValues({});
 
     setLoadingTemplate(true);
@@ -277,7 +281,7 @@ export const CreateModuleComponent = ({
       .then((res) => {
         let initialValuesMapped = mapsToArray(tmpConfig.root.properties, res);
 
-        // setInitialValuesRaw(res);
+        setInitialValuesRaw(res);
         setInitialValues(initialValuesMapped);
         form.setFieldsValue(initialValuesMapped);
 
@@ -564,26 +568,6 @@ export const CreateModuleComponent = ({
                       style={{ marginTop: "12px", marginBottom: "12px" }}
                     />
                     <Form.Item
-                      name="cyclops_module_lock_version"
-                      id="cyclops_module_lock_version"
-                      label={
-                        <div>
-                          Lock template version
-                          <p style={{ color: "#8b8e91", marginBottom: "0px" }}>
-                            If toggled, this Module will not automatically
-                            follow the latest version of the template selected
-                            and you will have to bump the template version while
-                            editing the module.
-                          </p>
-                        </div>
-                      }
-                      style={{ padding: "0px 12px 0px 12px" }}
-                      hasFeedback={true}
-                      validateDebounce={1000}
-                    >
-                      <Switch />
-                    </Form.Item>
-                    <Form.Item
                       name="cyclops_module_namespace"
                       id="cyclops_module_namespace"
                       label={
@@ -608,13 +592,7 @@ export const CreateModuleComponent = ({
                     </Form.Item>
                   </div>
                   <div
-                    style={{
-                      display:
-                        advancedOptionsExpanded &&
-                        template?.enforceGitOpsWrite === undefined
-                          ? ""
-                          : "none",
-                    }}
+                    style={{ display: advancedOptionsExpanded ? "" : "none" }}
                   >
                     <Divider
                       style={{ marginTop: "12px", marginBottom: "12px" }}

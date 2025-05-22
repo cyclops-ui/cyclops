@@ -162,18 +162,6 @@ type ModuleList struct {
 	Items           []Module `json:"items"`
 }
 
-func (m *Module) TemplateResolvedVersion(disableTemplateVersionLock bool) string {
-	if disableTemplateVersionLock {
-		return m.Spec.TemplateRef.Version
-	}
-
-	if len(m.Status.TemplateResolvedVersion) == 0 {
-		return m.Spec.TemplateRef.Version
-	}
-
-	return m.Status.TemplateResolvedVersion
-}
-
 func init() {
 	SchemeBuilder.Register(&Module{}, &ModuleList{})
 }
