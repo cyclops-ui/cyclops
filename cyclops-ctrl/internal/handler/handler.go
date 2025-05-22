@@ -58,15 +58,7 @@ func (h *Handler) Start() error {
 	gin.SetMode(gin.DebugMode)
 
 	templatesController := controller.NewTemplatesController(h.templatesRepo, h.k8sClient, h.telemetryClient)
-	modulesController := controller.NewModulesController(
-		h.templatesRepo,
-		h.k8sClient,
-		h.renderer,
-		h.gitWriteClient,
-		h.moduleTargetNamespace,
-		h.telemetryClient,
-		h.monitor,
-	)
+	modulesController := controller.NewModulesController(h.templatesRepo, h.k8sClient, h.renderer, h.gitWriteClient, h.moduleTargetNamespace, h.telemetryClient, h.monitor)
 	clusterController := controller.NewClusterController(h.k8sClient)
 	helmController := controller.NewHelmController(h.k8sClient, h.releaseClient, h.telemetryClient)
 
