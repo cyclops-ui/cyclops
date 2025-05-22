@@ -146,12 +146,12 @@ apiVersion: cyclops-ui.com/v1alpha1
 kind: TemplateStore
 metadata:
   annotations:
-    cyclops-ui.com/icon: https://raw.githubusercontent.com/grafana/k6-docs/main/static/images/icon.png
-  name: k6-operator
+    cyclops-ui.com/icon: https://avatars.githubusercontent.com/u/182288589
+  name: mcp-server
   namespace: cyclops
 spec:
-  path: charts/k6-operator
-  repo: https://github.com/grafana/k6-operator
+  path: mcp-server
+  repo: https://github.com/cyclops-ui/templates
   version: main
   sourceType: git
 ---
