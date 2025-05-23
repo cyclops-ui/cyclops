@@ -55,6 +55,19 @@ spec:
             type: object
           spec:
             properties:
+              enforceGitOpsWrite:
+                properties:
+                  path:
+                    type: string
+                  repo:
+                    type: string
+                  version:
+                    type: string
+                required:
+                - path
+                - repo
+                - version
+                type: object
               path:
                 type: string
               repo:

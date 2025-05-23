@@ -15,9 +15,9 @@ import {
   Radio,
   Popover,
   Checkbox,
+  Switch,
 } from "antd";
 import axios from "axios";
-import Title from "antd/es/typography/Title";
 import {
   DeleteOutlined,
   EditOutlined,
@@ -36,8 +36,12 @@ import {
 import gitLogo from "../../../static/img/git.png";
 import helmLogo from "../../../static/img/helm.png";
 import dockerLogo from "../../../static/img/docker-mark-blue.png";
+import { useTheme } from "../../theme/ThemeContext";
+import Title from "antd/es/typography/Title";
 
 const TemplateStore = () => {
+  const { mode } = useTheme();
+
   const [templates, setTemplates] = useState([]);
   const [query, setQuery] = useState("");
   const [filteredTemplates, setFilteredTemplates] = useState([]);
@@ -52,6 +56,7 @@ const TemplateStore = () => {
   const [requestStatus, setRequestStatus] = useState<{ [key: string]: string }>(
     {},
   );
+  const [enforceGitOpsEnabled, setEnforceGitOpsEnabled] = useState(false);
   const [error, setError] = useState({
     message: "",
     description: "",
@@ -274,6 +279,73 @@ const TemplateStore = () => {
     );
   };
 
+  const advancedTemplateGitOpsWrite = () => {
+    return (
+      <div
+        style={{
+          backgroundColor: mode === "light" ? "#fafafa" : "#333",
+          border: `1px solid ${mode === "light" ? "#c3c3c3" : "#707070"}`,
+          borderRadius: "7px",
+          padding: "16px",
+          marginTop: "24px",
+        }}
+      >
+        <div style={{ marginBottom: "16px" }}>
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: "12px",
+              marginBottom: "8px",
+            }}
+          >
+            <Switch
+              checked={enforceGitOpsEnabled}
+              onChange={setEnforceGitOpsEnabled}
+            />
+            <div style={{ margin: 0 }}>Enforce GitOps Write</div>
+          </div>
+          <p style={{ color: "#8b8e91", margin: "4px 0 0 0" }}>
+            Configure GitOps settings to push changes to a git repository
+            instead of deploying directly to the cluster.
+          </p>
+        </div>
+        {enforceGitOpsEnabled && (
+          <>
+            <Form.Item
+              label="Repository URL"
+              name={["enforceGitOpsWrite", "repo"]}
+              labelCol={{ span: 24 }}
+              wrapperCol={{ span: 24 }}
+              style={{ marginBottom: 8 }}
+            >
+              <Input placeholder="https://github.com/org/repo" />
+            </Form.Item>
+
+            <Form.Item
+              label="Path"
+              name={["enforceGitOpsWrite", "path"]}
+              labelCol={{ span: 24 }}
+              wrapperCol={{ span: 24 }}
+              style={{ marginBottom: 8 }}
+            >
+              <Input placeholder="/path/to/templates" />
+            </Form.Item>
+
+            <Form.Item
+              label="Branch"
+              name={["enforceGitOpsWrite", "branch"]}
+              labelCol={{ span: 24 }}
+              wrapperCol={{ span: 24 }}
+            >
+              <Input placeholder="main" />
+            </Form.Item>
+          </>
+        )}
+      </div>
+    );
+  };
+
   return (
     <div>
       {error.message.length !== 0 && (
@@ -432,15 +504,12 @@ const TemplateStore = () => {
                 <EditOutlined
                   className={"edittemplate"}
                   onClick={function () {
-                    editForm.setFieldValue(
-                      ["ref", "sourceType"],
-                      template.ref.sourceType,
-                    );
-                    editForm.setFieldValue(["ref", "repo"], template.ref.repo);
-                    editForm.setFieldValue(["ref", "path"], template.ref.path);
-                    editForm.setFieldValue(
-                      ["ref", "version"],
-                      template.ref.version,
+                    editForm.setFieldsValue(template);
+                    if (template.enforceGitOpsWrite === undefined) {
+                      editForm.setFieldValue(["enforceGitOpsWrite"], undefined);
+                    }
+                    setEnforceGitOpsEnabled(
+                      template.enforceGitOpsWrite !== undefined,
                     );
                     setEditModal(template.name);
                   }}
@@ -491,10 +560,23 @@ const TemplateStore = () => {
           onFinish={handleSubmit}
           form={addForm}
           initialValues={{ remember: true }}
-          labelCol={{ span: 6 }}
+          labelCol={{ span: 24 }}
+          wrapperCol={{ span: 24 }}
+          requiredMark={(label, { required }) => (
+            <Row>
+              <Col>
+                {required ? (
+                  <span style={{ color: "red", paddingRight: "3px" }}>*</span>
+                ) : (
+                  <></>
+                )}
+              </Col>
+              <Col>{label}</Col>
+            </Row>
+          )}
         >
           <Form.Item
-            style={{ paddingTop: "20px" }}
+            style={{ marginBottom: "12px" }}
             label="Name"
             name={"name"}
             rules={[
@@ -508,7 +590,7 @@ const TemplateStore = () => {
                   "Template ref name must contain no more than 63 characters",
               },
               {
-                pattern: /^[a-z0-9](?:[a-z0-9-]*[a-z0-9])?$/, // only alphanumeric characters and hyphens, cannot start or end with a hyphen and the alpha characters can only be lowercase
+                pattern: /^[a-z0-9](?:[a-z0-9-]*[a-z0-9])?$/,
                 message:
                   "Template ref name must follow the Kubernetes naming convention",
               },
@@ -517,11 +599,12 @@ const TemplateStore = () => {
             <Input />
           </Form.Item>
 
-          <Divider />
+          <Divider style={{ margin: "12px 0" }} />
 
           <Form.Item
             name={["ref", "sourceType"]}
             label="Select template source"
+            style={{ marginBottom: "12px" }}
           >
             <Radio.Group
               optionType="button"
@@ -551,6 +634,7 @@ const TemplateStore = () => {
             label="Repository URL"
             name={["ref", "repo"]}
             rules={[{ required: true, message: "Repo URL is required" }]}
+            style={{ marginBottom: "12px" }}
           >
             <Input />
           </Form.Item>
@@ -559,13 +643,20 @@ const TemplateStore = () => {
             label="Path"
             name={["ref", "path"]}
             rules={[{ required: true, message: "Path is required" }]}
+            style={{ marginBottom: "12px" }}
           >
             <Input />
           </Form.Item>
 
-          <Form.Item label="Version" name={["ref", "version"]}>
+          <Form.Item
+            label="Version"
+            name={["ref", "version"]}
+            style={{ marginBottom: "12px" }}
+          >
             <Input />
           </Form.Item>
+
+          {advancedTemplateGitOpsWrite()}
         </Form>
       </Modal>
       <Modal
@@ -597,15 +688,29 @@ const TemplateStore = () => {
           />
         )}
         <Form
-          style={{ paddingTop: "50px" }}
+          style={{ paddingTop: "24px" }}
           onFinish={handleUpdateSubmit}
           form={editForm}
           initialValues={{ remember: false }}
-          labelCol={{ span: 6 }}
+          labelCol={{ span: 24 }}
+          wrapperCol={{ span: 24 }}
+          requiredMark={(label, { required }) => (
+            <Row>
+              <Col>
+                {required ? (
+                  <span style={{ color: "red", paddingRight: "3px" }}>*</span>
+                ) : (
+                  <></>
+                )}
+              </Col>
+              <Col>{label}</Col>
+            </Row>
+          )}
         >
           <Form.Item
             name={["ref", "sourceType"]}
             label="Select template source"
+            style={{ marginBottom: "12px" }}
           >
             <Radio.Group
               optionType="button"
@@ -630,10 +735,12 @@ const TemplateStore = () => {
               </Radio>
             </Radio.Group>
           </Form.Item>
+
           <Form.Item
             label="Repository URL"
             name={["ref", "repo"]}
             rules={[{ required: true, message: "Repo URL is required" }]}
+            style={{ marginBottom: "12px" }}
           >
             <Input />
           </Form.Item>
@@ -642,13 +749,19 @@ const TemplateStore = () => {
             label="Path"
             name={["ref", "path"]}
             rules={[{ required: true, message: "Path is required" }]}
+            style={{ marginBottom: "12px" }}
           >
             <Input />
           </Form.Item>
 
-          <Form.Item label="Version" name={["ref", "version"]}>
+          <Form.Item
+            label="Version"
+            name={["ref", "version"]}
+            style={{ marginBottom: "12px" }}
+          >
             <Input />
           </Form.Item>
+          {advancedTemplateGitOpsWrite()}
         </Form>
       </Modal>
       <Modal

@@ -103,6 +103,19 @@ spec:
                   type: string
                 template:
                   properties:
+                    enforceGitOpsWrite:
+                      properties:
+                        path:
+                          type: string
+                        repo:
+                          type: string
+                        version:
+                          type: string
+                      required:
+                        - path
+                        - repo
+                        - version
+                      type: object
                     path:
                       type: string
                     repo:
@@ -337,6 +350,19 @@ spec:
               type: object
             spec:
               properties:
+                enforceGitOpsWrite:
+                  properties:
+                    path:
+                      type: string
+                    repo:
+                      type: string
+                    version:
+                      type: string
+                  required:
+                    - path
+                    - repo
+                    - version
+                  type: object
                 path:
                   type: string
                 repo:
@@ -432,7 +458,7 @@ spec:
     spec:
       containers:
         - name: cyclops-ui
-          image: cyclopsui/cyclops-ui:v0.20.3
+          image: cyclopsui/cyclops-ui:v0.21.0-rc.1
           ports:
             - containerPort: 80
           env:
@@ -497,7 +523,7 @@ spec:
       serviceAccountName: cyclops-ctrl
       containers:
         - name: cyclops-ctrl
-          image: cyclopsui/cyclops-ctrl:v0.20.3
+          image: cyclopsui/cyclops-ctrl:v0.21.0-rc.1
           ports:
             - containerPort: 8080
           env:

@@ -4,14 +4,13 @@ import (
 	"bytes"
 	"errors"
 	"fmt"
+	json "github.com/json-iterator/go"
 	path2 "path"
 	"text/template"
 	"time"
 
-	"github.com/cyclops-ui/cyclops/cyclops-ctrl/pkg/auth"
 	"github.com/go-logr/logr"
 
-	cyclopsv1alpha1 "github.com/cyclops-ui/cyclops/cyclops-ctrl/api/v1alpha1"
 	"github.com/go-git/go-billy/v5"
 	"github.com/go-git/go-billy/v5/memfs"
 	"github.com/go-git/go-git/v5"
@@ -20,6 +19,9 @@ import (
 	"github.com/go-git/go-git/v5/plumbing/transport/http"
 	"github.com/go-git/go-git/v5/storage/memory"
 	"sigs.k8s.io/yaml"
+
+	cyclopsv1alpha1 "github.com/cyclops-ui/cyclops/cyclops-ctrl/api/v1alpha1"
+	"github.com/cyclops-ui/cyclops/cyclops-ctrl/pkg/auth"
 )
 
 type WriteClient struct {
@@ -50,6 +52,32 @@ func getCommitMessageTemplate(commitMessageTemplate string, logger logr.Logger) 
 	return tmpl
 }
 
+func getModulePath(module cyclopsv1alpha1.Module) (string, error) {
+	path := module.GetAnnotations()[cyclopsv1alpha1.GitOpsWritePathAnnotation]
+
+	tmpl, err := template.New("modulePath").Parse(path)
+	if err != nil {
+		return "", err
+	}
+
+	moduleMap := make(map[string]interface{})
+	moduleData, err := json.Marshal(module)
+	if err != nil {
+		return "", err
+	}
+	if err := json.Unmarshal(moduleData, &moduleMap); err != nil {
+		return "", err
+	}
+
+	var o bytes.Buffer
+	err = tmpl.Execute(&o, moduleMap)
+	if err != nil {
+		return "", err
+	}
+
+	return o.String(), nil
+}
+
 func (c *WriteClient) Write(module cyclopsv1alpha1.Module) error {
 	module.Status.ReconciliationStatus = nil
 	module.Status.ManagedGVRs = nil
@@ -59,12 +87,20 @@ func (c *WriteClient) Write(module cyclopsv1alpha1.Module) error {
 		return errors.New(fmt.Sprintf("module passed to write without git repository; set cyclops-ui.com/write-repo annotation in module %v", module.Name))
 	}
 
-	path := module.GetAnnotations()[cyclopsv1alpha1.GitOpsWritePathAnnotation]
+	path, err := getModulePath(module)
+	if err != nil {
+		return err
+	}
+
 	revision := module.GetAnnotations()[cyclopsv1alpha1.GitOpsWriteRevisionAnnotation]
 
 	creds, err := c.templatesResolver.RepoAuthCredentials(repoURL)
 	if err != nil {
 		return err
+	}
+
+	if creds == nil {
+		return errors.New(fmt.Sprintf("failed to fetch creds for repo %v: check template auth rules", repoURL))
 	}
 
 	storer := memory.NewStorage()

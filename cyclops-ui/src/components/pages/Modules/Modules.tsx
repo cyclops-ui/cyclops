@@ -107,6 +107,7 @@ const Modules = () => {
   const handleClick = () => {
     window.location.href = "/modules/new";
   };
+
   const handleSelectItem = (selectedItems: any[]) => {
     setModuleHealthFilter(selectedItems);
   };
