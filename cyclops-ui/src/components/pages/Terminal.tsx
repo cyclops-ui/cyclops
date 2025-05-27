@@ -66,6 +66,30 @@ const ExecTerminal = ({
           t.writeln("[Disconnected]");
         };
 
+        t.attachCustomKeyEventHandler((event) => {
+          if (event.key === "ArrowUp") {
+            t.write("^[[A");
+            inputBuffer.current += "^[[A";
+            return false;
+          }
+          if (event.key === "ArrowDown") {
+            t.write("^[[B");
+            inputBuffer.current += "^[[B";
+            return false;
+          }
+          if (event.key === "ArrowRight") {
+            t.write("^[[C");
+            inputBuffer.current += "^[[C";
+            return false;
+          }
+          if (event.key === "ArrowLeft") {
+            t.write("^[[D");
+            inputBuffer.current += "^[[D";
+            return false;
+          }
+          return true;
+        });
+
         t.onData((data) => {
           const charCode = data.charCodeAt(0);
 
