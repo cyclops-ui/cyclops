@@ -67,7 +67,6 @@ const ExecTerminal = ({
         };
 
         t.attachCustomKeyEventHandler((event) => {
-          console.log("cile data", event);
           if (event.key === "ArrowUp") {
             t.write("^[[A");
             inputBuffer.current += "^[[A";
