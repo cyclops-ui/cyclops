@@ -94,6 +94,7 @@ func main() {
 	templatesRepo := template.NewRepo(
 		credsResolver,
 		cache.NewInMemoryTemplatesCache(),
+		k8sClient,
 	)
 
 	monitor, err := prometheus.NewMonitor(setupLog)
@@ -128,7 +129,7 @@ func main() {
 		}),
 		Cache: ctrlCache.Options{
 			DefaultNamespaces: map[string]ctrlCache.Config{
-				watchNamespace: {},
+				getWatchNamespace(): {},
 			},
 		},
 	})

@@ -21,6 +21,7 @@ export async function getTemplate(
   repo: string,
   path: string,
   version: string,
+  crdName: string,
   sourceType: string,
 ): Promise<any> {
   const resp = await axios.get(
@@ -30,6 +31,8 @@ export async function getTemplate(
       path +
       `&commit=` +
       version +
+      `&crdName=` +
+      crdName +
       `&sourceType=` +
       sourceType,
   );
@@ -41,6 +44,7 @@ export async function getTemplateInitialValues(
   repo: string,
   path: string,
   version: string,
+  crdName: string,
   sourceType: string,
 ): Promise<any> {
   const resp = await axios.get(
@@ -50,6 +54,8 @@ export async function getTemplateInitialValues(
       path +
       `&commit=` +
       version +
+      `&crdName=` +
+      crdName +
       `&sourceType=` +
       sourceType,
   );
@@ -85,6 +91,7 @@ export async function createModule(
       repo: templateRef.repo,
       path: templateRef.path,
       version: templateRef.version,
+      crdName: templateRef.crdName,
       sourceType: templateRef.sourceType,
     },
   });

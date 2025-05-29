@@ -35,6 +35,22 @@ func (s *Server) ReleaseResources(ctx *gin.Context) {
 	s.streamResources(ctx, resources)
 }
 
+func (s *Server) CRDResources(ctx *gin.Context) {
+	r, err := s.k8sClient.GetResource(ctx.Query("group"), ctx.Query("version"), ctx.Query("kind"), ctx.Query("name"), ctx.Query("namespace"))
+	if err != nil {
+		ctx.String(http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	other, ok := r.(*dto.Other)
+	if !ok {
+		ctx.String(http.StatusInternalServerError, "failed to fetch resource")
+		return
+	}
+
+	s.streamResources(ctx, other.Children)
+}
+
 func (s *Server) streamResources(ctx *gin.Context, resources []*dto.Resource) {
 	watchSpecs := make([]k8sclient.ResourceWatchSpec, 0, len(resources))
 	for _, resource := range resources {

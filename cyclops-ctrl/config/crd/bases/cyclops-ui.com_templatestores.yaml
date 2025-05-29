@@ -55,6 +55,8 @@ spec:
             type: object
           spec:
             properties:
+              CRDName:
+                type: string
               path:
                 type: string
               repo:
@@ -64,13 +66,10 @@ spec:
                 - git
                 - helm
                 - oci
+                - crd
                 type: string
               version:
                 type: string
-            required:
-            - path
-            - repo
-            - version
             type: object
         type: object
     served: true

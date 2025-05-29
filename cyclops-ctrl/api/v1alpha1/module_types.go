@@ -43,6 +43,7 @@ const (
 	TemplateSourceTypeGit  TemplateSourceType = "git"
 	TemplateSourceTypeHelm TemplateSourceType = "helm"
 	TemplateSourceTypeOCI  TemplateSourceType = "oci"
+	TemplateSourceTypeCRD  TemplateSourceType = "crd"
 
 	GitOpsWriteRepoAnnotation     = "cyclops-ui.com/write-repo"
 	GitOpsWritePathAnnotation     = "cyclops-ui.com/write-path"
@@ -55,11 +56,15 @@ const (
 )
 
 type TemplateRef struct {
-	URL     string `json:"repo"`
-	Path    string `json:"path"`
+	// +kubebuilder:validation:Optional
+	URL string `json:"repo"`
+	// +kubebuilder:validation:Optional
+	Path string `json:"path"`
+	// +kubebuilder:validation:Optional
 	Version string `json:"version"`
-
-	// +kubebuilder:validation:Enum=git;helm;oci
+	// +kubebuilder:validation:Optional
+	CRDName string `json:"CRDName"`
+	// +kubebuilder:validation:Enum=git;helm;oci;crd
 	// +kubebuilder:validation:Optional
 	SourceType TemplateSourceType `json:"sourceType,omitempty"`
 }
@@ -106,11 +111,16 @@ type ModuleStatus struct {
 }
 
 type HistoryTemplateRef struct {
-	URL     string `json:"repo"`
-	Path    string `json:"path"`
+	// +kubebuilder:validation:Optional
+	URL string `json:"repo"`
+	// +kubebuilder:validation:Optional
+	Path string `json:"path"`
+	// +kubebuilder:validation:Optional
 	Version string `json:"version"`
+	// +kubebuilder:validation:Optional
+	CRDName string `json:"CRDName"`
 
-	// +kubebuilder:validation:Enum=git;helm;oci
+	// +kubebuilder:validation:Enum=git;helm;oci;crd
 	// +kubebuilder:validation:Optional
 	SourceType TemplateSourceType `json:"sourceType,omitempty"`
 }

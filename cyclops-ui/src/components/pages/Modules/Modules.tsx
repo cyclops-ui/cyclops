@@ -152,6 +152,10 @@ const Modules = () => {
   };
 
   const getStatusColor = (module: any) => {
+    if (module.template.sourceType === "crd") {
+      return "#326CE5";
+    }
+
     if (module.status === "unknown") {
       return "#d3d3d3";
     }
@@ -188,6 +192,111 @@ const Modules = () => {
       return version;
     }
     return "main";
+  };
+
+  const moduleCardBody = (module: any) => {
+    if (module.template.sourceType === "crd") {
+      return (
+        <div>
+          <Row gutter={[16, 16]}>
+            <Col
+              span={24}
+              style={{
+                whiteSpace: "nowrap",
+                overflow: "hidden",
+                textOverflow: "ellipsis",
+                display: "block",
+              }}
+            >
+              K8s CRD: {module.template.crdName}
+            </Col>
+          </Row>
+          <Row gutter={[16, 16]}>
+            <Col
+              span={24}
+              style={{
+                whiteSpace: "nowrap",
+                overflow: "hidden",
+                textOverflow: "ellipsis",
+                display: "block",
+              }}
+            >
+              Namespace: {module.targetNamespace}
+            </Col>
+          </Row>
+        </div>
+      );
+    }
+
+    return (
+      <div>
+        <Row gutter={[16, 16]}>
+          <Col
+            span={24}
+            style={{
+              whiteSpace: "nowrap",
+              overflow: "hidden",
+              textOverflow: "ellipsis",
+              display: "block",
+            }}
+          >
+            Repo:
+            <Link aria-level={3} href={module.template.repo} target="_blank">
+              {" " + module.template.repo}
+            </Link>
+          </Col>
+        </Row>
+        <Row gutter={[16, 16]}>
+          <Col
+            span={24}
+            style={{
+              whiteSpace: "nowrap",
+              overflow: "hidden",
+              textOverflow: "ellipsis",
+              display: "block",
+            }}
+          >
+            Path:
+            <Link
+              aria-level={3}
+              target="_blank"
+              href={
+                module.template.repo +
+                `/tree/` +
+                getLinkPath(
+                  module.template.version,
+                  module.template.resolvedVersion,
+                ) +
+                `/` +
+                module.template.path
+              }
+            >
+              {" " + module.template.path}
+            </Link>
+          </Col>
+        </Row>
+        <Row gutter={[16, 16]}>
+          <Col
+            span={24}
+            style={{
+              whiteSpace: "nowrap",
+              overflow: "hidden",
+              textOverflow: "ellipsis",
+              display: "block",
+            }}
+          >
+            Version:
+            <span style={{ color: "#1677ff" }}>
+              {" "}
+              {getTemplateVersion(
+                module.template.version,
+                module.template.resolvedVersion,
+              )}
+            </span>
+          </Col>
+        </Row>
+      </div>
+    );
   };
 
   const renderModulesCards = () => {
@@ -245,6 +354,12 @@ const Modules = () => {
                     style={{ height: "2em", marginRight: "8px" }}
                     src={module.iconURL}
                   />
+                ) : module.template.sourceType === "crd" ? (
+                  <img
+                    alt="CRD Icon"
+                    style={{ height: "1.8em", marginRight: "8px" }}
+                    src="https://github.com/kubernetes/community/blob/master/icons/png/resources/labeled/crd-128.png?raw=true"
+                  />
                 ) : (
                   <></>
                 )}
@@ -255,78 +370,11 @@ const Modules = () => {
               borderLeft: "solid " + getStatusColor(module) + " 5px",
               width: "100%",
               maxWidth: "500px",
+              height: "100%",
             }}
             className={"modulecard"}
           >
-            <Row gutter={[16, 16]}>
-              <Col
-                span={24}
-                style={{
-                  whiteSpace: "nowrap",
-                  overflow: "hidden",
-                  textOverflow: "ellipsis",
-                  display: "block",
-                }}
-              >
-                Repo:
-                <Link
-                  aria-level={3}
-                  href={module.template.repo}
-                  target="_blank"
-                >
-                  {" " + module.template.repo}
-                </Link>
-              </Col>
-            </Row>
-            <Row gutter={[16, 16]}>
-              <Col
-                span={24}
-                style={{
-                  whiteSpace: "nowrap",
-                  overflow: "hidden",
-                  textOverflow: "ellipsis",
-                  display: "block",
-                }}
-              >
-                Path:
-                <Link
-                  aria-level={3}
-                  target="_blank"
-                  href={
-                    module.template.repo +
-                    `/tree/` +
-                    getLinkPath(
-                      module.template.version,
-                      module.template.resolvedVersion,
-                    ) +
-                    `/` +
-                    module.template.path
-                  }
-                >
-                  {" " + module.template.path}
-                </Link>
-              </Col>
-            </Row>
-            <Row gutter={[16, 16]}>
-              <Col
-                span={24}
-                style={{
-                  whiteSpace: "nowrap",
-                  overflow: "hidden",
-                  textOverflow: "ellipsis",
-                  display: "block",
-                }}
-              >
-                Version:
-                <span style={{ color: "#1677ff" }}>
-                  {" "}
-                  {getTemplateVersion(
-                    module.template.version,
-                    module.template.resolvedVersion,
-                  )}
-                </span>
-              </Col>
-            </Row>
+            {moduleCardBody(module)}
           </Card>
         </a>
       </Col>

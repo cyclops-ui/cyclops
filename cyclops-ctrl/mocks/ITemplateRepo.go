@@ -23,9 +23,9 @@ func (_m *ITemplateRepo) EXPECT() *ITemplateRepo_Expecter {
 	return &ITemplateRepo_Expecter{mock: &_m.Mock}
 }
 
-// GetTemplate provides a mock function with given fields: repo, path, version, resolvedVersion, source
-func (_m *ITemplateRepo) GetTemplate(repo string, path string, version string, resolvedVersion string, source v1alpha1.TemplateSourceType) (*models.Template, error) {
-	ret := _m.Called(repo, path, version, resolvedVersion, source)
+// GetTemplate provides a mock function with given fields: repo, path, version, resolvedVersion, CRDName, source
+func (_m *ITemplateRepo) GetTemplate(repo string, path string, version string, resolvedVersion string, CRDName string, source v1alpha1.TemplateSourceType) (*models.Template, error) {
+	ret := _m.Called(repo, path, version, resolvedVersion, CRDName, source)
 
 	if len(ret) == 0 {
 		panic("no return value specified for GetTemplate")
@@ -33,19 +33,19 @@ func (_m *ITemplateRepo) GetTemplate(repo string, path string, version string, r
 
 	var r0 *models.Template
 	var r1 error
-	if rf, ok := ret.Get(0).(func(string, string, string, string, v1alpha1.TemplateSourceType) (*models.Template, error)); ok {
-		return rf(repo, path, version, resolvedVersion, source)
+	if rf, ok := ret.Get(0).(func(string, string, string, string, string, v1alpha1.TemplateSourceType) (*models.Template, error)); ok {
+		return rf(repo, path, version, resolvedVersion, CRDName, source)
 	}
-	if rf, ok := ret.Get(0).(func(string, string, string, string, v1alpha1.TemplateSourceType) *models.Template); ok {
-		r0 = rf(repo, path, version, resolvedVersion, source)
+	if rf, ok := ret.Get(0).(func(string, string, string, string, string, v1alpha1.TemplateSourceType) *models.Template); ok {
+		r0 = rf(repo, path, version, resolvedVersion, CRDName, source)
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).(*models.Template)
 		}
 	}
 
-	if rf, ok := ret.Get(1).(func(string, string, string, string, v1alpha1.TemplateSourceType) error); ok {
-		r1 = rf(repo, path, version, resolvedVersion, source)
+	if rf, ok := ret.Get(1).(func(string, string, string, string, string, v1alpha1.TemplateSourceType) error); ok {
+		r1 = rf(repo, path, version, resolvedVersion, CRDName, source)
 	} else {
 		r1 = ret.Error(1)
 	}
@@ -63,14 +63,15 @@ type ITemplateRepo_GetTemplate_Call struct {
 //   - path string
 //   - version string
 //   - resolvedVersion string
+//   - CRDName string
 //   - source v1alpha1.TemplateSourceType
-func (_e *ITemplateRepo_Expecter) GetTemplate(repo interface{}, path interface{}, version interface{}, resolvedVersion interface{}, source interface{}) *ITemplateRepo_GetTemplate_Call {
-	return &ITemplateRepo_GetTemplate_Call{Call: _e.mock.On("GetTemplate", repo, path, version, resolvedVersion, source)}
+func (_e *ITemplateRepo_Expecter) GetTemplate(repo interface{}, path interface{}, version interface{}, resolvedVersion interface{}, CRDName interface{}, source interface{}) *ITemplateRepo_GetTemplate_Call {
+	return &ITemplateRepo_GetTemplate_Call{Call: _e.mock.On("GetTemplate", repo, path, version, resolvedVersion, CRDName, source)}
 }
 
-func (_c *ITemplateRepo_GetTemplate_Call) Run(run func(repo string, path string, version string, resolvedVersion string, source v1alpha1.TemplateSourceType)) *ITemplateRepo_GetTemplate_Call {
+func (_c *ITemplateRepo_GetTemplate_Call) Run(run func(repo string, path string, version string, resolvedVersion string, CRDName string, source v1alpha1.TemplateSourceType)) *ITemplateRepo_GetTemplate_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(string), args[1].(string), args[2].(string), args[3].(string), args[4].(v1alpha1.TemplateSourceType))
+		run(args[0].(string), args[1].(string), args[2].(string), args[3].(string), args[4].(string), args[5].(v1alpha1.TemplateSourceType))
 	})
 	return _c
 }
@@ -80,14 +81,14 @@ func (_c *ITemplateRepo_GetTemplate_Call) Return(_a0 *models.Template, _a1 error
 	return _c
 }
 
-func (_c *ITemplateRepo_GetTemplate_Call) RunAndReturn(run func(string, string, string, string, v1alpha1.TemplateSourceType) (*models.Template, error)) *ITemplateRepo_GetTemplate_Call {
+func (_c *ITemplateRepo_GetTemplate_Call) RunAndReturn(run func(string, string, string, string, string, v1alpha1.TemplateSourceType) (*models.Template, error)) *ITemplateRepo_GetTemplate_Call {
 	_c.Call.Return(run)
 	return _c
 }
 
-// GetTemplateInitialValues provides a mock function with given fields: repo, path, version, source
-func (_m *ITemplateRepo) GetTemplateInitialValues(repo string, path string, version string, source v1alpha1.TemplateSourceType) (map[string]interface{}, error) {
-	ret := _m.Called(repo, path, version, source)
+// GetTemplateInitialValues provides a mock function with given fields: repo, path, version, CRDName, source
+func (_m *ITemplateRepo) GetTemplateInitialValues(repo string, path string, version string, CRDName string, source v1alpha1.TemplateSourceType) (map[string]interface{}, error) {
+	ret := _m.Called(repo, path, version, CRDName, source)
 
 	if len(ret) == 0 {
 		panic("no return value specified for GetTemplateInitialValues")
@@ -95,19 +96,19 @@ func (_m *ITemplateRepo) GetTemplateInitialValues(repo string, path string, vers
 
 	var r0 map[string]interface{}
 	var r1 error
-	if rf, ok := ret.Get(0).(func(string, string, string, v1alpha1.TemplateSourceType) (map[string]interface{}, error)); ok {
-		return rf(repo, path, version, source)
+	if rf, ok := ret.Get(0).(func(string, string, string, string, v1alpha1.TemplateSourceType) (map[string]interface{}, error)); ok {
+		return rf(repo, path, version, CRDName, source)
 	}
-	if rf, ok := ret.Get(0).(func(string, string, string, v1alpha1.TemplateSourceType) map[string]interface{}); ok {
-		r0 = rf(repo, path, version, source)
+	if rf, ok := ret.Get(0).(func(string, string, string, string, v1alpha1.TemplateSourceType) map[string]interface{}); ok {
+		r0 = rf(repo, path, version, CRDName, source)
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).(map[string]interface{})
 		}
 	}
 
-	if rf, ok := ret.Get(1).(func(string, string, string, v1alpha1.TemplateSourceType) error); ok {
-		r1 = rf(repo, path, version, source)
+	if rf, ok := ret.Get(1).(func(string, string, string, string, v1alpha1.TemplateSourceType) error); ok {
+		r1 = rf(repo, path, version, CRDName, source)
 	} else {
 		r1 = ret.Error(1)
 	}
@@ -124,14 +125,15 @@ type ITemplateRepo_GetTemplateInitialValues_Call struct {
 //   - repo string
 //   - path string
 //   - version string
+//   - CRDName string
 //   - source v1alpha1.TemplateSourceType
-func (_e *ITemplateRepo_Expecter) GetTemplateInitialValues(repo interface{}, path interface{}, version interface{}, source interface{}) *ITemplateRepo_GetTemplateInitialValues_Call {
-	return &ITemplateRepo_GetTemplateInitialValues_Call{Call: _e.mock.On("GetTemplateInitialValues", repo, path, version, source)}
+func (_e *ITemplateRepo_Expecter) GetTemplateInitialValues(repo interface{}, path interface{}, version interface{}, CRDName interface{}, source interface{}) *ITemplateRepo_GetTemplateInitialValues_Call {
+	return &ITemplateRepo_GetTemplateInitialValues_Call{Call: _e.mock.On("GetTemplateInitialValues", repo, path, version, CRDName, source)}
 }
 
-func (_c *ITemplateRepo_GetTemplateInitialValues_Call) Run(run func(repo string, path string, version string, source v1alpha1.TemplateSourceType)) *ITemplateRepo_GetTemplateInitialValues_Call {
+func (_c *ITemplateRepo_GetTemplateInitialValues_Call) Run(run func(repo string, path string, version string, CRDName string, source v1alpha1.TemplateSourceType)) *ITemplateRepo_GetTemplateInitialValues_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(string), args[1].(string), args[2].(string), args[3].(v1alpha1.TemplateSourceType))
+		run(args[0].(string), args[1].(string), args[2].(string), args[3].(string), args[4].(v1alpha1.TemplateSourceType))
 	})
 	return _c
 }
@@ -141,7 +143,7 @@ func (_c *ITemplateRepo_GetTemplateInitialValues_Call) Return(_a0 map[string]int
 	return _c
 }
 
-func (_c *ITemplateRepo_GetTemplateInitialValues_Call) RunAndReturn(run func(string, string, string, v1alpha1.TemplateSourceType) (map[string]interface{}, error)) *ITemplateRepo_GetTemplateInitialValues_Call {
+func (_c *ITemplateRepo_GetTemplateInitialValues_Call) RunAndReturn(run func(string, string, string, string, v1alpha1.TemplateSourceType) (map[string]interface{}, error)) *ITemplateRepo_GetTemplateInitialValues_Call {
 	_c.Call.Return(run)
 	return _c
 }

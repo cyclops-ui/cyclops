@@ -10,6 +10,7 @@ import (
 
 	"github.com/go-logr/logr"
 	apiv1 "k8s.io/api/core/v1"
+	v1 "k8s.io/apiextensions-apiserver/pkg/apis/apiextensions/v1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/runtime/schema"
 	"k8s.io/apimachinery/pkg/version"
@@ -19,6 +20,8 @@ import (
 	"k8s.io/client-go/kubernetes"
 	ctrl "sigs.k8s.io/controller-runtime"
 
+	apiextensionsclientset "k8s.io/apiextensions-apiserver/pkg/client/clientset/clientset"
+
 	cyclopsv1alpha1 "github.com/cyclops-ui/cyclops/cyclops-ctrl/api/v1alpha1"
 	"github.com/cyclops-ui/cyclops/cyclops-ctrl/api/v1alpha1/client"
 	"github.com/cyclops-ui/cyclops/cyclops-ctrl/internal/models/dto"
@@ -27,14 +30,17 @@ import (
 type KubernetesClient struct {
 	config *rest.Config
 
-	Dynamic   dynamic.Interface
-	clientset *kubernetes.Clientset
-	discovery *discovery.DiscoveryClient
-	moduleset *client.CyclopsV1Alpha1Client
+	Dynamic             dynamic.Interface
+	clientset           *kubernetes.Clientset
+	discovery           *discovery.DiscoveryClient
+	moduleset           *client.CyclopsV1Alpha1Client
+	extensionsClientset *apiextensionsclientset.Clientset
 
 	moduleNamespace       string
 	helmReleaseNamespace  string
 	moduleTargetNamespace string
+
+	childLabels ChildLabels
 
 	logger logr.Logger
 }
@@ -99,17 +105,23 @@ func NewWithConfig(config ClientConfig, logger logr.Logger) (*KubernetesClient, 
 		return nil, fmt.Errorf("failed to create dynamic client: %w", err)
 	}
 
-	return &KubernetesClient{
-		config:                k8sConfig,
+	extensionsClientset := apiextensionsclientset.NewForConfigOrDie(k8sConfig)
+
+	k := &KubernetesClient{
 		Dynamic:               dynamic,
 		discovery:             discovery,
 		clientset:             clientset,
 		moduleset:             moduleSet,
+		extensionsClientset:   extensionsClientset,
 		moduleNamespace:       config.ModuleNamespace,
 		helmReleaseNamespace:  config.HelmReleaseNamespace,
 		moduleTargetNamespace: config.ModuleTargetNamespace,
 		logger:                logger,
-	}, nil
+	}
+
+	k.loadResourceRelationsLabels()
+
+	return k, nil
 }
 
 func New(
@@ -168,6 +180,8 @@ type IKubernetesClient interface {
 	DeleteTemplateStore(name string) error
 	GetResourcesForRelease(release string) ([]*dto.Resource, error)
 	GetWorkloadsForRelease(name string) ([]*dto.Resource, error)
+	ListCRDs() ([]v1.CustomResourceDefinition, error)
+	GetCRD(name string) (*v1.CustomResourceDefinition, error)
 	DeleteReleaseSecret(releaseName, releaseNamespace string) error
 	CommandExecutor(namespace, podName, container string) (remotecommand.Executor, error)
 }

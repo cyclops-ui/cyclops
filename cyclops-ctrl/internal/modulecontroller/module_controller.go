@@ -152,6 +152,7 @@ func (r *ModuleReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctr
 		module.Spec.TemplateRef.Path,
 		templateVersion,
 		module.Status.TemplateResolvedVersion,
+		module.Spec.TemplateRef.CRDName,
 		module.Spec.TemplateRef.SourceType,
 	)
 	if err != nil {
@@ -245,7 +246,7 @@ func (r *ModuleReconciler) generateResources(
 	module cyclopsv1alpha1.Module,
 	moduleTemplate *models.Template,
 ) ([]string, []cyclopsv1alpha1.GroupVersionResource, error) {
-	out, err := r.renderer.HelmTemplate(module, moduleTemplate)
+	out, err := r.renderer.RenderManifest(module, moduleTemplate)
 	if err != nil {
 		return nil, nil, err
 	}

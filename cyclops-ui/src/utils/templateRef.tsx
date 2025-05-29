@@ -8,6 +8,7 @@ export interface templateRef {
   path: string;
   version: string;
   resolvedVersion: string;
+  crdName: string;
   sourceType: string;
 }
 

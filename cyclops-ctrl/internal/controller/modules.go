@@ -201,6 +201,7 @@ func (m *Modules) Manifest(ctx *gin.Context) {
 		request.TemplateRef.Path,
 		request.TemplateRef.Version,
 		"",
+		request.TemplateRef.CRDName,
 		request.TemplateRef.SourceType,
 	)
 	if err != nil {
@@ -209,7 +210,7 @@ func (m *Modules) Manifest(ctx *gin.Context) {
 		return
 	}
 
-	manifest, err := m.renderer.HelmTemplate(v1alpha1.Module{
+	manifest, err := m.renderer.RenderManifest(v1alpha1.Module{
 		ObjectMeta: metav1.ObjectMeta{
 			Name: ctx.Param("name"),
 		},
@@ -218,6 +219,7 @@ func (m *Modules) Manifest(ctx *gin.Context) {
 				URL:        request.TemplateRef.URL,
 				Path:       request.TemplateRef.Path,
 				Version:    request.TemplateRef.Version,
+				CRDName:    request.TemplateRef.CRDName,
 				SourceType: request.TemplateRef.SourceType,
 			},
 			Values: request.Values,
@@ -250,6 +252,7 @@ func (m *Modules) CurrentManifest(ctx *gin.Context) {
 		module.Spec.TemplateRef.Path,
 		module.Spec.TemplateRef.Version,
 		module.Status.TemplateResolvedVersion,
+		module.Spec.TemplateRef.CRDName,
 		module.Spec.TemplateRef.SourceType,
 	)
 	if err != nil {
@@ -258,7 +261,7 @@ func (m *Modules) CurrentManifest(ctx *gin.Context) {
 		return
 	}
 
-	manifest, err := m.renderer.HelmTemplate(*module, targetTemplate)
+	manifest, err := m.renderer.RenderManifest(*module, targetTemplate)
 	if err != nil {
 		fmt.Println(err)
 		ctx.Status(http.StatusInternalServerError)
@@ -420,6 +423,7 @@ func (m *Modules) UpdateModule(ctx *gin.Context) {
 			URL:        curr.Spec.TemplateRef.URL,
 			Path:       curr.Spec.TemplateRef.Path,
 			Version:    curr.Status.TemplateResolvedVersion,
+			CRDName:    curr.Spec.TemplateRef.CRDName,
 			SourceType: curr.Spec.TemplateRef.SourceType,
 		},
 		Values: curr.Spec.Values,
@@ -484,6 +488,7 @@ func (m *Modules) HistoryEntryManifest(ctx *gin.Context) {
 		targetGeneration.TemplateRef.Path,
 		targetGeneration.TemplateRef.Version,
 		"",
+		targetGeneration.TemplateRef.CRDName,
 		targetGeneration.TemplateRef.SourceType,
 	)
 	if err != nil {
@@ -492,7 +497,7 @@ func (m *Modules) HistoryEntryManifest(ctx *gin.Context) {
 		return
 	}
 
-	manifest, err := m.renderer.HelmTemplate(v1alpha1.Module{
+	manifest, err := m.renderer.RenderManifest(v1alpha1.Module{
 		ObjectMeta: metav1.ObjectMeta{
 			Name: request.ModuleName,
 		},
@@ -656,6 +661,7 @@ func (m *Modules) ResourcesForModule(ctx *gin.Context) {
 		module.Spec.TemplateRef.Path,
 		templateVersion,
 		module.Status.TemplateResolvedVersion,
+		module.Spec.TemplateRef.CRDName,
 		module.Spec.TemplateRef.SourceType,
 	)
 	if err != nil {
@@ -670,7 +676,7 @@ func (m *Modules) ResourcesForModule(ctx *gin.Context) {
 		return
 	}
 
-	manifest, err := m.renderer.HelmTemplate(*module, t)
+	manifest, err := m.renderer.RenderManifest(*module, t)
 	if err != nil {
 		fmt.Println("error rendering manifest", err)
 		ctx.JSON(http.StatusInternalServerError, dto.NewError("Error rendering Module manifest", err.Error()))
@@ -710,6 +716,7 @@ func (m *Modules) Template(ctx *gin.Context) {
 		module.Spec.TemplateRef.Path,
 		module.Spec.TemplateRef.Version,
 		module.Status.TemplateResolvedVersion,
+		module.Spec.TemplateRef.CRDName,
 		module.Spec.TemplateRef.SourceType,
 	)
 	if err != nil {
@@ -718,7 +725,7 @@ func (m *Modules) Template(ctx *gin.Context) {
 		return
 	}
 
-	currentManifest, err := m.renderer.HelmTemplate(*module, currentTemplate)
+	currentManifest, err := m.renderer.RenderManifest(*module, currentTemplate)
 	if err != nil {
 		fmt.Println(err)
 		ctx.JSON(http.StatusInternalServerError, dto.NewError("Error templating current", err.Error()))
@@ -730,6 +737,7 @@ func (m *Modules) Template(ctx *gin.Context) {
 		module.Spec.TemplateRef.Path,
 		module.Spec.TemplateRef.Version,
 		module.Status.TemplateResolvedVersion,
+		module.Spec.TemplateRef.CRDName,
 		module.Spec.TemplateRef.SourceType,
 	)
 	if err != nil {
@@ -738,7 +746,7 @@ func (m *Modules) Template(ctx *gin.Context) {
 		return
 	}
 
-	proposedManifest, err := m.renderer.HelmTemplate(*module, proposedTemplate)
+	proposedManifest, err := m.renderer.RenderManifest(*module, proposedTemplate)
 	if err != nil {
 		fmt.Println(err)
 		ctx.JSON(http.StatusInternalServerError, dto.NewError("Error templating proposed", err.Error()))
@@ -768,6 +776,7 @@ func (m *Modules) HelmTemplate(ctx *gin.Context) {
 		module.Spec.TemplateRef.Path,
 		module.Spec.TemplateRef.Version,
 		module.Status.TemplateResolvedVersion,
+		module.Spec.TemplateRef.CRDName,
 		module.Spec.TemplateRef.SourceType,
 	)
 	if err != nil {
@@ -776,7 +785,7 @@ func (m *Modules) HelmTemplate(ctx *gin.Context) {
 		return
 	}
 
-	_, err = m.renderer.HelmTemplate(*module, currentTemplate)
+	_, err = m.renderer.RenderManifest(*module, currentTemplate)
 	if err != nil {
 		fmt.Println(err)
 		ctx.JSON(http.StatusInternalServerError, dto.NewError("Error templating", err.Error()))

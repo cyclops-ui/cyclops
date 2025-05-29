@@ -2,6 +2,7 @@ package template
 
 import (
 	"fmt"
+	"github.com/cyclops-ui/cyclops/cyclops-ctrl/pkg/cluster/k8sclient"
 
 	"github.com/cyclops-ui/cyclops/cyclops-ctrl/pkg/auth"
 
@@ -21,12 +22,14 @@ type ITemplateRepo interface {
 		path string,
 		version string,
 		resolvedVersion string,
+		CRDName string,
 		source cyclopsv1alpha1.TemplateSourceType,
 	) (*models.Template, error)
 	GetTemplateInitialValues(
 		repo string,
 		path string,
 		version string,
+		CRDName string,
 		source cyclopsv1alpha1.TemplateSourceType,
 	) (map[string]interface{}, error)
 	ReturnCache() *ristretto.Cache
@@ -35,6 +38,7 @@ type ITemplateRepo interface {
 type Repo struct {
 	credResolver auth.TemplatesResolver
 	cache        templateCache
+	k8sClient    *k8sclient.KubernetesClient
 }
 
 type templateCache interface {
@@ -45,10 +49,11 @@ type templateCache interface {
 	ReturnCache() *ristretto.Cache
 }
 
-func NewRepo(credResolver auth.TemplatesResolver, tc templateCache) ITemplateRepo {
+func NewRepo(credResolver auth.TemplatesResolver, tc templateCache, k8sClient *k8sclient.KubernetesClient) ITemplateRepo {
 	return &Repo{
 		credResolver: credResolver,
 		cache:        tc,
+		k8sClient:    k8sClient,
 	}
 }
 
@@ -57,6 +62,7 @@ func (r Repo) GetTemplate(
 	path string,
 	version string,
 	resolvedVersion string,
+	CRDName string,
 	source cyclopsv1alpha1.TemplateSourceType,
 ) (*models.Template, error) {
 	var err error
@@ -67,7 +73,7 @@ func (r Repo) GetTemplate(
 		}
 	}
 
-	return r.getTemplate(repo, path, version, resolvedVersion, source)
+	return r.getTemplate(repo, path, version, resolvedVersion, CRDName, source)
 }
 
 func (r Repo) getTemplate(
@@ -75,6 +81,7 @@ func (r Repo) getTemplate(
 	path string,
 	version string,
 	resolvedVersion string,
+	CRDName string,
 	source cyclopsv1alpha1.TemplateSourceType,
 ) (*models.Template, error) {
 	switch source {
@@ -84,6 +91,8 @@ func (r Repo) getTemplate(
 		return r.LoadHelmChart(repo, path, version, resolvedVersion)
 	case cyclopsv1alpha1.TemplateSourceTypeGit:
 		return r.LoadTemplate(repo, path, version, resolvedVersion)
+	case cyclopsv1alpha1.TemplateSourceTypeCRD:
+		return r.GetTemplateCRDs(CRDName)
 	default:
 		return nil, errors.New(fmt.Sprintf("unsupported template source: %v", source))
 	}
@@ -93,6 +102,7 @@ func (r Repo) GetTemplateInitialValues(
 	repo string,
 	path string,
 	version string,
+	CRDName string,
 	source cyclopsv1alpha1.TemplateSourceType,
 ) (map[string]interface{}, error) {
 	var err error
@@ -103,13 +113,14 @@ func (r Repo) GetTemplateInitialValues(
 		}
 	}
 
-	return r.getTemplateInitialValues(repo, path, version, source)
+	return r.getTemplateInitialValues(repo, path, version, CRDName, source)
 }
 
 func (r Repo) getTemplateInitialValues(
 	repo string,
 	path string,
 	version string,
+	CRDName string,
 	source cyclopsv1alpha1.TemplateSourceType,
 ) (map[string]interface{}, error) {
 	switch source {
@@ -119,6 +130,8 @@ func (r Repo) getTemplateInitialValues(
 		return r.LoadHelmChartInitialValues(repo, path, version)
 	case cyclopsv1alpha1.TemplateSourceTypeGit:
 		return r.LoadInitialTemplateValues(repo, path, version)
+	case cyclopsv1alpha1.TemplateSourceTypeCRD:
+		return r.LoadInitialTemplateValuesCRD(CRDName)
 	default:
 		return nil, errors.New(fmt.Sprintf("unsupported template source: %v", source))
 	}
@@ -131,7 +144,7 @@ func (r Repo) loadDependencies(metadata *helm.Metadata) ([]*models.Template, err
 			continue
 		}
 
-		dep, err := r.GetTemplate(dependency.Repository, dependency.Name, dependency.Version, "", "")
+		dep, err := r.GetTemplate(dependency.Repository, dependency.Name, dependency.Version, "", "", "")
 		if err != nil {
 			return nil, err
 		}
@@ -151,7 +164,7 @@ func (r Repo) loadDependenciesInitialValues(metadata *helm.Metadata) (map[string
 			continue
 		}
 
-		depInitialValues, err := r.GetTemplateInitialValues(dependency.Repository, dependency.Name, dependency.Version, "")
+		depInitialValues, err := r.GetTemplateInitialValues(dependency.Repository, dependency.Name, dependency.Version, "", "")
 		if err != nil {
 			return nil, err
 		}
