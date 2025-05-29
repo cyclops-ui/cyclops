@@ -105,7 +105,7 @@ func NewWithConfig(config ClientConfig, logger logr.Logger) (*KubernetesClient, 
 		return nil, fmt.Errorf("failed to create dynamic client: %w", err)
 	}
 
-	extensionsClientset := apiextensionsclientset.NewForConfigOrDie(config)
+	extensionsClientset := apiextensionsclientset.NewForConfigOrDie(k8sConfig)
 
 	k := &KubernetesClient{
 		Dynamic:               dynamic,
