@@ -23,41 +23,41 @@ const Blogs = () => {
         <Row gutter={[16, 16]}>
           <Col xs={{ span: 20, offset: 2 }} md={{ span: 6, offset: 3 }}>
             <Blog
-              title={"From Helm Chart to Developer UI in 5 Minutes"}
+              title={"MCP Servers for Agentic Dev Platforms"}
               description={
-                "Helm is great… …until you give it to a developer."
+                "For the past couple of months, the concept of MCP has been booming..."
               }
               blogLink={
-                "https://cyclops-ui.com/blog/2025/04/03/helm-to-idp-in-five"
+                "https://cyclops-ui.com/blog/2025/05/22/agentic-platform-for-mcps"
               }
               avatar={"https://github.com/KaradzaJuraj.png"}
-              banner={"/img/2025-04-03-helm-to-idp-in-five/cover.png"}
+              banner={"/img/2025-05-22-agentic-platform-for-mcps/cover.png"}
             />
           </Col>
           <Col xs={{ span: 20, offset: 2 }} md={{ span: 6, offset: 0 }}>
             <Blog
-              title={"How Platform Engineering Helps You Move Like a Startup Again"}
+              title={"Signs You Might Need a Developer Platform"}
               description={
-                "There's been a quiet shift happening in engineering teams over the last few years. DevOps isn't going away, but it *is* evolving..."
+                "We put together a lighthearted guide, told through memes, to help you spot the signs early..."
               }
               blogLink={
-                "https://cyclops-ui.com/blog/2025/03/27/move-like-a-startup"
+                "https://cyclops-ui.com/blog/2025/05/15/idp-signs"
               }
               avatar={"https://github.com/KaradzaJuraj.png"}
-              banner={"/img/2025-03-27-move-like-a-startup/cover.jpeg"}
+              banner={"/img/2025-05-15-idp-signs/cover.png"}
             />
           </Col>
           <Col xs={{ span: 20, offset: 2 }} md={{ span: 6, offset: 0 }}>
             <Blog
-              title={"Internal Developer Portals vs Platforms"}
+              title={"Vibe Coding on Kubernetes with Cyclops MCP"}
               description={
-                "TL;DR: The Internal Developer Portal is the interface to the Internal Developer Platform. That's it. You can go now."
+                "You want your infrastructure to be stable, and vibe coding isn't exactly known for stability..."
               }
               blogLink={
-                "https://cyclops-ui.com/blog/2025/03/13/portal-vs-platform"
+                "https://cyclops-ui.com/blog/2025/05/08/cyclops-mcp"
               }
-              avatar={"https://github.com/KaradzaJuraj.png"}
-              banner={"/img/2025-03-13-portal-vs-platform/cover.jpeg"}
+              avatar={"https://github.com/petar-cvit.png"}
+              banner={"/img/2025-05-08-cyclops-mcp/cover.png"}
             />
           </Col>
         </Row>

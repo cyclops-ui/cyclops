@@ -1,0 +1,21 @@
+.page-title-container {
+  position: sticky;
+  top: 64px;
+  z-index: 50;
+  padding-bottom: 12px;
+  transition: top 0.3s ease-in-out;
+}
+
+.page-title-container.scrolled {
+  padding: 8px 16px;
+}
+
+.page-title {
+  margin: 0;
+  font-size: 32px;
+  transition: font-size 0.3s ease;
+}
+
+.page-title-container.scrolled .page-title {
+  font-size: 24px;
+}

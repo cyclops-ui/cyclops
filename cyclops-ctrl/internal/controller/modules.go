@@ -9,6 +9,13 @@ import (
 	"strings"
 	"time"
 
+	json "github.com/json-iterator/go"
+	apiextensionsv1 "k8s.io/apiextensions-apiserver/pkg/apis/apiextensions/v1"
+	"k8s.io/apimachinery/pkg/api/errors"
+
+	"github.com/cyclops-ui/cyclops/cyclops-ctrl/pkg/template"
+	"github.com/cyclops-ui/cyclops/cyclops-ctrl/pkg/template/render"
+
 	"github.com/cyclops-ui/cyclops/cyclops-ctrl/internal/git"
 
 	"sigs.k8s.io/yaml"
@@ -20,8 +27,6 @@ import (
 	"github.com/cyclops-ui/cyclops/cyclops-ctrl/internal/models/dto"
 	"github.com/cyclops-ui/cyclops/cyclops-ctrl/internal/prometheus"
 	"github.com/cyclops-ui/cyclops/cyclops-ctrl/internal/telemetry"
-	"github.com/cyclops-ui/cyclops/cyclops-ctrl/internal/template"
-	"github.com/cyclops-ui/cyclops/cyclops-ctrl/internal/template/render"
 	"github.com/cyclops-ui/cyclops/cyclops-ctrl/pkg/cluster/k8sclient"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
@@ -1017,6 +1022,92 @@ func (m *Modules) GetResource(ctx *gin.Context) {
 	}
 
 	ctx.JSON(http.StatusOK, resource)
+}
+
+func (m *Modules) InstallMCPServer(ctx *gin.Context) {
+	ctx.Header("Access-Control-Allow-Origin", "*")
+
+	mcpModuleValues := map[string]interface{}{
+		"replicas": 1,
+		"version":  "latest",
+	}
+
+	m.telemetryClient.AddonInstall("mcp-server")
+
+	valBytes, err := json.Marshal(mcpModuleValues)
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, gin.H{
+			"error":  "Failed to create MCP server module values",
+			"reason": err.Error(),
+		})
+	}
+
+	mcpServerModule := v1alpha1.Module{
+		TypeMeta: metav1.TypeMeta{
+			Kind:       "Module",
+			APIVersion: "cyclops-ui.com/v1alpha1",
+		},
+		ObjectMeta: metav1.ObjectMeta{
+			Name: "mcp-cyclops",
+			Labels: map[string]string{
+				v1alpha1.MCPServerModuleLabel: "true",
+				v1alpha1.AddonModuleLabel:     "true",
+			},
+		},
+		Spec: v1alpha1.ModuleSpec{
+			TargetNamespace: "cyclops",
+			TemplateRef: v1alpha1.TemplateRef{
+				URL:        "https://github.com/cyclops-ui/templates",
+				Path:       "cyclops-mcp",
+				Version:    "main",
+				SourceType: "git",
+			},
+			Values: apiextensionsv1.JSON{
+				Raw: valBytes,
+			},
+		},
+		History: make([]v1alpha1.HistoryEntry, 0),
+	}
+
+	if err := m.kubernetesClient.CreateModule(mcpServerModule); err != nil {
+		ctx.JSON(http.StatusInternalServerError, gin.H{
+			"error":  "Failed to create Cyclops MCP server module",
+			"reason": err.Error(),
+		})
+		return
+	}
+
+	ctx.Status(http.StatusCreated)
+}
+
+func (m *Modules) MCPServerStatus(ctx *gin.Context) {
+	ctx.Header("Access-Control-Allow-Origin", "*")
+
+	type MCPServerStatus struct {
+		Installed bool `json:"installed"`
+	}
+
+	module, err := m.kubernetesClient.GetModule("mcp-cyclops")
+	if err != nil {
+		if errors.IsNotFound(err) {
+			ctx.JSON(http.StatusOK, MCPServerStatus{Installed: false})
+			return
+		}
+
+		ctx.JSON(http.StatusInternalServerError, gin.H{
+			"error":  "Failed to check Cyclops MCP server status",
+			"reason": err.Error(),
+		})
+		return
+	}
+
+	if module.Labels == nil {
+		ctx.JSON(http.StatusOK, MCPServerStatus{Installed: false})
+		return
+	}
+
+	_, ok := module.Labels[v1alpha1.MCPServerModuleLabel]
+	ctx.JSON(http.StatusOK, MCPServerStatus{Installed: ok})
 }
 
 func getTargetGeneration(generation string, module *v1alpha1.Module) (*v1alpha1.Module, bool) {

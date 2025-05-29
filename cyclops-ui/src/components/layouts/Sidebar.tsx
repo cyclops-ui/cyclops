@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { Button, Menu, MenuProps } from "antd";
 import {
   AppstoreAddOutlined,
@@ -8,6 +8,8 @@ import {
   GithubFilled,
   ThunderboltFilled,
   DiscordOutlined,
+  ApiOutlined,
+  RobotOutlined,
 } from "@ant-design/icons";
 import { useLocation } from "react-router";
 import PathConstants from "../../routes/PathConstants";
@@ -17,7 +19,19 @@ import helmLogo from "../../static/img/helm_white.png";
 import cyclopsLogo from "../../static/img/cyclops_logo.png";
 
 const SideNav = () => {
-  const location = useLocation().pathname.split("/")[1];
+  const [openKeys, setOpenKeys] = useState<string[]>([]);
+  const location = useLocation(); // from react-router-dom
+  const [selectedKeys, setSelectedKeys] = useState<string>("");
+
+  useEffect(() => {
+    setSelectedKeys(location.pathname.split("/")[1]);
+
+    if (location.pathname.startsWith(PathConstants.ADDONS_MCP_SERVER)) {
+      setOpenKeys(["addons"]);
+    } else {
+      setOpenKeys([]);
+    }
+  }, [location.pathname]);
 
   const sidebarItems: MenuProps["items"] = [
     {
@@ -43,6 +57,18 @@ const SideNav = () => {
       ),
       icon: <img alt="" style={{ height: "14px" }} src={helmLogo} />,
       key: "helm",
+    },
+    {
+      label: "Addons",
+      icon: <ApiOutlined />,
+      key: "addons",
+      children: [
+        {
+          icon: <RobotOutlined />,
+          label: <a href={PathConstants.ADDONS_MCP_SERVER}>MCP server</a>,
+          key: "addons-mcp",
+        },
+      ],
     },
   ];
 
@@ -73,8 +99,10 @@ const SideNav = () => {
       <Menu
         theme="dark"
         mode="inline"
-        selectedKeys={[location]}
+        selectedKeys={[selectedKeys]}
         items={sidebarItems}
+        openKeys={openKeys}
+        onOpenChange={(keys) => setOpenKeys(keys)}
       />
       <Button
         style={{ background: "transparent", margin: "auto 25px 12px 25px" }}

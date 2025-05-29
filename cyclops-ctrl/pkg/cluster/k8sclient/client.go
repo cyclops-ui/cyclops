@@ -2,6 +2,11 @@ package k8sclient
 
 import (
 	"context"
+	"fmt"
+
+	"k8s.io/client-go/rest"
+	"k8s.io/client-go/tools/clientcmd"
+	"k8s.io/client-go/tools/remotecommand"
 
 	"github.com/go-logr/logr"
 	apiv1 "k8s.io/api/core/v1"
@@ -23,6 +28,8 @@ import (
 )
 
 type KubernetesClient struct {
+	config *rest.Config
+
 	Dynamic             dynamic.Interface
 	clientset           *kubernetes.Clientset
 	discovery           *discovery.DiscoveryClient
@@ -38,28 +45,64 @@ type KubernetesClient struct {
 	logger logr.Logger
 }
 
-func New(
-	moduleNamespace string,
-	helmReleaseNamespace string,
-	moduleTargetNamespace string,
-	logger logr.Logger,
-) (*KubernetesClient, error) {
-	config := ctrl.GetConfigOrDie()
-	clientset, err := kubernetes.NewForConfig(config)
-	if err != nil {
-		return nil, err
+type ClientConfig struct {
+	KubeconfigPath string
+	Context        string
+
+	ModuleNamespace       string
+	HelmReleaseNamespace  string
+	ModuleTargetNamespace string
+}
+
+func NewWithConfig(config ClientConfig, logger logr.Logger) (*KubernetesClient, error) {
+	var k8sConfig *rest.Config
+	var err error
+
+	if config.KubeconfigPath == "" {
+		k8sConfig, err = rest.InClusterConfig()
+		if err != nil {
+			k8sConfig, err = ctrl.GetConfig()
+			if err != nil {
+				return nil, err
+			}
+		}
+	} else {
+		loadingRules := &clientcmd.ClientConfigLoadingRules{
+			ExplicitPath: config.KubeconfigPath,
+		}
+
+		configOverrides := &clientcmd.ConfigOverrides{}
+		if config.Context != "" {
+			configOverrides.CurrentContext = config.Context
+		}
+
+		k8sConfig, err = clientcmd.NewNonInteractiveDeferredLoadingClientConfig(
+			loadingRules,
+			configOverrides,
+		).ClientConfig()
+		if err != nil {
+			return nil, fmt.Errorf("failed to load kubeconfig: %w", err)
+		}
 	}
 
-	moduleSet, err := client.NewForConfig(config)
+	clientset, err := kubernetes.NewForConfig(k8sConfig)
 	if err != nil {
-		panic(err)
+		return nil, fmt.Errorf("failed to create clientset: %w", err)
 	}
 
-	discovery := discovery.NewDiscoveryClientForConfigOrDie(config)
-
-	dynamic, err := dynamic.NewForConfig(config)
+	moduleSet, err := client.NewForConfig(k8sConfig)
 	if err != nil {
-		panic(err.Error())
+		return nil, fmt.Errorf("failed to create module client: %w", err)
+	}
+
+	discovery, err := discovery.NewDiscoveryClientForConfig(k8sConfig)
+	if err != nil {
+		return nil, fmt.Errorf("failed to create discovery client: %w", err)
+	}
+
+	dynamic, err := dynamic.NewForConfig(k8sConfig)
+	if err != nil {
+		return nil, fmt.Errorf("failed to create dynamic client: %w", err)
 	}
 
 	extensionsClientset := apiextensionsclientset.NewForConfigOrDie(config)
@@ -70,15 +113,29 @@ func New(
 		clientset:             clientset,
 		moduleset:             moduleSet,
 		extensionsClientset:   extensionsClientset,
-		moduleNamespace:       moduleNamespace,
-		helmReleaseNamespace:  helmReleaseNamespace,
-		moduleTargetNamespace: moduleTargetNamespace,
+		moduleNamespace:       config.ModuleNamespace,
+		helmReleaseNamespace:  config.HelmReleaseNamespace,
+		moduleTargetNamespace: config.ModuleTargetNamespace,
 		logger:                logger,
 	}
 
 	k.loadResourceRelationsLabels()
 
 	return k, nil
+}
+
+func New(
+	moduleNamespace string,
+	helmReleaseNamespace string,
+	moduleTargetNamespace string,
+	logger logr.Logger,
+) (*KubernetesClient, error) {
+	config := ClientConfig{
+		ModuleNamespace:       moduleNamespace,
+		HelmReleaseNamespace:  helmReleaseNamespace,
+		ModuleTargetNamespace: moduleTargetNamespace,
+	}
+	return NewWithConfig(config, logger)
 }
 
 type IKubernetesClient interface {
@@ -117,6 +174,7 @@ type IKubernetesClient interface {
 	ListTemplateAuthRules() ([]cyclopsv1alpha1.TemplateAuthRule, error)
 	GetTemplateAuthRuleSecret(name, key string) (string, error)
 	ListTemplateStore() ([]cyclopsv1alpha1.TemplateStore, error)
+	GetTemplateStore(name string) (*cyclopsv1alpha1.TemplateStore, error)
 	CreateTemplateStore(ts *cyclopsv1alpha1.TemplateStore) error
 	UpdateTemplateStore(ts *cyclopsv1alpha1.TemplateStore) error
 	DeleteTemplateStore(name string) error
@@ -125,4 +183,5 @@ type IKubernetesClient interface {
 	ListCRDs() ([]v1.CustomResourceDefinition, error)
 	GetCRD(name string) (*v1.CustomResourceDefinition, error)
 	DeleteReleaseSecret(releaseName, releaseNamespace string) error
+	CommandExecutor(namespace, podName, container string) (remotecommand.Executor, error)
 }

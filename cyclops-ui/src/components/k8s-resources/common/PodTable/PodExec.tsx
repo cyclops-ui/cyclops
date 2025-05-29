@@ -1,30 +1,23 @@
-import { CodeOutlined, CopyOutlined } from "@ant-design/icons";
-import { Button, Modal } from "antd";
-import { useState } from "react";
+import { CodeOutlined } from "@ant-design/icons";
+import { Button, Drawer, Select } from "antd";
+import { useEffect, useState } from "react";
 import "ace-builds/src-noconflict/ext-searchbox";
-import { useTheme } from "../../../theme/ThemeContext";
+import ExecTerminal from "../../../pages/Terminal";
+import { Option } from "antd/es/mentions";
 
 interface PodExecProps {
   pod: any;
 }
 
 const PodExec = ({ pod }: PodExecProps) => {
-  const { mode } = useTheme();
-
   const [openExecModal, setOpenExecModal] = useState(false);
+  const [containerName, setContainerName] = useState<string>("");
 
-  const execCommand = (
-    <div>
-      <span style={{ color: mode === "light" ? "navy" : "lightblue" }}>
-        kubectl{" "}
-      </span>
-      <span>exec -n </span>
-      <span style={{ color: "#CC6903" }}>{pod.namespace} </span>
-      <span>-it </span>
-      <span style={{ color: "#CC6903" }}>{pod.name} </span>
-      <span>-- sh</span>
-    </div>
-  );
+  useEffect(() => {
+    setContainerName(
+      pod?.containers?.length > 0 ? pod.containers[0].name : undefined,
+    );
+  }, [pod]);
 
   return (
     <>
@@ -39,51 +32,42 @@ const PodExec = ({ pod }: PodExecProps) => {
           Exec to pod
         </h4>
       </Button>
-      <Modal
-        title="Copy exec command"
-        open={openExecModal}
-        onCancel={() => {
+      <Drawer
+        title={
+          <div>
+            {pod.namespace}/{pod.name}
+            <span style={{ fontWeight: "lighter" }}> in container</span>
+            <Select
+              defaultValue={containerName}
+              style={{ marginLeft: "12px" }}
+              onChange={(c) => setContainerName(c)}
+            >
+              {pod.containers.map((item) => (
+                <Option key={item.name} value={item.name}>
+                  {item.name}
+                </Option>
+              ))}
+            </Select>
+          </div>
+        }
+        placement="bottom"
+        onClose={() => {
           setOpenExecModal(false);
         }}
-        cancelButtonProps={{ style: { display: "none" } }}
-        okButtonProps={{ style: { display: "none" } }}
-        style={{ zIndex: 100 }}
-        width={"60%"}
+        open={openExecModal}
+        height={700}
+        styles={{
+          body: {
+            padding: "0",
+          },
+        }}
       >
-        <div style={{ paddingTop: "8px", paddingBottom: "4px" }}>
-          Copy the command below and run it from your terminal to exec into the
-          pod:
-        </div>
-        <pre
-          style={{
-            background: mode === "light" ? "#f5f5f5" : "#383838",
-            padding: "10px",
-            borderRadius: "5px",
-            whiteSpace: "pre-wrap",
-            wordBreak: "break-word",
-            position: "relative",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "space-between",
-            minHeight: "50px",
-          }}
-        >
-          {execCommand}
-          <Button
-            icon={<CopyOutlined />}
-            onClick={() => {
-              navigator.clipboard.writeText(
-                `kubectl exec -n ${pod.namespace} -it ${pod.name} -- sh`,
-              );
-            }}
-            style={{
-              position: "relative", // No need for absolute, since flexbox handles it
-              padding: "2px 8px",
-              fontSize: "12px",
-            }}
-          />
-        </pre>
-      </Modal>
+        <ExecTerminal
+          namespace={pod.namespace}
+          podName={pod.name}
+          containerName={containerName}
+        />
+      </Drawer>
     </>
   );
 };
