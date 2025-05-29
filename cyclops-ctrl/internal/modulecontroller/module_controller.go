@@ -28,7 +28,6 @@ import (
 
 	"github.com/go-logr/logr"
 	"helm.sh/helm/v3/pkg/chart"
-	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/types"
@@ -37,6 +36,7 @@ import (
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/controller"
+	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
 	"sigs.k8s.io/controller-runtime/pkg/log"
 
 	cyclopsv1alpha1 "github.com/cyclops-ui/cyclops/cyclops-ctrl/api/v1alpha1"
@@ -107,33 +107,34 @@ func (r *ModuleReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctr
 
 	var module cyclopsv1alpha1.Module
 	err := r.Get(ctx, req.NamespacedName, &module)
-	if apierrors.IsNotFound(err) {
-		r.logger.Info("delete module", "namespaced name", req.NamespacedName)
-		resources, err := r.kubernetesClient.GetResourcesForModule(req.Name)
-		if err != nil {
+	if err != nil {
+		if client.IgnoreNotFound(err) != nil {
 			r.logger.Error(err, "error on get module resources", "namespaced name", req.NamespacedName)
-			r.monitor.OnFailedReconciliation()
-			return ctrl.Result{}, err
 		}
+		return ctrl.Result{}, client.IgnoreNotFound(err)
+	}
 
-		for _, resource := range resources {
-			if err := r.kubernetesClient.Delete(resource); err != nil {
-				r.logger.Error(
-					err,
-					"error on delete module while deleting resource",
-					"module namespaced name",
-					req.NamespacedName,
-					"resource namespaced name",
-					fmt.Sprintf("%s/%s", resource.GetNamespace(), resource.GetName()),
-				)
+	if module.GetDeletionTimestamp() != nil {
+		if controllerutil.ContainsFinalizer(&module, cyclopsv1alpha1.ResourceFinalizer) {
+			if err := r.finalizeModule(module); err != nil {
+				return ctrl.Result{}, err
+			}
+
+			controllerutil.RemoveFinalizer(&module, cyclopsv1alpha1.ResourceFinalizer)
+			err := r.Update(ctx, &module)
+			if err != nil {
+				return ctrl.Result{}, err
 			}
 		}
-
 		return ctrl.Result{}, nil
 	}
-	if err != nil {
-		r.monitor.OnFailedReconciliation()
-		return ctrl.Result{}, err
+
+	if !controllerutil.ContainsFinalizer(&module, cyclopsv1alpha1.ResourceFinalizer) {
+		controllerutil.AddFinalizer(&module, cyclopsv1alpha1.ResourceFinalizer)
+		err = r.Update(ctx, &module)
+		if err != nil {
+			return ctrl.Result{}, err
+		}
 	}
 
 	if len(module.Labels) != 0 && module.Labels[cyclopsv1alpha1.ModuleManagerLabel] == "mcp" {
@@ -429,6 +430,28 @@ func (r *ModuleReconciler) mergeChildrenGVRs(existing, current []cyclopsv1alpha1
 	})
 
 	return merged
+}
+
+func (r *ModuleReconciler) finalizeModule(module cyclopsv1alpha1.Module) error {
+	resources, err := r.kubernetesClient.GetResourcesForModule(module.Name)
+	if err != nil {
+		return err
+	}
+
+	for _, resource := range resources {
+		if err := r.kubernetesClient.Delete(resource); err != nil {
+			r.logger.Error(
+				err,
+				"error finalizing module: failed to delete module",
+				"module",
+				module.Name,
+				"resource namespaced name",
+				fmt.Sprintf("%s/%s", resource.GetNamespace(), resource.GetName()),
+			)
+		}
+	}
+
+	return nil
 }
 
 func (r *ModuleReconciler) setStatus(

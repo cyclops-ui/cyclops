@@ -52,6 +52,8 @@ const (
 
 	AddonModuleLabel     = "cyclops-ui.com/addon"
 	MCPServerModuleLabel = "cyclops-ui.com/mcp-server"
+
+	ResourceFinalizer = "cyclops-ui.com/module-resources"
 )
 
 type TemplateRef struct {

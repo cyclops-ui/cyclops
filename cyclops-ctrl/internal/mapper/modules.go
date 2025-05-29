@@ -36,6 +36,9 @@ func RequestToModule(req dto.Module) (cyclopsv1alpha1.Module, error) {
 		ObjectMeta: metav1.ObjectMeta{
 			Name:        req.Name,
 			Annotations: annotations,
+			Finalizers: []string{
+				cyclopsv1alpha1.ResourceFinalizer,
+			},
 		},
 		Spec: cyclopsv1alpha1.ModuleSpec{
 			TargetNamespace: mapTargetNamespace(req.Namespace),
