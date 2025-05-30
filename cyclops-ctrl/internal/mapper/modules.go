@@ -1,7 +1,6 @@
 package mapper
 
 import (
-	"fmt"
 	"strings"
 
 	v1 "k8s.io/api/core/v1"
@@ -11,7 +10,6 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	cyclopsv1alpha1 "github.com/cyclops-ui/cyclops/cyclops-ctrl/api/v1alpha1"
-	"github.com/cyclops-ui/cyclops/cyclops-ctrl/internal/models"
 	"github.com/cyclops-ui/cyclops/cyclops-ctrl/internal/models/dto"
 )
 
@@ -113,57 +111,6 @@ func k8sTemplateRefToDTO(templateRef cyclopsv1alpha1.TemplateRef, templateResolv
 		ResolvedVersion: templateResolvedVersion,
 		SourceType:      string(templateRef.SourceType),
 	}
-}
-
-func fieldsMap(fields []models.Field) map[string]models.Field {
-	out := make(map[string]models.Field)
-	for _, field := range fields {
-		out[field.Name] = field
-	}
-
-	return out
-}
-
-func setValuesRecursive(moduleValues map[string]interface{}, fields map[string]models.Field) ([]cyclopsv1alpha1.ModuleValue, error) {
-	values := make([]cyclopsv1alpha1.ModuleValue, 0)
-	for k, v := range moduleValues {
-		switch fields[k].Type {
-		case "map":
-			data, err := json.Marshal(v)
-			if err != nil {
-				return nil, err
-			}
-
-			values = append(values, cyclopsv1alpha1.ModuleValue{
-				Name:  k,
-				Value: string(data),
-			})
-		//case "array":
-		//	//field := fields[k]
-		//
-		//	arrayValue, ok := v.([]interface{})
-		//	if !ok {
-		//		fmt.Println("could not cast into array", v)
-		//	}
-		//
-		//	fmt.Println(arrayValue)
-		//
-		//	for i, value := range arrayValue {
-		//		values = append(values, cyclopsv1alpha1.ModuleValue{
-		//			Name:  strings.Join([]string{k}, "."),
-		//			Value: "",
-		//		})
-		//	}
-
-		default:
-			values = append(values, cyclopsv1alpha1.ModuleValue{
-				Name:  k,
-				Value: fmt.Sprintf("%v", v),
-			})
-		}
-	}
-
-	return values, nil
 }
 
 func mapTargetNamespace(targetNamespace string) string {
