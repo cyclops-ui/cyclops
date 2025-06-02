@@ -184,6 +184,9 @@ export const CreateModuleComponent = ({
 
     values = findMaps(config.root.properties, values, initialValuesRaw);
 
+    setLoadingSubmitCreate(false);
+    // return
+
     submitModule(
       moduleName,
       moduleNamespace,
