@@ -44,6 +44,8 @@ func HelmSchemaToFields(name string, schema helm.Property, defs map[string]helm.
 		fields = append(fields, HelmSchemaToFields(propertyName, property, defs, nil))
 	}
 
+	fields = append(fields, conditionedFields(schema, defs)...)
+
 	fields = sortFields(fields, schema.Order)
 
 	for _, dependency := range dependencies {
@@ -237,4 +239,47 @@ func resolvePropertyComposition(schema helm.Property) helm.Property {
 	}
 
 	return schema.AnyOf[0]
+}
+
+func conditionedFields(schema helm.Property, defs map[string]helm.Property) []models.Field {
+	if schema.If == nil {
+		return []models.Field{}
+	}
+
+	conditionalFields := make([]models.Field, 0)
+
+	if schema.Then != nil {
+		for propertyName, property := range schema.Then.Properties {
+			field := HelmSchemaToFields(propertyName, property, defs, nil)
+			field.Condition = mapConditions(schema.If, models.Equal)
+
+			conditionalFields = append(conditionalFields, field)
+		}
+	}
+
+	if schema.Else != nil {
+		for propertyName, property := range schema.Else.Properties {
+			field := HelmSchemaToFields(propertyName, property, defs, nil)
+			field.Condition = mapConditions(schema.If, models.NotEqual)
+
+			conditionalFields = append(conditionalFields, field)
+		}
+	}
+
+	return conditionalFields
+}
+
+func mapConditions(r *helm.Property, operation models.ConditionOperation) []models.Condition {
+	conditions := make([]models.Condition, 0)
+
+	for propertyName, property := range r.Properties {
+		conditions = append(conditions, models.Condition{
+			Operation: operation,
+			Property:  propertyName,
+			Const:     property.Const,
+			Enum:      property.Enum,
+		})
+	}
+
+	return conditions
 }

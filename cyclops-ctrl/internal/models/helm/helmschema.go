@@ -35,6 +35,12 @@ type Property struct {
 
 	// schema compositions
 	AnyOf []Property `json:"anyOf"`
+	AllOf []Property `json:"allOf"`
+
+	If    *Property `json:"if,omitempty"`
+	Then  *Property `json:"then,omitempty"`
+	Else  *Property `json:"else,omitempty"`
+	Const *string   `json:"const"`
 }
 
 type PropertyType string
