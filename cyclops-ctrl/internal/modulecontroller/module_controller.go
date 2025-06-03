@@ -55,6 +55,8 @@ type ModuleReconciler struct {
 	kubernetesClient k8sclient.IKubernetesClient
 	renderer         *render.Renderer
 
+	maxConcurrentReconciles int
+
 	telemetryClient telemetry.Client
 	monitor         prometheus.Monitor
 	logger          logr.Logger
@@ -66,18 +68,20 @@ func NewModuleReconciler(
 	templatesRepo templaterepo.ITemplateRepo,
 	kubernetesClient k8sclient.IKubernetesClient,
 	renderer *render.Renderer,
+	maxConcurrentReconciles int,
 	telemetryClient telemetry.Client,
 	monitor prometheus.Monitor,
 ) *ModuleReconciler {
 	return &ModuleReconciler{
-		Client:           client,
-		Scheme:           scheme,
-		templatesRepo:    templatesRepo,
-		kubernetesClient: kubernetesClient,
-		renderer:         renderer,
-		telemetryClient:  telemetryClient,
-		monitor:          monitor,
-		logger:           ctrl.Log.WithName("reconciler"),
+		Client:                  client,
+		Scheme:                  scheme,
+		templatesRepo:           templatesRepo,
+		kubernetesClient:        kubernetesClient,
+		renderer:                renderer,
+		telemetryClient:         telemetryClient,
+		maxConcurrentReconciles: maxConcurrentReconciles,
+		monitor:                 monitor,
+		logger:                  ctrl.Log.WithName("reconciler"),
 	}
 }
 
@@ -226,7 +230,10 @@ func (r *ModuleReconciler) SetupWithManager(mgr ctrl.Manager) error {
 
 	return ctrl.NewControllerManagedBy(mgr).
 		For(&cyclopsv1alpha1.Module{}).
-		WithOptions(controller.Options{RateLimiter: rateLimiter}).
+		WithOptions(controller.Options{
+			RateLimiter:             rateLimiter,
+			MaxConcurrentReconciles: r.maxConcurrentReconciles,
+		}).
 		Complete(r)
 }
 
