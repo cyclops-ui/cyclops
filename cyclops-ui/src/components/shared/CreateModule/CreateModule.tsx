@@ -51,6 +51,11 @@ interface templateStoreOption {
     version: string;
     sourceType: string;
   };
+  enforceGitOpsWrite: {
+    repo: string;
+    path: string;
+    branch: string;
+  };
 }
 
 export interface CreateModuleProps {
@@ -102,12 +107,7 @@ export const CreateModuleComponent = ({
     dependencies: [],
   });
 
-  const [template, setTemplate] = useState({
-    repo: "",
-    path: "",
-    version: "",
-    sourceType: "",
-  });
+  const [template, setTemplate] = useState<templateStoreOption>();
 
   const [initialValues, setInitialValues] = useState({});
   const [initialValuesRaw, setInitialValuesRaw] = useState({});
@@ -146,6 +146,20 @@ export const CreateModuleComponent = ({
 
   const [form] = Form.useForm();
 
+  const resolveGitOpsWrite = (values: any) => {
+    if (template.enforceGitOpsWrite !== undefined) {
+      return template.enforceGitOpsWrite;
+    }
+
+    return gitopsToggle
+      ? {
+          repo: values["gitops-repo"],
+          path: values["gitops-path"],
+          branch: values["gitops-branch"],
+        }
+      : null;
+  };
+
   useEffect(() => {
     getTemplateStore()
       .then((res) => {
@@ -174,13 +188,6 @@ export const CreateModuleComponent = ({
 
     const moduleName = values["cyclops_module_name"];
     const moduleNamespace = values["cyclops_module_namespace"];
-    const gitOpsWrite = gitopsToggle
-      ? {
-          repo: values["gitops-repo"],
-          path: values["gitops-path"],
-          branch: values["gitops-branch"],
-        }
-      : null;
 
     values = findMaps(config.root.properties, values, initialValuesRaw);
 
@@ -188,13 +195,13 @@ export const CreateModuleComponent = ({
       moduleName,
       moduleNamespace,
       {
-        repo: template.repo,
-        path: template.path,
-        version: template.version,
-        sourceType: template.sourceType,
+        repo: template.ref.repo,
+        path: template.ref.path,
+        version: template.ref.version,
+        sourceType: template.ref.sourceType,
       },
       values,
-      gitOpsWrite,
+      resolveGitOpsWrite(values),
     )
       .then(() => {
         onSubmitModuleSuccess(moduleName);
@@ -300,12 +307,7 @@ export const CreateModuleComponent = ({
       return;
     }
 
-    setTemplate({
-      repo: ts.ref.repo,
-      path: ts.ref.path,
-      version: ts.ref.version,
-      sourceType: ts.ref.sourceType,
-    });
+    setTemplate(ts);
 
     loadTemplate(ts.ref.repo, ts.ref.path, ts.ref.version, ts.ref.sourceType);
   };
@@ -583,7 +585,13 @@ export const CreateModuleComponent = ({
                     </Form.Item>
                   </div>
                   <div
-                    style={{ display: advancedOptionsExpanded ? "" : "none" }}
+                    style={{
+                      display:
+                        advancedOptionsExpanded &&
+                        template?.enforceGitOpsWrite === undefined
+                          ? ""
+                          : "none",
+                    }}
                   >
                     <Divider
                       style={{ marginTop: "12px", marginBottom: "12px" }}
@@ -704,7 +712,11 @@ export const CreateModuleComponent = ({
                   disabled={
                     loadingTemplate ||
                     loadingTemplateInitialValues ||
-                    !(template.version || template.path || template.repo)
+                    !(
+                      template?.ref?.version ||
+                      template?.ref?.path ||
+                      template?.ref?.repo
+                    )
                   }
                 >
                   Deploy
