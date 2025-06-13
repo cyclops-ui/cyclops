@@ -207,3 +207,22 @@ func (c *Templates) DeleteTemplatesStore(ctx *gin.Context) {
 
 	ctx.Status(http.StatusOK)
 }
+
+func (c *Templates) GetTemplateRevisions(ctx *gin.Context) {
+	ctx.Header("Access-Control-Allow-Origin", "*")
+
+	repo := ctx.Query("repo")
+
+	if repo == "" {
+		ctx.String(http.StatusBadRequest, "set repo field")
+		return
+	}
+
+	revisions, err := c.templatesRepo.GetTemplateRevisions(repo)
+	if err != nil {
+		ctx.JSON(http.StatusBadRequest, dto.NewError("Error loading template", err.Error()))
+		return
+	}
+
+	ctx.JSON(http.StatusOK, revisions)
+}
