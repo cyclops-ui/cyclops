@@ -11,7 +11,7 @@ packages:
       IKubernetesClient:
         config:
           dir: pkg/mocks
-  github.com/cyclops-ui/cyclops/cyclops-ctrl/internal/template:
+  github.com/cyclops-ui/cyclops/cyclops-ctrl/pkg/template:
     interfaces:
       ITemplateRepo:
         config:
