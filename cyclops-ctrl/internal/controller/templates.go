@@ -214,7 +214,7 @@ func (c *Templates) GetTemplateRevisions(ctx *gin.Context) {
 	repo := ctx.Query("repo")
 
 	if repo == "" {
-		ctx.String(http.StatusBadRequest, "set repo field")
+		ctx.JSON(http.StatusOK, []string{})
 		return
 	}
 
