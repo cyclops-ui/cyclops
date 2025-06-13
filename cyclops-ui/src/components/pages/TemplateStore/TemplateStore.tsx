@@ -16,6 +16,7 @@ import {
   Popover,
   Checkbox,
   Switch,
+  AutoComplete,
 } from "antd";
 import axios from "axios";
 import {
@@ -65,6 +66,9 @@ const TemplateStore = () => {
   const sourceTypeFilter = ["git", "helm", "oci", "unknown"];
   const [templateSourceTypeFilter, setTemplateSourceTypeFilter] =
     useState<string[]>(sourceTypeFilter);
+
+  const [repoRevisions, setRepoRevisions] = useState<string[]>([]);
+  const [repoRevisionOptions, setRepoRevisionOptions] = useState([]);
 
   const [addForm] = Form.useForm();
   const [editForm] = Form.useForm();
@@ -344,6 +348,27 @@ const TemplateStore = () => {
         )}
       </div>
     );
+  };
+
+  const fetchRepoRevisions = (e) => {
+    axios
+      .get(`/api/templates/revisions?repo=` + e.target.value)
+      .then((res) => {
+        setRepoRevisions(res.data);
+      })
+      .catch(() => {});
+  };
+
+  const handleRepoInput = (value) => {
+    if (repoRevisions.length === 0) {
+      setRepoRevisionOptions([]);
+      return;
+    }
+
+    const filtered = repoRevisions
+      .filter((item) => item.toLowerCase().includes(value.toLowerCase()))
+      .map((item) => ({ value: item }));
+    setRepoRevisionOptions(filtered);
   };
 
   return (
@@ -636,7 +661,7 @@ const TemplateStore = () => {
             rules={[{ required: true, message: "Repo URL is required" }]}
             style={{ marginBottom: "12px" }}
           >
-            <Input />
+            <Input onBlur={fetchRepoRevisions} />
           </Form.Item>
 
           <Form.Item
@@ -653,7 +678,13 @@ const TemplateStore = () => {
             name={["ref", "version"]}
             style={{ marginBottom: "12px" }}
           >
-            <Input />
+            <AutoComplete
+              options={repoRevisionOptions}
+              onSearch={handleRepoInput}
+              allowClear
+            >
+              <Input />
+            </AutoComplete>
           </Form.Item>
 
           {advancedTemplateGitOpsWrite()}

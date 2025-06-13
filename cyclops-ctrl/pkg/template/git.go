@@ -274,6 +274,31 @@ func (r Repo) LoadInitialTemplateValues(repoURL, path, commit string) (map[strin
 	return initialValues, nil
 }
 
+func (r Repo) listRemoteRefs(repo string, creds *auth.Credentials) ([]string, error) {
+	rem := git.NewRemote(memory.NewStorage(), &config.RemoteConfig{
+		Name: "origin",
+		URLs: []string{repo},
+	})
+
+	refs, err := rem.List(&git.ListOptions{
+		PeelingOption: git.AppendPeeled,
+		Auth:          httpBasicAuthCredentials(creds),
+	})
+	if err != nil {
+		return nil, errors.Wrap(err, fmt.Sprintf("repo %s was not cloned successfully; authentication might be required; check if repository exists and you referenced it correctly", repo))
+	}
+
+	branches := make([]string, 0)
+
+	for _, ref := range refs {
+		if ref.Name().IsBranch() {
+			branches = append(branches, ref.Name().Short())
+		}
+	}
+
+	return branches, nil
+}
+
 func resolveRef(repo, version string, creds *auth.Credentials) (string, error) {
 	if len(version) == 0 {
 		return resolveDefaultBranchRef(repo, creds)

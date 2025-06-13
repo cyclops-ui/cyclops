@@ -146,6 +146,64 @@ func (_c *ITemplateRepo_GetTemplateInitialValues_Call) RunAndReturn(run func(str
 	return _c
 }
 
+// GetTemplateRevisions provides a mock function with given fields: repo
+func (_m *ITemplateRepo) GetTemplateRevisions(repo string) ([]string, error) {
+	ret := _m.Called(repo)
+
+	if len(ret) == 0 {
+		panic("no return value specified for GetTemplateRevisions")
+	}
+
+	var r0 []string
+	var r1 error
+	if rf, ok := ret.Get(0).(func(string) ([]string, error)); ok {
+		return rf(repo)
+	}
+	if rf, ok := ret.Get(0).(func(string) []string); ok {
+		r0 = rf(repo)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).([]string)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(string) error); ok {
+		r1 = rf(repo)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// ITemplateRepo_GetTemplateRevisions_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'GetTemplateRevisions'
+type ITemplateRepo_GetTemplateRevisions_Call struct {
+	*mock.Call
+}
+
+// GetTemplateRevisions is a helper method to define mock.On call
+//   - repo string
+func (_e *ITemplateRepo_Expecter) GetTemplateRevisions(repo interface{}) *ITemplateRepo_GetTemplateRevisions_Call {
+	return &ITemplateRepo_GetTemplateRevisions_Call{Call: _e.mock.On("GetTemplateRevisions", repo)}
+}
+
+func (_c *ITemplateRepo_GetTemplateRevisions_Call) Run(run func(repo string)) *ITemplateRepo_GetTemplateRevisions_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run(args[0].(string))
+	})
+	return _c
+}
+
+func (_c *ITemplateRepo_GetTemplateRevisions_Call) Return(_a0 []string, _a1 error) *ITemplateRepo_GetTemplateRevisions_Call {
+	_c.Call.Return(_a0, _a1)
+	return _c
+}
+
+func (_c *ITemplateRepo_GetTemplateRevisions_Call) RunAndReturn(run func(string) ([]string, error)) *ITemplateRepo_GetTemplateRevisions_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
 // ReturnCache provides a mock function with no fields
 func (_m *ITemplateRepo) ReturnCache() *ristretto.Cache {
 	ret := _m.Called()

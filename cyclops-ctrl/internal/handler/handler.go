@@ -79,6 +79,8 @@ func (h *Handler) Start() error {
 	h.router.GET("/templates", templatesController.GetTemplate)
 	h.router.GET("/templates/initial", templatesController.GetTemplateInitialValues)
 
+	h.router.GET("/templates/revisions", templatesController.GetTemplateRevisions)
+
 	// templates store
 	h.router.GET("/templates/store", templatesController.ListTemplatesStore)
 	h.router.PUT("/templates/store", templatesController.CreateTemplatesStore)
