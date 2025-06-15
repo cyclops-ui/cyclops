@@ -226,14 +226,23 @@ func fetchDigest(repo, chart, version, token string) (string, error) {
 }
 
 func getOCIStrictVersion(repo, chart, version string) (string, error) {
-	token, err := authorizeOCITags(repo, chart)
+	allTags, err := GetOCIChartTags(repo, chart)
 	if err != nil {
 		return "", err
 	}
 
+	return resolveSemver(version, allTags)
+}
+
+func GetOCIChartTags(repo, chart string) ([]string, error) {
+	token, err := authorizeOCITags(repo, chart)
+	if err != nil {
+		return nil, err
+	}
+
 	tURL, err := tagsURL(repo, chart)
 	if err != nil {
-		return "", err
+		return nil, err
 	}
 
 	client := &http.Client{}
@@ -241,7 +250,7 @@ func getOCIStrictVersion(repo, chart, version string) (string, error) {
 	for {
 		req, err := http.NewRequest(http.MethodGet, tURL.String(), nil)
 		if err != nil {
-			return "", err
+			return nil, err
 		}
 
 		req.Header.Set("User-Agent", "Helm/3.13.3")
@@ -251,13 +260,13 @@ func getOCIStrictVersion(repo, chart, version string) (string, error) {
 
 		resp, err := client.Do(req)
 		if err != nil {
-			return "", err
+			return nil, err
 		}
 		defer resp.Body.Close()
 
 		responseBody, err := ioutil.ReadAll(resp.Body)
 		if err != nil {
-			return "", err
+			return nil, err
 		}
 
 		var tagsResp struct {
@@ -265,7 +274,7 @@ func getOCIStrictVersion(repo, chart, version string) (string, error) {
 		}
 
 		if err := json.Unmarshal(responseBody, &tagsResp); err != nil {
-			return "", err
+			return nil, err
 		}
 
 		allTags = append(allTags, tagsResp.Tags...)
@@ -278,7 +287,7 @@ func getOCIStrictVersion(repo, chart, version string) (string, error) {
 
 		nextURL, err := parseNextLink(linkHeader)
 		if err != nil {
-			return "", err
+			return nil, err
 		}
 
 		if nextURL == "" {
@@ -287,11 +296,11 @@ func getOCIStrictVersion(repo, chart, version string) (string, error) {
 
 		tURL, err = resolveRelativeURL(tURL, nextURL)
 		if err != nil {
-			return "", err
+			return nil, err
 		}
 	}
 
-	return resolveSemver(version, allTags)
+	return allTags, err
 }
 
 func authorizeOCI(repo, chart, version string) (string, error) {

@@ -212,15 +212,21 @@ func (c *Templates) GetTemplateRevisions(ctx *gin.Context) {
 	ctx.Header("Access-Control-Allow-Origin", "*")
 
 	repo := ctx.Query("repo")
+	path := ctx.Query("path")
 
 	if repo == "" {
 		ctx.JSON(http.StatusOK, []string{})
 		return
 	}
 
-	revisions, err := c.templatesRepo.GetTemplateRevisions(repo)
+	revisions, err := c.templatesRepo.GetTemplateRevisions(repo, path)
 	if err != nil {
 		ctx.JSON(http.StatusBadRequest, dto.NewError("Error loading template", err.Error()))
+		return
+	}
+
+	if revisions == nil {
+		ctx.JSON(http.StatusOK, []string{})
 		return
 	}
 
