@@ -30,7 +30,7 @@ type ITemplateRepo interface {
 		version string,
 		source cyclopsv1alpha1.TemplateSourceType,
 	) (map[string]interface{}, error)
-	GetTemplateRevisions(repo string) ([]string, error)
+	GetTemplateRevisions(repo, path string) ([]string, error)
 	ReturnCache() *ristretto.Cache
 }
 
@@ -181,7 +181,11 @@ func (r Repo) assumeTemplateSourceType(repo string) (cyclopsv1alpha1.TemplateSou
 	return cyclopsv1alpha1.TemplateSourceTypeGit, nil
 }
 
-func (r Repo) GetTemplateRevisions(repo string) ([]string, error) {
+func (r Repo) GetTemplateRevisions(repo, path string) ([]string, error) {
+	if registry.IsOCI(repo) {
+		return GetOCIChartTags(repo, path)
+	}
+
 	if !gitproviders2.IsGitHubSource(repo) {
 		return nil, nil
 	}
