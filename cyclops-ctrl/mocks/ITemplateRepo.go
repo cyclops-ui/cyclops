@@ -146,9 +146,9 @@ func (_c *ITemplateRepo_GetTemplateInitialValues_Call) RunAndReturn(run func(str
 	return _c
 }
 
-// GetTemplateRevisions provides a mock function with given fields: repo
-func (_m *ITemplateRepo) GetTemplateRevisions(repo string) ([]string, error) {
-	ret := _m.Called(repo)
+// GetTemplateRevisions provides a mock function with given fields: repo, path
+func (_m *ITemplateRepo) GetTemplateRevisions(repo string, path string) ([]string, error) {
+	ret := _m.Called(repo, path)
 
 	if len(ret) == 0 {
 		panic("no return value specified for GetTemplateRevisions")
@@ -156,19 +156,19 @@ func (_m *ITemplateRepo) GetTemplateRevisions(repo string) ([]string, error) {
 
 	var r0 []string
 	var r1 error
-	if rf, ok := ret.Get(0).(func(string) ([]string, error)); ok {
-		return rf(repo)
+	if rf, ok := ret.Get(0).(func(string, string) ([]string, error)); ok {
+		return rf(repo, path)
 	}
-	if rf, ok := ret.Get(0).(func(string) []string); ok {
-		r0 = rf(repo)
+	if rf, ok := ret.Get(0).(func(string, string) []string); ok {
+		r0 = rf(repo, path)
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).([]string)
 		}
 	}
 
-	if rf, ok := ret.Get(1).(func(string) error); ok {
-		r1 = rf(repo)
+	if rf, ok := ret.Get(1).(func(string, string) error); ok {
+		r1 = rf(repo, path)
 	} else {
 		r1 = ret.Error(1)
 	}
@@ -183,13 +183,14 @@ type ITemplateRepo_GetTemplateRevisions_Call struct {
 
 // GetTemplateRevisions is a helper method to define mock.On call
 //   - repo string
-func (_e *ITemplateRepo_Expecter) GetTemplateRevisions(repo interface{}) *ITemplateRepo_GetTemplateRevisions_Call {
-	return &ITemplateRepo_GetTemplateRevisions_Call{Call: _e.mock.On("GetTemplateRevisions", repo)}
+//   - path string
+func (_e *ITemplateRepo_Expecter) GetTemplateRevisions(repo interface{}, path interface{}) *ITemplateRepo_GetTemplateRevisions_Call {
+	return &ITemplateRepo_GetTemplateRevisions_Call{Call: _e.mock.On("GetTemplateRevisions", repo, path)}
 }
 
-func (_c *ITemplateRepo_GetTemplateRevisions_Call) Run(run func(repo string)) *ITemplateRepo_GetTemplateRevisions_Call {
+func (_c *ITemplateRepo_GetTemplateRevisions_Call) Run(run func(repo string, path string)) *ITemplateRepo_GetTemplateRevisions_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(string))
+		run(args[0].(string), args[1].(string))
 	})
 	return _c
 }
@@ -199,7 +200,7 @@ func (_c *ITemplateRepo_GetTemplateRevisions_Call) Return(_a0 []string, _a1 erro
 	return _c
 }
 
-func (_c *ITemplateRepo_GetTemplateRevisions_Call) RunAndReturn(run func(string) ([]string, error)) *ITemplateRepo_GetTemplateRevisions_Call {
+func (_c *ITemplateRepo_GetTemplateRevisions_Call) RunAndReturn(run func(string, string) ([]string, error)) *ITemplateRepo_GetTemplateRevisions_Call {
 	_c.Call.Return(run)
 	return _c
 }
