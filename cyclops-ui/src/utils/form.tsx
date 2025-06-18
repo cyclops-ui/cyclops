@@ -1,5 +1,4 @@
 import YAML from "yaml";
-import { resolveConditions } from "./conditionalFields";
 
 export function fileExtension(fileExt: string): string {
   switch (fileExt) {
