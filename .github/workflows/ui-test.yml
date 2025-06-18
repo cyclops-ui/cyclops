@@ -21,7 +21,7 @@ jobs:
       - name: Install dependencies
         run: |
           cd ${{ github.workspace }}/cyclops-ui
-          yarn install
+          yarn install --network-timeout 60000
       - name: Run tests
         run: |
           cd ${{ github.workspace }}/cyclops-ui

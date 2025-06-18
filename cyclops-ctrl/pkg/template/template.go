@@ -2,6 +2,7 @@ package template
 
 import (
 	"fmt"
+	gitproviders2 "github.com/cyclops-ui/cyclops/cyclops-ctrl/pkg/template/gitproviders"
 
 	"github.com/cyclops-ui/cyclops/cyclops-ctrl/pkg/auth"
 
@@ -29,6 +30,7 @@ type ITemplateRepo interface {
 		version string,
 		source cyclopsv1alpha1.TemplateSourceType,
 	) (map[string]interface{}, error)
+	GetTemplateRevisions(repo, path string) ([]string, error)
 	ReturnCache() *ristretto.Cache
 }
 
@@ -177,6 +179,23 @@ func (r Repo) assumeTemplateSourceType(repo string) (cyclopsv1alpha1.TemplateSou
 	}
 
 	return cyclopsv1alpha1.TemplateSourceTypeGit, nil
+}
+
+func (r Repo) GetTemplateRevisions(repo, path string) ([]string, error) {
+	if registry.IsOCI(repo) {
+		return GetOCIChartTags(repo, path)
+	}
+
+	if !gitproviders2.IsGitHubSource(repo) {
+		return nil, nil
+	}
+
+	creds, err := r.credResolver.RepoAuthCredentials(repo)
+	if err != nil {
+		return nil, err
+	}
+
+	return r.listRemoteRefs(repo, creds)
 }
 
 func (r Repo) ReturnCache() *ristretto.Cache {

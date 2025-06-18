@@ -143,6 +143,7 @@ func main() {
 		templatesRepo,
 		k8sClient,
 		renderer,
+		getMaxConcurrentReconciles(),
 		telemetryClient,
 		monitor,
 	)).SetupWithManager(mgr); err != nil {
@@ -196,6 +197,20 @@ func getHelmWatchNamespace() string {
 	if value == "" {
 		return ""
 	}
+	return value
+}
+
+func getMaxConcurrentReconciles() int {
+	strValue := os.Getenv("MAX_CONCURRENT_RECONCILES")
+	if strValue == "" {
+		return 1
+	}
+
+	value, err := strconv.Atoi(strValue)
+	if err != nil {
+		return 1
+	}
+
 	return value
 }
 

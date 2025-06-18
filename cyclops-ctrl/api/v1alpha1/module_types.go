@@ -56,6 +56,12 @@ const (
 	ResourceFinalizer = "cyclops-ui.com/module-resources"
 )
 
+type GitOpsWriteDestination struct {
+	Repo    string `json:"repo"`
+	Path    string `json:"path"`
+	Version string `json:"version"`
+}
+
 type TemplateRef struct {
 	URL     string `json:"repo"`
 	Path    string `json:"path"`
@@ -64,6 +70,9 @@ type TemplateRef struct {
 	// +kubebuilder:validation:Enum=git;helm;oci
 	// +kubebuilder:validation:Optional
 	SourceType TemplateSourceType `json:"sourceType,omitempty"`
+
+	// +kubebuilder:validation:Optional
+	EnforceGitOpsWrite *GitOpsWriteDestination `json:"enforceGitOpsWrite,omitempty"`
 }
 
 type TemplateGitRef struct {

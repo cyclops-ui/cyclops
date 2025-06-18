@@ -55,6 +55,8 @@ type ModuleReconciler struct {
 	kubernetesClient k8sclient.IKubernetesClient
 	renderer         *render.Renderer
 
+	maxConcurrentReconciles int
+
 	telemetryClient telemetry.Client
 	monitor         prometheus.Monitor
 	logger          logr.Logger
@@ -66,18 +68,20 @@ func NewModuleReconciler(
 	templatesRepo templaterepo.ITemplateRepo,
 	kubernetesClient k8sclient.IKubernetesClient,
 	renderer *render.Renderer,
+	maxConcurrentReconciles int,
 	telemetryClient telemetry.Client,
 	monitor prometheus.Monitor,
 ) *ModuleReconciler {
 	return &ModuleReconciler{
-		Client:           client,
-		Scheme:           scheme,
-		templatesRepo:    templatesRepo,
-		kubernetesClient: kubernetesClient,
-		renderer:         renderer,
-		telemetryClient:  telemetryClient,
-		monitor:          monitor,
-		logger:           ctrl.Log.WithName("reconciler"),
+		Client:                  client,
+		Scheme:                  scheme,
+		templatesRepo:           templatesRepo,
+		kubernetesClient:        kubernetesClient,
+		renderer:                renderer,
+		telemetryClient:         telemetryClient,
+		maxConcurrentReconciles: maxConcurrentReconciles,
+		monitor:                 monitor,
+		logger:                  ctrl.Log.WithName("reconciler"),
 	}
 }
 
@@ -87,13 +91,6 @@ func NewModuleReconciler(
 
 // Reconcile is part of the main kubernetes reconciliation loop which aims to
 // move the current state of the cluster closer to the desired state.
-// TODO(user): Modify the Reconcile function to compare the state specified by
-// the Module object against the actual cluster state, and then
-// perform operations to make the cluster state reflect the state specified by
-// the user.
-//
-// For more details, check Reconcile and its Result here:
-// - https://pkg.go.dev/sigs.k8s.io/controller-runtime@v0.14.4/pkg/reconcile
 func (r *ModuleReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
 	_ = log.FromContext(ctx)
 	r.telemetryClient.ModuleReconciliation()
@@ -226,7 +223,10 @@ func (r *ModuleReconciler) SetupWithManager(mgr ctrl.Manager) error {
 
 	return ctrl.NewControllerManagedBy(mgr).
 		For(&cyclopsv1alpha1.Module{}).
-		WithOptions(controller.Options{RateLimiter: rateLimiter}).
+		WithOptions(controller.Options{
+			RateLimiter:             rateLimiter,
+			MaxConcurrentReconciles: r.maxConcurrentReconciles,
+		}).
 		Complete(r)
 }
 
