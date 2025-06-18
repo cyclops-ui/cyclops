@@ -350,20 +350,28 @@ const TemplateStore = () => {
     );
   };
 
-  const fetchRepoRevisions = (e) => {
+  const fetchRepoRevisions = () => {
+    const repo = addForm.getFieldValue(["ref", "repo"]);
+    const path = addForm.getFieldValue(["ref", "path"]);
+
     axios
-      .get(`/api/templates/revisions?repo=` + e.target.value)
+      .get(`/api/templates/revisions?repo=${repo}&path=${path}`)
       .then((res) => {
         setRepoRevisions(res.data);
+
+        const filtered = res.data.map((item) => ({ value: item }));
+        setRepoRevisionOptions(filtered);
       })
       .catch(() => {});
   };
 
-  const handleRepoInput = (value) => {
+  const handleVersionInput = (value) => {
     if (repoRevisions.length === 0) {
       setRepoRevisionOptions([]);
       return;
     }
+
+    console.log(value);
 
     const filtered = repoRevisions
       .filter((item) => item.toLowerCase().includes(value.toLowerCase()))
@@ -670,7 +678,7 @@ const TemplateStore = () => {
             rules={[{ required: true, message: "Path is required" }]}
             style={{ marginBottom: "12px" }}
           >
-            <Input />
+            <Input onBlur={fetchRepoRevisions} />
           </Form.Item>
 
           <Form.Item
@@ -680,7 +688,7 @@ const TemplateStore = () => {
           >
             <AutoComplete
               options={repoRevisionOptions}
-              onSearch={handleRepoInput}
+              onSearch={handleVersionInput}
               allowClear
             >
               <Input />
