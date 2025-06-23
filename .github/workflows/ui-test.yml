@@ -19,6 +19,8 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@v2
       - name: Install dependencies
+        env:
+          NODE_OPTIONS: "--dns-result-order=ipv4first"
         run: |
           cd ${{ github.workspace }}/cyclops-ui
           yarn install --network-timeout 60000
