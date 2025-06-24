@@ -60,7 +60,7 @@ const Validations = () => {
     }, [isVisible])
 
     return (
-        <Row style={{paddingTop: "50px", opacity: "0" }} ref={elementRef} className={isVisible ? styles.wrapper : ''}>
+        <Row style={{paddingTop: "50px" }} ref={elementRef} className={styles.wrapper}>
             <Col xs={{ span: 24, order: 2 }} lg={{ span: 11, offset: 2 }}>
                 <Card
                     className={styles.animationcard}
