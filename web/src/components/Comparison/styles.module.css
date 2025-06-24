@@ -2,79 +2,181 @@
   .all {
     flex-direction: column;
     width: 100%;
+    padding: 2rem 1rem;
   }
-}
 
-.title {
-  text-align: left;
-  display: inline-block;
-  color: #000830;
-  width: 100%;
-  font-size: 36px;
-}
+  .title {
+    text-align: center;
+    font-size: 2.5rem;
+  }
 
-.all {
-  display: flex;
-  justify-content: center;
-  background-color: white;
-}
+  .yaml {
+    width: 100%;
+    padding: 1rem;
+    order: 2;
+  }
 
-.yaml {
-  float: left;
-  width: 50%;
-  padding-left: 10%;
-  padding-top: 30px;
-  padding-bottom: 30px;
-}
+  .ui {
+    width: 100%;
+    padding: 2rem 1rem;
+    text-align: center;
+    order: 1;
+  }
 
-.ui {
-  padding-top: 30px;
-  padding-bottom: 30px;
-  float: left;
-  width: 30%;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-}
-
-.descriptionitem {
-  font-weight: 550;
-  color: #000830;
-  margin-bottom: 10px;
+  .descriptionitem {
+    text-align: center;
+  }
 }
 
 @media screen and (max-width: 600px) {
   .title {
-    text-align: center;
-    margin: 0 auto;
-    padding-bottom: 30px;
+    font-size: 2rem;
+    margin-bottom: 1rem;
   }
 
   .yaml {
     width: 95%;
     margin: 0 auto;
-    padding: 0 0 30px;
+    padding: 0.5rem;
   }
 
   .ui {
-    text-align: center;
-    width: 80%;
+    width: 90%;
     margin: 0 auto;
-    padding-bottom: 30px;
+    padding: 1rem 0.5rem;
   }
 
   .descriptionitem {
-    font-weight: normal;
-    color: #000;
-    margin-left: 0;
+    font-size: 1rem;
+    margin-bottom: 1.5rem;
   }
 }
 
+.all {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 80vh;
+  position: relative;
+  overflow: hidden;
+  /* Soft modern gradient background */
+  background: linear-gradient(135deg, #f8fafc 0%, #e0e7ff 100%);
+}
+
+.all::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: radial-gradient(circle at 30% 20%, rgba(254, 136, 1, 0.07) 0%, transparent 60%),
+              radial-gradient(circle at 70% 80%, rgba(30, 64, 175, 0.07) 0%, transparent 60%);
+  pointer-events: none;
+  z-index: 0;
+}
+
+.title {
+  text-align: left;
+  display: inline-block;
+  color: #0a0f2e;
+  width: 100%;
+  font-size: 3rem;
+  font-weight: 700;
+  margin-bottom: 1.5rem;
+  background: linear-gradient(135deg, #0a0f2e 0%, #1a1f4e 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.yaml {
+  width: 40%;
+  position: relative;
+  border-radius: 18px;
+}
+
+.ui {
+  padding: 3rem;
+  width: 40%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  position: relative;
+  margin-right: 2rem;
+}
+
+.descriptionitem {
+  font-weight: 500;
+  color: #1a1f4e;
+  margin-bottom: 2rem;
+  font-size: 1.2rem;
+  line-height: 1.6;
+}
+
+/* Modern code editor styling */
+.yaml > div:first-child {
+  background: linear-gradient(135deg, #1a1f4e 0%, #0a0f2e 100%);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 15px 15px 0 0;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  padding: 0 1rem;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+}
+
+.yaml > div:last-child {
+  border-radius: 0 0 15px 15px;
+  overflow: hidden;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
+}
+
 .dot {
-  top: 1px;
-  height: 14px;
-  width: 14px;
+  height: 12px;
+  width: 12px;
   border-radius: 50%;
   display: inline-block;
-  margin: 8px 4px;
+  margin: 0 6px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.ui, .yaml {
+  background: none;
+  box-shadow: none;
+  border-radius: 0;
+  backdrop-filter: none;
+  z-index: 1;
+}
+
+/* Responsive design */
+@media screen and (max-width: 950px) {
+  .all {
+    flex-direction: column;
+    width: 100%;
+    padding: 2rem 1rem;
+  }
+  .ui {
+    width: 100%;
+    margin-right: 0;
+    margin-bottom: 2rem;
+    padding: 2rem 1rem;
+  }
+  .yaml {
+    width: 100%;
+    padding: 1rem;
+  }
+}
+
+@media screen and (max-width: 600px) {
+  .ui {
+    width: 90%;
+    margin: 0 auto 1.5rem auto;
+    padding: 1rem 0.5rem;
+  }
+  .yaml {
+    width: 95%;
+    margin: 0 auto;
+    padding: 0.5rem;
+  }
 }
