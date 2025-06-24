@@ -14,7 +14,6 @@ const Comparison = () => {
     const [replicas, setReplicas] = useState(3);
     const [version, setVersion] = useState("1.14.2");
     const [port, setPort] = useState(80);
-    // const [expose, setExpose] = useState(false);
     const [intervalId, setIntervalId] = useState(null);
 
     const [form] = Form.useForm();
@@ -110,7 +109,6 @@ const Comparison = () => {
 
     const onNameChange = (event) => {
         setIntervalId(null);
-        console.log(intervalId)
         clearInterval(intervalId)
         setName(event.target.value)
     }
@@ -135,15 +133,24 @@ const Comparison = () => {
                 </div>
                 <div style={{paddingTop: "0", paddingBottom: "20px"}}>
                     <h3 className={styles.descriptionitem}>
-                        <span style={{color: "#ff8803", fontWeight: "bold"}}>Hide the complexity</span> of Kubernetes under a UI
-                        tailored to your needs. Ideal <span style={{color: "#ff8803", fontWeight: "bold"}}>for development teams</span> that interact with Kubernetes regularly.
+                        <span style={{color: "#fe8801", fontWeight: "bold"}}>Hide the complexity</span> of Kubernetes under a UI
+                        tailored to your needs. Ideal <span style={{color: "#fe8801", fontWeight: "bold"}}>for development teams</span> that interact with Kubernetes regularly.
                     </h3>
                 </div>
                 <ConfigProvider
                     theme={{
                         token: {
                             colorPrimary: '#fe8801',
+                            borderRadius: 8,
+                            fontSize: 16,
                         },
+                        components: {
+                            Form: {
+                                labelFontSize: 16,
+                                labelFontWeight: 600,
+                                labelColor: '#1a1f4e',
+                            },
+                        }
                     }}
                 >
                     <Form
@@ -207,13 +214,22 @@ const Comparison = () => {
                 </ConfigProvider>
             </div>
 
-            <div className={styles.yaml}>
+            <div
+                className={styles.yaml}
+                style={{
+                    borderRadius: "15px",
+                    boxShadow: "16px 24px 64px rgba(30, 64, 175, 0.4)"
+                }}
+            >
                 <div
                     style={{
-                        backgroundColor: "#000830",
-                        borderBottom: "1px solid #a7a7a7",
-                        borderRadius: "10px 10px 0px 0px",
-                        height: "30px"
+                        background: "linear-gradient(135deg, #1a1f4e 0%, #0a0f2e 100%)",
+                        borderBottom: "1px solid rgba(255, 255, 255, 0.1)",
+                        borderRadius: "15px 15px 0px 0px",
+                        height: "40px",
+                        display: "flex",
+                        alignItems: "center",
+                        padding: "0 1rem",
                     }}
                 >
                     <span className={styles.dot} style={{backgroundColor: "#fe5f58", marginLeft: "10px"}}></span>
@@ -223,18 +239,31 @@ const Comparison = () => {
                 <SyntaxHighlighter
                     style={{
                         "hljs-attr": {
-                            color: "#FFF"
+                            color: "#fe8801"
+                        },
+                        "hljs-string": {
+                            color: "#ffffff"
+                        },
+                        "hljs-number": {
+                            color: "#4ecdc4"
+                        },
+                        "hljs-keyword": {
+                            color: "#ff6b6b"
                         },
                         "react-syntax-highlighter-line-number": {
-                            color: "#a7a7a7",
+                            color: "#6c757d",
                             margin: "0"
                         }
                     }}
                     showLineNumbers={true}
                     customStyle={{
-                        "borderRadius": "0px 0px 10px 10px",
-                        backgroundColor: "#000830",
-                        color: "#fe8801",
+                        borderRadius: "0px 0px 15px 15px",
+                        background: "linear-gradient(135deg, #1a1f4e 0%, #0a0f2e 100%)",
+                        color: "#ffffff",
+                        fontSize: "14px",
+                        lineHeight: "1.6",
+                        padding: "1.5rem",
+                        margin: 0,
                     }}
                 >
                     {k8sDplString}
