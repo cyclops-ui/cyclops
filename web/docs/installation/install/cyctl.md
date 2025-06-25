@@ -5,7 +5,7 @@ title: Install Cyclops with our CLI
 description: "cyctl is the Cyclops CLI tool"
 ---
 
-## Install cyctl
+## Install cyctl using Brew
 
 Cyclops has its own CLI tool called cyctl.
 To install Cyclops in your cluster with cyctl, first install cyctl with homebrew:
@@ -14,21 +14,20 @@ To install Cyclops in your cluster with cyctl, first install cyctl with homebrew
 brew install cyctl
 ```
 
-## Install cyctl in linux based machines
+## Install cyctl from release
 
-Vist ```https://github.com/cyclops-ui/cyclops/releases/``` Page of repository
+Check Cyclops releases [https://github.com/cyclops-ui/cyclops/releases](https://github.com/cyclops-ui/cyclops/releases/)
 
-Select your release version you want, choose the arch suitable for your machine
+Select the release version you want and the arch suitable for your machine
 
-Let's take example for v0.21.0 version for linux amd64 arch
+For example: version `v0.21.0` for `linux` and arch `amd64`
 ```shell
 wget https://github.com/cyclops-ui/cyclops/releases/download/v0.21.0/cyctl_linux_amd64_v0.21.0.tar.gz
 tar -xzvf cyctl_linux_amd64_v0.21.0.tar.gz
 sudo mv cyctl /usr/local/bin/
 ```
 
-
-> _Check if the installation was successful by running `cyctl -v`_
+Check if the installation was successful by running `cyctl -v`
 
 ## Install Cyclops
 
