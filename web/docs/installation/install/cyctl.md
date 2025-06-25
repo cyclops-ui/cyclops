@@ -14,6 +14,20 @@ To install Cyclops in your cluster with cyctl, first install cyctl with homebrew
 brew install cyctl
 ```
 
+## Install cyctl in linux based machines
+
+Vist ```https://github.com/cyclops-ui/cyclops/releases/``` Page of repository
+
+Select your release version you want, choose the arch suitable for your machine
+
+Let's take example for v0.21.0 version for linux amd64 arch
+```shell
+wget https://github.com/cyclops-ui/cyclops/releases/download/v0.21.0/cyctl_linux_amd64_v0.21.0.tar.gz
+tar -xzvf cyctl_linux_amd64_v0.21.0.tar.gz
+sudo mv cyctl /usr/local/bin/
+```
+
+
 > _Check if the installation was successful by running `cyctl -v`_
 
 ## Install Cyclops
