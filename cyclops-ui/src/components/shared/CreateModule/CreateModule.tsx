@@ -130,7 +130,7 @@ export const CreateModuleComponent = ({
 
   const [namespaces, setNamespaces] = useState<string[]>([]);
 
-  const [gitopsToggle, SetGitopsToggle] = useState(false);
+  const [gitopsToggle, setGitopsToggle] = useState(false);
 
   const [notificationApi, contextHolder] = notification.useNotification();
   const openNotification = (errors: FeedbackError[]) => {
@@ -146,16 +146,20 @@ export const CreateModuleComponent = ({
 
   const [form] = Form.useForm();
 
-  const resolveGitOpsWrite = (values: any) => {
+  const resolveGitOpsWrite = (
+    writeRepo: string,
+    writePath: string,
+    writeBranch: string,
+  ) => {
     if (template.enforceGitOpsWrite !== undefined) {
       return template.enforceGitOpsWrite;
     }
 
     return gitopsToggle
       ? {
-          repo: values["gitops-repo"],
-          path: values["gitops-path"],
-          branch: values["gitops-branch"],
+          repo: writeRepo,
+          path: writePath,
+          branch: writeBranch,
         }
       : null;
   };
@@ -189,6 +193,10 @@ export const CreateModuleComponent = ({
     const moduleName = values["cyclops_module_name"];
     const moduleNamespace = values["cyclops_module_namespace"];
 
+    const gitopsWriteRepo = values["gitops-repo"];
+    const gitopsWritePath = values["gitops-path"];
+    const gitopsWriteBranch = values["gitops-branch"];
+
     values = findMaps(config.root.properties, values, initialValuesRaw);
 
     submitModule(
@@ -201,7 +209,7 @@ export const CreateModuleComponent = ({
         sourceType: template.ref.sourceType,
       },
       values,
-      resolveGitOpsWrite(values),
+      resolveGitOpsWrite(gitopsWriteRepo, gitopsWritePath, gitopsWriteBranch),
     )
       .then(() => {
         onSubmitModuleSuccess(moduleName);
@@ -612,7 +620,7 @@ export const CreateModuleComponent = ({
                     >
                       <Switch
                         onChange={(e) => {
-                          SetGitopsToggle(e);
+                          setGitopsToggle(e);
                         }}
                       />
                     </Form.Item>
