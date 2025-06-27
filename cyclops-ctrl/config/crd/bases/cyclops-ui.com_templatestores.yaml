@@ -63,10 +63,13 @@ spec:
                     type: string
                   version:
                     type: string
+                  writeResources:
+                    type: boolean
                 required:
                 - path
                 - repo
                 - version
+                - writeResources
                 type: object
               path:
                 type: string
