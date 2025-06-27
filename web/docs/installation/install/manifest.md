@@ -19,3 +19,17 @@ kubectl port-forward svc/cyclops-ui 3000:3000 -n cyclops
 ```
 
 You can now access Cyclops in your browser on [http://localhost:3000](http://localhost:3000).
+
+Alternate way (If you dont want to use port forwarding and block your terminal just for this)
+
+Expose cyclops ui using `NodePort` in your browser
+
+```bash
+kubectl patch svc cyclops-ui -n cyclops -p '{"spec": {"type": "NodePort"}}'
+```
+
+After this command, Grab the `NodePort` assigned by the cluster against port `3000`.
+
+You can now access Cyclops in your browser on [http://<Node-Ip>:<NodePort>](http://<Node-Ip>:<NodePort>).
+
+
