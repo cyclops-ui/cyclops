@@ -604,16 +604,52 @@ func (m *Modules) RollbackModule(ctx *gin.Context) {
 	ctx.Status(http.StatusOK)
 }
 
+func (m *Modules) BatchReconcileModules(ctx *gin.Context) {
+	ctx.Header("Access-Control-Allow-Origin", "*")
+
+	type ReconcileModulesReq struct {
+		Modules []string `json:"modules"`
+	}
+
+	var request struct {
+		Modules []string `json:"modules"`
+	}
+	if err := ctx.BindJSON(&request); err != nil {
+		fmt.Println(err)
+		ctx.JSON(http.StatusBadRequest, dto.NewError("Error mapping modules reconcile request", err.Error()))
+		return
+	}
+
+	for _, moduleName := range request.Modules {
+		if err := m.reconcileModule(moduleName); err != nil {
+			fmt.Println(err)
+			ctx.JSON(http.StatusInternalServerError, dto.NewError(fmt.Sprintf("Error reconciling module %v", moduleName), err.Error()))
+			return
+		}
+	}
+
+	ctx.Status(http.StatusAccepted)
+}
+
 func (m *Modules) ReconcileModule(ctx *gin.Context) {
 	ctx.Header("Access-Control-Allow-Origin", "*")
 
 	moduleName := ctx.Param("name")
 
-	module, err := m.kubernetesClient.GetModule(moduleName)
+	err := m.reconcileModule(moduleName)
 	if err != nil {
 		fmt.Println(err)
-		ctx.JSON(http.StatusInternalServerError, dto.NewError("Error fetching module", err.Error()))
+		ctx.JSON(http.StatusInternalServerError, dto.NewError("Error reconciling module", err.Error()))
 		return
+	}
+
+	ctx.Status(http.StatusAccepted)
+}
+
+func (m *Modules) reconcileModule(moduleName string) error {
+	module, err := m.kubernetesClient.GetModule(moduleName)
+	if err != nil {
+		return err
 	}
 
 	annotations := module.GetAnnotations()
@@ -627,14 +663,7 @@ func (m *Modules) ReconcileModule(ctx *gin.Context) {
 	module.Kind = "Module"
 	module.APIVersion = "cyclops-ui.com/v1alpha1"
 
-	err = m.kubernetesClient.UpdateModule(module)
-	if err != nil {
-		fmt.Println(err)
-		ctx.JSON(http.StatusInternalServerError, dto.NewError("Error updating module", err.Error()))
-		return
-	}
-
-	ctx.Status(http.StatusAccepted)
+	return m.kubernetesClient.UpdateModule(module)
 }
 
 func (m *Modules) ResourcesForModule(ctx *gin.Context) {
