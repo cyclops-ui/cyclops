@@ -8,6 +8,8 @@ import {
   Input,
   Row,
   Tooltip,
+  Checkbox,
+  InputNumber,
 } from "antd";
 import {
   InfoCircleOutlined,
@@ -121,15 +123,11 @@ export const ArrayField = ({
                         onClick={() => remove(arrField.name)}
                       />
                     </Row>
-                    {arrFields !== null &&
-                    arrFields !== undefined &&
-                    index + 1 === arrFields.length ? (
+                    {index + 1 === arrFields.length ? (
                       <Divider
                         style={{ marginTop: "4px", marginBottom: "12px" }}
                       />
-                    ) : (
-                      <></>
-                    )}
+                    ) : null}
                   </Col>
                 ))}
                 <Form.Item style={{ marginBottom: "0" }}>
@@ -148,6 +146,138 @@ export const ArrayField = ({
         </Form.Item>
       );
     }
+
+    if (field.items.type === "number") {
+      return (
+        <Form.Item
+          wrapperCol={{ span: 16 }}
+          name={fieldName}
+          label={field.display_name}
+          style={{ marginBottom: "12px" }}
+        >
+          <Form.List name={formItemName}>
+            {(arrFields, { add, remove }) => (
+              <div
+                style={{
+                  border: "solid 1px #d3d3d3",
+                  borderRadius: "7px",
+                  padding: "12px",
+                  width: "100%",
+                  backgroundColor: "#fafafa",
+                }}
+              >
+                {arrFields.map((arrField, index) => (
+                  <Col key={arrField.key}>
+                    <Row>
+                      <Form.Item
+                        style={{
+                          paddingBottom: "8px",
+                          marginBottom: "0px",
+                          width: "80%",
+                        }}
+                        wrapperCol={{ span: 24 }}
+                        {...arrField}
+                        name={[arrField.name]}
+                      >
+                        <InputNumber
+                          disabled={field.immutable && isModuleEdit}
+                        />
+                      </Form.Item>
+                      <MinusCircleOutlined
+                        style={{ fontSize: "16px", paddingLeft: "10px" }}
+                        onClick={() => remove(arrField.name)}
+                      />
+                    </Row>
+                    {index + 1 === arrFields.length ? (
+                      <Divider
+                        style={{ marginTop: "4px", marginBottom: "12px" }}
+                      />
+                    ) : null}
+                  </Col>
+                ))}
+                <Form.Item style={{ marginBottom: "0" }}>
+                  <Button
+                    type="dashed"
+                    onClick={() => add()}
+                    block
+                    icon={<PlusOutlined />}
+                  >
+                    Add
+                  </Button>
+                </Form.Item>
+              </div>
+            )}
+          </Form.List>
+        </Form.Item>
+      );
+    }
+
+    if (field.items.type === "boolean") {
+      return (
+        <Form.Item
+          wrapperCol={{ span: 16 }}
+          name={fieldName}
+          label={field.display_name}
+          style={{ marginBottom: "12px" }}
+        >
+          <Form.List name={formItemName}>
+            {(arrFields, { add, remove }) => (
+              <div
+                style={{
+                  border: "solid 1px #d3d3d3",
+                  borderRadius: "7px",
+                  padding: "12px",
+                  width: "100%",
+                  backgroundColor: "#fafafa",
+                }}
+              >
+                {arrFields.map((arrField, index) => (
+                  <Col key={arrField.key}>
+                    <Row>
+                      <Form.Item
+                        style={{
+                          paddingBottom: "8px",
+                          marginBottom: "0px",
+                          width: "80%",
+                        }}
+                        wrapperCol={{ span: 24 }}
+                        {...arrField}
+                        name={[arrField.name]}
+                        valuePropName="checked"
+                      >
+                        <Checkbox disabled={field.immutable && isModuleEdit}>
+                          {field.display_name}
+                        </Checkbox>
+                      </Form.Item>
+                      <MinusCircleOutlined
+                        style={{ fontSize: "16px", paddingLeft: "10px" }}
+                        onClick={() => remove(arrField.name)}
+                      />
+                    </Row>
+                    {index + 1 === arrFields.length ? (
+                      <Divider
+                        style={{ marginTop: "4px", marginBottom: "12px" }}
+                      />
+                    ) : null}
+                  </Col>
+                ))}
+                <Form.Item style={{ marginBottom: "0" }}>
+                  <Button
+                    type="dashed"
+                    onClick={() => add()}
+                    block
+                    icon={<PlusOutlined />}
+                  >
+                    Add
+                  </Button>
+                </Form.Item>
+              </div>
+            )}
+          </Form.List>
+        </Form.Item>
+      );
+    }
+
     if (field.items.type === "object") {
       return (
         <div
