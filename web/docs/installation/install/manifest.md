@@ -22,8 +22,6 @@ You can now access Cyclops in your browser on [http://localhost:3000](http://loc
 
 ### Alternative Method: Expose Cyclops UI Using NodePort
 
-Alternate way (If you dont want to use port forwarding and block your terminal just for this)
-
 Expose cyclops ui using `NodePort` in your browser
 
 ```bash
