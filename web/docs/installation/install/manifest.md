@@ -30,5 +30,5 @@ kubectl patch svc cyclops-ui -n cyclops -p '{"spec": {"type": "NodePort"}}'
 
 After this command, Grab the `NodePort` assigned by the cluster against port `3000`.
 
-You can now access Cyclops in your browser on [http://Node-Ip:NodePort].
+You can now access Cyclops in your browser on (http://Node-Ip:NodePort).
 
