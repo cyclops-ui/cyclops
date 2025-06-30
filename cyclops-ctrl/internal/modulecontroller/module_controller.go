@@ -19,6 +19,7 @@ package modulecontroller
 import (
 	"context"
 	"fmt"
+	"github.com/cyclops-ui/cyclops/cyclops-ctrl/internal/git"
 	"sort"
 	"strings"
 	"time"
@@ -53,6 +54,7 @@ type ModuleReconciler struct {
 
 	templatesRepo    templaterepo.ITemplateRepo
 	kubernetesClient k8sclient.IKubernetesClient
+	gitWriteClient   *git.WriteClient
 	renderer         *render.Renderer
 
 	maxConcurrentReconciles int
@@ -67,6 +69,7 @@ func NewModuleReconciler(
 	scheme *runtime.Scheme,
 	templatesRepo templaterepo.ITemplateRepo,
 	kubernetesClient k8sclient.IKubernetesClient,
+	gitWriteClient *git.WriteClient,
 	renderer *render.Renderer,
 	maxConcurrentReconciles int,
 	telemetryClient telemetry.Client,
@@ -77,6 +80,7 @@ func NewModuleReconciler(
 		Scheme:                  scheme,
 		templatesRepo:           templatesRepo,
 		kubernetesClient:        kubernetesClient,
+		gitWriteClient:          gitWriteClient,
 		renderer:                renderer,
 		telemetryClient:         telemetryClient,
 		maxConcurrentReconciles: maxConcurrentReconciles,
@@ -260,6 +264,23 @@ func (r *ModuleReconciler) generateResources(
 			continue
 		}
 
+		if _, ok := module.Annotations[cyclopsv1alpha1.GitOpsWriteResourcesAnnotation]; ok {
+			err := r.writeResourceToGit(s)
+
+			r.logger.Error(err, "failed to write child resource to git",
+				"module namespaced name",
+				module.Name,
+			)
+
+			installErrors = append(installErrors, fmt.Sprintf(
+				"failed to write child resource to git for module %v :%v",
+				module.Name,
+				err.Error(),
+			))
+
+			continue
+		}
+
 		var obj unstructured.Unstructured
 		decoder := yaml.NewYAMLOrJSONDecoder(strings.NewReader(s), len(s))
 		if err := decoder.Decode(&obj); err != nil {
@@ -336,6 +357,12 @@ func (r *ModuleReconciler) generateResources(
 	}
 
 	return installErrors, childrenGVRs, nil
+}
+
+func (r *ModuleReconciler) writeResourceToGit(
+	obj string,
+) error {
+	r.gitWriteClient.Write()
 }
 
 func (r *ModuleReconciler) applyCRDs(template *models.Template) []string {
