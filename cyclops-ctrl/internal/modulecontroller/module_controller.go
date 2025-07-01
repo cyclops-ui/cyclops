@@ -258,26 +258,11 @@ func (r *ModuleReconciler) generateResources(
 	installErrors := make([]string, 0)
 	childrenGVRs := make([]cyclopsv1alpha1.GroupVersionResource, 0)
 
+	childObjs := make([]unstructured.Unstructured, 0)
+
 	for _, s := range strings.Split(out, "\n---\n") {
 		s := strings.TrimSpace(s)
 		if len(s) == 0 {
-			continue
-		}
-
-		if _, ok := module.Annotations[cyclopsv1alpha1.GitOpsWriteResourcesAnnotation]; ok {
-			err := r.writeResourceToGit(s)
-
-			r.logger.Error(err, "failed to write child resource to git",
-				"module namespaced name",
-				module.Name,
-			)
-
-			installErrors = append(installErrors, fmt.Sprintf(
-				"failed to write child resource to git for module %v :%v",
-				module.Name,
-				err.Error(),
-			))
-
 			continue
 		}
 
@@ -341,6 +326,35 @@ func (r *ModuleReconciler) generateResources(
 		}
 		childrenGVRs = append(childrenGVRs, gvr)
 
+		childObjs = append(childObjs, obj)
+	}
+
+	if _, ok := module.GetAnnotations()[cyclopsv1alpha1.GitOpsWriteResourcesAnnotation]; ok {
+		return []string{}, childrenGVRs, r.gitWriteClient.WriteModuleResources(module, childObjs)
+	}
+
+	for _, obj := range childObjs {
+		resourceName, err := kClient.GVKtoAPIResourceName(obj.GroupVersionKind().GroupVersion(), obj.GroupVersionKind().Kind)
+		if err != nil {
+			installErrors = append(installErrors, fmt.Sprintf(
+				"%v%v/%v %v/%v failed to apply: %v",
+				obj.GroupVersionKind().Group,
+				obj.GroupVersionKind().Version,
+				obj.GroupVersionKind().Kind,
+				obj.GetNamespace(),
+				obj.GetName(),
+				err.Error(),
+			))
+
+			continue
+		}
+
+		gvr := cyclopsv1alpha1.GroupVersionResource{
+			Group:    obj.GroupVersionKind().Group,
+			Version:  obj.GroupVersionKind().Version,
+			Resource: resourceName,
+		}
+
 		if err := kClient.CreateDynamic(gvr, &obj, module.Spec.TargetNamespace); err != nil {
 			installErrors = append(installErrors, fmt.Sprintf(
 				"%v%v/%v %v/%v failed to apply: %v",
@@ -357,12 +371,6 @@ func (r *ModuleReconciler) generateResources(
 	}
 
 	return installErrors, childrenGVRs, nil
-}
-
-func (r *ModuleReconciler) writeResourceToGit(
-	obj string,
-) error {
-	r.gitWriteClient.Write()
 }
 
 func (r *ModuleReconciler) applyCRDs(template *models.Template) []string {

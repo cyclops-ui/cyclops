@@ -314,7 +314,7 @@ func (m *Modules) CreateModule(ctx *gin.Context) {
 	m.telemetryClient.ModuleCreation()
 
 	if module.GetAnnotations() != nil && len(module.GetAnnotations()[v1alpha1.GitOpsWriteRepoAnnotation]) != 0 {
-		err := m.gitWriteClient.Write(module)
+		err := m.gitWriteClient.WriteModule(module)
 		if err != nil {
 			fmt.Println(err)
 			ctx.JSON(http.StatusInternalServerError, dto.NewError("Error pushing to git", err.Error()))
@@ -400,7 +400,7 @@ func (m *Modules) UpdateModule(ctx *gin.Context) {
 	module.SetAnnotations(annotations)
 
 	if len(module.GetAnnotations()[v1alpha1.GitOpsWriteRepoAnnotation]) != 0 {
-		err := m.gitWriteClient.Write(module)
+		err := m.gitWriteClient.WriteModule(module)
 		if err != nil {
 			fmt.Println(err)
 			ctx.JSON(http.StatusInternalServerError, dto.NewError("Error pushing to git", err.Error()))
