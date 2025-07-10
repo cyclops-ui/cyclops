@@ -55,4 +55,20 @@ type Field struct {
 	MinLength *int    `json:"minLength"`
 	MaxLength *int    `json:"maxLength"`
 	Pattern   *string `json:"pattern"`
+
+	Condition []Condition `json:"condition"`
 }
+
+type Condition struct {
+	Operation ConditionOperation `json:"operation"`
+	Property  string             `json:"property"`
+	Const     interface{}        `json:"const"`
+	Enum      []interface{}      `json:"enum"`
+}
+
+type ConditionOperation string
+
+const (
+	Equal    ConditionOperation = "eq"
+	NotEqual ConditionOperation = "neq"
+)
