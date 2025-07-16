@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"errors"
 	"fmt"
-	json "github.com/json-iterator/go"
 	path2 "path"
 	"text/template"
 	"time"
@@ -18,6 +17,8 @@ import (
 	"github.com/go-git/go-git/v5/plumbing/object"
 	"github.com/go-git/go-git/v5/plumbing/transport/http"
 	"github.com/go-git/go-git/v5/storage/memory"
+	json "github.com/json-iterator/go"
+	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"sigs.k8s.io/yaml"
 
 	cyclopsv1alpha1 "github.com/cyclops-ui/cyclops/cyclops-ctrl/api/v1alpha1"
@@ -36,6 +37,141 @@ func NewWriteClient(templatesResolver auth.TemplatesResolver, commitMessageTempl
 		templatesResolver:     templatesResolver,
 		commitMessageTemplate: getCommitMessageTemplate(commitMessageTemplate, logger),
 	}
+}
+
+func (c *WriteClient) WriteModule(module cyclopsv1alpha1.Module) error {
+	module.Status.ReconciliationStatus = nil
+	module.Status.ManagedGVRs = nil
+
+	repoURL, exists := module.GetAnnotations()[cyclopsv1alpha1.GitOpsWriteRepoAnnotation]
+	if !exists {
+		return errors.New(fmt.Sprintf("module passed to write without git repository; set cyclops-ui.com/write-repo annotation in module %v", module.Name))
+	}
+
+	path, err := getModulePath(module)
+	if err != nil {
+		return err
+	}
+
+	revision := module.GetAnnotations()[cyclopsv1alpha1.GitOpsWriteRevisionAnnotation]
+
+	creds, err := c.templatesResolver.RepoAuthCredentials(repoURL)
+	if err != nil {
+		return err
+	}
+
+	if creds == nil {
+		return errors.New(fmt.Sprintf("failed to fetch creds for repo %v: check template auth rules", repoURL))
+	}
+
+	_, fs, repo, worktree, err := c.clone(repoURL, revision, creds)
+	if err != nil {
+		return err
+	}
+
+	path = moduleFilePath(path, module.Name)
+
+	file, err := fs.Create(path)
+	if err != nil {
+		return fmt.Errorf("failed to create file in repository: %w", err)
+	}
+
+	moduleData, err := yaml.Marshal(module)
+	if err != nil {
+		return err
+	}
+
+	if _, err := file.Write(moduleData); err != nil {
+		return fmt.Errorf("failed to write JSON data to file: %w", err)
+	}
+	file.Close()
+
+	return c.commitPush(path, module, repo, worktree, creds)
+}
+
+func (c *WriteClient) WriteModuleResources(module cyclopsv1alpha1.Module, resources []unstructured.Unstructured) error {
+	if _, ok := module.GetAnnotations()[cyclopsv1alpha1.GitOpsWriteResourcesAnnotation]; !ok {
+		return nil
+	}
+
+	module.Status.ReconciliationStatus = nil
+	module.Status.ManagedGVRs = nil
+
+	repoURL, exists := module.GetAnnotations()[cyclopsv1alpha1.GitOpsWriteRepoAnnotation]
+	if !exists {
+		return errors.New(fmt.Sprintf("module passed to write without git repository; set cyclops-ui.com/write-repo annotation in module %v", module.Name))
+	}
+
+	basePath, err := getModulePath(module)
+	if err != nil {
+		return err
+	}
+
+	revision := module.GetAnnotations()[cyclopsv1alpha1.GitOpsWriteRevisionAnnotation]
+
+	creds, err := c.templatesResolver.RepoAuthCredentials(repoURL)
+	if err != nil {
+		return err
+	}
+
+	if creds == nil {
+		return errors.New(fmt.Sprintf("failed to fetch creds for repo %v: check template auth rules", repoURL))
+	}
+
+	_, fs, repo, worktree, err := c.clone(repoURL, revision, creds)
+	if err != nil {
+		return err
+	}
+
+	for _, resource := range resources {
+		path := moduleResourceFilePath(basePath, module.Name, resource.GetKind(), resource.GetName())
+
+		file, err := fs.Create(path)
+		if err != nil {
+			return fmt.Errorf("failed to create file in repository: %w", err)
+		}
+
+		moduleData, err := yaml.Marshal(resource.Object)
+		if err != nil {
+			return err
+		}
+
+		if _, err := file.Write(moduleData); err != nil {
+			return fmt.Errorf("failed to write JSON data to file: %w", err)
+		}
+		file.Close()
+	}
+
+	return c.commitPush(basePath, module, repo, worktree, creds)
+}
+
+func (c *WriteClient) DeleteModule(module cyclopsv1alpha1.Module) error {
+	repoURL, exists := module.GetAnnotations()[cyclopsv1alpha1.GitOpsWriteRepoAnnotation]
+	if !exists {
+		return errors.New(fmt.Sprintf("module passed to delete without git repository; set cyclops-ui.com/write-repo annotation in module %v", module.Name))
+	}
+
+	path := module.GetAnnotations()[cyclopsv1alpha1.GitOpsWritePathAnnotation]
+	revision := module.GetAnnotations()[cyclopsv1alpha1.GitOpsWriteRevisionAnnotation]
+
+	creds, err := c.templatesResolver.RepoAuthCredentials(repoURL)
+	if err != nil {
+		return err
+	}
+
+	_, fs, repo, worktree, err := c.clone(repoURL, revision, creds)
+	if err != nil {
+		return err
+	}
+
+	path = moduleFilePath(path, module.Name)
+
+	err = fs.Remove(path)
+	if err != nil {
+		return fmt.Errorf("failed to remove file from repository: %w", err)
+	}
+
+	return c.commitPush(path, module, repo, worktree, creds)
 }
 
 func getCommitMessageTemplate(commitMessageTemplate string, logger logr.Logger) *template.Template {
@@ -78,177 +214,102 @@ func getModulePath(module cyclopsv1alpha1.Module) (string, error) {
 	return o.String(), nil
 }
 
-func (c *WriteClient) Write(module cyclopsv1alpha1.Module) error {
-	module.Status.ReconciliationStatus = nil
-	module.Status.ManagedGVRs = nil
-
-	repoURL, exists := module.GetAnnotations()[cyclopsv1alpha1.GitOpsWriteRepoAnnotation]
-	if !exists {
-		return errors.New(fmt.Sprintf("module passed to write without git repository; set cyclops-ui.com/write-repo annotation in module %v", module.Name))
-	}
-
-	path, err := getModulePath(module)
-	if err != nil {
-		return err
-	}
-
-	revision := module.GetAnnotations()[cyclopsv1alpha1.GitOpsWriteRevisionAnnotation]
-
-	creds, err := c.templatesResolver.RepoAuthCredentials(repoURL)
-	if err != nil {
-		return err
-	}
-
-	if creds == nil {
-		return errors.New(fmt.Sprintf("failed to fetch creds for repo %v: check template auth rules", repoURL))
-	}
-
-	storer := memory.NewStorage()
-	fs := memfs.New()
-
-	repo, worktree, err := cloneRepo(repoURL, revision, storer, &fs, creds)
-	if err != nil {
-		if errors.Is(err, git.NoMatchingRefSpecError{}) {
-			storer = memory.NewStorage()
-			fs = memfs.New()
-			repo, worktree, err = cloneRepo(repoURL, "", storer, &fs, creds)
-			if err != nil {
-				return err
-			}
-
-			err = worktree.Checkout(&git.CheckoutOptions{
-				Branch: plumbing.NewBranchReferenceName(revision),
-				Create: true,
-			})
-			if err != nil {
-				return err
-			}
-		} else {
-			return err
-		}
-	}
-
-	path = moduleFilePath(path, module.Name)
-
-	file, err := fs.Create(path)
-	if err != nil {
-		return fmt.Errorf("failed to create file in repository: %w", err)
-	}
-
-	moduleData, err := yaml.Marshal(module)
-	if err != nil {
-		return err
-	}
-
-	if _, err := file.Write(moduleData); err != nil {
-		return fmt.Errorf("failed to write JSON data to file: %w", err)
-	}
-	file.Close()
-
-	if _, err := worktree.Add(path); err != nil {
-		fmt.Println("err worktree.Add", path)
-		return fmt.Errorf("failed to add file to worktree: %w", err)
-	}
-
-	var o bytes.Buffer
-	err = c.commitMessageTemplate.Execute(&o, module.ObjectMeta)
-	if err != nil {
-		return err
-	}
-
-	_, err = worktree.Commit(o.String(), &git.CommitOptions{
-		Author: &object.Signature{
-			Name: creds.Username,
-			When: time.Now(),
-		},
-	})
-	if err != nil {
-		return fmt.Errorf("failed to commit changes: %w", err)
-	}
-
-	if err := repo.Push(&git.PushOptions{
-		Auth: httpBasicAuthCredentials(creds),
-	}); err != nil {
-		return fmt.Errorf("failed to push changes: %w", err)
-	}
-
-	return nil
-}
-
-func (c *WriteClient) DeleteModule(module cyclopsv1alpha1.Module) error {
-	repoURL, exists := module.GetAnnotations()[cyclopsv1alpha1.GitOpsWriteRepoAnnotation]
-	if !exists {
-		return errors.New(fmt.Sprintf("module passed to delete without git repository; set cyclops-ui.com/write-repo annotation in module %v", module.Name))
-	}
-
-	path := module.GetAnnotations()[cyclopsv1alpha1.GitOpsWritePathAnnotation]
-	revision := module.GetAnnotations()[cyclopsv1alpha1.GitOpsWriteRevisionAnnotation]
-
-	creds, err := c.templatesResolver.RepoAuthCredentials(repoURL)
-	if err != nil {
-		return err
-	}
-
-	storer := memory.NewStorage()
-	fs := memfs.New()
-
-	repo, worktree, err := cloneRepo(repoURL, revision, storer, &fs, creds)
-	if err != nil {
-		if errors.Is(err, git.NoMatchingRefSpecError{}) {
-			storer = memory.NewStorage()
-			fs = memfs.New()
-			repo, worktree, err = cloneRepo(repoURL, "", storer, &fs, creds)
-			if err != nil {
-				return err
-			}
-
-			err = worktree.Checkout(&git.CheckoutOptions{
-				Branch: plumbing.NewBranchReferenceName(revision),
-				Create: true,
-			})
-			if err != nil {
-				return err
-			}
-		} else {
-			return err
-		}
-	}
-
-	path = moduleFilePath(path, module.Name)
-
-	err = fs.Remove(path)
-	if err != nil {
-		return fmt.Errorf("failed to remove file from repository: %w", err)
-	}
-
-	if _, err := worktree.Add(path); err != nil {
-		return fmt.Errorf("failed to add changes to worktree: %w", err)
-	}
-
-	var o bytes.Buffer
-	err = c.commitMessageTemplate.Execute(&o, module.ObjectMeta)
-	if err != nil {
-		return err
-	}
-
-	_, err = worktree.Commit(o.String(), &git.CommitOptions{
-		Author: &object.Signature{
-			Name: creds.Username,
-			When: time.Now(),
-		},
-	})
-	if err != nil {
-		return fmt.Errorf("failed to commit changes: %w", err)
-	}
-
-	if err := repo.Push(&git.PushOptions{
-		Auth: httpBasicAuthCredentials(creds),
-	}); err != nil {
-		return fmt.Errorf("failed to push changes: %w", err)
-	}
-
-	return nil
-}
+//func (c *WriteClient) Write(module cyclopsv1alpha1.Module) error {
+//	module.Status.ReconciliationStatus = nil
+//	module.Status.ManagedGVRs = nil
+//
+//	repoURL, exists := module.GetAnnotations()[cyclopsv1alpha1.GitOpsWriteRepoAnnotation]
+//	if !exists {
+//		return errors.New(fmt.Sprintf("module passed to write without git repository; set cyclops-ui.com/write-repo annotation in module %v", module.Name))
+//	}
+//
+//	path, err := getModulePath(module)
+//	if err != nil {
+//		return err
+//	}
+//
+//	revision := module.GetAnnotations()[cyclopsv1alpha1.GitOpsWriteRevisionAnnotation]
+//
+//	creds, err := c.templatesResolver.RepoAuthCredentials(repoURL)
+//	if err != nil {
+//		return err
+//	}
+//
+//	if creds == nil {
+//		return errors.New(fmt.Sprintf("failed to fetch creds for repo %v: check template auth rules", repoURL))
+//	}
+//
+//	storer := memory.NewStorage()
+//	fs := memfs.New()
+//
+//	repo, worktree, err := cloneRepo(repoURL, revision, storer, &fs, creds)
+//	if err != nil {
+//		if errors.Is(err, git.NoMatchingRefSpecError{}) {
+//			storer = memory.NewStorage()
+//			fs = memfs.New()
+//			repo, worktree, err = cloneRepo(repoURL, "", storer, &fs, creds)
+//			if err != nil {
+//				return err
+//			}
+//
+//			err = worktree.Checkout(&git.CheckoutOptions{
+//				Branch: plumbing.NewBranchReferenceName(revision),
+//				Create: true,
+//			})
+//			if err != nil {
+//				return err
+//			}
+//		} else {
+//			return err
+//		}
+//	}
+//
+//	path = moduleFilePath(path, module.Name)
+//
+//	file, err := fs.Create(path)
+//	if err != nil {
+//		return fmt.Errorf("failed to create file in repository: %w", err)
+//	}
+//
+//	moduleData, err := yaml.Marshal(module)
+//	if err != nil {
+//		return err
+//	}
+//
+//	if _, err := file.Write(moduleData); err != nil {
+//		return fmt.Errorf("failed to write JSON data to file: %w", err)
+//	}
+//	file.Close()
+//
+//	if _, err := worktree.Add(path); err != nil {
+//		fmt.Println("err worktree.Add", path)
+//		return fmt.Errorf("failed to add file to worktree: %w", err)
+//	}
+//
+//	var o bytes.Buffer
+//	err = c.commitMessageTemplate.Execute(&o, module.ObjectMeta)
+//	if err != nil {
+//		return err
+//	}
+//
+//	_, err = worktree.Commit(o.String(), &git.CommitOptions{
+//		Author: &object.Signature{
+//			Name: creds.Username,
+//			When: time.Now(),
+//		},
+//	})
+//	if err != nil {
+//		return fmt.Errorf("failed to commit changes: %w", err)
+//	}
+//
+//	if err := repo.Push(&git.PushOptions{
+//		Auth: httpBasicAuthCredentials(creds),
+//	}); err != nil {
+//		return fmt.Errorf("failed to push changes: %w", err)
+//	}
+//
+//	return nil
+//}
 
 func moduleFilePath(path, moduleName string) string {
 	if path2.Ext(path) != "yaml" || path2.Ext(path) != "yml" {
@@ -258,7 +319,44 @@ func moduleFilePath(path, moduleName string) string {
 	return path
 }
 
-func cloneRepo(url, revision string, storer *memory.Storage, fs *billy.Filesystem, creds *auth.Credentials) (*git.Repository, *git.Worktree, error) {
+func moduleResourceFilePath(path, moduleName, resourceKind, resourceName string) string {
+	if path2.Ext(path) != "yaml" || path2.Ext(path) != "yml" {
+		path = path2.Join(path, fmt.Sprintf("%v_resources", moduleName), fmt.Sprintf("%v_%v.yaml", resourceKind, resourceName))
+	}
+
+	return path
+}
+
+func (c *WriteClient) clone(repoURL, revision string, creds *auth.Credentials) (*memory.Storage, billy.Filesystem, *git.Repository, *git.Worktree, error) {
+	storer := memory.NewStorage()
+	fs := memfs.New()
+
+	repo, worktree, err := c.cloneRepo(repoURL, revision, storer, &fs, creds)
+	if err != nil {
+		if errors.Is(err, git.NoMatchingRefSpecError{}) {
+			storer = memory.NewStorage()
+			fs = memfs.New()
+			repo, worktree, err = c.cloneRepo(repoURL, "", storer, &fs, creds)
+			if err != nil {
+				return nil, nil, nil, nil, err
+			}
+
+			err = worktree.Checkout(&git.CheckoutOptions{
+				Branch: plumbing.NewBranchReferenceName(revision),
+				Create: true,
+			})
+			if err != nil {
+				return nil, nil, nil, nil, err
+			}
+		} else {
+			return nil, nil, nil, nil, err
+		}
+	}
+
+	return storer, fs, repo, worktree, nil
+}
+
+func (c *WriteClient) cloneRepo(url, revision string, storer *memory.Storage, fs *billy.Filesystem, creds *auth.Credentials) (*git.Repository, *git.Worktree, error) {
 	cloneOpts := git.CloneOptions{
 		URL:          url,
 		Auth:         httpBasicAuthCredentials(creds),
@@ -280,6 +378,31 @@ func cloneRepo(url, revision string, storer *memory.Storage, fs *billy.Filesyste
 	}
 
 	return repo, worktree, nil
+}
+
+func (c *WriteClient) commitPush(path string, module cyclopsv1alpha1.Module, repo *git.Repository, worktree *git.Worktree, creds *auth.Credentials) error {
+	if _, err := worktree.Add(path); err != nil {
+		fmt.Println("err worktree.Add", path)
+		return fmt.Errorf("failed to add file to worktree: %w", err)
+	}
+
+	var o bytes.Buffer
+	if err := c.commitMessageTemplate.Execute(&o, module.ObjectMeta); err != nil {
+		return err
+	}
+
+	if _, err := worktree.Commit(o.String(), &git.CommitOptions{
+		Author: &object.Signature{
+			Name: creds.Username,
+			When: time.Now(),
+		},
+	}); err != nil {
+		return fmt.Errorf("failed to commit changes: %w", err)
+	}
+
+	return repo.Push(&git.PushOptions{
+		Auth: httpBasicAuthCredentials(creds),
+	})
 }
 
 func httpBasicAuthCredentials(creds *auth.Credentials) *http.BasicAuth {
