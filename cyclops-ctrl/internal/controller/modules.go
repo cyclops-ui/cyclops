@@ -319,7 +319,6 @@ func (m *Modules) CreateModule(ctx *gin.Context) {
 			fmt.Println(err)
 			ctx.JSON(http.StatusInternalServerError, dto.NewError("Error pushing to git", err.Error()))
 		}
-		return
 	}
 
 	err = m.kubernetesClient.CreateModule(module)
