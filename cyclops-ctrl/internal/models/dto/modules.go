@@ -37,9 +37,10 @@ type Template struct {
 }
 
 type GitOpsWrite struct {
-	Repo   string `json:"repo"`
-	Path   string `json:"path"`
-	Branch string `json:"branch"`
+	Repo           string `json:"repo"`
+	Path           string `json:"path"`
+	Branch         string `json:"branch"`
+	WriteResources bool   `json:"writeResources"`
 }
 
 type TemplatesResponse struct {
