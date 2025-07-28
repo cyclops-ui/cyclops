@@ -63,6 +63,8 @@ spec:
                     type: string
                   version:
                     type: string
+                  writeResources:
+                    type: boolean
                 required:
                 - path
                 - repo

@@ -55,6 +55,7 @@ interface templateStoreOption {
     repo: string;
     path: string;
     branch: string;
+    writeResources: boolean;
   };
 }
 
@@ -150,6 +151,7 @@ export const CreateModuleComponent = ({
     writeRepo: string,
     writePath: string,
     writeBranch: string,
+    writeResources: boolean,
   ) => {
     if (template.enforceGitOpsWrite !== undefined) {
       return template.enforceGitOpsWrite;
@@ -160,6 +162,7 @@ export const CreateModuleComponent = ({
           repo: writeRepo,
           path: writePath,
           branch: writeBranch,
+          writeResources: writeResources,
         }
       : null;
   };
@@ -196,6 +199,7 @@ export const CreateModuleComponent = ({
     const gitopsWriteRepo = values["gitops-repo"];
     const gitopsWritePath = values["gitops-path"];
     const gitopsWriteBranch = values["gitops-branch"];
+    const gitopsWriteResources = values["gitops-write-resources"];
 
     values = findMaps(config.root.properties, values, initialValuesRaw);
 
@@ -209,7 +213,12 @@ export const CreateModuleComponent = ({
         sourceType: template.ref.sourceType,
       },
       values,
-      resolveGitOpsWrite(gitopsWriteRepo, gitopsWritePath, gitopsWriteBranch),
+      resolveGitOpsWrite(
+        gitopsWriteRepo,
+        gitopsWritePath,
+        gitopsWriteBranch,
+        gitopsWriteResources,
+      ),
     )
       .then(() => {
         onSubmitModuleSuccess(moduleName);
@@ -665,6 +674,26 @@ export const CreateModuleComponent = ({
                         style={{ padding: "0px 12px 0px 12px" }}
                       >
                         <Input />
+                      </Form.Item>
+                      <Form.Item
+                        name="gitops-write-resources"
+                        id="gitops-write-resources"
+                        label={
+                          <div>
+                            Write child resources to Git?
+                            <p
+                              style={{ color: "#8b8e91", marginBottom: "0px" }}
+                            >
+                              Instead of applying created resources to the
+                              cluster, Cyclops will push all the created
+                              resources to a git repository on path specified
+                              above.
+                            </p>
+                          </div>
+                        }
+                        style={{ padding: "0px 12px 0px 12px" }}
+                      >
+                        <Switch />
                       </Form.Item>
                     </div>
                   </div>

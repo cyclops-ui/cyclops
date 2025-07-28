@@ -24,6 +24,10 @@ func RequestToModule(req dto.Module) (cyclopsv1alpha1.Module, error) {
 		annotations[cyclopsv1alpha1.GitOpsWriteRepoAnnotation] = req.GitOpsWrite.Repo
 		annotations[cyclopsv1alpha1.GitOpsWritePathAnnotation] = req.GitOpsWrite.Path
 		annotations[cyclopsv1alpha1.GitOpsWriteRevisionAnnotation] = req.GitOpsWrite.Branch
+
+		if req.GitOpsWrite.WriteResources {
+			annotations[cyclopsv1alpha1.GitOpsWriteResourcesAnnotation] = "true"
+		}
 	}
 
 	return cyclopsv1alpha1.Module{

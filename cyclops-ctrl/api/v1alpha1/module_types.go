@@ -44,9 +44,10 @@ const (
 	TemplateSourceTypeHelm TemplateSourceType = "helm"
 	TemplateSourceTypeOCI  TemplateSourceType = "oci"
 
-	GitOpsWriteRepoAnnotation     = "cyclops-ui.com/write-repo"
-	GitOpsWritePathAnnotation     = "cyclops-ui.com/write-path"
-	GitOpsWriteRevisionAnnotation = "cyclops-ui.com/write-revision"
+	GitOpsWriteRepoAnnotation      = "cyclops-ui.com/write-repo"
+	GitOpsWritePathAnnotation      = "cyclops-ui.com/write-path"
+	GitOpsWriteRevisionAnnotation  = "cyclops-ui.com/write-revision"
+	GitOpsWriteResourcesAnnotation = "cyclops-ui.com/write-child-resources"
 
 	ModuleManagerLabel = "cyclops-ui.com/module-manager"
 
@@ -60,6 +61,9 @@ type GitOpsWriteDestination struct {
 	Repo    string `json:"repo"`
 	Path    string `json:"path"`
 	Version string `json:"version"`
+
+	// +kubebuilder:validation:Optional
+	WriteResources bool `json:"writeResources"`
 }
 
 type TemplateRef struct {

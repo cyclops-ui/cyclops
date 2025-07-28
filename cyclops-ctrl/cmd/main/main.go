@@ -142,6 +142,7 @@ func main() {
 		mgr.GetScheme(),
 		templatesRepo,
 		k8sClient,
+		gitWriteClient,
 		renderer,
 		getMaxConcurrentReconciles(),
 		telemetryClient,
