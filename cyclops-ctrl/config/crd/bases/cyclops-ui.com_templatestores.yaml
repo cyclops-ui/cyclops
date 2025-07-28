@@ -69,7 +69,6 @@ spec:
                 - path
                 - repo
                 - version
-                - writeResources
                 type: object
               path:
                 type: string

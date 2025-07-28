@@ -58,10 +58,12 @@ const (
 )
 
 type GitOpsWriteDestination struct {
-	Repo           string `json:"repo"`
-	Path           string `json:"path"`
-	Version        string `json:"version"`
-	WriteResources bool   `json:"writeResources"`
+	Repo    string `json:"repo"`
+	Path    string `json:"path"`
+	Version string `json:"version"`
+
+	// +kubebuilder:validation:Optional
+	WriteResources bool `json:"writeResources"`
 }
 
 type TemplateRef struct {
