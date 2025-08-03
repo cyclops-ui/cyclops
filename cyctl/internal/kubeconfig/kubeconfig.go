@@ -5,6 +5,7 @@ import (
 
 	"github.com/cyclops-ui/cyclops/cyclops-ctrl/api/v1alpha1/client"
 	"github.com/cyclops-ui/cyclops/cyclops-ctrl/pkg/cluster/k8sclient"
+	"github.com/go-logr/logr"
 
 	"github.com/spf13/cobra"
 	"k8s.io/client-go/kubernetes"
@@ -43,7 +44,7 @@ func GetKubeConfig() func(cmd *cobra.Command, args []string) {
 			panic(err.Error())
 		}
 
-		K8sClient, err = k8sclient.New()
+		K8sClient, err = k8sclient.New("cyclops", "", "", logr.Discard())
 		if err != nil {
 			panic(err.Error())
 		}
