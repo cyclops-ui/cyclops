@@ -14,6 +14,7 @@ import {
   Checkbox,
   theme,
   ConfigProvider,
+  notification,
 } from "antd";
 
 import axios from "axios";
@@ -45,6 +46,34 @@ const Modules = () => {
   const [searchInputFilter, setsearchInputFilter] = useState("");
   const resourceFilter = ["Healthy", "Unhealthy", "Progressing", "Unknown"];
   const [namespaceFilterData, setNamespaceFilterData] = useState<string[]>([]);
+
+  const [checkedModules, setCheckedModules] = useState<Set<string>>(new Set());
+  const [selectAllChecked, setSelectAllChecked] = useState(false);
+
+  const handleModuleSelect = (moduleName: string, checked: boolean) => {
+    setCheckedModules((prev) => {
+      const updatedSet = new Set(prev);
+      if (checked) {
+        updatedSet.add(moduleName);
+      } else {
+        updatedSet.delete(moduleName);
+      }
+      if (!checked) {
+        setSelectAllChecked(false);
+      }
+      return updatedSet;
+    });
+  };
+
+  const handleSelectAllModules = (checked: boolean) => {
+    setSelectAllChecked(checked);
+    if (!checked) {
+      setCheckedModules(new Set());
+      return;
+    }
+
+    setCheckedModules(new Set(filteredData.map((module: any) => module.name)));
+  };
 
   const [error, setError] = useState({
     message: "",
@@ -113,6 +142,25 @@ const Modules = () => {
   };
   const handleNamespaceSelectItem = (selectedItems: any[]) => {
     setModuleNamespaceFilter(selectedItems);
+  };
+
+  const handleBatchReconcile = () => {
+    axios
+      .post(`/api/modules/reconcile`, {
+        modules: Array.from(checkedModules),
+      })
+      .then(() => {
+        notification.success({
+          message: "Reconciliation triggered",
+          description: `Modules have been queued for reconciliation.`,
+          duration: 10,
+        });
+        setCheckedModules(new Set());
+        setSelectAllChecked(false);
+      })
+      .catch((error) => {
+        setError(mapResponseError(error));
+      });
   };
 
   const resourceFilterPopover = () => {
@@ -238,18 +286,40 @@ const Modules = () => {
       <Col key={index} xs={24} sm={12} md={8} lg={8} xl={6}>
         <a href={"/modules/" + module.name}>
           <Card
+            styles={{
+              header: {
+                borderRadius: "4px 7px 0 0",
+                backgroundColor: checkedModules.has(module.name)
+                  ? mode === "light"
+                    ? "#fcd8ae"
+                    : "#5e3301"
+                  : "",
+              },
+            }}
             title={
-              <div>
-                {module.iconURL ? (
-                  <img
-                    alt=""
-                    style={{ height: "2em", marginRight: "8px" }}
-                    src={module.iconURL}
-                  />
-                ) : (
-                  <></>
-                )}
-                {module.name}
+              <div
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "space-between",
+                }}
+              >
+                <div style={{ display: "flex", alignItems: "center" }}>
+                  {module.iconURL && (
+                    <img
+                      alt=""
+                      style={{ height: "2em", marginRight: "8px" }}
+                      src={module.iconURL}
+                    />
+                  )}
+                  {module.name}
+                </div>
+                <Checkbox
+                  checked={checkedModules.has(module.name)}
+                  onChange={(e) =>
+                    handleModuleSelect(module.name, e.target.checked)
+                  }
+                />
               </div>
             }
             style={{
@@ -387,22 +457,41 @@ const Modules = () => {
           />
         )}
 
-        <Row gutter={[16, 0]}>
-          <Col span={18}>
-            <Title level={2}>Deployed modules</Title>
+        <Row gutter={[20, 0]} align="middle" justify="space-between">
+          <Col>
+            <Title level={3}>Deployed modules</Title>
           </Col>
-          <Col span={6}>
-            <Button
-              type={"primary"}
-              onClick={handleClick}
-              block
-              style={{
-                fontWeight: "600",
-              }}
-            >
-              <PlusCircleOutlined />
-              Add module
-            </Button>
+          <Col>
+            <Row gutter={[10, 0]} align="middle">
+              <Col>
+                <Checkbox
+                  checked={selectAllChecked}
+                  onChange={(e) => handleSelectAllModules(e.target.checked)}
+                >
+                  Select all modules
+                </Checkbox>
+              </Col>
+              <Col>
+                <Button
+                  onClick={handleBatchReconcile}
+                  disabled={checkedModules.size === 0}
+                  style={{ fontWeight: "600" }}
+                  block
+                >
+                  <PlusCircleOutlined /> Reconcile
+                </Button>
+              </Col>
+              <Col>
+                <Button
+                  type="primary"
+                  onClick={handleClick}
+                  style={{ fontWeight: "600", width: "240px" }}
+                  block
+                >
+                  <PlusCircleOutlined /> Add module
+                </Button>
+              </Col>
+            </Row>
           </Col>
         </Row>
 

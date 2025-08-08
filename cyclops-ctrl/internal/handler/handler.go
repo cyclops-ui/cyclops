@@ -97,6 +97,7 @@ func (h *Handler) Start() error {
 	h.router.POST("/modules/rollback", modulesController.RollbackModule)
 	h.router.GET("/modules/:name/raw", modulesController.GetRawModuleManifest)
 	h.router.POST("/modules/:name/reconcile", modulesController.ReconcileModule)
+	h.router.POST("/modules/reconcile", modulesController.BatchReconcileModules)
 	h.router.GET("/modules/:name/history", modulesController.GetModuleHistory)
 	h.router.POST("/modules/:name/manifest", modulesController.Manifest)
 	h.router.GET("/modules/:name/currentManifest", modulesController.CurrentManifest)
