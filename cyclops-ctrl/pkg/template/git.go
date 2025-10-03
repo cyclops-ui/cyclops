@@ -74,10 +74,10 @@ func (r Repo) LoadTemplate(repoURL, path, commit, resolvedVersion string) (*mode
 	}
 
 	// region read files
-	filesFs, err := fs.Chroot(path)
-	if err != nil {
-		return nil, errors.Wrap(err, "could not find 'templates' dir; it should be placed in the repo/path you provided; make sure 'templates' directory exists")
-	}
+    filesFs, err := fs.Chroot(path)
+    if err != nil {
+        return nil, errors.Wrap(err, "invalid path: set path to the Helm chart folder (contains Chart.yaml and templates/). Do not point to a file or the templates/ subfolder.")
+    }
 
 	files, err := readFiles("", filesFs)
 	if err != nil {
@@ -85,9 +85,9 @@ func (r Repo) LoadTemplate(repoURL, path, commit, resolvedVersion string) (*mode
 	}
 	// endregion
 
-	if len(files) == 0 {
-		return nil, errors.Errorf("no files found in repo %v on path %v; make sure the repo, path and version are correct", repoURL, path)
-	}
+    if len(files) == 0 {
+        return nil, errors.Errorf("no files found at path %v in repo %v. Path must be a chart root containing Chart.yaml and templates/. Check repo URL (avoid trailing .git), path, and version/commit.", path, repoURL)
+    }
 
 	// region map files to template
 	metadataBytes := []byte{}
@@ -310,13 +310,13 @@ func resolveRef(repo, version string, creds *auth.Credentials) (string, error) {
 	})
 
 	// We can then use every Remote functions to retrieve wanted information
-	refs, err := rem.List(&git.ListOptions{
-		PeelingOption: git.AppendPeeled,
-		Auth:          httpBasicAuthCredentials(creds),
-	})
-	if err != nil {
-		return "", errors.Wrap(err, fmt.Sprintf("repo %s was not cloned successfully; authentication might be required; check if repository exists and you referenced it correctly", repo))
-	}
+    refs, err := rem.List(&git.ListOptions{
+        PeelingOption: git.AppendPeeled,
+        Auth:          httpBasicAuthCredentials(creds),
+    })
+    if err != nil {
+        return "", errors.Wrap(err, fmt.Sprintf("failed to list refs for %s. Hint: use repo URL without trailing .git for GitHub; ensure repo exists and auth is configured for private repos.", repo))
+    }
 
 	// Filters the references list and only keeps tags
 	for _, ref := range refs {
@@ -335,13 +335,13 @@ func resolveDefaultBranchRef(repo string, creds *auth.Credentials) (string, erro
 	})
 
 	// We can then use every Remote functions to retrieve wanted information
-	refs, err := rem.List(&git.ListOptions{
-		PeelingOption: git.AppendPeeled,
-		Auth:          httpBasicAuthCredentials(creds),
-	})
-	if err != nil {
-		return "", errors.Wrap(err, fmt.Sprintf("repo %s was not cloned successfully; authentication might be required; check if repository exists and you referenced it correctly", repo))
-	}
+    refs, err := rem.List(&git.ListOptions{
+        PeelingOption: git.AppendPeeled,
+        Auth:          httpBasicAuthCredentials(creds),
+    })
+    if err != nil {
+        return "", errors.Wrap(err, fmt.Sprintf("failed to list refs for %s. Hint: ensure repo URL is correct and accessible; for GitHub avoid trailing .git.", repo))
+    }
 
 	// Filters the references list and only keeps tags
 	for _, r := range refs {
@@ -384,14 +384,14 @@ func clone(repoURL, commit string, creds *auth.Credentials) (billy.Filesystem, e
 		}
 	}
 
-	repo, err := git.Clone(memory.NewStorage(), memfs.New(), &git.CloneOptions{
-		URL:  repoURL,
-		Tags: git.AllTags,
-		Auth: httpBasicAuthCredentials(creds),
-	})
-	if err != nil {
-		return nil, errors.Wrap(err, fmt.Sprintf("repo %s was not cloned successfully; authentication might be required; check if repository exists and you referenced it correctly", repoURL))
-	}
+    repo, err := git.Clone(memory.NewStorage(), memfs.New(), &git.CloneOptions{
+        URL:  repoURL,
+        Tags: git.AllTags,
+        Auth: httpBasicAuthCredentials(creds),
+    })
+    if err != nil {
+        return nil, errors.Wrap(err, fmt.Sprintf("failed to clone %s. Check repo URL (avoid trailing .git for GitHub), network/auth, and that the repo exists.", repoURL))
+    }
 
 	wt, err := repo.Worktree()
 	if err != nil {
@@ -537,20 +537,20 @@ func readFiles(path string, fs billy.Filesystem) ([]*chart.File, error) {
 }
 
 func (r Repo) mapGitHubRepoTemplate(repoURL, path, commitSHA string, creds *auth.Credentials) (*models.Template, error) {
-	tgzData, err := gitproviders2.GitHubClone(repoURL, commitSHA, creds)
-	if err != nil {
-		return nil, err
-	}
+    tgzData, err := gitproviders2.GitHubClone(repoURL, commitSHA, creds)
+    if err != nil {
+        return nil, err
+    }
 
-	ghRepoFiles, err := unpackTgzInMemory(tgzData)
-	if err != nil {
-		return nil, errors.Wrap(err, "failed to clone repo from GitHub: make sure that the version (branch or commit) exist on the specified repo")
-	}
+    ghRepoFiles, err := unpackTgzInMemory(tgzData)
+    if err != nil {
+        return nil, errors.Wrap(err, "failed to read GitHub tarball. Ensure branch/tag/commit exists and access is allowed (rate limits/private repo). Also verify repo URL is correct and not ending with .git.")
+    }
 
-	ghRepoFiles, exists := gitproviders2.SanitizeGHFiles(ghRepoFiles, path)
-	if !exists {
-		return nil, errors.Errorf("provided path %v for repo %v does not exist on version %v", path, repoURL, commitSHA)
-	}
+    ghRepoFiles, exists := gitproviders2.SanitizeGHFiles(ghRepoFiles, path)
+    if !exists {
+        return nil, errors.Errorf("invalid path '%v' for repo %v at %v. Path must be the chart folder (contains Chart.yaml). Do not set it to a file or to templates/.", path, repoURL, commitSHA)
+    }
 
 	template, err := r.mapHelmChart(path, ghRepoFiles)
 	if err != nil {
@@ -571,10 +571,10 @@ func (r Repo) mapGitHubRepoInitialValues(repoURL, path, commitSHA string, creds 
 		return nil, err
 	}
 
-	ghRepoFiles, exists := gitproviders2.SanitizeGHFiles(ghRepoFiles, path)
-	if !exists {
-		return nil, errors.Errorf("provided path %v for repo %v does not exist on version %v", path, repoURL, commitSHA)
-	}
+    ghRepoFiles, exists := gitproviders2.SanitizeGHFiles(ghRepoFiles, path)
+    if !exists {
+        return nil, errors.Errorf("invalid path '%v' for repo %v at %v. Path must be the chart folder (contains Chart.yaml).", path, repoURL, commitSHA)
+    }
 
 	initial, err := r.mapHelmChartInitialValues(ghRepoFiles)
 	if err != nil {
