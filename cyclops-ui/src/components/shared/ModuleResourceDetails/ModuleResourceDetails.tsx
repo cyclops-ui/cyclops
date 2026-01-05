@@ -19,12 +19,14 @@ import {
 } from "antd";
 import "ace-builds/src-noconflict/ace";
 import {
+  AppstoreOutlined,
   BookOutlined,
   CopyOutlined,
   DeleteOutlined,
   EditOutlined,
   FileTextOutlined,
   GithubOutlined,
+  PartitionOutlined,
   UndoOutlined,
 } from "@ant-design/icons";
 import "./custom.css";
@@ -34,6 +36,7 @@ import ReactAce from "react-ace";
 
 import { mapResponseError } from "../../../utils/api/errors";
 import ResourceList from "../../k8s-resources/ResourceList/ResourceList";
+import ResourceTree from "../../k8s-resources/ResourceTree/ResourceTree";
 import { Workload } from "../../../utils/k8s/workload";
 
 import {
@@ -209,6 +212,7 @@ export const ModuleResourceDetails = ({
 
   const [resources, setResources] = useState<any[]>([]);
   const [workloads, setWorkloads] = useState<Map<string, Workload>>(new Map());
+  const [viewMode, setViewMode] = useState<"list" | "tree">("list");
 
   function getWorkload(ref: ResourceRef): Workload | undefined {
     let k = resourceRefKey(ref);
@@ -836,6 +840,33 @@ export const ModuleResourceDetails = ({
             </Button>
           </Col>
         </Row>
+        <Divider
+          style={{ fontSize: "120%" }}
+          orientationMargin="0"
+          orientation={"left"}
+        >
+          Resources
+        </Divider>
+        <Row gutter={[20, 20]} style={{ marginBottom: "20px" }}>
+          <Col>
+            <Button
+              type={viewMode === "list" ? "primary" : "default"}
+              onClick={() => setViewMode("list")}
+              icon={<AppstoreOutlined />}
+            >
+              List View
+            </Button>
+          </Col>
+          <Col>
+            <Button
+              type={viewMode === "tree" ? "primary" : "default"}
+              onClick={() => setViewMode("tree")}
+              icon={<PartitionOutlined />}
+            >
+              Tree View
+            </Button>
+          </Col>
+        </Row>
         <ResourceListActionsProvider
           streamingDisabled={streamingDisabled}
           fetchResource={fetchResource}
@@ -847,15 +878,26 @@ export const ModuleResourceDetails = ({
           downloadPodLogs={downloadPodLogs}
           streamPodLogs={streamPodLogs}
         >
-          <ResourceList
-            loadResources={loadResources}
-            resources={resources}
-            workloads={workloads}
-            onResourceDelete={() => {
-              setLoadResources(false);
-              fetchModuleResourcesCallback();
-            }}
-          />
+          {viewMode === "list" ? (
+            <ResourceList
+              loadResources={loadResources}
+              resources={resources}
+              workloads={workloads}
+              onResourceDelete={() => {
+                setLoadResources(false);
+                fetchModuleResourcesCallback();
+              }}
+            />
+          ) : (
+            <ResourceTree
+              resources={resources}
+              workloads={workloads}
+              onResourceDelete={() => {
+                setLoadResources(false);
+                fetchModuleResourcesCallback();
+              }}
+            />
+          )}
         </ResourceListActionsProvider>
         <Modal
           title={
