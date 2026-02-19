@@ -1,7 +1,22 @@
-import React from "react";
-import { Button, Col, Divider, Form, Input, Row } from "antd";
-import { MinusCircleOutlined, PlusOutlined } from "@ant-design/icons";
+import React, { useState } from "react";
+import {
+  Button,
+  Col,
+  Collapse,
+  Divider,
+  Form,
+  Input,
+  Row,
+  Tooltip,
+} from "antd";
+import {
+  InfoCircleOutlined,
+  MinusCircleOutlined,
+  PlusOutlined,
+} from "@ant-design/icons";
 import TextArea from "antd/es/input/TextArea";
+import { mapFields } from "../../TemplateFormFields";
+import { collapseColor } from "../utils";
 import { useTemplateFormFields } from "../../TemplateFormFieldsContext";
 
 interface Props {
@@ -10,9 +25,12 @@ interface Props {
   level: number;
   formItemName: string;
   isRequired: boolean;
+  initialValues?: any;
+  uniqueFieldName?: string[];
+  isModuleEdit?: boolean;
 }
 
-export const MapField = ({
+const FlatMapField = ({
   field,
   fieldName,
   level,
@@ -109,4 +127,150 @@ export const MapField = ({
       </Form.List>
     </Form.Item>
   );
+};
+
+const StructuredMapField = ({
+  field,
+  fieldName,
+  level,
+  formItemName,
+  isRequired,
+  initialValues,
+  uniqueFieldName,
+  isModuleEdit,
+}: Props) => {
+  const { themePalette } = useTemplateFormFields();
+  const [open, setOpen] = useState(false);
+
+  const ap = field.additionalProperties;
+
+  let header = <Row>{field.display_name}</Row>;
+  if (field.description && field.description.length !== 0) {
+    header = (
+      <Row gutter={[0, 8]}>
+        <Col
+          span={15}
+          style={{ display: "flex", justifyContent: "flex-start" }}
+        >
+          {field.display_name}
+        </Col>
+        <Col span={9} style={{ display: "flex", justifyContent: "flex-end" }}>
+          <Tooltip title={field.description} trigger={["hover", "click"]}>
+            <InfoCircleOutlined style={{ right: "0px", fontSize: "20px" }} />
+          </Tooltip>
+        </Col>
+      </Row>
+    );
+  }
+
+  return (
+    <Col
+      span={level === 0 ? 16 : 24}
+      offset={level === 0 ? 2 : 0}
+      style={{
+        paddingTop: "8px",
+        paddingBottom: "8px",
+        paddingLeft: "0px",
+        paddingRight: "0px",
+        marginLeft: "0px",
+        marginRight: "0px",
+      }}
+    >
+      <Collapse
+        size={"small"}
+        bordered={false}
+        onChange={function (value: string | string[]) {
+          setOpen(value.length > 0);
+        }}
+      >
+        <Collapse.Panel
+          key={fieldName}
+          header={header}
+          style={{
+            borderRadius: "7px",
+            backgroundColor: collapseColor(open, themePalette),
+          }}
+          forceRender={true}
+        >
+          <Form.Item
+            wrapperCol={{ span: 16 }}
+            style={{
+              paddingTop: "8px",
+              marginBottom: "0",
+            }}
+          >
+            <Form.List name={formItemName}>
+              {(arrFields, { add, remove }) => (
+                <>
+                  {arrFields.map((arrField) => (
+                    <Col
+                      key={arrField.key}
+                      style={{ padding: 0, paddingBottom: "12px" }}
+                    >
+                      <div
+                        style={{
+                          border: "solid 1.5px #c3c3c3",
+                          borderRadius: "7px",
+                          padding: "12px",
+                          width: "100%",
+                          backgroundColor:
+                            themePalette === "dark" ? "#444" : "#fafafa",
+                        }}
+                      >
+                        <Form.Item
+                          name={[arrField.name, "key"]}
+                          label="Name"
+                          rules={[
+                            { required: true, message: "Key name is required" },
+                          ]}
+                          style={{ marginBottom: "8px" }}
+                        >
+                          <Input placeholder="Enter key name" />
+                        </Form.Item>
+                        {mapFields(
+                          isModuleEdit || false,
+                          ap.properties,
+                          initialValues,
+                          [...(uniqueFieldName || []), String("")],
+                          "",
+                          level + 1,
+                          2,
+                          arrField,
+                          ap.required,
+                        )}
+                        <MinusCircleOutlined
+                          style={{ fontSize: "16px" }}
+                          onClick={() => remove(arrField.name)}
+                        />
+                      </div>
+                    </Col>
+                  ))}
+                  <Form.Item style={{ marginBottom: "0" }}>
+                    <Button
+                      type="dashed"
+                      onClick={() => add()}
+                      block
+                      icon={<PlusOutlined />}
+                    >
+                      Add
+                    </Button>
+                  </Form.Item>
+                </>
+              )}
+            </Form.List>
+          </Form.Item>
+        </Collapse.Panel>
+      </Collapse>
+    </Col>
+  );
+};
+
+export const MapField = (props: Props) => {
+  const hasStructuredValues =
+    props.field.additionalProperties?.properties?.length > 0;
+
+  if (hasStructuredValues) {
+    return <StructuredMapField {...props} />;
+  }
+  return <FlatMapField {...props} />;
 };
