@@ -137,11 +137,29 @@ export function findMaps(fields: any[], values: any, initialValues: any): any {
           break;
         }
 
-        let object: any = {};
-        valuesList.forEach((valueFromList) => {
-          object[valueFromList.key] = YAML.parse(String(valueFromList.value));
-        });
-        out[field.name] = object;
+        if (
+          field.additionalProperties &&
+          field.additionalProperties.properties
+        ) {
+          let structuredObject: any = {};
+          valuesList.forEach((valueFromList) => {
+            const { key, ...rest } = valueFromList;
+            structuredObject[key] = findMaps(
+              field.additionalProperties.properties,
+              rest,
+              {},
+            );
+          });
+          out[field.name] = structuredObject;
+        } else {
+          let object: any = {};
+          valuesList.forEach((valueFromList) => {
+            object[valueFromList.key] = YAML.parse(
+              String(valueFromList.value),
+            );
+          });
+          out[field.name] = object;
+        }
         break;
     }
   });
@@ -215,27 +233,41 @@ export const mapsToArray = (fields: any[], values: any): any => {
           break;
         }
 
-        Object.keys(values[field.name]).forEach((key) => {
-          if (values[field.name][key] === null) {
-            object.push({
-              key: key,
-            });
-            return;
-          }
-
-          if (typeof values[field.name][key] === "object") {
-            object.push({
-              key: key,
-              value: YAML.stringify(values[field.name][key], null, 4),
-            });
-            return;
-          }
-
-          object.push({
-            key: key,
-            value: values[field.name][key],
+        if (
+          field.additionalProperties &&
+          field.additionalProperties.properties
+        ) {
+          Object.keys(values[field.name]).forEach((key) => {
+            let entry = mapsToArray(
+              field.additionalProperties.properties,
+              values[field.name][key] || {},
+            );
+            entry.key = key;
+            object.push(entry);
           });
-        });
+        } else {
+          Object.keys(values[field.name]).forEach((key) => {
+            if (values[field.name][key] === null) {
+              object.push({
+                key: key,
+              });
+              return;
+            }
+
+            if (typeof values[field.name][key] === "object") {
+              object.push({
+                key: key,
+                value: YAML.stringify(values[field.name][key], null, 4),
+              });
+              return;
+            }
+
+            object.push({
+              key: key,
+              value: values[field.name][key],
+            });
+          });
+        }
 
         object.sort((a, b) => a.key.localeCompare(b.key));
 

@@ -188,6 +188,9 @@ export function mapFields(
             level={level}
             formItemName={formItemName}
             isRequired={isRequired}
+            initialValues={initialValues}
+            uniqueFieldName={uniqueFieldName}
+            isModuleEdit={isModuleEdit}
           />,
         );
     }
