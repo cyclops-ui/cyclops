@@ -104,6 +104,8 @@ const ResourceList = ({
   });
   const [deleteResourceVerify, setDeleteResourceVerify] = useState("");
 
+  const [loadingResourceManifest, setLoadingResourceManifest] = useState(false);
+
   const [showManagedFields, setShowManagedFields] = useState(false);
 
   const [resourceFilter, setResourceFilter] = useState<string[]>([]);
@@ -181,6 +183,8 @@ const ResourceList = ({
     name: string,
     showManagedFields: boolean,
   ) => {
+    setLoadingResourceManifest(true);
+
     fetchResourceManifest(
       group,
       version,
@@ -197,7 +201,63 @@ const ResourceList = ({
       })
       .catch((error) => {
         setError(mapResponseError(error));
+      })
+      .finally(() => {
+        setLoadingResourceManifest(false);
       });
+  };
+
+  const resourceManifestContent = (content: string, loading: boolean) => {
+    if (loading) {
+      return <Spin />;
+    }
+
+    return (
+      <div>
+        <Divider />
+        <div style={{ position: "relative" }}>
+          <ReactAce
+            mode={"sass"}
+            theme={mode === "light" ? "github" : "twilight"}
+            fontSize={12}
+            showPrintMargin={true}
+            showGutter={true}
+            highlightActiveLine={true}
+            readOnly={true}
+            setOptions={{
+              enableBasicAutocompletion: true,
+              enableLiveAutocompletion: true,
+              enableSnippets: false,
+              showLineNumbers: true,
+              tabSize: 4,
+              useWorker: false,
+            }}
+            style={{
+              width: "100%",
+            }}
+            value={content}
+          />
+          <Tooltip title={"Copy Manifest"} trigger="hover">
+            <Button
+              onClick={() => {
+                navigator.clipboard.writeText(content);
+              }}
+              style={{
+                position: "absolute",
+                right: "20px",
+                top: "10px",
+              }}
+            >
+              <CopyOutlined
+                style={{
+                  fontSize: "20px",
+                }}
+              />
+            </Button>
+          </Tooltip>
+        </div>
+      </div>
+    );
   };
 
   const resourceFilterOptions = () => {
@@ -740,42 +800,17 @@ const ResourceList = ({
       <Modal
         title="Manifest"
         open={manifestModal.on}
-        onOk={handleCancelManifest}
         onCancel={handleCancelManifest}
-        cancelButtonProps={{ style: { display: "none" } }}
+        footer={null}
         width={"70%"}
       >
         <Checkbox onChange={handleCheckboxChange} checked={showManagedFields}>
           Include Managed Fields
         </Checkbox>
-        <Divider style={{ marginTop: "12px", marginBottom: "12px" }} />
-        <div style={{ position: "relative" }}>
-          <ReactAce
-            style={{ width: "100%" }}
-            mode={"sass"}
-            theme={mode === "light" ? "github" : "twilight"}
-            value={manifestModal.manifest}
-            readOnly={true}
-          />
-          <Tooltip title={"Copy Manifest"} trigger="hover">
-            <Button
-              onClick={() => {
-                navigator.clipboard.writeText(manifestModal.manifest);
-              }}
-              style={{
-                position: "absolute",
-                right: "20px",
-                top: "10px",
-              }}
-            >
-              <CopyOutlined
-                style={{
-                  fontSize: "20px",
-                }}
-              />
-            </Button>
-          </Tooltip>
-        </div>
+        {resourceManifestContent(
+          manifestModal.manifest,
+          loadingResourceManifest,
+        )}
       </Modal>
       <Modal
         title={
