@@ -183,7 +183,12 @@ func (r Repo) assumeTemplateSourceType(repo string) (cyclopsv1alpha1.TemplateSou
 
 func (r Repo) GetTemplateRevisions(repo, path string) ([]string, error) {
 	if registry.IsOCI(repo) {
-		return GetOCIChartTags(repo, path)
+		creds, err := r.credResolver.RepoAuthCredentials(repo)
+		if err != nil {
+			return nil, err
+		}
+
+		return getOCIChartTags(repo, path, creds)
 	}
 
 	if !gitproviders2.IsGitHubSource(repo) {
