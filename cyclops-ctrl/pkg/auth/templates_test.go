@@ -82,6 +82,19 @@ var _ = Describe("Templates resolver", func() {
 				},
 			},
 		},
+		{
+			Spec: v1alpha1.TemplateAuthRuleSpec{
+				Repo: "oci://registry.example.com/my-org",
+				Username: apiv1.SecretKeySelector{
+					LocalObjectReference: apiv1.LocalObjectReference{Name: "oci-secret-name"},
+					Key:                  "username",
+				},
+				Password: apiv1.SecretKeySelector{
+					LocalObjectReference: apiv1.LocalObjectReference{Name: "oci-secret-name"},
+					Key:                  "token",
+				},
+			},
+		},
 	}
 
 	testCases := []testCase{
@@ -154,7 +167,7 @@ var _ = Describe("Templates resolver", func() {
 			},
 		},
 		{
-			description: "fetches no matching template auth rules",
+			description: "fetches matching template auth rule",
 			in: caseInput{
 				repo: "https://github.com/my-org/my-team",
 				mockCalls: func() {
@@ -167,6 +180,24 @@ var _ = Describe("Templates resolver", func() {
 				credentials: &Credentials{
 					Username: "my-secret-username",
 					Password: "my-secret-token",
+				},
+				returnsError: false,
+			},
+		},
+		{
+			description: "fetches matching OCI template auth rule",
+			in: caseInput{
+				repo: "oci://registry.example.com/my-org",
+				mockCalls: func() {
+					k8sClient.On("ListTemplateAuthRules").Return(tars, nil)
+					k8sClient.On("GetTemplateAuthRuleSecret", "oci-secret-name", "username").Return("my-oci-username", nil)
+					k8sClient.On("GetTemplateAuthRuleSecret", "oci-secret-name", "token").Return("my-oci-token", nil)
+				},
+			},
+			out: caseOutput{
+				credentials: &Credentials{
+					Username: "my-oci-username",
+					Password: "my-oci-token",
 				},
 				returnsError: false,
 			},
