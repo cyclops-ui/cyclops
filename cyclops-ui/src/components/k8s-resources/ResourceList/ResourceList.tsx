@@ -13,7 +13,6 @@ import {
   Modal,
   Alert,
 } from "antd";
-import ReactAce from "react-ace";
 import {
   isWorkload,
   ResourceRef,
@@ -35,7 +34,6 @@ import NetworkPolicy from "../NetworkPolicy";
 
 import {
   CaretRightOutlined,
-  CopyOutlined,
   FileTextOutlined,
   FilterOutlined,
   WarningTwoTone,
@@ -54,6 +52,7 @@ import {
   ErrorIcon,
   WarningIcon,
 } from "../../status/icons";
+import ManifestContent from "../../shared/ManifestContent/ManifestContent";
 
 interface Props {
   loadResources: boolean;
@@ -105,6 +104,7 @@ const ResourceList = ({
   const [deleteResourceVerify, setDeleteResourceVerify] = useState("");
 
   const [showManagedFields, setShowManagedFields] = useState(false);
+  const [loadingResourceManifest, setLoadingResourceManifest] = useState(false);
 
   const [resourceFilter, setResourceFilter] = useState<string[]>([]);
   const [activeCollapses, setActiveCollapses] = useState(new Map());
@@ -181,6 +181,7 @@ const ResourceList = ({
     name: string,
     showManagedFields: boolean,
   ) => {
+    setLoadingResourceManifest(true);
     fetchResourceManifest(
       group,
       version,
@@ -194,9 +195,11 @@ const ResourceList = ({
           ...prev,
           manifest: res,
         }));
+        setLoadingResourceManifest(false);
       })
       .catch((error) => {
         setError(mapResponseError(error));
+        setLoadingResourceManifest(false);
       });
   };
 
@@ -740,42 +743,18 @@ const ResourceList = ({
       <Modal
         title="Manifest"
         open={manifestModal.on}
-        onOk={handleCancelManifest}
         onCancel={handleCancelManifest}
-        cancelButtonProps={{ style: { display: "none" } }}
+        footer={null}
         width={"70%"}
       >
         <Checkbox onChange={handleCheckboxChange} checked={showManagedFields}>
           Include Managed Fields
         </Checkbox>
-        <Divider style={{ marginTop: "12px", marginBottom: "12px" }} />
-        <div style={{ position: "relative" }}>
-          <ReactAce
-            style={{ width: "100%" }}
-            mode={"sass"}
-            theme={mode === "light" ? "github" : "twilight"}
-            value={manifestModal.manifest}
-            readOnly={true}
-          />
-          <Tooltip title={"Copy Manifest"} trigger="hover">
-            <Button
-              onClick={() => {
-                navigator.clipboard.writeText(manifestModal.manifest);
-              }}
-              style={{
-                position: "absolute",
-                right: "20px",
-                top: "10px",
-              }}
-            >
-              <CopyOutlined
-                style={{
-                  fontSize: "20px",
-                }}
-              />
-            </Button>
-          </Tooltip>
-        </div>
+        <ManifestContent
+          content={manifestModal.manifest}
+          loading={loadingResourceManifest}
+          mode={mode}
+        />
       </Modal>
       <Modal
         title={

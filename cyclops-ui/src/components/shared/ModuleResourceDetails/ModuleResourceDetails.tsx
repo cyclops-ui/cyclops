@@ -20,7 +20,6 @@ import {
 import "ace-builds/src-noconflict/ace";
 import {
   BookOutlined,
-  CopyOutlined,
   DeleteOutlined,
   EditOutlined,
   FileTextOutlined,
@@ -30,7 +29,6 @@ import {
 import "./custom.css";
 
 import "ace-builds/src-noconflict/mode-jsx";
-import ReactAce from "react-ace";
 
 import { mapResponseError } from "../../../utils/api/errors";
 import ResourceList from "../../k8s-resources/ResourceList/ResourceList";
@@ -57,6 +55,7 @@ import {
   moduleConfigGitRefLink,
 } from "../../../utils/moduleConfigGitRef";
 import ModuleTitle from "./ModuleTitle/ModuleTitle";
+import ManifestContent from "../ManifestContent/ManifestContent";
 
 const languages = [
   "javascript",
@@ -656,59 +655,6 @@ export const ModuleResourceDetails = ({
       });
   };
 
-  const moduleManifestContent = (content: string, loading: boolean) => {
-    if (loading) {
-      return <Spin />;
-    }
-
-    return (
-      <div>
-        <Divider />
-        <div style={{ position: "relative" }}>
-          <ReactAce
-            mode={"sass"}
-            theme={mode === "light" ? "github" : "twilight"}
-            fontSize={12}
-            showPrintMargin={true}
-            showGutter={true}
-            highlightActiveLine={true}
-            readOnly={true}
-            setOptions={{
-              enableBasicAutocompletion: true,
-              enableLiveAutocompletion: true,
-              enableSnippets: false,
-              showLineNumbers: true,
-              tabSize: 4,
-              useWorker: false,
-            }}
-            style={{
-              width: "100%",
-            }}
-            value={content}
-          />
-          <Tooltip title={"Copy manifest"} trigger="hover">
-            <Button
-              onClick={() => {
-                navigator.clipboard.writeText(content);
-              }}
-              style={{
-                position: "absolute",
-                right: "20px",
-                top: "10px",
-              }}
-            >
-              <CopyOutlined
-                style={{
-                  fontSize: "20px",
-                }}
-              />
-            </Button>
-          </Tooltip>
-        </div>
-      </div>
-    );
-  };
-
   const gitConfigRedirectButton = () => {
     if (!module.gitOpsWrite) {
       return;
@@ -908,22 +854,28 @@ export const ModuleResourceDetails = ({
         <Modal
           title="Module manifest"
           open={viewRawManifest}
-          onOk={() => setViewRawManifest(false)}
           onCancel={() => setViewRawManifest(false)}
-          cancelButtonProps={{ style: { display: "none" } }}
+          footer={null}
           width={"70%"}
         >
-          {moduleManifestContent(rawModuleManifest, loadingRawManifest)}
+          <ManifestContent
+            content={rawModuleManifest}
+            loading={loadingRawManifest}
+            mode={mode}
+          />
         </Modal>
         <Modal
           title="Rendered manifest"
           open={viewRenderedManifest}
-          onOk={() => setViewRenderedManifest(false)}
           onCancel={() => setViewRenderedManifest(false)}
-          cancelButtonProps={{ style: { display: "none" } }}
+          footer={null}
           width={"70%"}
         >
-          {moduleManifestContent(renderedManifest, loadingRenderedManifest)}
+          <ManifestContent
+            content={renderedManifest}
+            loading={loadingRenderedManifest}
+            mode={mode}
+          />
         </Modal>
       </ConfigProvider>
     </div>
