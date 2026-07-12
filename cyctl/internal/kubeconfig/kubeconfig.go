@@ -1,6 +1,7 @@
 package kubeconfig
 
 import (
+	"os"
 	"path/filepath"
 
 	"github.com/cyclops-ui/cyclops/cyclops-ctrl/api/v1alpha1/client"
@@ -20,6 +21,16 @@ var K8sClient *k8sclient.KubernetesClient
 
 func GetKubeConfig() func(cmd *cobra.Command, args []string) {
 	return func(cmd *cobra.Command, args []string) {
+		// Commands that don't talk to a cluster (completion, help, version)
+		// should be usable without a kubeconfig instead of panicking on
+		// startup. Detect them from the invoked subcommand.
+		if len(os.Args) > 1 {
+			switch os.Args[1] {
+			case "completion", "help", "version":
+				return
+			}
+		}
+
 		var kubeconfig string
 		if home := homedir.HomeDir(); home != "" {
 			kubeconfig = filepath.Join(home, ".kube", "config")
@@ -30,22 +41,26 @@ func GetKubeConfig() func(cmd *cobra.Command, args []string) {
 		var err error
 		Config, err = clientcmd.BuildConfigFromFlags("", kubeconfig)
 		if err != nil {
-			panic(err.Error())
+			cmd.PrintErrf("failed to load kubeconfig: %v\n", err)
+			os.Exit(1)
 		}
 
 		Moduleset, err = client.NewForConfig(Config)
 		if err != nil {
-			panic(err.Error())
+			cmd.PrintErrf("failed to create Cyclops client: %v\n", err)
+			os.Exit(1)
 		}
 
 		Clientset, err = kubernetes.NewForConfig(Config)
 		if err != nil {
-			panic(err.Error())
+			cmd.PrintErrf("failed to create Kubernetes client: %v\n", err)
+			os.Exit(1)
 		}
 
 		K8sClient, err = k8sclient.New()
 		if err != nil {
-			panic(err.Error())
+			cmd.PrintErrf("failed to create Kubernetes client: %v\n", err)
+			os.Exit(1)
 		}
 	}
 }
