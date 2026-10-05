@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useCallback } from "react";
+import React, { useEffect, useState, useCallback, useRef } from "react";
 import {
   Alert,
   Button,
@@ -57,6 +57,9 @@ import {
   moduleConfigGitRefLink,
 } from "../../../utils/moduleConfigGitRef";
 import ModuleTitle from "./ModuleTitle/ModuleTitle";
+import ReconciliationStatusIndicator, {
+  ModuleReconciliationStatus,
+} from "./ReconciliationStatusIndicator/ReconciliationStatusIndicator";
 
 const languages = [
   "javascript",
@@ -107,6 +110,7 @@ interface module {
     path: string;
     branch: string;
   };
+  reconciliationStatus?: ModuleReconciliationStatus;
 }
 
 export interface ModuleResourceDetailsProps {
@@ -203,6 +207,8 @@ export const ModuleResourceDetails = ({
   const [loadModule, setLoadModule] = useState(false);
   const [loadResources, setLoadResources] = useState(false);
   const [loadingReconciliation, setLoadingReconciliation] = useState(false);
+  const [reconciliationRequested, setReconciliationRequested] = useState(false);
+  const reconcileRefreshTimeout = useRef<number | null>(null);
 
   const [deleteName, setDeleteName] = useState("");
   const [deleteModuleForm] = Form.useForm();
@@ -243,6 +249,9 @@ export const ModuleResourceDetails = ({
       path: "",
       branch: "",
     },
+    reconciliationStatus: {
+      status: "unknown",
+    },
   });
 
   const [loadingRawManifest, setLoadingRawManifest] = useState(false);
@@ -271,24 +280,36 @@ export const ModuleResourceDetails = ({
       });
   }, [name, fetchModuleResources]);
 
-  useEffect(() => {
+  const fetchModuleCallback = useCallback(() => {
     fetchModule(name)
       .then((res) => {
         setModule(res);
         setLoadModule(true);
+        setReconciliationRequested(false);
       })
       .catch((error) => {
         setLoading(false);
         setLoadModule(true);
         setError(mapResponseError(error));
       });
+  }, [name, fetchModule]);
 
+  useEffect(() => {
+    fetchModuleCallback();
     fetchModuleResourcesCallback();
-    const interval = setInterval(() => fetchModuleResourcesCallback(), 10000);
+
+    const interval = setInterval(() => {
+      fetchModuleCallback();
+      fetchModuleResourcesCallback();
+    }, 10000);
+
     return () => {
       clearInterval(interval);
+      if (reconcileRefreshTimeout.current !== null) {
+        clearTimeout(reconcileRefreshTimeout.current);
+      }
     };
-  }, [name, fetchModule, fetchModuleResourcesCallback]);
+  }, [fetchModuleCallback, fetchModuleResourcesCallback]);
 
   useEffect(() => {
     if (!streamingDisabled) {
@@ -428,6 +449,23 @@ export const ModuleResourceDetails = ({
     );
   };
 
+  const reconciliationStatusIndicator = () => {
+    if (!loadModule) {
+      return <></>;
+    }
+
+    const reconciliationStatus = module.reconciliationStatus;
+
+    return (
+      <ReconciliationStatusIndicator
+        status={reconciliationStatus?.status}
+        reason={reconciliationStatus?.reason}
+        errors={reconciliationStatus?.errors}
+        reconciling={reconciliationRequested}
+      />
+    );
+  };
+
   const moduleTitleLoading = () => {
     if (!loadModule) {
       return <Spin />;
@@ -438,6 +476,7 @@ export const ModuleResourceDetails = ({
         moduleName={name}
         appIconURL={module.iconURL}
         statusIcon={moduleStatusIcon()}
+        reconciliationIndicator={reconciliationStatusIndicator()}
       />
     );
   };
@@ -638,13 +677,21 @@ export const ModuleResourceDetails = ({
     setLoadingReconciliation(true);
 
     reconcileModule(name)
-      .then((res) => {
+      .then(() => {
         setLoadingReconciliation(false);
+        setReconciliationRequested(true);
         notification.success({
           message: "Reconciliation triggered",
           description: `${name} has been queued for reconciliation. All the resources will be recreated`,
           duration: 10,
         });
+
+        if (reconcileRefreshTimeout.current !== null) {
+          clearTimeout(reconcileRefreshTimeout.current);
+        }
+        reconcileRefreshTimeout.current = window.setTimeout(() => {
+          fetchModuleCallback();
+        }, 3000);
       })
       .catch((error) => {
         notification.error({

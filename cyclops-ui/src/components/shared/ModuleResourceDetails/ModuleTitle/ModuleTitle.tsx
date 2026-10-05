@@ -10,12 +10,14 @@ export interface ModuleTitleProps {
   moduleName: string;
   appIconURL: string;
   statusIcon: ReactElement;
+  reconciliationIndicator?: ReactElement;
 }
 
 const ModuleTitle = ({
   moduleName,
   appIconURL,
   statusIcon,
+  reconciliationIndicator,
 }: ModuleTitleProps) => {
   const { mode } = useTheme();
   const [scrolled, setScrolled] = useState(false);
@@ -61,6 +63,7 @@ const ModuleTitle = ({
             </span>
           </Tooltip>
         </Title>
+        {reconciliationIndicator}
         {scrolled && statusIcon}
       </div>
       {scrolled && <Divider style={{ marginTop: 8, marginBottom: 0 }} />}
